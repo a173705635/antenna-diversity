@@ -1,96 +1,109 @@
-# Python 双天线 GPS L1 C/A RF→DFE→TRK 仿真
+# HUAWEI Mate 70 理想角点 GPS L1 C/A 空域抗干扰仿真
 
-本目录是 `matlab_sim` 中 GPS L1 C/A 链路的 Python 原生实现。MATLAB 参考代码保持不变；Galileo E5/AltBOC 不属于本阶段迁移范围。
+本目录是 GPS L1 C/A 的 Python 原生端到端仿真：等效复数 IF → RF/ADC → DFE → SINGLE/EGC/MVDR → 捕获/跟踪。默认配置使用 **HUAWEI Mate 70 的 160.9 × 75.9 × 7.8 mm 外形尺寸**，并把四个外形角点当作理想、共面、各向同性的相位中心。它们只是首版阵列接口，**不代表已知的真实 Mate 70 天线位置、方向图或产品性能**。
 
-## 架构图与设计说明
+![HUAWEI Mate 70 理想角点空域抗干扰仿真架构](docs/simulation_architecture.svg)
 
-![Python GPS L1 C/A 双天线分集仿真架构](docs/simulation_architecture.svg)
+- 对外架构与模型边界：[`ARCHITECTURE.md`](ARCHITECTURE.md)
+- 公式、接口和实现映射：[`DESIGN.md`](DESIGN.md)
+- 可编辑矢量图：[`docs/simulation_architecture.svg`](docs/simulation_architecture.svg)
+- 报告用位图：[`docs/simulation_architecture.png`](docs/simulation_architecture.png)
 
-- 对外展示版架构与模型边界说明：[`ARCHITECTURE.md`](ARCHITECTURE.md)
-- 完整公式、数据尺寸和代码映射：[`DESIGN.md`](DESIGN.md)
-- 可直接放入报告或 PPT 的 PNG：[`docs/simulation_architecture.png`](docs/simulation_architecture.png)
-- 可导入 Figma、Illustrator 或 Inkscape 修改的 SVG：[`docs/simulation_architecture.svg`](docs/simulation_architecture.svg)
+## 坐标、方向和数据约定
 
-## 链路结构
+手机中心为原点，`+x` 指向屏幕右侧，`+y` 指向手机顶部，`+z` 垂直于屏幕向外。方位角从 `+x` 朝 `+y` 逆时针增加；仰角从手机平面向 `+z` 增加，范围 0°–90°。方向单位向量为
 
 ```text
-GPS L1 C/A 与窄带 CW 干扰
-→ 双天线空间响应和通道幅相误差
-→ RF 级联增益、Friis 噪声、限幅、复数 ADC
-→ DDC、低通 FIR、群延迟对齐、4 倍抽取、输出量化
-→ single / EGC / MVDR
-→ FFT 多普勒×码相位捕获
-→ Early/Prompt/Late DLL、FLL 辅助 PLL 跟踪
-→ 指标表、频谱、方向图、捕获热力图和跟踪曲线
+u = [cos(el) cos(az), cos(el) sin(az), sin(el)]
 ```
 
-模型使用复数等效中频，不直接以 1.57542 GHz 对载波采样。多通道数组始终采用 `(天线数, 采样点数)`，合并后的单路数据采用 `(采样点数,)`。
+阵列流形使用 `exp(-j 2π f p·u/c)`，位置是三维坐标。共面理想角点在天顶（仰角 90°）具有相同空间相位。所有多通道数组 shape 为 `(channels, samples)`；合并输出为 `(samples,)`。
 
-## 环境与运行
+## 环境与入口
 
-当前代码要求 Python 3.11 或更高版本，并使用 NumPy、SciPy、Matplotlib 和 pytest：
+要求 Python 3.11+、NumPy、SciPy、Matplotlib 和 pytest：
 
 ```powershell
 cd F:\antenna_diversity\python_sim
 python -m pip install -e ".[test]"
-python -m pytest -v
-python run_end_to_end.py
-```
-
-运行脚本会在终端显示 single、EGC 和 MVDR 的指标，并把图保存到 `python_sim/results/`：
-
-- `rf_dfe_spectra.png`
-- `combined_spectra.png`
-- `array_response.png`
-- `acquisition_search.png`
-- `tracking_comparison.png`
-
-`combined_spectra.png` 使用三个共享坐标范围的子图，依次显示 SINGLE、EGC 和 MVDR 合并后的绝对幅度频谱。绿色虚线标记目标 Doppler，红色虚线标记 DDC 后的干扰频偏；共享尺度可以直接观察 MVDR 对窄带干扰谱线的抑制程度。
-
-无图形界面运行时可使用：
-
-```powershell
 $env:MPLBACKEND='Agg'
-python run_end_to_end.py
+python -W error -m pytest -q
+python -W error run_end_to_end.py
+python -W error run_legacy_ula.py
 ```
 
-## 修改参数
+`default_config()` 是四个理想手机角点的当前默认；`legacy_ula_config()` 保留原始双阵元半波长 ULA 基线。两者共享 channels-by-samples 的 RF、DFE、合并、捕获和跟踪链路。
+
+## 可复制配置示例
+
+任意不重复的 2–4 个角点都可激活；名称和顺序为 `TL`、`TR`、`BL`、`BR`：
 
 ```python
 from antenna_diversity.config import default_config
 from antenna_diversity.pipeline import run_end_to_end
 
 cfg = default_config()
-cfg.jammer.power_dbm = -95.0
-cfg.jammer.angle_deg = 45.0
-cfg.array.channel_amplitude_error_db[1] = 0.5
-cfg.array.channel_phase_error_deg[1] = 5.0
-cfg.diversity.diagonal_loading_factor = 1e-3
+cfg.array.active_antennas = ("TL", "TR", "BR")
 cfg.plot.enable = False
-
 results = run_end_to_end(cfg)
 ```
 
-常用扫描入口包括：
+手机配置支持 0–3 个分别具有方向、功率、频偏、初相和独立时间门的 `CWInterferer`：
 
-- `cfg.jammer.power_dbm`、`offset_hz`、`angle_deg`
-- `cfg.array.spacing_m`、`positions_m` 和通道幅相误差
-- `cfg.rf.stages`、`adc_bits`、`adc_vpp`
-- `cfg.dfe.cutoff_hz`、`num_taps`、`output_bits`
-- `cfg.diversity.diagonal_loading_factor`
-- `cfg.acquisition.doppler_bins_hz`、积分时长和阈值
-- `cfg.tracking` 中的 DLL、FLL、PLL 参数
+```python
+from antenna_diversity.config import CWInterferer, Direction, default_config
 
-修改阵元间距时，应同时更新 `cfg.array.positions_m`；`spacing_m` 是便于阅读和记录的参数，导向矢量实际使用 `positions_m`。
+cfg = default_config()
+cfg.interferers = ()  # 零干扰
+cfg.interferers = (
+    CWInterferer(Direction(120.0, 10.0), power_dbm=-90.0, offset_hz=250e3),
+    CWInterferer(
+        Direction(250.0, 25.0), power_dbm=-96.0, offset_hz=-180e3,
+        initial_phase_rad=1.1, start_ms=2.0, stop_ms=18.0,
+    ),
+)
+```
 
-## 默认结果的含义
+## 快速组合与方向扫描
 
-默认场景故意设置了很强的窄带干扰。single 和 EGC 通常无法通过捕获阈值；MVDR 在已知目标导向矢量约束下形成空间零陷，从而能够捕获并跟踪目标。这个用例说明 MVDR 在该场景中的干扰抑制作用，不表示 MVDR 在导向矢量失配、协方差估计不足或所有传播环境下都必然更优。
+解析扫描不生成时域 RF 样本，适合先筛选参数；它们会深拷贝配置，不改写调用者输入：
 
-## MATLAB 与 Python 的数值约定
+```python
+import numpy as np
+from antenna_diversity.config import default_config
+from antenna_diversity.experiments import (
+    compare_corner_combinations,
+    scan_interferer_directions,
+)
 
-- Python 内部和输出的码相位采样索引均为零基。
-- MATLAB `firstValid = groupDelay + 1` 对应 Python 的 `filtered[:, group_delay:]`。
-- ADC 与 DFE 量化使用“半整数远离零”的 MATLAB 舍入规则，而不是 NumPy 默认的银行家舍入。
-- 固定随机种子在 Python 内部可复现，但 NumPy 与 MATLAB 的噪声样本不要求逐点相同。
-- 跨语言一致性通过确定性数学测试、估计误差容限和端到端物理结论验证。
+cfg = default_config()
+all_subarrays = compare_corner_combinations(cfg, mode="mvdr")  # 11 个子集
+direction_grid = scan_interferer_directions(
+    cfg, interferer_index=0,
+    azimuths_deg=np.arange(0.0, 360.0, 15.0),
+    elevations_deg=np.arange(0.0, 91.0, 10.0), mode="mvdr",
+)
+```
+
+同一模块还提供干扰功率、目标假设方向、位置误差和对角加载扫描。
+
+## 顺序 Monte Carlo
+
+本阶段故意顺序运行：随机状态和结果顺序与传入 seed 完全一致，不暴露并行参数。返回值只保留每 seed、每分支的标量记录、捕获/跟踪率以及 acquisition metric、最终 Doppler 误差、输出 SINR、最差干扰增益的分布；端到端链未提供的输出 SINR 明确为 `None`，不保存原始样本数组。
+
+```python
+import json
+from antenna_diversity.config import default_config
+from antenna_diversity.experiments import run_monte_carlo
+
+cfg = default_config()
+cfg.plot.enable = False
+mc = run_monte_carlo(cfg, seeds=(101, 102, 103))
+print(json.dumps(mc.to_dict(), ensure_ascii=False, indent=2, allow_nan=False))
+```
+
+## 当前模型边界
+
+当前已实现 3-D 阵列流形和阵元方向图协议，但首版只使用各向同性阵元。以下内容明确未建模：真实 Mate 70 天线位置、真实测量方向图、互耦、极化、多径/NLOS、动态 DOA、非 CW 干扰、多颗卫星，以及导航数据到 PVT 的完整解算。默认结果只说明给定理想模型中 MVDR 的可重复空间抑制与后续捕获/跟踪表现，不是产品级声明。
+
+运行脚本生成的频谱、空间响应、捕获热力图和跟踪曲线位于忽略版本控制的 `results/` 目录。

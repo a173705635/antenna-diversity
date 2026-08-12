@@ -1,58 +1,61 @@
-# Python 天线分集仿真架构说明（对外展示版）
+# Mate 70 理想角点空域抗干扰仿真架构
 
-![Python GPS L1 C/A 天线分集仿真架构](docs/simulation_architecture.svg)
+![Mate 70 理想角点空域抗干扰仿真架构](docs/simulation_architecture.svg)
 
-图片文件：
+图片文件：[`docs/simulation_architecture.svg`](docs/simulation_architecture.svg) 是可编辑矢量主文件；[`docs/simulation_architecture.png`](docs/simulation_architecture.png) 用于报告和演示；实现细节见 [`DESIGN.md`](DESIGN.md)。
 
-- [`docs/simulation_architecture.svg`](docs/simulation_architecture.svg)：主文件，矢量可编辑，可直接导入 Figma、Illustrator 或 Inkscape。
-- [`docs/simulation_architecture.png`](docs/simulation_architecture.png)：用于报告、PPT 和知识文档。
-- [`DESIGN.md`](DESIGN.md)：更详细的公式、数据尺寸、算法和代码文件说明。
+## 一句话定位
 
-## 这张图应该怎样讲
+这是一个以 HUAWEI Mate 70 外形尺寸为几何边界、以 2–4 个理想角点为可选相位中心的 GPS L1 C/A 端到端研究链，用于比较 SINGLE、EGC 和 MVDR 在 0–3 个静态 CW 干扰下的空间响应、捕获与跟踪结果。
 
-当前工程建立了一条从双天线等效复数 IF 输入，到 RF/ADC、数字前端、天线合并、GPS 捕获与跟踪，再到性能评估的端到端仿真链。它的核心研究问题是：在强干扰场景中，不同天线合并方法产生的输出，能否被后续 GNSS 接收机真正捕获并稳定跟踪。
+## 中央数据路径
 
-默认场景使用 GPS L1 C/A PRN 1、2 阵元半波长均匀线阵、一个目标信号和一个连续波干扰。三种合并方式使用完全相同的 RF、DFE、捕获和跟踪配置，因此结果可以直接比较。当前默认案例中，SINGLE 和 EGC 未通过捕获门限，MVDR 把干扰方向幅度响应压低到约 0.00472 后成功捕获并完成跟踪。
+```text
+GPS L1 C/A + 0–3 CW interferers
+→ HUAWEI Mate 70 ideal 2–4 selected corners
+→ isotropic element-pattern interface × 3-D manifold
+→ RF / complex ADC
+→ coherent DFE
+→ SINGLE / EGC / loaded MVDR
+→ Doppler × code-phase ACQ
+→ gated DLL / FLL-assisted PLL TRK
+→ branch metrics, spatial scans, sequential Monte Carlo
+```
 
-## 当前确实建模的内容
+RF 到 DFE 始终保留 `(channels, samples)` 形状，因此同一处理链可接受 2、3 或 4 个激活角点。三种合并器输出单通道样本后共享同一捕获与跟踪配置；只有捕获成功的分支才进入跟踪。
 
-- 目标 GPS L1 C/A 码、码延迟、载波 Doppler，以及 Doppler 对码率的同比例影响；
-- 默认 2 阵元 ULA，阵元间距为 L1 半波长，使用到达角产生通道间空间相位差；
-- 每通道静态幅度误差和相位误差接口；
-- 一个具有功率、频偏、初相和到达角的 CW 干扰；
-- Friis 级联增益/噪声系数、输入参考热噪声、I/Q 限幅和 ADC 量化；
-- 公共相干 DDC、抗混叠 FIR、4 倍抽取与输出重量化；
-- SINGLE、EGC、带对角加载的 MVDR；
-- Doppler–码相位二维 FFT 捕获；
-- Early/Prompt/Late DLL、FLL-assisted PLL 和 C/N₀ 等跟踪指标；
-- RF/DFE/合并后频谱、阵列响应、捕获热图和跟踪曲线。
+## 当前已建模
 
-## 当前没有建模或尚未验证的内容
+- Mate 70 外形尺寸 160.9 × 75.9 × 7.8 mm，以及中心原点的理想角点坐标；
+- 任意不重复的 2–4 角点子集，共 11 种稳定顺序组合；
+- 手机坐标中的方位角/仰角和位置点积构成的 3-D 阵列流形；
+- `ElementPattern` 接口及其首版 `IsotropicElementPattern`；
+- 单星 GPS L1 C/A、码延迟、载波/码 Doppler、等效复数 IF；
+- 0–3 个静态 CW 干扰，每个具有独立方向、功率、频偏、相位与起止时间门；
+- RF 级联增益/NF、热噪声、限幅、复数 ADC，以及相干 DDC/FIR/抽取/重量化；
+- SINGLE、EGC、loaded MVDR，FFT 捕获和 E/P/L DLL + FLL-assisted PLL；
+- 功率分解、输出 SINR、协方差诊断、逐干扰增益的解析空间指标和扫描；
+- 顺序、种子有序、严格 JSON 的 Monte Carlo 汇总。
 
-- **没有建模真实天线增益方向图。** 当前阵元等效为各向同性点阵元，只计算阵元位置造成的相位差。`array_response.png` 展示的是“合并权值 × 理想阵列流形”的空间响应，不是实际天线方向图；
-- **默认和当前结果只针对 2 根天线。** 合并函数按任意通道数写成，但 3 根及以上天线的阵列几何、通道配置、测试用例和性能结果尚未建立，不能把当前结果直接宣称为多阵元结论；
-- 没有天线极化、互耦、遮挡、安装平台散射、各阵元独立方向图和频率相关响应；
-- 没有多颗卫星、导航数据比特、比特边界、帧同步和 PVT；
-- 没有多径、NLOS 和时变传播环境；
-- 干扰目前只有一个静态 CW，没有宽带、扫频、脉冲、调制干扰或多个同时干扰源；
-- RF 采用等效级联模型，没有逐级模拟模拟滤波器、压缩点、相位噪声、I/Q 不平衡、DC 偏置和时钟抖动；
-- 目标和干扰到达角固定，MVDR 使用已知名义目标导向矢量，没有在线 DOA 估计、导向矢量估计和鲁棒失配处理；
-- MVDR 权值基于整段 DFE 数据的协方差一次性计算，没有滑窗实时更新；
-- 跟踪环路使用离散经验增益，尚未按指定噪声带宽和阻尼系数做标准环路滤波器设计。
+## 当前未建模
 
-## 对外展示时的准确表述
+- **真实天线位置**：角点是理想相位中心接口，不声称对应 Mate 70 内部天线；
+- **真实测量方向图**：当前各向同性增益 `1+0j` 只是可替换接口的首版；
+- 互耦、极化、人体/机身遮挡与平台散射；
+- 多径、NLOS、运动和动态 DOA；
+- 宽带、扫频、脉冲或其他非 CW 干扰；
+- 多颗卫星、多 PRN 并发、导航数据、位/帧同步和 PVT；
+- 在线 DOA、鲁棒导向矢量估计和 MVDR 滑窗实时更新；
+- 完整硬件非理想，例如相位噪声、I/Q 失衡、时钟抖动和逐级压缩。
 
-推荐表述：
+## 对外表述边界
 
-> 已构建一套 Python 端到端双天线 GPS L1 C/A 接收机仿真平台，覆盖等效 RF、ADC、数字下变频、抽取、SINGLE/EGC/MVDR 空域合并、FFT 捕获及闭环跟踪；当前用于研究静态单 CW 强干扰条件下的天线分集与空域抑制效果。
+推荐：
 
-不建议直接表述为“已建立真实多天线 GNSS 接收机全物理模型”，因为真实天线方向图、3 阵元以上阵列、多径、多星、多类型干扰和完整硬件非理想目前尚未纳入。
+> 已构建一套基于 Mate 70 外形理想角点的 GPS L1 C/A 空域抗干扰仿真，覆盖 2–4 通道三维阵列流形、0–3 个静态 CW 干扰、RF/DFE、SINGLE/EGC/MVDR、捕获跟踪、解析扫描和顺序 Monte Carlo。
 
-## 下一步扩展建议
+避免称为“Mate 70 真实天线仿真”或宣称产品抗干扰性能，因为真实位置、方向图、互耦、极化和传播测量均未输入模型。
 
-1. 先加入每个阵元的可配置增益/相位方向图，使导向矢量变为“阵元方向图 × 阵列空间相位”；
-2. 建立 3 阵元 ULA 和 3 阵元非均匀/平面阵列配置，并补充回归测试与对比结果；
-3. 扫描目标/干扰角度、功率、导向矢量误差和对角加载系数；
-4. 加入多径和多个干扰源，再研究阵元数与可抑制自由度的关系；
-5. 将 MVDR 协方差与权值改为滑窗更新，研究动态干扰；
-6. 最后补充多星、导航数据、标准跟踪环路和 PVT。
+## 两条基线
+
+`default_config()` 是手机理想四角默认；`legacy_ula_config()` 与 `run_legacy_ula.py` 保留原始双阵元半波长 ULA 结论。两者并存，使新手机接口的扩展不改变旧基线的含义。

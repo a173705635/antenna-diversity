@@ -1,4 +1,6 @@
-"""Fast analytical experiment orchestration."""
+"""Analytical scans and sequential Monte Carlo orchestration."""
+
+from .monte_carlo import MonteCarloResult, MonteCarloRun, run_monte_carlo
 
 from .spatial_scan import (
     compare_corner_combinations,
@@ -11,6 +13,8 @@ from .spatial_scan import (
 )
 
 __all__ = [
+    "MonteCarloResult",
+    "MonteCarloRun",
     "compare_corner_combinations",
     "evaluate_configuration_spatially",
     "scan_assumed_target_directions",
@@ -18,4 +22,5 @@ __all__ = [
     "scan_interferer_directions",
     "scan_interferer_powers",
     "scan_position_errors",
+    "run_monte_carlo",
 ]
