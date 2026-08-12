@@ -2,6 +2,15 @@
 
 本目录是 `matlab_sim` 中 GPS L1 C/A 链路的 Python 原生实现。MATLAB 参考代码保持不变；Galileo E5/AltBOC 不属于本阶段迁移范围。
 
+## 架构图与设计说明
+
+![Python GPS L1 C/A 双天线分集仿真架构](docs/simulation_architecture.svg)
+
+- 对外展示版架构与模型边界说明：[`ARCHITECTURE.md`](ARCHITECTURE.md)
+- 完整公式、数据尺寸和代码映射：[`DESIGN.md`](DESIGN.md)
+- 可直接放入报告或 PPT 的 PNG：[`docs/simulation_architecture.png`](docs/simulation_architecture.png)
+- 可导入 Figma、Illustrator 或 Inkscape 修改的 SVG：[`docs/simulation_architecture.svg`](docs/simulation_architecture.svg)
+
 ## 链路结构
 
 ```text

@@ -1,0 +1,219 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1080" viewBox="0 0 1800 1080" role="img" aria-labelledby="title desc">
+  <title id="title">Python GPS L1 C/A 天线分集接收机全链路设计框图</title>
+  <desc id="desc">从双天线场景、等效 RF 前端、ADC、DDC 与抽取，到 SINGLE、EGC、MVDR 合并，再到捕获和闭环跟踪的详细信号流程。</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#17262f" flood-opacity="0.09"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 z" fill="#52626a"/>
+    </marker>
+    <marker id="arrowPurple" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7657a8"/>
+    </marker>
+    <linearGradient id="headerWash" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#e9f4f1"/>
+      <stop offset="0.52" stop-color="#edf3f9"/>
+      <stop offset="1" stop-color="#f1ecf8"/>
+    </linearGradient>
+    <style>
+      .bg { fill:#f7f8f5; }
+      .ink { fill:#17262f; }
+      .muted { fill:#64727a; }
+      .stage { fill:#ffffff; stroke:#d8dedb; stroke-width:1.5; rx:18; filter:url(#shadow); }
+      .stage-title { font-family:"Segoe UI","Microsoft YaHei",sans-serif; font-size:22px; font-weight:600; fill:#17262f; }
+      .stage-num { font-family:"Segoe UI",sans-serif; font-size:13px; font-weight:700; letter-spacing:1.5px; fill:#637078; }
+      .node-title { font-family:"Segoe UI","Microsoft YaHei",sans-serif; font-size:18px; font-weight:600; fill:#17262f; }
+      .node-copy { font-family:"Segoe UI","Microsoft YaHei",sans-serif; font-size:14px; font-weight:400; fill:#526169; }
+      .tiny { font-family:"Segoe UI","Microsoft YaHei",sans-serif; font-size:12px; font-weight:500; fill:#69767d; }
+      .mono { font-family:"Cascadia Mono","Consolas",monospace; font-size:13px; font-weight:500; fill:#34454e; }
+      .main-line { fill:none; stroke:#52626a; stroke-width:2.5; marker-end:url(#arrow); }
+      .thin-line { fill:none; stroke:#8b989e; stroke-width:1.7; marker-end:url(#arrow); }
+      .feedback { fill:none; stroke:#7657a8; stroke-width:2; stroke-dasharray:7 6; marker-end:url(#arrowPurple); }
+      .green { fill:#e8f5ef; stroke:#6eb49c; stroke-width:1.4; }
+      .coral { fill:#fff0ea; stroke:#e1957f; stroke-width:1.4; }
+      .blue { fill:#eaf2fb; stroke:#79a9d2; stroke-width:1.4; }
+      .purple { fill:#f1ecfa; stroke:#a38bc7; stroke-width:1.4; }
+      .neutral { fill:#f3f4f1; stroke:#c5ccc8; stroke-width:1.3; }
+      .pass { fill:#e8f5ef; stroke:#4e9d80; stroke-width:1.4; }
+      .fail { fill:#f3f4f1; stroke:#b8bfbb; stroke-width:1.3; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1800" height="1080"/>
+  <rect x="0" y="0" width="1800" height="148" fill="url(#headerWash)"/>
+  <path d="M0 148 H1800" stroke="#d8dfdc"/>
+  <text x="64" y="58" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="15" font-weight="700" letter-spacing="2.5" fill="#397365">GNSS · ANTENNA DIVERSITY · END-TO-END MODEL</text>
+  <text x="64" y="103" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="34" font-weight="600" class="ink">Python GPS L1 C/A 天线分集接收机全链路</text>
+  <text x="1280" y="55" class="tiny">BASELINE / PRN 1 / SEED 42</text>
+  <text x="1280" y="82" class="mono">RF 16.368 Msps  →  DFE 4.092 Msps</text>
+  <text x="1280" y="108" class="mono">2 antennas  ·  λ/2 spacing  ·  40 ms</text>
+
+  <!-- stage containers -->
+  <rect class="stage" x="48" y="184" width="278" height="690"/>
+  <rect class="stage" x="354" y="184" width="282" height="690"/>
+  <rect class="stage" x="664" y="184" width="318" height="690"/>
+  <rect class="stage" x="1010" y="184" width="310" height="690"/>
+  <rect class="stage" x="1348" y="184" width="404" height="690"/>
+
+  <!-- stage headings -->
+  <text x="72" y="218" class="stage-num">01 · SCENE</text>
+  <text x="72" y="250" class="stage-title">空间信号与双天线</text>
+  <text x="378" y="218" class="stage-num">02 · RF / ADC</text>
+  <text x="378" y="250" class="stage-title">等效射频前端</text>
+  <text x="688" y="218" class="stage-num">03 · DFE</text>
+  <text x="688" y="250" class="stage-title">相干数字前端</text>
+  <text x="1034" y="218" class="stage-num">04 · DIVERSITY</text>
+  <text x="1034" y="250" class="stage-title">三路并行合并</text>
+  <text x="1372" y="218" class="stage-num">05 · ACQ / TRK</text>
+  <text x="1372" y="250" class="stage-title">捕获门控与闭环跟踪</text>
+
+  <!-- scene -->
+  <rect class="green" x="72" y="282" width="230" height="105" rx="13"/>
+  <circle cx="94" cy="307" r="7" fill="#2c8b6d"/>
+  <text x="111" y="313" class="node-title">目标 GPS L1 C/A</text>
+  <text x="92" y="340" class="node-copy">PRN 1 · −128.5 dBm · θ = −10°</text>
+  <text x="92" y="365" class="mono">f = IF + 1.5 kHz</text>
+
+  <rect class="coral" x="72" y="409" width="230" height="105" rx="13"/>
+  <circle cx="94" cy="434" r="7" fill="#db6c4f"/>
+  <text x="111" y="440" class="node-title">连续波干扰 CW</text>
+  <text x="92" y="467" class="node-copy">−90 dBm · θ = +35°</text>
+  <text x="92" y="492" class="mono">f = IF + 250 kHz</text>
+
+  <path d="M100 588 Q134 548 168 588 T236 588" fill="none" stroke="#6e8896" stroke-width="2" opacity="0.8"/>
+  <path d="M100 608 Q134 568 168 608 T236 608" fill="none" stroke="#6e8896" stroke-width="2" opacity="0.45"/>
+  <line x1="147" y1="625" x2="147" y2="697" stroke="#263b45" stroke-width="4"/>
+  <line x1="228" y1="625" x2="228" y2="697" stroke="#263b45" stroke-width="4"/>
+  <path d="M129 644 H165 M210 644 H246" stroke="#263b45" stroke-width="3"/>
+  <path d="M129 697 H165 M210 697 H246" stroke="#263b45" stroke-width="3"/>
+  <path d="M147 718 H228" stroke="#79878e" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <path d="M151 712 L147 718 L151 724 M224 712 L228 718 L224 724" fill="none" stroke="#79878e" stroke-width="1.5"/>
+  <text x="166" y="742" class="mono">d = λ/2</text>
+  <text x="88" y="778" class="node-title">2 阵元均匀线阵 ULA</text>
+  <text x="88" y="804" class="node-copy">宽边方向为 0°，阵元位置 [0, λ/2]</text>
+  <text x="88" y="829" class="node-copy">加入每通道幅度与相位响应</text>
+
+  <!-- RF -->
+  <rect class="neutral" x="378" y="282" width="234" height="86" rx="13"/>
+  <text x="398" y="312" class="node-title">输入参考热噪声</text>
+  <text x="398" y="341" class="mono">Pn = k · T · B · Fcascade</text>
+  <path class="thin-line" d="M495 368 V395"/>
+
+  <rect class="blue" x="378" y="398" width="234" height="118" rx="13"/>
+  <text x="398" y="429" class="node-title">Friis 级联增益 / 噪声</text>
+  <text x="398" y="458" class="node-copy">LNA 28/1.2 · Mixer 8/8</text>
+  <text x="398" y="481" class="node-copy">VGA 44/10 （增益/NF, dB）</text>
+  <text x="398" y="504" class="mono">G = 80 dB · NF = 1.235 dB</text>
+  <path class="thin-line" d="M495 516 V543"/>
+
+  <rect class="blue" x="378" y="546" width="234" height="96" rx="13"/>
+  <text x="398" y="577" class="node-title">I / Q 分量软限幅</text>
+  <text x="398" y="606" class="mono">±Vpp/2 · tanh(x / limit)</text>
+  <text x="398" y="628" class="node-copy">默认 Vpp = 1 V，当前无饱和</text>
+  <path class="thin-line" d="M495 642 V669"/>
+
+  <rect class="blue" x="378" y="672" width="234" height="112" rx="13"/>
+  <text x="398" y="704" class="node-title">复数 I/Q ADC</text>
+  <text x="398" y="733" class="node-copy">I、Q 分别量化为有符号 10 bit</text>
+  <text x="398" y="758" class="mono">LSB = 0.9765625 mV</text>
+
+  <!-- DFE -->
+  <rect class="blue" x="688" y="282" width="270" height="102" rx="13"/>
+  <text x="708" y="314" class="node-title">公共相干 NCO / DDC</text>
+  <text x="708" y="343" class="mono">x[n] · exp(−j2π·4.092M·n/fs)</text>
+  <text x="708" y="368" class="node-copy">目标→1.5 kHz；干扰→250 kHz</text>
+  <path class="thin-line" d="M823 384 V411"/>
+
+  <rect class="blue" x="688" y="414" width="270" height="126" rx="13"/>
+  <text x="708" y="446" class="node-title">抗混叠低通 FIR</text>
+  <text x="708" y="475" class="node-copy">129 taps · Hamming-windowed sinc</text>
+  <text x="708" y="499" class="mono">fc = 1.8 MHz · Σh[n] = 1</text>
+  <text x="708" y="523" class="node-copy">线性相位群延迟 = 64 个输入样点</text>
+  <path class="thin-line" d="M823 540 V567"/>
+
+  <rect class="blue" x="688" y="570" width="270" height="96" rx="13"/>
+  <text x="708" y="602" class="node-title">时延对齐与 4 倍抽取</text>
+  <text x="708" y="631" class="mono">16.368 Msps  →  4.092 Msps</text>
+  <text x="708" y="653" class="node-copy">每码片 4 样点 · 每毫秒 4092 样点</text>
+  <path class="thin-line" d="M823 666 V693"/>
+
+  <rect class="blue" x="688" y="696" width="270" height="88" rx="13"/>
+  <text x="708" y="728" class="node-title">DFE 输出重定量</text>
+  <text x="708" y="757" class="node-copy">二进制右移 2 bit → 有符号 8 bit</text>
+
+  <!-- diversity -->
+  <text x="1034" y="286" class="node-copy">每个分支满足目标单位响应约束</text>
+  <text x="1034" y="309" class="mono">y[n] = wᴴx[n]</text>
+  <rect class="neutral" x="1034" y="337" width="262" height="112" rx="13"/>
+  <text x="1054" y="370" class="node-title">SINGLE</text>
+  <text x="1054" y="399" class="node-copy">只使用第 1 根天线</text>
+  <text x="1054" y="425" class="mono">w = [1/a₁*, 0]ᵀ</text>
+
+  <rect class="blue" x="1034" y="475" width="262" height="112" rx="13"/>
+  <text x="1054" y="508" class="node-title">EGC</text>
+  <text x="1054" y="537" class="node-copy">按目标方向相位对齐、等增益相加</text>
+  <text x="1054" y="563" class="mono">w = a / (aᴴa)</text>
+
+  <rect class="purple" x="1034" y="613" width="262" height="154" rx="13"/>
+  <text x="1054" y="646" class="node-title">MVDR + diagonal loading</text>
+  <text x="1054" y="675" class="node-copy">估计样本协方差并抑制强干扰</text>
+  <text x="1054" y="701" class="mono">R = XXᴴ/N</text>
+  <text x="1054" y="725" class="mono">δ = 0.01·tr(R)/M</text>
+  <text x="1054" y="749" class="mono">w = (R+δI)⁻¹a / aᴴ(R+δI)⁻¹a</text>
+  <text x="1034" y="816" class="tiny">关键前提：目标导向矢量 a 已知且足够准确</text>
+
+  <!-- acquisition/tracking -->
+  <rect class="neutral" x="1372" y="282" width="356" height="146" rx="13"/>
+  <text x="1392" y="314" class="node-title">各分支独立 FFT 并行码相位捕获</text>
+  <text x="1392" y="343" class="node-copy">41 个 Doppler bin：−5 kHz…+5 kHz</text>
+  <text x="1392" y="367" class="node-copy">每 bin 搜索 4092 个码相位</text>
+  <text x="1392" y="391" class="node-copy">1 ms 相干 × 4 次非相干累加</text>
+  <text x="1392" y="415" class="mono">metric = peak / second peak · gate ≥ 2.5</text>
+
+  <rect class="fail" x="1372" y="455" width="168" height="91" rx="12"/>
+  <text x="1390" y="483" class="node-title">SINGLE</text>
+  <text x="1390" y="510" class="mono">1.0455 · FAIL</text>
+  <text x="1390" y="532" class="tiny">不启动 TRK</text>
+  <rect class="fail" x="1560" y="455" width="168" height="91" rx="12"/>
+  <text x="1578" y="483" class="node-title">EGC</text>
+  <text x="1578" y="510" class="mono">1.0461 · FAIL</text>
+  <text x="1578" y="532" class="tiny">不启动 TRK</text>
+
+  <rect class="pass" x="1372" y="570" width="356" height="103" rx="13"/>
+  <text x="1392" y="602" class="node-title">MVDR 捕获通过</text>
+  <text x="1392" y="631" class="mono">metric 17.841 · Doppler 1500 Hz</text>
+  <text x="1392" y="655" class="node-copy">码相位 549 samples = 137.25 chips</text>
+  <path class="thin-line" d="M1550 673 V700"/>
+
+  <rect class="purple" x="1372" y="703" width="356" height="114" rx="13"/>
+  <text x="1392" y="735" class="node-title">TRK：E / P / L DLL + FLL-assisted PLL</text>
+  <text x="1392" y="764" class="node-copy">前 5 epoch 使用 FLL 辅助 · 30 × 1 ms</text>
+  <text x="1392" y="789" class="mono">final fd = 1497.9 Hz · C/N₀ = 52.68 dB-Hz</text>
+  <path class="feedback" d="M1707 817 V842 H1367 V761 H1392"/>
+  <text x="1440" y="858" class="tiny" fill="#7657a8">载波频率/相位与码率/码相位闭环更新</text>
+
+  <!-- interstage main arrows -->
+  <path class="main-line" d="M326 529 H350"/>
+  <path class="main-line" d="M636 529 H660"/>
+  <path class="main-line" d="M982 529 H1006"/>
+  <path class="main-line" d="M1320 529 H1344"/>
+
+  <!-- bottom data ribbon -->
+  <rect x="48" y="910" width="1704" height="118" rx="18" fill="#17262f"/>
+  <text x="72" y="942" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="13" font-weight="700" letter-spacing="1.5" fill="#9eb0b7">DATA SHAPE &amp; TIME BASE</text>
+  <text x="72" y="976" font-family="Cascadia Mono, Consolas, monospace" font-size="15" fill="#eef3f1">Scene / ADC</text>
+  <text x="72" y="1001" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" fill="#b9c7cb">2 × 654720 complex · 16.368 Msps · 40 ms</text>
+  <path d="M380 940 V1006" stroke="#40525b"/>
+  <text x="410" y="976" font-family="Cascadia Mono, Consolas, monospace" font-size="15" fill="#eef3f1">DFE channels</text>
+  <text x="410" y="1001" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" fill="#b9c7cb">2 × 163664 complex · 4.092 Msps</text>
+  <path d="M728 940 V1006" stroke="#40525b"/>
+  <text x="758" y="976" font-family="Cascadia Mono, Consolas, monospace" font-size="15" fill="#eef3f1">Combined branches</text>
+  <text x="758" y="1001" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" fill="#b9c7cb">3 × 163664 complex · each branch independent</text>
+  <path d="M1140 940 V1006" stroke="#40525b"/>
+  <text x="1170" y="976" font-family="Cascadia Mono, Consolas, monospace" font-size="15" fill="#eef3f1">ACQ window</text>
+  <text x="1170" y="1001" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" fill="#b9c7cb">16368 samples · first 4 ms</text>
+  <path d="M1425 940 V1006" stroke="#40525b"/>
+  <text x="1455" y="976" font-family="Cascadia Mono, Consolas, monospace" font-size="15" fill="#eef3f1">MVDR TRK</text>
+  <text x="1455" y="1001" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" fill="#b9c7cb">starts @16917 · 30 epochs</text>
+</svg>

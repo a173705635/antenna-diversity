@@ -1,0 +1,50 @@
+flowchart LR
+    CFG["默认配置与校验\nPRN / 功率 / 角度 / RF / DFE / 环路"] --> SCENE
+
+    subgraph SCENE["① 双天线场景生成"]
+        SAT["GPS L1 C/A PRN 1\n-128.5 dBm, θ=-10°\nIF + 1500 Hz"]
+        JAM["连续波干扰 CW\n-90 dBm, θ=+35°\nIF + 250 kHz"]
+        ULA["2 阵元 ULA\n阵元间距 λ/2\n通道幅相误差"]
+        SAT --> ULA
+        JAM --> ULA
+    end
+
+    SCENE --> RF
+    subgraph RF["② 等效 RF 前端与 ADC"]
+        N["Friis 级联噪声\nk·T·B·F"] --> G["LNA + Mixer + VGA\n总增益 80 dB"]
+        G --> LIM["I/Q 软限幅\n±0.5 V"]
+        LIM --> ADC["10-bit 复数 ADC"]
+    end
+
+    RF --> DFE
+    subgraph DFE["③ 数字前端 DFE"]
+        DDC["公共相干 NCO\nDDC: -4.092 MHz"] --> LPF["129-tap Hamming-sinc LPF\n截止 1.8 MHz / 群延迟 64"]
+        LPF --> DEC["抽取 ÷4\n16.368 → 4.092 Msps"]
+        DEC --> RQ["右移 2 bit + 8-bit 复数量化"]
+    end
+
+    DFE --> SPLIT{"④ 三种天线合并"}
+    SPLIT --> S["SINGLE\n仅第 1 路"]
+    SPLIT --> E["EGC\n相位对齐、等增益"]
+    SPLIT --> M["MVDR\nR+δI 与已知目标导向矢量"]
+
+    S --> AS["FFT 捕获\n失败：1.05 < 2.5"]
+    E --> AE["FFT 捕获\n失败：1.05 < 2.5"]
+    M --> AM["FFT 捕获\n成功：17.84\n1500 Hz / 549 samples"]
+
+    AS -->|"门限未通过"| STOP1["不进入跟踪"]
+    AE -->|"门限未通过"| STOP2["不进入跟踪"]
+    AM -->|"门限通过"| TRK["⑤ TRK 闭环跟踪\nE/P/L DLL + FLL-assisted PLL\n30 × 1 ms epochs"]
+    TRK -. "载波频率/相位与码率/码相位更新" .-> TRK
+    TRK --> MET["指标与五类诊断图\n最终 Doppler 1497.9 Hz\nC/N₀ 52.68 dB-Hz"]
+
+    classDef desired fill:#e5f4ed,stroke:#24856a,color:#123d34;
+    classDef jammer fill:#fff0eb,stroke:#dc6b4f,color:#663326;
+    classDef digital fill:#eaf1fb,stroke:#3978b8,color:#173b60;
+    classDef estimate fill:#f0ebfa,stroke:#7356a8,color:#382852;
+    classDef muted fill:#f1f2ef,stroke:#8a908a,color:#3e443f;
+    class SAT desired;
+    class JAM jammer;
+    class DDC,LPF,DEC,RQ,ADC digital;
+    class M,AM,TRK,MET estimate;
+    class STOP1,STOP2 muted;

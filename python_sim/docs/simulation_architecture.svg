@@ -1,0 +1,214 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1200" viewBox="0 0 1920 1200" role="img" aria-labelledby="archTitle archDesc">
+  <title id="archTitle">Python GPS L1 C/A 双天线分集端到端仿真架构</title>
+  <desc id="archDesc">展示场景、RF ADC、数字前端、天线合并、捕获跟踪和评估流程，并明确当前已建模与未建模边界。</desc>
+  <defs>
+    <linearGradient id="topGradient" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#e6f4ef"/>
+      <stop offset="0.52" stop-color="#e9f1fa"/>
+      <stop offset="1" stop-color="#f0eafa"/>
+    </linearGradient>
+    <linearGradient id="flowGradient" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#347c6a"/>
+      <stop offset="0.58" stop-color="#397ab4"/>
+      <stop offset="1" stop-color="#7659a7"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="7" stdDeviation="11" flood-color="#172832" flood-opacity="0.09"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#65757d"/>
+    </marker>
+    <style>
+      .bg{fill:#f7f8f5}.ink{fill:#172832}.muted{fill:#66747b}
+      .h1{font-family:"Segoe UI","Microsoft YaHei",sans-serif;font-size:36px;font-weight:600;fill:#172832}
+      .eyebrow{font-family:"Segoe UI",sans-serif;font-size:14px;font-weight:700;letter-spacing:2.5px;fill:#347c6a}
+      .lead{font-family:"Segoe UI","Microsoft YaHei",sans-serif;font-size:16px;font-weight:400;fill:#5b6a72}
+      .phase{font-family:"Segoe UI",sans-serif;font-size:13px;font-weight:700;letter-spacing:1.5px;fill:#6b777d}
+      .stageTitle{font-family:"Segoe UI","Microsoft YaHei",sans-serif;font-size:21px;font-weight:600;fill:#172832}
+      .nodeTitle{font-family:"Segoe UI","Microsoft YaHei",sans-serif;font-size:16px;font-weight:600;fill:#172832}
+      .copy{font-family:"Segoe UI","Microsoft YaHei",sans-serif;font-size:14px;font-weight:400;fill:#56656d}
+      .small{font-family:"Segoe UI","Microsoft YaHei",sans-serif;font-size:12px;font-weight:500;fill:#69777e}
+      .mono{font-family:"Cascadia Mono","Consolas",monospace;font-size:13px;font-weight:500;fill:#344851}
+      .whiteTitle{font-family:"Segoe UI","Microsoft YaHei",sans-serif;font-size:17px;font-weight:600;fill:#f5f8f7}
+      .whiteCopy{font-family:"Segoe UI","Microsoft YaHei",sans-serif;font-size:13px;font-weight:400;fill:#c7d2d5}
+      .stage{fill:#fff;stroke:#d9dfdc;stroke-width:1.4;filter:url(#softShadow)}
+      .node{fill:#f3f5f3;stroke:#c9d0cd;stroke-width:1.2}
+      .blue{fill:#eaf2fb;stroke:#7faed3;stroke-width:1.2}
+      .green{fill:#e7f4ee;stroke:#73b49e;stroke-width:1.2}
+      .coral{fill:#fff0ea;stroke:#e09a84;stroke-width:1.2}
+      .purple{fill:#f1ecfa;stroke:#a58dc8;stroke-width:1.2}
+      .line{fill:none;stroke:#65757d;stroke-width:2.2;marker-end:url(#arrow)}
+      .thin{fill:none;stroke:#8b979c;stroke-width:1.5;marker-end:url(#arrow)}
+      .dash{fill:none;stroke:#8a70b2;stroke-width:1.7;stroke-dasharray:6 5}
+      .check{fill:#2f836b}.cross{fill:#cf6a50}
+    </style>
+  </defs>
+
+  <rect class="bg" width="1920" height="1200"/>
+  <rect x="0" y="0" width="1920" height="164" fill="url(#topGradient)"/>
+  <path d="M0 164 H1920" stroke="#d7dfdb"/>
+  <text x="64" y="48" class="eyebrow">SYSTEM ARCHITECTURE · MODEL SCOPE · VERIFIED BASELINE</text>
+  <text x="64" y="96" class="h1">Python GPS L1 C/A 双天线分集端到端仿真架构</text>
+  <text x="64" y="132" class="lead">从等效复数 IF 到捕获与闭环跟踪，并明确“已建模 / 未建模”的工程边界</text>
+  <rect x="1530" y="38" width="326" height="88" rx="14" fill="#172832"/>
+  <text x="1552" y="68" class="whiteTitle">当前基线</text>
+  <text x="1552" y="94" class="whiteCopy">2 antennas · PRN 1 · CW jammer · 40 ms</text>
+  <text x="1552" y="116" class="whiteCopy">16.368 Msps → 4.092 Msps · seed 42</text>
+
+  <!-- central architecture -->
+  <text x="64" y="205" class="phase">A · END-TO-END SIGNAL FLOW</text>
+  <rect x="64" y="226" width="1792" height="410" rx="22" fill="#fff" stroke="#d9dfdc" filter="url(#softShadow)"/>
+  <rect x="64" y="226" width="1792" height="7" rx="4" fill="url(#flowGradient)"/>
+
+  <!-- stage 1 -->
+  <text x="92" y="271" class="phase">01 · SCENE</text>
+  <text x="92" y="304" class="stageTitle">信号与双天线场景</text>
+  <rect class="green" x="92" y="331" width="244" height="80" rx="12"/>
+  <circle cx="112" cy="353" r="6" fill="#2f836b"/>
+  <text x="128" y="359" class="nodeTitle">GPS L1 C/A 目标</text>
+  <text x="112" y="385" class="copy">−128.5 dBm · −10° · +1500 Hz</text>
+  <rect class="coral" x="92" y="425" width="244" height="80" rx="12"/>
+  <circle cx="112" cy="447" r="6" fill="#cf6a50"/>
+  <text x="128" y="453" class="nodeTitle">单个 CW 干扰</text>
+  <text x="112" y="479" class="copy">−90 dBm · +35° · +250 kHz</text>
+  <rect class="node" x="92" y="519" width="244" height="82" rx="12"/>
+  <text x="112" y="548" class="nodeTitle">2 阵元 ULA · d = λ/2</text>
+  <text x="112" y="573" class="copy">理想点阵元空间相位 + 通道幅相误差</text>
+  <text x="112" y="594" class="small">不含真实天线增益方向图</text>
+
+  <!-- arrow 1 -->
+  <path class="line" d="M351 414 H380"/>
+  <text x="354" y="399" class="small">2 × N</text>
+
+  <!-- stage 2 -->
+  <text x="392" y="271" class="phase">02 · RF / ADC</text>
+  <text x="392" y="304" class="stageTitle">等效射频前端</text>
+  <rect class="blue" x="392" y="331" width="246" height="92" rx="12"/>
+  <text x="412" y="361" class="nodeTitle">Friis 级联 + 热噪声</text>
+  <text x="412" y="387" class="copy">LNA / Mixer / VGA · G = 80 dB</text>
+  <text x="412" y="409" class="mono">Pn = kTBF · NF = 1.235 dB</text>
+  <path class="thin" d="M515 423 V447"/>
+  <rect class="blue" x="392" y="450" width="246" height="68" rx="12"/>
+  <text x="412" y="479" class="nodeTitle">I/Q 软限幅</text>
+  <text x="412" y="502" class="copy">±0.5 V · tanh</text>
+  <path class="thin" d="M515 518 V542"/>
+  <rect class="blue" x="392" y="545" width="246" height="56" rx="12"/>
+  <text x="412" y="579" class="nodeTitle">10-bit 复数 ADC</text>
+
+  <!-- arrow 2 -->
+  <path class="line" d="M653 414 H682"/>
+  <text x="650" y="399" class="small">16.368 Msps</text>
+
+  <!-- stage 3 -->
+  <text x="694" y="271" class="phase">03 · DFE</text>
+  <text x="694" y="304" class="stageTitle">相干数字前端</text>
+  <rect class="blue" x="694" y="331" width="260" height="70" rx="12"/>
+  <text x="714" y="361" class="nodeTitle">公共 NCO / DDC</text>
+  <text x="714" y="384" class="copy">−4.092 MHz，保持通道相对相位</text>
+  <path class="thin" d="M824 401 V425"/>
+  <rect class="blue" x="694" y="428" width="260" height="78" rx="12"/>
+  <text x="714" y="457" class="nodeTitle">129-tap 抗混叠 FIR</text>
+  <text x="714" y="481" class="copy">fc 1.8 MHz · 群延迟 64 样点</text>
+  <text x="714" y="499" class="small">Hamming-windowed sinc</text>
+  <path class="thin" d="M824 506 V530"/>
+  <rect class="blue" x="694" y="533" width="260" height="68" rx="12"/>
+  <text x="714" y="562" class="nodeTitle">÷4 抽取 + 8-bit 重量化</text>
+  <text x="714" y="585" class="copy">4.092 Msps · 4 samples/chip</text>
+
+  <!-- arrow 3 -->
+  <path class="line" d="M969 414 H998"/>
+  <text x="968" y="399" class="small">2 × 163664</text>
+
+  <!-- stage 4 -->
+  <text x="1010" y="271" class="phase">04 · DIVERSITY</text>
+  <text x="1010" y="304" class="stageTitle">并行天线合并</text>
+  <rect class="node" x="1010" y="331" width="250" height="68" rx="12"/>
+  <text x="1030" y="359" class="nodeTitle">SINGLE</text>
+  <text x="1030" y="382" class="copy">只取第 1 路 · 基准</text>
+  <rect class="blue" x="1010" y="415" width="250" height="68" rx="12"/>
+  <text x="1030" y="443" class="nodeTitle">EGC</text>
+  <text x="1030" y="466" class="copy">目标相位对齐 · 等增益</text>
+  <rect class="purple" x="1010" y="499" width="250" height="102" rx="12"/>
+  <text x="1030" y="527" class="nodeTitle">MVDR + 对角加载</text>
+  <text x="1030" y="551" class="copy">R = XXᴴ/N · 已知目标导向矢量</text>
+  <text x="1030" y="574" class="mono">δ = 0.01·tr(R)/M</text>
+  <text x="1030" y="593" class="small">权值离线一次计算</text>
+
+  <!-- arrow 4 -->
+  <path class="line" d="M1275 414 H1304"/>
+  <text x="1270" y="399" class="small">3 branches</text>
+
+  <!-- stage 5 -->
+  <text x="1316" y="271" class="phase">05 · RECEIVER</text>
+  <text x="1316" y="304" class="stageTitle">捕获门控与跟踪</text>
+  <rect class="node" x="1316" y="331" width="244" height="104" rx="12"/>
+  <text x="1336" y="360" class="nodeTitle">FFT 捕获</text>
+  <text x="1336" y="384" class="copy">41 Doppler bins × 4092 码相位</text>
+  <text x="1336" y="407" class="copy">1 ms coherent × 4 noncoherent</text>
+  <text x="1336" y="427" class="mono">peak / second ≥ 2.5</text>
+  <path class="thin" d="M1438 435 V459"/>
+  <rect class="purple" x="1316" y="462" width="244" height="139" rx="12"/>
+  <text x="1336" y="491" class="nodeTitle">TRK（仅捕获成功时）</text>
+  <text x="1336" y="515" class="copy">Early / Prompt / Late</text>
+  <text x="1336" y="538" class="copy">DLL + FLL-assisted PLL</text>
+  <text x="1336" y="561" class="copy">载波频率/相位 + 码率/码相位</text>
+  <text x="1336" y="584" class="small">30 × 1 ms tracking epochs</text>
+
+  <!-- arrow 5 -->
+  <path class="line" d="M1575 414 H1604"/>
+
+  <!-- stage 6 -->
+  <text x="1616" y="271" class="phase">06 · ANALYSIS</text>
+  <text x="1616" y="304" class="stageTitle">结果与验证</text>
+  <rect class="node" x="1616" y="331" width="212" height="126" rx="12"/>
+  <text x="1636" y="360" class="nodeTitle">五类诊断图</text>
+  <text x="1636" y="385" class="copy">RF/DFE 频谱 · 合并频谱</text>
+  <text x="1636" y="408" class="copy">阵列响应 · 捕获热图</text>
+  <text x="1636" y="431" class="copy">跟踪曲线</text>
+  <rect class="green" x="1616" y="473" width="212" height="128" rx="12"/>
+  <text x="1636" y="502" class="nodeTitle">默认案例结果</text>
+  <text x="1636" y="527" class="copy">SINGLE / EGC：未捕获</text>
+  <text x="1636" y="550" class="copy">MVDR：metric 17.84</text>
+  <text x="1636" y="573" class="copy">final Doppler 1497.9 Hz</text>
+  <text x="1636" y="594" class="small">仅代表当前基线场景</text>
+
+  <!-- scope panels -->
+  <text x="64" y="685" class="phase">B · CURRENT MODEL COVERAGE</text>
+  <rect x="64" y="705" width="872" height="405" rx="22" fill="#fff" stroke="#d9dfdc" filter="url(#softShadow)"/>
+  <rect x="64" y="705" width="8" height="405" rx="4" fill="#3b8a72"/>
+  <circle cx="103" cy="750" r="17" fill="#e4f3ec"/>
+  <path d="M95 750 l6 6 11-14" fill="none" stroke="#2f836b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="132" y="758" class="stageTitle">当前已建模 / 已进入端到端链路</text>
+
+  <g>
+    <circle cx="105" cy="806" r="5" class="check"/><text x="122" y="811" class="nodeTitle">信号</text><text x="210" y="811" class="copy">单星 GPS L1 C/A、码延迟、载波/码 Doppler</text>
+    <circle cx="105" cy="852" r="5" class="check"/><text x="122" y="857" class="nodeTitle">阵列</text><text x="210" y="857" class="copy">默认 2 阵元 ULA、λ/2、空间相位、静态通道幅相误差</text>
+    <circle cx="105" cy="898" r="5" class="check"/><text x="122" y="903" class="nodeTitle">干扰</text><text x="210" y="903" class="copy">单个静态 CW：功率、频偏、初相、到达角</text>
+    <circle cx="105" cy="944" r="5" class="check"/><text x="122" y="949" class="nodeTitle">RF</text><text x="210" y="949" class="copy">级联增益/NF、热噪声、I/Q 限幅、ADC 量化</text>
+    <circle cx="105" cy="990" r="5" class="check"/><text x="122" y="995" class="nodeTitle">DFE</text><text x="210" y="995" class="copy">相干 DDC、FIR、时延对齐、抽取、固定点重量化</text>
+    <circle cx="105" cy="1036" r="5" class="check"/><text x="122" y="1041" class="nodeTitle">算法</text><text x="210" y="1041" class="copy">SINGLE / EGC / loaded MVDR、FFT 捕获、DLL/FLL/PLL</text>
+    <circle cx="105" cy="1082" r="5" class="check"/><text x="122" y="1087" class="nodeTitle">验证</text><text x="210" y="1087" class="copy">固定种子、31 项测试、五类可视化和三分支指标</text>
+  </g>
+
+  <text x="984" y="685" class="phase">C · EXPLICIT LIMITATIONS / NEXT MODEL LAYERS</text>
+  <rect x="984" y="705" width="872" height="405" rx="22" fill="#fff" stroke="#d9dfdc" filter="url(#softShadow)"/>
+  <rect x="1848" y="705" width="8" height="405" rx="4" fill="#d17055"/>
+  <circle cx="1023" cy="750" r="17" fill="#fff0ea"/>
+  <path d="M1016 743 l14 14 M1030 743 l-14 14" fill="none" stroke="#cf6a50" stroke-width="3" stroke-linecap="round"/>
+  <text x="1052" y="758" class="stageTitle">当前未建模 / 尚未完成专项验证</text>
+
+  <g>
+    <circle cx="1025" cy="806" r="5" class="cross"/><text x="1042" y="811" class="nodeTitle">天线</text><text x="1130" y="811" class="copy">真实增益方向图、极化、互耦、平台遮挡与散射</text>
+    <circle cx="1025" cy="852" r="5" class="cross"/><text x="1042" y="857" class="nodeTitle">规模</text><text x="1130" y="857" class="copy">3 根及以上天线的阵列配置、测试与性能结论</text>
+    <circle cx="1025" cy="898" r="5" class="cross"/><text x="1042" y="903" class="nodeTitle">传播</text><text x="1130" y="903" class="copy">多径、NLOS、时变 DOA 和运动场景</text>
+    <circle cx="1025" cy="944" r="5" class="cross"/><text x="1042" y="949" class="nodeTitle">干扰</text><text x="1130" y="949" class="copy">宽带/扫频/脉冲/调制干扰与多个同时干扰源</text>
+    <circle cx="1025" cy="990" r="5" class="cross"/><text x="1042" y="995" class="nodeTitle">硬件</text><text x="1130" y="995" class="copy">模拟滤波、压缩点、相位噪声、I/Q 失衡、时钟抖动</text>
+    <circle cx="1025" cy="1036" r="5" class="cross"/><text x="1042" y="1041" class="nodeTitle">阵列算法</text><text x="1130" y="1041" class="copy">在线 DOA、导向矢量失配鲁棒性、MVDR 滑窗更新</text>
+    <circle cx="1025" cy="1082" r="5" class="cross"/><text x="1042" y="1087" class="nodeTitle">GNSS</text><text x="1130" y="1087" class="copy">多星、导航数据、位/帧同步、标准环路设计与 PVT</text>
+  </g>
+
+  <!-- footer -->
+  <rect x="64" y="1136" width="1792" height="34" rx="8" fill="#172832"/>
+  <text x="86" y="1158" class="whiteCopy">准确定位：双天线 · 静态单 CW · 等效复数 IF · 已知目标导向矢量 · 端到端捕获/跟踪验证平台</text>
+  <text x="1610" y="1158" class="whiteCopy">Python baseline · 2026-08-12</text>
+</svg>
