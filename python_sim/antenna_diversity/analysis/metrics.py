@@ -57,6 +57,21 @@ def compute_metrics(
                 "acquisition_metric": float(acquisition["metric"]),
                 "acquired_doppler_hz": float(acquisition["doppler_hz"]),
                 "jammer_direction_gain": jammer_direction_gain,
+                "target_direction_gain": branch.combining[
+                    "target_direction_gain"
+                ],
+                "interferer_direction_gains": branch.combining[
+                    "interferer_direction_gains"
+                ],
+                "worst_interferer_gain": branch.combining[
+                    "worst_interferer_gain"
+                ],
+                "covariance_snapshots": branch.combining[
+                    "covariance_snapshots"
+                ],
+                "weights_are_fixed": branch.combining[
+                    "weights_are_fixed"
+                ],
                 "tracking": tracking_locked,
                 "final_doppler_hz": final_doppler_hz,
                 "pll_rms_rad": pll_rms_rad,

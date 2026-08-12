@@ -2,8 +2,8 @@ import numpy as np
 import pytest
 
 from antenna_diversity.array.steering import steering_vector
-from antenna_diversity.config import default_config
-from antenna_diversity.diversity.combiner import combine
+from antenna_diversity.config import default_config, mate70_default_config
+from antenna_diversity.diversity.combiner import combine, compute_weights
 
 
 def deterministic_array_case(cfg):
@@ -63,3 +63,50 @@ def test_combiner_rejects_unknown_mode():
 
     with pytest.raises(ValueError, match="unknown diversity mode"):
         combine(x, a, "mrc", cfg.diversity)
+
+
+@pytest.mark.parametrize("num_antennas", [2, 3, 4])
+@pytest.mark.parametrize("mode", ["single", "egc", "mvdr"])
+def test_combiner_supports_two_to_four_channels(num_antennas, mode):
+    """Catch fixed-size weights or incorrect conjugation for phone subarrays."""
+
+    rng = np.random.default_rng(7)
+    desired = np.exp(1j * np.arange(num_antennas) * 0.31)
+    samples = rng.standard_normal(
+        (num_antennas, 4000)
+    ) + 1j * rng.standard_normal((num_antennas, 4000))
+
+    output, info = combine(
+        samples,
+        desired,
+        mode,
+        mate70_default_config().diversity,
+    )
+
+    assert output.shape == (4000,)
+    assert np.vdot(info["weights"], desired) == pytest.approx(
+        1.0 + 0j, abs=1e-10
+    )
+
+
+@pytest.mark.parametrize(
+    ("covariance", "desired", "message"),
+    [
+        (np.ones((2, 3)), np.ones(2), "square"),
+        (np.eye(2), np.ones(3), "one value per antenna"),
+        (np.array([[1.0, np.nan], [0.0, 1.0]]), np.ones(2), "finite"),
+        (np.eye(2), np.zeros(2), "nonzero"),
+    ],
+)
+def test_compute_weights_rejects_invalid_constraints(
+    covariance, desired, message
+):
+    """Catch malformed covariance or steering inputs before a linear solve."""
+
+    with pytest.raises(ValueError, match=message):
+        compute_weights(
+            covariance,
+            desired,
+            "mvdr",
+            mate70_default_config().diversity,
+        )

@@ -28,7 +28,7 @@ def run_end_to_end(cfg: SimulationConfig | None = None) -> SimulationResults:
     )
     dfe_channels, dfe_info = process_channels(adc_codes, cfg.dfe)
 
-    desired_steering = truth["desired_steering_nominal"]
+    desired_steering = truth["desired_steering_assumed"]
     branches: dict[str, BranchResult] = {}
     for mode in cfg.diversity.modes:
         combined, combining_info = combine(
@@ -36,6 +36,24 @@ def run_end_to_end(cfg: SimulationConfig | None = None) -> SimulationResults:
             desired_steering,
             mode,
             cfg.diversity,
+        )
+        weights = combining_info["weights"]
+        interferer_direction_gains = [
+            float(abs(np.vdot(weights, steering)))
+            for steering in truth["interferer_steering_effective"]
+        ]
+        combining_info.update(
+            {
+                "target_direction_gain": float(
+                    abs(np.vdot(weights, truth["desired_steering_true"]))
+                ),
+                "interferer_direction_gains": interferer_direction_gains,
+                "worst_interferer_gain": max(
+                    interferer_direction_gains, default=0.0
+                ),
+                "covariance_snapshots": dfe_channels.shape[1],
+                "weights_are_fixed": True,
+            }
         )
         acquisition = acquire(
             combined,
