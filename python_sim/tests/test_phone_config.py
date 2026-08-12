@@ -27,6 +27,14 @@ def test_mate70_config_uses_all_four_ideal_corners():
     )
 
 
+def test_mate70_config_disables_legacy_jammer_when_using_cw_interferer():
+    cfg = mate70_default_config()
+
+    assert not cfg.jammer.enable
+    assert len(cfg.interferers) == 1
+    assert cfg.interferers[0].enable
+
+
 def test_phone_config_accepts_arbitrary_unique_two_to_four_corner_subset():
     cfg = mate70_default_config()
     cfg.array.active_antennas = ("TR", "BL")
@@ -48,6 +56,25 @@ def test_phone_config_rejects_invalid_corner_selections(active):
     cfg.array.active_antennas = active
 
     with pytest.raises(ValueError, match="active_antennas"):
+        cfg.validate()
+
+
+def test_phone_config_rejects_consistent_noncorner_coordinate_and_error_maps():
+    cfg = mate70_default_config()
+    noncorners = ("XX", "YY", "ZZ", "WW")
+    phase_centers = {
+        name: (float(index), 0.0, 0.0)
+        for index, name in enumerate(noncorners)
+    }
+    cfg.phone.phase_centers_m = phase_centers
+    cfg.phone.assumed_phase_centers_m = phase_centers.copy()
+    cfg.array.active_antennas = ("XX", "YY")
+    cfg.array.channel_amplitude_error_db = {name: 0.0 for name in noncorners}
+    cfg.array.channel_phase_error_deg = {name: 0.0 for name in noncorners}
+    cfg.array.estimated_channel_amplitude_error_db = {name: 0.0 for name in noncorners}
+    cfg.array.estimated_channel_phase_error_deg = {name: 0.0 for name in noncorners}
+
+    with pytest.raises(ValueError, match="corner-name set"):
         cfg.validate()
 
 

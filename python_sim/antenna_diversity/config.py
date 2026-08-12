@@ -10,6 +10,7 @@ from numpy.typing import NDArray
 
 
 SPEED_OF_LIGHT_MPS = 299_792_458.0
+PHONE_CORNER_NAMES = {"TL", "TR", "BL", "BR"}
 
 
 @dataclass(frozen=True)
@@ -265,7 +266,9 @@ class SimulationConfig:
                 self.array.estimated_channel_amplitude_error_db,
                 self.array.estimated_channel_phase_error_deg,
             )
-            if any(set(corner_map) != corner_names for corner_map in corner_maps):
+            if corner_names != PHONE_CORNER_NAMES or any(
+                set(corner_map) != PHONE_CORNER_NAMES for corner_map in corner_maps
+            ):
                 raise ValueError("phone coordinate and channel-error maps must use the same corner-name set")
             if any(
                 np.asarray(coordinates).shape != (3,)
@@ -414,7 +417,7 @@ def mate70_default_config() -> SimulationConfig:
         random_seed=42,
         signal=signal,
         array=array,
-        jammer=JammerConfig(),
+        jammer=JammerConfig(enable=False),
         rf=RFConfig(resistance_ohm=signal.resistance_ohm),
         dfe=DFEConfig(fs_in_hz=signal.fs_rf_hz, if_hz=signal.if_hz),
         diversity=DiversityConfig(),
