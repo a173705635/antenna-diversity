@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from antenna_diversity.array.steering import steering_vector
-from antenna_diversity.config import default_config
+from antenna_diversity.config import legacy_ula_config
 from antenna_diversity.gnss.ca_code import ca_code
 
 
@@ -26,7 +26,7 @@ def test_ca_code_rejects_prn_outside_integer_range(invalid_prn):
 
 def test_broadside_referenced_steering_phase():
     """Catch a flipped angle convention or missing wavelength normalization."""
-    cfg = default_config()
+    cfg = legacy_ula_config()
     a = steering_vector(
         [0.0, cfg.array.spacing_m],
         30.0,

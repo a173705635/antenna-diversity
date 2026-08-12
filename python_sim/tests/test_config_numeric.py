@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from antenna_diversity.config import ArrayConfig, default_config
+from antenna_diversity.config import default_config
 from antenna_diversity.numeric import matlab_round
 
 
@@ -16,12 +16,11 @@ def test_default_config_satisfies_matlab_sampling_constraints():
     assert cfg.diversity.modes == ("single", "egc", "mvdr")
 
 
-def test_default_config_remains_the_legacy_ula_during_phone_transition():
+def test_default_config_is_mate70_four_corner_array():
     cfg = default_config()
 
-    assert isinstance(cfg.array, ArrayConfig)
-    assert cfg.phone is None
-    assert cfg.interferers == ()
+    assert cfg.array.active_antennas == ("TL", "TR", "BL", "BR")
+    assert cfg.array.num_elements == 4
 
 
 def test_matlab_round_moves_half_ties_away_from_zero():

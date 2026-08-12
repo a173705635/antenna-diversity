@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "antenna-diversity-sim"
 version = "0.1.0"
-description = "Dual-antenna GPS L1 C/A RF-to-tracking simulation"
+description = "2–4 antenna phone-array GPS L1 C/A research simulation"
 requires-python = ">=3.11"
 dependencies = [
     "numpy>=2.0",

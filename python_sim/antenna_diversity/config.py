@@ -429,6 +429,6 @@ def mate70_default_config() -> SimulationConfig:
 
 
 def default_config() -> SimulationConfig:
-    """Return the baseline dual-antenna GPS L1 C/A configuration."""
+    """Return the baseline Mate 70 four-corner GPS L1 C/A configuration."""
 
-    return legacy_ula_config()
+    return mate70_default_config()

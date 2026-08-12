@@ -2,13 +2,17 @@ import numpy as np
 import pytest
 
 from antenna_diversity.analysis.metrics import format_metrics
-from antenna_diversity.config import default_config, mate70_default_config
+from antenna_diversity.config import (
+    default_config,
+    legacy_ula_config,
+    mate70_default_config,
+)
 from antenna_diversity.pipeline import run_end_to_end
 
 
-def test_default_pipeline_reproduces_diversity_conclusion():
+def test_legacy_pipeline_preserves_original_diversity_conclusion():
     """Catch any cross-stage mismatch that removes the expected MVDR advantage."""
-    cfg = default_config()
+    cfg = legacy_ula_config()
     cfg.plot.enable = False
 
     results = run_end_to_end(cfg)
@@ -44,6 +48,23 @@ def test_default_pipeline_reproduces_diversity_conclusion():
     )
     assert mvdr_gain < single_gain
     assert len(results.metrics) == 3
+
+
+def test_mate70_baseline_mvdr_improves_spatial_and_receiver_metrics():
+    cfg = default_config()
+    cfg.plot.enable = False
+
+    results = run_end_to_end(cfg)
+
+    single = results.branches["single"]
+    mvdr = results.branches["mvdr"]
+    assert (
+        mvdr.combining["interferer_direction_gains"][0]
+        < 0.1 * single.combining["interferer_direction_gains"][0]
+    )
+    assert mvdr.acquisition["metric"] > single.acquisition["metric"]
+    assert mvdr.acquisition["success"]
+    assert mvdr.tracking["success"]
 
 
 def test_metric_formatter_includes_every_branch_and_tracking_state():

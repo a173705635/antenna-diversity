@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from antenna_diversity.array.steering import steering_vector
-from antenna_diversity.config import default_config, mate70_default_config
+from antenna_diversity.config import legacy_ula_config, mate70_default_config
 from antenna_diversity.diversity.combiner import combine, compute_weights
 
 
@@ -32,7 +32,7 @@ def deterministic_array_case(cfg):
 @pytest.mark.parametrize("mode", ["single", "egc", "mvdr"])
 def test_combiner_has_unit_desired_response(mode):
     """Catch conjugation or normalization errors in each branch's weights."""
-    cfg = default_config()
+    cfg = legacy_ula_config()
     cfg.diversity.diagonal_loading_factor = 1e-4
     a, _, x = deterministic_array_case(cfg)
 
@@ -44,7 +44,7 @@ def test_combiner_has_unit_desired_response(mode):
 
 def test_mvdr_reduces_jammer_direction_gain_by_tenfold():
     """Catch covariance, loading, or solve errors that remove the spatial null."""
-    cfg = default_config()
+    cfg = legacy_ula_config()
     cfg.diversity.diagonal_loading_factor = 1e-4
     a, b, x = deterministic_array_case(cfg)
 
@@ -58,7 +58,7 @@ def test_mvdr_reduces_jammer_direction_gain_by_tenfold():
 
 def test_combiner_rejects_unknown_mode():
     """Catch silent fallback to an unintended combining algorithm."""
-    cfg = default_config()
+    cfg = legacy_ula_config()
     a, _, x = deterministic_array_case(cfg)
 
     with pytest.raises(ValueError, match="unknown diversity mode"):

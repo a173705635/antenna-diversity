@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 
 from antenna_diversity.analysis.metrics import format_metrics
 from antenna_diversity.analysis.plotting import plot_results, save_figures
+from antenna_diversity.config import default_config
 from antenna_diversity.pipeline import run_end_to_end as run_pipeline
 
 
@@ -25,7 +26,7 @@ def _backend_supports_gui() -> bool:
 
 
 def main():
-    results = run_pipeline()
+    results = run_pipeline(default_config())
     print(format_metrics(results.metrics))
     if results.config.plot.enable:
         figures = plot_results(results)

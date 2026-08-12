@@ -1,13 +1,13 @@
 import numpy as np
 import pytest
 
-from antenna_diversity.config import default_config
+from antenna_diversity.config import legacy_ula_config
 from antenna_diversity.gnss.scenario import generate_scenario
 
 
 def test_scenario_projects_signal_through_both_antennas():
     """Catch loss of code Doppler, array response, or antennas-by-samples shape."""
-    cfg = default_config()
+    cfg = legacy_ula_config()
     cfg.jammer.enable = False
 
     x, truth = generate_scenario(cfg)
@@ -28,7 +28,7 @@ def test_scenario_projects_signal_through_both_antennas():
 
 def test_channel_amplitude_and_phase_errors_modify_each_antenna_response():
     """Catch omission of per-channel complex gain errors from scenario generation."""
-    cfg = default_config()
+    cfg = legacy_ula_config()
     cfg.jammer.enable = False
     cfg.array.channel_amplitude_error_db = np.array([0.0, 6.020599913279624])
     cfg.array.channel_phase_error_deg = np.array([0.0, 90.0])
@@ -39,7 +39,7 @@ def test_channel_amplitude_and_phase_errors_modify_each_antenna_response():
 
 
 def test_legacy_scenario_preserves_singular_truth_aliases():
-    cfg = default_config()
+    cfg = legacy_ula_config()
 
     _, truth = generate_scenario(cfg)
 

@@ -222,14 +222,15 @@ def test_phone_spectra_mark_enabled_interferers_in_each_sampling_domain():
     plt.close(combined_figure)
 
 
-def test_cli_avoids_show_warning_with_noninteractive_backend():
+@pytest.mark.parametrize("script", ["run_end_to_end.py", "run_legacy_ula.py"])
+def test_cli_avoids_show_warning_with_noninteractive_backend(script):
     """Catch calls to plt.show() when the selected backend cannot display a GUI."""
     project_dir = Path(__file__).resolve().parents[1]
     environment = os.environ.copy()
     environment["MPLBACKEND"] = "Agg"
 
     completed = subprocess.run(
-        [sys.executable, "-W", "error", "run_end_to_end.py"],
+        [sys.executable, "-W", "error", script],
         cwd=project_dir,
         env=environment,
         capture_output=True,
