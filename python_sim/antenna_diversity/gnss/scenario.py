@@ -106,6 +106,12 @@ def _time_gate(
     if stop_ms is not None and (not np.isfinite(stop_ms) or stop_ms < start_ms):
         raise ValueError("interferer stop_ms must be finite and not precede start_ms")
 
+    duration_ms = n_samples / fs_hz * 1e3
+    if start_ms > duration_ms or (
+        stop_ms is not None and stop_ms > duration_ms
+    ):
+        raise ValueError("interferer time gate must lie within signal duration")
+
     first = round(start_ms * 1e-3 * fs_hz)
     stop = n_samples if stop_ms is None else round(stop_ms * 1e-3 * fs_hz)
     if first > n_samples or stop > n_samples:

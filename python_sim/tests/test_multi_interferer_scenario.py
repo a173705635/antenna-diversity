@@ -75,3 +75,35 @@ def test_negative_cw_start_time_is_rejected_instead_of_wrapping():
 
     with pytest.raises(ValueError, match="start_ms"):
         generate_scenario(cfg)
+
+
+@pytest.mark.parametrize(
+    "gate_times",
+    [
+        {"start_ms": 10.0 + 0.4 / 16_368.0},
+        {"start_ms": 0.0, "stop_ms": 10.0 + 0.4 / 16_368.0},
+    ],
+)
+def test_cw_gate_rejects_subsample_overrun_before_rounding(gate_times):
+    cfg = mate70_default_config()
+    cfg.signal.duration_ms = 10
+    cfg.interferers = (
+        CWInterferer(Direction(120.0, 10.0), **gate_times),
+    )
+
+    with pytest.raises(ValueError, match="signal duration"):
+        generate_scenario(cfg)
+
+
+def test_cw_gate_accepts_exact_signal_duration_boundary():
+    cfg = mate70_default_config()
+    cfg.signal.duration_ms = 10
+    cfg.interferers = (
+        CWInterferer(Direction(120.0, 10.0), start_ms=10.0),
+        CWInterferer(Direction(220.0, 20.0), stop_ms=10.0),
+    )
+
+    _, truth = generate_scenario(cfg)
+
+    assert np.all(truth["interferer_components"][0] == 0)
+    assert np.all(truth["interferer_components"][1] != 0)
