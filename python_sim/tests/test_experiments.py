@@ -117,9 +117,17 @@ def test_single_case_uses_only_enabled_interferers():
     disabled.interferers = ()
     empty_scene = evaluate_configuration_spatially(disabled, mode="mvdr")
 
-    assert without_jammer["output_sinr_db"] == pytest.approx(
-        empty_scene["output_sinr_db"]
+    assert without_jammer.metrics["output_sinr_db"] == pytest.approx(
+        empty_scene.metrics["output_sinr_db"]
     )
+
+
+def test_single_case_returns_json_serializable_dataclass():
+    result = evaluate_configuration_spatially(mate70_default_config(), mode="mvdr")
+
+    assert result.mode == "mvdr"
+    assert result.metrics["covariance_snapshots"] is None
+    json.dumps(result.to_dict(), allow_nan=False)
 
 
 def test_direction_scan_reports_gain_for_selected_enabled_interferer():
@@ -133,7 +141,7 @@ def test_direction_scan_reports_gain_for_selected_enabled_interferer():
     result = scan_interferer_directions(cfg, 1, [80.0], [20.0], mode="mvdr")
 
     assert result.interferer_gain[0, 0] == pytest.approx(
-        expected["interferer_direction_gains"][1]
+        expected.metrics["interferer_direction_gains"][1]
     )
 
 
@@ -155,6 +163,39 @@ def test_scan_rejects_nonfinite_output_metric():
 
     with pytest.raises(ValueError, match="finite"):
         scan_diagonal_loading(cfg, [1e-2], mode="mvdr")
+
+
+def test_finite_signal_dbm_that_underflows_to_zero_is_rejected():
+    cfg = mate70_default_config()
+    cfg.signal.power_dbm = -5000.0
+
+    with pytest.raises(ValueError, match="signal.power_dbm.*positive"):
+        evaluate_configuration_spatially(cfg, mode="mvdr")
+
+
+def test_finite_interferer_dbm_that_underflows_to_zero_is_rejected():
+    cfg = mate70_default_config()
+    cfg.interferers = (
+        CWInterferer(direction=Direction(120.0, 10.0), power_dbm=-5000.0),
+    )
+
+    with pytest.raises(ValueError, match="interferer.power_dbm.*positive"):
+        evaluate_configuration_spatially(cfg, mode="mvdr")
+
+
+def test_parameter_scan_preserves_complete_spatial_metric_schema_and_none():
+    single = evaluate_configuration_spatially(mate70_default_config(), mode="mvdr")
+    scan = scan_diagonal_loading(mate70_default_config(), [1e-2], mode="mvdr")
+    grid = scan_interferer_directions(
+        mate70_default_config(), 0, [120.0], [10.0], mode="mvdr"
+    )
+
+    assert set(scan.metrics) == set(single.metrics)
+    assert set(grid.metrics) == set(single.metrics)
+    assert scan.metrics["covariance_snapshots"] == [None]
+    assert grid.metrics["covariance_snapshots"] == [[None]]
+    json.dumps(scan.to_dict(), allow_nan=False)
+    json.dumps(grid.to_dict(), allow_nan=False)
 
 
 @pytest.mark.parametrize(

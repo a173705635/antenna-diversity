@@ -27,6 +27,7 @@ from antenna_diversity.config import (
 from antenna_diversity.diversity.combiner import compute_weights
 from antenna_diversity.models import (
     SpatialCombinationResult,
+    SpatialEvaluationResult,
     SpatialGridScanResult,
     SpatialParameterScanResult,
 )
@@ -34,11 +35,27 @@ from antenna_diversity.rf.cascade import cascade_metrics
 
 
 _BOLTZMANN_J_PER_K = 1.380649e-23
+_SPATIAL_METRIC_NAMES = (
+    "target_direction_gain",
+    "interferer_direction_gains",
+    "worst_interferer_gain",
+    "output_signal_power_w",
+    "output_interference_power_w",
+    "output_noise_power_w",
+    "output_sinr_db",
+    "weight_norm",
+    "white_noise_gain",
+    "covariance_rank",
+    "covariance_condition_number",
+    "diagonal_loading",
+    "covariance_snapshots",
+    "weights_are_fixed",
+)
 
 
 def evaluate_configuration_spatially(
     cfg: SimulationConfig, mode: str
-) -> dict[str, object]:
+) -> SpatialEvaluationResult:
     """Evaluate one copied phone configuration without generating samples."""
 
     case = copy.deepcopy(cfg)
@@ -106,7 +123,7 @@ def evaluate_configuration_spatially(
     weights, weight_info = compute_weights(
         covariance, assumed_desired, mode, case.diversity
     )
-    return evaluate_spatial_case(
+    metrics = evaluate_spatial_case(
         weights,
         true_desired,
         signal_power_w,
@@ -118,6 +135,7 @@ def evaluate_configuration_spatially(
         covariance_snapshots=None,
         weights_are_fixed=True,
     )
+    return SpatialEvaluationResult(str(mode).lower(), metrics)
 
 
 def compare_corner_combinations(
@@ -137,7 +155,7 @@ def compare_corner_combinations(
                 positions_m=tuple(tuple(float(value) for value in row) for row in positions),
                 maximum_baseline_m=maximum_baseline_m(positions),
                 mode=str(mode).lower(),
-                metrics=evaluate_configuration_spatially(case, mode),
+                metrics=evaluate_configuration_spatially(case, mode).metrics,
             )
         )
     return records
@@ -158,7 +176,7 @@ def scan_interferer_directions(
         interferer.enable for interferer in cfg.interferers[:interferer_index]
     )
 
-    def evaluate(azimuth: float, elevation: float) -> dict[str, object]:
+    def evaluate(azimuth: float, elevation: float) -> SpatialEvaluationResult:
         case = copy.deepcopy(cfg)
         interferers = list(case.interferers)
         interferers[interferer_index] = _replace_interferer(
@@ -168,7 +186,7 @@ def scan_interferer_directions(
         return evaluate_configuration_spatially(case, mode)
 
     metrics = _scan_grid(azimuths, elevations, evaluate)
-    gain = np.asarray(metrics.pop("interferer_direction_gains"), dtype=float)[
+    gain = np.asarray(metrics["interferer_direction_gains"], dtype=float)[
         ..., selected_gain_index
     ]
     return SpatialGridScanResult(azimuths, elevations, str(mode).lower(), metrics, gain)
@@ -184,13 +202,13 @@ def scan_assumed_target_directions(
 
     azimuths, elevations = _direction_grid(azimuths_deg, elevations_deg)
 
-    def evaluate(azimuth: float, elevation: float) -> dict[str, object]:
+    def evaluate(azimuth: float, elevation: float) -> SpatialEvaluationResult:
         case = copy.deepcopy(cfg)
         case.signal.assumed_direction = Direction(azimuth, elevation)
         return evaluate_configuration_spatially(case, mode)
 
     metrics = _scan_grid(azimuths, elevations, evaluate)
-    jammer_gains = np.asarray(metrics.pop("interferer_direction_gains"), dtype=float)
+    jammer_gains = np.asarray(metrics["interferer_direction_gains"], dtype=float)
     gain = (
         np.max(jammer_gains, axis=-1)
         if jammer_gains.shape[-1] > 0
@@ -210,7 +228,7 @@ def scan_interferer_powers(
     _validate_interferer_index(cfg, interferer_index, require_enabled=True)
     powers = _finite_vector("powers_dbm", powers_dbm)
 
-    def evaluate(power: float) -> dict[str, object]:
+    def evaluate(power: float) -> SpatialEvaluationResult:
         case = copy.deepcopy(cfg)
         interferers = list(case.interferers)
         original = interferers[interferer_index]
@@ -238,7 +256,7 @@ def scan_diagonal_loading(
     if np.any(values <= 0.0):
         raise ValueError("factors must contain positive finite values")
 
-    def evaluate(factor: float) -> dict[str, object]:
+    def evaluate(factor: float) -> SpatialEvaluationResult:
         case = copy.deepcopy(cfg)
         case.diversity.diagonal_loading_factor = factor
         return evaluate_configuration_spatially(case, mode)
@@ -274,7 +292,7 @@ def scan_position_errors(
     ):
         raise ValueError("xyz_errors_m must have finite real shape (N, 3)")
 
-    def evaluate(error: NDArray[np.float64]) -> dict[str, object]:
+    def evaluate(error: NDArray[np.float64]) -> SpatialEvaluationResult:
         case = copy.deepcopy(cfg)
         assumed = np.asarray(
             case.phone.assumed_phase_centers_m[corner_name], dtype=float
@@ -288,7 +306,7 @@ def scan_position_errors(
 def _scan_grid(
     azimuths: NDArray[np.float64],
     elevations: NDArray[np.float64],
-    evaluate: Callable[[float, float], dict[str, object]],
+    evaluate: Callable[[float, float], SpatialEvaluationResult],
 ) -> dict[str, NDArray]:
     cases = [
         evaluate(float(azimuth), float(elevation))
@@ -302,29 +320,32 @@ def _parameter_result(
     name: str,
     values: NDArray,
     mode: str,
-    evaluate: Callable[[object], dict[str, object]],
+    evaluate: Callable[[object], SpatialEvaluationResult],
 ) -> SpatialParameterScanResult:
     metrics = _collect_metrics([evaluate(value) for value in values], (len(values),))
     return SpatialParameterScanResult(name, values.copy(), str(mode).lower(), metrics)
 
 
 def _collect_metrics(
-    cases: list[dict[str, object]], shape: tuple[int, ...]
+    cases: list[SpatialEvaluationResult], shape: tuple[int, ...]
 ) -> dict[str, NDArray]:
-    metrics = {
-        name: np.asarray([case[name] for case in cases]).reshape(
-            shape + np.asarray(cases[0][name]).shape
-        )
-        for name in cases[0]
-        if case_metric_is_array_compatible(cases[0][name])
-    }
-    if any(not np.all(np.isfinite(values)) for values in metrics.values()):
-        raise ValueError("scan metrics must contain only finite values")
+    expected = set(_SPATIAL_METRIC_NAMES)
+    for case in cases:
+        if set(case.metrics) != expected:
+            raise ValueError("spatial metric schema contains unknown or missing fields")
+
+    metrics: dict[str, NDArray] = {}
+    for name in _SPATIAL_METRIC_NAMES:
+        values = [case.metrics[name] for case in cases]
+        first_shape = np.asarray(values[0]).shape
+        if any(np.asarray(value).shape != first_shape for value in values):
+            raise ValueError(f"spatial metric {name} has inconsistent shape")
+        collected = np.asarray(values).reshape(shape + first_shape)
+        nonnull = [value for value in collected.flat if value is not None]
+        if nonnull and not np.all(np.isfinite(np.asarray(nonnull))):
+            raise ValueError("scan metrics must contain only finite values or None")
+        metrics[name] = collected
     return metrics
-
-
-def case_metric_is_array_compatible(value: object) -> bool:
-    return value is not None and isinstance(value, (bool, int, float, list))
 
 
 def _direction_grid(
@@ -388,6 +409,6 @@ def _dbm_to_watts(name: str, power_dbm: float) -> float:
         raise ValueError(f"{name} must be a finite scalar")
     with np.errstate(over="ignore"):
         power_w = float(1e-3 * 10.0 ** (float(value) / 10.0))
-    if not np.isfinite(power_w):
-        raise ValueError(f"{name} converts to nonfinite watts")
+    if not np.isfinite(power_w) or power_w <= 0.0:
+        raise ValueError(f"{name} must convert to finite positive watts")
     return power_w

@@ -50,6 +50,15 @@ class SpatialCombinationResult:
 
 
 @dataclass(frozen=True)
+class SpatialEvaluationResult:
+    mode: str
+    metrics: dict[str, Any]
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"mode": self.mode, "metrics": self.metrics}
+
+
+@dataclass(frozen=True)
 class SpatialGridScanResult:
     azimuths_deg: np.ndarray
     elevations_deg: np.ndarray
