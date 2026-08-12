@@ -8,6 +8,8 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
+from antenna_diversity.array.geometry import mate70_phase_centers
+
 
 SPEED_OF_LIGHT_MPS = 299_792_458.0
 PHONE_CORNER_NAMES = {"TL", "TR", "BL", "BR"}
@@ -391,12 +393,7 @@ def mate70_default_config() -> SimulationConfig:
         true_direction=Direction(30.0, 60.0),
         assumed_direction=Direction(30.0, 60.0),
     )
-    phase_centers_m = {
-        "TL": (-0.03795, 0.08045, 0.0),
-        "TR": (0.03795, 0.08045, 0.0),
-        "BL": (-0.03795, -0.08045, 0.0),
-        "BR": (0.03795, -0.08045, 0.0),
-    }
+    phase_centers_m = mate70_phase_centers()
     phone = PhoneGeometryConfig(
         model_name="HUAWEI Mate 70",
         length_m=0.1609,
