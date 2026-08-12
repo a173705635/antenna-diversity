@@ -20,6 +20,10 @@ from antenna_diversity.config import (
 )
 
 
+_COVARIANCE_HERMITIAN_RTOL = 1e-9
+_COVARIANCE_HERMITIAN_ATOL = 1e-12
+
+
 def analytic_covariance(
     desired_steering: ArrayLike,
     signal_power_w: float,
@@ -121,6 +125,13 @@ def evaluate_spatial_case(
             raise ValueError("covariance must be square with one row per weight")
         if not np.all(np.isfinite(covariance_matrix)):
             raise ValueError("covariance must contain finite values")
+        if not np.allclose(
+            covariance_matrix,
+            covariance_matrix.conj().T,
+            rtol=_COVARIANCE_HERMITIAN_RTOL,
+            atol=_COVARIANCE_HERMITIAN_ATOL,
+        ):
+            raise ValueError("covariance must be Hermitian within tolerance")
         covariance_rank = int(np.linalg.matrix_rank(covariance_matrix))
         covariance_condition_number = float(np.linalg.cond(covariance_matrix))
 
@@ -200,8 +211,10 @@ def response_grid_db(
             response[elevation_index, azimuth_index] = abs(np.vdot(w, manifold))
 
     peak = float(np.max(response))
-    if not np.isfinite(peak) or peak <= 0.0:
-        raise ValueError("response grid must have a finite positive maximum")
+    if not np.isfinite(peak):
+        raise ValueError("response grid must have a finite maximum")
+    if peak == 0.0:
+        return np.full(response.shape, -80.0)
     with np.errstate(divide="ignore"):
         response_db = 20.0 * np.log10(response / peak)
     return np.maximum(response_db, -80.0)

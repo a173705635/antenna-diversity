@@ -137,6 +137,36 @@ def test_spatial_metrics_report_covariance_and_snapshot_metadata():
     json.dumps(metrics)
 
 
+def test_spatial_metrics_reject_non_hermitian_covariance():
+    with pytest.raises(ValueError, match="Hermitian"):
+        evaluate_spatial_case(
+            np.array([1.0, 0.0]),
+            np.array([1.0, 1.0]),
+            signal_power_w=1.0,
+            interferer_steering=(),
+            interferer_powers_w=(),
+            noise_power_per_element_w=0.0,
+            covariance=np.array([[1.0, 2.0], [0.0, 1.0]]),
+        )
+
+
+def test_spatial_metrics_accept_covariance_with_roundoff_asymmetry():
+    metrics = evaluate_spatial_case(
+        np.array([1.0, 0.0]),
+        np.array([1.0, 1.0]),
+        signal_power_w=1.0,
+        interferer_steering=(),
+        interferer_powers_w=(),
+        noise_power_per_element_w=0.0,
+        covariance=np.array(
+            [[2.0, 0.5 + 0.25j], [0.5 - 0.25j + 1e-11, 1.0]]
+        ),
+    )
+
+    assert metrics["covariance_rank"] == 2
+    assert np.isfinite(metrics["covariance_condition_number"])
+
+
 def test_spatial_metrics_use_epsilon_floor_for_zero_output_denominator():
     metrics = evaluate_spatial_case(
         np.array([1.0]),
@@ -251,3 +281,21 @@ def test_response_grid_uses_active_phone_positions_in_configured_order():
     )
 
     np.testing.assert_allclose(response, np.zeros((2, 2)), atol=1e-12)
+
+
+def test_response_grid_returns_floor_when_every_requested_point_is_exact_null():
+    cfg = mate70_default_config()
+    cfg.array.active_antennas = ("TL", "TR")
+    cfg.phone.phase_centers_m["TL"] = (0.0, 0.0, 0.0)
+    cfg.phone.phase_centers_m["TR"] = (0.0, 0.0, 0.0)
+
+    response = response_grid_db(
+        cfg,
+        np.array([1.0, -1.0]),
+        np.array([0.0, 90.0]),
+        np.array([0.0, 45.0, 90.0]),
+    )
+
+    assert response.shape == (3, 2)
+    assert np.all(np.isfinite(response))
+    np.testing.assert_array_equal(response, np.full((3, 2), -80.0))
