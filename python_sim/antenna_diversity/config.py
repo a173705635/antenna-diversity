@@ -15,15 +15,29 @@ SPEED_OF_LIGHT_MPS = 299_792_458.0
 PHONE_CORNER_NAMES = {"TL", "TR", "BL", "BR"}
 
 
+def _is_finite_real_scalar(value: object) -> bool:
+    """Return whether *value* is one finite, non-complex numeric scalar."""
+
+    candidate = np.asarray(value)
+    return (
+        candidate.ndim == 0
+        and np.issubdtype(candidate.dtype, np.number)
+        and not np.issubdtype(candidate.dtype, np.complexfloating)
+        and bool(np.isfinite(candidate))
+    )
+
+
 @dataclass(frozen=True)
 class Direction:
     azimuth_deg: float
     elevation_deg: float
 
     def validate(self) -> None:
-        if not np.isfinite(self.azimuth_deg):
-            raise ValueError("direction.azimuth_deg must be finite")
-        if not np.isfinite(self.elevation_deg) or not 0.0 <= self.elevation_deg <= 90.0:
+        if not _is_finite_real_scalar(self.azimuth_deg):
+            raise ValueError("direction.azimuth_deg must be a finite real scalar")
+        if not _is_finite_real_scalar(self.elevation_deg):
+            raise ValueError("direction.elevation_deg must be a finite real scalar")
+        if not 0.0 <= self.elevation_deg <= 90.0:
             raise ValueError("direction.elevation_deg must lie in [0, 90]")
 
 
@@ -304,26 +318,31 @@ class SimulationConfig:
             raise ValueError("phone configurations support at most three interferers")
         for interferer in self.interferers:
             interferer.direction.validate()
-            if not np.isfinite(interferer.power_dbm):
-                raise ValueError("interferer.power_dbm must be finite")
-            if not np.isfinite(interferer.offset_hz):
-                raise ValueError("interferer.offset_hz must be finite")
-            if not np.isfinite(interferer.initial_phase_rad):
-                raise ValueError("interferer.initial_phase_rad must be finite")
-            if not np.isfinite(interferer.start_ms) or interferer.start_ms < 0.0:
-                raise ValueError("interferer.start_ms must be finite and nonnegative")
+            if not _is_finite_real_scalar(interferer.power_dbm):
+                raise ValueError("interferer.power_dbm must be a finite real scalar")
+            if not _is_finite_real_scalar(interferer.offset_hz):
+                raise ValueError("interferer.offset_hz must be a finite real scalar")
+            if not _is_finite_real_scalar(interferer.initial_phase_rad):
+                raise ValueError(
+                    "interferer.initial_phase_rad must be a finite real scalar"
+                )
+            if not _is_finite_real_scalar(interferer.start_ms):
+                raise ValueError("interferer.start_ms must be a finite real scalar")
+            if interferer.start_ms < 0.0:
+                raise ValueError("interferer.start_ms must be nonnegative")
             if interferer.start_ms > self.signal.duration_ms:
                 raise ValueError(
                     "interferer.start_ms must not exceed signal duration "
                     "(signal.duration_ms)"
                 )
             if interferer.stop_ms is not None:
-                if (
-                    not np.isfinite(interferer.stop_ms)
-                    or interferer.stop_ms < interferer.start_ms
-                ):
+                if not _is_finite_real_scalar(interferer.stop_ms):
                     raise ValueError(
-                        "interferer.stop_ms must be finite and not precede interferer.start_ms"
+                        "interferer.stop_ms must be a finite real scalar"
+                    )
+                if interferer.stop_ms < interferer.start_ms:
+                    raise ValueError(
+                        "interferer.stop_ms must not precede interferer.start_ms"
                     )
                 if interferer.stop_ms > self.signal.duration_ms:
                     raise ValueError(

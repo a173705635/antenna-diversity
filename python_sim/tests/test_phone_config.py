@@ -173,6 +173,23 @@ def test_phone_config_validates_each_interferer_direction():
 
 
 @pytest.mark.parametrize(
+    "direction",
+    [
+        Direction(120.0 + 1.0j, 10.0),
+        Direction(np.array([120.0]), 10.0),
+        Direction(120.0, 10.0 + 1.0j),
+        Direction(120.0, np.array([10.0])),
+    ],
+)
+def test_phone_config_rejects_non_real_scalar_interferer_directions(direction):
+    cfg = mate70_default_config()
+    cfg.interferers = (CWInterferer(direction),)
+
+    with pytest.raises(ValueError, match="direction\\.(azimuth|elevation)_deg"):
+        cfg.validate()
+
+
+@pytest.mark.parametrize(
     ("overrides", "match"),
     [
         ({"power_dbm": np.nan}, "interferer.power_dbm"),
@@ -187,6 +204,29 @@ def test_phone_config_validates_each_interferer_direction():
     ],
 )
 def test_phone_config_rejects_invalid_interferer_fields(overrides, match):
+    cfg = mate70_default_config()
+    cfg.interferers = (CWInterferer(Direction(120.0, 10.0), **overrides),)
+
+    with pytest.raises(ValueError, match=match):
+        cfg.validate()
+
+
+@pytest.mark.parametrize(
+    ("overrides", "match"),
+    [
+        ({"power_dbm": -90.0 + 1.0j}, "interferer.power_dbm"),
+        ({"power_dbm": np.array([-90.0])}, "interferer.power_dbm"),
+        ({"offset_hz": 250e3 + 1.0j}, "interferer.offset_hz"),
+        ({"offset_hz": np.array([250e3])}, "interferer.offset_hz"),
+        ({"initial_phase_rad": 0.8 + 1.0j}, "interferer.initial_phase_rad"),
+        ({"initial_phase_rad": np.array([0.8])}, "interferer.initial_phase_rad"),
+        ({"start_ms": 1.0 + 1.0j}, "interferer.start_ms"),
+        ({"start_ms": np.array([1.0])}, "interferer.start_ms"),
+        ({"stop_ms": 2.0 + 1.0j}, "interferer.stop_ms"),
+        ({"stop_ms": np.array([2.0])}, "interferer.stop_ms"),
+    ],
+)
+def test_phone_config_rejects_non_real_scalar_interferer_fields(overrides, match):
     cfg = mate70_default_config()
     cfg.interferers = (CWInterferer(Direction(120.0, 10.0), **overrides),)
 
