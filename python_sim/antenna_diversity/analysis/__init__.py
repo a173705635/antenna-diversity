@@ -7,6 +7,7 @@ from .plotting import (
     plot_results,
     save_figures,
 )
+from .spatial import analytic_covariance, evaluate_spatial_case, response_grid_db
 
 __all__ = [
     "compute_metrics",
@@ -15,4 +16,7 @@ __all__ = [
     "plot_combined_spectra",
     "plot_results",
     "save_figures",
+    "analytic_covariance",
+    "evaluate_spatial_case",
+    "response_grid_db",
 ]
