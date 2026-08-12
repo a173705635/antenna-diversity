@@ -1,0 +1,27 @@
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+.venv/
+venv/
+
+# Generated Python simulation figures
+python_sim/results/
+
+# MATLAB generated and temporary files
+*.asv
+slprj/
+codegen/
+
+# Microsoft Office lock files
+~$*.docx
+~$*.xlsx
+~$*.pptx
+
+# Obsidian machine-local workspace state
+**/.obsidian/workspace.json
+
+# Operating-system files
+.DS_Store
+Thumbs.db
