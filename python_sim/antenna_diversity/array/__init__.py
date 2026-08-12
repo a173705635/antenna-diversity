@@ -6,10 +6,20 @@ from .geometry import (
     maximum_baseline_m,
     select_phase_centers,
 )
+from .manifold import (
+    ElementPattern,
+    IsotropicElementPattern,
+    array_manifold,
+    direction_unit_vector,
+)
 from .steering import steering_vector
 
 __all__ = [
     "active_corner_combinations",
+    "array_manifold",
+    "direction_unit_vector",
+    "ElementPattern",
+    "IsotropicElementPattern",
     "mate70_phase_centers",
     "maximum_baseline_m",
     "select_phase_centers",
