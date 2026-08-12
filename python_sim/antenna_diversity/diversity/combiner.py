@@ -34,19 +34,34 @@ def compute_weights(
         raise ValueError("desired_steering must contain one value per antenna")
     if not np.all(np.isfinite(a)):
         raise ValueError("desired_steering must contain finite values")
-    if np.linalg.norm(a) == 0:
+    if not np.any(a != 0):
         raise ValueError("desired_steering must be nonzero")
 
-    loading = (
-        cfg.diagonal_loading_factor
-        * float(np.trace(covariance_matrix).real)
-        / n_antennas
-    )
-    if not np.isfinite(loading) or loading <= 0:
-        loading = float(
-            np.spacing(max(1.0, np.linalg.norm(covariance_matrix, "fro")))
+    with np.errstate(over="ignore", invalid="ignore"):
+        loading = (
+            cfg.diagonal_loading_factor
+            * float(np.trace(covariance_matrix).real)
+            / n_antennas
         )
-    loaded_covariance = covariance_matrix + loading * np.eye(n_antennas)
+    if not np.isfinite(loading) or loading <= 0:
+        covariance_scale = max(
+            1.0,
+            float(
+                np.max(
+                    np.maximum(
+                        np.abs(covariance_matrix.real),
+                        np.abs(covariance_matrix.imag),
+                    )
+                )
+            ),
+        )
+        loading = float(np.spacing(covariance_scale))
+    if not np.isfinite(loading) or loading <= 0:
+        raise ValueError("diagonal loading must be finite and positive")
+    with np.errstate(over="ignore", invalid="ignore"):
+        loaded_covariance = covariance_matrix + loading * np.eye(n_antennas)
+    if not np.all(np.isfinite(loaded_covariance)):
+        raise ValueError("loaded covariance must contain finite values")
 
     normalized_mode = str(mode).lower()
     if normalized_mode == "single":
@@ -55,19 +70,29 @@ def compute_weights(
         weights = np.zeros(n_antennas, dtype=np.complex128)
         weights[0] = 1.0 / np.conj(a[0])
     elif normalized_mode == "egc":
-        weights = a / np.vdot(a, a)
+        denominator = np.vdot(a, a)
+        if not np.isfinite(denominator) or denominator == 0:
+            raise ValueError("desired constraint cannot be normalized")
+        weights = a / denominator
     elif normalized_mode == "mvdr":
         solved = np.linalg.solve(loaded_covariance, a)
+        if not np.all(np.isfinite(solved)):
+            raise ValueError("loaded covariance solve returned nonfinite values")
         denominator = np.vdot(a, solved)
-        if abs(denominator) < np.finfo(float).eps:
+        if not np.isfinite(denominator) or denominator == 0:
             raise ValueError("loaded covariance cannot support desired constraint")
         weights = solved / denominator
     else:
         raise ValueError(f"unknown diversity mode: {mode}")
 
+    if not np.all(np.isfinite(weights)):
+        raise ValueError("combiner weights must contain finite values")
+    desired_response = np.vdot(weights, a)
+    if not np.isfinite(desired_response):
+        raise ValueError("desired response must be finite")
     info: dict[str, Any] = {
         "constraint_steering": a,
-        "desired_response": np.vdot(weights, a),
+        "desired_response": desired_response,
         "diagonal_loading": loading,
         "loaded_covariance": loaded_covariance,
     }

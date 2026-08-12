@@ -110,3 +110,25 @@ def test_compute_weights_rejects_invalid_constraints(
             "mvdr",
             mate70_default_config().diversity,
         )
+
+
+@pytest.mark.parametrize("mode", ["egc", "mvdr"])
+def test_compute_weights_handles_large_finite_covariance(mode):
+    """Catch overflow in loading fallback for finite high-dynamic-range input."""
+
+    covariance = np.eye(2) * 1e308
+    desired = np.ones(2, dtype=np.complex128)
+
+    weights, info = compute_weights(
+        covariance,
+        desired,
+        mode,
+        mate70_default_config().diversity,
+    )
+
+    assert np.all(np.isfinite(weights))
+    assert np.isfinite(info["desired_response"])
+    assert info["desired_response"] == pytest.approx(1.0 + 0j)
+    assert np.isfinite(info["diagonal_loading"])
+    assert info["diagonal_loading"] > 0
+    assert np.all(np.isfinite(info["loaded_covariance"]))
