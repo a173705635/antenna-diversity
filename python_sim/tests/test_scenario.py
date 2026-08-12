@@ -36,3 +36,25 @@ def test_channel_amplitude_and_phase_errors_modify_each_antenna_response():
     _, truth = generate_scenario(cfg)
 
     np.testing.assert_allclose(truth["channel_response"], [1.0, 2.0j], atol=1e-12)
+
+
+def test_legacy_scenario_preserves_singular_truth_aliases():
+    cfg = default_config()
+
+    _, truth = generate_scenario(cfg)
+
+    np.testing.assert_allclose(
+        truth["desired_steering_nominal"], truth["desired_steering_assumed"]
+    )
+    np.testing.assert_allclose(
+        truth["desired_steering_effective"], truth["desired_steering_true"]
+    )
+    np.testing.assert_allclose(
+        truth["jammer_steering_nominal"], truth["interferer_steering_nominal"][0]
+    )
+    np.testing.assert_allclose(
+        truth["jammer_steering_effective"], truth["interferer_steering_effective"][0]
+    )
+    np.testing.assert_allclose(
+        truth["jammer_component"], truth["interferer_components"][0]
+    )
