@@ -243,6 +243,8 @@ class SimulationConfig:
                 raise ValueError("legacy ArrayConfig requires directions to be None")
             if self.phone is not None:
                 raise ValueError("legacy ArrayConfig requires phone to be None")
+            if self.interferers != ():
+                raise ValueError("interferers must be empty for legacy ArrayConfig")
             positions = np.asarray(self.array.positions_m)
             amplitude_errors = np.asarray(self.array.channel_amplitude_error_db)
             phase_errors = np.asarray(self.array.channel_phase_error_deg)
@@ -255,6 +257,8 @@ class SimulationConfig:
         elif isinstance(self.array, PhoneArrayConfig):
             if self.phone is None:
                 raise ValueError("PhoneArrayConfig requires a phone configuration")
+            if self.jammer.enable:
+                raise ValueError("legacy jammer must be disabled for phone configurations")
             if self.signal.true_direction is None or self.signal.assumed_direction is None:
                 raise ValueError("PhoneArrayConfig requires true and assumed directions")
             self.signal.true_direction.validate()
@@ -300,6 +304,32 @@ class SimulationConfig:
             raise ValueError("phone configurations support at most three interferers")
         for interferer in self.interferers:
             interferer.direction.validate()
+            if not np.isfinite(interferer.power_dbm):
+                raise ValueError("interferer.power_dbm must be finite")
+            if not np.isfinite(interferer.offset_hz):
+                raise ValueError("interferer.offset_hz must be finite")
+            if not np.isfinite(interferer.initial_phase_rad):
+                raise ValueError("interferer.initial_phase_rad must be finite")
+            if not np.isfinite(interferer.start_ms) or interferer.start_ms < 0.0:
+                raise ValueError("interferer.start_ms must be finite and nonnegative")
+            if interferer.start_ms > self.signal.duration_ms:
+                raise ValueError(
+                    "interferer.start_ms must not exceed signal duration "
+                    "(signal.duration_ms)"
+                )
+            if interferer.stop_ms is not None:
+                if (
+                    not np.isfinite(interferer.stop_ms)
+                    or interferer.stop_ms < interferer.start_ms
+                ):
+                    raise ValueError(
+                        "interferer.stop_ms must be finite and not precede interferer.start_ms"
+                    )
+                if interferer.stop_ms > self.signal.duration_ms:
+                    raise ValueError(
+                        "interferer.stop_ms must not exceed signal duration "
+                        "(signal.duration_ms)"
+                    )
 
         if self.rf.temperature_k < 0 or self.rf.noise_bandwidth_hz <= 0:
             raise ValueError("RF temperature and noise bandwidth are invalid")

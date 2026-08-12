@@ -66,6 +66,14 @@ class SpatialGridScanResult:
     metrics: dict[str, np.ndarray]
     interferer_gain: np.ndarray
 
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "azimuths_deg", np.array(self.azimuths_deg, copy=True))
+        object.__setattr__(
+            self,
+            "elevations_deg",
+            np.array(self.elevations_deg, copy=True),
+        )
+
     @property
     def output_sinr_db(self) -> np.ndarray:
         return self.metrics["output_sinr_db"]

@@ -49,6 +49,28 @@ def test_direction_scan_returns_requested_grid_without_running_receiver(monkeypa
     json.dumps(result.to_dict())
 
 
+def test_direction_scan_copies_caller_axes_before_freezing_result():
+    azimuths = np.array([0.0, 120.0])
+    elevations = np.array([0.0, 30.0])
+    result = scan_interferer_directions(
+        mate70_default_config(),
+        interferer_index=0,
+        azimuths_deg=azimuths,
+        elevations_deg=elevations,
+        mode="mvdr",
+    )
+    serialized_before = result.to_dict()
+
+    assert not np.shares_memory(result.azimuths_deg, azimuths)
+    assert not np.shares_memory(result.elevations_deg, elevations)
+    azimuths[:] = [-10.0, -20.0]
+    elevations[:] = [80.0, 90.0]
+
+    np.testing.assert_array_equal(result.azimuths_deg, [0.0, 120.0])
+    np.testing.assert_array_equal(result.elevations_deg, [0.0, 30.0])
+    assert result.to_dict() == serialized_before
+
+
 def test_loading_and_power_scans_preserve_requested_parameter_order():
     cfg = mate70_default_config()
 
