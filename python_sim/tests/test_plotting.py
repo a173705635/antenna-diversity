@@ -131,6 +131,52 @@ def test_phone_array_response_contains_three_heatmaps_and_direction_markers():
     plt.close(figure)
 
 
+def test_phone_array_response_uses_fixed_required_mode_order():
+    """Catch dict insertion order or extra branches changing the three panels."""
+    cfg = mate70_default_config()
+    cfg.plot.enable = False
+    cfg.signal.duration_ms = 8
+    cfg.tracking.max_epochs = 2
+    results = run_end_to_end(cfg)
+    branches = results.branches
+    results.branches = {
+        "mvdr": branches["mvdr"],
+        "diagnostic": branches["single"],
+        "single": branches["single"],
+        "egc": branches["egc"],
+    }
+
+    figure = plot_array_response(results)
+    image_axes = [axis for axis in figure.axes if axis.images]
+
+    assert [axis.get_title() for axis in image_axes] == [
+        "SINGLE array response",
+        "EGC array response",
+        "MVDR array response",
+    ]
+    plt.close(figure)
+
+
+def test_phone_array_response_rejects_missing_required_branch():
+    """Catch incomplete phone response reports silently rendering fewer panels."""
+    cfg = mate70_default_config()
+    cfg.plot.enable = False
+    cfg.signal.duration_ms = 8
+    cfg.tracking.max_epochs = 2
+    results = run_end_to_end(cfg)
+    results.branches = {
+        mode: branch
+        for mode, branch in results.branches.items()
+        if mode != "egc"
+    }
+
+    with pytest.raises(
+        ValueError,
+        match="phone array response requires single, egc, and mvdr branches",
+    ):
+        plot_array_response(results)
+
+
 def test_phone_spectra_mark_enabled_interferers_in_each_sampling_domain():
     """Catch singular jammer markers or RF/DFE frequency-domain confusion."""
     cfg = mate70_default_config()

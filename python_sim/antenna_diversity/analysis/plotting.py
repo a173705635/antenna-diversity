@@ -225,16 +225,21 @@ def _plot_legacy_array_response(results: SimulationResults) -> Figure:
 
 def _plot_phone_array_response(results: SimulationResults) -> Figure:
     cfg = results.config
+    required_modes = ("single", "egc", "mvdr")
+    if any(mode not in results.branches for mode in required_modes):
+        raise ValueError(
+            "phone array response requires single, egc, and mvdr branches"
+        )
     azimuths = np.arange(0.0, 360.0 + 2.0, 2.0)
     elevations = np.arange(0.0, 90.0 + 1.0, 1.0)
     grids = {
         mode: response_grid_db(
             cfg,
-            branch.combining["weights"],
+            results.branches[mode].combining["weights"],
             azimuths,
             elevations,
         )
-        for mode, branch in results.branches.items()
+        for mode in required_modes
     }
     figure, axes = plt.subplots(
         1,
