@@ -8,7 +8,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.figure import Figure
 
+from antenna_diversity.analysis.spatial import response_grid_db
 from antenna_diversity.array.steering import steering_vector
+from antenna_diversity.config import PhoneArrayConfig
 from antenna_diversity.models import SimulationResults
 
 
@@ -44,6 +46,39 @@ def _plot_spectrum(axis, x: np.ndarray, fs_hz: float, title: str) -> None:
     axis.set_title(title)
 
 
+def _enabled_interferers(results: SimulationResults):
+    cfg = results.config
+    if isinstance(cfg.array, PhoneArrayConfig):
+        return tuple(
+            interferer for interferer in cfg.interferers if interferer.enable
+        )
+    return (cfg.jammer,) if cfg.jammer.enable else ()
+
+
+def _mark_spectrum_directions(
+    axis,
+    results: SimulationResults,
+    frequency_shift_hz: float,
+) -> None:
+    axis.axvline(
+        (frequency_shift_hz + results.truth["doppler_hz"]) / 1e6,
+        color="green",
+        linestyle="--",
+        label="Target Doppler",
+        alpha=0.75,
+        zorder=1,
+    )
+    for index, interferer in enumerate(_enabled_interferers(results), start=1):
+        axis.axvline(
+            (frequency_shift_hz + interferer.offset_hz) / 1e6,
+            color="red",
+            linestyle="--",
+            label=f"Interferer {index}",
+            alpha=0.75,
+            zorder=1,
+        )
+
+
 def plot_spectra(results: SimulationResults) -> Figure:
     """Plot antenna input, ADC output, and DFE output spectra."""
 
@@ -56,18 +91,22 @@ def plot_spectra(results: SimulationResults) -> Figure:
         results.config.signal.fs_rf_hz,
         "Antenna 1 input",
     )
+    _mark_spectrum_directions(axes[0], results, results.config.signal.if_hz)
     _plot_spectrum(
         axes[1],
         results.adc_codes[0],
         results.config.signal.fs_rf_hz,
         "ADC output",
     )
+    _mark_spectrum_directions(axes[1], results, results.config.signal.if_hz)
     _plot_spectrum(
         axes[2],
         results.dfe_channels[0],
         results.dfe_info["fs_out_hz"],
         "DFE output",
     )
+    _mark_spectrum_directions(axes[2], results, 0.0)
+    axes[0].legend(loc="best")
     figure.suptitle("RF and DFE chain")
     return figure
 
@@ -119,8 +158,6 @@ def plot_combined_spectra(results: SimulationResults) -> Figure:
         sharey=True,
         constrained_layout=True,
     )
-    target_frequency_mhz = results.truth["doppler_hz"] / 1e6
-    jammer_frequency_mhz = results.config.jammer.offset_hz / 1e6
     for axis, mode in zip(axes, required_modes, strict=True):
         frequency_mhz, magnitude_db = spectra[mode]
         axis.plot(
@@ -129,23 +166,7 @@ def plot_combined_spectra(results: SimulationResults) -> Figure:
             linewidth=0.8,
             zorder=3,
         )
-        axis.axvline(
-            target_frequency_mhz,
-            color="green",
-            linestyle="--",
-            label="Target Doppler",
-            alpha=0.75,
-            zorder=1,
-        )
-        if results.config.jammer.enable:
-            axis.axvline(
-                jammer_frequency_mhz,
-                color="red",
-                linestyle="--",
-                label="Jammer offset",
-                alpha=0.75,
-                zorder=1,
-            )
+        _mark_spectrum_directions(axis, results, 0.0)
         axis.set_xlim(frequency_mhz[0], frequency_mhz[-1])
         axis.set_ylim(y_min - y_padding, y_max + y_padding)
         axis.set_ylabel("Magnitude (dB)")
@@ -157,9 +178,7 @@ def plot_combined_spectra(results: SimulationResults) -> Figure:
     return figure
 
 
-def plot_array_response(results: SimulationResults) -> Figure:
-    """Plot nominal spatial responses of all combining branches."""
-
+def _plot_legacy_array_response(results: SimulationResults) -> Figure:
     cfg = results.config
     angles_deg = np.arange(-90.0, 90.0 + 0.25, 0.25)
     figure, axis = plt.subplots(figsize=(10, 5), constrained_layout=True)
@@ -202,6 +221,89 @@ def plot_array_response(results: SimulationResults) -> Figure:
     axis.set_title("Nominal array response")
     axis.legend(loc="best")
     return figure
+
+
+def _plot_phone_array_response(results: SimulationResults) -> Figure:
+    cfg = results.config
+    azimuths = np.arange(0.0, 360.0 + 2.0, 2.0)
+    elevations = np.arange(0.0, 90.0 + 1.0, 1.0)
+    grids = {
+        mode: response_grid_db(
+            cfg,
+            branch.combining["weights"],
+            azimuths,
+            elevations,
+        )
+        for mode, branch in results.branches.items()
+    }
+    figure, axes = plt.subplots(
+        1,
+        len(grids),
+        figsize=(16, 5),
+        squeeze=False,
+        constrained_layout=True,
+    )
+    image = None
+    for axis, (mode, grid) in zip(axes[0], grids.items(), strict=True):
+        image = axis.imshow(
+            grid,
+            origin="lower",
+            aspect="auto",
+            extent=(0.0, 360.0, 0.0, 90.0),
+            vmin=-60.0,
+            vmax=0.0,
+        )
+        if float(np.min(grid)) < -3.0 < float(np.max(grid)):
+            axis.contour(
+                azimuths,
+                elevations,
+                grid,
+                levels=[-3.0],
+                colors="white",
+                linewidths=1.0,
+            )
+        target = cfg.signal.true_direction
+        axis.plot(
+            target.azimuth_deg,
+            target.elevation_deg,
+            marker="*",
+            color="green",
+            linestyle="none",
+            markersize=12,
+            label="Target",
+        )
+        for index, interferer in enumerate(
+            _enabled_interferers(results), start=1
+        ):
+            axis.plot(
+                interferer.direction.azimuth_deg,
+                interferer.direction.elevation_deg,
+                marker="x",
+                color="red",
+                linestyle="none",
+                markersize=9,
+                markeredgewidth=2,
+                label=f"Interferer {index}",
+            )
+        axis.set_xlabel("Azimuth (deg)")
+        axis.set_ylabel("Elevation (deg)")
+        axis.set_title(f"{mode.upper()} array response")
+        axis.legend(loc="best")
+    figure.colorbar(
+        image,
+        ax=axes[0].tolist(),
+        label="Normalized response (dB)",
+    )
+    figure.suptitle("Phone-array spatial response")
+    return figure
+
+
+def plot_array_response(results: SimulationResults) -> Figure:
+    """Plot nominal spatial responses of all combining branches."""
+
+    if isinstance(results.config.array, PhoneArrayConfig):
+        return _plot_phone_array_response(results)
+    return _plot_legacy_array_response(results)
 
 
 def plot_acquisition(results: SimulationResults) -> Figure:
