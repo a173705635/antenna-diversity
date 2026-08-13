@@ -119,6 +119,34 @@ class InterfererTemplate:
 
 
 @dataclass(frozen=True)
+class StudyCase:
+    case_id: str
+    stage: str
+    active_antennas: tuple[str, ...]
+    mode: str
+    seed: int | None
+    parameters: dict[str, object]
+    selection_reasons: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class CombinedErrorRealization:
+    level: str
+    sample_index: int
+    child_seed: int
+    azimuth_error_deg: float
+    elevation_error_deg: float
+    position_errors_m: dict[str, tuple[float, float, float]]
+    amplitude_errors_db: dict[str, float]
+    phase_errors_deg: dict[str, float]
+
+    def to_dict(self) -> dict[str, object]:
+        """Return a detached strict-JSON-compatible realization snapshot."""
+
+        return strict_snapshot(self)  # type: ignore[return-value]
+
+
+@dataclass(frozen=True)
 class StudyConfig:
     schema_version: int
     name: str

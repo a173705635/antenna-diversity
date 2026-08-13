@@ -13,6 +13,7 @@ import numpy as np
 from antenna_diversity.config import CWInterferer, Direction, RFStage, SimulationConfig, default_config
 
 from .models import ErrorLevel, InterfererTemplate, ResolvedStudyConfig, StudyConfig
+from .scenarios import parse_combination_spec
 
 
 PRESET_NAMES = ("quick", "standard", "extended")
@@ -21,16 +22,6 @@ _ALL_COMBINATIONS = (
     ("TL", "TR", "BL"), ("TL", "TR", "BR"), ("TL", "BL", "BR"), ("TR", "BL", "BR"),
     ("TL", "TR", "BL", "BR"),
 )
-
-
-def _parse_combinations(value: object) -> tuple[tuple[str, ...], ...]:
-    if isinstance(value, str):
-        if value == "all":
-            return _ALL_COMBINATIONS
-        value = tuple(tuple(part.strip() for part in item.split("+") if part.strip()) for item in value.split(",") if item.strip())
-    if not isinstance(value, (tuple, list)):
-        raise ValueError("study.combinations must be a combination specification")
-    return tuple(tuple(item) for item in value)
 
 
 def _templates() -> tuple[InterfererTemplate, ...]:
@@ -170,7 +161,7 @@ def _study_updates(
     axes = {"azimuths_deg", "elevations_deg", "powers_dbm", "direction_errors_deg", "position_errors_m", "amplitude_errors_db", "phase_errors_deg", "loading_factors"}
     for name, value in updates.items():
         if name == "combinations":
-            converted[name] = _parse_combinations(value)
+            converted[name] = parse_combination_spec(value)  # type: ignore[arg-type]
         elif name in {"spatial_modes", "full_chain_modes", "single_antennas", "automatic_roles"}:
             converted[name] = tuple(value) if not isinstance(value, str) else tuple(part.strip() for part in value.split(",") if part.strip())
         elif name == "modes":  # CLI shorthand, retained outside the serialized model.
