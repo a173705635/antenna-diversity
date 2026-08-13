@@ -176,3 +176,43 @@ def test_resolved_state_cannot_be_mutated_through_public_arrays_cases_or_simulat
 def test_single_antennas_must_be_a_nonempty_unique_corner_subset(single_antennas):
     with pytest.raises(ValueError, match="single_antennas"):
         resolve_study_config(preset="quick", cli_overrides={"single_antennas": single_antennas})
+
+
+@pytest.mark.parametrize(
+    "study_update",
+    [
+        {"error_levels": [{}]},
+        {"multi_jammer_templates": [{"name": "x", "interferers": [{}]}]},
+    ],
+)
+def test_incomplete_nested_study_records_raise_value_error(tmp_path: Path, study_update):
+    path = tmp_path / "study.json"
+    path.write_text(json.dumps({"study": study_update}), encoding="utf-8")
+
+    with pytest.raises(ValueError):
+        resolve_study_config(path)
+
+
+def test_resolved_containers_are_canonical_and_immutable_after_from_parts():
+    base = resolve_study_config(preset="quick", cli_overrides={"manual_cases": [{"key": "value"}]})
+    study_with_lists = __import__("dataclasses").replace(
+        base.study,
+        spatial_modes=["egc", "mvdr"],
+        full_chain_modes=["single", "egc", "mvdr"],
+        combinations=[["TL", "BR"]],
+        single_antennas=["TL"],
+        automatic_roles=["best"],
+    )
+    resolved = ResolvedStudyConfig.from_parts(study_with_lists, base.simulation)
+    before = resolved.to_dict()
+    digest = resolved.config_sha256
+
+    with pytest.raises(TypeError):
+        resolved.study.manual_cases[0] |= {"other": "value"}
+    with pytest.raises(AttributeError):
+        resolved.study.spatial_modes.append("single")
+
+    assert resolved.study.spatial_modes == ("egc", "mvdr")
+    assert resolved.study.combinations == (("TL", "BR"),)
+    assert resolved.to_dict() == before
+    assert resolved.config_sha256 == digest

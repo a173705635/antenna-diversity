@@ -27,6 +27,7 @@ class _FrozenDict(dict[str, object]):
     popitem = _immutable
     setdefault = _immutable
     update = _immutable
+    __ior__ = _immutable
 
     def __deepcopy__(self, memo: dict[int, object]) -> "_FrozenDict":
         return self
@@ -42,6 +43,23 @@ def _freeze(value: object) -> object:
     if isinstance(value, tuple):
         return tuple(_freeze(item) for item in value)
     return copy.deepcopy(value)
+
+
+def _canonical_study(study: StudyConfig) -> StudyConfig:
+    """Copy and normalize every public StudyConfig container at the boundary."""
+
+    values = {
+        field.name: copy.deepcopy(getattr(study, field.name))
+        for field in fields(StudyConfig)
+    }
+    values["output_dir"] = Path(values["output_dir"])
+    values["combinations"] = tuple(tuple(combo) for combo in values["combinations"])
+    for name in ("spatial_modes", "full_chain_modes", "single_antennas", "automatic_roles"):
+        values[name] = tuple(values[name])
+    values["error_levels"] = tuple(values["error_levels"])
+    values["multi_jammer_templates"] = tuple(values["multi_jammer_templates"])
+    values["manual_cases"] = tuple(values["manual_cases"])
+    return StudyConfig(**values)
 
 
 def strict_snapshot(value: object) -> object:
@@ -222,10 +240,7 @@ class ResolvedStudyConfig:
 
     @classmethod
     def from_parts(cls, study: StudyConfig, simulation: SimulationConfig) -> "ResolvedStudyConfig":
-        study_copy = StudyConfig(**{
-            field.name: copy.deepcopy(getattr(study, field.name))
-            for field in fields(StudyConfig)
-        })
+        study_copy = _canonical_study(study)
         simulation_copy = copy.deepcopy(simulation)
         validate_study_config(study_copy)
         simulation_copy.validate()

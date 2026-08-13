@@ -78,6 +78,13 @@ def _reject_unknown(data: Mapping[str, object], allowed: set[str], context: str)
         raise ValueError(f"unknown {context} key: {sorted(unknown)[0]}")
 
 
+def _require_exact_keys(data: Mapping[str, object], required: set[str], context: str) -> None:
+    _reject_unknown(data, required, context)
+    missing = required - set(data)
+    if missing:
+        raise ValueError(f"missing {context} key: {sorted(missing)[0]}")
+
+
 def _update_dataclass(value: object, updates: Mapping[str, object], context: str) -> object:
     if not is_dataclass(value):
         raise ValueError(f"{context} does not accept nested keys")
@@ -117,13 +124,20 @@ def _update_dataclass(value: object, updates: Mapping[str, object], context: str
 def _interferer(raw: object) -> CWInterferer:
     if not isinstance(raw, Mapping):
         raise ValueError("interferer must be an object")
-    _reject_unknown(raw, {field.name for field in fields(CWInterferer)}, "interferer")
+    allowed = {field.name for field in fields(CWInterferer)}
+    _reject_unknown(raw, allowed, "interferer")
+    if "direction" not in raw:
+        raise ValueError("missing interferer key: direction")
     data = dict(raw)
     direction = data.get("direction")
-    if isinstance(direction, Mapping):
-        _reject_unknown(direction, {"azimuth_deg", "elevation_deg"}, "interferer.direction")
-        data["direction"] = Direction(**direction)
-    return CWInterferer(**data)  # type: ignore[arg-type]
+    if not isinstance(direction, Mapping):
+        raise ValueError("interferer.direction must be an object")
+    _require_exact_keys(direction, {"azimuth_deg", "elevation_deg"}, "interferer.direction")
+    data["direction"] = Direction(**direction)
+    try:
+        return CWInterferer(**data)  # type: ignore[arg-type]
+    except TypeError as error:
+        raise ValueError(f"invalid interferer: {error}") from error
 
 
 def _apply_simulation_updates(simulation: SimulationConfig, updates: Mapping[str, object]) -> SimulationConfig:
@@ -175,8 +189,11 @@ def _study_updates(
             for item in value:
                 if not isinstance(item, Mapping):
                     raise ValueError("study.error_levels entries must be objects")
-                _reject_unknown(item, {field.name for field in fields(ErrorLevel)}, "study.error_levels")
-                levels.append(ErrorLevel(**item))
+                _require_exact_keys(item, {field.name for field in fields(ErrorLevel)}, "study.error_levels")
+                try:
+                    levels.append(ErrorLevel(**item))
+                except TypeError as error:
+                    raise ValueError(f"invalid study.error_levels entry: {error}") from error
             converted[name] = tuple(levels)
         elif name == "multi_jammer_templates":
             if not isinstance(value, (list, tuple)):
@@ -185,7 +202,7 @@ def _study_updates(
             for item in value:
                 if not isinstance(item, Mapping):
                     raise ValueError("study.multi_jammer_templates entries must be objects")
-                _reject_unknown(item, {field.name for field in fields(InterfererTemplate)}, "study.multi_jammer_templates")
+                _require_exact_keys(item, {field.name for field in fields(InterfererTemplate)}, "study.multi_jammer_templates")
                 interferers = item.get("interferers")
                 if not isinstance(interferers, (list, tuple)):
                     raise ValueError("study.multi_jammer_templates.interferers must be a list")
