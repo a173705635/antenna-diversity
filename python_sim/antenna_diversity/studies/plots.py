@@ -139,8 +139,7 @@ def _directions(rows: Sequence[Mapping[str, object]]) -> Figure:
 def _power(rows: Sequence[Mapping[str, object]]) -> Figure:
     figure, axis = plt.subplots(figsize=(7, 4.5), layout="constrained")
     for (combination, mode), group in _groups(rows, "combination", "mode").items():
-        points = sorted(((_finite(row.get("power_dbm")), _finite(row.get("output_sinr_db"))) for row in group))
-        points = [(x, y) for x, y in points if x is not None and y is not None]
+        points = _finite_points(group, "power_dbm", "output_sinr_db")
         if points:
             axis.plot(*zip(*points), marker="o", label=f"{mode.upper()}({combination})")
     if axis.lines:
@@ -154,8 +153,7 @@ def _power(rows: Sequence[Mapping[str, object]]) -> Figure:
 def _robustness(rows: Sequence[Mapping[str, object]]) -> Figure:
     figure, axis = plt.subplots(figsize=(7, 4.5), layout="constrained")
     for (combination, factor), group in _groups(rows, "combination", "factor").items():
-        points = sorted(((_finite(row.get("normalized_severity", row.get("absolute_normalized_severity"))), _finite(row.get("mvdr_minus_egc_sinr_db"))) for row in group))
-        points = [(x, y) for x, y in points if x is not None and y is not None]
+        points = _finite_points(group, "normalized_severity", "mvdr_minus_egc_sinr_db", fallback_x="absolute_normalized_severity")
         if points:
             axis.plot(*zip(*points), marker="o", label=f"Δ MVDR−EGC {combination} {factor}")
     if axis.lines:
@@ -237,8 +235,7 @@ def _full_chain(rows: Sequence[Mapping[str, object]]) -> Figure:
 def _cn0(rows: Sequence[Mapping[str, object]], validation_rows: Sequence[Mapping[str, object]]) -> Figure:
     figure, axis = plt.subplots(figsize=(7, 4.5), layout="constrained")
     for (case_id, mode, run), group in _groups(rows, "case_id", "mode", "run_index").items():
-        points = sorted(((_finite(row.get("time_ms")), _finite(row.get("cn0_db_hz"))) for row in group))
-        points = [(x, y) for x, y in points if x is not None and y is not None]
+        points = _finite_points(group, "time_ms", "cn0_db_hz")
         if points:
             axis.plot(*zip(*points), label=f"{mode.upper()} {case_id} run {run}")
     if axis.lines:
@@ -257,9 +254,21 @@ def _ranked_rows(rows: Sequence[Mapping[str, object]]) -> list[Mapping[str, obje
         if not isinstance(rank, int) or isinstance(rank, bool) or rank <= 0:
             raise ValueError("baseline ranking requires a positive integer rank")
         ranks.append(rank)
-    if len(set(ranks)) != len(ranks):
-        raise ValueError("baseline ranking ranks must be unique")
+    if sorted(ranks) != list(range(1, len(rows) + 1)):
+        raise ValueError("baseline ranking ranks must be contiguous one-based integers")
     return sorted(rows, key=lambda row: int(row["rank"]))
+
+
+def _finite_points(
+    rows: Sequence[Mapping[str, object]], x_field: str, y_field: str, *, fallback_x: str | None = None,
+) -> list[tuple[float, float]]:
+    points: list[tuple[float, float]] = []
+    for row in rows:
+        x = _finite(row.get(x_field, row.get(fallback_x) if fallback_x else None))
+        y = _finite(row.get(y_field))
+        if x is not None and y is not None:
+            points.append((x, y))
+    return sorted(points)
 
 
 def _required_finite(row: Mapping[str, object], field: str) -> float:

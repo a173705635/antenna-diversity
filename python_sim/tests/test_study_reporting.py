@@ -50,7 +50,7 @@ def test_report_contains_evidence_boundaries_and_reproduction_links(tmp_path: Pa
     tables = completed_tables_for_reporting()
     manifest = completed_manifest()
     selection = {
-        "cases": [{"case_id": "best-001", "selection_reasons": ["best"]}],
+        "cases": [{"case_id": "best-001", "active_antennas": ["TL", "BR"], "selection_reasons": ["best"]}],
         "unselected_roles": {"knee": "no crossing"},
     }
     figures = {"baseline_rankings": Path("figures/baseline_rankings.png")}
@@ -134,6 +134,73 @@ def test_summary_names_rank_roles_and_validates_knee_evidence():
     assert summary["knee"] == {"status": "unavailable", "reason": "not selected"}
     with pytest.raises(ValueError, match="knee"):
         build_summary(tables, completed_manifest(), {"cases": [{"selection_reasons": ["knee"]}], "unselected_roles": {"knee": "no crossing"}})
+
+
+@pytest.mark.parametrize("rank_values", [(2, 3), (1, 3), (1, 1), (0, 1), (True, 2)])
+def test_reporting_requires_contiguous_one_based_ranks(rank_values):
+    tables = completed_tables_for_reporting()
+    first = {**tables["baseline_rankings"][0], "rank": rank_values[0]}
+    second = {**tables["baseline_rankings"][0], "active_antennas": ["TR", "BL"], "rank": rank_values[1]}
+    tables["baseline_rankings"] = (first, second)
+
+    with pytest.raises(ValueError, match="rank"):
+        build_summary(tables, completed_manifest(), {})
+    with pytest.raises(ValueError, match="rank"):
+        plot_study_tables(tables)
+
+
+def test_curve_plots_ignore_partial_and_all_unavailable_coordinates_without_errors():
+    tables = completed_tables_for_reporting()
+    tables["power_scan"] = (
+        {**tables["power_scan"][0], "power_dbm": None},
+        tables["power_scan"][1],
+        {**tables["power_scan"][2], "output_sinr_db": float("nan")},
+    )
+    tables["robustness_scans"] = (
+        {**tables["robustness_scans"][0], "normalized_severity": None},
+        tables["robustness_scans"][1],
+        {**tables["robustness_scans"][2], "mvdr_minus_egc_sinr_db": float("nan")},
+    )
+    tables["full_chain_cn0"] = (
+        {**tables["full_chain_cn0"][0], "time_ms": None},
+        tables["full_chain_cn0"][1],
+        {**tables["full_chain_cn0"][2], "cn0_db_hz": float("nan")},
+    )
+
+    partial = plot_study_tables(tables)
+    assert tuple(partial) == (
+        "baseline_rankings", "direction_heatmaps", "power_curves", "robustness_curves",
+        "combined_error_distributions", "multi_jammer_comparison", "full_chain_validation", "cn0_validation",
+    )
+    tables["power_scan"] = ({"mode": "mvdr", "active_antennas": ["TL", "BR"], "power_dbm": None, "output_sinr_db": None},)
+    tables["robustness_scans"] = ({"factor": "phase", "active_antennas": ["TL", "BR"], "normalized_severity": None, "mvdr_minus_egc_sinr_db": None},)
+    tables["full_chain_cn0"] = ({"case_id": "x", "mode": "mvdr", "run_index": 0, "time_ms": None, "cn0_db_hz": None},)
+    unavailable = plot_study_tables(tables)
+    assert not unavailable["power_curves"].axes[0].lines
+    assert not unavailable["robustness_curves"].axes[0].lines
+    assert not unavailable["cn0_validation"].axes[0].lines
+
+
+def test_summary_binds_each_role_reason_to_its_own_selected_case():
+    tables = completed_tables_for_reporting()
+    best = tables["baseline_rankings"][0]
+    second = {**best, "active_antennas": ["TR", "BL"], "display_label": "MVDR(TR+BL)", "rank": 2}
+    tables["baseline_rankings"] = (best, second)
+    with pytest.raises(ValueError, match="best"):
+        build_summary(tables, completed_manifest(), {
+            "cases": [
+                {"active_antennas": ["TR", "BL"], "selection_reasons": ["best"]},
+                {"active_antennas": ["TL", "BR"], "selection_reasons": ["manual"]},
+            ],
+        })
+    summary = build_summary(tables, completed_manifest(), {
+        "cases": [
+            {"active_antennas": ["TL", "BR"], "selection_reasons": ["best"]},
+            {"active_antennas": ["TR", "BL"], "selection_reasons": ["worst"]},
+            {"active_antennas": ["TL", "BR"], "selection_reasons": ["manual"]},
+        ],
+    })
+    assert summary["baseline"]["best"]["combination"] == "TL+BR"
 
 
 def test_report_link_validation_requires_existing_confined_targets(tmp_path: Path):

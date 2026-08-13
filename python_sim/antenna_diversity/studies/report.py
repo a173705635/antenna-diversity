@@ -239,8 +239,8 @@ def _ranked_rows(rows: Sequence[Mapping[str, object]]) -> list[Mapping[str, obje
         if not isinstance(rank, int) or isinstance(rank, bool) or rank <= 0:
             raise ValueError("baseline ranking requires a positive integer rank")
         ranks.append(rank)
-    if len(set(ranks)) != len(ranks):
-        raise ValueError("baseline ranking ranks must be unique")
+    if sorted(ranks) != list(range(1, len(rows) + 1)):
+        raise ValueError("baseline ranking ranks must be contiguous one-based integers")
     return sorted(rows, key=lambda row: int(row["rank"]))
 
 
@@ -261,16 +261,19 @@ def _selection_reasons(selection: Mapping[str, object]) -> set[str]:
 
 
 def _validate_selection_roles(roles: Mapping[str, object], selection: Mapping[str, object]) -> None:
-    reasons = _selection_reasons(selection)
-    selected_combinations = {
-        _combo(case) for case in selection.get("cases", ())
-        if isinstance(case, Mapping) and "active_antennas" in case
-    }
+    _selection_reasons(selection)
+    cases = selection.get("cases", ())
     for role, snapshot in roles.items():
-        if role not in reasons or not isinstance(snapshot, Mapping) or not selected_combinations:
+        if not isinstance(snapshot, Mapping):
             continue
-        if str(snapshot["combination"]) not in selected_combinations:
-            raise ValueError(f"selection {role} conflicts with ranked baseline")
+        expected = str(snapshot["combination"])
+        for case in cases:
+            if not isinstance(case, Mapping):
+                continue
+            raw = case.get("selection_reasons", case.get("role", ()))
+            reasons = {raw} if isinstance(raw, str) else {str(value) for value in raw} if isinstance(raw, Sequence) else set()
+            if role in reasons and _combo(case) != expected:
+                raise ValueError(f"selection {role} conflicts with ranked baseline")
 
 
 def _knee_summary(selection: Mapping[str, object]) -> dict[str, object]:
