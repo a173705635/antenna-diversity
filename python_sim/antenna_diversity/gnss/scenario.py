@@ -1,4 +1,4 @@
-"""Dual-antenna GPS L1 C/A and continuous-wave interference scene."""
+"""GPS L1 C/A and continuous-wave interference scene generation."""
 
 from __future__ import annotations
 
@@ -7,10 +7,143 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
+from antenna_diversity.array.geometry import select_phase_centers
+from antenna_diversity.array.manifold import IsotropicElementPattern, array_manifold
 from antenna_diversity.array.steering import steering_vector
-from antenna_diversity.config import SimulationConfig
+from antenna_diversity.config import (
+    ArrayConfig,
+    CWInterferer,
+    Direction,
+    PhoneArrayConfig,
+    SimulationConfig,
+)
 
 from .ca_code import ca_code
+
+
+def _legacy_channel_response(cfg: SimulationConfig) -> NDArray[np.complex128]:
+    amplitude_errors_db = np.asarray(
+        cfg.array.channel_amplitude_error_db, dtype=np.float64
+    ).reshape(-1)
+    phase_errors_deg = np.asarray(
+        cfg.array.channel_phase_error_deg, dtype=np.float64
+    ).reshape(-1)
+    return 10.0 ** (amplitude_errors_db / 20.0) * np.exp(
+        1j * np.deg2rad(phase_errors_deg)
+    )
+
+
+def _desired_responses(
+    cfg: SimulationConfig,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return true nominal, assumed nominal, and true effective steering."""
+
+    if isinstance(cfg.array, ArrayConfig):
+        nominal = steering_vector(
+            cfg.array.positions_m,
+            cfg.array.desired_angle_deg,
+            cfg.signal.wavelength_m,
+        )
+        effective = _legacy_channel_response(cfg) * nominal
+        return nominal, nominal, effective
+
+    if not isinstance(cfg.array, PhoneArrayConfig) or cfg.phone is None:
+        raise ValueError("phone array configuration is incomplete")
+    if cfg.signal.true_direction is None or cfg.signal.assumed_direction is None:
+        raise ValueError("phone array directions are incomplete")
+
+    names = cfg.array.active_antennas
+    pattern = IsotropicElementPattern()
+    true_positions = select_phase_centers(cfg.phone.phase_centers_m, names)
+    assumed_positions = select_phase_centers(
+        cfg.phone.assumed_phase_centers_m, names
+    )
+    true_nominal = array_manifold(
+        true_positions,
+        cfg.signal.true_direction,
+        cfg.signal.carrier_hz,
+        names,
+        pattern,
+    )
+    assumed_nominal = array_manifold(
+        assumed_positions,
+        cfg.signal.assumed_direction,
+        cfg.signal.carrier_hz,
+        names,
+        pattern,
+    )
+    assumed_constraint = cfg.array.channel_response(estimated=True) * assumed_nominal
+    true_effective = cfg.array.channel_response(estimated=False) * true_nominal
+    return true_nominal, assumed_constraint, true_effective
+
+
+def _active_interferers(cfg: SimulationConfig) -> tuple[CWInterferer, ...]:
+    """Return phone interferers or a CWInterferer view of the legacy jammer."""
+
+    if isinstance(cfg.array, PhoneArrayConfig):
+        return tuple(interferer for interferer in cfg.interferers if interferer.enable)
+    if not cfg.jammer.enable:
+        return ()
+    return (
+        CWInterferer(
+            direction=Direction(cfg.jammer.angle_deg, 0.0),
+            power_dbm=cfg.jammer.power_dbm,
+            offset_hz=cfg.jammer.offset_hz,
+            initial_phase_rad=cfg.jammer.initial_phase_rad,
+        ),
+    )
+
+
+def _time_gate(
+    n_samples: int,
+    fs_hz: float,
+    start_ms: float,
+    stop_ms: float | None,
+) -> NDArray[np.float64]:
+    gate = np.zeros(n_samples, dtype=np.float64)
+    if not np.isfinite(start_ms) or start_ms < 0.0:
+        raise ValueError("interferer start_ms must be finite and nonnegative")
+    if stop_ms is not None and (not np.isfinite(stop_ms) or stop_ms < start_ms):
+        raise ValueError("interferer stop_ms must be finite and not precede start_ms")
+
+    duration_ms = n_samples / fs_hz * 1e3
+    if start_ms > duration_ms or (
+        stop_ms is not None and stop_ms > duration_ms
+    ):
+        raise ValueError("interferer time gate must lie within signal duration")
+
+    first = round(start_ms * 1e-3 * fs_hz)
+    stop = n_samples if stop_ms is None else round(stop_ms * 1e-3 * fs_hz)
+    if first > n_samples or stop > n_samples:
+        raise ValueError("interferer time gate must lie within signal duration")
+    gate[first:stop] = 1.0
+    return gate
+
+
+def _interferer_response(
+    cfg: SimulationConfig,
+    interferer: CWInterferer,
+) -> tuple[NDArray[np.complex128], NDArray[np.complex128]]:
+    if isinstance(cfg.array, ArrayConfig):
+        nominal = steering_vector(
+            cfg.array.positions_m,
+            interferer.direction.azimuth_deg,
+            cfg.signal.wavelength_m,
+        )
+        return nominal, _legacy_channel_response(cfg) * nominal
+
+    if not isinstance(cfg.array, PhoneArrayConfig) or cfg.phone is None:
+        raise ValueError("phone array configuration is incomplete")
+    names = cfg.array.active_antennas
+    positions = select_phase_centers(cfg.phone.phase_centers_m, names)
+    nominal = array_manifold(
+        positions,
+        interferer.direction,
+        cfg.signal.carrier_hz,
+        names,
+        IsotropicElementPattern(),
+    )
+    return nominal, cfg.array.channel_response(estimated=False) * nominal
 
 
 def generate_scenario(
@@ -51,71 +184,81 @@ def generate_scenario(
     )
     desired_waveform = signal_amplitude_v * sampled_code * signal_carrier
 
-    desired_steering = steering_vector(
-        cfg.array.positions_m,
-        cfg.array.desired_angle_deg,
-        cfg.signal.wavelength_m,
-    )
-    amplitude_errors_db = np.asarray(
-        cfg.array.channel_amplitude_error_db, dtype=np.float64
-    ).reshape(-1)
-    phase_errors_deg = np.asarray(
-        cfg.array.channel_phase_error_deg, dtype=np.float64
-    ).reshape(-1)
-    channel_response = 10.0 ** (amplitude_errors_db / 20.0) * np.exp(
-        1j * np.deg2rad(phase_errors_deg)
-    )
-    if channel_response.size != n_antennas:
-        raise ValueError("channel error arrays must contain one value per antenna")
-    desired_steering_effective = channel_response * desired_steering
-    desired_component = (
-        desired_steering_effective[:, np.newaxis]
-        * desired_waveform[np.newaxis, :]
-    )
+    desired_nominal, desired_assumed, desired_true = _desired_responses(cfg)
+    desired_component = desired_true[:, np.newaxis] * desired_waveform[np.newaxis, :]
 
-    if cfg.jammer.enable:
-        jammer_power_w = 10.0 ** ((cfg.jammer.power_dbm - 30.0) / 10.0)
-        jammer_amplitude_v = np.sqrt(
-            jammer_power_w * cfg.signal.resistance_ohm
-        )
-        jammer_waveform = jammer_amplitude_v * np.exp(
+    interferer_steering_nominal: list[NDArray[np.complex128]] = []
+    interferer_steering_effective: list[NDArray[np.complex128]] = []
+    interferer_components: list[NDArray[np.complex128]] = []
+    for interferer in _active_interferers(cfg):
+        nominal, effective = _interferer_response(cfg, interferer)
+        power_w = 10.0 ** ((interferer.power_dbm - 30.0) / 10.0)
+        amplitude_v = np.sqrt(power_w * cfg.signal.resistance_ohm)
+        waveform = amplitude_v * np.exp(
             1j
             * (
                 2.0
                 * np.pi
-                * (cfg.signal.if_hz + cfg.jammer.offset_hz)
+                * (cfg.signal.if_hz + interferer.offset_hz)
                 * time_s
-                + cfg.jammer.initial_phase_rad
+                + interferer.initial_phase_rad
             )
         )
-        jammer_steering = steering_vector(
-            cfg.array.positions_m,
-            cfg.jammer.angle_deg,
-            cfg.signal.wavelength_m,
+        waveform *= _time_gate(
+            n_samples,
+            cfg.signal.fs_rf_hz,
+            interferer.start_ms,
+            interferer.stop_ms,
         )
-        jammer_steering_effective = channel_response * jammer_steering
-        jammer_component = (
-            jammer_steering_effective[:, np.newaxis]
-            * jammer_waveform[np.newaxis, :]
-        )
-    else:
-        jammer_steering = np.zeros(n_antennas, dtype=np.complex128)
-        jammer_steering_effective = np.zeros(n_antennas, dtype=np.complex128)
-        jammer_component = np.zeros(
-            (n_antennas, n_samples), dtype=np.complex128
-        )
+        interferer_steering_nominal.append(nominal)
+        interferer_steering_effective.append(effective)
+        interferer_components.append(effective[:, np.newaxis] * waveform[np.newaxis, :])
 
-    x_antenna_v = desired_component + jammer_component
+    zero_steering = np.zeros(n_antennas, dtype=np.complex128)
+    zero_component = np.zeros((n_antennas, n_samples), dtype=np.complex128)
+    jammer_steering_nominal = (
+        interferer_steering_nominal[0]
+        if interferer_steering_nominal
+        else zero_steering
+    )
+    jammer_steering_effective = (
+        interferer_steering_effective[0]
+        if interferer_steering_effective
+        else zero_steering
+    )
+    jammer_component = (
+        interferer_components[0] if interferer_components else zero_component
+    )
+    x_antenna_v = desired_component + sum(interferer_components, zero_component)
+
+    if isinstance(cfg.array, PhoneArrayConfig):
+        active_antennas = cfg.array.active_antennas
+        positions_m = select_phase_centers(
+            cfg.phone.phase_centers_m, active_antennas
+        )
+        channel_response = cfg.array.channel_response(estimated=False)
+    else:
+        active_antennas = tuple(str(index) for index in range(n_antennas))
+        positions_m = np.asarray(cfg.array.positions_m, dtype=np.float64)
+        channel_response = _legacy_channel_response(cfg)
+
     truth: dict[str, Any] = {
         "time_s": time_s,
         "code": code,
         "desired_waveform": desired_waveform,
         "desired_component": desired_component,
-        "jammer_component": jammer_component,
-        "desired_steering_nominal": desired_steering,
-        "desired_steering_effective": desired_steering_effective,
-        "jammer_steering_nominal": jammer_steering,
+        "desired_steering_true": desired_true,
+        "desired_steering_assumed": desired_assumed,
+        "interferer_steering_nominal": interferer_steering_nominal,
+        "interferer_steering_effective": interferer_steering_effective,
+        "interferer_components": interferer_components,
+        "active_antennas": active_antennas,
+        "positions_m": positions_m,
+        "desired_steering_nominal": desired_nominal,
+        "desired_steering_effective": desired_true,
+        "jammer_steering_nominal": jammer_steering_nominal,
         "jammer_steering_effective": jammer_steering_effective,
+        "jammer_component": jammer_component,
         "channel_response": channel_response,
         "doppler_hz": cfg.signal.doppler_hz,
         "code_rate_hz": received_code_rate_hz,

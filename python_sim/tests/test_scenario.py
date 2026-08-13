@@ -1,13 +1,13 @@
 import numpy as np
 import pytest
 
-from antenna_diversity.config import default_config
+from antenna_diversity.config import legacy_ula_config
 from antenna_diversity.gnss.scenario import generate_scenario
 
 
 def test_scenario_projects_signal_through_both_antennas():
     """Catch loss of code Doppler, array response, or antennas-by-samples shape."""
-    cfg = default_config()
+    cfg = legacy_ula_config()
     cfg.jammer.enable = False
 
     x, truth = generate_scenario(cfg)
@@ -28,7 +28,7 @@ def test_scenario_projects_signal_through_both_antennas():
 
 def test_channel_amplitude_and_phase_errors_modify_each_antenna_response():
     """Catch omission of per-channel complex gain errors from scenario generation."""
-    cfg = default_config()
+    cfg = legacy_ula_config()
     cfg.jammer.enable = False
     cfg.array.channel_amplitude_error_db = np.array([0.0, 6.020599913279624])
     cfg.array.channel_phase_error_deg = np.array([0.0, 90.0])
@@ -36,3 +36,25 @@ def test_channel_amplitude_and_phase_errors_modify_each_antenna_response():
     _, truth = generate_scenario(cfg)
 
     np.testing.assert_allclose(truth["channel_response"], [1.0, 2.0j], atol=1e-12)
+
+
+def test_legacy_scenario_preserves_singular_truth_aliases():
+    cfg = legacy_ula_config()
+
+    _, truth = generate_scenario(cfg)
+
+    np.testing.assert_allclose(
+        truth["desired_steering_nominal"], truth["desired_steering_assumed"]
+    )
+    np.testing.assert_allclose(
+        truth["desired_steering_effective"], truth["desired_steering_true"]
+    )
+    np.testing.assert_allclose(
+        truth["jammer_steering_nominal"], truth["interferer_steering_nominal"][0]
+    )
+    np.testing.assert_allclose(
+        truth["jammer_steering_effective"], truth["interferer_steering_effective"][0]
+    )
+    np.testing.assert_allclose(
+        truth["jammer_component"], truth["interferer_components"][0]
+    )

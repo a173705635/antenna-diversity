@@ -6,6 +6,9 @@ __pycache__/
 .venv/
 venv/
 
+# Local git worktrees used for isolated feature execution
+.worktrees/
+
 # Generated Python simulation figures
 python_sim/results/
 

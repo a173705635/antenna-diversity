@@ -16,6 +16,13 @@ def test_default_config_satisfies_matlab_sampling_constraints():
     assert cfg.diversity.modes == ("single", "egc", "mvdr")
 
 
+def test_default_config_is_mate70_four_corner_array():
+    cfg = default_config()
+
+    assert cfg.array.active_antennas == ("TL", "TR", "BL", "BR")
+    assert cfg.array.num_elements == 4
+
+
 def test_matlab_round_moves_half_ties_away_from_zero():
     """Catch use of NumPy's ties-to-even rounding in hardware quantizers."""
     values = np.array([-2.5, -1.5, -0.5, 0.0, 0.5, 1.5, 2.5])

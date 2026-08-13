@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1200" viewBox="0 0 1920 1200" role="img" aria-labelledby="title desc">
+  <title id="title">HUAWEI Mate 70 ideal-corner spatial anti-jam simulation</title>
+  <desc id="desc">Editable end-to-end signal-flow architecture separating the current ideal model from real antenna and propagation effects that are not modeled.</desc>
+  <defs>
+    <linearGradient id="header" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#E6F4EF"/><stop offset="0.55" stop-color="#EAF2FB"/><stop offset="1" stop-color="#F2EDFA"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-15%" width="120%" height="140%">
+      <feDropShadow dx="0" dy="7" stdDeviation="10" flood-color="#172832" flood-opacity="0.08"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#60747E"/>
+    </marker>
+    <style>
+      .h1{font:600 38px "Segoe UI","Microsoft YaHei",sans-serif;fill:#172832}.lead{font:400 17px "Segoe UI","Microsoft YaHei",sans-serif;fill:#53666F}
+      .eyebrow{font:700 13px "Segoe UI",sans-serif;letter-spacing:2.4px;fill:#2F806A}.phase{font:700 13px "Segoe UI",sans-serif;letter-spacing:1.7px;fill:#66777F}
+      .stage{font:600 20px "Segoe UI","Microsoft YaHei",sans-serif;fill:#172832}.node{font:600 15px "Segoe UI","Microsoft YaHei",sans-serif;fill:#172832}
+      .copy{font:400 13px "Segoe UI","Microsoft YaHei",sans-serif;fill:#52656E}.small{font:500 12px "Segoe UI","Microsoft YaHei",sans-serif;fill:#687A82}
+      .mono{font:500 12px "Cascadia Mono",Consolas,monospace;fill:#35505D}.white{font:500 13px "Segoe UI","Microsoft YaHei",sans-serif;fill:#DCE7E9}
+      .card{fill:#FFF;stroke:#D7DFDC;stroke-width:1.4}.neutral{fill:#F4F6F5;stroke:#CBD4D0;stroke-width:1.2}.target{fill:#E6F4EE;stroke:#64AA91;stroke-width:1.2}
+      .jam{fill:#FFF0EA;stroke:#DE927A;stroke-width:1.2}.digital{fill:#EAF2FB;stroke:#78A8CE;stroke-width:1.2}.estimate{fill:#F1ECFA;stroke:#A188C5;stroke-width:1.2}
+      .flow{fill:none;stroke:#60747E;stroke-width:2.3;marker-end:url(#arrow)}.control{fill:none;stroke:#8F75B4;stroke-width:1.6;stroke-dasharray:6 5;marker-end:url(#arrow)}
+      .tick{fill:#2F806A}.cross{fill:#CD6B51}
+    </style>
+  </defs>
+
+  <rect width="1920" height="1200" fill="#F7F8F5"/>
+  <rect width="1920" height="165" fill="url(#header)"/><path d="M0 165H1920" stroke="#D5DEDA"/>
+  <text x="64" y="46" class="eyebrow">PRECISION SIGNAL FLOW · IDEAL INTERFACE · REPRODUCIBLE BASELINE</text>
+  <text x="64" y="96" class="h1">HUAWEI Mate 70 ideal-corner spatial anti-jam simulation</text>
+  <text x="64" y="132" class="lead">2–4 selected phase centers · 3-D manifold · 0–3 CW interferers · RF-to-tracking evidence</text>
+  <rect x="1510" y="35" width="346" height="96" rx="14" fill="#172832"/>
+  <text x="1534" y="65" class="white">CURRENT DEFAULT</text><text x="1534" y="91" class="white">4 ideal corners · GPS L1 C/A · seed 42</text>
+  <text x="1534" y="115" class="white">160.9 × 75.9 × 7.8 mm outline</text>
+
+  <text x="64" y="207" class="phase">A · END-TO-END PATH</text>
+  <rect x="64" y="226" width="1792" height="446" rx="22" class="card" filter="url(#shadow)"/>
+  <rect x="64" y="226" width="1792" height="7" rx="4" fill="url(#header)"/>
+
+  <!-- 01 geometry and field -->
+  <text x="92" y="270" class="phase">01 · SPACE / ARRAY</text><text x="92" y="301" class="stage">Ideal phone interface</text>
+  <rect x="92" y="326" width="248" height="112" rx="13" class="neutral"/>
+  <rect x="114" y="343" width="70" height="80" rx="12" fill="#EEF2F0" stroke="#7B8D93" stroke-width="1.5"/>
+  <circle cx="121" cy="351" r="5" fill="#2F806A"/><circle cx="177" cy="351" r="5" fill="#2F806A"/><circle cx="121" cy="415" r="5" fill="#2F806A"/><circle cx="177" cy="415" r="5" fill="#2F806A"/>
+  <text x="200" y="356" class="node">2–4 selected corners</text><text x="200" y="380" class="copy">TL · TR · BL · BR</text><text x="200" y="404" class="small">ideal phase centers only</text>
+  <rect x="92" y="452" width="248" height="78" rx="12" class="target"/><circle cx="113" cy="475" r="6" fill="#2F806A"/>
+  <text x="128" y="480" class="node">GPS L1 C/A target</text><text x="113" y="508" class="copy">true + assumed azimuth / elevation</text>
+  <rect x="92" y="544" width="248" height="90" rx="12" class="jam"/><circle cx="113" cy="567" r="6" fill="#CD6B51"/>
+  <text x="128" y="572" class="node">0–3 CW interferers</text><text x="113" y="598" class="copy">direction · power · offset · phase</text><text x="113" y="619" class="small">independent start / stop gates</text>
+
+  <path d="M351 447H376" class="flow"/><text x="348" y="430" class="small">M × N</text>
+
+  <!-- 02 manifold -->
+  <text x="388" y="270" class="phase">02 · MANIFOLD</text><text x="388" y="301" class="stage">3-D spatial response</text>
+  <rect x="388" y="326" width="242" height="124" rx="13" class="target"/>
+  <text x="408" y="356" class="node">ElementPattern interface</text><text x="408" y="382" class="copy">current: isotropic gain 1+0j</text>
+  <path d="M408 404H610" stroke="#64AA91"/><text x="408" y="430" class="mono">gₘ(az, el, f)</text>
+  <rect x="388" y="466" width="242" height="108" rx="13" class="digital"/>
+  <text x="408" y="496" class="node">3-D array manifold</text><text x="408" y="522" class="mono">exp(−j2πf pₘ·u/c)</text><text x="408" y="550" class="copy">phone-frame azimuth / elevation</text>
+  <rect x="388" y="590" width="242" height="44" rx="10" class="neutral"/><text x="408" y="617" class="copy">static channel amplitude / phase</text>
+
+  <path d="M641 447H666" class="flow"/>
+
+  <!-- 03 RF DFE -->
+  <text x="678" y="270" class="phase">03 · RF → DFE</text><text x="678" y="301" class="stage">Coherent channel chain</text>
+  <rect x="678" y="326" width="248" height="88" rx="13" class="digital"/><text x="698" y="356" class="node">RF cascade + complex ADC</text>
+  <text x="698" y="382" class="copy">Friis NF · thermal noise · limiter</text><text x="698" y="402" class="small">16.368 Msps · 10-bit I/Q</text>
+  <path d="M802 414V439" class="flow"/>
+  <rect x="678" y="450" width="248" height="124" rx="13" class="digital"/><text x="698" y="480" class="node">Coherent DFE</text>
+  <text x="698" y="506" class="copy">common DDC · 129-tap FIR</text><text x="698" y="530" class="copy">delay align · ÷4 · requantize</text><text x="698" y="556" class="small">4.092 Msps · channels × samples</text>
+  <rect x="678" y="590" width="248" height="44" rx="10" class="neutral"/><text x="698" y="617" class="copy">2 / 3 / 4 channels preserved</text>
+
+  <path d="M937 447H962" class="flow"/>
+
+  <!-- 04 branches -->
+  <text x="974" y="270" class="phase">04 · SPATIAL</text><text x="974" y="301" class="stage">Three branch outputs</text>
+  <rect x="974" y="326" width="230" height="72" rx="12" class="neutral"/><text x="994" y="355" class="node">SINGLE</text><text x="994" y="379" class="copy">first active channel</text>
+  <rect x="974" y="414" width="230" height="72" rx="12" class="digital"/><text x="994" y="443" class="node">EGC</text><text x="994" y="467" class="copy">phase-align · equal gain</text>
+  <rect x="974" y="502" width="230" height="104" rx="12" class="estimate"/><text x="994" y="531" class="node">MVDR</text><text x="994" y="555" class="copy">sample covariance + loading</text><text x="994" y="579" class="mono">wᴴa₀ = 1 target constraint</text>
+  <text x="994" y="630" class="small">each output: 1 × samples</text>
+
+  <path d="M1215 447H1240" class="flow"/>
+
+  <!-- 05 receiver -->
+  <text x="1252" y="270" class="phase">05 · ACQ / TRK</text><text x="1252" y="301" class="stage">Receiver gate</text>
+  <rect x="1252" y="326" width="242" height="118" rx="13" class="neutral"/><text x="1272" y="356" class="node">ACQ</text>
+  <text x="1272" y="382" class="copy">Doppler × code-phase FFT</text><text x="1272" y="406" class="copy">peak / second-peak decision</text><text x="1272" y="428" class="small">same search for all branches</text>
+  <path d="M1373 444V469" class="flow"/>
+  <rect x="1252" y="480" width="242" height="126" rx="13" class="estimate"/><text x="1272" y="510" class="node">TRK · acquisition-gated</text>
+  <text x="1272" y="536" class="copy">Early / Prompt / Late DLL</text><text x="1272" y="560" class="copy">FLL-assisted PLL</text><text x="1272" y="584" class="small">carrier + code estimates · C/N₀</text>
+
+  <path d="M1505 447H1530" class="flow"/>
+
+  <!-- 06 evidence -->
+  <text x="1542" y="270" class="phase">06 · EVIDENCE</text><text x="1542" y="301" class="stage">Metrics + experiments</text>
+  <rect x="1542" y="326" width="286" height="104" rx="13" class="neutral"/><text x="1562" y="356" class="node">Per-branch receiver metrics</text>
+  <text x="1562" y="382" class="copy">capture · tracking · Doppler error</text><text x="1562" y="406" class="small">diagnostic plots and truth markers</text>
+  <rect x="1542" y="446" width="286" height="92" rx="13" class="digital"/><text x="1562" y="476" class="node">Fast spatial scans</text>
+  <text x="1562" y="502" class="copy">SINR · gains · power · covariance</text><text x="1562" y="524" class="small">11 corner subsets + parameter grids</text>
+  <rect x="1542" y="554" width="286" height="80" rx="13" class="estimate"/><text x="1562" y="584" class="node">Sequential Monte Carlo</text>
+  <text x="1562" y="610" class="copy">ordered seeds · strict JSON · no arrays</text>
+
+  <path d="M1410 480C1410 458 1452 457 1452 432" class="control"/><text x="1418" y="472" class="small">success only</text>
+
+  <!-- panels -->
+  <text x="64" y="721" class="phase">B · MODEL BOUNDARY</text>
+  <rect x="64" y="741" width="872" height="368" rx="22" class="card" filter="url(#shadow)"/><rect x="64" y="741" width="8" height="368" rx="4" fill="#2F806A"/>
+  <circle cx="105" cy="790" r="18" fill="#E6F4EE"/><path d="M97 790l6 6 12-15" fill="none" stroke="#2F806A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="136" y="798" class="stage">MODELED · deterministic interfaces</text>
+  <circle cx="106" cy="850" r="5" class="tick"/><text x="125" y="855" class="node">Geometry</text><text x="250" y="855" class="copy">Mate 70 outline + ideal selectable 3-D corner coordinates</text>
+  <circle cx="106" cy="897" r="5" class="tick"/><text x="125" y="902" class="node">Pattern</text><text x="250" y="902" class="copy">element-pattern protocol; isotropic implementation only</text>
+  <circle cx="106" cy="944" r="5" class="tick"/><text x="125" y="949" class="node">Signals</text><text x="250" y="949" class="copy">one GPS L1 C/A target + zero to three independently gated CWs</text>
+  <circle cx="106" cy="991" r="5" class="tick"/><text x="125" y="996" class="node">Chain</text><text x="250" y="996" class="copy">RF / DFE / SINGLE–EGC–MVDR / ACQ / gated TRK</text>
+  <circle cx="106" cy="1038" r="5" class="tick"/><text x="125" y="1043" class="node">Analysis</text><text x="250" y="1043" class="copy">spatial distributions, scans and sequential seeded runs</text>
+  <rect x="104" y="1067" width="792" height="24" rx="7" fill="#EDF6F2"/><text x="122" y="1084" class="small">“Ideal corner” and “isotropic” describe this first interface revision—not measured hardware.</text>
+
+  <rect x="984" y="741" width="872" height="368" rx="22" class="card" filter="url(#shadow)"/><rect x="1848" y="741" width="8" height="368" rx="4" fill="#CD6B51"/>
+  <circle cx="1025" cy="790" r="18" fill="#FFF0EA"/><path d="M1017 782l16 16m0-16l-16 16" fill="none" stroke="#CD6B51" stroke-width="3" stroke-linecap="round"/>
+  <text x="1056" y="798" class="stage">UNMODELED · no product-level claim</text>
+  <circle cx="1026" cy="850" r="5" class="cross"/><text x="1045" y="855" class="node">Hardware</text><text x="1170" y="855" class="copy">real antenna locations · measured patterns · coupling · polarization</text>
+  <circle cx="1026" cy="897" r="5" class="cross"/><text x="1045" y="902" class="node">Platform</text><text x="1170" y="902" class="copy">hand/body effects · chassis blockage and scattering</text>
+  <circle cx="1026" cy="944" r="5" class="cross"/><text x="1045" y="949" class="node">Channel</text><text x="1170" y="949" class="copy">multipath · NLOS · motion · dynamic DOA</text>
+  <circle cx="1026" cy="991" r="5" class="cross"/><text x="1045" y="996" class="node">Threats</text><text x="1170" y="996" class="copy">non-CW interference · online DOA and robust adaptation</text>
+  <circle cx="1026" cy="1038" r="5" class="cross"/><text x="1045" y="1043" class="node">GNSS</text><text x="1170" y="1043" class="copy">multiple satellites · nav data · bit/frame sync · PVT</text>
+  <rect x="1024" y="1067" width="792" height="24" rx="7" fill="#FFF4EF"/><text x="1042" y="1084" class="small">Replace interfaces with measured data before drawing conclusions about a real handset.</text>
+
+  <rect x="64" y="1137" width="1792" height="34" rx="8" fill="#172832"/>
+  <text x="86" y="1160" class="white">Scope: ideal phone-frame geometry · static CW directions · equivalent complex IF · known target steering · reproducible research chain</text>
+  <text x="1642" y="1160" class="white">Python · 2026-08-12</text>
+</svg>
