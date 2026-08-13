@@ -60,6 +60,7 @@ def test_ranking_uses_exact_stable_key_order():
     assert result.ranked_combinations == (
         ("TR", "BR"), ("BL", "BR"), ("TL", "TR"), ("TL", "BR"),
     )
+    assert [summary["rank"] for summary in result.summaries] == [1, 2, 3, 4]
 
 
 def test_p10_direction_ties_choose_elevation_then_azimuth_index():

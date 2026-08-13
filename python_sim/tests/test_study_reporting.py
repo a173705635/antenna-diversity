@@ -40,6 +40,10 @@ def test_study_plots_have_stable_keys_and_shared_heatmap_limits():
     heatmaps = figures["direction_heatmaps"].axes
     limits = {image.get_clim() for axis in heatmaps for image in axis.images}
     assert len(limits) == 1
+    axis = next(axis for axis in heatmaps if axis.images)
+    assert axis.lines[0].get_xdata()[0] == pytest.approx(33.0)
+    assert axis.lines[0].get_ydata()[0] == pytest.approx(22.0)
+    assert axis.patches[0].center == pytest.approx((33.0, 22.0))
 
 
 def test_report_contains_evidence_boundaries_and_reproduction_links(tmp_path: Path):
@@ -60,6 +64,12 @@ def test_report_contains_evidence_boundaries_and_reproduction_links(tmp_path: Pa
     assert "final_cn0_db_hz" in report
     assert "未建模" in report
     assert "配置哈希" in report
+    assert "two_jammer_separated" in report
+    assert "TL+BR" in report
+    assert "12.0" in report
+    assert "最佳组合" in report
+    assert "全方向" in report
+    assert "可分辨区域" in report
     json.dumps(summary, allow_nan=False)
 
 
@@ -82,6 +92,48 @@ def test_summary_rejects_missing_required_table():
 
     with pytest.raises(ValueError, match="missing required table: power_scan"):
         build_summary(tables, completed_manifest(), {})
+
+
+def test_reporting_rejects_missing_or_invalid_saved_metadata():
+    tables = completed_tables_for_reporting()
+    tables["baseline_rankings"] = ({**tables["baseline_rankings"][0], "rank": None},)
+    with pytest.raises(ValueError, match="rank"):
+        build_summary(tables, completed_manifest(), {})
+    with pytest.raises(ValueError, match="rank"):
+        plot_study_tables(tables)
+
+    tables = completed_tables_for_reporting()
+    tables["direction_scan"] = tuple({key: value for key, value in row.items() if key != "target_azimuth_deg"} for row in tables["direction_scan"])
+    with pytest.raises(ValueError, match="target_azimuth_deg"):
+        plot_study_tables(tables)
+
+
+def test_plots_do_not_fabricate_zero_bars_for_unavailable_science_values():
+    tables = completed_tables_for_reporting()
+    tables["baseline_rankings"] = ({**tables["baseline_rankings"][0], "p10_resolvable_db": None, "median_resolvable_db": float("nan")},)
+    tables["multi_jammer"] = ({**tables["multi_jammer"][0], "output_sinr_db": None},)
+    tables["full_chain_validation"] = tuple({**row, "analytic_output_sinr_db": None} for row in tables["full_chain_validation"])
+
+    figures = plot_study_tables(tables)
+
+    assert not figures["baseline_rankings"].axes[0].patches
+    assert not figures["multi_jammer_comparison"].axes[0].patches
+    assert not figures["full_chain_validation"].axes[1].patches
+
+
+def test_summary_names_rank_roles_and_validates_knee_evidence():
+    tables = completed_tables_for_reporting()
+    second = {**tables["baseline_rankings"][0], "active_antennas": ["TR", "BL"], "display_label": "MVDR(TR+BL)", "rank": 2}
+    third = {**tables["baseline_rankings"][0], "active_antennas": ["TL", "TR"], "display_label": "MVDR(TL+TR)", "rank": 3}
+    tables["baseline_rankings"] = (tables["baseline_rankings"][0], second, third)
+    summary = build_summary(tables, completed_manifest(), {"cases": [], "unselected_roles": {}})
+
+    assert summary["baseline"]["best"]["rank"] == 1
+    assert summary["baseline"]["typical"]["rank"] == 2
+    assert summary["baseline"]["worst"]["rank"] == 3
+    assert summary["knee"] == {"status": "unavailable", "reason": "not selected"}
+    with pytest.raises(ValueError, match="knee"):
+        build_summary(tables, completed_manifest(), {"cases": [{"selection_reasons": ["knee"]}], "unselected_roles": {"knee": "no crossing"}})
 
 
 def test_report_link_validation_requires_existing_confined_targets(tmp_path: Path):

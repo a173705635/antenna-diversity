@@ -49,6 +49,10 @@ def test_baseline_direction_rows_have_exact_quick_grid_size():
     assert len(result.tables["direction"]) == 12 * 7
     assert all(np.isfinite(row["output_sinr_db"]) for row in result.tables["direction"])
     assert all(np.isfinite(row["interferer_gain"]) for row in result.tables["direction"])
+    target = resolved.simulation.signal.true_direction
+    assert target is not None
+    assert all(row["target_azimuth_deg"] == target.azimuth_deg for row in result.tables["direction"])
+    assert all(row["target_elevation_deg"] == target.elevation_deg for row in result.tables["direction"])
 
 
 def test_baseline_orders_direction_axes_cases_and_never_runs_receiver(monkeypatch):

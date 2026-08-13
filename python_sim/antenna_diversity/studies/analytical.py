@@ -275,6 +275,9 @@ def _direction_rows(
     resolved: ResolvedStudyConfig, case: dict[str, object], reference_power_dbm: float
 ) -> Iterable[dict[str, object]]:
     simulation = _simulation_for_case(resolved, case)
+    target = resolved.simulation.signal.true_direction
+    if target is None:
+        raise ValueError("direction rows require a true target direction")
     scan = scan_interferer_directions(
         simulation,
         interferer_index=0,
@@ -298,6 +301,8 @@ def _direction_rows(
                 azimuth_index=azimuth_index,
                 elevation_deg=float(elevation_deg),
                 azimuth_deg=float(azimuth_deg),
+                target_azimuth_deg=float(target.azimuth_deg),
+                target_elevation_deg=float(target.elevation_deg),
             )
 
 

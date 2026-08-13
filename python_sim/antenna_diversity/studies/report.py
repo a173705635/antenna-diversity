@@ -26,7 +26,7 @@ def build_summary(
     for name in _REQUIRED_TABLES:
         if name not in tables:
             raise ValueError(f"missing required table: {name}")
-    rankings = sorted(tables["baseline_rankings"], key=lambda row: (int(row.get("rank", 10**9)), _combo(row)))
+    rankings = _ranked_rows(tables["baseline_rankings"])
     by_level: dict[str, list[float]] = defaultdict(list)
     for row in tables["combined_errors"]:
         value = _finite(row.get("output_sinr_db", row.get("mvdr_output_sinr_db")))
@@ -47,10 +47,12 @@ def build_summary(
         values = [_finite(row.get("cn0_db_hz")) for row in tables["full_chain_cn0"] if str(row.get("mode", "")) == mode]
         cn0_by_mode[mode] = _statistics(values)
     ranked = [_ranking_snapshot(row) for row in rankings]
+    roles = {"best": ranked[0] if ranked else None, "typical": ranked[(len(ranked) - 1) // 2] if ranked else None, "worst": ranked[-1] if ranked else None}
+    _validate_selection_roles(roles, selection)
     output: dict[str, object] = {
         "study": {"name": manifest.get("name"), "status": manifest.get("status"), "git_sha": manifest.get("git_sha"), "config_sha256": manifest.get("config_sha256", manifest.get("configuration_sha256"))},
-        "baseline": {"rankings": ranked, "winning": ranked[0] if ranked else None, "median": ranked[(len(ranked) - 1) // 2] if ranked else None, "losing": ranked[-1] if ranked else None},
-        "knee": {"status": "unavailable" if dict(selection.get("unselected_roles", {})).get("knee") else "selected", "reason": dict(selection.get("unselected_roles", {})).get("knee")},
+        "baseline": {"rankings": ranked, **roles},
+        "knee": _knee_summary(selection),
         "combined_errors": {level: _statistics(values) for level, values in sorted(by_level.items())},
         "multi_jammer": [_multi_snapshot(row) for row in sorted(tables["multi_jammer"], key=lambda row: (str(row.get("template", "")), _combo(row), str(row.get("mode", ""))))],
         "full_chain": full_chain, "cn0_curves": cn0_by_mode,
@@ -79,7 +81,7 @@ def render_report(
         "", "## 功率", "", _link_line("功率曲线", figures.get("power_curves")),
         "", "## 鲁棒性", "", _knee_text(dict(summary.get("knee", {}))), _link_line("鲁棒性曲线", figures.get("robustness_curves")),
         "", "## 组合误差", "", _combined_text(dict(summary.get("combined_errors", {}))), _link_line("组合误差分布", figures.get("combined_error_distributions")),
-        "", "## 多干扰压力", "", _link_line("多干扰比较", figures.get("multi_jammer_comparison")),
+        "", "## 多干扰压力", "", _multi_text(summary.get("multi_jammer", ())), _link_line("多干扰比较", figures.get("multi_jammer_comparison")),
         "", "## RF 到跟踪验证", "", "完整链路字段保留 `analytic_output_sinr_db` 与 `final_cn0_db_hz`；捕获或跟踪失败是有效结果，并以不可用原因呈现。", _full_chain_text(dict(summary.get("full_chain", {}))), _link_line("完整链路验证", figures.get("full_chain_validation")), _link_line("C/N₀ 验证", figures.get("cn0_validation")),
         "", "## 结论与限制", "", "模型包括理想角点子阵、窄带各向同性流形、静态 CW 干扰、SINGLE/EGC/MVDR、解析空间指标和 RF/ADC/DFE/捕获/跟踪/C/N₀ 链路。", "", "### 未建模", "", "- 真实 Mate 70 天线位置、方向图、极化、互耦和人体握持效应。", "- 多径、NLOS、动态到达方向和宽带/调制干扰。", "- 多颗卫星、导航电文、定位解算与 PVT，以及实时权值更新和硬件实现限制。",
         "", "## 复现", "", "以下链接指向本研究目录中的固定工件：",
@@ -130,7 +132,7 @@ def _rate(rows: Sequence[Mapping[str, object]], field: str) -> float | None:
 
 def _ranking_snapshot(row: Mapping[str, object]) -> dict[str, object]:
     return {
-        "combination": _combo(row), "label": row.get("display_label"), "rank": row.get("rank"),
+        "combination": _combo(row), "label": row.get("display_label"), "rank": row["rank"],
         "p10_all_db": _finite(row.get("p10_all_db")), "median_all_db": _finite(row.get("median_all_db")),
         "minimum_all_db": _finite(row.get("minimum_all_db")),
         "p10_resolvable_db": _finite(row.get("p10_resolvable_db")),
@@ -181,8 +183,21 @@ def _link_line(label: str, path: str | None) -> str:
 
 
 def _ranking_text(baseline: Mapping[str, object]) -> str:
-    winner = baseline.get("winning")
-    return "无基线排名行。" if not isinstance(winner, Mapping) else f"首选组合：`{winner.get('combination')}`；可分辨区域 p10：`{winner.get('p10_resolvable_db')}` dB；中位数：`{winner.get('median_resolvable_db')}` dB；全方向最差值：`{winner.get('minimum_all_db')}` dB。"
+    best = baseline.get("best")
+    if not isinstance(best, Mapping):
+        return "无基线排名行。"
+    fragments = []
+    for label, key in (("最佳组合", "best"), ("典型组合", "typical"), ("最差组合", "worst")):
+        snapshot = baseline.get(key)
+        if not isinstance(snapshot, Mapping):
+            continue
+        fragments.append(
+            f"{label}：`{snapshot.get('combination')}`；全方向 p10/中位数/最小值："
+            f"`{snapshot.get('p10_all_db')}`/`{snapshot.get('median_all_db')}`/`{snapshot.get('minimum_all_db')}` dB；"
+            f"可分辨区域 p10/中位数/最小值：`{snapshot.get('p10_resolvable_db')}`/"
+            f"`{snapshot.get('median_resolvable_db')}`/`{snapshot.get('minimum_resolvable_db')}` dB。"
+        )
+    return " ".join(fragments)
 
 
 def _knee_text(knee: Mapping[str, object]) -> str:
@@ -199,3 +214,73 @@ def _full_chain_text(full_chain: Mapping[str, object]) -> str:
     if not full_chain:
         return "没有完整链路汇总行。"
     return "；".join(f"{mode.upper()}：捕获率 {dict(stats).get('acquisition_rate')}，跟踪率 {dict(stats).get('tracking_rate')}" for mode, stats in full_chain.items() if isinstance(stats, Mapping)) + "。"
+
+
+def _multi_text(outcomes: object) -> str:
+    if not isinstance(outcomes, Sequence) or isinstance(outcomes, (str, bytes)) or not outcomes:
+        return "没有多干扰结果。"
+    evidence = []
+    for raw in outcomes:
+        if not isinstance(raw, Mapping):
+            continue
+        template, combination, mode = raw.get("template"), raw.get("combination"), raw.get("mode")
+        sinr, gain = raw.get("output_sinr_db"), raw.get("worst_interferer_gain")
+        if sinr is None or gain is None:
+            evidence.append(f"{template}/{combination}/{mode}：不可用。")
+        else:
+            evidence.append(f"{template}/{combination}/{mode}：输出 SINR {sinr} dB，最差干扰增益 {gain}。")
+    return " ".join(evidence) or "没有多干扰结果。"
+
+
+def _ranked_rows(rows: Sequence[Mapping[str, object]]) -> list[Mapping[str, object]]:
+    ranks: list[int] = []
+    for row in rows:
+        rank = row.get("rank")
+        if not isinstance(rank, int) or isinstance(rank, bool) or rank <= 0:
+            raise ValueError("baseline ranking requires a positive integer rank")
+        ranks.append(rank)
+    if len(set(ranks)) != len(ranks):
+        raise ValueError("baseline ranking ranks must be unique")
+    return sorted(rows, key=lambda row: int(row["rank"]))
+
+
+def _selection_reasons(selection: Mapping[str, object]) -> set[str]:
+    cases = selection.get("cases", ())
+    if not isinstance(cases, Sequence) or isinstance(cases, (str, bytes)):
+        raise ValueError("selection cases must be a sequence")
+    reasons: set[str] = set()
+    for case in cases:
+        if not isinstance(case, Mapping):
+            raise ValueError("selection case must be a mapping")
+        raw = case.get("selection_reasons", case.get("role", ()))
+        if isinstance(raw, str):
+            reasons.add(raw)
+        elif isinstance(raw, Sequence):
+            reasons.update(str(value) for value in raw)
+    return reasons
+
+
+def _validate_selection_roles(roles: Mapping[str, object], selection: Mapping[str, object]) -> None:
+    reasons = _selection_reasons(selection)
+    selected_combinations = {
+        _combo(case) for case in selection.get("cases", ())
+        if isinstance(case, Mapping) and "active_antennas" in case
+    }
+    for role, snapshot in roles.items():
+        if role not in reasons or not isinstance(snapshot, Mapping) or not selected_combinations:
+            continue
+        if str(snapshot["combination"]) not in selected_combinations:
+            raise ValueError(f"selection {role} conflicts with ranked baseline")
+
+
+def _knee_summary(selection: Mapping[str, object]) -> dict[str, object]:
+    reasons = _selection_reasons(selection)
+    raw_unselected = selection.get("unselected_roles", {})
+    if not isinstance(raw_unselected, Mapping):
+        raise ValueError("selection unselected_roles must be a mapping")
+    unavailable = raw_unselected.get("knee")
+    if "knee" in reasons and unavailable is not None:
+        raise ValueError("knee selection conflicts with unavailable reason")
+    if "knee" in reasons:
+        return {"status": "selected", "reason": None}
+    return {"status": "unavailable", "reason": str(unavailable) if unavailable is not None else "not selected"}

@@ -88,6 +88,8 @@ def summarize_and_rank(
         -float(summary["white_noise_gain"]), -float(summary["maximum_baseline_m"]),
         str(summary["combination_name"]),
     ))
+    for rank, summary in enumerate(summaries, start=1):
+        summary["rank"] = rank
     return RankingResult(
         tuple(strict_snapshot(summary) for summary in summaries),  # type: ignore[arg-type]
         tuple(tuple(summary["active_antennas"]) for summary in summaries),  # type: ignore[arg-type]

@@ -87,10 +87,11 @@ def _empty_axis(axis: Any, message: str) -> None:
 
 def _baseline(rows: Sequence[Mapping[str, object]]) -> Figure:
     figure, axis = plt.subplots(figsize=(8, 4.5), layout="constrained")
-    ordered = sorted(rows, key=lambda row: (int(row.get("rank", 10**9)), _combination(row), str(row.get("mode", ""))))
-    labels = [str(row.get("display_label", _combination(row))) for row in ordered]
-    p10 = [_finite(row.get("p10_resolvable_db")) or 0.0 for row in ordered]
-    median = [_finite(row.get("median_resolvable_db")) or 0.0 for row in ordered]
+    ordered = _ranked_rows(rows)
+    finite_rows = [row for row in ordered if _finite(row.get("p10_resolvable_db")) is not None and _finite(row.get("median_resolvable_db")) is not None]
+    labels = [str(row.get("display_label", _combination(row))) for row in finite_rows]
+    p10 = [_finite(row.get("p10_resolvable_db")) for row in finite_rows]
+    median = [_finite(row.get("median_resolvable_db")) for row in finite_rows]
     if labels:
         y = np.arange(len(labels))
         axis.barh(y - 0.18, p10, 0.35, label="Resolvable p10")
@@ -105,6 +106,7 @@ def _baseline(rows: Sequence[Mapping[str, object]]) -> Figure:
 
 
 def _directions(rows: Sequence[Mapping[str, object]]) -> Figure:
+    _validate_direction_targets(rows)
     grouped = _groups(rows, "combination", "mode")
     panels = list(grouped.items()) or [((), [])]
     figure, axes = plt.subplots(1, len(panels), figsize=(5 * len(panels), 4.5), squeeze=False, layout="constrained")
@@ -122,8 +124,8 @@ def _directions(rows: Sequence[Mapping[str, object]]) -> Figure:
             axis.imshow(data, origin="lower", aspect="auto", vmin=lo, vmax=hi,
                         extent=(min(azimuths), max(azimuths), min(elevations), max(elevations)))
             reference = group[0]
-            target_az = _finite(reference.get("target_azimuth_deg")) or 0.0
-            target_el = _finite(reference.get("target_elevation_deg")) or 0.0
+            target_az = _required_finite(reference, "target_azimuth_deg")
+            target_el = _required_finite(reference, "target_elevation_deg")
             axis.plot(target_az, target_el, "w*", markeredgecolor="black", label="Target")
             boundary = plt.Circle((target_az, target_el), 15.0, fill=False, color="white", linestyle="--", label="15° boundary")
             axis.add_patch(boundary)
@@ -188,9 +190,9 @@ def _combined(rows: Sequence[Mapping[str, object]]) -> Figure:
 
 def _multi_jammer(rows: Sequence[Mapping[str, object]]) -> Figure:
     figure, axis = plt.subplots(figsize=(7, 4.5), layout="constrained")
-    ordered = sorted(rows, key=lambda row: (str(row.get("template", "")), _combination(row), str(row.get("mode", ""))))
+    ordered = [row for row in sorted(rows, key=lambda row: (str(row.get("template", "")), _combination(row), str(row.get("mode", "")))) if _finite(row.get("output_sinr_db")) is not None]
     labels = [f"{row.get('template', '')}\n{_combination(row)}" for row in ordered]
-    values = [_finite(row.get("output_sinr_db")) or 0.0 for row in ordered]
+    values = [_finite(row.get("output_sinr_db")) for row in ordered]
     if labels:
         axis.bar(np.arange(len(labels)), values)
         axis.set_xticks(np.arange(len(labels)), labels, rotation=20, ha="right")
@@ -211,13 +213,19 @@ def _full_chain(rows: Sequence[Mapping[str, object]]) -> Figure:
         axes[0].bar(x + 0.2, tracking, 0.4, label="Tracking")
         axes[0].set_xticks(x, [mode.upper() for mode in modes])
         axes[0].legend()
-        sinr = []
+        sinr, scalar_modes = [], []
         for mode in modes:
             values = [_finite(row.get("analytic_output_sinr_db")) for row in rows if row.get("mode") == mode]
             finite = [value for value in values if value is not None]
-            sinr.append(float(np.mean(finite)) if finite else 0.0)
-        axes[1].bar(x, sinr)
-        axes[1].set_xticks(x, [mode.upper() for mode in modes])
+            if finite:
+                scalar_modes.append(mode)
+                sinr.append(float(np.mean(finite)))
+        if sinr:
+            scalar_x = np.arange(len(scalar_modes))
+            axes[1].bar(scalar_x, sinr)
+            axes[1].set_xticks(scalar_x, [mode.upper() for mode in scalar_modes])
+        else:
+            _empty_axis(axes[1], "No finite analytic SINR rows")
     else:
         _empty_axis(axes[0], "No full-chain rows")
         _empty_axis(axes[1], "No scalar validation rows")
@@ -240,3 +248,28 @@ def _cn0(rows: Sequence[Mapping[str, object]], validation_rows: Sequence[Mapping
         _empty_axis(axis, "C/N₀ unavailable: " + (", ".join(unavailable) or "no finite epoch rows"))
     axis.set(xlabel="Time (ms)", ylabel="C/N₀ (dB-Hz)", title="C/N₀ validation")
     return figure
+
+
+def _ranked_rows(rows: Sequence[Mapping[str, object]]) -> list[Mapping[str, object]]:
+    ranks: list[int] = []
+    for row in rows:
+        rank = row.get("rank")
+        if not isinstance(rank, int) or isinstance(rank, bool) or rank <= 0:
+            raise ValueError("baseline ranking requires a positive integer rank")
+        ranks.append(rank)
+    if len(set(ranks)) != len(ranks):
+        raise ValueError("baseline ranking ranks must be unique")
+    return sorted(rows, key=lambda row: int(row["rank"]))
+
+
+def _required_finite(row: Mapping[str, object], field: str) -> float:
+    value = _finite(row.get(field))
+    if value is None:
+        raise ValueError(f"direction row requires finite {field}")
+    return value
+
+
+def _validate_direction_targets(rows: Sequence[Mapping[str, object]]) -> None:
+    for row in rows:
+        _required_finite(row, "target_azimuth_deg")
+        _required_finite(row, "target_elevation_deg")
