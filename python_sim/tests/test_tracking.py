@@ -1,9 +1,38 @@
 import numpy as np
+import pytest
 
 from antenna_diversity.config import default_config
 from antenna_diversity.gnss.ca_code import ca_code
 from antenna_diversity.receiver.acquisition import acquire
-from antenna_diversity.receiver.tracking import track
+from antenna_diversity.receiver.tracking import estimate_cn0_db_hz, track
+
+
+def test_prompt_window_cn0_matches_coherent_to_noise_power_ratio():
+    cn0_db_hz = estimate_cn0_db_hz(
+        np.array([1.0 + 0.0j, 3.0 + 0.0j]),
+        coherent_interval_s=1e-3,
+    )
+
+    assert cn0_db_hz == pytest.approx(10.0 * np.log10(4000.0))
+
+
+@pytest.mark.parametrize(
+    "prompt_window",
+    [np.array([], dtype=complex), np.array([1.0 + 0.0j])],
+)
+def test_prompt_window_cn0_is_unavailable_before_two_samples(prompt_window):
+    assert np.isnan(estimate_cn0_db_hz(prompt_window, 1e-3))
+
+
+@pytest.mark.parametrize("coherent_interval_s", [0.0, -1e-3, np.nan, np.inf])
+def test_prompt_window_cn0_rejects_invalid_coherent_interval(coherent_interval_s):
+    with pytest.raises(ValueError, match="coherent_interval_s"):
+        estimate_cn0_db_hz(np.ones(2, dtype=complex), coherent_interval_s)
+
+
+def test_prompt_window_cn0_rejects_nonvector_prompt_samples():
+    with pytest.raises(ValueError, match="one-dimensional"):
+        estimate_cn0_db_hz(np.ones((2, 1), dtype=complex), 1e-3)
 
 
 def make_tracking_signal(
