@@ -3,6 +3,7 @@ import matplotlib
 matplotlib.use("Agg", force=True)
 
 import matplotlib.pyplot as plt
+import numpy as np
 import os
 from pathlib import Path
 import subprocess
@@ -14,6 +15,7 @@ from antenna_diversity.analysis.plotting import (
     plot_acquisition,
     plot_array_response,
     plot_combined_spectra,
+    plot_cn0,
     plot_results,
     plot_spectra,
     save_figures,
@@ -48,6 +50,56 @@ def test_acquisition_plot_contains_maps_slices_and_peak_markers(tmp_path):
     assert paths["acquisition_search"].is_file()
     assert paths["acquisition_search"].stat().st_size > 0
     plt.close(figure)
+
+
+def test_cn0_plot_shows_tracked_modes_and_failed_acquisition_status():
+    cfg = default_config()
+    cfg.plot.enable = False
+    results = run_end_to_end(cfg)
+
+    figure = plot_cn0(results)
+    axis = figure.axes[0]
+
+    assert [line.get_label() for line in axis.lines] == ["EGC", "MVDR"]
+    assert axis.get_xlabel() == "Tracking time (ms)"
+    assert axis.get_ylabel() == "Estimated C/N₀ (dB-Hz)"
+    assert axis.get_title() == "Tracking C/N₀ comparison"
+    assert any(
+        "SINGLE: acquisition failed" in text.get_text()
+        for text in axis.texts
+    )
+    for line in axis.lines:
+        assert np.all(np.isfinite(line.get_ydata()))
+
+
+def test_cn0_plot_returns_annotated_figure_when_no_branch_tracks():
+    cfg = default_config()
+    cfg.plot.enable = False
+    results = run_end_to_end(cfg)
+    for branch in results.branches.values():
+        branch.acquisition["success"] = False
+        branch.tracking = {
+            "success": False,
+            "status": "acquisition_failed",
+            "prompt": np.array([], dtype=complex),
+        }
+
+    figure = plot_cn0(results)
+    axis = figure.axes[0]
+
+    assert not axis.lines
+    assert len(axis.texts) == 3
+    assert all("C/N₀ unavailable" in text.get_text() for text in axis.texts)
+
+
+def test_cn0_plot_rejects_mismatched_tracking_arrays():
+    cfg = default_config()
+    cfg.plot.enable = False
+    results = run_end_to_end(cfg)
+    results.branches["mvdr"].tracking["epoch_start_samples"] = np.array([0])
+
+    with pytest.raises(ValueError, match="mvdr.*length"):
+        plot_cn0(results)
 
 
 def test_plot_results_produces_five_named_figures(tmp_path):
