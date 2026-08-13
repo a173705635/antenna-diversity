@@ -169,9 +169,28 @@ def _study_updates(
         elif name == "output_dir":
             converted[name] = Path(value)  # type: ignore[arg-type]
         elif name == "error_levels":
-            converted[name] = tuple(ErrorLevel(**item) if isinstance(item, Mapping) else item for item in value)  # type: ignore[arg-type]
+            if not isinstance(value, (list, tuple)):
+                raise ValueError("study.error_levels must be a list")
+            levels = []
+            for item in value:
+                if not isinstance(item, Mapping):
+                    raise ValueError("study.error_levels entries must be objects")
+                _reject_unknown(item, {field.name for field in fields(ErrorLevel)}, "study.error_levels")
+                levels.append(ErrorLevel(**item))
+            converted[name] = tuple(levels)
         elif name == "multi_jammer_templates":
-            converted[name] = tuple(InterfererTemplate(item["name"], tuple(_interferer(entry) for entry in item["interferers"])) if isinstance(item, Mapping) else item for item in value)  # type: ignore[arg-type]
+            if not isinstance(value, (list, tuple)):
+                raise ValueError("study.multi_jammer_templates must be a list")
+            templates = []
+            for item in value:
+                if not isinstance(item, Mapping):
+                    raise ValueError("study.multi_jammer_templates entries must be objects")
+                _reject_unknown(item, {field.name for field in fields(InterfererTemplate)}, "study.multi_jammer_templates")
+                interferers = item.get("interferers")
+                if not isinstance(interferers, (list, tuple)):
+                    raise ValueError("study.multi_jammer_templates.interferers must be a list")
+                templates.append(InterfererTemplate(str(item.get("name", "")), tuple(_interferer(entry) for entry in interferers)))
+            converted[name] = tuple(templates)
         else:
             converted[name] = copy.deepcopy(value)
     return replace(study, **converted)

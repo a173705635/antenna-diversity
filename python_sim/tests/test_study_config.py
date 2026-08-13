@@ -132,3 +132,47 @@ def test_nested_simulation_dataclass_keys_are_validated(tmp_path: Path):
 
     with pytest.raises(ValueError, match="unknown.*noise_figre_db"):
         resolve_study_config(path)
+
+
+@pytest.mark.parametrize(
+    "study_update",
+    [
+        {"error_levels": [{"name": "light", "direction_sigma_deg": 1.0, "position_sigma_m": .001, "amplitude_sigma_db": .25, "phase_sigma_deg": 3.0, "phase_sigme_deg": 4.0}]},
+        {"multi_jammer_templates": [{"name": "custom", "interferers": [], "unexpected": True}]},
+        {"error_levels": {"name": "not-a-list"}},
+        {"multi_jammer_templates": [{"name": "custom", "interferers": "not-a-list"}]},
+    ],
+)
+def test_nested_study_records_reject_unknown_keys_and_invalid_shapes(tmp_path: Path, study_update):
+    path = tmp_path / "study.json"
+    path.write_text(json.dumps({"study": study_update}), encoding="utf-8")
+
+    with pytest.raises(ValueError):
+        resolve_study_config(path)
+
+
+def test_resolved_state_cannot_be_mutated_through_public_arrays_cases_or_simulation():
+    resolved = resolve_study_config(
+        preset="quick",
+        cli_overrides={"manual_cases": [{"label": "fixed", "nested": [1, 2]}]},
+    )
+    before = resolved.to_dict()
+
+    with pytest.raises(ValueError):
+        resolved.study.azimuths_deg[0] = 123.0
+    with pytest.raises(TypeError):
+        resolved.study.manual_cases[0]["label"] = "changed"
+    with pytest.raises(AttributeError):
+        resolved.study.manual_cases[0]["nested"].append(3)
+
+    simulation_copy = resolved.simulation
+    simulation_copy.signal.carrier_hz = 1.2e9
+
+    assert resolved.to_dict() == before
+    assert resolved.simulation.signal.carrier_hz != 1.2e9
+
+
+@pytest.mark.parametrize("single_antennas", [(), ("TL", "TL"), ("TL", "XX")])
+def test_single_antennas_must_be_a_nonempty_unique_corner_subset(single_antennas):
+    with pytest.raises(ValueError, match="single_antennas"):
+        resolve_study_config(preset="quick", cli_overrides={"single_antennas": single_antennas})

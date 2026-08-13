@@ -14,6 +14,36 @@ import numpy as np
 from antenna_diversity.config import CWInterferer, SimulationConfig
 
 
+class _FrozenDict(dict[str, object]):
+    """A recursively frozen JSON-like mapping that remains deepcopy-safe."""
+
+    def _immutable(self, *args: object, **kwargs: object) -> None:
+        raise TypeError("resolved study mappings are immutable")
+
+    __setitem__ = _immutable
+    __delitem__ = _immutable
+    clear = _immutable
+    pop = _immutable
+    popitem = _immutable
+    setdefault = _immutable
+    update = _immutable
+
+    def __deepcopy__(self, memo: dict[int, object]) -> "_FrozenDict":
+        return self
+
+
+def _freeze(value: object) -> object:
+    if isinstance(value, dict):
+        frozen = _FrozenDict()
+        dict.update(frozen, {key: _freeze(item) for key, item in value.items()})
+        return frozen
+    if isinstance(value, list):
+        return tuple(_freeze(item) for item in value)
+    if isinstance(value, tuple):
+        return tuple(_freeze(item) for item in value)
+    return copy.deepcopy(value)
+
+
 def strict_snapshot(value: object) -> object:
     """Convert supported values to a detached, strict-JSON-compatible snapshot."""
 
@@ -88,8 +118,10 @@ class StudyConfig:
             "azimuths_deg", "elevations_deg", "powers_dbm", "direction_errors_deg",
             "position_errors_m", "amplitude_errors_db", "phase_errors_deg", "loading_factors",
         ):
-            object.__setattr__(self, name, np.array(getattr(self, name), copy=True))
-        object.__setattr__(self, "manual_cases", copy.deepcopy(tuple(self.manual_cases)))
+            array = np.array(getattr(self, name), copy=True)
+            array.setflags(write=False)
+            object.__setattr__(self, name, array)
+        object.__setattr__(self, "manual_cases", tuple(_freeze(case) for case in self.manual_cases))
 
 
 def validate_study_config(study: StudyConfig) -> None:
@@ -108,8 +140,20 @@ def validate_study_config(study: StudyConfig) -> None:
     if not study.combinations or len(set(study.combinations)) != len(study.combinations):
         raise ValueError("study.combinations must be nonempty and unique")
     allowed_antennas = {"TL", "TR", "BL", "BR"}
-    if any(not 2 <= len(combo) <= 4 or len(set(combo)) != len(combo) or set(combo) - allowed_antennas for combo in study.combinations):
+    if any(
+        not isinstance(combo, tuple)
+        or not 2 <= len(combo) <= 4
+        or len(set(combo)) != len(combo)
+        or set(combo) - allowed_antennas
+        for combo in study.combinations
+    ):
         raise ValueError("study.combinations must be unique two-to-four antenna subsets")
+    if (
+        not study.single_antennas
+        or len(set(study.single_antennas)) != len(study.single_antennas)
+        or set(study.single_antennas) - allowed_antennas
+    ):
+        raise ValueError("study.single_antennas must be a nonempty unique corner subset")
     allowed_modes = {"single", "egc", "mvdr"}
     if not study.spatial_modes or set(study.spatial_modes) - allowed_modes:
         raise ValueError("study.spatial_modes contains an unknown mode")
@@ -145,8 +189,19 @@ class ResolvedStudyConfig:
     simulation: SimulationConfig
     config_sha256: str
 
+    def __getattribute__(self, name: str) -> object:
+        """Return a working copy of mutable simulation configuration to callers."""
+
+        if name == "simulation":
+            return copy.deepcopy(object.__getattribute__(self, name))
+        return object.__getattribute__(self, name)
+
     def to_dict(self) -> dict[str, object]:
-        return strict_snapshot({"study": self.study, "simulation": self.simulation, "config_sha256": self.config_sha256})  # type: ignore[return-value]
+        return strict_snapshot({
+            "study": self.study,
+            "simulation": object.__getattribute__(self, "simulation"),
+            "config_sha256": self.config_sha256,
+        })  # type: ignore[return-value]
 
     def scientific_dict(self) -> dict[str, object]:
         snapshot = self.to_dict()
@@ -167,7 +222,10 @@ class ResolvedStudyConfig:
 
     @classmethod
     def from_parts(cls, study: StudyConfig, simulation: SimulationConfig) -> "ResolvedStudyConfig":
-        study_copy = copy.deepcopy(study)
+        study_copy = StudyConfig(**{
+            field.name: copy.deepcopy(getattr(study, field.name))
+            for field in fields(StudyConfig)
+        })
         simulation_copy = copy.deepcopy(simulation)
         validate_study_config(study_copy)
         simulation_copy.validate()
