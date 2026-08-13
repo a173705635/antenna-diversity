@@ -25,6 +25,8 @@ from .models import ResolvedStudyConfig
 MANIFEST_SCHEMA_VERSION = 1
 _MANIFEST_NAME = "manifest.json"
 _CONFIG_NAME = "resolved-config.json"
+_MANIFEST_STATUSES = {"running", "completed", "failed"}
+_STAGE_STATUSES = {"pending", "completed", "failed"}
 
 
 def _utc_now() -> str:
@@ -136,6 +138,10 @@ def _record_count(payload: object) -> int:
     return 1
 
 
+def _is_int(value: object) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
 class StudyStore:
     """Own a study directory, its immutable configuration, and stage checkpoints."""
 
@@ -153,9 +159,10 @@ class StudyStore:
 
     @property
     def completed_stages(self) -> tuple[str, ...]:
-        stages = self.manifest["stages"]
-        assert isinstance(stages, dict)
-        return tuple(name for name in self.STAGE_NAMES if stages[name]["status"] == "completed")  # type: ignore[index]
+        return tuple(
+            name for name in self.STAGE_NAMES
+            if self._stage_record(name).get("status") == "completed"
+        )
 
     @classmethod
     def create(cls, resolved: ResolvedStudyConfig) -> "StudyStore":
@@ -191,12 +198,11 @@ class StudyStore:
             loaded = _strict_json_load(manifest_path.read_bytes())
         except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as error:
             raise ValueError(f"invalid study manifest: {error}") from error
-        if not isinstance(loaded, dict) or loaded.get("schema_version") != MANIFEST_SCHEMA_VERSION:
-            raise ValueError("unsupported manifest schema")
-        if loaded.get("configuration_sha256") != resolved.config_sha256:
+        if not isinstance(loaded, dict):
+            raise ValueError("invalid study manifest schema")
+        cls._validate_manifest(loaded, resolved)
+        if loaded["configuration_sha256"] != resolved.config_sha256:
             raise ValueError("configuration hash does not match existing study")
-        if not isinstance(loaded.get("stages"), dict):
-            raise ValueError("invalid study manifest stages")
         store = cls(resolved, study_dir, loaded)
         repaired = False
         for name in cls.STAGE_NAMES:
@@ -204,10 +210,68 @@ class StudyStore:
             if record.get("status") == "completed" and not store._checkpoint_valid(name, record):
                 record.update(_initial_stage())
                 repaired = True
-        if repaired or store.manifest.get("status") != "completed":
+        all_valid = all(
+            store._stage_record(name).get("status") == "completed"
+            and store._checkpoint_valid(name, store._stage_record(name))
+            for name in cls.STAGE_NAMES
+        )
+        if repaired or store.manifest.get("status") != "completed" or not all_valid:
             store.manifest["status"] = "running"
         store._save_manifest()
         return store
+
+    @classmethod
+    def _validate_manifest(cls, manifest: Mapping[str, object], resolved: ResolvedStudyConfig) -> None:
+        required = {
+            "schema_version", "name", "status", "created_at_utc", "updated_at_utc",
+            "configuration_sha256", "git_sha", "git_status", "environment", "artifacts", "stages",
+        }
+        if set(manifest) != required:
+            raise ValueError("invalid study manifest schema")
+        if manifest["schema_version"] != MANIFEST_SCHEMA_VERSION:
+            raise ValueError("unsupported manifest schema")
+        if manifest["name"] != resolved.study.name or not isinstance(manifest["name"], str):
+            raise ValueError("invalid study manifest name")
+        if manifest["status"] not in _MANIFEST_STATUSES:
+            raise ValueError("invalid study manifest status")
+        if not all(isinstance(manifest[key], str) for key in ("created_at_utc", "updated_at_utc", "configuration_sha256")):
+            raise ValueError("invalid study manifest metadata")
+        if manifest["git_sha"] is not None and not isinstance(manifest["git_sha"], str):
+            raise ValueError("invalid study manifest Git metadata")
+        if manifest["git_status"] not in {"available", "git_unavailable"}:
+            raise ValueError("invalid study manifest Git metadata")
+        if not isinstance(manifest["environment"], dict) or not all(
+            isinstance(key, str) and isinstance(value, str) for key, value in manifest["environment"].items()
+        ):
+            raise ValueError("invalid study manifest environment")
+        artifacts = manifest["artifacts"]
+        if not isinstance(artifacts, dict) or not all(
+            isinstance(key, str) and isinstance(value, str) for key, value in artifacts.items()
+        ):
+            raise ValueError("invalid study manifest artifacts")
+        stages = manifest["stages"]
+        if not isinstance(stages, dict) or set(stages) != set(cls.STAGE_NAMES):
+            raise ValueError("invalid study manifest stages")
+        for name in cls.STAGE_NAMES:
+            cls._validate_stage_record(name, stages[name])
+
+    @staticmethod
+    def _validate_stage_record(name: str, record: object) -> None:
+        required = {"status", "record_count", "checkpoint_sha256", "checkpoint_path", "error"}
+        if not isinstance(record, dict) or set(record) != required:
+            raise ValueError(f"invalid study manifest stage: {name}")
+        if record["status"] not in _STAGE_STATUSES or not _is_int(record["record_count"]) or record["record_count"] < 0:
+            raise ValueError(f"invalid study manifest stage: {name}")
+        for key in ("checkpoint_sha256", "checkpoint_path"):
+            if record[key] is not None and not isinstance(record[key], str):
+                raise ValueError(f"invalid study manifest stage: {name}")
+        error = record["error"]
+        if error is not None and (
+            not isinstance(error, dict)
+            or set(error) != {"type", "message", "timestamp_utc"}
+            or not all(isinstance(value, str) for value in error.values())
+        ):
+            raise ValueError(f"invalid study manifest stage: {name}")
 
     def _stage_record(self, stage: str) -> dict[str, object]:
         if stage not in self.STAGE_NAMES:
@@ -216,6 +280,12 @@ class StudyStore:
         if not isinstance(stages, dict) or not isinstance(stages.get(stage), dict):
             raise ValueError("invalid study manifest stages")
         return stages[stage]
+
+    def _artifacts(self) -> dict[str, object]:
+        artifacts = self.manifest.get("artifacts")
+        if not isinstance(artifacts, dict):
+            raise ValueError("invalid study manifest artifacts")
+        return artifacts
 
     def _confined_path(self, relative_path: Path) -> Path:
         if relative_path.is_absolute():
@@ -264,8 +334,7 @@ class StudyStore:
             "checkpoint_path": checkpoint.relative_to(self.study_dir).as_posix(),
             "error": None,
         })
-        artifacts = self.manifest.get("artifacts")
-        assert isinstance(artifacts, dict)
+        artifacts = self._artifacts()
         artifacts[stage] = checkpoint.relative_to(self.study_dir).as_posix()
         self._save_manifest()
         return checkpoint
@@ -276,7 +345,8 @@ class StudyStore:
             raise ValueError(f"stage checkpoint is not valid: {stage}")
         path = self._confined_path(Path(str(record["checkpoint_path"])))
         document = _strict_json_load(path.read_bytes())
-        assert isinstance(document, dict)
+        if not isinstance(document, dict) or "payload" not in document:
+            raise ValueError(f"stage checkpoint is not valid: {stage}")
         return document["payload"]
 
     def fail_stage(self, stage: str, error: BaseException) -> None:

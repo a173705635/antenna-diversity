@@ -78,6 +78,57 @@ def test_resume_marks_corrupt_completed_checkpoint_pending(tmp_path: Path):
     assert resumed.manifest["status"] == "running"
 
 
+def test_resume_downgrades_completed_manifest_without_all_stages(tmp_path: Path):
+    """A hand-edited completed flag cannot skip uncheckpointed canonical stages."""
+    resolved = resolved_for_test(output_dir=tmp_path, name="artifact-test")
+    store = StudyStore.create(resolved)
+    manifest = json.loads(store.manifest_path.read_text(encoding="utf-8"))
+    manifest["status"] = "completed"
+    write_json_atomic(store.manifest_path, manifest)
+
+    resumed = StudyStore.resume(resolved)
+
+    assert resumed.manifest["status"] == "running"
+
+
+def test_resume_downgrades_completed_manifest_with_corrupt_checkpoint(tmp_path: Path):
+    """One bad checkpoint invalidates the completed study state and its stage."""
+    resolved = resolved_for_test(output_dir=tmp_path, name="artifact-test")
+    store = StudyStore.create(resolved)
+    checkpoints = [store.write_stage(stage, {"rows": []}) for stage in StudyStore.STAGE_NAMES]
+    store.complete()
+    checkpoints[-1].write_text("not json", encoding="utf-8")
+
+    resumed = StudyStore.resume(resolved)
+
+    assert resumed.manifest["status"] == "running"
+    assert resumed.manifest["stages"]["report"]["status"] == "pending"
+
+
+def test_resume_rejects_malformed_artifacts_mapping(tmp_path: Path):
+    """Malformed manifest structure fails at resume rather than a later public call."""
+    resolved = resolved_for_test(output_dir=tmp_path, name="artifact-test")
+    store = StudyStore.create(resolved)
+    manifest = json.loads(store.manifest_path.read_text(encoding="utf-8"))
+    manifest["artifacts"] = []
+    write_json_atomic(store.manifest_path, manifest)
+
+    with pytest.raises(ValueError, match="artifacts"):
+        StudyStore.resume(resolved)
+
+
+def test_resume_rejects_malformed_canonical_stage_record(tmp_path: Path):
+    """Every canonical stage record must retain its controlled manifest shape."""
+    resolved = resolved_for_test(output_dir=tmp_path, name="artifact-test")
+    store = StudyStore.create(resolved)
+    manifest = json.loads(store.manifest_path.read_text(encoding="utf-8"))
+    manifest["stages"]["baseline"] = {"status": "pending"}
+    write_json_atomic(store.manifest_path, manifest)
+
+    with pytest.raises(ValueError, match="baseline"):
+        StudyStore.resume(resolved)
+
+
 def test_csv_uses_caller_field_order_and_rejects_unknown_fields(tmp_path: Path):
     """CSV table shape comes from its public caller-supplied schema."""
     destination = tmp_path / "rows.csv"
