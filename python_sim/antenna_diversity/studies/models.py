@@ -56,8 +56,23 @@ def _canonical_study(study: StudyConfig) -> StudyConfig:
     values["combinations"] = tuple(tuple(combo) for combo in values["combinations"])
     for name in ("spatial_modes", "full_chain_modes", "single_antennas", "automatic_roles"):
         values[name] = tuple(values[name])
-    values["error_levels"] = tuple(values["error_levels"])
-    values["multi_jammer_templates"] = tuple(values["multi_jammer_templates"])
+    values["error_levels"] = tuple(
+        ErrorLevel(
+            name=str(level.name),
+            direction_sigma_deg=copy.deepcopy(level.direction_sigma_deg),
+            position_sigma_m=copy.deepcopy(level.position_sigma_m),
+            amplitude_sigma_db=copy.deepcopy(level.amplitude_sigma_db),
+            phase_sigma_deg=copy.deepcopy(level.phase_sigma_deg),
+        )
+        for level in values["error_levels"]
+    )
+    values["multi_jammer_templates"] = tuple(
+        InterfererTemplate(
+            name=str(template.name),
+            interferers=tuple(copy.deepcopy(interferer) for interferer in template.interferers),
+        )
+        for template in values["multi_jammer_templates"]
+    )
     values["manual_cases"] = tuple(values["manual_cases"])
     return StudyConfig(**values)
 

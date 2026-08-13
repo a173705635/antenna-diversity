@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 from antenna_diversity.studies.config import resolve_study_config
-from antenna_diversity.studies.models import ResolvedStudyConfig
+from antenna_diversity.studies.models import InterfererTemplate, ResolvedStudyConfig
 
 
 def test_quick_preset_has_exact_axes_and_counts():
@@ -214,5 +214,27 @@ def test_resolved_containers_are_canonical_and_immutable_after_from_parts():
 
     assert resolved.study.spatial_modes == ("egc", "mvdr")
     assert resolved.study.combinations == (("TL", "BR"),)
+    assert resolved.to_dict() == before
+    assert resolved.config_sha256 == digest
+
+
+def test_from_parts_canonicalizes_inner_interferer_template_containers():
+    base = resolve_study_config(preset="quick")
+    cw = base.study.multi_jammer_templates[0].interferers[0]
+    mutable_interferers = [cw]
+    raw = __import__("dataclasses").replace(
+        base.study,
+        multi_jammer_templates=[InterfererTemplate("mutable", mutable_interferers)],
+    )
+    resolved = ResolvedStudyConfig.from_parts(raw, base.simulation)
+    before = resolved.to_dict()
+    digest = resolved.config_sha256
+
+    mutable_interferers.append(cw)
+
+    assert isinstance(resolved.study.multi_jammer_templates, tuple)
+    assert isinstance(resolved.study.multi_jammer_templates[0].interferers, tuple)
+    with pytest.raises(AttributeError):
+        resolved.study.multi_jammer_templates[0].interferers.append(cw)
     assert resolved.to_dict() == before
     assert resolved.config_sha256 == digest
