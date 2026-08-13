@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Mapping, Sequence
+import os
 from pathlib import Path
+import tempfile
 from typing import Any
 
 import matplotlib.pyplot as plt
@@ -50,9 +52,33 @@ def save_study_figures(figures: Mapping[str, Figure], output_dir: Path) -> dict[
         if key not in figures:
             raise ValueError(f"missing required figure: {key}")
         path = directory / f"{key}.png"
-        figures[key].savefig(path, dpi=150)
+        _save_figure_atomic(figures[key], path)
         paths[key] = path
     return paths
+
+
+def _save_figure_atomic(figure: Figure, destination: Path) -> None:
+    """Render one PNG to a same-directory temporary file before publishing it."""
+
+    temporary: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="wb", dir=destination.parent, prefix=f".{destination.name}.",
+            suffix=".tmp", delete=False,
+        ) as stream:
+            temporary = Path(stream.name)
+        figure.savefig(temporary, dpi=150, format="png")
+        with temporary.open("r+b") as stream:
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, destination)
+        temporary = None
+    finally:
+        if temporary is not None:
+            try:
+                temporary.unlink()
+            except FileNotFoundError:
+                pass
 
 
 def _require_tables(tables: Mapping[str, Sequence[Mapping[str, object]]]) -> None:

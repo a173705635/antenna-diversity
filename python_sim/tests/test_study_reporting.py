@@ -86,6 +86,25 @@ def test_plots_allow_constant_and_failure_only_rows_without_warnings(tmp_path: P
     assert all(path.is_file() and path.stat().st_size > 0 for path in paths.values())
 
 
+def test_figure_save_failure_keeps_existing_png_and_removes_temp(monkeypatch, tmp_path: Path):
+    """A save interruption must not replace a finished PNG with partial bytes."""
+    figures = plot_study_tables(completed_tables_for_reporting())
+    destination = tmp_path / "baseline_rankings.png"
+    destination.write_bytes(b"complete-old-png")
+
+    def partial_then_fail(path, **kwargs):
+        Path(path).write_bytes(b"partial-new-png")
+        raise RuntimeError("interrupted PNG write")
+
+    monkeypatch.setattr(figures["baseline_rankings"], "savefig", partial_then_fail)
+
+    with pytest.raises(RuntimeError, match="interrupted PNG write"):
+        save_study_figures(figures, tmp_path)
+
+    assert destination.read_bytes() == b"complete-old-png"
+    assert not list(tmp_path.glob(".baseline_rankings.png.*.tmp"))
+
+
 def test_summary_rejects_missing_required_table():
     tables = completed_tables_for_reporting()
     tables.pop("power_scan")
