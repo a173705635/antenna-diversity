@@ -5,7 +5,12 @@ import numpy as np
 import pytest
 
 from antenna_diversity.experiments.spatial_scan import evaluate_configuration_spatially
-from antenna_diversity.studies.analytical import run_baseline
+from antenna_diversity.studies.analytical import (
+    run_baseline,
+    run_combined_error_studies,
+    run_multi_jammer_studies,
+    run_single_factor_studies,
+)
 from antenna_diversity.studies.config import resolve_study_config
 
 
@@ -101,3 +106,76 @@ def test_single_result_ignores_its_zero_weight_companion_channel():
         assert metrics["output_interference_power_w"] == pytest.approx(
             results[0]["output_interference_power_w"]
         )
+
+
+def _robustness_config():
+    return resolve_study_config(
+        preset="quick",
+        cli_overrides={
+            "combinations": "TL+BR",
+            "direction_errors_deg": [-1.0, 0.0, 1.0],
+            "position_errors_m": [-0.001, 0.0, 0.001],
+            "amplitude_errors_db": [-0.5, 0.0, 0.5],
+            "phase_errors_deg": [-5.0, 0.0, 5.0],
+            "loading_factors": [1e-3, 1e-2, 1e-1],
+            "combined_error_samples_per_level": 2,
+        },
+    )
+
+
+def test_single_factor_changes_assumed_values_only_and_keeps_zero_baseline():
+    resolved = _robustness_config()
+    before = copy.deepcopy(resolved.to_dict())
+
+    records = run_single_factor_studies(resolved).tables["single_factor"]
+
+    assert {row["factor"] for row in records} == {
+        "direction_azimuth", "direction_elevation", "position",
+        "amplitude", "phase", "loading",
+    }
+    position = [row for row in records if row["factor"] == "position"]
+    assert {(row["corner"], row["axis"]) for row in position} == {
+        (corner, axis) for corner in ("TL", "BR") for axis in ("x", "y", "z")
+    }
+    assert all(row["true_geometry_unchanged"] for row in position)
+    assert all(row["true_state_unchanged"] for row in records)
+    assert all(row["mvdr_case_id"] == row["egc_case_id"] for row in records)
+    assert all(
+        row["mvdr_minus_egc_sinr_db"] == pytest.approx(
+            row["mvdr_output_sinr_db"] - row["egc_output_sinr_db"]
+        )
+        for row in records
+    )
+    zero_rows = [row for row in records if row["factor"] != "loading" and row["value"] == 0.0]
+    assert zero_rows
+    assert all(row["zero_matches_baseline"] for row in zero_rows)
+    assert all(row["default_loading"] for row in records if row["factor"] == "loading" and row["value"] == 1e-2)
+    assert resolved.to_dict() == before
+
+
+def test_combined_error_studies_copy_saved_realizations_and_are_deterministic():
+    resolved = _robustness_config()
+
+    first = run_combined_error_studies(resolved)
+    second = run_combined_error_studies(resolved)
+    rows = first.tables["combined_error"]
+
+    assert first.to_dict() == second.to_dict()
+    assert len(rows) == 3 * resolved.study.combined_error_samples_per_level * len(resolved.study.combinations)
+    assert all(row["mvdr_case_id"] == row["egc_case_id"] for row in rows)
+    assert all(row["realization"]["child_seed"] == row["child_seed"] for row in rows)
+    assert all(row["true_state_unchanged"] for row in rows)
+    assert all(set(row["realization"]["position_errors_m"]) == {"TL", "BR"} for row in rows)
+
+
+def test_multi_jammer_studies_preserve_enabled_pressure_cases():
+    resolved = _robustness_config()
+
+    rows = run_multi_jammer_studies(resolved).tables["multi_jammer"]
+
+    assert rows
+    assert {row["mode"] for row in rows} == {"egc", "mvdr"}
+    assert all(row["enabled_interferer_count"] == len(row["enabled_interferers"]) for row in rows)
+    stress = [row for row in rows if row["template"] == "three_jammer_stress"]
+    assert stress and all(row["enabled_interferer_count"] == 3 for row in stress)
+    assert all(np.isfinite(row["worst_interferer_gain"]) for row in rows)

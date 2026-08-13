@@ -5,7 +5,10 @@ from __future__ import annotations
 import copy
 from collections.abc import Iterable
 
+import numpy as np
+
 from antenna_diversity.array.geometry import CORNER_ORDER, maximum_baseline_m, select_phase_centers
+from antenna_diversity.config import Direction, PhoneArrayConfig
 from antenna_diversity.experiments.spatial_scan import (
     evaluate_configuration_spatially,
     scan_interferer_directions,
@@ -13,7 +16,7 @@ from antenna_diversity.experiments.spatial_scan import (
 )
 
 from .models import ResolvedStudyConfig, StageRecords, strict_snapshot
-from .scenarios import stable_case_id
+from .scenarios import build_multi_jammer_cases, sample_combined_errors, stable_case_id
 
 
 def run_baseline(resolved: ResolvedStudyConfig) -> StageRecords:
@@ -29,7 +32,6 @@ def run_baseline(resolved: ResolvedStudyConfig) -> StageRecords:
         for combination in resolved.study.combinations
         for mode in resolved.study.spatial_modes
     )
-
     direction_rows = []
     power_rows = []
     for combination in resolved.study.combinations:
@@ -45,6 +47,211 @@ def run_baseline(resolved: ResolvedStudyConfig) -> StageRecords:
             "direction": tuple(direction_rows),
             "power": tuple(power_rows),
         },
+    )
+
+
+def run_single_factor_studies(resolved: ResolvedStudyConfig) -> StageRecords:
+    """Evaluate one assumed-state error at a time, with matched EGC/MVDR cases."""
+
+    _validate_single_factor_axes(resolved)
+    rows = []
+    for combination in resolved.study.combinations:
+        baseline = _matched_metrics(_case_configuration(resolved, combination))
+        for factor, values, variants in _single_factor_variants(resolved, combination):
+            for value, corner, axis, simulation in variants:
+                metrics = _matched_metrics(simulation)
+                is_zero = value == 0.0
+                rows.append(_robustness_row(
+                    stage="single_factor", combination=combination, metrics=metrics,
+                    parameters={"factor": factor, "value": value, "corner": corner, "axis": axis},
+                    factor=factor, value=value, severity=_severity(value, values), corner=corner, axis=axis,
+                    true_geometry_unchanged=True, true_state_unchanged=True,
+                    zero_matches_baseline=(not is_zero or _matched_metrics_match(metrics, baseline)),
+                    default_loading=(factor != "loading" or value == resolved.simulation.diversity.diagonal_loading_factor),
+                ))
+    return StageRecords(name="single_factor", tables={"single_factor": tuple(rows)})
+
+
+def run_combined_error_studies(resolved: ResolvedStudyConfig) -> StageRecords:
+    """Evaluate the exact deterministic realization for every level and subarray."""
+
+    rows = []
+    for combination in resolved.study.combinations:
+        for level in resolved.study.error_levels:
+            for realization in sample_combined_errors(resolved, level.name, combination):
+                simulation = _case_configuration(resolved, combination)
+                _apply_combined_realization(simulation, realization)
+                metrics = _matched_metrics(simulation)
+                realization_snapshot = realization.to_dict()
+                rows.append(_robustness_row(
+                    stage="combined_error", combination=combination, metrics=metrics,
+                    parameters={"level": level.name, "sample_index": realization.sample_index,
+                                "child_seed": realization.child_seed, "realization": realization_snapshot},
+                    level=level.name, sample_index=realization.sample_index,
+                    child_seed=realization.child_seed, realization=realization_snapshot,
+                    true_geometry_unchanged=True, true_state_unchanged=True,
+                ))
+    return StageRecords(name="combined_error", tables={"combined_error": tuple(rows)})
+
+
+def run_multi_jammer_studies(resolved: ResolvedStudyConfig) -> StageRecords:
+    """Evaluate every template exactly, including underdetermined jammer cases."""
+
+    rows = []
+    for combination in resolved.study.combinations:
+        for mode in resolved.study.spatial_modes:
+            for case in build_multi_jammer_cases(resolved, resolved.simulation, combination, mode):
+                simulation = _case_configuration(resolved, combination)
+                template = next(
+                    template for template in resolved.study.multi_jammer_templates
+                    if template.name == case.parameters["template"]
+                )
+                simulation.interferers = tuple(copy.deepcopy(template.interferers))
+                metrics = evaluate_configuration_spatially(simulation, mode).metrics
+                enabled = [interferer for interferer in simulation.interferers if interferer.enable]
+                gains = list(np.asarray(metrics["interferer_direction_gains"], dtype=float))
+                jammer_rows = [
+                    {**strict_snapshot(interferer), "direction_gain": float(gain)}
+                    for interferer, gain in zip(enabled, gains, strict=True)
+                ]
+                rows.append(strict_snapshot({
+                    "stage": "multi_jammer", "case_id": case.case_id,
+                    "active_antennas": list(combination), "num_antennas": len(combination),
+                    "mode": mode, "template": case.parameters["template"], "child_seed": case.seed,
+                    "interferers": strict_snapshot(simulation.interferers),
+                    "enabled_interferers": jammer_rows, "enabled_interferer_count": len(enabled),
+                    "output_sinr_db": metrics["output_sinr_db"],
+                    "worst_interferer_gain": metrics["worst_interferer_gain"],
+                    "covariance_rank": metrics["covariance_rank"],
+                    "covariance_condition_number": metrics["covariance_condition_number"],
+                    "metrics": strict_snapshot(metrics),
+                }))  # type: ignore[arg-type]
+    return StageRecords(name="multi_jammer", tables={"multi_jammer": tuple(rows)})
+
+
+def _single_factor_variants(resolved: ResolvedStudyConfig, combination: tuple[str, ...]):
+    """Yield factor metadata and independently copied one-error cases."""
+
+    for factor, values in (
+        ("direction_azimuth", resolved.study.direction_errors_deg),
+        ("direction_elevation", resolved.study.direction_errors_deg),
+        ("position", resolved.study.position_errors_m),
+        ("amplitude", resolved.study.amplitude_errors_db),
+        ("phase", resolved.study.phase_errors_deg),
+        ("loading", resolved.study.loading_factors),
+    ):
+        variants = []
+        for raw_value in values:
+            value = float(raw_value)
+            if factor == "position":
+                for corner in combination:
+                    for axis_index, axis in enumerate(("x", "y", "z")):
+                        simulation = _case_configuration(resolved, combination)
+                        assumed = list(simulation.phone.assumed_phase_centers_m[corner])  # type: ignore[union-attr]
+                        assumed[axis_index] += value
+                        simulation.phone.assumed_phase_centers_m[corner] = tuple(assumed)  # type: ignore[union-attr]
+                        variants.append((value, corner, axis, simulation))
+            else:
+                simulation = _case_configuration(resolved, combination)
+                if factor == "direction_azimuth":
+                    assumed = simulation.signal.assumed_direction
+                    simulation.signal.assumed_direction = Direction(assumed.azimuth_deg + value, assumed.elevation_deg)  # type: ignore[union-attr]
+                elif factor == "direction_elevation":
+                    assumed = simulation.signal.assumed_direction
+                    simulation.signal.assumed_direction = Direction(assumed.azimuth_deg, assumed.elevation_deg + value)  # type: ignore[union-attr]
+                elif factor == "amplitude":
+                    for corner in combination:
+                        estimated = _case_configuration(resolved, combination)
+                        estimated.array.estimated_channel_amplitude_error_db[corner] = value  # type: ignore[union-attr]
+                        variants.append((value, corner, None, estimated))
+                    continue
+                elif factor == "phase":
+                    for corner in combination:
+                        estimated = _case_configuration(resolved, combination)
+                        estimated.array.estimated_channel_phase_error_deg[corner] = value  # type: ignore[union-attr]
+                        variants.append((value, corner, None, estimated))
+                    continue
+                else:
+                    simulation.diversity.diagonal_loading_factor = value
+                variants.append((value, None, None, simulation))
+        yield factor, values, variants
+
+
+def _validate_single_factor_axes(resolved: ResolvedStudyConfig) -> None:
+    """Keep every single-error sweep anchored to its ideal configuration."""
+
+    non_loading_axes = (
+        resolved.study.direction_errors_deg,
+        resolved.study.position_errors_m,
+        resolved.study.amplitude_errors_db,
+        resolved.study.phase_errors_deg,
+    )
+    if any(not np.any(np.asarray(axis) == 0.0) for axis in non_loading_axes):
+        raise ValueError("single-factor non-loading axes must include zero")
+    if not np.any(np.asarray(resolved.study.loading_factors) == resolved.simulation.diversity.diagonal_loading_factor):
+        raise ValueError("single-factor loading axis must include the default loading factor")
+
+
+def _case_configuration(resolved: ResolvedStudyConfig, combination: tuple[str, ...]):
+    simulation = copy.deepcopy(resolved.simulation)
+    if not isinstance(simulation.array, PhoneArrayConfig) or simulation.phone is None:
+        raise ValueError("robustness studies require a phone-array configuration")
+    simulation.array.active_antennas = tuple(combination)
+    return simulation
+
+
+def _matched_metrics(simulation):
+    """Evaluate EGC and MVDR from distinct deep copies of the same case."""
+
+    return {
+        mode: evaluate_configuration_spatially(copy.deepcopy(simulation), mode).metrics
+        for mode in ("egc", "mvdr")
+    }
+
+
+def _apply_combined_realization(simulation, realization) -> None:
+    assumed = simulation.signal.assumed_direction
+    simulation.signal.assumed_direction = Direction(
+        assumed.azimuth_deg + realization.azimuth_error_deg,
+        assumed.elevation_deg + realization.elevation_error_deg,
+    )
+    for corner, error in realization.position_errors_m.items():
+        base = np.asarray(simulation.phone.assumed_phase_centers_m[corner], dtype=float)
+        simulation.phone.assumed_phase_centers_m[corner] = tuple(base + np.asarray(error, dtype=float))
+    for corner, value in realization.amplitude_errors_db.items():
+        simulation.array.estimated_channel_amplitude_error_db[corner] = value
+    for corner, value in realization.phase_errors_deg.items():
+        simulation.array.estimated_channel_phase_error_deg[corner] = value
+
+
+def _robustness_row(*, stage, combination, metrics, parameters, **fields):
+    """Capture matched outputs and diagnostics in a strict, detached record."""
+
+    pair_id = stable_case_id(stage, combination, "matched", parameters, None)
+    row = {
+        "stage": stage, "case_id": pair_id, "mvdr_case_id": pair_id, "egc_case_id": pair_id,
+        "active_antennas": list(combination), "num_antennas": len(combination),
+        "signed_value": fields.get("value"),
+        "absolute_normalized_severity": fields.get("severity"),
+        "egc_output_sinr_db": metrics["egc"]["output_sinr_db"],
+        "mvdr_output_sinr_db": metrics["mvdr"]["output_sinr_db"],
+        "mvdr_minus_egc_sinr_db": metrics["mvdr"]["output_sinr_db"] - metrics["egc"]["output_sinr_db"],
+        "egc_metrics": strict_snapshot(metrics["egc"]), "mvdr_metrics": strict_snapshot(metrics["mvdr"]),
+        "mvdr_metric_record": strict_snapshot(metrics["mvdr"]),
+        **fields,
+    }
+    return strict_snapshot(row)  # type: ignore[return-value]
+
+
+def _severity(value: float, values) -> float:
+    maximum = float(np.max(np.abs(values)))
+    return 0.0 if maximum == 0.0 else abs(value) / maximum
+
+
+def _matched_metrics_match(first, second) -> bool:
+    return all(
+        np.isclose(first[mode]["output_sinr_db"], second[mode]["output_sinr_db"], rtol=0.0, atol=1e-12)
+        for mode in ("egc", "mvdr")
     )
 
 
