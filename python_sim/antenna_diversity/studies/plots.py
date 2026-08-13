@@ -30,16 +30,23 @@ def plot_study_tables(tables: Mapping[str, Sequence[Mapping[str, object]]]) -> d
     """Build the eight fixed research figures from saved table rows only."""
 
     _require_tables(tables)
-    return {
-        "baseline_rankings": _baseline(tables["baseline_rankings"]),
-        "direction_heatmaps": _directions(tables["direction_scan"]),
-        "power_curves": _power(tables["power_scan"]),
-        "robustness_curves": _robustness(tables["robustness_scans"]),
-        "combined_error_distributions": _combined(tables["combined_errors"]),
-        "multi_jammer_comparison": _multi_jammer(tables["multi_jammer"]),
-        "full_chain_validation": _full_chain(tables["full_chain_validation"]),
-        "cn0_validation": _cn0(tables["full_chain_cn0"], tables["full_chain_validation"]),
-    }
+    figures: dict[str, Figure] = {}
+    try:
+        figures["baseline_rankings"] = _baseline(tables["baseline_rankings"])
+        figures["direction_heatmaps"] = _directions(tables["direction_scan"])
+        figures["power_curves"] = _power(tables["power_scan"])
+        figures["robustness_curves"] = _robustness(tables["robustness_scans"])
+        figures["combined_error_distributions"] = _combined(tables["combined_errors"])
+        figures["multi_jammer_comparison"] = _multi_jammer(tables["multi_jammer"])
+        figures["full_chain_validation"] = _full_chain(tables["full_chain_validation"])
+        figures["cn0_validation"] = _cn0(
+            tables["full_chain_cn0"], tables["full_chain_validation"]
+        )
+    except BaseException:
+        for figure in figures.values():
+            plt.close(figure)
+        raise
+    return figures
 
 
 def save_study_figures(figures: Mapping[str, Figure], output_dir: Path) -> dict[str, Path]:

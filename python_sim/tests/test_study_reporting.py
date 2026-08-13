@@ -46,6 +46,23 @@ def test_study_plots_have_stable_keys_and_shared_heatmap_limits():
     assert axis.patches[0].center == pytest.approx((33.0, 22.0))
 
 
+def test_plot_construction_failure_closes_only_partially_built_figures():
+    """A later builder failure must release earlier figures, not external ones."""
+    tables = completed_tables_for_reporting()
+    tables["direction_scan"] = tuple(
+        {**row, "target_azimuth_deg": None} for row in tables["direction_scan"]
+    )
+    external = plt.figure()
+    figures_before = set(plt.get_fignums())
+
+    for _ in range(3):
+        with pytest.raises(ValueError, match="target_azimuth_deg"):
+            plot_study_tables(tables)
+
+        assert set(plt.get_fignums()) == figures_before
+        assert plt.fignum_exists(external.number)
+
+
 def test_report_contains_evidence_boundaries_and_reproduction_links(tmp_path: Path):
     tables = completed_tables_for_reporting()
     manifest = completed_manifest()
