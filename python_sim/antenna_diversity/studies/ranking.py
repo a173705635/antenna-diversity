@@ -268,6 +268,10 @@ def _manual_case(raw: Mapping[str, object]) -> StudyCase:
     missing = required - set(raw)
     if missing:
         raise ValueError(f"manual case missing {sorted(missing)[0]}")
+    if raw["stage"] in {"representative_direction", "multi_jammer", "full_chain"}:
+        parameters = raw["parameters"]
+        if isinstance(parameters, Mapping) and "interferers" in parameters:
+            validate_interferer_snapshots(parameters["interferers"])
     return StudyCase(str(raw["case_id"]), str(raw["stage"]), tuple(raw["active_antennas"]), str(raw["mode"]), _optional_int(raw["seed"]), strict_snapshot(raw["parameters"]), ("manual",))  # type: ignore[arg-type]
 
 
@@ -283,8 +287,7 @@ def _validate_case(case: StudyCase, resolved: ResolvedStudyConfig) -> None:
     parameters = case.parameters
     if case.stage in {"representative_direction", "multi_jammer", "full_chain"}:
         _require_case_parameters(case, parameters, {"interferers"})
-        if not isinstance(parameters["interferers"], (list, tuple)):
-            raise ValueError(f"selected case {case.stage} parameters.interferers must be a sequence")
+        validate_interferer_snapshots(parameters["interferers"])
     elif case.stage == "single_factor":
         _require_case_parameters(case, parameters, {"single_factor"})
         factor = parameters["single_factor"]
@@ -308,6 +311,44 @@ def _require_case_parameters(case: StudyCase, parameters: Mapping[str, object], 
     missing = required - set(parameters)
     if missing:
         raise ValueError(f"selected case {case.stage} lacks reconstruction parameter: {sorted(missing)[0]}")
+
+
+def validate_interferer_snapshots(value: object) -> None:
+    """Validate the exact strict-JSON schema needed to rebuild CW interferers."""
+
+    if not isinstance(value, (list, tuple)):
+        raise ValueError("selected case parameters.interferers must be a sequence")
+    required = {
+        "direction", "enable", "power_dbm", "offset_hz", "initial_phase_rad",
+        "start_ms", "stop_ms",
+    }
+    direction_fields = {"azimuth_deg", "elevation_deg"}
+    for raw in value:
+        if not isinstance(raw, Mapping) or set(raw) != required:
+            raise ValueError("selected case interferer must contain the exact CWInterferer fields")
+        direction = raw["direction"]
+        if not isinstance(direction, Mapping) or set(direction) != direction_fields:
+            raise ValueError("selected case interferer direction must contain exact direction fields")
+        if not all(_is_finite_real_scalar(direction[name]) for name in direction_fields):
+            raise ValueError("selected case interferer direction must be finite real scalars")
+        try:
+            Direction(direction["azimuth_deg"], direction["elevation_deg"]).validate()
+        except (TypeError, ValueError) as error:
+            raise ValueError("selected case interferer direction is invalid") from error
+        if type(raw["enable"]) is not bool:
+            raise ValueError("selected case interferer enable must be a bool")
+        for name in ("power_dbm", "offset_hz", "initial_phase_rad", "start_ms"):
+            if not _is_finite_real_scalar(raw[name]):
+                raise ValueError(f"selected case interferer {name} must be a finite real scalar")
+        start_ms = raw["start_ms"]
+        stop_ms = raw["stop_ms"]
+        if start_ms < 0:
+            raise ValueError("selected case interferer start_ms must be nonnegative")
+        if stop_ms is not None:
+            if not _is_finite_real_scalar(stop_ms):
+                raise ValueError("selected case interferer stop_ms must be None or a finite real scalar")
+            if stop_ms < start_ms:
+                raise ValueError("selected case interferer stop_ms must not precede start_ms")
 
 
 def _valid_single_factor_parameters(parameters: Mapping[str, object], combination: tuple[str, ...]) -> bool:

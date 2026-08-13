@@ -12,6 +12,7 @@ from antenna_diversity.experiments.spatial_scan import evaluate_configuration_sp
 from antenna_diversity.pipeline import run_end_to_end
 
 from .models import FullChainRecords, ResolvedStudyConfig, SelectionResult, StudyCase, strict_snapshot
+from .ranking import validate_interferer_snapshots
 from .scenarios import derive_child_seed
 
 
@@ -77,19 +78,15 @@ def _reconstruct_case(
 
 
 def _interferers(value: object) -> tuple[CWInterferer, ...]:
-    if not isinstance(value, (tuple, list)):
-        raise ValueError("selected case interferers must be a sequence")
+    validate_interferer_snapshots(value)
     built = []
-    for raw in value:
-        if not isinstance(raw, Mapping) or not isinstance(raw.get("direction"), Mapping):
-            raise ValueError("selected case interferer is invalid")
+    for raw in value:  # type: ignore[union-attr]
         direction = raw["direction"]
         built.append(CWInterferer(
-            direction=Direction(float(direction["azimuth_deg"]), float(direction["elevation_deg"])),
-            enable=bool(raw["enable"]), power_dbm=float(raw["power_dbm"]),
-            offset_hz=float(raw["offset_hz"]), initial_phase_rad=float(raw["initial_phase_rad"]),
-            start_ms=float(raw["start_ms"]),
-            stop_ms=None if raw["stop_ms"] is None else float(raw["stop_ms"]),
+            direction=Direction(direction["azimuth_deg"], direction["elevation_deg"]),
+            enable=raw["enable"], power_dbm=raw["power_dbm"],
+            offset_hz=raw["offset_hz"], initial_phase_rad=raw["initial_phase_rad"],
+            start_ms=raw["start_ms"], stop_ms=raw["stop_ms"],
         ))
     return tuple(built)
 
@@ -173,5 +170,5 @@ def _cn0_rows(case, run_index, seed, mode, tracking, fs_out_hz):
             "cn0_db_hz": float(value),
         }
         for start, value in zip(starts, cn0, strict=True)
-        if np.isfinite(value)
+        if np.isfinite(start) and np.isfinite(value)
     ]

@@ -1,6 +1,9 @@
+from dataclasses import replace
+
 import pytest
 
 from antenna_diversity.config import Direction
+from antenna_diversity.studies.models import ResolvedStudyConfig
 from antenna_diversity.studies.ranking import (
     direction_separation_deg,
     select_representative_cases,
@@ -220,6 +223,64 @@ def test_selection_rejects_manual_case_with_unsupported_stage_or_missing_reconst
     )
     with pytest.raises(ValueError, match="lacks reconstruction parameter: interferers"):
         select_representative_cases(ranking, direction_rows, (), (), missing_parameters)
+
+
+def _manual_full_chain_with_interferer(interferer):
+    base = resolved_for_test(combinations=(("TL", "BR"),), automatic_roles=())
+    manual_cases = ({
+            "case_id": "manual-interferer", "stage": "full_chain",
+            "active_antennas": ["TL", "BR"], "mode": "mvdr", "seed": None,
+            "parameters": {"interferers": [interferer]},
+        },)
+    study = replace(base.study, manual_cases=manual_cases)
+    return ResolvedStudyConfig(study, base.simulation, base.config_sha256)
+
+
+def _valid_interferer():
+    return {
+        "direction": {"azimuth_deg": 120.0, "elevation_deg": 10.0},
+        "enable": True, "power_dbm": -90.0, "offset_hz": 250e3,
+        "initial_phase_rad": 0.8, "start_ms": 0.0, "stop_ms": None,
+    }
+
+
+@pytest.mark.parametrize("interferer", [
+    {},
+    {**_valid_interferer(), "enable": "false"},
+    {**_valid_interferer(), "power_dbm": True},
+    {**_valid_interferer(), "power_dbm": float("nan")},
+    {**_valid_interferer(), "direction": {"azimuth_deg": 120.0, "elevation_deg": 100.0}},
+    {**_valid_interferer(), "direction": {"azimuth_deg": 120.0}},
+    {**_valid_interferer(), "direction": {"azimuth_deg": 120.0, "elevation_deg": 10.0, "extra": 1}},
+    {**_valid_interferer(), "start_ms": -1.0},
+    {**_valid_interferer(), "stop_ms": -1.0},
+    {**_valid_interferer(), "unexpected": 1},
+])
+def test_selection_rejects_manual_interferers_that_cannot_be_reconstructed(interferer):
+    resolved = _manual_full_chain_with_interferer(interferer)
+    rows = [_direction_row(("TL", "BR"), 5.0)]
+    ranking = summarize_and_rank(rows, resolved)
+
+    with pytest.raises(ValueError, match="interferer"):
+        select_representative_cases(ranking, rows, (), (), resolved)
+
+
+def test_selection_accepts_complete_manual_and_automatic_interferers():
+    manual = _manual_full_chain_with_interferer(_valid_interferer())
+    rows = [_direction_row(("TL", "BR"), 5.0)]
+    manual_selection = select_representative_cases(
+        summarize_and_rank(rows, manual), rows, (), (), manual
+    )
+
+    automatic = resolved_for_test(
+        combinations=(("TL", "BR"),), automatic_roles=("best",)
+    )
+    automatic_selection = select_representative_cases(
+        summarize_and_rank(rows, automatic), rows, (), (), automatic
+    )
+
+    assert manual_selection.cases[0].parameters["interferers"] == [_valid_interferer()]
+    assert automatic_selection.cases[0].stage == "representative_direction"
 
 
 @pytest.mark.parametrize("factor,value,corner,axis", [
