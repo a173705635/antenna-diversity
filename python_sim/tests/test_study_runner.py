@@ -71,6 +71,8 @@ def test_stage_context_exposes_only_immutable_prior_checkpoints(monkeypatch, tmp
         seen["single_factor"] = context.prerequisites
         with pytest.raises(TypeError):
             context.prerequisites["later"] = {}  # type: ignore[index]
+        with pytest.raises(TypeError):
+            context.prerequisites["baseline"]["rows"][0]["value"] = 2  # type: ignore[index]
         return {"rows": []}
 
     monkeypatch.setattr(
@@ -83,6 +85,31 @@ def test_stage_context_exposes_only_immutable_prior_checkpoints(monkeypatch, tmp
 
     assert dict(seen["baseline"]) == {}
     assert tuple(seen["single_factor"]) == ("baseline",)
+
+
+def test_pending_baseline_cannot_read_a_preexisting_future_report_checkpoint(monkeypatch, tmp_path: Path):
+    """A future checkpoint must not give an earlier adapter a read capability."""
+    from antenna_diversity.studies.artifacts import StudyStore
+
+    resolved = resolved_for_test(output_dir=tmp_path, name="future-probe")
+    store = StudyStore.create(resolved)
+    store.write_stage("report", {"future": "must remain unavailable"})
+    observed: dict[str, object] = {}
+
+    def baseline(context):
+        observed["has_store"] = hasattr(context, "store")
+        observed["has_read_stage"] = hasattr(context, "read_stage")
+        observed["prerequisites"] = context.prerequisites
+        return {"stage": "baseline"}
+
+    monkeypatch.setattr(
+        "antenna_diversity.studies.runner._STAGE_FUNCTIONS",
+        {**{name: lambda context, name=name: {"stage": name} for name in STAGES}, "baseline": baseline},
+    )
+
+    run_research(resolved, resume=True)
+
+    assert observed == {"has_store": False, "has_read_stage": False, "prerequisites": {}}
 
 
 def test_runner_recovers_from_corrupt_checkpoint_at_that_stage(monkeypatch, tmp_path: Path):
@@ -141,7 +168,9 @@ def test_report_stage_publishes_eight_linked_tables_and_figures(monkeypatch, tmp
         "selection": {"ranking": {"summaries": tables["baseline_rankings"]}, "selection": {"cases": [{"case_id": "best-001", "active_antennas": ["TL", "BR"], "selection_reasons": ["best"]}], "unselected_roles": {"knee": "none"}}},
         "full_chain": {"metrics": tables["full_chain_validation"], "cn0": tables["full_chain_cn0"]},
     }
-    context = __import__("antenna_diversity.studies.runner", fromlist=["StageContext"]).StageContext(resolved, store, checkpoints)
+    context = __import__("antenna_diversity.studies.runner", fromlist=["StageContext"]).StageContext(
+        resolved, checkpoints, study_dir=store.study_dir, manifest=store.manifest,
+    )
 
     payload = _report(context)
 

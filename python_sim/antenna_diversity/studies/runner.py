@@ -35,18 +35,21 @@ class StageContext:
     """Inputs available to a stage, limited to immutable earlier checkpoints."""
 
     resolved: ResolvedStudyConfig
-    store: StudyStore
     prerequisites: Mapping[str, object]
+    study_dir: Path | None = None
+    manifest: Mapping[str, object] | None = None
 
 
 def run_research(resolved: ResolvedStudyConfig, resume: bool = False) -> Path:
     """Run every pending stage in canonical order and return the study directory."""
 
+    if set(STAGES) != StudyStore.REQUIRED_STAGES:
+        raise RuntimeError("runner and store stage names disagree")
     store = StudyStore.resume(resolved) if resume else StudyStore.create(resolved)
     completed: dict[str, object] = {}
     rerun_from_here = False
     for name in STAGES:
-        if not rerun_from_here and name in store.completed_stages:
+        if not rerun_from_here and store.is_stage_completed(name):
             completed[name] = store.read_stage(name)
             continue
         rerun_from_here = True
@@ -54,7 +57,11 @@ def run_research(resolved: ResolvedStudyConfig, resume: bool = False) -> Path:
             prior: _read_only(completed[prior]) for prior in STAGES[:STAGES.index(name)]
             if prior in completed
         })
-        context = StageContext(resolved, store, prerequisites)
+        context = StageContext(
+            resolved, prerequisites,
+            study_dir=store.study_dir if name == "report" else None,
+            manifest=_read_only(store.manifest) if name == "report" else None,
+        )
         try:
             payload = _STAGE_FUNCTIONS[name](context)
             store.write_stage(name, payload)
@@ -104,33 +111,35 @@ def _full_chain(context: StageContext) -> dict[str, object]:
 
 
 def _report(context: StageContext) -> dict[str, object]:
+    if context.study_dir is None or context.manifest is None:
+        raise ValueError("report stage requires publication context")
     tables = _report_tables(context.prerequisites)
-    table_dir = context.store.study_dir / "tables"
+    table_dir = context.study_dir / "tables"
     table_dir.mkdir(parents=True, exist_ok=True)
     table_paths: dict[str, Path] = {}
     for name in _TABLE_ORDER:
         path = table_dir / f"{name}.csv"
         write_csv_atomic(path, _CSV_FIELDS[name], _csv_rows(tables[name], _CSV_FIELDS[name]))
-        table_paths[name] = path.relative_to(context.store.study_dir)
+        table_paths[name] = path.relative_to(context.study_dir)
 
-    figure_dir = context.store.study_dir / "figures"
+    figure_dir = context.study_dir / "figures"
     figure_paths = {
-        name: path.relative_to(context.store.study_dir)
+        name: path.relative_to(context.study_dir)
         for name, path in save_study_figures(plot_study_tables(tables), figure_dir).items()
     }
     selection = _mapping(_mapping(context.prerequisites["selection"], "selection checkpoint").get("selection"), "selection")
-    final_manifest = {**context.store.manifest, "status": "completed"}
+    final_manifest = {**context.manifest, "status": "completed"}
     summary = build_summary(tables, final_manifest, selection)
-    summary_path = context.store.study_dir / "summary.json"
+    summary_path = context.study_dir / "summary.json"
     write_json_atomic(summary_path, summary)
-    report_path = context.store.study_dir / "report.md"
+    report_path = context.study_dir / "report.md"
     report = render_report(summary, final_manifest, figure_paths, table_paths)
     verify_report_links(report, report_path)
     _write_text_atomic(report_path, report)
     return {
         "artifacts": {
-            "summary": summary_path.relative_to(context.store.study_dir).as_posix(),
-            "report": report_path.relative_to(context.store.study_dir).as_posix(),
+            "summary": summary_path.relative_to(context.study_dir).as_posix(),
+            "report": report_path.relative_to(context.study_dir).as_posix(),
             "tables": {name: path.as_posix() for name, path in table_paths.items()},
             "figures": {name: path.as_posix() for name, path in figure_paths.items()},
         },

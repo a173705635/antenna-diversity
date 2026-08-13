@@ -95,9 +95,12 @@ def test_resume_downgrades_completed_manifest_with_corrupt_checkpoint(tmp_path: 
     """One bad checkpoint invalidates the completed study state and its stage."""
     resolved = resolved_for_test(output_dir=tmp_path, name="artifact-test")
     store = StudyStore.create(resolved)
-    checkpoints = [store.write_stage(stage, {"rows": []}) for stage in StudyStore.STAGE_NAMES]
+    checkpoints = {
+        stage: store.write_stage(stage, {"rows": []})
+        for stage in StudyStore.REQUIRED_STAGES
+    }
     store.complete()
-    checkpoints[-1].write_text("not json", encoding="utf-8")
+    checkpoints["report"].write_text("not json", encoding="utf-8")
 
     resumed = StudyStore.resume(resolved)
 
@@ -198,7 +201,7 @@ def test_complete_requires_every_stage_then_marks_manifest_completed(tmp_path: P
 
     with pytest.raises(ValueError, match="all stages"):
         store.complete()
-    for stage in StudyStore.STAGE_NAMES:
+    for stage in StudyStore.REQUIRED_STAGES:
         store.write_stage(stage, {"rows": []})
 
     store.complete()

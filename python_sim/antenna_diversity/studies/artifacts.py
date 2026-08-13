@@ -27,6 +27,10 @@ _MANIFEST_NAME = "manifest.json"
 _CONFIG_NAME = "resolved-config.json"
 _MANIFEST_STATUSES = {"running", "completed", "failed"}
 _STAGE_STATUSES = {"pending", "completed", "failed"}
+REQUIRED_STAGES = frozenset({
+    "baseline", "single_factor", "combined_error", "multi_jammer",
+    "selection", "full_chain", "report",
+})
 
 
 def _utc_now() -> str:
@@ -145,10 +149,7 @@ def _is_int(value: object) -> bool:
 class StudyStore:
     """Own a study directory, its immutable configuration, and stage checkpoints."""
 
-    STAGE_NAMES = (
-        "baseline", "single_factor", "combined_error", "multi_jammer",
-        "selection", "full_chain", "report",
-    )
+    REQUIRED_STAGES = REQUIRED_STAGES
 
     def __init__(self, resolved: ResolvedStudyConfig, study_dir: Path, manifest: dict[str, object]) -> None:
         self.resolved = resolved
@@ -159,10 +160,14 @@ class StudyStore:
 
     @property
     def completed_stages(self) -> tuple[str, ...]:
-        return tuple(
-            name for name in self.STAGE_NAMES
+        return tuple(sorted(
+            name for name in self.REQUIRED_STAGES
             if self._stage_record(name).get("status") == "completed"
-        )
+        ))
+
+    def is_stage_completed(self, stage: str) -> bool:
+        """Return whether *stage* has a completed record; the runner verifies content."""
+        return self._stage_record(stage).get("status") == "completed"
 
     @classmethod
     def create(cls, resolved: ResolvedStudyConfig) -> "StudyStore":
@@ -183,7 +188,7 @@ class StudyStore:
             "git_status": git_status,
             "environment": _environment(),
             "artifacts": {"configuration": _CONFIG_NAME, "manifest": _MANIFEST_NAME},
-            "stages": {name: _initial_stage() for name in cls.STAGE_NAMES},
+            "stages": {name: _initial_stage() for name in sorted(cls.REQUIRED_STAGES)},
         }
         store = cls(resolved, study_dir, manifest)
         write_json_atomic(store.config_path, resolved.to_dict())
@@ -205,7 +210,7 @@ class StudyStore:
             raise ValueError("configuration hash does not match existing study")
         store = cls(resolved, study_dir, loaded)
         repaired = False
-        for name in cls.STAGE_NAMES:
+        for name in cls.REQUIRED_STAGES:
             record = store._stage_record(name)
             if record.get("status") == "completed" and not store._checkpoint_valid(name, record):
                 record.update(_initial_stage())
@@ -213,7 +218,7 @@ class StudyStore:
         all_valid = all(
             store._stage_record(name).get("status") == "completed"
             and store._checkpoint_valid(name, store._stage_record(name))
-            for name in cls.STAGE_NAMES
+            for name in cls.REQUIRED_STAGES
         )
         if repaired or store.manifest.get("status") != "completed" or not all_valid:
             store.manifest["status"] = "running"
@@ -250,9 +255,9 @@ class StudyStore:
         ):
             raise ValueError("invalid study manifest artifacts")
         stages = manifest["stages"]
-        if not isinstance(stages, dict) or set(stages) != set(cls.STAGE_NAMES):
+        if not isinstance(stages, dict) or set(stages) != cls.REQUIRED_STAGES:
             raise ValueError("invalid study manifest stages")
-        for name in cls.STAGE_NAMES:
+        for name in cls.REQUIRED_STAGES:
             cls._validate_stage_record(name, stages[name])
 
     @staticmethod
@@ -279,7 +284,7 @@ class StudyStore:
             raise ValueError(f"invalid study manifest stage: {name}")
 
     def _stage_record(self, stage: str) -> dict[str, object]:
-        if stage not in self.STAGE_NAMES:
+        if stage not in self.REQUIRED_STAGES:
             raise ValueError(f"unknown stage: {stage}")
         stages = self.manifest.get("stages")
         if not isinstance(stages, dict) or not isinstance(stages.get(stage), dict):
@@ -367,7 +372,7 @@ class StudyStore:
         self._save_manifest()
 
     def complete(self) -> None:
-        missing = [name for name in self.STAGE_NAMES if self._stage_record(name).get("status") != "completed"]
+        missing = sorted(name for name in self.REQUIRED_STAGES if self._stage_record(name).get("status") != "completed")
         if missing:
             raise ValueError("cannot complete until all stages are completed")
         self.manifest["status"] = "completed"
