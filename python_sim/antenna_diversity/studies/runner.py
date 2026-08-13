@@ -36,8 +36,54 @@ class StageContext:
 
     resolved: ResolvedStudyConfig
     prerequisites: Mapping[str, object]
-    study_dir: Path | None = None
+    publication: "_Publication" | None = None
     manifest: Mapping[str, object] | None = None
+
+
+class _Publication:
+    """Confined fixed-name report publication; intentionally exposes no paths."""
+
+    __slots__ = ("__root",)
+
+    def __init__(self, root: Path) -> None:
+        self.__root = root
+
+    def write_tables(
+        self, tables: Mapping[str, Sequence[Mapping[str, object]]],
+    ) -> dict[str, Path]:
+        table_dir = self.__root / "tables"
+        table_dir.mkdir(parents=True, exist_ok=True)
+        paths: dict[str, Path] = {}
+        for name in _TABLE_ORDER:
+            path = table_dir / f"{name}.csv"
+            write_csv_atomic(path, _CSV_FIELDS[name], _csv_rows(tables[name], _CSV_FIELDS[name]))
+            paths[name] = path.relative_to(self.__root)
+        return paths
+
+    def save_figures(
+        self, tables: Mapping[str, Sequence[Mapping[str, object]]],
+    ) -> dict[str, Path]:
+        return {
+            name: path.relative_to(self.__root)
+            for name, path in save_study_figures(
+                plot_study_tables(tables), self.__root / "figures"
+            ).items()
+        }
+
+    def write_summary(self, summary: Mapping[str, object]) -> Path:
+        path = self.__root / "summary.json"
+        write_json_atomic(path, summary)
+        return path.relative_to(self.__root)
+
+    def publish_report(self, report: str) -> Path:
+        path = self.__root / "report.md"
+        verify_report_links(report, path)
+        _write_text_atomic(path, report)
+        return path.relative_to(self.__root)
+
+
+def _publication_for(root: Path) -> _Publication:
+    return _Publication(root)
 
 
 def run_research(resolved: ResolvedStudyConfig, resume: bool = False) -> Path:
@@ -59,7 +105,7 @@ def run_research(resolved: ResolvedStudyConfig, resume: bool = False) -> Path:
         })
         context = StageContext(
             resolved, prerequisites,
-            study_dir=store.study_dir if name == "report" else None,
+            publication=_publication_for(store.study_dir) if name == "report" else None,
             manifest=_read_only(store.manifest) if name == "report" else None,
         )
         try:
@@ -111,35 +157,21 @@ def _full_chain(context: StageContext) -> dict[str, object]:
 
 
 def _report(context: StageContext) -> dict[str, object]:
-    if context.study_dir is None or context.manifest is None:
+    if context.publication is None or context.manifest is None:
         raise ValueError("report stage requires publication context")
     tables = _report_tables(context.prerequisites)
-    table_dir = context.study_dir / "tables"
-    table_dir.mkdir(parents=True, exist_ok=True)
-    table_paths: dict[str, Path] = {}
-    for name in _TABLE_ORDER:
-        path = table_dir / f"{name}.csv"
-        write_csv_atomic(path, _CSV_FIELDS[name], _csv_rows(tables[name], _CSV_FIELDS[name]))
-        table_paths[name] = path.relative_to(context.study_dir)
-
-    figure_dir = context.study_dir / "figures"
-    figure_paths = {
-        name: path.relative_to(context.study_dir)
-        for name, path in save_study_figures(plot_study_tables(tables), figure_dir).items()
-    }
+    table_paths = context.publication.write_tables(tables)
+    figure_paths = context.publication.save_figures(tables)
     selection = _mapping(_mapping(context.prerequisites["selection"], "selection checkpoint").get("selection"), "selection")
     final_manifest = {**context.manifest, "status": "completed"}
     summary = build_summary(tables, final_manifest, selection)
-    summary_path = context.study_dir / "summary.json"
-    write_json_atomic(summary_path, summary)
-    report_path = context.study_dir / "report.md"
+    summary_path = context.publication.write_summary(summary)
     report = render_report(summary, final_manifest, figure_paths, table_paths)
-    verify_report_links(report, report_path)
-    _write_text_atomic(report_path, report)
+    report_path = context.publication.publish_report(report)
     return {
         "artifacts": {
-            "summary": summary_path.relative_to(context.study_dir).as_posix(),
-            "report": report_path.relative_to(context.study_dir).as_posix(),
+            "summary": summary_path.as_posix(),
+            "report": report_path.as_posix(),
             "tables": {name: path.as_posix() for name, path in table_paths.items()},
             "figures": {name: path.as_posix() for name, path in figure_paths.items()},
         },

@@ -99,6 +99,8 @@ def test_pending_baseline_cannot_read_a_preexisting_future_report_checkpoint(mon
     def baseline(context):
         observed["has_store"] = hasattr(context, "store")
         observed["has_read_stage"] = hasattr(context, "read_stage")
+        observed["has_study_dir"] = hasattr(context, "study_dir")
+        observed["publication"] = context.publication
         observed["prerequisites"] = context.prerequisites
         return {"stage": "baseline"}
 
@@ -109,7 +111,10 @@ def test_pending_baseline_cannot_read_a_preexisting_future_report_checkpoint(mon
 
     run_research(resolved, resume=True)
 
-    assert observed == {"has_store": False, "has_read_stage": False, "prerequisites": {}}
+    assert observed == {
+        "has_store": False, "has_read_stage": False, "has_study_dir": False,
+        "publication": None, "prerequisites": {},
+    }
 
 
 def test_runner_recovers_from_corrupt_checkpoint_at_that_stage(monkeypatch, tmp_path: Path):
@@ -152,7 +157,7 @@ def test_real_minimal_analytical_stages_reach_selection(monkeypatch, tmp_path: P
 
 def test_report_stage_publishes_eight_linked_tables_and_figures(monkeypatch, tmp_path: Path):
     """Report publication must verify links after every target is atomically written."""
-    from antenna_diversity.studies.runner import _report
+    from antenna_diversity.studies.runner import _publication_for, _report
     from antenna_diversity.studies.artifacts import StudyStore
     from antenna_diversity.studies.report import verify_report_links
     from tests.study_helpers import completed_tables_for_reporting
@@ -169,7 +174,7 @@ def test_report_stage_publishes_eight_linked_tables_and_figures(monkeypatch, tmp
         "full_chain": {"metrics": tables["full_chain_validation"], "cn0": tables["full_chain_cn0"]},
     }
     context = __import__("antenna_diversity.studies.runner", fromlist=["StageContext"]).StageContext(
-        resolved, checkpoints, study_dir=store.study_dir, manifest=store.manifest,
+        resolved, checkpoints, publication=_publication_for(store.study_dir), manifest=store.manifest,
     )
 
     payload = _report(context)
@@ -177,3 +182,27 @@ def test_report_stage_publishes_eight_linked_tables_and_figures(monkeypatch, tmp
     assert set(payload["artifacts"]["tables"]) == set(tables)
     assert len(payload["artifacts"]["figures"]) == 8
     verify_report_links((store.study_dir / "report.md").read_text(encoding="utf-8"), store.study_dir / "report.md")
+
+
+def test_report_context_publication_has_only_fixed_publication_actions(monkeypatch, tmp_path: Path):
+    """Report adapters get fixed publication actions, never a writable artifact root."""
+    observed: dict[str, object] = {}
+    resolved = resolved_for_test(output_dir=tmp_path, name="publication-surface")
+
+    def report(context):
+        observed["context_attrs"] = set(vars(context))
+        observed["publication_attrs"] = {
+            name for name in dir(context.publication)
+            if not name.startswith("_")
+        }
+        return {"artifacts": {}, "record_counts": {}}
+
+    monkeypatch.setattr(
+        "antenna_diversity.studies.runner._STAGE_FUNCTIONS",
+        {**{name: lambda context, name=name: {"stage": name} for name in STAGES}, "report": report},
+    )
+
+    run_research(resolved)
+
+    assert observed["context_attrs"] == {"resolved", "prerequisites", "publication", "manifest"}
+    assert observed["publication_attrs"] == {"publish_report", "save_figures", "write_summary", "write_tables"}
