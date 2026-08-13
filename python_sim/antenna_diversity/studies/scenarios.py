@@ -1,7 +1,8 @@
 """Stable spatial-study scenario definitions and deterministic perturbations.
 
-The combined-error draw order is azimuth, elevation (redrawn alone until
-valid), per-corner XYZ position, per-corner amplitude, then per-corner phase.
+The combined-error draw order is azimuth, signed elevation (redrawn alone
+until the perturbed true elevation is valid), per-corner XYZ position,
+per-corner amplitude, then per-corner phase.
 """
 
 from __future__ import annotations
@@ -107,6 +108,10 @@ def sample_combined_errors(
     count = resolved.study.combined_error_samples_per_level if sample_count is None else sample_count
     if not isinstance(count, int) or count < 1:
         raise ValueError("sample_count must be a positive integer")
+    true_direction = resolved.simulation.signal.true_direction
+    if true_direction is None:
+        raise ValueError("combined error sampling requires a true target direction")
+    true_target_elevation_deg = true_direction.elevation_deg
 
     namespace = f"combined-error:{level_name}:{'+'.join(combination)}"
     realizations = []
@@ -115,7 +120,7 @@ def sample_combined_errors(
         rng = np.random.default_rng(child_seed)
         azimuth_error = float(rng.normal(0.0, level.direction_sigma_deg))
         elevation_error = float(rng.normal(0.0, level.direction_sigma_deg))
-        while not 0.0 <= elevation_error <= 90.0:
+        while not 0.0 <= true_target_elevation_deg + elevation_error <= 90.0:
             elevation_error = float(rng.normal(0.0, level.direction_sigma_deg))
         position_errors = {
             corner: tuple(float(rng.normal(0.0, level.position_sigma_m)) for _ in range(3))

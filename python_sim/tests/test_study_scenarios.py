@@ -1,5 +1,6 @@
 import copy
 import json
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -93,9 +94,9 @@ def test_combined_error_sampling_redraws_only_invalid_elevation(monkeypatch):
         def __init__(self):
             self.calls = []
             self.values = iter((
-                1.0, -2.0, 3.0,
+                1.0, -61.0, -2.0,
                 0.1, 0.2, 0.3, 0.4, 0.5, 0.6,
-                0.7, 0.8, 0.9, 1.0,
+                0.7, 0.8, 0.9, 1.0, 1.1,
             ))
 
         def normal(self, loc, scale, size=None):
@@ -111,8 +112,27 @@ def test_combined_error_sampling_redraws_only_invalid_elevation(monkeypatch):
     sample = sample_combined_errors(resolved, "light", ("TL", "BR"), 1)[0]
 
     assert sample.azimuth_error_deg == 1.0
-    assert sample.elevation_error_deg == 3.0
+    assert sample.elevation_error_deg == -2.0
     assert [call[2] for call in rng.calls[:3]] == [None, None, None]
+
+
+def test_combined_error_sampling_keeps_valid_negative_elevation_errors():
+    resolved = resolve_study_config(preset="quick")
+
+    samples = sample_combined_errors(resolved, "light", ("TL", "BR"), 20)
+
+    assert any(sample.elevation_error_deg < 0.0 for sample in samples)
+    assert all(0.0 <= 60.0 + sample.elevation_error_deg <= 90.0 for sample in samples)
+
+
+def test_combined_error_sampling_requires_true_target_direction():
+    resolved = resolve_study_config(preset="quick")
+    simulation = resolved.simulation
+    simulation.signal.true_direction = None
+    incomplete = SimpleNamespace(study=resolved.study, simulation=simulation)
+
+    with pytest.raises(ValueError, match="true target direction"):
+        sample_combined_errors(incomplete, "light", ("TL", "BR"), 1)
 
 
 def test_multi_jammer_cases_preserve_exact_template_values_and_json_snapshots():
