@@ -219,7 +219,7 @@ def _knee_row(combination: tuple[str, ...], rows: Sequence[Mapping[str, object]]
     if slopes:
         maximum = max(value for value, _ in slopes)
         return min(
-            (row for value, row in slopes if np.isclose(value, maximum, rtol=0.0, atol=1e-12)),
+            (row for value, row in slopes if value == maximum),
             key=lambda row: (float(row["absolute_normalized_severity"]), *_curve_tie_key(row)),
         )
     return None
@@ -230,11 +230,14 @@ def _usable_knee_row(row: Mapping[str, object]) -> bool:
         "factor", "signed_value", "absolute_normalized_severity",
         "mvdr_minus_egc_sinr_db", "mvdr_output_sinr_db", "egc_output_sinr_db",
     )
-    if any(name not in row for name in required) or str(row["factor"]) not in _FACTOR_INDEX:
+    if any(name not in row for name in required):
         return False
     try:
-        return all(np.isfinite(float(row[name])) for name in required[1:])
-    except (TypeError, ValueError):
+        return (
+            _valid_single_factor_parameters(row, tuple(str(name) for name in row["active_antennas"]))
+            and all(_is_finite_real_scalar(row[name]) for name in required[1:])
+        )
+    except (KeyError, TypeError, ValueError):
         return False
 
 
@@ -277,7 +280,6 @@ def _validate_case(case: StudyCase, resolved: ResolvedStudyConfig) -> None:
         raise ValueError(f"selected case has unknown combination: {'+'.join(case.active_antennas)}")
     if case.mode not in {"single", "egc", "mvdr"}:
         raise ValueError(f"selected case has unknown mode: {case.mode}")
-    strict_snapshot(case.parameters)
     parameters = case.parameters
     if case.stage in {"representative_direction", "multi_jammer", "full_chain"}:
         _require_case_parameters(case, parameters, {"interferers"})
@@ -286,8 +288,8 @@ def _validate_case(case: StudyCase, resolved: ResolvedStudyConfig) -> None:
     elif case.stage == "single_factor":
         _require_case_parameters(case, parameters, {"single_factor"})
         factor = parameters["single_factor"]
-        if not isinstance(factor, Mapping) or not {"factor", "value", "corner", "axis"} <= set(factor):
-            raise ValueError("selected case single_factor lacks reconstruction parameters")
+        if not isinstance(factor, Mapping) or not _valid_single_factor_parameters(factor, case.active_antennas):
+            raise ValueError("selected case single_factor has invalid reconstruction parameters")
     elif case.stage == "combined_error":
         _require_case_parameters(case, parameters, {"level", "sample_index", "child_seed", "realization"})
         realization = parameters["realization"]
@@ -299,9 +301,39 @@ def _validate_case(case: StudyCase, resolved: ResolvedStudyConfig) -> None:
             raise ValueError("selected case combined_error lacks reconstruction parameters")
     else:
         raise ValueError(f"unsupported selected case stage: {case.stage}")
+    strict_snapshot(case.parameters)
 
 
 def _require_case_parameters(case: StudyCase, parameters: Mapping[str, object], required: set[str]) -> None:
     missing = required - set(parameters)
     if missing:
         raise ValueError(f"selected case {case.stage} lacks reconstruction parameter: {sorted(missing)[0]}")
+
+
+def _valid_single_factor_parameters(parameters: Mapping[str, object], combination: tuple[str, ...]) -> bool:
+    required = {"factor", "value", "corner", "axis"}
+    if not required <= set(parameters):
+        return False
+    factor = parameters["factor"]
+    if not isinstance(factor, str) or factor not in _FACTOR_INDEX:
+        return False
+    if not _is_finite_real_scalar(parameters["value"]):
+        return False
+    corner, axis = parameters["corner"], parameters["axis"]
+    if factor == "position":
+        return corner in combination and axis in {"x", "y", "z"}
+    if factor in {"amplitude", "phase"}:
+        return corner in combination and axis is None
+    return corner is None and axis is None
+
+
+def _is_finite_real_scalar(value: object) -> bool:
+    if isinstance(value, (bool, complex)):
+        return False
+    candidate = np.asarray(value)
+    return (
+        candidate.ndim == 0
+        and np.issubdtype(candidate.dtype, np.number)
+        and not np.issubdtype(candidate.dtype, np.complexfloating)
+        and bool(np.isfinite(candidate))
+    )
