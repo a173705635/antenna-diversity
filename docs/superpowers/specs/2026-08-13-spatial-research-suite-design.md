@@ -212,8 +212,8 @@ EGC 和 MVDR 可以对全部 11 种子阵或用户指定的任意合法子集运
 - `typical`：主排名居中，偶数时采用排序后较低的中央索引，保证唯一；
 - `worst`：主排名最低；
 - `knee`：在 best 组合的单因素误差扫描中，MVDR 相对 EGC 的输出 SINR 优势最早小于或等于 0 dB 的点；
-- 三个多干扰模板；
-- extended 额外加入轻度、中度和重度综合误差代表样本；
+- 三个多干扰模板：全部使用理想主排名的 best 组合；
+- extended 额外加入轻度、中度和重度综合误差代表样本：分别在 best 组合、MVDR 模式下选择输出 SINR 最接近该等级样本中位数的 realization，并以 `sample_index` 作为并列决胜；
 - 用户手动指定的场景始终保留，不被自动筛选覆盖。
 
 自动角色以 `case_id` 去重；同一个场景若同时承担 best、typical 或 worst 等多个角色，只运行一次，并保存全部选择原因。因此“自动完整链路场景数”是上限，不保证在组合很少或曲线不具备 knee 时达到该数量。缺少 EGC 或 MVDR 时无法定义二者优势的 knee，该角色被明确记为 `not_selected`，其他场景仍可完成。
@@ -298,7 +298,8 @@ python_sim/results/studies/<study-name>/
 │  ├─ robustness_scans.csv
 │  ├─ combined_errors.csv
 │  ├─ multi_jammer.csv
-│  └─ full_chain_validation.csv
+│  ├─ full_chain_validation.csv
+│  └─ full_chain_cn0.csv
 ├─ figures/
 │  └─ *.png
 └─ checkpoints/
@@ -308,7 +309,7 @@ python_sim/results/studies/<study-name>/
 - CSV 使用 UTF-8 长表，一行对应一个组合、模式、场景和采样点，便于 pandas、Excel 和 MATLAB 读取；
 - JSON 使用严格 JSON，禁止 `NaN` 和 `Infinity`，不可用数据写 `null` 并附原因字段；
 - 默认不保存完整 RF、ADC、DFE 和相关器数组；
-- C/N₀ 曲线默认保存时间轴和标量序列；
+- C/N₀ 曲线在 `full_chain_cn0.csv` 中按场景、模式、种子和 epoch 保存时间轴与有限标量值；不可用原因保存在 `full_chain_validation.csv` 的分支汇总行；
 - 每条结果能追溯到组合、模式、场景、参数、随机种子和选择原因。
 
 ### 9.4 Manifest 与配置哈希
@@ -322,7 +323,7 @@ python_sim/results/studies/<study-name>/
 - 各阶段状态、记录数和错误摘要；
 - 最终报告和表格路径。
 
-配置哈希覆盖所有会影响科学结果和筛选规则的解析后字段，不覆盖输出目录、显示开关和 `resume` 标志。已有目录默认拒绝覆盖。只有配置哈希和 schema 版本完全一致时 `--resume` 才可复用检查点。
+配置哈希覆盖所有会影响科学结果和筛选规则的解析后字段，不覆盖研究名称、预设名称、输出目录、显示开关和 `resume` 标志；预设展开后的实际轴、样本数和场景仍参与哈希。已有目录默认拒绝覆盖。只有配置哈希和 schema 版本完全一致时 `--resume` 才可复用检查点。
 
 ## 10. 检查点、失败语义和恢复
 
