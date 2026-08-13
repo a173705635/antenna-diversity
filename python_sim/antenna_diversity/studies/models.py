@@ -130,6 +130,23 @@ class StudyCase:
 
 
 @dataclass(frozen=True)
+class StageRecords:
+    """Normalized strict-JSON rows emitted by one study stage."""
+
+    name: str
+    tables: dict[str, tuple[dict[str, object], ...]]
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "name": self.name,
+            "tables": {
+                key: [dict(row) for row in rows]
+                for key, rows in self.tables.items()
+            },
+        }
+
+
+@dataclass(frozen=True)
 class CombinedErrorRealization:
     level: str
     sample_index: int
