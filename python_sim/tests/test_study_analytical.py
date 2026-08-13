@@ -1,9 +1,11 @@
 import copy
 import json
+from dataclasses import replace
 
 import numpy as np
 import pytest
 
+from antenna_diversity.config import CWInterferer, Direction
 from antenna_diversity.experiments.spatial_scan import evaluate_configuration_spatially
 from antenna_diversity.studies.analytical import (
     run_baseline,
@@ -12,6 +14,7 @@ from antenna_diversity.studies.analytical import (
     run_single_factor_studies,
 )
 from antenna_diversity.studies.config import resolve_study_config
+from antenna_diversity.studies.models import InterfererTemplate, ResolvedStudyConfig
 
 
 def test_baseline_emits_single_corner_references_and_requested_subarrays():
@@ -153,6 +156,18 @@ def test_single_factor_changes_assumed_values_only_and_keeps_zero_baseline():
     assert resolved.to_dict() == before
 
 
+def test_single_factor_loading_severity_is_normalized_log_distance_from_default():
+    resolved = _robustness_config()
+
+    rows = run_single_factor_studies(resolved).tables["single_factor"]
+    severity = {
+        row["value"]: row["absolute_normalized_severity"]
+        for row in rows if row["factor"] == "loading"
+    }
+
+    assert severity == {1e-3: pytest.approx(1.0), 1e-2: pytest.approx(0.0), 1e-1: pytest.approx(1.0)}
+
+
 def test_combined_error_studies_copy_saved_realizations_and_are_deterministic():
     resolved = _robustness_config()
 
@@ -179,3 +194,22 @@ def test_multi_jammer_studies_preserve_enabled_pressure_cases():
     stress = [row for row in rows if row["template"] == "three_jammer_stress"]
     assert stress and all(row["enabled_interferer_count"] == 3 for row in stress)
     assert all(np.isfinite(row["worst_interferer_gain"]) for row in rows)
+
+
+def test_multi_jammer_studies_keep_duplicate_named_template_definitions_distinct():
+    base = _robustness_config()
+    templates = (
+        InterfererTemplate("duplicate", (CWInterferer(Direction(25.0, 10.0), power_dbm=-81.0),)),
+        InterfererTemplate("duplicate", (CWInterferer(Direction(260.0, 35.0), power_dbm=-103.0),)),
+    )
+    resolved = ResolvedStudyConfig.from_parts(
+        replace(base.study, multi_jammer_templates=templates), base.simulation
+    )
+
+    rows = run_multi_jammer_studies(resolved).tables["multi_jammer"]
+    definitions = {
+        (row["interferers"][0]["direction"]["azimuth_deg"], row["interferers"][0]["power_dbm"])
+        for row in rows
+    }
+
+    assert definitions == {(25.0, -81.0), (260.0, -103.0)}

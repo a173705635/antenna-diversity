@@ -64,7 +64,9 @@ def run_single_factor_studies(resolved: ResolvedStudyConfig) -> StageRecords:
                 rows.append(_robustness_row(
                     stage="single_factor", combination=combination, metrics=metrics,
                     parameters={"factor": factor, "value": value, "corner": corner, "axis": axis},
-                    factor=factor, value=value, severity=_severity(value, values), corner=corner, axis=axis,
+                    factor=factor, value=value,
+                    severity=_severity(factor, value, values, resolved.simulation.diversity.diagonal_loading_factor),
+                    corner=corner, axis=axis,
                     true_geometry_unchanged=True, true_state_unchanged=True,
                     zero_matches_baseline=(not is_zero or _matched_metrics_match(metrics, baseline)),
                     default_loading=(factor != "loading" or value == resolved.simulation.diversity.diagonal_loading_factor),
@@ -100,12 +102,9 @@ def run_multi_jammer_studies(resolved: ResolvedStudyConfig) -> StageRecords:
     rows = []
     for combination in resolved.study.combinations:
         for mode in resolved.study.spatial_modes:
-            for case in build_multi_jammer_cases(resolved, resolved.simulation, combination, mode):
+            cases = build_multi_jammer_cases(resolved, resolved.simulation, combination, mode)
+            for case, template in zip(cases, resolved.study.multi_jammer_templates, strict=True):
                 simulation = _case_configuration(resolved, combination)
-                template = next(
-                    template for template in resolved.study.multi_jammer_templates
-                    if template.name == case.parameters["template"]
-                )
                 simulation.interferers = tuple(copy.deepcopy(template.interferers))
                 metrics = evaluate_configuration_spatially(simulation, mode).metrics
                 enabled = [interferer for interferer in simulation.interferers if interferer.enable]
@@ -243,9 +242,15 @@ def _robustness_row(*, stage, combination, metrics, parameters, **fields):
     return strict_snapshot(row)  # type: ignore[return-value]
 
 
-def _severity(value: float, values) -> float:
-    maximum = float(np.max(np.abs(values)))
-    return 0.0 if maximum == 0.0 else abs(value) / maximum
+def _severity(factor: str, value: float, values, default_loading: float) -> float:
+    if factor == "loading":
+        distances = np.abs(np.log10(np.asarray(values, dtype=float) / default_loading))
+        maximum = float(np.max(distances))
+        raw = abs(float(np.log10(value / default_loading)))
+    else:
+        maximum = float(np.max(np.abs(values)))
+        raw = abs(value)
+    return 0.0 if maximum == 0.0 else raw / maximum
 
 
 def _matched_metrics_match(first, second) -> bool:
