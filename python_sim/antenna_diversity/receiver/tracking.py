@@ -22,6 +22,35 @@ def _wrap_phase(phase_rad: float) -> float:
     return float(np.mod(phase_rad + np.pi, 2.0 * np.pi) - np.pi)
 
 
+def estimate_cn0_db_hz(
+    prompt_window: ArrayLike,
+    coherent_interval_s: float,
+) -> float:
+    """Estimate C/N0 from a window of coherent Prompt correlators."""
+
+    prompt_samples = np.asarray(prompt_window, dtype=np.complex128)
+    if prompt_samples.ndim != 1:
+        raise ValueError("prompt_window must be one-dimensional")
+    if not np.isfinite(coherent_interval_s) or coherent_interval_s <= 0.0:
+        raise ValueError("coherent_interval_s must be finite and positive")
+    if prompt_samples.size < 2:
+        return float("nan")
+
+    coherent_power = abs(np.mean(prompt_samples)) ** 2
+    total_power = np.mean(np.abs(prompt_samples) ** 2)
+    eps = np.finfo(float).eps
+    noise_power = max(float(total_power - coherent_power), eps)
+    return float(
+        10.0
+        * np.log10(
+            max(
+                coherent_power / (noise_power * coherent_interval_s),
+                eps,
+            )
+        )
+    )
+
+
 def track(
     x: ArrayLike,
     fs_hz: float,
@@ -163,13 +192,10 @@ def track(
         phase_lock_metric[epoch] = abs(np.sum(prompt_window)) / (
             np.sum(np.abs(prompt_window)) + eps
         )
-        if prompt_window.size >= 2:
-            coherent_power = abs(np.mean(prompt_window)) ** 2
-            total_power = np.mean(np.abs(prompt_window) ** 2)
-            noise_power = max(float(total_power - coherent_power), eps)
-            cn0_db_hz[epoch] = 10.0 * np.log10(
-                max(coherent_power / (noise_power * epoch_duration_s), eps)
-            )
+        cn0_db_hz[epoch] = estimate_cn0_db_hz(
+            prompt_window,
+            epoch_duration_s,
+        )
 
     return {
         "success": True,

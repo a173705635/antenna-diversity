@@ -109,7 +109,7 @@ def format_metrics(metrics: list[dict[str, Any]]) -> str:
         ("PllRms", "pll_rms_rad", 9),
         ("DllRms", "dll_rms", 9),
         ("MeanPrompt", "mean_prompt_magnitude", 12),
-        ("FinalCn0", "final_cn0_db_hz", 10),
+        ("FinalCn0DbHz", "final_cn0_db_hz", 13),
     )
     header = " ".join(title.rjust(width) for title, _, width in columns)
     separator = " ".join("-" * width for _, _, width in columns)

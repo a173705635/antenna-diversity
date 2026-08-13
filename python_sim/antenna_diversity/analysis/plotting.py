@@ -464,6 +464,58 @@ def plot_tracking(results: SimulationResults) -> Figure:
     return figure
 
 
+def plot_cn0(results: SimulationResults) -> Figure:
+    """Plot measured tracking C/N0 for every available branch."""
+
+    figure, axis = plt.subplots(figsize=(10, 5), constrained_layout=True)
+    unavailable_messages: list[str] = []
+    for mode, branch in results.branches.items():
+        tracking = branch.tracking
+        if not branch.acquisition.get("success", False):
+            unavailable_messages.append(
+                f"{mode.upper()}: acquisition failed – C/N₀ unavailable"
+            )
+            continue
+        if not tracking.get("success", False):
+            unavailable_messages.append(
+                f"{mode.upper()}: tracking unavailable – C/N₀ unavailable"
+            )
+            continue
+
+        epoch_starts = np.asarray(tracking["epoch_start_samples"])
+        cn0_db_hz = np.asarray(tracking["cn0_db_hz"])
+        if (
+            epoch_starts.ndim != 1
+            or cn0_db_hz.ndim != 1
+            or epoch_starts.size != cn0_db_hz.size
+        ):
+            raise ValueError(f"{mode} C/N0 tracking arrays have inconsistent length")
+        finite = np.isfinite(cn0_db_hz)
+        if not np.any(finite):
+            unavailable_messages.append(
+                f"{mode.upper()}: tracking unavailable – C/N₀ unavailable"
+            )
+            continue
+        time_ms = epoch_starts / results.config.dfe.fs_out_hz * 1e3
+        axis.plot(time_ms[finite], cn0_db_hz[finite], label=mode.upper())
+
+    for index, message in enumerate(unavailable_messages):
+        axis.text(
+            0.02,
+            0.98 - 0.07 * index,
+            message,
+            transform=axis.transAxes,
+            va="top",
+        )
+    axis.grid(True)
+    axis.set_xlabel("Tracking time (ms)")
+    axis.set_ylabel("Estimated C/N₀ (dB-Hz)")
+    axis.set_title("Tracking C/N₀ comparison")
+    if axis.lines:
+        axis.legend(loc="best")
+    return figure
+
+
 def plot_results(results: SimulationResults) -> dict[str, Figure]:
     """Create every standard simulation diagnostic figure."""
 
@@ -473,6 +525,7 @@ def plot_results(results: SimulationResults) -> dict[str, Figure]:
         "array_response": plot_array_response(results),
         "acquisition_search": plot_acquisition(results),
         "tracking_comparison": plot_tracking(results),
+        "cn0_comparison": plot_cn0(results),
     }
 
 
