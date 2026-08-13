@@ -148,6 +148,15 @@ class SelectionResult:
 
 
 @dataclass(frozen=True)
+class FullChainRecords:
+    metrics: tuple[dict[str, object], ...]
+    cn0: tuple[dict[str, object], ...]
+
+    def to_dict(self) -> dict[str, object]:
+        return strict_snapshot(self)  # type: ignore[return-value]
+
+
+@dataclass(frozen=True)
 class StageRecords:
     """Normalized strict-JSON rows emitted by one study stage."""
 
