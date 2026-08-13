@@ -102,7 +102,7 @@ def test_cn0_plot_rejects_mismatched_tracking_arrays():
         plot_cn0(results)
 
 
-def test_plot_results_produces_five_named_figures(tmp_path):
+def test_plot_results_produces_six_named_figures(tmp_path):
     """Catch omission of a stage-level diagnostic figure from the full report."""
     cfg = default_config()
     cfg.plot.enable = False
@@ -117,6 +117,7 @@ def test_plot_results_produces_five_named_figures(tmp_path):
         "array_response",
         "acquisition_search",
         "tracking_comparison",
+        "cn0_comparison",
     }
     assert all(path.is_file() and path.stat().st_size > 0 for path in paths.values())
     for figure in figures.values():
@@ -292,3 +293,4 @@ def test_cli_avoids_show_warning_with_noninteractive_backend(script):
     )
 
     assert completed.returncode == 0, completed.stderr
+    assert "cn0_comparison:" in completed.stdout

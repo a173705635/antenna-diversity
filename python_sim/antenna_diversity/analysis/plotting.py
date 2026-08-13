@@ -525,6 +525,7 @@ def plot_results(results: SimulationResults) -> dict[str, Figure]:
         "array_response": plot_array_response(results),
         "acquisition_search": plot_acquisition(results),
         "tracking_comparison": plot_tracking(results),
+        "cn0_comparison": plot_cn0(results),
     }
 
 

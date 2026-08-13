@@ -80,6 +80,7 @@ def test_metric_formatter_includes_every_branch_and_tracking_state():
     assert "mvdr" in table
     assert "Acquired" in table
     assert "Tracking" in table
+    assert "FinalCn0DbHz" in table
 
 
 def test_phone_pipeline_uses_assumed_target_steering_for_weights():
