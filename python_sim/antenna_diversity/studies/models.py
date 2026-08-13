@@ -130,6 +130,24 @@ class StudyCase:
 
 
 @dataclass(frozen=True)
+class RankingResult:
+    summaries: tuple[dict[str, object], ...]
+    ranked_combinations: tuple[tuple[str, ...], ...]
+
+    def to_dict(self) -> dict[str, object]:
+        return strict_snapshot(self)  # type: ignore[return-value]
+
+
+@dataclass(frozen=True)
+class SelectionResult:
+    cases: tuple[StudyCase, ...]
+    unselected_roles: dict[str, str]
+
+    def to_dict(self) -> dict[str, object]:
+        return strict_snapshot(self)  # type: ignore[return-value]
+
+
+@dataclass(frozen=True)
 class StageRecords:
     """Normalized strict-JSON rows emitted by one study stage."""
 
