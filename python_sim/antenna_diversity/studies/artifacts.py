@@ -228,17 +228,17 @@ class StudyStore:
         }
         if set(manifest) != required:
             raise ValueError("invalid study manifest schema")
-        if manifest["schema_version"] != MANIFEST_SCHEMA_VERSION:
+        if type(manifest["schema_version"]) is not int or manifest["schema_version"] != MANIFEST_SCHEMA_VERSION:
             raise ValueError("unsupported manifest schema")
         if manifest["name"] != resolved.study.name or not isinstance(manifest["name"], str):
             raise ValueError("invalid study manifest name")
-        if manifest["status"] not in _MANIFEST_STATUSES:
+        if not isinstance(manifest["status"], str) or manifest["status"] not in _MANIFEST_STATUSES:
             raise ValueError("invalid study manifest status")
         if not all(isinstance(manifest[key], str) for key in ("created_at_utc", "updated_at_utc", "configuration_sha256")):
             raise ValueError("invalid study manifest metadata")
         if manifest["git_sha"] is not None and not isinstance(manifest["git_sha"], str):
             raise ValueError("invalid study manifest Git metadata")
-        if manifest["git_status"] not in {"available", "git_unavailable"}:
+        if not isinstance(manifest["git_status"], str) or manifest["git_status"] not in {"available", "git_unavailable"}:
             raise ValueError("invalid study manifest Git metadata")
         if not isinstance(manifest["environment"], dict) or not all(
             isinstance(key, str) and isinstance(value, str) for key, value in manifest["environment"].items()
@@ -260,7 +260,12 @@ class StudyStore:
         required = {"status", "record_count", "checkpoint_sha256", "checkpoint_path", "error"}
         if not isinstance(record, dict) or set(record) != required:
             raise ValueError(f"invalid study manifest stage: {name}")
-        if record["status"] not in _STAGE_STATUSES or not _is_int(record["record_count"]) or record["record_count"] < 0:
+        if (
+            not isinstance(record["status"], str)
+            or record["status"] not in _STAGE_STATUSES
+            or not _is_int(record["record_count"])
+            or record["record_count"] < 0
+        ):
             raise ValueError(f"invalid study manifest stage: {name}")
         for key in ("checkpoint_sha256", "checkpoint_path"):
             if record[key] is not None and not isinstance(record[key], str):

@@ -129,6 +129,35 @@ def test_resume_rejects_malformed_canonical_stage_record(tmp_path: Path):
         StudyStore.resume(resolved)
 
 
+@pytest.mark.parametrize(
+    ("field", "value", "match"),
+    [
+        ("status", [], "status"),
+        ("git_status", {}, "Git"),
+        ("stage_status", [], "baseline"),
+        ("stage_status", {}, "baseline"),
+        ("schema_version", True, "schema"),
+        ("schema_version", 1.0, "schema"),
+        ("schema_version", "1", "schema"),
+    ],
+)
+def test_resume_rejects_non_scalar_manifest_enums_and_schema_types(
+    tmp_path: Path, field: str, value: object, match: str
+):
+    """Enum-like manifest fields reject unhashable and lookalike JSON values safely."""
+    resolved = resolved_for_test(output_dir=tmp_path, name="artifact-test")
+    store = StudyStore.create(resolved)
+    manifest = json.loads(store.manifest_path.read_text(encoding="utf-8"))
+    if field == "stage_status":
+        manifest["stages"]["baseline"]["status"] = value
+    else:
+        manifest[field] = value
+    write_json_atomic(store.manifest_path, manifest)
+
+    with pytest.raises(ValueError, match=match):
+        StudyStore.resume(resolved)
+
+
 def test_csv_uses_caller_field_order_and_rejects_unknown_fields(tmp_path: Path):
     """CSV table shape comes from its public caller-supplied schema."""
     destination = tmp_path / "rows.csv"
