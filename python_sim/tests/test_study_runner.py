@@ -1,6 +1,11 @@
 from dataclasses import replace
 from pathlib import Path
 
+import matplotlib
+
+matplotlib.use("Agg", force=True)
+
+import matplotlib.pyplot as plt
 import pytest
 
 from antenna_diversity.studies.runner import STAGES, run_research
@@ -182,6 +187,46 @@ def test_report_stage_publishes_eight_linked_tables_and_figures(monkeypatch, tmp
     assert set(payload["artifacts"]["tables"]) == set(tables)
     assert len(payload["artifacts"]["figures"]) == 8
     verify_report_links((store.study_dir / "report.md").read_text(encoding="utf-8"), store.study_dir / "report.md")
+
+
+def test_publication_repeatedly_saves_without_leaking_owned_figures(tmp_path: Path):
+    """Repeated report publication must not accumulate its eight owned figures."""
+    from antenna_diversity.studies.runner import _publication_for
+    from tests.study_helpers import completed_tables_for_reporting
+
+    external = plt.figure()
+    figures_before = set(plt.get_fignums())
+    try:
+        publication = _publication_for(tmp_path)
+        for _ in range(3):
+            publication.save_figures(completed_tables_for_reporting())
+
+        assert set(plt.get_fignums()) == figures_before
+    finally:
+        for figure_number in set(plt.get_fignums()) - figures_before:
+            plt.close(figure_number)
+        plt.close(external)
+
+
+def test_publication_closes_owned_figures_when_saving_raises(monkeypatch, tmp_path: Path):
+    """A failed save must release every figure created by report publication."""
+    from antenna_diversity.studies.runner import _publication_for
+    from tests.study_helpers import completed_tables_for_reporting
+
+    figures_before = set(plt.get_fignums())
+
+    def fail_save(figures, output_dir):
+        raise RuntimeError("figure save failed")
+
+    monkeypatch.setattr("antenna_diversity.studies.runner.save_study_figures", fail_save)
+    try:
+        with pytest.raises(RuntimeError, match="figure save failed"):
+            _publication_for(tmp_path).save_figures(completed_tables_for_reporting())
+
+        assert set(plt.get_fignums()) == figures_before
+    finally:
+        for figure_number in set(plt.get_fignums()) - figures_before:
+            plt.close(figure_number)
 
 
 def test_report_context_publication_has_only_fixed_publication_actions(monkeypatch, tmp_path: Path):

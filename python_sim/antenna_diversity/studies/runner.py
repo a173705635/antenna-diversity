@@ -10,6 +10,8 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Callable, Mapping, Sequence
 
+import matplotlib.pyplot as plt
+
 from .analytical import (
     run_baseline,
     run_combined_error_studies,
@@ -63,12 +65,17 @@ class _Publication:
     def save_figures(
         self, tables: Mapping[str, Sequence[Mapping[str, object]]],
     ) -> dict[str, Path]:
-        return {
-            name: path.relative_to(self.__root)
-            for name, path in save_study_figures(
-                plot_study_tables(tables), self.__root / "figures"
-            ).items()
-        }
+        figures = plot_study_tables(tables)
+        try:
+            return {
+                name: path.relative_to(self.__root)
+                for name, path in save_study_figures(
+                    figures, self.__root / "figures"
+                ).items()
+            }
+        finally:
+            for figure in figures.values():
+                plt.close(figure)
 
     def write_summary(self, summary: Mapping[str, object]) -> Path:
         path = self.__root / "summary.json"
