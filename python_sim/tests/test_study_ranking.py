@@ -74,8 +74,8 @@ def test_selection_deduplicates_best_typical_worst_and_keeps_manual_cases():
     resolved = resolved_for_test(
         combinations=(("TL", "BR"),), spatial_modes=("mvdr",), ranking_mode="mvdr",
         automatic_roles=("best", "typical", "worst"),
-        manual_cases=({"case_id": "manual", "stage": "manual", "active_antennas": ["TL", "BR"],
-                       "mode": "mvdr", "seed": 8, "parameters": {}},),
+        manual_cases=({"case_id": "manual", "stage": "full_chain", "active_antennas": ["TL", "BR"],
+                       "mode": "mvdr", "seed": 8, "parameters": {"interferers": []}},),
     )
     direction_rows = [_direction_row(("TL", "BR"), 5.0)]
     ranking = summarize_and_rank(direction_rows, resolved)
@@ -103,8 +103,8 @@ def test_knee_uses_steepest_decline_fallback_and_reports_missing_modes():
     direction_rows = [_direction_row(("TL", "BR"), 5.0)]
     ranking = summarize_and_rank(direction_rows, resolved)
     rows = [
-        {"active_antennas": ["TL", "BR"], "factor": "phase", "corner": "TL", "axis": None,
-         "value": value, "absolute_normalized_severity": severity,
+        {"stage": "single_factor", "active_antennas": ["TL", "BR"], "factor": "phase", "corner": "TL", "axis": None,
+         "value": value, "signed_value": value, "absolute_normalized_severity": severity,
          "mvdr_minus_egc_sinr_db": advantage, "mvdr_output_sinr_db": 3.0,
          "egc_output_sinr_db": 3.0 - advantage}
         for value, severity, advantage in ((0.0, 0.0, 6.0), (1.0, 0.5, 5.0), (2.0, 1.0, 1.0))
@@ -115,6 +115,72 @@ def test_knee_uses_steepest_decline_fallback_and_reports_missing_modes():
     assert selected.cases[0].parameters["single_factor"]["value"] == 2.0
     absent = select_representative_cases(ranking, direction_rows, (), (), resolved)
     assert absent.unselected_roles["knee"] == "no usable EGC/MVDR single-factor curves"
+
+
+def test_knee_ignores_combined_rows_and_nonfinite_single_factor_values():
+    resolved = resolved_for_test(combinations=(("TL", "BR"),), automatic_roles=("knee",))
+    direction_rows = [_direction_row(("TL", "BR"), 5.0)]
+    ranking = summarize_and_rank(direction_rows, resolved)
+    rows = [
+        {"stage": "single_factor", "active_antennas": ["TL", "BR"], "factor": "phase", "corner": "TL", "axis": None,
+         "value": value, "signed_value": value, "absolute_normalized_severity": severity,
+         "mvdr_minus_egc_sinr_db": advantage, "mvdr_output_sinr_db": 3.0, "egc_output_sinr_db": 3.0 - advantage}
+        for value, severity, advantage in ((0.0, 0.0, 3.0), (1.0, 1.0, -1.0))
+    ]
+    rows.extend((
+        {"stage": "combined_error", "active_antennas": ["TL", "BR"], "mvdr_output_sinr_db": 2.0,
+         "egc_output_sinr_db": 1.0, "signed_value": None, "absolute_normalized_severity": None},
+        {"stage": "single_factor", "active_antennas": ["TL", "BR"], "factor": "phase", "corner": "BR", "axis": None,
+         "value": 1.0, "signed_value": 1.0, "absolute_normalized_severity": float("nan"),
+         "mvdr_minus_egc_sinr_db": -5.0, "mvdr_output_sinr_db": 3.0, "egc_output_sinr_db": 8.0},
+    ))
+
+    selected = select_representative_cases(ranking, direction_rows, rows, (), resolved)
+
+    assert selected.cases[0].parameters["single_factor"]["corner"] == "TL"
+
+
+def test_knee_slope_ties_choose_lower_higher_endpoint_severity_before_factor_order():
+    resolved = resolved_for_test(combinations=(("TL", "BR"),), automatic_roles=("knee",))
+    direction_rows = [_direction_row(("TL", "BR"), 5.0)]
+    ranking = summarize_and_rank(direction_rows, resolved)
+    rows = [
+        {"stage": "single_factor", "case_id": case_id, "active_antennas": ["TL", "BR"], "factor": factor,
+         "corner": None, "axis": None, "value": value, "signed_value": value,
+         "absolute_normalized_severity": severity, "mvdr_minus_egc_sinr_db": advantage,
+         "mvdr_output_sinr_db": 5.0, "egc_output_sinr_db": 5.0 - advantage}
+        for factor, case_id, value, severity, advantage in (
+            ("phase", "phase-zero", 0.0, 0.0, 3.0),
+            ("phase", "phase-half", 1.0, 0.5, 2.0),
+            ("direction_azimuth", "az-zero", 0.0, 0.0, 4.0),
+            ("direction_azimuth", "az-one", 1.0, 1.0, 2.0),
+        )
+    ]
+
+    selected = select_representative_cases(ranking, direction_rows, rows, (), resolved)
+
+    assert selected.cases[0].parameters["single_factor"]["case_id"] == "phase-half"
+
+
+def test_selection_rejects_manual_case_with_unsupported_stage_or_missing_reconstruction_inputs():
+    resolved = resolved_for_test(
+        combinations=(("TL", "BR"),), automatic_roles=(),
+        manual_cases=({"case_id": "banana", "stage": "banana", "active_antennas": ["TL", "BR"],
+                       "mode": "mvdr", "seed": None, "parameters": {"any": "json"}},),
+    )
+    direction_rows = [_direction_row(("TL", "BR"), 5.0)]
+    ranking = summarize_and_rank(direction_rows, resolved)
+
+    with pytest.raises(ValueError, match="unsupported selected case stage"):
+        select_representative_cases(ranking, direction_rows, (), (), resolved)
+
+    missing_parameters = resolved_for_test(
+        combinations=(("TL", "BR"),), automatic_roles=(),
+        manual_cases=({"case_id": "incomplete", "stage": "full_chain", "active_antennas": ["TL", "BR"],
+                       "mode": "mvdr", "seed": None, "parameters": {}},),
+    )
+    with pytest.raises(ValueError, match="lacks reconstruction parameter: interferers"):
+        select_representative_cases(ranking, direction_rows, (), (), missing_parameters)
 
 
 def test_selection_uses_saved_rows_without_rerunning_analytical_code(monkeypatch):

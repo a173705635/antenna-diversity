@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Iterable, Mapping, Sequence
-from typing import Any
-
 import numpy as np
 
 from antenna_diversity.array.geometry import CORNER_ORDER
@@ -190,7 +188,12 @@ def _robustness_case(role: str, row: Mapping[str, object], resolved: ResolvedStu
 
 
 def _knee_row(combination: tuple[str, ...], rows: Sequence[Mapping[str, object]]) -> Mapping[str, object] | None:
-    matched = [row for row in rows if tuple(row.get("active_antennas", ())) == combination and "mvdr_output_sinr_db" in row and "egc_output_sinr_db" in row]
+    matched = [
+        row for row in rows
+        if row.get("stage") == "single_factor"
+        and tuple(row.get("active_antennas", ())) == combination
+        and _usable_knee_row(row)
+    ]
     groups: dict[tuple[object, object, object], list[Mapping[str, object]]] = defaultdict(list)
     for row in matched:
         groups[(row.get("factor"), row.get("corner"), row.get("axis"))].append(row)
@@ -215,8 +218,24 @@ def _knee_row(combination: tuple[str, ...], rows: Sequence[Mapping[str, object]]
         return min(crossings, key=lambda row: (float(row["absolute_normalized_severity"]), *_curve_tie_key(row)))
     if slopes:
         maximum = max(value for value, _ in slopes)
-        return min((row for value, row in slopes if value == maximum), key=_curve_tie_key)
+        return min(
+            (row for value, row in slopes if np.isclose(value, maximum, rtol=0.0, atol=1e-12)),
+            key=lambda row: (float(row["absolute_normalized_severity"]), *_curve_tie_key(row)),
+        )
     return None
+
+
+def _usable_knee_row(row: Mapping[str, object]) -> bool:
+    required = (
+        "factor", "signed_value", "absolute_normalized_severity",
+        "mvdr_minus_egc_sinr_db", "mvdr_output_sinr_db", "egc_output_sinr_db",
+    )
+    if any(name not in row for name in required) or str(row["factor"]) not in _FACTOR_INDEX:
+        return False
+    try:
+        return all(np.isfinite(float(row[name])) for name in required[1:])
+    except (TypeError, ValueError):
+        return False
 
 
 def _side(row: Mapping[str, object]) -> int:
@@ -259,3 +278,30 @@ def _validate_case(case: StudyCase, resolved: ResolvedStudyConfig) -> None:
     if case.mode not in {"single", "egc", "mvdr"}:
         raise ValueError(f"selected case has unknown mode: {case.mode}")
     strict_snapshot(case.parameters)
+    parameters = case.parameters
+    if case.stage in {"representative_direction", "multi_jammer", "full_chain"}:
+        _require_case_parameters(case, parameters, {"interferers"})
+        if not isinstance(parameters["interferers"], (list, tuple)):
+            raise ValueError(f"selected case {case.stage} parameters.interferers must be a sequence")
+    elif case.stage == "single_factor":
+        _require_case_parameters(case, parameters, {"single_factor"})
+        factor = parameters["single_factor"]
+        if not isinstance(factor, Mapping) or not {"factor", "value", "corner", "axis"} <= set(factor):
+            raise ValueError("selected case single_factor lacks reconstruction parameters")
+    elif case.stage == "combined_error":
+        _require_case_parameters(case, parameters, {"level", "sample_index", "child_seed", "realization"})
+        realization = parameters["realization"]
+        required = {
+            "level", "sample_index", "child_seed", "azimuth_error_deg", "elevation_error_deg",
+            "position_errors_m", "amplitude_errors_db", "phase_errors_deg",
+        }
+        if not isinstance(realization, Mapping) or not required <= set(realization):
+            raise ValueError("selected case combined_error lacks reconstruction parameters")
+    else:
+        raise ValueError(f"unsupported selected case stage: {case.stage}")
+
+
+def _require_case_parameters(case: StudyCase, parameters: Mapping[str, object], required: set[str]) -> None:
+    missing = required - set(parameters)
+    if missing:
+        raise ValueError(f"selected case {case.stage} lacks reconstruction parameter: {sorted(missing)[0]}")
