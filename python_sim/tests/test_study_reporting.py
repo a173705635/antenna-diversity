@@ -46,6 +46,161 @@ def test_study_plots_have_stable_keys_and_shared_heatmap_limits():
     assert axis.patches[0].center == pytest.approx((33.0, 22.0))
 
 
+def test_single_point_direction_heatmap_renders_a_nonzero_physical_cell():
+    tables = completed_tables_for_reporting()
+    row = {
+        **tables["direction_scan"][0],
+        "azimuth_deg": 120.0,
+        "elevation_deg": 10.0,
+        "target_azimuth_deg": 120.0,
+        "target_elevation_deg": 10.0,
+        "output_sinr_db": 12.0,
+    }
+    tables["direction_scan"] = (row,)
+
+    figures = plot_study_tables(tables)
+    axis = figures["direction_heatmaps"].axes[0]
+    image = axis.images[0]
+
+    assert image.get_extent() == pytest.approx((119.5, 120.5, 9.5, 10.5))
+    assert image.get_array().shape == (1, 1)
+    assert image.get_array()[0, 0] == pytest.approx(12.0)
+    assert image.get_clim() == pytest.approx((11.5, 12.5))
+    assert axis.get_xlim()[1] - axis.get_xlim()[0] > 0.0
+    assert axis.get_ylim()[1] - axis.get_ylim()[0] > 0.0
+    assert axis.lines[0].get_xdata()[0] == pytest.approx(120.0)
+    assert axis.lines[0].get_ydata()[0] == pytest.approx(10.0)
+    assert axis.patches[0].center == pytest.approx((120.0, 10.0))
+    assert axis.patches[0].radius == pytest.approx(15.0)
+
+
+@pytest.mark.parametrize(
+    ("points", "expected_extent"),
+    [
+        (((120.0, 10.0), (120.0, 20.0)), (119.5, 120.5, 5.0, 25.0)),
+        (((90.0, 10.0), (120.0, 10.0)), (75.0, 135.0, 9.5, 10.5)),
+    ],
+    ids=("single-azimuth-axis", "single-elevation-axis"),
+)
+def test_direction_heatmap_uses_cell_edges_for_single_axis_grids(
+    points, expected_extent,
+):
+    tables = completed_tables_for_reporting()
+    reference = tables["direction_scan"][0]
+    tables["direction_scan"] = tuple(
+        {
+            **reference,
+            "case_id": f"direction-{azimuth}-{elevation}",
+            "azimuth_deg": azimuth,
+            "elevation_deg": elevation,
+            "target_azimuth_deg": points[0][0],
+            "target_elevation_deg": points[0][1],
+            "output_sinr_db": 12.0 + index,
+        }
+        for index, (azimuth, elevation) in enumerate(points)
+    )
+
+    figures = plot_study_tables(tables)
+    image = figures["direction_heatmaps"].axes[0].images[0]
+
+    assert image.get_extent() == pytest.approx(expected_extent)
+    assert image.get_array().size == 2
+
+
+@pytest.mark.parametrize(
+    ("azimuth", "elevation", "expected_extent"),
+    [
+        (0.0, 0.0, (-0.5, 0.5, 0.0, 0.5)),
+        (359.75, 90.0, (359.25, 360.25, 89.5, 90.0)),
+    ],
+)
+def test_single_point_direction_extent_wraps_azimuth_and_clamps_elevation(
+    azimuth, elevation, expected_extent,
+):
+    tables = completed_tables_for_reporting()
+    tables["direction_scan"] = ({
+        **tables["direction_scan"][0],
+        "azimuth_deg": azimuth,
+        "elevation_deg": elevation,
+        "target_azimuth_deg": azimuth,
+        "target_elevation_deg": elevation,
+    },)
+
+    figures = plot_study_tables(tables)
+    image = figures["direction_heatmaps"].axes[0].images[0]
+
+    assert image.get_extent() == pytest.approx(expected_extent)
+
+
+class _ExplodingFloat:
+    def __float__(self):
+        raise RuntimeError("builder exploded")
+
+
+class _ExplodingString:
+    def __str__(self):
+        raise RuntimeError("builder exploded")
+
+
+class _ExplodingBoolean:
+    def __bool__(self):
+        raise RuntimeError("builder exploded")
+
+
+def test_first_builder_failure_repeatedly_closes_its_figure_and_preserves_external_one():
+    tables = completed_tables_for_reporting()
+    tables["baseline_rankings"] = ({
+        **tables["baseline_rankings"][0], "rank": None,
+    },)
+    external = plt.figure()
+    figures_before = set(plt.get_fignums())
+
+    for _ in range(20):
+        with pytest.raises(ValueError, match="rank"):
+            plot_study_tables(tables)
+
+        assert set(plt.get_fignums()) == figures_before
+        assert plt.fignum_exists(external.number)
+
+
+@pytest.mark.parametrize(
+    ("table_name", "field", "bad_value"),
+    [
+        ("direction_scan", "azimuth_deg", _ExplodingFloat()),
+        ("power_scan", "power_dbm", _ExplodingFloat()),
+        ("robustness_scans", "normalized_severity", _ExplodingFloat()),
+        ("combined_errors", "level", _ExplodingString()),
+        ("multi_jammer", "template", _ExplodingString()),
+        ("full_chain_validation", "acquired", _ExplodingBoolean()),
+        ("full_chain_cn0", "case_id", _ExplodingString()),
+    ],
+    ids=("directions", "power", "robustness", "combined", "multi-jammer", "full-chain", "cn0"),
+)
+def test_each_later_builder_closes_its_current_figure_on_mid_build_error(
+    table_name, field, bad_value,
+):
+    tables = completed_tables_for_reporting()
+    tables[table_name] = ({**tables[table_name][0], field: bad_value},)
+    external = plt.figure()
+    figures_before = set(plt.get_fignums())
+
+    with pytest.raises(RuntimeError, match="builder exploded"):
+        plot_study_tables(tables)
+
+    assert set(plt.get_fignums()) == figures_before
+    assert plt.fignum_exists(external.number)
+
+
+def test_successful_builders_and_generic_save_leave_caller_owned_figures_open(tmp_path: Path):
+    external = plt.figure()
+    figures = plot_study_tables(completed_tables_for_reporting())
+
+    save_study_figures(figures, tmp_path)
+
+    assert plt.fignum_exists(external.number)
+    assert all(plt.fignum_exists(figure.number) for figure in figures.values())
+
+
 def test_plot_construction_failure_closes_only_partially_built_figures():
     """A later builder failure must release earlier figures, not external ones."""
     tables = completed_tables_for_reporting()
@@ -55,7 +210,7 @@ def test_plot_construction_failure_closes_only_partially_built_figures():
     external = plt.figure()
     figures_before = set(plt.get_fignums())
 
-    for _ in range(3):
+    for _ in range(20):
         with pytest.raises(ValueError, match="target_azimuth_deg"):
             plot_study_tables(tables)
 

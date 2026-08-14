@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterator, Mapping, Sequence
+from contextlib import contextmanager
 import os
 from pathlib import Path
 import tempfile
@@ -118,23 +119,49 @@ def _empty_axis(axis: Any, message: str) -> None:
     axis.text(0.5, 0.5, message, transform=axis.transAxes, ha="center", va="center")
 
 
+@contextmanager
+def _close_on_error(figure: Figure) -> Iterator[None]:
+    try:
+        yield
+    except BaseException:
+        plt.close(figure)
+        raise
+
+
+def _cell_edges(
+    coordinates: Sequence[float], *, lower: float | None = None,
+    upper: float | None = None,
+) -> tuple[float, float]:
+    if len(coordinates) == 1:
+        left, right = coordinates[0] - 0.5, coordinates[0] + 0.5
+    else:
+        left = coordinates[0] - (coordinates[1] - coordinates[0]) / 2.0
+        right = coordinates[-1] + (coordinates[-1] - coordinates[-2]) / 2.0
+    if lower is not None:
+        left = max(lower, left)
+    if upper is not None:
+        right = min(upper, right)
+    return left, right
+
+
 def _baseline(rows: Sequence[Mapping[str, object]]) -> Figure:
     figure, axis = plt.subplots(figsize=(8, 4.5), layout="constrained")
-    ordered = _ranked_rows(rows)
-    finite_rows = [row for row in ordered if _finite(row.get("p10_resolvable_db")) is not None and _finite(row.get("median_resolvable_db")) is not None]
-    labels = [str(row.get("display_label", _combination(row))) for row in finite_rows]
-    p10 = [_finite(row.get("p10_resolvable_db")) for row in finite_rows]
-    median = [_finite(row.get("median_resolvable_db")) for row in finite_rows]
-    if labels:
-        y = np.arange(len(labels))
-        axis.barh(y - 0.18, p10, 0.35, label="Resolvable p10")
-        axis.barh(y + 0.18, median, 0.35, label="Resolvable median")
-        axis.set_yticks(y, labels)
-        axis.invert_yaxis()
-        axis.legend()
-    else:
-        _empty_axis(axis, "No baseline rows")
-    axis.set(xlabel="Output SINR (dB)", title="Baseline rankings")
+    with _close_on_error(figure):
+        ordered = _ranked_rows(rows)
+        finite_rows = [row for row in ordered if _finite(row.get("p10_resolvable_db")) is not None and _finite(row.get("median_resolvable_db")) is not None]
+        labels = [str(row.get("display_label", _combination(row))) for row in finite_rows]
+        p10 = [_finite(row.get("p10_resolvable_db")) for row in finite_rows]
+        median = [_finite(row.get("median_resolvable_db")) for row in finite_rows]
+        if labels:
+            y = np.arange(len(labels))
+            axis.barh(y - 0.18, p10, 0.35, label="Resolvable p10")
+            axis.barh(y + 0.18, median, 0.35, label="Resolvable median")
+            axis.set_yticks(y, labels)
+            axis.invert_yaxis()
+            axis.legend()
+        else:
+            _empty_axis(axis, "No baseline rows")
+        axis.set(xlabel="Output SINR (dB)", title="Baseline rankings")
     return figure
 
 
@@ -143,140 +170,151 @@ def _directions(rows: Sequence[Mapping[str, object]]) -> Figure:
     grouped = _groups(rows, "combination", "mode")
     panels = list(grouped.items()) or [((), [])]
     figure, axes = plt.subplots(1, len(panels), figsize=(5 * len(panels), 4.5), squeeze=False, layout="constrained")
-    finite_values = [_finite(row.get("output_sinr_db")) for row in rows]
-    values = [value for value in finite_values if value is not None]
-    lo, hi = (min(values), max(values)) if values else (0.0, 1.0)
-    if lo == hi:
-        lo, hi = lo - 0.5, hi + 0.5
-    for axis, (key, group) in zip(axes.flat, panels, strict=True):
-        cells = {( _finite(row.get("elevation_deg")), _finite(row.get("azimuth_deg"))): _finite(row.get("output_sinr_db")) for row in group}
-        azimuths = sorted({az for _, az in cells if az is not None})
-        elevations = sorted({el for el, _ in cells if el is not None})
-        if azimuths and elevations:
-            data = np.array([[cells.get((el, az), np.nan) for az in azimuths] for el in elevations], dtype=float)
-            axis.imshow(data, origin="lower", aspect="auto", vmin=lo, vmax=hi,
-                        extent=(min(azimuths), max(azimuths), min(elevations), max(elevations)))
-            reference = group[0]
-            target_az = _required_finite(reference, "target_azimuth_deg")
-            target_el = _required_finite(reference, "target_elevation_deg")
-            axis.plot(target_az, target_el, "w*", markeredgecolor="black", label="Target")
-            boundary = plt.Circle((target_az, target_el), 15.0, fill=False, color="white", linestyle="--", label="15° boundary")
-            axis.add_patch(boundary)
-            axis.legend(loc="best")
-        else:
-            _empty_axis(axis, "No finite direction rows")
-        axis.set(title=" ".join(key) or "Direction scan", xlabel="Azimuth (deg)", ylabel="Elevation (deg)")
+    with _close_on_error(figure):
+        finite_values = [_finite(row.get("output_sinr_db")) for row in rows]
+        values = [value for value in finite_values if value is not None]
+        lo, hi = (min(values), max(values)) if values else (0.0, 1.0)
+        if lo == hi:
+            lo, hi = lo - 0.5, hi + 0.5
+        for axis, (key, group) in zip(axes.flat, panels, strict=True):
+            cells = {(_finite(row.get("elevation_deg")), _finite(row.get("azimuth_deg"))): _finite(row.get("output_sinr_db")) for row in group}
+            azimuths = sorted({az for _, az in cells if az is not None})
+            elevations = sorted({el for el, _ in cells if el is not None})
+            if azimuths and elevations:
+                data = np.array([[cells.get((el, az), np.nan) for az in azimuths] for el in elevations], dtype=float)
+                azimuth_extent = _cell_edges(azimuths)
+                elevation_extent = _cell_edges(elevations, lower=0.0, upper=90.0)
+                axis.imshow(
+                    data, origin="lower", aspect="auto", vmin=lo, vmax=hi,
+                    extent=(*azimuth_extent, *elevation_extent),
+                )
+                reference = group[0]
+                target_az = _required_finite(reference, "target_azimuth_deg")
+                target_el = _required_finite(reference, "target_elevation_deg")
+                axis.plot(target_az, target_el, "w*", markeredgecolor="black", label="Target")
+                boundary = plt.Circle((target_az, target_el), 15.0, fill=False, color="white", linestyle="--", label="15° boundary")
+                axis.add_patch(boundary)
+                axis.legend(loc="best")
+            else:
+                _empty_axis(axis, "No finite direction rows")
+            axis.set(title=" ".join(key) or "Direction scan", xlabel="Azimuth (deg)", ylabel="Elevation (deg)")
     return figure
 
 
 def _power(rows: Sequence[Mapping[str, object]]) -> Figure:
     figure, axis = plt.subplots(figsize=(7, 4.5), layout="constrained")
-    for (combination, mode), group in _groups(rows, "combination", "mode").items():
-        points = _finite_points(group, "power_dbm", "output_sinr_db")
-        if points:
-            axis.plot(*zip(*points), marker="o", label=f"{mode.upper()}({combination})")
-    if axis.lines:
-        axis.legend()
-    else:
-        _empty_axis(axis, "No finite power rows")
-    axis.set(xlabel="Interferer power (dBm)", ylabel="Output SINR (dB)", title="Power sweep")
+    with _close_on_error(figure):
+        for (combination, mode), group in _groups(rows, "combination", "mode").items():
+            points = _finite_points(group, "power_dbm", "output_sinr_db")
+            if points:
+                axis.plot(*zip(*points), marker="o", label=f"{mode.upper()}({combination})")
+        if axis.lines:
+            axis.legend()
+        else:
+            _empty_axis(axis, "No finite power rows")
+        axis.set(xlabel="Interferer power (dBm)", ylabel="Output SINR (dB)", title="Power sweep")
     return figure
 
 
 def _robustness(rows: Sequence[Mapping[str, object]]) -> Figure:
     figure, axis = plt.subplots(figsize=(7, 4.5), layout="constrained")
-    for (combination, factor), group in _groups(rows, "combination", "factor").items():
-        points = _finite_points(group, "normalized_severity", "mvdr_minus_egc_sinr_db", fallback_x="absolute_normalized_severity")
-        if points:
-            axis.plot(*zip(*points), marker="o", label=f"Δ MVDR−EGC {combination} {factor}")
-    if axis.lines:
-        axis.axhline(0.0, color="black", linewidth=0.8)
-        axis.legend()
-    else:
-        _empty_axis(axis, "No finite robustness rows")
-    axis.set(xlabel="Normalized severity", ylabel="SINR delta (dB)", title="Robustness curves")
+    with _close_on_error(figure):
+        for (combination, factor), group in _groups(rows, "combination", "factor").items():
+            points = _finite_points(group, "normalized_severity", "mvdr_minus_egc_sinr_db", fallback_x="absolute_normalized_severity")
+            if points:
+                axis.plot(*zip(*points), marker="o", label=f"Δ MVDR−EGC {combination} {factor}")
+        if axis.lines:
+            axis.axhline(0.0, color="black", linewidth=0.8)
+            axis.legend()
+        else:
+            _empty_axis(axis, "No finite robustness rows")
+        axis.set(xlabel="Normalized severity", ylabel="SINR delta (dB)", title="Robustness curves")
     return figure
 
 
 def _combined(rows: Sequence[Mapping[str, object]]) -> Figure:
     figure, axis = plt.subplots(figsize=(7, 4.5), layout="constrained")
-    grouped = _groups(rows, "level")
-    labels, data = [], []
-    for (level,), group in grouped.items():
-        values = [_finite(row.get("output_sinr_db", row.get("mvdr_output_sinr_db"))) for row in group]
-        finite = [value for value in values if value is not None]
-        if finite:
-            labels.append(level)
-            data.append(finite)
-    if data:
-        if all(len(set(values)) == 1 for values in data):
-            axis.plot(range(1, len(data) + 1), [values[0] for values in data], "o")
+    with _close_on_error(figure):
+        grouped = _groups(rows, "level")
+        labels, data = [], []
+        for (level,), group in grouped.items():
+            values = [_finite(row.get("output_sinr_db", row.get("mvdr_output_sinr_db"))) for row in group]
+            finite = [value for value in values if value is not None]
+            if finite:
+                labels.append(level)
+                data.append(finite)
+        if data:
+            if all(len(set(values)) == 1 for values in data):
+                axis.plot(range(1, len(data) + 1), [values[0] for values in data], "o")
+            else:
+                axis.boxplot(data, tick_labels=labels)
         else:
-            axis.boxplot(data, tick_labels=labels)
-    else:
-        _empty_axis(axis, "No finite combined-error rows")
-    axis.set(xlabel="Combined-error level", ylabel="Output SINR (dB)", title="Combined error distributions")
+            _empty_axis(axis, "No finite combined-error rows")
+        axis.set(xlabel="Combined-error level", ylabel="Output SINR (dB)", title="Combined error distributions")
     return figure
 
 
 def _multi_jammer(rows: Sequence[Mapping[str, object]]) -> Figure:
     figure, axis = plt.subplots(figsize=(7, 4.5), layout="constrained")
-    ordered = [row for row in sorted(rows, key=lambda row: (str(row.get("template", "")), _combination(row), str(row.get("mode", "")))) if _finite(row.get("output_sinr_db")) is not None]
-    labels = [f"{row.get('template', '')}\n{_combination(row)}" for row in ordered]
-    values = [_finite(row.get("output_sinr_db")) for row in ordered]
-    if labels:
-        axis.bar(np.arange(len(labels)), values)
-        axis.set_xticks(np.arange(len(labels)), labels, rotation=20, ha="right")
-    else:
-        _empty_axis(axis, "No multi-jammer rows")
-    axis.set(ylabel="Output SINR (dB)", title="Multi-jammer comparison")
+    with _close_on_error(figure):
+        ordered = [row for row in sorted(rows, key=lambda row: (str(row.get("template", "")), _combination(row), str(row.get("mode", "")))) if _finite(row.get("output_sinr_db")) is not None]
+        labels = [f"{row.get('template', '')}\n{_combination(row)}" for row in ordered]
+        values = [_finite(row.get("output_sinr_db")) for row in ordered]
+        if labels:
+            axis.bar(np.arange(len(labels)), values)
+            axis.set_xticks(np.arange(len(labels)), labels, rotation=20, ha="right")
+        else:
+            _empty_axis(axis, "No multi-jammer rows")
+        axis.set(ylabel="Output SINR (dB)", title="Multi-jammer comparison")
     return figure
 
 
 def _full_chain(rows: Sequence[Mapping[str, object]]) -> Figure:
     figure, axes = plt.subplots(1, 2, figsize=(9, 4.5), layout="constrained")
-    modes = [mode for mode in _MODES if any(str(row.get("mode")) == mode for row in rows)]
-    if modes:
-        acquired = [np.mean([bool(row.get("acquired")) for row in rows if row.get("mode") == mode]) for mode in modes]
-        tracking = [np.mean([bool(row.get("tracking")) for row in rows if row.get("mode") == mode]) for mode in modes]
-        x = np.arange(len(modes))
-        axes[0].bar(x - 0.2, acquired, 0.4, label="Acquired")
-        axes[0].bar(x + 0.2, tracking, 0.4, label="Tracking")
-        axes[0].set_xticks(x, [mode.upper() for mode in modes])
-        axes[0].legend()
-        sinr, scalar_modes = [], []
-        for mode in modes:
-            values = [_finite(row.get("analytic_output_sinr_db")) for row in rows if row.get("mode") == mode]
-            finite = [value for value in values if value is not None]
-            if finite:
-                scalar_modes.append(mode)
-                sinr.append(float(np.mean(finite)))
-        if sinr:
-            scalar_x = np.arange(len(scalar_modes))
-            axes[1].bar(scalar_x, sinr)
-            axes[1].set_xticks(scalar_x, [mode.upper() for mode in scalar_modes])
+    with _close_on_error(figure):
+        modes = [mode for mode in _MODES if any(str(row.get("mode")) == mode for row in rows)]
+        if modes:
+            acquired = [np.mean([bool(row.get("acquired")) for row in rows if row.get("mode") == mode]) for mode in modes]
+            tracking = [np.mean([bool(row.get("tracking")) for row in rows if row.get("mode") == mode]) for mode in modes]
+            x = np.arange(len(modes))
+            axes[0].bar(x - 0.2, acquired, 0.4, label="Acquired")
+            axes[0].bar(x + 0.2, tracking, 0.4, label="Tracking")
+            axes[0].set_xticks(x, [mode.upper() for mode in modes])
+            axes[0].legend()
+            sinr, scalar_modes = [], []
+            for mode in modes:
+                values = [_finite(row.get("analytic_output_sinr_db")) for row in rows if row.get("mode") == mode]
+                finite = [value for value in values if value is not None]
+                if finite:
+                    scalar_modes.append(mode)
+                    sinr.append(float(np.mean(finite)))
+            if sinr:
+                scalar_x = np.arange(len(scalar_modes))
+                axes[1].bar(scalar_x, sinr)
+                axes[1].set_xticks(scalar_x, [mode.upper() for mode in scalar_modes])
+            else:
+                _empty_axis(axes[1], "No finite analytic SINR rows")
         else:
-            _empty_axis(axes[1], "No finite analytic SINR rows")
-    else:
-        _empty_axis(axes[0], "No full-chain rows")
-        _empty_axis(axes[1], "No scalar validation rows")
-    axes[0].set(ylabel="Rate", ylim=(0, 1.05), title="Capture and tracking rates")
-    axes[1].set(ylabel="analytic_output_sinr_db (dB)", title="Analytic validation")
+            _empty_axis(axes[0], "No full-chain rows")
+            _empty_axis(axes[1], "No scalar validation rows")
+        axes[0].set(ylabel="Rate", ylim=(0, 1.05), title="Capture and tracking rates")
+        axes[1].set(ylabel="analytic_output_sinr_db (dB)", title="Analytic validation")
     return figure
 
 
 def _cn0(rows: Sequence[Mapping[str, object]], validation_rows: Sequence[Mapping[str, object]]) -> Figure:
     figure, axis = plt.subplots(figsize=(7, 4.5), layout="constrained")
-    for (case_id, mode, run), group in _groups(rows, "case_id", "mode", "run_index").items():
-        points = _finite_points(group, "time_ms", "cn0_db_hz")
-        if points:
-            axis.plot(*zip(*points), label=f"{mode.upper()} {case_id} run {run}")
-    if axis.lines:
-        axis.legend()
-    else:
-        unavailable = sorted({str(row.get("mode", "")) for row in validation_rows if not bool(row.get("tracking"))})
-        _empty_axis(axis, "C/N₀ unavailable: " + (", ".join(unavailable) or "no finite epoch rows"))
-    axis.set(xlabel="Time (ms)", ylabel="C/N₀ (dB-Hz)", title="C/N₀ validation")
+    with _close_on_error(figure):
+        for (case_id, mode, run), group in _groups(rows, "case_id", "mode", "run_index").items():
+            points = _finite_points(group, "time_ms", "cn0_db_hz")
+            if points:
+                axis.plot(*zip(*points), label=f"{mode.upper()} {case_id} run {run}")
+        if axis.lines:
+            axis.legend()
+        else:
+            unavailable = sorted({str(row.get("mode", "")) for row in validation_rows if not bool(row.get("tracking"))})
+            _empty_axis(axis, "C/N₀ unavailable: " + (", ".join(unavailable) or "no finite epoch rows"))
+        axis.set(xlabel="Time (ms)", ylabel="C/N₀ (dB-Hz)", title="C/N₀ validation")
     return figure
 
 
