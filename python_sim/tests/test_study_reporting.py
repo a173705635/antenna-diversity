@@ -46,6 +46,16 @@ def test_study_plots_have_stable_keys_and_shared_heatmap_limits():
     assert axis.patches[0].center == pytest.approx((33.0, 22.0))
 
 
+def _rendered_rgba_at(image, x: float, y: float) -> tuple[int, ...]:
+    axis = image.axes
+    axis.figure.canvas.draw()
+    rgba, left, bottom, _ = image.make_image(axis.figure.canvas.get_renderer())
+    display_x, display_y = axis.transData.transform((x, y))
+    column = int(display_x - left)
+    row = int(display_y - bottom)
+    return tuple(rgba[row, column])
+
+
 def test_single_point_direction_heatmap_renders_a_nonzero_physical_cell():
     tables = completed_tables_for_reporting()
     row = {
@@ -62,7 +72,8 @@ def test_single_point_direction_heatmap_renders_a_nonzero_physical_cell():
     axis = figures["direction_heatmaps"].axes[0]
     image = axis.images[0]
 
-    assert image.get_extent() == pytest.approx((119.5, 120.5, 9.5, 10.5))
+    assert axis.get_xlim() == pytest.approx((119.5, 120.5))
+    assert axis.get_ylim() == pytest.approx((9.5, 10.5))
     assert image.get_array().shape == (1, 1)
     assert image.get_array()[0, 0] == pytest.approx(12.0)
     assert image.get_clim() == pytest.approx((11.5, 12.5))
@@ -101,9 +112,10 @@ def test_direction_heatmap_uses_cell_edges_for_single_axis_grids(
     )
 
     figures = plot_study_tables(tables)
-    image = figures["direction_heatmaps"].axes[0].images[0]
+    axis = figures["direction_heatmaps"].axes[0]
+    image = axis.images[0]
 
-    assert image.get_extent() == pytest.approx(expected_extent)
+    assert (*axis.get_xlim(), *axis.get_ylim()) == pytest.approx(expected_extent)
     assert image.get_array().size == 2
 
 
@@ -127,9 +139,78 @@ def test_single_point_direction_extent_wraps_azimuth_and_clamps_elevation(
     },)
 
     figures = plot_study_tables(tables)
-    image = figures["direction_heatmaps"].axes[0].images[0]
+    axis = figures["direction_heatmaps"].axes[0]
+    image = axis.images[0]
 
-    assert image.get_extent() == pytest.approx(expected_extent)
+    assert (*axis.get_xlim(), *axis.get_ylim()) == pytest.approx(expected_extent)
+    assert image.get_array().shape == (1, 1)
+
+
+def test_direction_heatmap_renders_unsorted_nonuniform_centers_at_true_midpoints():
+    tables = completed_tables_for_reporting()
+    reference = tables["direction_scan"][0]
+    coordinates = (
+        (40.0, 20.0), (0.0, 10.0), (10.0, 20.0),
+        (40.0, 10.0), (0.0, 20.0), (10.0, 10.0),
+    )
+    values = {0.0: 10.0, 10.0: 20.0, 40.0: 30.0}
+    tables["direction_scan"] = tuple(
+        {
+            **reference,
+            "case_id": f"direction-{index}",
+            "azimuth_deg": azimuth,
+            "elevation_deg": elevation,
+            "target_azimuth_deg": 300.0,
+            "target_elevation_deg": 80.0,
+            "output_sinr_db": values[azimuth],
+        }
+        for index, (azimuth, elevation) in enumerate(coordinates)
+    )
+
+    figures = plot_study_tables(tables)
+    axis = figures["direction_heatmaps"].axes[0]
+    image = axis.images[0]
+
+    assert image.get_array().tolist() == [[10.0, 20.0, 30.0], [10.0, 20.0, 30.0]]
+    expected = {
+        10.0: tuple(image.to_rgba(10.0, bytes=True)),
+        20.0: tuple(image.to_rgba(20.0, bytes=True)),
+        30.0: tuple(image.to_rgba(30.0, bytes=True)),
+    }
+    assert _rendered_rgba_at(image, 4.0, 12.0) == expected[10.0]
+    assert _rendered_rgba_at(image, 6.0, 12.0) == expected[20.0]
+    assert _rendered_rgba_at(image, 24.0, 12.0) == expected[20.0]
+    assert _rendered_rgba_at(image, 26.0, 12.0) == expected[30.0]
+    assert axis.get_xlim() == pytest.approx((-5.0, 55.0))
+    assert axis.get_ylim() == pytest.approx((5.0, 25.0))
+
+
+def test_direction_heatmap_rejects_duplicate_coordinates_without_leaking_figures():
+    tables = completed_tables_for_reporting()
+    reference = tables["direction_scan"][0]
+    tables["direction_scan"] = (
+        reference,
+        {**reference, "case_id": "duplicate", "output_sinr_db": 99.0},
+    )
+    external = plt.figure()
+    figures_before = set(plt.get_fignums())
+
+    with pytest.raises(ValueError, match="duplicate direction coordinate"):
+        plot_study_tables(tables)
+
+    assert set(plt.get_fignums()) == figures_before
+    assert plt.fignum_exists(external.number)
+
+
+@pytest.mark.parametrize("field", ["azimuth_deg", "elevation_deg"])
+def test_direction_heatmap_rejects_nonfinite_axis_coordinates(field):
+    tables = completed_tables_for_reporting()
+    tables["direction_scan"] = ({
+        **tables["direction_scan"][0], field: float("nan"),
+    },)
+
+    with pytest.raises(ValueError, match=field):
+        plot_study_tables(tables)
 
 
 class _ExplodingFloat:

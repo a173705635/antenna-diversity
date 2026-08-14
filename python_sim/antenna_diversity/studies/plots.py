@@ -12,6 +12,7 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
+from matplotlib.image import NonUniformImage
 import numpy as np
 
 
@@ -177,17 +178,30 @@ def _directions(rows: Sequence[Mapping[str, object]]) -> Figure:
         if lo == hi:
             lo, hi = lo - 0.5, hi + 0.5
         for axis, (key, group) in zip(axes.flat, panels, strict=True):
-            cells = {(_finite(row.get("elevation_deg")), _finite(row.get("azimuth_deg"))): _finite(row.get("output_sinr_db")) for row in group}
-            azimuths = sorted({az for _, az in cells if az is not None})
-            elevations = sorted({el for el, _ in cells if el is not None})
+            cells: dict[tuple[float, float], float | None] = {}
+            for row in group:
+                elevation = _required_finite(row, "elevation_deg")
+                azimuth = _required_finite(row, "azimuth_deg")
+                coordinate = (elevation, azimuth)
+                if coordinate in cells:
+                    raise ValueError(
+                        "duplicate direction coordinate: "
+                        f"azimuth_deg={azimuth}, elevation_deg={elevation}"
+                    )
+                cells[coordinate] = _finite(row.get("output_sinr_db"))
+            azimuths = sorted({azimuth for _, azimuth in cells})
+            elevations = sorted({elevation for elevation, _ in cells})
             if azimuths and elevations:
                 data = np.array([[cells.get((el, az), np.nan) for az in azimuths] for el in elevations], dtype=float)
                 azimuth_extent = _cell_edges(azimuths)
                 elevation_extent = _cell_edges(elevations, lower=0.0, upper=90.0)
-                axis.imshow(
-                    data, origin="lower", aspect="auto", vmin=lo, vmax=hi,
+                image = NonUniformImage(
+                    axis, interpolation="nearest",
                     extent=(*azimuth_extent, *elevation_extent),
                 )
+                image.set_clim(lo, hi)
+                image.set_data(azimuths, elevations, data)
+                axis.add_image(image)
                 reference = group[0]
                 target_az = _required_finite(reference, "target_azimuth_deg")
                 target_el = _required_finite(reference, "target_elevation_deg")
@@ -195,6 +209,8 @@ def _directions(rows: Sequence[Mapping[str, object]]) -> Figure:
                 boundary = plt.Circle((target_az, target_el), 15.0, fill=False, color="white", linestyle="--", label="15° boundary")
                 axis.add_patch(boundary)
                 axis.legend(loc="best")
+                axis.set_xlim(*azimuth_extent)
+                axis.set_ylim(*elevation_extent)
             else:
                 _empty_axis(axis, "No finite direction rows")
             axis.set(title=" ".join(key) or "Direction scan", xlabel="Azimuth (deg)", ylabel="Elevation (deg)")
