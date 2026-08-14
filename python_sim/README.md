@@ -34,6 +34,53 @@ python -W error run_legacy_ula.py
 
 `default_config()` 是四个理想手机角点的当前默认；`legacy_ula_config()` 保留原始双阵元半波长 ULA 基线。两者共享 channels-by-samples 的 RF、DFE、合并、捕获和跟踪链路。
 
+## 可复现空间研究套件
+
+`run_spatial_research.py` 顺序运行解析扫描、鲁棒性研究、代表场景筛选、完整样本链验证和报告发布。它不打开 GUI；成功后会打印 manifest、报告、八张表和八幅图的绝对路径。仓库内的 [`studies/example_quick.json`](studies/example_quick.json) 是可直接编辑的完整示例，显式列出研究名称、输出目录、主种子、载波/IF/采样与 DFE 频率、目标和干扰方向/功率、扫描轴及三档误差。
+
+```powershell
+cd F:\antenna_diversity\python_sim
+$env:MPLBACKEND='Agg'
+
+# 全部 11 种稳定顺序组合
+python run_spatial_research.py --preset standard --combinations all
+
+# 单个组合
+python run_spatial_research.py --preset quick --combinations TL+BR --modes egc,mvdr
+
+# 指定组合列表；逗号分隔，组合内部用 +
+python run_spatial_research.py --preset quick --combinations TL+BR,TL+TR+BR --modes egc,mvdr
+
+# 加载可编辑 JSON；只覆盖输出位置和研究名
+python run_spatial_research.py --config studies/example_quick.json `
+  --output-dir results/studies --name example-quick
+
+# 配置不变时恢复中断运行
+python run_spatial_research.py --config studies/example_quick.json --resume
+```
+
+配置优先级固定为 `命令行显式覆盖 > JSON > quick/standard/extended 预设 > default_config()`。未在命令行给出的选项不会遮蔽 JSON；已有研究目录默认拒绝覆盖。`--resume` 只在 schema 与科学配置哈希一致时复用哈希校验通过的阶段，从首个缺失、失败或损坏的阶段继续。
+
+每次研究写入 `<output_dir>/<name>/`：
+
+```text
+<output_dir>/<name>/
+├── manifest.json
+├── resolved-config.json
+├── checkpoints/
+│   ├── baseline.json ... report.json
+├── tables/
+│   ├── baseline_rankings.csv ... full_chain_cn0.csv
+├── figures/
+│   ├── baseline_rankings.png ... cn0_validation.png
+├── summary.json
+└── report.md
+```
+
+表中的 `output_sinr_db` / `analytic_output_sinr_db` 是由功率、阵列流形和协方差得到的解析空间指标，不生成时域 RF 样本。`acquisition_metric`、`acquired`、`tracking` 和最终 Doppler 来自 RF → ADC → DFE → 合并 → 捕获/跟踪的样本链；`final_cn0_db_hz` 仅在跟踪给出有限估计时存在，否则为 JSON `null`，原因见同一行的 `status`/`reason`。解析 SINR、捕获指标与 C/N₀不是可互换的量，报告把它们并列作为不同证据。
+
+> **理想模型警告：** 研究套件仍使用 Mate 70 外形四角的理想、共面、各向同性相位中心。排名与报告只比较该模型中的可复现实验，不代表真实天线布局、方向图、互耦、传播环境或产品抗干扰性能。
+
 ## 可复制配置示例
 
 任意不重复的 2–4 个角点都可激活；名称和顺序为 `TL`、`TR`、`BL`、`BR`：
@@ -106,4 +153,4 @@ print(json.dumps(mc.to_dict(), ensure_ascii=False, indent=2, allow_nan=False))
 
 当前已实现 3-D 阵列流形和阵元方向图协议，但首版只使用各向同性阵元。以下内容明确未建模：真实 Mate 70 天线位置、真实测量方向图、互耦、极化、多径/NLOS、动态 DOA、非 CW 干扰、多颗卫星，以及导航数据到 PVT 的完整解算。默认结果只说明给定理想模型中 MVDR 的可重复空间抑制与后续捕获/跟踪表现，不是产品级声明。
 
-运行脚本生成的频谱、空间响应、捕获热力图和跟踪曲线位于忽略版本控制的 `results/` 目录。
+运行脚本生成的频谱、空间响应、捕获热力图、跟踪曲线和研究报告位于忽略版本控制的 `results/` 目录。

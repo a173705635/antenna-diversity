@@ -2,6 +2,7 @@
 
 from .config import PRESET_NAMES, resolve_study_config
 from .models import ErrorLevel, InterfererTemplate, ResolvedStudyConfig, StudyConfig
+from .runner import run_research
 
 __all__ = [
     "ErrorLevel",
@@ -10,4 +11,5 @@ __all__ = [
     "ResolvedStudyConfig",
     "StudyConfig",
     "resolve_study_config",
+    "run_research",
 ]

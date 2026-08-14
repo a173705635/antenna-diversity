@@ -24,6 +24,36 @@ GPS L1 C/A + 0–3 CW interferers
 
 RF 到 DFE 始终保留 `(channels, samples)` 形状，因此同一处理链可接受 2、3 或 4 个激活角点。三种合并器输出单通道样本后共享同一捕获与跟踪配置；只有捕获成功的分支才进入跟踪。
 
+## Studies 研究编排层
+
+研究层位于现有解析路径和完整样本路径之上，不替代其中任何一个：
+
+```text
+JSON / preset / explicit CLI overrides
+                 │
+                 ▼
+        resolved immutable configuration
+                 │
+        ┌────────┴─────────┐
+        ▼                  ▼
+analytical spatial path    selected full-chain path
+baseline / direction /     RF → ADC → DFE → SINGLE/EGC/MVDR
+power / error / jammer     → acquisition → tracking / C/N₀
+        │                  │
+        └────────┬─────────┘
+                 ▼
+      atomic stage checkpoints + manifest
+                 │
+                 ▼
+ tables / figures / summary / Markdown report
+```
+
+`antenna_diversity.studies` 固定按 baseline、single-factor、combined-error、multi-jammer、selection、full-chain、report 七阶段执行。每个成功阶段先原子发布严格 JSON checkpoint，manifest 记录路径、SHA-256、状态和记录数；异常保留先前证据并把当前阶段标为失败。恢复运行只读取完成且哈希有效的前置 checkpoint，不能让早期阶段看到未来数据。
+
+selection 只根据已保存的归一化解析记录选择代表场景；full-chain 只运行这些已选场景。report 再从七阶段 checkpoint 中装配固定八表、八图、摘要和本地链接。**报告阶段绝不重新运行解析扫描或 RF/DFE/捕获/跟踪仿真**，因此报告内容与已保存证据保持一致，也不会因制图而消耗新的随机数。
+
+解析 `output_sinr_db` 衡量理想空间功率与协方差关系；完整链的 `acquisition_metric`、捕获/跟踪状态和可空 `final_cn0_db_hz` 衡量样本接收机表现。这些量共享配置和 case ID 以便追溯，但含义不同，架构不把解析 SINR 当作采样 C/N₀。
+
 ## 当前已建模
 
 - Mate 70 外形尺寸 160.9 × 75.9 × 7.8 mm，以及中心原点的理想角点坐标；
