@@ -6,6 +6,7 @@ from antenna_diversity.array import (
     rotation_matrix_ypr,
     wave_in_element_frame,
 )
+from antenna_diversity.config import mate70_default_config
 
 
 def test_rhcp_and_lhcp_are_unit_and_orthogonal():
@@ -23,6 +24,34 @@ def test_linear_tilt_and_explicit_jones_are_normalized():
     ).jones_vector()
     np.testing.assert_allclose(abs(linear[1]), 1.0, atol=1e-12)
     np.testing.assert_allclose(explicit, [1.0, 0.0], atol=1e-12)
+
+
+def test_huge_finite_explicit_jones_is_unit_normalized():
+    jones = WavePolarization(
+        "jones", az_real=1e308, az_imag=-1e308, el_real=-1e308, el_imag=1e308
+    ).jones_vector()
+
+    assert np.all(np.isfinite(jones))
+    np.testing.assert_allclose(np.vdot(jones, jones), 1.0, atol=1e-12)
+    np.testing.assert_allclose(
+        jones,
+        np.array([1.0 - 1.0j, -1.0 + 1.0j]) / 2.0,
+        atol=1e-12,
+    )
+
+
+def test_config_validation_preserves_huge_finite_explicit_jones():
+    cfg = mate70_default_config()
+    cfg.signal.true_polarization = WavePolarization(
+        "jones", az_real=1e308, el_real=1e308
+    )
+
+    cfg.validate()
+    np.testing.assert_allclose(
+        cfg.signal.true_polarization.jones_vector(),
+        np.array([1.0, 1.0]) / np.sqrt(2.0),
+        atol=1e-12,
+    )
 
 
 @pytest.mark.parametrize("value", [np.nan, np.inf, 1 + 1j, [1.0], "30.0"])

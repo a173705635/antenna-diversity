@@ -62,10 +62,16 @@ class WavePolarization:
             )
         else:
             raise ValueError("polarization kind must be rhcp, lhcp, linear, or jones")
-        norm = float(np.linalg.norm(vector))
-        if norm == 0.0:
+        component_scale = float(
+            max(np.max(np.abs(vector.real)), np.max(np.abs(vector.imag)))
+        )
+        if not np.isfinite(component_scale) or component_scale == 0.0:
             raise ValueError("polarization Jones vector must be nonzero")
-        result = vector / norm
+        scaled = vector / component_scale
+        norm = float(np.linalg.norm(scaled))
+        if not np.isfinite(norm) or norm == 0.0:
+            raise ValueError("polarization Jones vector must be nonzero")
+        result = scaled / norm
         result.setflags(write=False)
         return result
 
