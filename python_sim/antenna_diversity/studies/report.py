@@ -22,7 +22,11 @@ _REQUIRED_TABLES = (
 
 
 def build_summary(
-    tables: Mapping[str, Sequence[Mapping[str, object]]], manifest: Mapping[str, object], selection: Mapping[str, object],
+    tables: Mapping[str, Sequence[Mapping[str, object]]],
+    manifest: Mapping[str, object],
+    selection: Mapping[str, object],
+    *,
+    active_antennas: Sequence[str],
 ) -> dict[str, object]:
     """Summarize saved tables without recomputing simulation or scientific values."""
 
@@ -59,7 +63,9 @@ def build_summary(
         "combined_errors": {level: _statistics(values) for level, values in sorted(by_level.items())},
         "multi_jammer": [_multi_snapshot(row) for row in sorted(tables["multi_jammer"], key=lambda row: (str(row.get("template", "")), _combo(row), str(row.get("mode", ""))))],
         "full_chain": full_chain, "cn0_curves": cn0_by_mode,
-        "antenna_model": _antenna_summary(tables["antenna_diagnostics"]),
+        "antenna_model": _antenna_summary(
+            tables["antenna_diagnostics"], active_antennas
+        ),
         "selection": _strict(selection),
     }
     strict = _strict(output)
@@ -157,6 +163,7 @@ def _multi_snapshot(row: Mapping[str, object]) -> dict[str, object]:
 
 def _antenna_summary(
     rows: Sequence[Mapping[str, object]],
+    active_antennas: Sequence[str],
 ) -> dict[str, object]:
     sources = {str(row["model_source"]) for row in rows if row.get("model_source")}
     labels = {str(row["model_label"]) for row in rows if row.get("model_label")}
@@ -169,15 +176,19 @@ def _antenna_summary(
     }
     if len(true_digests) > 1:
         raise ValueError("antenna diagnostics contain inconsistent measured pattern digests")
-    present = {
-        str(row["element_name"])
-        for row in rows if row.get("element_name") in CORNER_ORDER
-    }
+    configured = tuple(active_antennas)
+    if (
+        not 2 <= len(configured) <= 4
+        or any(not isinstance(corner, str) for corner in configured)
+        or len(set(configured)) != len(configured)
+        or any(corner not in CORNER_ORDER for corner in configured)
+    ):
+        raise ValueError("active_antennas must be a unique two-to-four corner subset")
     return {
         "source": next(iter(sources), "unknown"),
         "label": next(iter(labels), "unavailable"),
         "measured_pattern_sha256": next(iter(true_digests), None),
-        "active_antennas": [corner for corner in CORNER_ORDER if corner in present],
+        "active_antennas": list(configured),
     }
 
 

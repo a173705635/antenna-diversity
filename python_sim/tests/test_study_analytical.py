@@ -163,6 +163,35 @@ def test_baseline_saves_complete_scalar_antenna_diagnostics(monkeypatch):
     json.dumps(result.to_dict(), allow_nan=False)
 
 
+def test_pattern_grid_is_polarization_independent_but_source_match_is_not():
+    resolved = _diagnostic_resolved()
+
+    rows = run_baseline(resolved).tables["antenna_diagnostics"]
+    pattern = {
+        (
+            row["model_view"], row["element_name"],
+            row["azimuth_deg"], row["elevation_deg"],
+        ): row["response_db"]
+        for row in rows if row["record_kind"] == "pattern_grid"
+    }
+    for element_name in ("TL", "TR", "BL", "BR"):
+        for elevation in (10.0, 55.0):
+            for azimuth in (0.0, 37.0, 180.0):
+                assert pattern[("true", element_name, azimuth, elevation)] == pytest.approx(
+                    pattern[("assumed", element_name, azimuth, elevation)]
+                )
+    source_match = {
+        (row["model_view"], row["element_name"]): row["polarization_match_db"]
+        for row in rows
+        if row["record_kind"] == "source_match" and row["source_name"] == "gps"
+    }
+    assert any(
+        source_match[("true", element)]
+        != pytest.approx(source_match[("assumed", element)])
+        for element in ("TL", "TR", "BL", "BR")
+    )
+
+
 def test_baseline_orders_direction_axes_cases_and_never_runs_receiver(monkeypatch):
     import antenna_diversity.pipeline as pipeline
 

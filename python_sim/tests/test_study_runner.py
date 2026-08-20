@@ -168,6 +168,9 @@ def test_report_stage_publishes_nine_linked_tables_and_twelve_figures(monkeypatc
     from tests.study_helpers import completed_tables_for_reporting
 
     resolved = resolved_for_test(output_dir=tmp_path, name="report-runner")
+    simulation = resolved.simulation
+    simulation.array.active_antennas = ("TL", "TR", "BR")
+    resolved = type(resolved).from_parts(resolved.study, simulation)
     store = StudyStore.create(resolved)
     tables = completed_tables_for_reporting()
     checkpoints = {
@@ -187,6 +190,10 @@ def test_report_stage_publishes_nine_linked_tables_and_twelve_figures(monkeypatc
     assert set(payload["artifacts"]["tables"]) == set(tables)
     assert len(payload["artifacts"]["tables"]) == 9
     assert len(payload["artifacts"]["figures"]) == 12
+    summary = __import__("json").loads(
+        (store.study_dir / "summary.json").read_text(encoding="utf-8")
+    )
+    assert summary["antenna_model"]["active_antennas"] == ["TL", "TR", "BR"]
     verify_report_links((store.study_dir / "report.md").read_text(encoding="utf-8"), store.study_dir / "report.md")
 
 

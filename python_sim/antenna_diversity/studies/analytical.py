@@ -89,25 +89,27 @@ def antenna_diagnostic_rows(
                 diagnostic = model.diagnostics(
                     direction, polarization, frequency_hz, estimated=estimated
                 )
-                voltages = np.asarray(
-                    diagnostic["pattern_polarization_voltage"],
-                    dtype=np.complex128,
-                )
                 blockage = np.asarray(
                     diagnostic["blockage_voltage"], dtype=np.float64
                 )
                 for index, element_name in enumerate(CORNER_ORDER):
-                    voltage = complex(voltages[index])
+                    pattern_voltage = _pattern_voltage_magnitude(
+                        state,
+                        element_name,
+                        direction,
+                        polarization,
+                        frequency_hz,
+                    )
                     rows.append(_antenna_row(
                         "pattern_grid", model, model_view, digest,
                         element_name=element_name,
                         azimuth_deg=float(azimuth),
                         elevation_deg=float(elevation),
-                        response_real=float(voltage.real),
-                        response_imag=float(voltage.imag),
-                        response_db=_voltage_db(voltage),
+                        response_real=pattern_voltage,
+                        response_imag=0.0,
+                        response_db=_voltage_db(pattern_voltage),
                     ))
-                    blocked = voltage * float(blockage[index])
+                    blocked = pattern_voltage * float(blockage[index])
                     rows.append(_antenna_row(
                         "blockage_grid", model, model_view, digest,
                         element_name=element_name,
@@ -249,6 +251,31 @@ def _polarization_match_db(
         return _DB_FLOOR
     match = abs(np.vdot(height, local_wave.jones)) / denominator
     return _voltage_db(float(np.clip(match, 0.0, 1.0)))
+
+
+def _pattern_voltage_magnitude(
+    state,
+    element_name: str,
+    direction: Direction,
+    polarization,
+    frequency_hz: float,
+) -> float:
+    if state.scalar_pattern is not None:
+        return abs(complex(state.scalar_pattern.complex_gain(
+            element_name, direction, frequency_hz
+        )))
+    local_wave = wave_in_element_frame(
+        direction.azimuth_deg,
+        direction.elevation_deg,
+        polarization,
+        state.rotations[element_name],
+    )
+    height = np.asarray(state.pattern.effective_height(
+        element_name,
+        LocalDirection(local_wave.azimuth_deg, local_wave.elevation_deg),
+        frequency_hz,
+    ), dtype=np.complex128)
+    return float(np.linalg.norm(height))
 
 
 def run_single_factor_studies(resolved: ResolvedStudyConfig) -> StageRecords:

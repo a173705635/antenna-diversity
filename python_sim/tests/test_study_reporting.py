@@ -6,11 +6,15 @@ import matplotlib
 matplotlib.use("Agg", force=True)
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pytest
 
 from antenna_diversity.studies.plots import plot_study_tables, save_study_figures
 from antenna_diversity.studies.report import build_summary, render_report, verify_report_links
 from tests.study_helpers import completed_tables_for_reporting
+
+
+_ACTIVE_ANTENNAS = ("TL", "TR", "BL", "BR")
 
 
 def completed_manifest():
@@ -91,6 +95,35 @@ def test_antenna_plot_builders_ignore_missing_and_nonfinite_optional_values():
         "element_patterns", "polarization_losses", "coupling_matrices",
         "blockage_comparison",
     ))
+
+
+def test_blockage_figure_compares_saved_unblocked_and_blocked_response_values():
+    tables = completed_tables_for_reporting()
+    diagnostics = tables["antenna_diagnostics"]
+
+    figure = plot_study_tables(tables)["blockage_comparison"]
+    axes = {axis.get_title(): axis for axis in figure.axes if axis.images}
+    unblocked = axes["True TL unblocked"].images[0].get_array()
+    blocked = axes["True TL blocked"].images[0].get_array()
+    expected_unblocked = sorted(
+        float(row["response_db"])
+        for row in diagnostics
+        if row["record_kind"] == "pattern_grid"
+        and row["model_view"] == "true" and row["element_name"] == "TL"
+    )
+    expected_blocked = sorted(
+        float(row["response_db"])
+        for row in diagnostics
+        if row["record_kind"] == "blockage_grid"
+        and row["model_view"] == "true" and row["element_name"] == "TL"
+    )
+
+    assert sorted(np.asarray(unblocked, dtype=float).ravel()) == pytest.approx(
+        expected_unblocked
+    )
+    assert sorted(np.asarray(blocked, dtype=float).ravel()) == pytest.approx(
+        expected_blocked
+    )
 
 
 def _rendered_rgba_at(image, x: float, y: float) -> tuple[int, ...]:
@@ -325,7 +358,7 @@ def test_each_later_builder_closes_its_current_figure_on_mid_build_error(
         ("pattern_grid", "response_db"),
         ("source_match", "polarization_match_db"),
         ("coupling_entry", "response_real"),
-        ("blockage_grid", "attenuation_db"),
+        ("blockage_grid", "response_db"),
     ],
 )
 def test_each_antenna_builder_closes_its_partial_figure_on_error(
@@ -385,7 +418,9 @@ def test_report_contains_evidence_boundaries_and_reproduction_links(tmp_path: Pa
     }
     figures = {"baseline_rankings": Path("figures/baseline_rankings.png")}
     table_paths = {name: Path("tables") / f"{name}.csv" for name in tables}
-    summary = build_summary(tables, manifest, selection)
+    summary = build_summary(
+        tables, manifest, selection, active_antennas=_ACTIVE_ANTENNAS
+    )
     report = render_report(summary, manifest, figures, table_paths)
 
     assert "比较性研究" in report
@@ -415,6 +450,20 @@ def test_report_contains_evidence_boundaries_and_reproduction_links(tmp_path: Pa
     assert "相关外部天线噪声" in report
     assert "全波平台散射" in report
     json.dumps(summary, allow_nan=False)
+
+
+@pytest.mark.parametrize("active_antennas", [("TL", "BR"), ("TL", "TR", "BR")])
+def test_summary_uses_resolved_active_antennas_not_four_corner_diagnostic_rows(
+    active_antennas,
+):
+    summary = build_summary(
+        completed_tables_for_reporting(),
+        completed_manifest(),
+        {},
+        active_antennas=active_antennas,
+    )
+
+    assert summary["antenna_model"]["active_antennas"] == list(active_antennas)
 
 
 def test_plots_allow_constant_and_failure_only_rows_without_warnings(tmp_path: Path):
@@ -454,14 +503,18 @@ def test_summary_rejects_missing_required_table():
     tables.pop("power_scan")
 
     with pytest.raises(ValueError, match="missing required table: power_scan"):
-        build_summary(tables, completed_manifest(), {})
+        build_summary(
+            tables, completed_manifest(), {}, active_antennas=_ACTIVE_ANTENNAS
+        )
 
 
 def test_reporting_rejects_missing_or_invalid_saved_metadata():
     tables = completed_tables_for_reporting()
     tables["baseline_rankings"] = ({**tables["baseline_rankings"][0], "rank": None},)
     with pytest.raises(ValueError, match="rank"):
-        build_summary(tables, completed_manifest(), {})
+        build_summary(
+            tables, completed_manifest(), {}, active_antennas=_ACTIVE_ANTENNAS
+        )
     with pytest.raises(ValueError, match="rank"):
         plot_study_tables(tables)
 
@@ -489,14 +542,22 @@ def test_summary_names_rank_roles_and_validates_knee_evidence():
     second = {**tables["baseline_rankings"][0], "active_antennas": ["TR", "BL"], "display_label": "MVDR(TR+BL)", "rank": 2}
     third = {**tables["baseline_rankings"][0], "active_antennas": ["TL", "TR"], "display_label": "MVDR(TL+TR)", "rank": 3}
     tables["baseline_rankings"] = (tables["baseline_rankings"][0], second, third)
-    summary = build_summary(tables, completed_manifest(), {"cases": [], "unselected_roles": {}})
+    summary = build_summary(
+        tables, completed_manifest(), {"cases": [], "unselected_roles": {}},
+        active_antennas=_ACTIVE_ANTENNAS,
+    )
 
     assert summary["baseline"]["best"]["rank"] == 1
     assert summary["baseline"]["typical"]["rank"] == 2
     assert summary["baseline"]["worst"]["rank"] == 3
     assert summary["knee"] == {"status": "unavailable", "reason": "not selected"}
     with pytest.raises(ValueError, match="knee"):
-        build_summary(tables, completed_manifest(), {"cases": [{"selection_reasons": ["knee"]}], "unselected_roles": {"knee": "no crossing"}})
+        build_summary(
+            tables, completed_manifest(),
+            {"cases": [{"selection_reasons": ["knee"]}],
+             "unselected_roles": {"knee": "no crossing"}},
+            active_antennas=_ACTIVE_ANTENNAS,
+        )
 
 
 @pytest.mark.parametrize("rank_values", [(2, 3), (1, 3), (1, 1), (0, 1), (True, 2)])
@@ -507,7 +568,9 @@ def test_reporting_requires_contiguous_one_based_ranks(rank_values):
     tables["baseline_rankings"] = (first, second)
 
     with pytest.raises(ValueError, match="rank"):
-        build_summary(tables, completed_manifest(), {})
+        build_summary(
+            tables, completed_manifest(), {}, active_antennas=_ACTIVE_ANTENNAS
+        )
     with pytest.raises(ValueError, match="rank"):
         plot_study_tables(tables)
 
@@ -559,14 +622,14 @@ def test_summary_binds_each_role_reason_to_its_own_selected_case():
                 {"active_antennas": ["TR", "BL"], "selection_reasons": ["best"]},
                 {"active_antennas": ["TL", "BR"], "selection_reasons": ["manual"]},
             ],
-        })
+        }, active_antennas=_ACTIVE_ANTENNAS)
     summary = build_summary(tables, completed_manifest(), {
         "cases": [
             {"active_antennas": ["TL", "BR"], "selection_reasons": ["best"]},
             {"active_antennas": ["TR", "BL"], "selection_reasons": ["worst"]},
             {"active_antennas": ["TL", "BR"], "selection_reasons": ["manual"]},
         ],
-    })
+    }, active_antennas=_ACTIVE_ANTENNAS)
     assert summary["baseline"]["best"]["combination"] == "TL+BR"
 
 
@@ -579,7 +642,10 @@ def test_report_link_validation_requires_existing_confined_targets(tmp_path: Pat
     for name in completed_tables_for_reporting():
         (tables / f"{name}.csv").write_text("header\n", encoding="utf-8")
     report = render_report(
-        build_summary(completed_tables_for_reporting(), completed_manifest(), {}),
+        build_summary(
+            completed_tables_for_reporting(), completed_manifest(), {},
+            active_antennas=_ACTIVE_ANTENNAS,
+        ),
         completed_manifest(),
         {"baseline_rankings": Path("figures/baseline_rankings.png")},
         {name: Path("tables") / f"{name}.csv" for name in completed_tables_for_reporting()},

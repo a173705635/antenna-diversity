@@ -56,10 +56,7 @@ def plot_study_tables(tables: Mapping[str, Sequence[Mapping[str, object]]]) -> d
         )
         figures["polarization_losses"] = _polarization_losses(diagnostics)
         figures["coupling_matrices"] = _coupling_matrices(diagnostics)
-        figures["blockage_comparison"] = _diagnostic_heatmaps(
-            diagnostics, "blockage_grid", "attenuation_db", "Blockage attenuation",
-            "Attenuation (dB)",
-        )
+        figures["blockage_comparison"] = _blockage_comparison(diagnostics)
     except BaseException:
         for figure in figures.values():
             plt.close(figure)
@@ -478,6 +475,57 @@ def _polarization_losses(rows: Sequence[Mapping[str, object]]) -> Figure:
             ylabel="Polarization match (dB)",
             title="Saved source polarization match",
         )
+    return figure
+
+
+def _blockage_comparison(
+    rows: Sequence[Mapping[str, object]],
+) -> Figure:
+    views = ("true", "assumed")
+    states = (("unblocked", "pattern_grid"), ("blocked", "blockage_grid"))
+    selected = [
+        row for row in rows
+        if row.get("record_kind") in {record_kind for _, record_kind in states}
+    ]
+    figure, axes = plt.subplots(
+        len(views) * len(states), len(CORNER_ORDER),
+        figsize=(4 * len(CORNER_ORDER), 13), squeeze=False, layout="constrained",
+    )
+    with _close_on_error(figure):
+        values = [
+            value for row in selected
+            if (value := _finite(row.get("response_db"))) is not None
+        ]
+        lo, hi = _finite_limits(values)
+        images = []
+        for view_index, view in enumerate(views):
+            for state_index, (state_label, record_kind) in enumerate(states):
+                row_index = view_index * len(states) + state_index
+                for column_index, element_name in enumerate(CORNER_ORDER):
+                    axis = axes[row_index, column_index]
+                    group = [
+                        row for row in selected
+                        if row.get("record_kind") == record_kind
+                        and row.get("model_view") == view
+                        and row.get("element_name") == element_name
+                    ]
+                    image = _saved_grid_image(
+                        axis, group, "response_db", lo, hi
+                    )
+                    if image is None:
+                        _empty_axis(axis, "No finite saved rows")
+                    else:
+                        images.append(image)
+                    axis.set(
+                        title=f"{view.title()} {element_name} {state_label}",
+                        xlabel="Azimuth (deg)", ylabel="Elevation (deg)",
+                    )
+        if images:
+            figure.colorbar(
+                images[0], ax=axes.ravel().tolist(), shrink=0.82,
+                label="Element response (dB)",
+            )
+        figure.suptitle("Saved unblocked versus blocked element response")
     return figure
 
 

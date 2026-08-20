@@ -34,6 +34,31 @@ FIGURE_NAMES = (
 )
 
 
+def _parametric_antenna_model() -> dict[str, object]:
+    polarization = {
+        "kind": "rhcp", "tilt_deg": 0.0,
+        "az_real": 1.0, "az_imag": 0.0, "el_real": 0.0, "el_imag": 0.0,
+    }
+    patterns = {
+        corner: {
+            "peak_gain_db": float(index),
+            "cosine_exponent": 1.5,
+            "back_lobe_gain_db": -18.0,
+            "nominal_polarization": polarization,
+            "cross_polar_discrimination_db": 24.0,
+            "cross_phase_deg": 10.0,
+        }
+        for index, corner in enumerate(("TL", "TR", "BL", "BR"))
+    }
+    state = {"pattern_kind": "parametric", "parametric_patterns": patterns}
+    return {
+        "model_label": "minimal parametric fixture",
+        "model_source": "parametric",
+        "true_state": state,
+        "assumed_state": state,
+    }
+
+
 def _strict_load(path: Path):
     return json.loads(
         path.read_text(encoding="utf-8"),
@@ -236,6 +261,10 @@ def test_real_minimal_cli_runs_all_stages_and_publishes_complete_evidence(
         "automatic_roles": ["best"],
     })
     data["simulation"]["signal"]["duration_ms"] = 8
+    data["simulation"]["array"] = {
+        "active_antennas": ["TL", "BR"],
+        "antenna_model": _parametric_antenna_model(),
+    }
     config_path.write_text(json.dumps(data), encoding="utf-8")
 
     result = run_spatial_research.main(["--config", str(config_path), "--preset", "quick"])
@@ -255,6 +284,9 @@ def test_real_minimal_cli_runs_all_stages_and_publishes_complete_evidence(
     assert len(json_paths) == 10
     for path in json_paths:
         _strict_load(path)
+    summary = _strict_load(study_dir / "summary.json")
+    assert summary["antenna_model"]["source"] == "parametric"
+    assert summary["antenna_model"]["active_antennas"] == ["TL", "BR"]
 
     table_paths = {name: study_dir / "tables" / f"{name}.csv" for name in TABLE_NAMES}
     rows_by_table = {}
@@ -280,7 +312,8 @@ def test_real_minimal_cli_runs_all_stages_and_publishes_complete_evidence(
     report_path = study_dir / "report.md"
     assert report_path.is_file() and report_path.stat().st_size > 0
     report = report_path.read_text(encoding="utf-8")
-    assert "ideal" in report
+    assert "parametric" in report
+    assert "minimal parametric fixture" in report
     for target in re.findall(r"\[[^]]*\]\(([^)]+)\)", report):
         assert not Path(target).is_absolute()
         assert (study_dir / target).resolve().is_file()

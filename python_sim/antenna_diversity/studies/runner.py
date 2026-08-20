@@ -171,7 +171,12 @@ def _report(context: StageContext) -> dict[str, object]:
     figure_paths = context.publication.save_figures(tables)
     selection = _mapping(_mapping(context.prerequisites["selection"], "selection checkpoint").get("selection"), "selection")
     final_manifest = {**context.manifest, "status": "completed"}
-    summary = build_summary(tables, final_manifest, selection)
+    summary = build_summary(
+        tables,
+        final_manifest,
+        selection,
+        active_antennas=context.resolved.simulation.array.active_antennas,
+    )
     summary_path = context.publication.write_summary(summary)
     report = render_report(summary, final_manifest, figure_paths, table_paths)
     report_path = context.publication.publish_report(report)
