@@ -637,11 +637,15 @@ def test_factory_rejects_nonfinite_derived_channel_without_warning():
 def test_factory_rejects_nonfinite_derived_coupling_without_warning():
     cfg = default_config()
     state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=_parametric_parameters(
+            {name: 1.0 for name in CORNER_NAMES}
+        ),
         coupling_paths=(CouplingPath("TL", "TR", 1e308, 0.0),)
     )
     cfg.array.antenna_model = PhoneAntennaConfig(
         model_label="coupling overflow",
-        model_source="ideal",
+        model_source="parametric",
         true_state=state,
         assumed_state=copy.deepcopy(state),
     )
@@ -680,13 +684,17 @@ def test_composed_response_rejects_nonfinite_effective_voltage_without_warning(
         getattr(model, method_name)(ZENITH, RHCP, cfg.signal.carrier_hz)
 
 
-def test_structured_isotropic_state_applies_blockage_and_coupling():
+def test_structured_parametric_state_applies_blockage_and_coupling():
     cfg = default_config()
     cfg.array.active_antennas = ("TL", "TR")
     zero_positions = {name: (0.0, 0.0, 0.0) for name in CORNER_NAMES}
     cfg.phone.phase_centers_m = zero_positions.copy()
     cfg.phone.assumed_phase_centers_m = zero_positions.copy()
     state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=_parametric_parameters(
+            {name: 1.0 for name in CORNER_NAMES}
+        ),
         attenuation_regions=(
             AttenuationRegion(("TL",), 0.0, 90.0, 1.0, 6.020599913279624),
         ),
@@ -695,8 +703,8 @@ def test_structured_isotropic_state_applies_blockage_and_coupling():
         ),
     )
     cfg.array.antenna_model = PhoneAntennaConfig(
-        model_label="structured isotropic",
-        model_source="ideal",
+        model_label="structured parametric",
+        model_source="parametric",
         true_state=state,
         assumed_state=copy.deepcopy(state),
     )

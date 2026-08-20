@@ -119,13 +119,31 @@ class PhoneAntennaConfig:
             raise ValueError("antenna true_state and assumed_state must be state records")
         self.true_state.validate()
         self.assumed_state.validate()
+        states = (self.true_state, self.assumed_state)
+        if self.model_source == "ideal":
+            if any(state.pattern_kind != "isotropic" for state in states):
+                raise ValueError(
+                    "ideal model_source requires isotropic true and assumed states"
+                )
+            if any(
+                state.attenuation_regions or state.coupling_paths for state in states
+            ):
+                raise ValueError("ideal model_source requires zero antenna effects")
+            return
         expected_true_kind = {
-            "ideal": "isotropic",
             "parametric": "parametric",
             "measured": "measured",
         }[self.model_source]
         if self.true_state.pattern_kind != expected_true_kind:
             raise ValueError("model_source conflicts with true_state pattern_kind")
+        if any(
+            (state.attenuation_regions or state.coupling_paths)
+            and state.pattern_kind not in {"parametric", "measured"}
+            for state in states
+        ):
+            raise ValueError(
+                "antenna effects require a parametric or measured pattern_kind"
+            )
 
 
 def resolved_phone_antenna_config(array_cfg: object) -> PhoneAntennaConfig:

@@ -53,6 +53,16 @@ def _polarized_scan_config():
     return cfg
 
 
+def _unit_parametric_patterns():
+    return {
+        name: ParametricPatternParameters(
+            back_lobe_gain_db=0.0,
+            cross_polar_discrimination_db=300.0,
+        )
+        for name in ("TL", "TR", "BL", "BR")
+    }
+
+
 def test_combination_comparison_returns_all_eleven_phone_subarrays():
     records = compare_corner_combinations(mate70_default_config(), mode="mvdr")
 
@@ -194,6 +204,8 @@ def test_single_case_uses_true_effective_covariance_and_assumed_mvdr_constraint(
     cfg = mate70_default_config()
     cfg.array.active_antennas = ("TL", "TR")
     true_state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=_unit_parametric_patterns(),
         attenuation_regions=(
             AttenuationRegion(
                 ("TL",),
@@ -206,11 +218,13 @@ def test_single_case_uses_true_effective_covariance_and_assumed_mvdr_constraint(
         coupling_paths=(CouplingPath("TL", "TR", -6.020599913279624, 90.0),),
     )
     assumed_state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=_unit_parametric_patterns(),
         coupling_paths=(CouplingPath("TR", "TL", -12.041199826559248, 0.0),),
     )
     cfg.array.antenna_model = PhoneAntennaConfig(
         model_label="analytical integration",
-        model_source="ideal",
+        model_source="parametric",
         true_state=true_state,
         assumed_state=assumed_state,
     )

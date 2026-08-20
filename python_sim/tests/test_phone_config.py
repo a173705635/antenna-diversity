@@ -128,6 +128,107 @@ def test_structured_model_is_returned_by_resolver_after_validation():
     assert resolved_phone_antenna_config(cfg.array) is model
 
 
+def test_effect_free_isotropic_ideal_model_remains_valid():
+    cfg = default_config()
+    cfg.array.antenna_model = phone_antenna_config_for_test()
+
+    cfg.validate()
+
+    resolved = resolved_phone_antenna_config(cfg.array)
+    assert resolved.model_source == "ideal"
+    assert resolved.true_state.attenuation_regions == ()
+    assert resolved.assumed_state.coupling_paths == ()
+
+
+@pytest.mark.parametrize("state_name", ["true_state", "assumed_state"])
+@pytest.mark.parametrize("effect_kind", ["blockage", "coupling"])
+def test_ideal_model_rejects_true_or_assumed_blockage_and_coupling(
+    state_name, effect_kind
+):
+    state = AntennaStateConfig(
+        attenuation_regions=(
+            (AttenuationRegion(("TL",), 0.0, 30.0, 10.0, 3.0),)
+            if effect_kind == "blockage"
+            else ()
+        ),
+        coupling_paths=(
+            (CouplingPath("TL", "BR", -20.0, 0.0),)
+            if effect_kind == "coupling"
+            else ()
+        ),
+    )
+    states = {
+        "true_state": AntennaStateConfig(),
+        "assumed_state": AntennaStateConfig(),
+    }
+    states[state_name] = state
+    cfg = default_config()
+    cfg.array.antenna_model = phone_antenna_config_for_test(**states)
+
+    with pytest.raises(ValueError, match="ideal.*effects"):
+        cfg.validate()
+
+
+@pytest.mark.parametrize("state_name", ["true_state", "assumed_state"])
+def test_ideal_model_requires_both_states_to_be_isotropic(state_name):
+    parametric_state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=parameters_for_test(),
+    )
+    states = {
+        "true_state": AntennaStateConfig(),
+        "assumed_state": AntennaStateConfig(),
+    }
+    states[state_name] = parametric_state
+    cfg = default_config()
+    cfg.array.antenna_model = phone_antenna_config_for_test(**states)
+
+    with pytest.raises(ValueError, match="ideal.*isotropic.*true.*assumed"):
+        cfg.validate()
+
+
+def test_parametric_states_accept_blockage_and_coupling_effects():
+    true_state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=parameters_for_test(),
+        attenuation_regions=(
+            AttenuationRegion(("TL",), 0.0, 30.0, 10.0, 3.0),
+        ),
+    )
+    assumed_state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=parameters_for_test(),
+        coupling_paths=(CouplingPath("TL", "BR", -20.0, 0.0),),
+    )
+    cfg = default_config()
+    cfg.array.antenna_model = phone_antenna_config_for_test(
+        source="parametric",
+        true_state=true_state,
+        assumed_state=assumed_state,
+    )
+
+    cfg.validate()
+
+
+def test_structured_effects_require_parametric_or_measured_state():
+    true_state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=parameters_for_test(),
+    )
+    assumed_state = AntennaStateConfig(
+        coupling_paths=(CouplingPath("TL", "BR", -20.0, 0.0),),
+    )
+    cfg = default_config()
+    cfg.array.antenna_model = phone_antenna_config_for_test(
+        source="parametric",
+        true_state=true_state,
+        assumed_state=assumed_state,
+    )
+
+    with pytest.raises(ValueError, match="effects.*parametric.*measured"):
+        cfg.validate()
+
+
 def test_default_signal_and_interferer_polarizations_are_rhcp():
     cfg = default_config()
 

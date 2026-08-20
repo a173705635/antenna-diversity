@@ -8,10 +8,21 @@ from antenna_diversity.array.antenna_config import (
     PhoneAntennaConfig,
 )
 from antenna_diversity.array.effects import AttenuationRegion, CouplingPath
+from antenna_diversity.array.patterns import ParametricPatternParameters
 from antenna_diversity.array.phone_model import PhoneAntennaModel
 from antenna_diversity.config import legacy_ula_config, mate70_default_config
 from antenna_diversity.gnss.scenario import generate_scenario
 from antenna_diversity.studies.models import strict_snapshot
+
+
+def _unit_parametric_patterns():
+    return {
+        name: ParametricPatternParameters(
+            back_lobe_gain_db=0.0,
+            cross_polar_discrimination_db=300.0,
+        )
+        for name in ("TL", "TR", "BL", "BR")
+    }
 
 
 def _complex_diagnostic(snapshot):
@@ -78,6 +89,8 @@ def test_scenario_truth_and_samples_use_shared_phone_antenna_model():
     cfg.signal.duration_ms = 1
     cfg.array.active_antennas = ("TL", "TR")
     true_state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=_unit_parametric_patterns(),
         attenuation_regions=(
             AttenuationRegion(
                 ("TL",),
@@ -91,7 +104,7 @@ def test_scenario_truth_and_samples_use_shared_phone_antenna_model():
     )
     cfg.array.antenna_model = PhoneAntennaConfig(
         model_label="scenario integration",
-        model_source="ideal",
+        model_source="parametric",
         true_state=true_state,
         assumed_state=copy.deepcopy(true_state),
     )
@@ -128,7 +141,7 @@ def test_scenario_truth_and_samples_use_shared_phone_antenna_model():
         samples,
         truth["desired_component"] + sum(truth["interferer_components"]),
     )
-    assert truth["antenna_model_source"] == "ideal"
+    assert truth["antenna_model_source"] == "parametric"
     true_diagnostics = model.diagnostics(
         cfg.signal.true_direction,
         cfg.signal.true_polarization,

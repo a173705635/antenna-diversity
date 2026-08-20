@@ -9,6 +9,7 @@ from antenna_diversity.array.antenna_config import (
     PhoneAntennaConfig,
 )
 from antenna_diversity.array.effects import AttenuationRegion, CouplingPath
+from antenna_diversity.array.patterns import ParametricPatternParameters
 from antenna_diversity.array.phone_model import PhoneAntennaModel
 from antenna_diversity.config import (
     default_config,
@@ -16,6 +17,16 @@ from antenna_diversity.config import (
     mate70_default_config,
 )
 from antenna_diversity.pipeline import run_end_to_end
+
+
+def _unit_parametric_patterns():
+    return {
+        name: ParametricPatternParameters(
+            back_lobe_gain_db=0.0,
+            cross_polar_discrimination_db=300.0,
+        )
+        for name in ("TL", "TR", "BL", "BR")
+    }
 
 
 def test_legacy_pipeline_preserves_original_diversity_conclusion():
@@ -153,6 +164,8 @@ def test_phone_pipeline_propagates_nonideal_effective_manifold_once():
     cfg.tracking.max_epochs = 2
     cfg.array.active_antennas = ("TL", "TR")
     state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=_unit_parametric_patterns(),
         attenuation_regions=(
             AttenuationRegion(
                 ("TL",),
@@ -166,7 +179,7 @@ def test_phone_pipeline_propagates_nonideal_effective_manifold_once():
     )
     cfg.array.antenna_model = PhoneAntennaConfig(
         model_label="end-to-end fixture",
-        model_source="ideal",
+        model_source="parametric",
         true_state=state,
         assumed_state=copy.deepcopy(state),
     )
