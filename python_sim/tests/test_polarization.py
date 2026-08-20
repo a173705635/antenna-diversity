@@ -25,10 +25,24 @@ def test_linear_tilt_and_explicit_jones_are_normalized():
     np.testing.assert_allclose(explicit, [1.0, 0.0], atol=1e-12)
 
 
-@pytest.mark.parametrize("value", [np.nan, np.inf, 1 + 1j, [1.0]])
+@pytest.mark.parametrize("value", [np.nan, np.inf, 1 + 1j, [1.0], "30.0"])
 def test_polarization_rejects_nonfinite_or_nonscalar_fields(value):
     with pytest.raises(ValueError):
         WavePolarization("linear", tilt_deg=value).jones_vector()
+
+
+@pytest.mark.parametrize(
+    "call",
+    [
+        lambda: rotation_matrix_ypr("0.0", 0.0, 0.0),
+        lambda: wave_in_element_frame(
+            "15.0", 10.0, WavePolarization("rhcp"), np.eye(3)
+        ),
+    ],
+)
+def test_coordinate_interfaces_reject_string_angles(call):
+    with pytest.raises(ValueError):
+        call()
 
 
 def test_identity_frame_preserves_direction_and_jones():
@@ -45,3 +59,21 @@ def test_positive_yaw_moves_source_to_negative_local_azimuth():
     wave = wave_in_element_frame(120.0, 20.0, WavePolarization("linear"), rotation)
     assert wave.azimuth_deg == pytest.approx(30.0)
     assert wave.elevation_deg == pytest.approx(20.0)
+
+
+def test_external_wave_rejects_negative_elevation():
+    with pytest.raises(ValueError):
+        wave_in_element_frame(15.0, -10.0, WavePolarization("rhcp"), np.eye(3))
+
+
+def test_positive_pitch_transforms_local_jones_basis():
+    rotation = rotation_matrix_ypr(0.0, 90.0, 0.0)
+    wave = wave_in_element_frame(
+        90.0, 0.0, WavePolarization("linear", tilt_deg=45.0), rotation
+    )
+
+    assert wave.azimuth_deg == pytest.approx(90.0)
+    assert wave.elevation_deg == pytest.approx(0.0)
+    np.testing.assert_allclose(
+        wave.jones, np.array([1.0, -1.0]) / np.sqrt(2.0), atol=1e-12
+    )

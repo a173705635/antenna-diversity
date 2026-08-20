@@ -12,7 +12,11 @@ def _finite_real_scalar(value: object) -> bool:
         return False
     try:
         array = np.asarray(value)
-        if array.shape != () or np.iscomplexobj(array):
+        if (
+            array.shape != ()
+            or np.iscomplexobj(array)
+            or not np.issubdtype(array.dtype, np.number)
+        ):
             return False
         return bool(np.isfinite(float(array)))
     except (TypeError, ValueError, OverflowError):
@@ -176,9 +180,14 @@ def wave_in_element_frame(
     """Transform an incident phone-frame wave into an element's local frame."""
     if not isinstance(polarization, WavePolarization):
         raise ValueError("polarization must be a WavePolarization")
+    if not _finite_real_scalar(elevation_deg):
+        raise ValueError("external wave elevation must be within [0, 90]")
+    external_elevation = float(elevation_deg)
+    if not 0.0 <= external_elevation <= 90.0:
+        raise ValueError("external wave elevation must be within [0, 90]")
     rotation = _validated_rotation(local_to_phone)
     unit_phone, az_basis_phone, el_basis_phone = _spherical_frame(
-        azimuth_deg, elevation_deg
+        azimuth_deg, external_elevation
     )
     jones_phone = polarization.jones_vector()
     field_phone = jones_phone[0] * az_basis_phone + jones_phone[1] * el_basis_phone
