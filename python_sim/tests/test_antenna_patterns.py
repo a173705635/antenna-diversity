@@ -136,6 +136,28 @@ def test_tabulated_pattern_interpolates_complex_components_and_wraps_azimuth(tmp
     np.testing.assert_allclose(at_270, expected, atol=1e-12)
 
 
+def test_tabulated_pattern_grid_storage_cannot_be_made_writeable(tmp_path):
+    pattern = TabulatedElementPattern.from_csv(
+        write_rectangular_pattern_csv(tmp_path), _FREQUENCY_HZ
+    )
+    before = pattern.effective_height(
+        "TL", LocalDirection(90.0, 0.0), _FREQUENCY_HZ
+    )
+    grid = pattern.grids["TL"]
+
+    for values in (grid.azimuths_deg, grid.elevations_deg, grid.heights):
+        assert values.flags.writeable is False
+        with pytest.raises(ValueError):
+            values.setflags(write=True)
+        with pytest.raises(ValueError):
+            values.flat[0] = 123.0
+
+    after = pattern.effective_height(
+        "TL", LocalDirection(90.0, 0.0), _FREQUENCY_HZ
+    )
+    np.testing.assert_allclose(after, before, rtol=0.0, atol=0.0)
+
+
 def test_tabulated_pattern_interpolates_across_zero_for_shifted_azimuth_grid(tmp_path):
     path = tmp_path / "shifted-grid.csv"
     path.write_text(

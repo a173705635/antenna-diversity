@@ -64,6 +64,16 @@ def _frequency_tolerance(frequency_hz: float) -> float:
     return max(1.0, 1e-9 * frequency_hz)
 
 
+def _immutable_array(
+    values: NDArray[np.generic],
+) -> NDArray[np.generic]:
+    """Copy an array onto immutable bytes-backed storage."""
+    source = np.ascontiguousarray(values)
+    return np.frombuffer(source.tobytes(order="C"), dtype=source.dtype).reshape(
+        source.shape
+    )
+
+
 @dataclass(frozen=True)
 class LocalDirection:
     """Direction in an antenna element's local spherical coordinate frame."""
@@ -373,10 +383,11 @@ def _parse_pattern_rows(
                         "measured pattern CSV must contain a complete rectangular grid"
                     ) from error
                 heights[elevation_index, azimuth_index] = (h_az, h_el)
-        azimuths.setflags(write=False)
-        elevations.setflags(write=False)
-        heights.setflags(write=False)
-        result[element_name] = _ElementGrid(azimuths, elevations, heights)
+        result[element_name] = _ElementGrid(
+            _immutable_array(azimuths),
+            _immutable_array(elevations),
+            _immutable_array(heights),
+        )
     return result
 
 

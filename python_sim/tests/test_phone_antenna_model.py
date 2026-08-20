@@ -16,7 +16,10 @@ from antenna_diversity.array.effects import (
 )
 from antenna_diversity.array.geometry import select_phase_centers
 from antenna_diversity.array.manifold import IsotropicElementPattern, array_manifold
-from antenna_diversity.array.patterns import ParametricPatternParameters
+from antenna_diversity.array.patterns import (
+    ParametricPatternParameters,
+    TabulatedElementPattern,
+)
 from antenna_diversity.array.phone_model import PhoneAntennaModel
 from antenna_diversity.array.polarization import WavePolarization
 from antenna_diversity.config import (
@@ -551,6 +554,38 @@ def test_internal_numeric_state_has_irreversible_read_only_backing():
         model.effective_manifold(
             ZENITH, RHCP, cfg.signal.carrier_hz, estimated=True
         ),
+        assumed_before,
+        rtol=0.0,
+        atol=0.0,
+    )
+
+
+def test_measured_runtime_grid_storage_cannot_change_model_response(tmp_path: Path):
+    model = _model_for_pattern_kind("measured", tmp_path)
+    frequency_hz = 1_575.42e6
+    true_before = model.effective_manifold(ZENITH, RHCP, frequency_hz)
+    assumed_before = model.effective_manifold(
+        ZENITH, RHCP, frequency_hz, estimated=True
+    )
+
+    for state in (model.true_state, model.assumed_state):
+        assert isinstance(state.pattern, TabulatedElementPattern)
+        for grid in state.pattern.grids.values():
+            for values in (grid.azimuths_deg, grid.elevations_deg, grid.heights):
+                assert values.flags.writeable is False
+                with pytest.raises(ValueError):
+                    values.setflags(write=True)
+                with pytest.raises(ValueError):
+                    values.flat[0] = 123.0
+
+    np.testing.assert_allclose(
+        model.effective_manifold(ZENITH, RHCP, frequency_hz),
+        true_before,
+        rtol=0.0,
+        atol=0.0,
+    )
+    np.testing.assert_allclose(
+        model.effective_manifold(ZENITH, RHCP, frequency_hz, estimated=True),
         assumed_before,
         rtol=0.0,
         atol=0.0,
