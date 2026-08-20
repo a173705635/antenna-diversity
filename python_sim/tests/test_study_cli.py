@@ -236,6 +236,35 @@ def test_editable_quick_example_resolves_every_visible_axis():
     assert resolved.study.loading_factors.size
 
 
+def test_editable_antenna_realism_example_resolves_small_parametric_study():
+    path = (
+        Path(__file__).parents[1]
+        / "antenna_diversity"
+        / "studies"
+        / "example_antenna_realism.json"
+    )
+
+    resolved = resolve_study_config(path, preset="quick")
+
+    assert resolved.study.combinations == (("TL", "BR"), ("TL", "TR", "BR"))
+    assert resolved.study.spatial_modes == ("egc", "mvdr")
+    assert resolved.study.full_chain_modes == ("single", "egc", "mvdr")
+    assert resolved.study.azimuths_deg.tolist() == [0.0, 120.0, 240.0]
+    assert resolved.study.elevations_deg.tolist() == [10.0, 60.0]
+    assert resolved.study.powers_dbm.tolist() == [-95.0, -85.0]
+    assert resolved.study.combined_error_samples_per_level == 1
+    assert resolved.study.full_chain_run_count == 1
+    model = resolved.simulation.array.antenna_model
+    assert model.model_source == "parametric"
+    assert model.model_label == "synthetic_phone_corner_v1"
+    assert len(model.true_state.attenuation_regions) == 1
+    assert model.true_state.coupling_paths
+    assert all(
+        interferer.polarization.kind == "linear"
+        for interferer in resolved.simulation.interferers
+    )
+
+
 def test_real_minimal_cli_runs_all_stages_and_publishes_complete_evidence(
     tmp_path: Path, capsys,
 ):

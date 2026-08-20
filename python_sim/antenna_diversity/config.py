@@ -2,17 +2,24 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
 
 from antenna_diversity.array.antenna_config import (
+    AntennaStateConfig,
     PhoneAntennaConfig,
     resolved_phone_antenna_config,
 )
+from antenna_diversity.array.effects import (
+    AttenuationRegion,
+    CouplingPath,
+    ElementOrientation,
+)
 from antenna_diversity.array.geometry import mate70_phase_centers
+from antenna_diversity.array.patterns import ParametricPatternParameters
 from antenna_diversity.array.polarization import WavePolarization
 
 
@@ -498,6 +505,121 @@ def mate70_default_config() -> SimulationConfig:
         plot=PlotConfig(),
         phone=phone,
         interferers=(CWInterferer(direction=Direction(120.0, 10.0)),),
+    )
+    cfg.validate()
+    return cfg
+
+
+def parametric_phone_config(
+    active_antennas: tuple[str, ...] = ("TL", "TR", "BL", "BR"),
+) -> SimulationConfig:
+    """Return a deterministic synthetic phone-corner antenna study preset.
+
+    The values exercise orientation, polarized cosine-rolloff patterns, one
+    handset/hand attenuation region, and weak asymmetric port coupling.  They
+    are synthetic sensitivity-study inputs, not Mate 70 measurements.
+    """
+
+    cfg = mate70_default_config()
+    cfg.array.active_antennas = active_antennas
+    cfg.signal.true_polarization = WavePolarization("rhcp")
+    cfg.signal.assumed_polarization = WavePolarization("rhcp")
+    cfg.interferers = tuple(
+        replace(
+            interferer,
+            polarization=WavePolarization(
+                "linear", tilt_deg=35.0 + 50.0 * index
+            ),
+        )
+        for index, interferer in enumerate(cfg.interferers)
+    )
+
+    orientations = {
+        "TL": ElementOrientation(yaw_deg=135.0, pitch_deg=12.0, roll_deg=-4.0),
+        "TR": ElementOrientation(yaw_deg=45.0, pitch_deg=10.0, roll_deg=3.0),
+        "BL": ElementOrientation(yaw_deg=225.0, pitch_deg=8.0, roll_deg=5.0),
+        "BR": ElementOrientation(yaw_deg=315.0, pitch_deg=11.0, roll_deg=-3.0),
+    }
+    patterns = {
+        "TL": ParametricPatternParameters(
+            peak_gain_db=1.5,
+            cosine_exponent=1.4,
+            back_lobe_gain_db=-17.0,
+            nominal_polarization=WavePolarization("rhcp"),
+            cross_polar_discrimination_db=22.0,
+            cross_phase_deg=8.0,
+        ),
+        "TR": ParametricPatternParameters(
+            peak_gain_db=1.0,
+            cosine_exponent=1.6,
+            back_lobe_gain_db=-18.0,
+            nominal_polarization=WavePolarization("rhcp"),
+            cross_polar_discrimination_db=24.0,
+            cross_phase_deg=-6.0,
+        ),
+        "BL": ParametricPatternParameters(
+            peak_gain_db=0.5,
+            cosine_exponent=1.8,
+            back_lobe_gain_db=-19.0,
+            nominal_polarization=WavePolarization("rhcp"),
+            cross_polar_discrimination_db=21.0,
+            cross_phase_deg=12.0,
+        ),
+        "BR": ParametricPatternParameters(
+            peak_gain_db=1.2,
+            cosine_exponent=1.5,
+            back_lobe_gain_db=-18.5,
+            nominal_polarization=WavePolarization("rhcp"),
+            cross_polar_discrimination_db=23.0,
+            cross_phase_deg=-10.0,
+        ),
+    }
+    attenuation = (
+        AttenuationRegion(
+            elements=("BL", "BR"),
+            center_azimuth_deg=225.0,
+            center_elevation_deg=20.0,
+            radius_deg=42.0,
+            attenuation_db=8.0,
+            transition_width_deg=18.0,
+        ),
+    )
+    true_coupling = (
+        CouplingPath("TL", "TR", -18.0, 32.0),
+        CouplingPath("TR", "TL", -20.5, -24.0),
+        CouplingPath("BL", "BR", -19.0, 20.0),
+        CouplingPath("BR", "BL", -21.0, -38.0),
+        CouplingPath("TL", "BR", -25.0, 55.0),
+        CouplingPath("BR", "TL", -27.0, -48.0),
+    )
+    assumed_coupling = tuple(
+        CouplingPath(
+            path.source,
+            path.receiver,
+            path.magnitude_db - 1.0,
+            path.phase_deg - 5.0,
+        )
+        for path in true_coupling
+    )
+    true_state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=patterns.copy(),
+        orientations=orientations.copy(),
+        attenuation_regions=attenuation,
+        coupling_paths=true_coupling,
+    )
+    assumed_state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=patterns.copy(),
+        orientations=orientations.copy(),
+        attenuation_regions=(),
+        coupling_paths=assumed_coupling,
+    )
+    cfg.array.antenna_model = PhoneAntennaConfig(
+        model_label="synthetic_phone_corner_v1",
+        model_source="parametric",
+        true_state=true_state,
+        assumed_state=assumed_state,
     )
     cfg.validate()
     return cfg

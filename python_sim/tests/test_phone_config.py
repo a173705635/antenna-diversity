@@ -22,7 +22,9 @@ from antenna_diversity.config import (
     default_config,
     legacy_ula_config,
     mate70_default_config,
+    parametric_phone_config,
 )
+from antenna_diversity.experiments import evaluate_configuration_spatially
 
 
 CORNERS = ("TL", "TR", "BL", "BR")
@@ -56,6 +58,41 @@ def test_default_phone_resolves_to_ideal_antenna_without_changing_old_fields():
 
     assert cfg.array.pattern_model == "isotropic"
     assert cfg.array.antenna_model is None
+
+
+def test_parametric_phone_preset_is_explicit_nonmeasured_and_runnable():
+    from antenna_diversity import parametric_phone_config as published_preset
+
+    assert published_preset is parametric_phone_config
+    cfg = parametric_phone_config(("TL", "BR"))
+
+    cfg.validate()
+    result = evaluate_configuration_spatially(cfg, "mvdr")
+
+    assert cfg.array.active_antennas == ("TL", "BR")
+    assert cfg.array.antenna_model.model_source == "parametric"
+    assert cfg.array.antenna_model.model_label == "synthetic_phone_corner_v1"
+    true_state = cfg.array.antenna_model.true_state
+    assert true_state.pattern_kind == "parametric"
+    assert true_state.measured_pattern_csv is None
+    assert len({item.yaw_deg for item in true_state.orientations.values()}) == 4
+    assert set(true_state.parametric_patterns) == set(CORNERS)
+    assert all(
+        np.isfinite(item.cosine_exponent) and item.cosine_exponent > 0.0
+        for item in true_state.parametric_patterns.values()
+    )
+    assert cfg.signal.true_polarization.kind == "rhcp"
+    assert all(
+        interferer.polarization.kind == "linear"
+        for interferer in cfg.interferers
+    )
+    assert len(true_state.attenuation_regions) == 1
+    coupling = {
+        (item.source, item.receiver): item.magnitude_db
+        for item in true_state.coupling_paths
+    }
+    assert coupling[("TL", "TR")] != coupling[("TR", "TL")]
+    assert np.isfinite(result.metrics["output_sinr_db"])
 
 
 def test_legacy_isotropic_selector_resolves_two_complete_independent_ideal_states():

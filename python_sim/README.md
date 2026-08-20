@@ -1,8 +1,8 @@
-# HUAWEI Mate 70 理想角点 GPS L1 C/A 空域抗干扰仿真
+# 手机角点 GPS L1 C/A 空域抗干扰仿真
 
-本目录是 GPS L1 C/A 的 Python 原生端到端仿真：等效复数 IF → RF/ADC → DFE → SINGLE/EGC/MVDR → 捕获/跟踪。默认配置使用 **HUAWEI Mate 70 的 160.9 × 75.9 × 7.8 mm 外形尺寸**，并把四个外形角点当作理想、共面、各向同性的相位中心。它们只是首版阵列接口，**不代表已知的真实 Mate 70 天线位置、方向图或产品性能**。
+本目录是 GPS L1 C/A 的 Python 原生端到端仿真：入射方向/极化 → 分层手机天线 → 等效复数 IF → RF/ADC → DFE → SINGLE/EGC/MVDR → 捕获/跟踪。`default_config()` 仍使用 **HUAWEI Mate 70 的 160.9 × 75.9 × 7.8 mm 外形尺寸**和理想、共面、各向同性角点，保证旧基线不变；另有明确标为非实测的参数化预设，以及需要外部 CSV 与摘要的测量输入接口。任何预设都**不代表已知的真实 Mate 70 天线位置或产品性能**。
 
-![HUAWEI Mate 70 理想角点空域抗干扰仿真架构](docs/simulation_architecture.svg)
+![手机角点空域抗干扰仿真架构](docs/simulation_architecture.svg)
 
 - 对外架构与模型边界：[`ARCHITECTURE.md`](ARCHITECTURE.md)
 - 公式、接口和实现映射：[`DESIGN.md`](DESIGN.md)
@@ -17,7 +17,11 @@
 u = [cos(el) cos(az), cos(el) sin(az), sin(el)]
 ```
 
-阵列流形使用 `exp(-j 2π f p·u/c)`，位置是三维坐标。共面理想角点在天顶（仰角 90°）具有相同空间相位。所有多通道数组 shape 为 `(channels, samples)`；合并输出为 `(samples,)`。
+每个阵元先把手机坐标中的单位功率 Jones 向量 `e=[E_az,E_el]` 变换到本地姿态，再计算
+
+`x_m = b_m(u) h_m(u_m,f)^H e_m exp(-j 2π f p_m·u/c)`，
+
+最后按 `a_effective = D_channel C_coupling x` 依次施加端口互耦和逐通道幅相响应。真实场景、干扰协方差和样本生成使用 true state；MVDR 目标约束使用 assumed state。所有多通道数组 shape 为 `(channels, samples)`；合并输出为 `(samples,)`。默认理想模型显式绕过极化内积，仍严格得到旧版单位阵元响应。
 
 ## 环境与入口
 
@@ -32,11 +36,11 @@ python -W error run_end_to_end.py
 python -W error run_legacy_ula.py
 ```
 
-`default_config()` 是四个理想手机角点的当前默认；`legacy_ula_config()` 保留原始双阵元半波长 ULA 基线。两者共享 channels-by-samples 的 RF、DFE、合并、捕获和跟踪链路。
+`default_config()` 是四个理想手机角点的当前默认；`parametric_phone_config()` 提供确定性的 `synthetic_phone_corner_v1` 合成方向图、姿态、遮挡、极化和弱非对称互耦；`legacy_ula_config()` 保留原始双阵元半波长 ULA 基线。三者共享 channels-by-samples 的 RF、DFE、合并、捕获和跟踪链路。
 
 ## 可复现空间研究套件
 
-`run_spatial_research.py` 顺序运行解析扫描、鲁棒性研究、代表场景筛选、完整样本链验证和报告发布。它不打开 GUI；成功后会打印 manifest、报告、八张表和八幅图的绝对路径。仓库内的 [`studies/example_quick.json`](studies/example_quick.json) 是可直接编辑的完整示例，显式列出研究名称、输出目录、主种子、载波/IF/采样与 DFE 频率、目标和干扰方向/功率、扫描轴及三档误差。
+`run_spatial_research.py` 顺序运行解析扫描、鲁棒性研究、代表场景筛选、完整样本链验证和报告发布。它不打开 GUI；成功后会打印 manifest、报告、9 张表和 12 幅图的绝对路径。[理想快速示例](studies/example_quick.json) 保留旧用法；[参数化天线示例](antenna_diversity/studies/example_antenna_realism.json) 显式列出可编辑的载频/IF/采样率、两个角点组合、天线 true/assumed state、GPS/干扰极化、遮挡和互耦。
 
 ```powershell
 cd F:\antenna_diversity\python_sim
@@ -55,6 +59,11 @@ python run_spatial_research.py --preset quick --combinations TL+BR,TL+TR+BR --mo
 python run_spatial_research.py --config studies/example_quick.json `
   --output-dir results/studies --name example-quick
 
+# 小型参数化天线七阶段研究
+python -W error run_spatial_research.py `
+  --config antenna_diversity/studies/example_antenna_realism.json `
+  --preset quick --name antenna-realism-smoke
+
 # 配置不变时恢复中断运行
 python run_spatial_research.py --config studies/example_quick.json --resume
 ```
@@ -70,16 +79,16 @@ python run_spatial_research.py --config studies/example_quick.json --resume
 ├── checkpoints/
 │   ├── baseline.json ... report.json
 ├── tables/
-│   ├── baseline_rankings.csv ... full_chain_cn0.csv
+│   ├── baseline_rankings.csv ... antenna_diagnostics.csv
 ├── figures/
-│   ├── baseline_rankings.png ... cn0_validation.png
+│   ├── baseline_rankings.png ... blockage_comparison.png
 ├── summary.json
 └── report.md
 ```
 
 表中的 `output_sinr_db` / `analytic_output_sinr_db` 是由功率、阵列流形和协方差得到的解析空间指标，不生成时域 RF 样本。`acquisition_metric`、`acquired`、`tracking` 和最终 Doppler 来自 RF → ADC → DFE → 合并 → 捕获/跟踪的样本链；`final_cn0_db_hz` 仅在跟踪给出有限估计时存在，否则为 JSON `null`，原因见同一行的 `status`/`reason`。解析 SINR、捕获指标与 C/N₀不是可互换的量，报告把它们并列作为不同证据。
 
-> **理想模型警告：** 研究套件仍使用 Mate 70 外形四角的理想、共面、各向同性相位中心。排名与报告只比较该模型中的可复现实验，不代表真实天线布局、方向图、互耦、传播环境或产品抗干扰性能。
+> **证据标签：** 报告中的 `ideal` 是旧各向同性基线，`parametric` 是人为合成敏感性模型，`measured` 才表示由带 SHA-256 的外部表格驱动。三者都不等于 Mate 70 产品级验证。
 
 ## 可复制配置示例
 
@@ -91,6 +100,17 @@ from antenna_diversity.pipeline import run_end_to_end
 
 cfg = default_config()
 cfg.array.active_antennas = ("TL", "TR", "BR")
+cfg.plot.enable = False
+results = run_end_to_end(cfg)
+```
+
+若要直接运行参数化模型：
+
+```python
+from antenna_diversity import parametric_phone_config
+from antenna_diversity.pipeline import run_end_to_end
+
+cfg = parametric_phone_config(("TL", "BR"))
 cfg.plot.enable = False
 results = run_end_to_end(cfg)
 ```
@@ -151,6 +171,8 @@ print(json.dumps(mc.to_dict(), ensure_ascii=False, indent=2, allow_nan=False))
 
 ## 当前模型边界
 
-当前已实现 3-D 阵列流形和阵元方向图协议，但首版只使用各向同性阵元。以下内容明确未建模：真实 Mate 70 天线位置、真实测量方向图、互耦、极化、多径/NLOS、动态 DOA、非 CW 干扰、多颗卫星，以及导航数据到 PVT 的完整解算。默认结果只说明给定理想模型中 MVDR 的可重复空间抑制与后续捕获/跟踪表现，不是产品级声明。
+当前窄带手机天线层已建模：每角点独立姿态、复数双极化响应、参数化/表格方向图、方向性电压衰减、固定频率复数互耦，以及 true/assumed 模型失配。信号和干扰功率都以“到达单位增益且极化完全匹配的参考天线端口”为基准，因此绝对方向图增益、极化失配和遮挡会进入链路预算。
+
+测量方向图 CSV 固定为 `element_name,frequency_hz,azimuth_deg,elevation_deg,h_az_real,h_az_imag,h_el_real,h_el_imag`；方位周期插值、仰角有界插值，解析后记录文件 SHA-256。未建模项仍包括真实相位中心标定、全波机壳/人体散射、互耦引起的外部噪声相关、多径/NLOS、运动和动态 DOA、非 CW 干扰、多星/多 PRN、导航数据与 PVT、在线 DOA/鲁棒导向估计及实时滑窗 MVDR。
 
 运行脚本生成的频谱、空间响应、捕获热力图、跟踪曲线和研究报告位于忽略版本控制的 `results/` 目录。
