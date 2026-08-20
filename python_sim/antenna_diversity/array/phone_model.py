@@ -39,6 +39,16 @@ class _RuntimeState:
 
 
 @dataclass(frozen=True)
+class _OpenCircuitStages:
+    positions_m: NDArray[np.float64]
+    polarization_jones: NDArray[np.complex128]
+    spatial_phase: NDArray[np.complex128]
+    pattern_polarization_voltage: NDArray[np.complex128]
+    blockage_voltage: NDArray[np.float64]
+    open_circuit_response: NDArray[np.complex128]
+
+
+@dataclass(frozen=True)
 class PhoneAntennaModel:
     """Detached true/assumed antenna states composed in active-element order."""
 
@@ -68,10 +78,12 @@ class PhoneAntennaModel:
             true_positions=_frozen_array(
                 select_phase_centers(candidate.phone.phase_centers_m, names),
                 np.float64,
+                "true positions",
             ),
             assumed_positions=_frozen_array(
                 select_phase_centers(candidate.phone.assumed_phase_centers_m, names),
                 np.float64,
+                "assumed positions",
             ),
             true_state=_build_runtime_state(
                 antenna.true_state, names, candidate.signal.carrier_hz
@@ -79,11 +91,11 @@ class PhoneAntennaModel:
             assumed_state=_build_runtime_state(
                 antenna.assumed_state, names, candidate.signal.carrier_hz
             ),
-            true_channel=_frozen_array(
-                candidate.array.channel_response(False), np.complex128
+            true_channel=_build_channel_response(
+                candidate.array, estimated=False, label="true channel response"
             ),
-            assumed_channel=_frozen_array(
-                candidate.array.channel_response(True), np.complex128
+            assumed_channel=_build_channel_response(
+                candidate.array, estimated=True, label="assumed channel response"
             ),
             model_label=antenna.model_label,
             model_source=antenna.model_source,
@@ -98,41 +110,96 @@ class PhoneAntennaModel:
         estimated: bool = False,
     ) -> NDArray[np.complex128]:
         """Return pattern/position/polarization response before coupling."""
-        if not isinstance(polarization, WavePolarization):
-            raise ValueError("polarization must be a WavePolarization")
-        polarization.jones_vector()
+        return self._open_circuit_stages(
+            direction, polarization, frequency_hz, estimated=estimated
+        ).open_circuit_response.copy()
+
+    def _open_circuit_stages(
+        self,
+        direction: Direction,
+        polarization: WavePolarization,
+        frequency_hz: float,
+        *,
+        estimated: bool,
+    ) -> _OpenCircuitStages:
+        validated_frequency, polarization_jones = _validated_source_inputs(
+            direction, polarization, frequency_hz
+        )
         positions, state = self._selected_geometry_state(estimated)
-        spatial = array_manifold(
-            positions,
-            direction,
-            frequency_hz,
-            self.active_antennas,
-            state.scalar_pattern,
-        )
-        if state.scalar_pattern is not None:
-            nominal = spatial
-        else:
-            voltages = []
-            for name in self.active_antennas:
-                local_wave = wave_in_element_frame(
-                    direction.azimuth_deg,
-                    direction.elevation_deg,
-                    polarization,
-                    state.rotations[name],
+        try:
+            with np.errstate(all="ignore"):
+                spatial = array_manifold(
+                    positions,
+                    direction,
+                    validated_frequency,
+                    self.active_antennas,
                 )
-                height = state.pattern.effective_height(
-                    name,
-                    LocalDirection(
-                        local_wave.azimuth_deg, local_wave.elevation_deg
-                    ),
-                    frequency_hz,
-                )
-                voltages.append(np.vdot(height, local_wave.jones))
-            nominal = spatial * np.asarray(voltages, dtype=np.complex128)
-        blockage = attenuation_voltage(
-            state.attenuation_regions, self.active_antennas, direction
+        except (ArithmeticError, FloatingPointError) as error:
+            raise ValueError("spatial phase must contain finite values") from error
+        spatial = _finite_array(spatial, np.complex128, "spatial phase")
+        try:
+            with np.errstate(all="ignore"):
+                if state.scalar_pattern is not None:
+                    pattern_voltage = np.asarray(
+                        [
+                            state.scalar_pattern.complex_gain(
+                                name, direction, validated_frequency
+                            )
+                            for name in self.active_antennas
+                        ],
+                        dtype=np.complex128,
+                    )
+                else:
+                    voltages = []
+                    for name in self.active_antennas:
+                        local_wave = wave_in_element_frame(
+                            direction.azimuth_deg,
+                            direction.elevation_deg,
+                            polarization,
+                            state.rotations[name],
+                        )
+                        height = state.pattern.effective_height(
+                            name,
+                            LocalDirection(
+                                local_wave.azimuth_deg, local_wave.elevation_deg
+                            ),
+                            validated_frequency,
+                        )
+                        voltages.append(np.vdot(height, local_wave.jones))
+                    pattern_voltage = np.asarray(voltages, dtype=np.complex128)
+        except (ArithmeticError, FloatingPointError) as error:
+            raise ValueError(
+                "pattern/polarization voltage must contain finite values"
+            ) from error
+        pattern_voltage = _finite_array(
+            pattern_voltage,
+            np.complex128,
+            "pattern/polarization voltage",
         )
-        return np.asarray(nominal * blockage, dtype=np.complex128)
+        try:
+            with np.errstate(all="ignore"):
+                blockage = attenuation_voltage(
+                    state.attenuation_regions, self.active_antennas, direction
+                )
+        except (ArithmeticError, FloatingPointError) as error:
+            raise ValueError("blockage voltage must contain finite values") from error
+        blockage = _finite_array(blockage, np.float64, "blockage voltage")
+        with np.errstate(all="ignore"):
+            open_circuit = np.asarray(
+                spatial * pattern_voltage * blockage,
+                dtype=np.complex128,
+            )
+        open_circuit = _finite_array(
+            open_circuit, np.complex128, "open-circuit response"
+        )
+        return _OpenCircuitStages(
+            positions_m=positions,
+            polarization_jones=polarization_jones,
+            spatial_phase=spatial,
+            pattern_polarization_voltage=pattern_voltage,
+            blockage_voltage=blockage,
+            open_circuit_response=open_circuit,
+        )
 
     def coupling_matrix(self, estimated: bool = False) -> NDArray[np.complex128]:
         """Return a detached ordered coupling matrix."""
@@ -156,8 +223,10 @@ class PhoneAntennaModel:
         open_circuit = self.open_circuit_response(
             direction, polarization, frequency_hz, estimated=estimated
         )
-        coupled = self.coupling_matrix(estimated=estimated) @ open_circuit
-        return self.channel_response(estimated=estimated) * coupled
+        _, _, _, effective = self._composed_stages(
+            open_circuit, estimated=estimated
+        )
+        return effective.copy()
 
     def diagnostics(
         self,
@@ -168,31 +237,58 @@ class PhoneAntennaModel:
         estimated: bool = False,
     ) -> dict[str, object]:
         """Return a detached snapshot of every numeric composition stage."""
-        positions, state = self._selected_geometry_state(estimated)
-        open_circuit = self.open_circuit_response(
+        _, state = self._selected_geometry_state(estimated)
+        stages = self._open_circuit_stages(
             direction, polarization, frequency_hz, estimated=estimated
         )
-        attenuation = attenuation_voltage(
-            state.attenuation_regions, self.active_antennas, direction
+        coupling, coupled, channel, effective = self._composed_stages(
+            stages.open_circuit_response, estimated=estimated
         )
-        coupling = self.coupling_matrix(estimated=estimated)
-        coupled = coupling @ open_circuit
-        channel = self.channel_response(estimated=estimated)
-        effective = channel * coupled
         return {
             "active_antennas": self.active_antennas,
             "estimated": bool(estimated),
             "model_label": self.model_label,
             "model_source": self.model_source,
             "pattern_kind": state.pattern_kind,
-            "positions_m": positions.copy(),
-            "attenuation_voltage": attenuation.copy(),
-            "open_circuit_response": open_circuit.copy(),
+            "frequency_hz": _validated_frequency(frequency_hz),
+            "direction_azimuth_deg": float(direction.azimuth_deg),
+            "direction_elevation_deg": float(direction.elevation_deg),
+            "polarization_jones": stages.polarization_jones.copy(),
+            "positions_m": stages.positions_m.copy(),
+            "spatial_phase": stages.spatial_phase.copy(),
+            "pattern_polarization_voltage": (
+                stages.pattern_polarization_voltage.copy()
+            ),
+            "blockage_voltage": stages.blockage_voltage.copy(),
+            "open_circuit_response": stages.open_circuit_response.copy(),
             "coupling_matrix": coupling.copy(),
             "coupled_response": coupled.copy(),
             "channel_response": channel.copy(),
             "effective_manifold": effective.copy(),
         }
+
+    def _composed_stages(
+        self,
+        open_circuit: NDArray[np.complex128],
+        *,
+        estimated: bool,
+    ) -> tuple[
+        NDArray[np.complex128],
+        NDArray[np.complex128],
+        NDArray[np.complex128],
+        NDArray[np.complex128],
+    ]:
+        coupling = self.coupling_matrix(estimated=estimated)
+        channel = self.channel_response(estimated=estimated)
+        with np.errstate(all="ignore"):
+            coupled = coupling @ open_circuit
+        coupled = _finite_array(coupled, np.complex128, "coupled response")
+        with np.errstate(all="ignore"):
+            effective = channel * coupled
+        effective = _finite_array(
+            effective, np.complex128, "effective manifold"
+        )
+        return coupling, coupled, channel, effective
 
     def _selected_geometry_state(
         self, estimated: bool
@@ -232,6 +328,7 @@ def _build_runtime_state(
                 orientation.roll_deg,
             ),
             np.float64,
+            f"{name} rotation",
         )
         for name, orientation in state.orientations.items()
     }
@@ -241,13 +338,82 @@ def _build_runtime_state(
         scalar_pattern=scalar_pattern,
         rotations=MappingProxyType(rotations),
         attenuation_regions=tuple(state.attenuation_regions),
-        coupling=_frozen_array(
-            coupling_matrix(state.coupling_paths, active_antennas), np.complex128
-        ),
+        coupling=_build_coupling(state, active_antennas),
     )
 
 
-def _frozen_array(values: object, dtype: object) -> NDArray:
-    result = np.array(values, dtype=dtype, copy=True)
-    result.setflags(write=False)
+def _build_coupling(
+    state: AntennaStateConfig, active_antennas: tuple[str, ...]
+) -> NDArray[np.complex128]:
+    try:
+        with np.errstate(all="ignore"):
+            values = coupling_matrix(state.coupling_paths, active_antennas)
+    except (ArithmeticError, FloatingPointError, TypeError, ValueError) as error:
+        raise ValueError("coupling matrix must contain finite values") from error
+    return _frozen_array(values, np.complex128, "coupling matrix")
+
+
+def _build_channel_response(
+    array_config: object, *, estimated: bool, label: str
+) -> NDArray[np.complex128]:
+    try:
+        with np.errstate(all="ignore"):
+            values = array_config.channel_response(estimated)
+    except (ArithmeticError, FloatingPointError, TypeError, ValueError) as error:
+        raise ValueError(f"{label} must contain finite values") from error
+    return _frozen_array(values, np.complex128, label)
+
+
+def _frozen_array(values: object, dtype: object, label: str) -> NDArray:
+    source = _finite_array(values, dtype, label, order="C")
+    return np.frombuffer(source.tobytes(order="C"), dtype=source.dtype).reshape(
+        source.shape
+    )
+
+
+def _finite_array(
+    values: object, dtype: object, label: str, *, order: str = "K"
+) -> NDArray:
+    try:
+        result = np.array(values, dtype=dtype, copy=True, order=order)
+    except (TypeError, ValueError, OverflowError) as error:
+        raise ValueError(f"{label} must contain finite values") from error
+    if not np.all(np.isfinite(result)):
+        raise ValueError(f"{label} must contain finite values")
     return result
+
+
+def _validated_source_inputs(
+    direction: object,
+    polarization: object,
+    frequency_hz: object,
+) -> tuple[float, NDArray[np.complex128]]:
+    from antenna_diversity.config import Direction
+
+    if not isinstance(direction, Direction):
+        raise ValueError("direction must be a Direction")
+    direction.validate()
+    if not isinstance(polarization, WavePolarization):
+        raise ValueError("polarization must be a WavePolarization")
+    return _validated_frequency(frequency_hz), polarization.jones_vector()
+
+
+def _validated_frequency(value: object) -> float:
+    if isinstance(value, (bool, np.bool_)):
+        raise ValueError("frequency_hz must be a positive finite real scalar")
+    try:
+        candidate = np.asarray(value)
+    except (TypeError, ValueError, OverflowError) as error:
+        raise ValueError(
+            "frequency_hz must be a positive finite real scalar"
+        ) from error
+    if (
+        candidate.shape != ()
+        or np.iscomplexobj(candidate)
+        or not np.issubdtype(candidate.dtype, np.number)
+    ):
+        raise ValueError("frequency_hz must be a positive finite real scalar")
+    numeric = float(candidate)
+    if not np.isfinite(numeric) or numeric <= 0.0:
+        raise ValueError("frequency_hz must be a positive finite real scalar")
+    return numeric

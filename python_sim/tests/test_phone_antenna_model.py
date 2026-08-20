@@ -70,6 +70,40 @@ def _parametric_parameters(
     }
 
 
+def _model_for_pattern_kind(pattern_kind: str, tmp_path: Path) -> PhoneAntennaModel:
+    if pattern_kind == "isotropic":
+        return PhoneAntennaModel.from_config(default_config())
+    if pattern_kind == "parametric":
+        cfg = _parametric_config(
+            ("TL", "TR"), {name: 1.0 for name in CORNER_NAMES}
+        )
+        return PhoneAntennaModel.from_config(cfg)
+    cfg = default_config()
+    cfg.array.active_antennas = ("TL", "TR")
+    frequency_hz = cfg.signal.carrier_hz
+    component = 2.0**-0.5
+    pattern_path = tmp_path / "validation-pattern.csv"
+    pattern_path.write_text(
+        "element_name,frequency_hz,azimuth_deg,elevation_deg,"
+        "h_az_real,h_az_imag,h_el_real,h_el_imag\n"
+        f"TL,{frequency_hz},0,90,{component},0,0,{-component}\n"
+        f"TR,{frequency_hz},0,90,{component},0,0,{-component}\n",
+        encoding="utf-8",
+    )
+    state = AntennaStateConfig(
+        pattern_kind="measured",
+        measured_pattern_csv=pattern_path,
+        measured_pattern_sha256=hashlib.sha256(pattern_path.read_bytes()).hexdigest(),
+    )
+    cfg.array.antenna_model = PhoneAntennaConfig(
+        model_label="measured validation model",
+        model_source="measured",
+        true_state=state,
+        assumed_state=copy.deepcopy(state),
+    )
+    return PhoneAntennaModel.from_config(cfg)
+
+
 def test_phone_antenna_model_is_exported_from_array_package():
     from antenna_diversity.array import PhoneAntennaModel as PublicPhoneAntennaModel
 
@@ -375,8 +409,14 @@ def test_diagnostics_are_finite_detached_snapshots_without_runtime_objects():
         "model_label",
         "model_source",
         "pattern_kind",
+        "frequency_hz",
+        "direction_azimuth_deg",
+        "direction_elevation_deg",
+        "polarization_jones",
         "positions_m",
-        "attenuation_voltage",
+        "spatial_phase",
+        "pattern_polarization_voltage",
+        "blockage_voltage",
         "open_circuit_response",
         "coupling_matrix",
         "coupled_response",
@@ -388,9 +428,15 @@ def test_diagnostics_are_finite_detached_snapshots_without_runtime_objects():
     assert diagnostics["model_label"] == "test parametric model"
     assert diagnostics["model_source"] == "parametric"
     assert diagnostics["pattern_kind"] == "parametric"
+    assert diagnostics["frequency_hz"] == cfg.signal.carrier_hz
+    assert diagnostics["direction_azimuth_deg"] == 0.0
+    assert diagnostics["direction_elevation_deg"] == 90.0
     numeric_keys = (
+        "polarization_jones",
         "positions_m",
-        "attenuation_voltage",
+        "spatial_phase",
+        "pattern_polarization_voltage",
+        "blockage_voltage",
         "open_circuit_response",
         "coupling_matrix",
         "coupled_response",
@@ -401,9 +447,246 @@ def test_diagnostics_are_finite_detached_snapshots_without_runtime_objects():
         assert isinstance(diagnostics[key], np.ndarray)
         assert np.all(np.isfinite(diagnostics[key]))
 
-    diagnostics["positions_m"][0, 0] = np.nan
-    diagnostics["coupling_matrix"][0, 0] = np.nan
-    diagnostics["channel_response"][0] = np.nan
+    originals = {key: diagnostics[key].copy() for key in numeric_keys}
+    for key in numeric_keys:
+        diagnostics[key].flat[0] = np.nan
     fresh = model.diagnostics(ZENITH, RHCP, cfg.signal.carrier_hz)
     for key in numeric_keys:
         assert np.all(np.isfinite(fresh[key]))
+        np.testing.assert_allclose(fresh[key], originals[key], rtol=0.0, atol=0.0)
+
+
+def test_diagnostics_decompose_every_response_stage_with_numeric_source_context():
+    cfg = _parametric_config(
+        ("BR", "TL"),
+        {"TL": 10.0, "TR": 1.0, "BL": 1.0, "BR": 1.0},
+    )
+    cfg.array.antenna_model.true_state.attenuation_regions = (
+        AttenuationRegion(("TL",), 0.0, 90.0, 1.0, 6.020599913279624),
+    )
+    cfg.array.antenna_model.true_state.coupling_paths = (
+        CouplingPath("BR", "TL", -6.020599913279624, 90.0),
+    )
+    cfg.array.channel_amplitude_error_db["BR"] = 6.020599913279624
+    cfg.array.channel_phase_error_deg["TL"] = 90.0
+    model = PhoneAntennaModel.from_config(cfg)
+
+    diagnostics = model.diagnostics(ZENITH, RHCP, cfg.signal.carrier_hz)
+
+    assert diagnostics["frequency_hz"] == cfg.signal.carrier_hz
+    assert diagnostics["direction_azimuth_deg"] == 0.0
+    assert diagnostics["direction_elevation_deg"] == 90.0
+    np.testing.assert_allclose(
+        diagnostics["polarization_jones"],
+        [2.0**-0.5, -1.0j * 2.0**-0.5],
+        rtol=0.0,
+        atol=1e-12,
+    )
+    np.testing.assert_allclose(
+        diagnostics["spatial_phase"], [1.0, 1.0], rtol=0.0, atol=1e-12
+    )
+    np.testing.assert_allclose(
+        diagnostics["pattern_polarization_voltage"],
+        [1.0, 10.0],
+        rtol=0.0,
+        atol=1e-12,
+    )
+    np.testing.assert_allclose(
+        diagnostics["blockage_voltage"], [1.0, 0.5], rtol=0.0, atol=1e-12
+    )
+    np.testing.assert_allclose(
+        diagnostics["open_circuit_response"],
+        diagnostics["spatial_phase"]
+        * diagnostics["pattern_polarization_voltage"]
+        * diagnostics["blockage_voltage"],
+        rtol=0.0,
+        atol=1e-12,
+    )
+    np.testing.assert_allclose(
+        diagnostics["coupled_response"],
+        diagnostics["coupling_matrix"] @ diagnostics["open_circuit_response"],
+        rtol=0.0,
+        atol=1e-12,
+    )
+    np.testing.assert_allclose(
+        diagnostics["effective_manifold"],
+        diagnostics["channel_response"] * diagnostics["coupled_response"],
+        rtol=0.0,
+        atol=1e-12,
+    )
+
+
+def test_internal_numeric_state_has_irreversible_read_only_backing():
+    cfg = _parametric_config(("TL", "BR"), {name: 1.0 for name in CORNER_NAMES})
+    model = PhoneAntennaModel.from_config(cfg)
+    true_before = model.effective_manifold(ZENITH, RHCP, cfg.signal.carrier_hz)
+    assumed_before = model.effective_manifold(
+        ZENITH, RHCP, cfg.signal.carrier_hz, estimated=True
+    )
+    internal_arrays = (
+        model.true_positions,
+        model.assumed_positions,
+        model.true_channel,
+        model.assumed_channel,
+        model.true_state.coupling,
+        model.assumed_state.coupling,
+        *model.true_state.rotations.values(),
+        *model.assumed_state.rotations.values(),
+    )
+
+    for values in internal_arrays:
+        assert values.flags.writeable is False
+        with pytest.raises(ValueError):
+            values.setflags(write=True)
+        with pytest.raises(ValueError):
+            values.flat[0] = 123.0
+
+    np.testing.assert_allclose(
+        model.effective_manifold(ZENITH, RHCP, cfg.signal.carrier_hz),
+        true_before,
+        rtol=0.0,
+        atol=0.0,
+    )
+    np.testing.assert_allclose(
+        model.effective_manifold(
+            ZENITH, RHCP, cfg.signal.carrier_hz, estimated=True
+        ),
+        assumed_before,
+        rtol=0.0,
+        atol=0.0,
+    )
+
+
+@pytest.mark.parametrize("pattern_kind", ["isotropic", "parametric", "measured"])
+def test_public_response_entries_reject_non_direction_objects(
+    pattern_kind: str, tmp_path: Path
+):
+    model = _model_for_pattern_kind(pattern_kind, tmp_path)
+
+    for method in (
+        model.open_circuit_response,
+        model.effective_manifold,
+        model.diagnostics,
+    ):
+        with pytest.raises(ValueError, match="direction"):
+            method(object(), RHCP, 1_575.42e6)
+
+
+@pytest.mark.parametrize("pattern_kind", ["isotropic", "parametric", "measured"])
+@pytest.mark.parametrize(
+    "frequency_hz",
+    [True, 1.0 + 0.0j, np.array([1.0]), 0.0, -1.0, np.inf, np.nan],
+)
+def test_public_response_entries_reject_invalid_frequency_for_every_pattern_kind(
+    pattern_kind: str, frequency_hz: object, tmp_path: Path
+):
+    model = _model_for_pattern_kind(pattern_kind, tmp_path)
+
+    for method in (
+        model.open_circuit_response,
+        model.effective_manifold,
+        model.diagnostics,
+    ):
+        with pytest.raises(ValueError, match="frequency_hz"):
+            method(ZENITH, RHCP, frequency_hz)
+
+
+def test_factory_rejects_nonfinite_derived_channel_without_warning():
+    cfg = default_config()
+    cfg.array.channel_amplitude_error_db["TL"] = 1e308
+
+    with pytest.raises(ValueError, match="true channel.*finite"):
+        PhoneAntennaModel.from_config(cfg)
+
+
+def test_factory_rejects_nonfinite_derived_coupling_without_warning():
+    cfg = default_config()
+    state = AntennaStateConfig(
+        coupling_paths=(CouplingPath("TL", "TR", 1e308, 0.0),)
+    )
+    cfg.array.antenna_model = PhoneAntennaConfig(
+        model_label="coupling overflow",
+        model_source="ideal",
+        true_state=state,
+        assumed_state=copy.deepcopy(state),
+    )
+
+    with pytest.raises(ValueError, match="coupling matrix.*finite"):
+        PhoneAntennaModel.from_config(cfg)
+
+
+def test_open_circuit_rejects_nonfinite_pattern_voltage_without_warning():
+    cfg = _parametric_config(("TL", "TR"), {name: 1.0 for name in CORNER_NAMES})
+    cfg.array.antenna_model.true_state.parametric_patterns = {
+        name: ParametricPatternParameters(
+            peak_gain_db=1e308,
+            back_lobe_gain_db=-100.0,
+            nominal_polarization=RHCP,
+        )
+        for name in CORNER_NAMES
+    }
+    model = PhoneAntennaModel.from_config(cfg)
+
+    with pytest.raises(ValueError, match="pattern/polarization voltage.*finite"):
+        model.open_circuit_response(ZENITH, RHCP, cfg.signal.carrier_hz)
+
+
+@pytest.mark.parametrize("method_name", ["effective_manifold", "diagnostics"])
+def test_composed_response_rejects_nonfinite_effective_voltage_without_warning(
+    method_name: str,
+):
+    cfg = _parametric_config(
+        ("TL", "TR"), {name: 1e150 for name in CORNER_NAMES}
+    )
+    cfg.array.channel_amplitude_error_db["TL"] = 6000.0
+    model = PhoneAntennaModel.from_config(cfg)
+
+    with pytest.raises(ValueError, match="effective manifold.*finite"):
+        getattr(model, method_name)(ZENITH, RHCP, cfg.signal.carrier_hz)
+
+
+def test_structured_isotropic_state_applies_blockage_and_coupling():
+    cfg = default_config()
+    cfg.array.active_antennas = ("TL", "TR")
+    zero_positions = {name: (0.0, 0.0, 0.0) for name in CORNER_NAMES}
+    cfg.phone.phase_centers_m = zero_positions.copy()
+    cfg.phone.assumed_phase_centers_m = zero_positions.copy()
+    state = AntennaStateConfig(
+        attenuation_regions=(
+            AttenuationRegion(("TL",), 0.0, 90.0, 1.0, 6.020599913279624),
+        ),
+        coupling_paths=(
+            CouplingPath("TL", "TR", -6.020599913279624, 0.0),
+        ),
+    )
+    cfg.array.antenna_model = PhoneAntennaConfig(
+        model_label="structured isotropic",
+        model_source="ideal",
+        true_state=state,
+        assumed_state=copy.deepcopy(state),
+    )
+    model = PhoneAntennaModel.from_config(cfg)
+
+    diagnostics = model.diagnostics(ZENITH, RHCP, cfg.signal.carrier_hz)
+
+    np.testing.assert_allclose(
+        diagnostics["pattern_polarization_voltage"],
+        [1.0, 1.0],
+        rtol=0.0,
+        atol=1e-12,
+    )
+    np.testing.assert_allclose(
+        diagnostics["blockage_voltage"], [0.5, 1.0], rtol=0.0, atol=1e-12
+    )
+    np.testing.assert_allclose(
+        diagnostics["open_circuit_response"],
+        [0.5, 1.0],
+        rtol=0.0,
+        atol=1e-12,
+    )
+    np.testing.assert_allclose(
+        diagnostics["effective_manifold"],
+        [0.5, 1.25],
+        rtol=0.0,
+        atol=1e-12,
+    )
