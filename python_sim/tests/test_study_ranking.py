@@ -242,6 +242,8 @@ def _valid_interferer():
         "direction": {"azimuth_deg": 120.0, "elevation_deg": 10.0},
         "enable": True, "power_dbm": -90.0, "offset_hz": 250e3,
         "initial_phase_rad": 0.8, "start_ms": 0.0, "stop_ms": None,
+        "polarization": {"kind": "rhcp", "tilt_deg": 0.0, "az_real": 1.0,
+                         "az_imag": 0.0, "el_real": 0.0, "el_imag": 0.0},
     }
 
 
@@ -331,7 +333,10 @@ def test_selection_keeps_exact_multi_jammer_and_median_combined_parameters():
         "template": "two_jammer_separated", "child_seed": 99,
         "interferers": [{"direction": {"azimuth_deg": 120.0, "elevation_deg": 10.0}, "enable": True,
                           "power_dbm": -90.0, "offset_hz": 250e3, "initial_phase_rad": 0.8,
-                          "start_ms": 0.0, "stop_ms": None}],
+                          "start_ms": 0.0, "stop_ms": None,
+                          "polarization": {"kind": "rhcp", "tilt_deg": 0.0,
+                                           "az_real": 1.0, "az_imag": 0.0,
+                                           "el_real": 0.0, "el_imag": 0.0}}],
     }]
     combined = [
         {"case_id": f"combined-{index}", "active_antennas": ["TL", "BR"], "level": "light",

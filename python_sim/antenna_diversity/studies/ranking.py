@@ -8,6 +8,7 @@ import numpy as np
 
 from antenna_diversity.array.geometry import CORNER_ORDER
 from antenna_diversity.array.manifold import direction_unit_vector
+from antenna_diversity.array.polarization import WavePolarization
 from antenna_diversity.config import Direction
 
 from .models import RankingResult, ResolvedStudyConfig, SelectionResult, StudyCase, strict_snapshot
@@ -322,9 +323,12 @@ def validate_interferer_snapshots(value: object) -> None:
         raise ValueError("selected case parameters.interferers must be a sequence")
     required = {
         "direction", "enable", "power_dbm", "offset_hz", "initial_phase_rad",
-        "start_ms", "stop_ms",
+        "start_ms", "stop_ms", "polarization",
     }
     direction_fields = {"azimuth_deg", "elevation_deg"}
+    polarization_fields = {
+        "kind", "tilt_deg", "az_real", "az_imag", "el_real", "el_imag",
+    }
     for raw in value:
         if not isinstance(raw, Mapping) or set(raw) != required:
             raise ValueError("selected case interferer must contain the exact CWInterferer fields")
@@ -337,6 +341,15 @@ def validate_interferer_snapshots(value: object) -> None:
             Direction(direction["azimuth_deg"], direction["elevation_deg"]).validate()
         except (TypeError, ValueError) as error:
             raise ValueError("selected case interferer direction is invalid") from error
+        polarization = raw["polarization"]
+        if not isinstance(polarization, Mapping) or set(polarization) != polarization_fields:
+            raise ValueError(
+                "selected case interferer polarization must contain exact polarization fields"
+            )
+        try:
+            WavePolarization(**polarization).jones_vector()
+        except (TypeError, ValueError) as error:
+            raise ValueError("selected case interferer polarization is invalid") from error
         if type(raw["enable"]) is not bool:
             raise ValueError("selected case interferer enable must be a bool")
         for name in ("power_dbm", "offset_hz", "initial_phase_rad", "start_ms"):

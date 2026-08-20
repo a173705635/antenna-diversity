@@ -7,6 +7,7 @@ from collections.abc import Mapping
 
 import numpy as np
 
+from antenna_diversity.array.polarization import WavePolarization
 from antenna_diversity.config import CWInterferer, Direction, PhoneArrayConfig
 from antenna_diversity.experiments.spatial_scan import evaluate_configuration_spatially
 from antenna_diversity.pipeline import run_end_to_end
@@ -87,6 +88,7 @@ def _interferers(value: object) -> tuple[CWInterferer, ...]:
             enable=raw["enable"], power_dbm=raw["power_dbm"],
             offset_hz=raw["offset_hz"], initial_phase_rad=raw["initial_phase_rad"],
             start_ms=raw["start_ms"], stop_ms=raw["stop_ms"],
+            polarization=WavePolarization(**raw["polarization"]),
         ))
     return tuple(built)
 

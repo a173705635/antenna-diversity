@@ -136,7 +136,7 @@ class JammerConfig:
     initial_phase_rad: float = 0.8
 
 
-@dataclass(frozen=True, init=False)
+@dataclass(frozen=True)
 class CWInterferer:
     direction: Direction
     enable: bool = True
@@ -145,36 +145,7 @@ class CWInterferer:
     initial_phase_rad: float = 0.8
     start_ms: float = 0.0
     stop_ms: float | None = None
-
-    # Keep polarization out of dataclass fields so legacy study snapshots retain
-    # their exact pre-polarization schema while callers still get a typed value.
-    def __init__(
-        self,
-        direction: Direction,
-        enable: bool = True,
-        power_dbm: float = -90.0,
-        offset_hz: float = 250e3,
-        initial_phase_rad: float = 0.8,
-        start_ms: float = 0.0,
-        stop_ms: float | None = None,
-        polarization: WavePolarization | None = None,
-    ) -> None:
-        object.__setattr__(self, "direction", direction)
-        object.__setattr__(self, "enable", enable)
-        object.__setattr__(self, "power_dbm", power_dbm)
-        object.__setattr__(self, "offset_hz", offset_hz)
-        object.__setattr__(self, "initial_phase_rad", initial_phase_rad)
-        object.__setattr__(self, "start_ms", start_ms)
-        object.__setattr__(self, "stop_ms", stop_ms)
-        object.__setattr__(
-            self,
-            "_polarization",
-            WavePolarization() if polarization is None else polarization,
-        )
-
-    @property
-    def polarization(self) -> WavePolarization:
-        return self._polarization
+    polarization: WavePolarization = field(default_factory=WavePolarization)
 
 
 @dataclass(frozen=True)

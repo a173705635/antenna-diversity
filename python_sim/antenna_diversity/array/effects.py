@@ -164,9 +164,11 @@ def attenuation_voltage(
         center_vector = _direction_vector(
             float(region.center_azimuth_deg), float(region.center_elevation_deg)
         )
-        separation_deg = float(
-            np.rad2deg(np.arccos(np.clip(np.dot(direction_vector, center_vector), -1.0, 1.0)))
+        dot_product = float(
+            np.clip(np.dot(direction_vector, center_vector), -1.0, 1.0)
         )
+        cross_norm = float(np.linalg.norm(np.cross(direction_vector, center_vector)))
+        separation_deg = float(np.rad2deg(np.arctan2(cross_norm, dot_product)))
         if region.transition_width_deg == 0.0:
             fraction = 1.0 if separation_deg <= region.radius_deg else 0.0
         else:

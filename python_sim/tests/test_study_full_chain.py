@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from antenna_diversity.studies.models import SelectionResult, StudyCase
-from antenna_diversity.studies.full_chain import run_selected_full_chain
+from antenna_diversity.studies.full_chain import _interferers, run_selected_full_chain
 from tests.study_helpers import resolved_for_test
 
 
@@ -27,11 +27,30 @@ def one_selected_case() -> SelectionResult:
                 "direction": {"azimuth_deg": 120.0, "elevation_deg": 10.0},
                 "enable": True, "power_dbm": -90.0, "offset_hz": 250e3,
                 "initial_phase_rad": 0.8, "start_ms": 0.0, "stop_ms": None,
+                "polarization": {"kind": "rhcp", "tilt_deg": 0.0,
+                                 "az_real": 1.0, "az_imag": 0.0,
+                                 "el_real": 0.0, "el_imag": 0.0},
             }],
         },
         selection_reasons=("best",),
     )
     return SelectionResult((case,), {})
+
+
+def test_interferer_snapshot_reconstruction_preserves_polarization():
+    snapshot = [{
+        "direction": {"azimuth_deg": 120.0, "elevation_deg": 10.0},
+        "enable": True, "power_dbm": -90.0, "offset_hz": 250e3,
+        "initial_phase_rad": 0.8, "start_ms": 0.0, "stop_ms": None,
+        "polarization": {"kind": "linear", "tilt_deg": 35.0,
+                         "az_real": 1.0, "az_imag": 0.0,
+                         "el_real": 0.0, "el_imag": 0.0},
+    }]
+
+    rebuilt = _interferers(snapshot)
+
+    assert rebuilt[0].polarization.kind == "linear"
+    assert rebuilt[0].polarization.tilt_deg == 35.0
 
 
 def controlled_results(cfg):

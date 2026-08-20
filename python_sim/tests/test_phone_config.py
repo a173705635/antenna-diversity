@@ -107,15 +107,17 @@ def test_default_signal_and_interferer_polarizations_are_rhcp():
     )
 
 
-def test_interferer_polarization_extension_preserves_legacy_study_snapshot_schema():
+def test_interferer_polarization_participates_in_equality_replace_and_snapshot():
     from antenna_diversity.studies.models import strict_snapshot
 
     polarization = WavePolarization("linear", tilt_deg=45.0)
-    interferer = CWInterferer(
-        Direction(120.0, 10.0), polarization=polarization
-    )
+    interferer = CWInterferer(Direction(120.0, 10.0), polarization=polarization)
+    default_interferer = CWInterferer(Direction(120.0, 10.0))
+    changed_power = replace(interferer, power_dbm=-80.0)
 
     assert interferer.polarization is polarization
+    assert interferer != default_interferer
+    assert changed_power.polarization is polarization
     assert strict_snapshot(interferer) == {
         "direction": {"azimuth_deg": 120.0, "elevation_deg": 10.0},
         "enable": True,
@@ -124,7 +126,34 @@ def test_interferer_polarization_extension_preserves_legacy_study_snapshot_schem
         "initial_phase_rad": 0.8,
         "start_ms": 0.0,
         "stop_ms": None,
+        "polarization": {
+            "kind": "linear",
+            "tilt_deg": 45.0,
+            "az_real": 1.0,
+            "az_imag": 0.0,
+            "el_real": 0.0,
+            "el_imag": 0.0,
+        },
     }
+    assert strict_snapshot(interferer) != strict_snapshot(default_interferer)
+
+
+def test_interferer_polarization_changes_scientific_configuration_hash():
+    from antenna_diversity.studies.config import resolve_study_config
+    from antenna_diversity.studies.models import ResolvedStudyConfig
+
+    base = resolve_study_config(preset="quick")
+    simulation = base.simulation
+    simulation.interferers = (
+        replace(
+            simulation.interferers[0],
+            polarization=WavePolarization("linear", tilt_deg=30.0),
+        ),
+    )
+
+    changed = ResolvedStudyConfig.from_parts(base.study, simulation)
+
+    assert changed.config_sha256 != base.config_sha256
 
 
 @pytest.mark.parametrize(

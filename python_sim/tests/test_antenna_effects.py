@@ -54,6 +54,40 @@ def test_transition_uses_raised_cosine_centered_on_region_radius():
     np.testing.assert_allclose(voltage, [10 ** (-3.0 / 20.0), 1.0])
 
 
+def test_zero_radius_region_at_exact_center_applies_full_attenuation():
+    regions = (AttenuationRegion(("TL",), 0.1, 33.3, 0.0, 6.0),)
+
+    voltage = attenuation_voltage(
+        regions, ("TL", "BR"), Direction(0.1, 33.3)
+    )
+
+    np.testing.assert_allclose(voltage, [10 ** (-6.0 / 20.0), 1.0])
+
+
+@pytest.mark.parametrize(
+    ("azimuth_deg", "expected_attenuation_db"),
+    [
+        (10.0, 8.0),
+        (15.0, 8.0),
+        (20.0, 4.0),
+        (25.0, 0.0),
+        (30.0, 0.0),
+    ],
+)
+def test_raised_cosine_transition_has_stable_inside_edge_middle_and_outside_values(
+    azimuth_deg, expected_attenuation_db
+):
+    regions = (AttenuationRegion(("TL",), 0.0, 0.0, 20.0, 8.0, 10.0),)
+
+    voltage = attenuation_voltage(
+        regions, ("TL", "BR"), Direction(azimuth_deg, 0.0)
+    )
+
+    np.testing.assert_allclose(
+        voltage, [10 ** (-expected_attenuation_db / 20.0), 1.0], atol=1e-15
+    )
+
+
 def test_coupling_path_with_inactive_endpoint_does_not_change_selected_matrix():
     paths = (
         CouplingPath("TL", "BR", -10.0, 0.0),
