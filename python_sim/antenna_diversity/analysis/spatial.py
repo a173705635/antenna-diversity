@@ -8,11 +8,7 @@ from typing import Any
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from antenna_diversity.array.geometry import select_phase_centers
-from antenna_diversity.array.manifold import (
-    IsotropicElementPattern,
-    array_manifold,
-)
+from antenna_diversity.array.phone_model import PhoneAntennaModel
 from antenna_diversity.config import (
     Direction,
     PhoneArrayConfig,
@@ -177,13 +173,12 @@ def response_grid_db(
     weights: ArrayLike,
     azimuths_deg: ArrayLike,
     elevations_deg: ArrayLike,
+    model_view: str = "true",
 ) -> NDArray[np.float64]:
     """Return a phone-array response grid normalized to 0 dB."""
 
     if not isinstance(cfg.array, PhoneArrayConfig) or cfg.phone is None:
         raise ValueError("response_grid_db requires a phone-array configuration")
-    if cfg.array.pattern_model != "isotropic":
-        raise ValueError("response_grid_db supports only the isotropic pattern")
 
     w = _finite_vector("weights", weights)
     if w.size != cfg.array.num_elements:
@@ -195,29 +190,41 @@ def response_grid_db(
     if np.any((elevations < 0.0) | (elevations > 90.0)):
         raise ValueError("elevations_deg must lie in [0, 90]")
 
-    names = cfg.array.active_antennas
-    positions = select_phase_centers(cfg.phone.phase_centers_m, names)
-    pattern = IsotropicElementPattern()
+    view = str(model_view).lower()
+    if view not in {"true", "assumed"}:
+        raise ValueError("model_view must be true or assumed")
+    model = PhoneAntennaModel.from_config(cfg)
+    polarization = (
+        cfg.signal.true_polarization
+        if view == "true"
+        else cfg.signal.assumed_polarization
+    )
+    estimated = view == "assumed"
     response = np.empty((elevations.size, azimuths.size), dtype=float)
     for elevation_index, elevation in enumerate(elevations):
         for azimuth_index, azimuth in enumerate(azimuths):
-            manifold = array_manifold(
-                positions,
+            manifold = model.effective_manifold(
                 Direction(float(azimuth), float(elevation)),
+                polarization,
                 cfg.signal.carrier_hz,
-                element_names=names,
-                pattern=pattern,
+                estimated=estimated,
             )
             response[elevation_index, azimuth_index] = abs(np.vdot(w, manifold))
 
+    return _normalized_response_db(response, floor_db=-80.0)
+
+
+def _normalized_response_db(
+    response: NDArray[np.float64], floor_db: float
+) -> NDArray[np.float64]:
     peak = float(np.max(response))
     if not np.isfinite(peak):
         raise ValueError("response grid must have a finite maximum")
     if peak == 0.0:
-        return np.full(response.shape, -80.0)
+        return np.full(response.shape, floor_db)
     with np.errstate(divide="ignore"):
         response_db = 20.0 * np.log10(response / peak)
-    return np.maximum(response_db, -80.0)
+    return np.maximum(response_db, floor_db)
 
 
 def _finite_vector(name: str, values: ArrayLike) -> NDArray[np.complex128]:

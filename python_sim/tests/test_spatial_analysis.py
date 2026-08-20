@@ -1,8 +1,16 @@
 import json
 
+import copy
+
 import numpy as np
 import pytest
 
+from antenna_diversity.array.antenna_config import (
+    AntennaStateConfig,
+    PhoneAntennaConfig,
+)
+from antenna_diversity.array.effects import AttenuationRegion
+from antenna_diversity.array.phone_model import PhoneAntennaModel
 from antenna_diversity.analysis.spatial import (
     analytic_covariance,
     evaluate_spatial_case,
@@ -299,3 +307,51 @@ def test_response_grid_returns_floor_when_every_requested_point_is_exact_null():
     assert response.shape == (3, 2)
     assert np.all(np.isfinite(response))
     np.testing.assert_array_equal(response, np.full((3, 2), -80.0))
+
+
+def test_response_grid_uses_selected_phone_model_view_without_normalizing_manifold():
+    cfg = mate70_default_config()
+    cfg.array.active_antennas = ("TL", "TR")
+    true_state = AntennaStateConfig(
+        attenuation_regions=(
+            AttenuationRegion(("TL",), 0.0, 45.0, 1.0, 6.020599913279624),
+        ),
+    )
+    cfg.array.antenna_model = PhoneAntennaConfig(
+        model_label="grid fixture",
+        model_source="ideal",
+        true_state=true_state,
+        assumed_state=copy.deepcopy(AntennaStateConfig()),
+    )
+    weights = np.array([1.0, 0.0])
+    azimuths = np.array([0.0, 90.0])
+    elevations = np.array([45.0])
+
+    true_response = response_grid_db(
+        cfg, weights, azimuths, elevations, model_view="true"
+    )
+    assumed_response = response_grid_db(
+        cfg, weights, azimuths, elevations, model_view="ASSUMED"
+    )
+
+    np.testing.assert_allclose(true_response, [[-6.020599913279624, 0.0]], atol=1e-12)
+    np.testing.assert_allclose(assumed_response, [[0.0, 0.0]], atol=1e-12)
+    model = PhoneAntennaModel.from_config(cfg)
+    open_circuit = model.open_circuit_response(
+        Direction(0.0, 45.0),
+        cfg.signal.true_polarization,
+        cfg.signal.carrier_hz,
+        estimated=False,
+    )
+    assert abs(open_circuit[0]) == pytest.approx(0.5)
+
+
+def test_response_grid_rejects_unknown_model_view():
+    with pytest.raises(ValueError, match="model_view must be true or assumed"):
+        response_grid_db(
+            mate70_default_config(),
+            np.ones(4),
+            [0.0],
+            [45.0],
+            model_view="nominal",
+        )

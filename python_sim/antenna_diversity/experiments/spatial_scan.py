@@ -17,7 +17,7 @@ from antenna_diversity.array.geometry import (
     maximum_baseline_m,
     select_phase_centers,
 )
-from antenna_diversity.array.manifold import IsotropicElementPattern, array_manifold
+from antenna_diversity.array.phone_model import PhoneAntennaModel
 from antenna_diversity.config import (
     CWInterferer,
     Direction,
@@ -62,43 +62,32 @@ def evaluate_configuration_spatially(
     case.validate()
     if not isinstance(case.array, PhoneArrayConfig) or case.phone is None:
         raise ValueError("spatial experiments require a phone-array configuration")
-    if case.array.pattern_model != "isotropic":
-        raise ValueError("spatial experiments support only the isotropic pattern")
 
-    names = case.array.active_antennas
-    true_positions = select_phase_centers(case.phone.phase_centers_m, names)
-    assumed_positions = select_phase_centers(
-        case.phone.assumed_phase_centers_m, names
-    )
-    pattern = IsotropicElementPattern()
+    model = PhoneAntennaModel.from_config(case)
     frequency_hz = case.signal.carrier_hz
-    true_desired = array_manifold(
-        true_positions,
+    true_desired = model.effective_manifold(
         case.signal.true_direction,
+        case.signal.true_polarization,
         frequency_hz,
-        element_names=names,
-        pattern=pattern,
-    ) * case.array.channel_response(estimated=False)
-    assumed_desired = array_manifold(
-        assumed_positions,
+        estimated=False,
+    )
+    assumed_desired = model.effective_manifold(
         case.signal.assumed_direction,
+        case.signal.assumed_polarization,
         frequency_hz,
-        element_names=names,
-        pattern=pattern,
-    ) * case.array.channel_response(estimated=True)
+        estimated=True,
+    )
 
     enabled_interferers = tuple(
         interferer for interferer in case.interferers if interferer.enable
     )
     interferer_steering = tuple(
-        array_manifold(
-            true_positions,
+        model.effective_manifold(
             interferer.direction,
+            interferer.polarization,
             frequency_hz,
-            element_names=names,
-            pattern=pattern,
+            estimated=False,
         )
-        * case.array.channel_response(estimated=False)
         for interferer in enabled_interferers
     )
     signal_power_w = _dbm_to_watts("signal.power_dbm", case.signal.power_dbm)

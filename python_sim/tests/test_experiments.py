@@ -4,7 +4,14 @@ import json
 import numpy as np
 import pytest
 
+import antenna_diversity.experiments.spatial_scan as spatial_scan_module
+from antenna_diversity.array.antenna_config import (
+    AntennaStateConfig,
+    PhoneAntennaConfig,
+)
+from antenna_diversity.array.effects import AttenuationRegion, CouplingPath
 from antenna_diversity.array.geometry import active_corner_combinations
+from antenna_diversity.array.phone_model import PhoneAntennaModel
 from antenna_diversity.config import CWInterferer, Direction, mate70_default_config
 from antenna_diversity.experiments.spatial_scan import (
     compare_corner_combinations,
@@ -150,6 +157,87 @@ def test_single_case_returns_json_serializable_dataclass():
     assert result.mode == "mvdr"
     assert result.metrics["covariance_snapshots"] is None
     json.dumps(result.to_dict(), allow_nan=False)
+
+
+def test_single_case_uses_true_effective_covariance_and_assumed_mvdr_constraint(
+    monkeypatch,
+):
+    cfg = mate70_default_config()
+    cfg.array.active_antennas = ("TL", "TR")
+    true_state = AntennaStateConfig(
+        attenuation_regions=(
+            AttenuationRegion(
+                ("TL",),
+                cfg.signal.true_direction.azimuth_deg,
+                cfg.signal.true_direction.elevation_deg,
+                1.0,
+                6.020599913279624,
+            ),
+        ),
+        coupling_paths=(CouplingPath("TL", "TR", -6.020599913279624, 90.0),),
+    )
+    assumed_state = AntennaStateConfig(
+        coupling_paths=(CouplingPath("TR", "TL", -12.041199826559248, 0.0),),
+    )
+    cfg.array.antenna_model = PhoneAntennaConfig(
+        model_label="analytical integration",
+        model_source="ideal",
+        true_state=true_state,
+        assumed_state=assumed_state,
+    )
+    model = PhoneAntennaModel.from_config(cfg)
+    expected_true = model.effective_manifold(
+        cfg.signal.true_direction,
+        cfg.signal.true_polarization,
+        cfg.signal.carrier_hz,
+        estimated=False,
+    )
+    expected_assumed = model.effective_manifold(
+        cfg.signal.assumed_direction,
+        cfg.signal.assumed_polarization,
+        cfg.signal.carrier_hz,
+        estimated=True,
+    )
+    expected_interferers = tuple(
+        model.effective_manifold(
+            interferer.direction,
+            interferer.polarization,
+            cfg.signal.carrier_hz,
+            estimated=False,
+        )
+        for interferer in cfg.interferers
+        if interferer.enable
+    )
+    covariance_inputs = {}
+    constraint_inputs = {}
+    real_analytic_covariance = spatial_scan_module.analytic_covariance
+    real_compute_weights = spatial_scan_module.compute_weights
+
+    def capture_covariance(desired, signal_power, interferers, powers, noise_power):
+        covariance_inputs["desired"] = np.array(desired, copy=True)
+        covariance_inputs["interferers"] = tuple(
+            np.array(value, copy=True) for value in interferers
+        )
+        return real_analytic_covariance(
+            desired, signal_power, interferers, powers, noise_power
+        )
+
+    def capture_constraint(covariance, desired, mode, diversity):
+        constraint_inputs["desired"] = np.array(desired, copy=True)
+        return real_compute_weights(covariance, desired, mode, diversity)
+
+    monkeypatch.setattr(spatial_scan_module, "analytic_covariance", capture_covariance)
+    monkeypatch.setattr(spatial_scan_module, "compute_weights", capture_constraint)
+
+    evaluate_configuration_spatially(cfg, mode="mvdr")
+
+    np.testing.assert_allclose(covariance_inputs["desired"], expected_true)
+    assert len(covariance_inputs["interferers"]) == len(expected_interferers)
+    for actual, expected in zip(
+        covariance_inputs["interferers"], expected_interferers, strict=True
+    ):
+        np.testing.assert_allclose(actual, expected)
+    np.testing.assert_allclose(constraint_inputs["desired"], expected_assumed)
 
 
 def test_direction_scan_reports_gain_for_selected_enabled_interferer():

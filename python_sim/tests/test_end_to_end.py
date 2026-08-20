@@ -1,7 +1,15 @@
+import copy
+
 import numpy as np
 import pytest
 
 from antenna_diversity.analysis.metrics import format_metrics
+from antenna_diversity.array.antenna_config import (
+    AntennaStateConfig,
+    PhoneAntennaConfig,
+)
+from antenna_diversity.array.effects import AttenuationRegion, CouplingPath
+from antenna_diversity.array.phone_model import PhoneAntennaModel
 from antenna_diversity.config import (
     default_config,
     legacy_ula_config,
@@ -136,3 +144,44 @@ def test_phone_pipeline_reports_stable_gain_without_interferers():
     for record in results.metrics:
         assert record["interferer_direction_gains"] == []
         assert record["worst_interferer_gain"] == 0.0
+
+
+def test_phone_pipeline_propagates_nonideal_effective_manifold_once():
+    cfg = mate70_default_config()
+    cfg.plot.enable = False
+    cfg.signal.duration_ms = 8
+    cfg.tracking.max_epochs = 2
+    cfg.array.active_antennas = ("TL", "TR")
+    state = AntennaStateConfig(
+        attenuation_regions=(
+            AttenuationRegion(
+                ("TL",),
+                cfg.signal.true_direction.azimuth_deg,
+                cfg.signal.true_direction.elevation_deg,
+                1.0,
+                6.020599913279624,
+            ),
+        ),
+        coupling_paths=(CouplingPath("TL", "TR", -6.020599913279624, 90.0),),
+    )
+    cfg.array.antenna_model = PhoneAntennaConfig(
+        model_label="end-to-end fixture",
+        model_source="ideal",
+        true_state=state,
+        assumed_state=copy.deepcopy(state),
+    )
+    model = PhoneAntennaModel.from_config(cfg)
+    expected = model.effective_manifold(
+        cfg.signal.true_direction,
+        cfg.signal.true_polarization,
+        cfg.signal.carrier_hz,
+        estimated=False,
+    )
+
+    results = run_end_to_end(cfg)
+
+    np.testing.assert_allclose(results.truth["desired_steering_true"], expected)
+    np.testing.assert_allclose(
+        results.truth["desired_component"],
+        expected[:, None] * results.truth["desired_waveform"][None, :],
+    )
