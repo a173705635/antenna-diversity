@@ -8,7 +8,12 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
+from antenna_diversity.array.antenna_config import (
+    PhoneAntennaConfig,
+    resolved_phone_antenna_config,
+)
 from antenna_diversity.array.geometry import mate70_phase_centers
+from antenna_diversity.array.polarization import WavePolarization
 
 
 SPEED_OF_LIGHT_MPS = 299_792_458.0
@@ -56,6 +61,8 @@ class SignalConfig:
     resistance_ohm: float = 50.0
     true_direction: Direction | None = None
     assumed_direction: Direction | None = None
+    true_polarization: WavePolarization = field(default_factory=WavePolarization)
+    assumed_polarization: WavePolarization = field(default_factory=WavePolarization)
 
     @property
     def wavelength_m(self) -> float:
@@ -94,6 +101,7 @@ class PhoneArrayConfig:
     estimated_channel_amplitude_error_db: dict[str, float]
     estimated_channel_phase_error_deg: dict[str, float]
     pattern_model: str = "isotropic"
+    antenna_model: PhoneAntennaConfig | None = None
 
     @property
     def num_elements(self) -> int:
@@ -128,7 +136,7 @@ class JammerConfig:
     initial_phase_rad: float = 0.8
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, init=False)
 class CWInterferer:
     direction: Direction
     enable: bool = True
@@ -137,6 +145,36 @@ class CWInterferer:
     initial_phase_rad: float = 0.8
     start_ms: float = 0.0
     stop_ms: float | None = None
+
+    # Keep polarization out of dataclass fields so legacy study snapshots retain
+    # their exact pre-polarization schema while callers still get a typed value.
+    def __init__(
+        self,
+        direction: Direction,
+        enable: bool = True,
+        power_dbm: float = -90.0,
+        offset_hz: float = 250e3,
+        initial_phase_rad: float = 0.8,
+        start_ms: float = 0.0,
+        stop_ms: float | None = None,
+        polarization: WavePolarization | None = None,
+    ) -> None:
+        object.__setattr__(self, "direction", direction)
+        object.__setattr__(self, "enable", enable)
+        object.__setattr__(self, "power_dbm", power_dbm)
+        object.__setattr__(self, "offset_hz", offset_hz)
+        object.__setattr__(self, "initial_phase_rad", initial_phase_rad)
+        object.__setattr__(self, "start_ms", start_ms)
+        object.__setattr__(self, "stop_ms", stop_ms)
+        object.__setattr__(
+            self,
+            "_polarization",
+            WavePolarization() if polarization is None else polarization,
+        )
+
+    @property
+    def polarization(self) -> WavePolarization:
+        return self._polarization
 
 
 @dataclass(frozen=True)
@@ -251,6 +289,16 @@ class SimulationConfig:
         )
         if any(not np.isfinite(value) or value <= 0 for value in positive_signal_values):
             raise ValueError("signal frequencies, duration, and resistance must be positive")
+        for label, polarization in (
+            ("signal.true_polarization", self.signal.true_polarization),
+            ("signal.assumed_polarization", self.signal.assumed_polarization),
+        ):
+            if not isinstance(polarization, WavePolarization):
+                raise ValueError(f"{label} must be a WavePolarization")
+            try:
+                polarization.jones_vector()
+            except ValueError as error:
+                raise ValueError(f"{label} is invalid: {error}") from error
 
         if isinstance(self.array, ArrayConfig):
             if self.signal.true_direction is not None or self.signal.assumed_direction is not None:
@@ -311,6 +359,7 @@ class SimulationConfig:
                 or any(name not in corner_names for name in self.array.active_antennas)
             ):
                 raise ValueError("active_antennas must be a unique two-to-four corner subset")
+            resolved_phone_antenna_config(self.array)
         else:
             raise ValueError("array must be an ArrayConfig or PhoneArrayConfig")
 
@@ -318,6 +367,12 @@ class SimulationConfig:
             raise ValueError("phone configurations support at most three interferers")
         for interferer in self.interferers:
             interferer.direction.validate()
+            if not isinstance(interferer.polarization, WavePolarization):
+                raise ValueError("interferer.polarization must be a WavePolarization")
+            try:
+                interferer.polarization.jones_vector()
+            except ValueError as error:
+                raise ValueError(f"interferer.polarization is invalid: {error}") from error
             if not _is_finite_real_scalar(interferer.power_dbm):
                 raise ValueError("interferer.power_dbm must be a finite real scalar")
             if not _is_finite_real_scalar(interferer.offset_hz):
