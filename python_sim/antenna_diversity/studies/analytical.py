@@ -161,13 +161,13 @@ def _single_factor_variants(resolved: ResolvedStudyConfig, combination: tuple[st
                 elif factor == "amplitude":
                     for corner in combination:
                         estimated = _case_configuration(resolved, combination)
-                        estimated.array.estimated_channel_amplitude_error_db[corner] = value  # type: ignore[union-attr]
+                        estimated.array.estimated_channel_amplitude_error_db[corner] += value  # type: ignore[union-attr]
                         variants.append((value, corner, None, estimated))
                     continue
                 elif factor == "phase":
                     for corner in combination:
                         estimated = _case_configuration(resolved, combination)
-                        estimated.array.estimated_channel_phase_error_deg[corner] = value  # type: ignore[union-attr]
+                        estimated.array.estimated_channel_phase_error_deg[corner] += value  # type: ignore[union-attr]
                         variants.append((value, corner, None, estimated))
                     continue
                 else:
@@ -218,9 +218,9 @@ def _apply_combined_realization(simulation, realization) -> None:
         base = np.asarray(simulation.phone.assumed_phase_centers_m[corner], dtype=float)
         simulation.phone.assumed_phase_centers_m[corner] = tuple(base + np.asarray(error, dtype=float))
     for corner, value in realization.amplitude_errors_db.items():
-        simulation.array.estimated_channel_amplitude_error_db[corner] = value
+        simulation.array.estimated_channel_amplitude_error_db[corner] += value
     for corner, value in realization.phase_errors_deg.items():
-        simulation.array.estimated_channel_phase_error_deg[corner] = value
+        simulation.array.estimated_channel_phase_error_deg[corner] += value
 
 
 def _robustness_row(*, stage, combination, metrics, parameters, **fields):

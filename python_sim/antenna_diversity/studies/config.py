@@ -510,9 +510,14 @@ def _resolve_measured_state(
     if not isinstance(state.measured_pattern_csv, Path):
         raise ValueError(f"{context} measured pattern CSV path is missing or invalid")
     source = state.measured_pattern_csv
-    if not source.is_absolute():
-        source = config_dir / source
-    source = source.resolve()
+    try:
+        if not source.is_absolute():
+            source = config_dir / source
+        source = source.resolve()
+    except (OSError, RuntimeError, ValueError) as error:
+        raise ValueError(
+            f"cannot resolve {context} measured pattern CSV path: {source}"
+        ) from error
     try:
         raw = source.read_bytes()
     except OSError as error:
@@ -552,7 +557,7 @@ def resolve_pattern_resources(
         raise ValueError("simulation must be a SimulationConfig")
     try:
         directory = Path(config_dir).resolve()
-    except (TypeError, ValueError, OSError) as error:
+    except (TypeError, ValueError, OSError, RuntimeError) as error:
         raise ValueError("config_dir must be a valid path") from error
     resolved = copy.deepcopy(simulation)
     if not isinstance(resolved.array, PhoneArrayConfig):
@@ -590,10 +595,20 @@ def resolve_study_config(config_path: Path | None = None, preset: str | None = N
     json_simulation: Mapping[str, object] = {}
     config_dir = Path.cwd()
     if config_path is not None:
-        source = Path(config_path)
-        config_dir = source.resolve().parent
+        try:
+            source = Path(config_path)
+        except (TypeError, ValueError, OSError) as error:
+            raise ValueError("JSON configuration path is invalid") from error
+        try:
+            config_dir = source.resolve().parent
+        except (OSError, RuntimeError, ValueError) as error:
+            raise ValueError(
+                f"cannot resolve JSON configuration path: {source}"
+            ) from error
         try:
             data = json.loads(source.read_text(encoding="utf-8"))
+        except UnicodeDecodeError as error:
+            raise ValueError(f"JSON configuration must be UTF-8: {source}") from error
         except json.JSONDecodeError as error:
             raise ValueError(f"invalid JSON configuration: {error.msg}") from error
         except OSError as error:

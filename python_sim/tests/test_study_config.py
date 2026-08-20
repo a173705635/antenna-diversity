@@ -13,7 +13,11 @@ from antenna_diversity.array.polarization import WavePolarization
 from antenna_diversity.config import default_config
 from antenna_diversity.studies import config as study_config_module
 from antenna_diversity.studies.config import resolve_study_config
-from antenna_diversity.studies.models import InterfererTemplate, ResolvedStudyConfig
+from antenna_diversity.studies.models import (
+    InterfererTemplate,
+    ResolvedStudyConfig,
+    strict_snapshot,
+)
 
 
 _CORNERS = ("TL", "TR", "BL", "BR")
@@ -149,6 +153,20 @@ def _write_pattern_csv(path: Path, *, component: float = 1.0) -> None:
         *(f"{corner},1575420000,0,0,{component},0,0,0" for corner in _CORNERS),
     ]
     path.write_text("\n".join(rows) + "\n", encoding="utf-8")
+
+
+def _unresolved_measured_simulation() -> object:
+    simulation = default_config()
+    simulation.array.antenna_model = PhoneAntennaConfig(
+        "measured failure fixture",
+        "measured",
+        AntennaStateConfig(
+            pattern_kind="measured",
+            measured_pattern_csv=Path("patterns.csv"),
+        ),
+        AntennaStateConfig(),
+    )
+    return simulation
 
 
 def test_quick_preset_has_exact_axes_and_counts():
@@ -488,6 +506,121 @@ def test_measured_pattern_missing_file_is_a_contextual_value_error(tmp_path: Pat
 
     with pytest.raises(ValueError, match="measured pattern CSV"):
         resolve_study_config(path, preset="quick")
+
+
+def test_invalid_utf8_json_is_normalized_to_contextual_value_error(tmp_path: Path):
+    path = tmp_path / "study.json"
+    raw = b'\xff{"simulation": {}}'
+    path.write_bytes(raw)
+
+    with pytest.raises(ValueError, match="JSON configuration.*UTF-8") as caught:
+        resolve_study_config(path, preset="quick")
+
+    assert type(caught.value) is ValueError
+    assert path.read_bytes() == raw
+
+
+def test_json_path_resolution_failure_is_contextual_and_preserves_file(
+    tmp_path: Path, monkeypatch
+):
+    path = tmp_path / "study.json"
+    raw = b'{"simulation": {}}'
+    path.write_bytes(raw)
+    original_resolve = Path.resolve
+
+    def fail_source_resolve(self, *args, **kwargs):
+        if self == path:
+            raise OSError("fixture resolve failure")
+        return original_resolve(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "resolve", fail_source_resolve)
+
+    with pytest.raises(ValueError, match="JSON configuration path") as caught:
+        resolve_study_config(path, preset="quick")
+
+    assert type(caught.value) is ValueError
+    assert path.read_bytes() == raw
+
+
+def test_json_read_failure_is_contextual_and_preserves_file(tmp_path: Path, monkeypatch):
+    path = tmp_path / "study.json"
+    raw = b'{"simulation": {}}'
+    path.write_bytes(raw)
+    original_read_text = Path.read_text
+
+    def fail_source_read(self, *args, **kwargs):
+        if self == path:
+            raise OSError("fixture read failure")
+        return original_read_text(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", fail_source_read)
+
+    with pytest.raises(ValueError, match="cannot read JSON configuration") as caught:
+        resolve_study_config(path, preset="quick")
+
+    assert type(caught.value) is ValueError
+    assert path.read_bytes() == raw
+
+
+def test_measured_csv_path_resolution_failure_is_contextual_and_preserves_caller(
+    tmp_path: Path, monkeypatch
+):
+    simulation = _unresolved_measured_simulation()
+    before = strict_snapshot(simulation)
+    csv_path = tmp_path / "patterns.csv"
+    original_resolve = Path.resolve
+
+    def fail_csv_resolve(self, *args, **kwargs):
+        if self == csv_path:
+            raise OSError("fixture resolve failure")
+        return original_resolve(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "resolve", fail_csv_resolve)
+
+    with pytest.raises(
+        ValueError,
+        match="true_state.*measured pattern CSV path",
+    ) as caught:
+        study_config_module.resolve_pattern_resources(simulation, tmp_path)
+
+    assert type(caught.value) is ValueError
+    assert strict_snapshot(simulation) == before
+
+
+def test_measured_csv_read_failure_is_contextual_and_preserves_caller(
+    tmp_path: Path, monkeypatch
+):
+    csv_path = tmp_path / "patterns.csv"
+    csv_path.write_text("fixture", encoding="utf-8")
+    simulation = _unresolved_measured_simulation()
+    before = strict_snapshot(simulation)
+    original_read_bytes = Path.read_bytes
+
+    def fail_csv_read(self, *args, **kwargs):
+        if self == csv_path:
+            raise OSError("fixture read failure")
+        return original_read_bytes(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_bytes", fail_csv_read)
+
+    with pytest.raises(ValueError, match="cannot read.*true_state.*measured pattern CSV") as caught:
+        study_config_module.resolve_pattern_resources(simulation, tmp_path)
+
+    assert type(caught.value) is ValueError
+    assert strict_snapshot(simulation) == before
+
+
+def test_measured_csv_invalid_utf8_is_contextual_and_preserves_caller(tmp_path: Path):
+    csv_path = tmp_path / "patterns.csv"
+    csv_path.write_bytes(b"\xff")
+    simulation = _unresolved_measured_simulation()
+    before = strict_snapshot(simulation)
+
+    with pytest.raises(ValueError, match="true_state.*measured pattern CSV must be UTF-8") as caught:
+        study_config_module.resolve_pattern_resources(simulation, tmp_path)
+
+    assert type(caught.value) is ValueError
+    assert strict_snapshot(simulation) == before
 
 
 def test_resolve_pattern_resources_returns_a_detached_resolved_copy(tmp_path: Path):

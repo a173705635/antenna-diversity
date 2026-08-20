@@ -8,13 +8,21 @@ import pytest
 from antenna_diversity.config import CWInterferer, Direction
 from antenna_diversity.experiments.spatial_scan import evaluate_configuration_spatially
 from antenna_diversity.studies.analytical import (
+    _apply_combined_realization as _apply_analytical_combined_realization,
+    _single_factor_variants,
     run_baseline,
     run_combined_error_studies,
     run_multi_jammer_studies,
     run_single_factor_studies,
 )
 from antenna_diversity.studies.config import resolve_study_config
-from antenna_diversity.studies.models import InterfererTemplate, ResolvedStudyConfig
+from antenna_diversity.studies.full_chain import _reconstruct_case
+from antenna_diversity.studies.models import (
+    CombinedErrorRealization,
+    InterfererTemplate,
+    ResolvedStudyConfig,
+    StudyCase,
+)
 
 
 def test_baseline_emits_single_corner_references_and_requested_subarrays():
@@ -130,6 +138,14 @@ def _robustness_config():
     )
 
 
+def _nonzero_channel_baseline() -> ResolvedStudyConfig:
+    base = _robustness_config()
+    simulation = base.simulation
+    simulation.array.estimated_channel_amplitude_error_db["TL"] = 1.5
+    simulation.array.estimated_channel_phase_error_deg["TL"] = 10.0
+    return ResolvedStudyConfig.from_parts(base.study, simulation)
+
+
 def test_single_factor_changes_assumed_values_only_and_keeps_zero_baseline():
     resolved = _robustness_config()
     before = copy.deepcopy(resolved.to_dict())
@@ -160,6 +176,77 @@ def test_single_factor_changes_assumed_values_only_and_keeps_zero_baseline():
     assert resolved.to_dict() == before
 
 
+@pytest.mark.parametrize(
+    ("factor", "value", "expected"),
+    [("amplitude", 0.5, 2.0), ("phase", 5.0, 15.0)],
+)
+def test_single_factor_nonzero_channel_baseline_matches_full_chain_reconstruction(
+    factor, value, expected
+):
+    resolved = _nonzero_channel_baseline()
+    variants = {
+        name: cases
+        for name, _values, cases in _single_factor_variants(resolved, ("TL", "BR"))
+    }
+    analytical = next(
+        simulation
+        for case_value, corner, axis, simulation in variants[factor]
+        if case_value == value and corner == "TL" and axis is None
+    )
+    case = StudyCase(
+        case_id=f"nonzero-{factor}",
+        stage="single_factor",
+        active_antennas=("TL", "BR"),
+        mode="mvdr",
+        seed=None,
+        parameters={
+            "single_factor": {
+                "factor": factor,
+                "value": value,
+                "corner": "TL",
+                "axis": None,
+            }
+        },
+    )
+
+    full_chain = _reconstruct_case(resolved, case, seed=7)
+
+    if factor == "amplitude":
+        assert analytical.array.estimated_channel_amplitude_error_db["TL"] == expected
+    else:
+        assert analytical.array.estimated_channel_phase_error_deg["TL"] == expected
+    assert (
+        analytical.array.estimated_channel_amplitude_error_db
+        == full_chain.array.estimated_channel_amplitude_error_db
+    )
+    assert (
+        analytical.array.estimated_channel_phase_error_deg
+        == full_chain.array.estimated_channel_phase_error_deg
+    )
+
+
+def test_single_factor_zero_channel_baseline_outputs_remain_absolute_error_values():
+    resolved = _robustness_config()
+    variants = {
+        name: cases
+        for name, _values, cases in _single_factor_variants(resolved, ("TL", "BR"))
+    }
+
+    amplitude = next(
+        simulation
+        for value, corner, axis, simulation in variants["amplitude"]
+        if value == 0.5 and corner == "TL" and axis is None
+    )
+    phase = next(
+        simulation
+        for value, corner, axis, simulation in variants["phase"]
+        if value == 5.0 and corner == "TL" and axis is None
+    )
+
+    assert amplitude.array.estimated_channel_amplitude_error_db["TL"] == 0.5
+    assert phase.array.estimated_channel_phase_error_deg["TL"] == 5.0
+
+
 def test_single_factor_loading_severity_is_normalized_log_distance_from_default():
     resolved = _robustness_config()
 
@@ -185,6 +272,43 @@ def test_combined_error_studies_copy_saved_realizations_and_are_deterministic():
     assert all(row["realization"]["child_seed"] == row["child_seed"] for row in rows)
     assert all(row["true_state_unchanged"] for row in rows)
     assert all(set(row["realization"]["position_errors_m"]) == {"TL", "BR"} for row in rows)
+
+
+def test_combined_nonzero_channel_baseline_matches_full_chain_reconstruction():
+    resolved = _nonzero_channel_baseline()
+    realization = CombinedErrorRealization(
+        level="fixture",
+        sample_index=0,
+        child_seed=11,
+        azimuth_error_deg=0.0,
+        elevation_error_deg=0.0,
+        position_errors_m={"TL": (0.0, 0.0, 0.0)},
+        amplitude_errors_db={"TL": 0.5},
+        phase_errors_deg={"TL": -4.0},
+    )
+    analytical = resolved.simulation
+    _apply_analytical_combined_realization(analytical, realization)
+    case = StudyCase(
+        case_id="nonzero-combined",
+        stage="combined_error",
+        active_antennas=("TL", "BR"),
+        mode="mvdr",
+        seed=11,
+        parameters={"realization": realization.to_dict()},
+    )
+
+    full_chain = _reconstruct_case(resolved, case, seed=11)
+
+    assert analytical.array.estimated_channel_amplitude_error_db["TL"] == 2.0
+    assert analytical.array.estimated_channel_phase_error_deg["TL"] == 6.0
+    assert (
+        analytical.array.estimated_channel_amplitude_error_db
+        == full_chain.array.estimated_channel_amplitude_error_db
+    )
+    assert (
+        analytical.array.estimated_channel_phase_error_deg
+        == full_chain.array.estimated_channel_phase_error_deg
+    )
 
 
 def test_multi_jammer_studies_preserve_enabled_pressure_cases():
