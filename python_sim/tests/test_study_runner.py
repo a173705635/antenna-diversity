@@ -160,7 +160,7 @@ def test_real_minimal_analytical_stages_reach_selection(monkeypatch, tmp_path: P
     assert selection["selection"]["cases"][0]["selection_reasons"] == ["best"]
 
 
-def test_report_stage_publishes_eight_linked_tables_and_figures(monkeypatch, tmp_path: Path):
+def test_report_stage_publishes_nine_linked_tables_and_twelve_figures(monkeypatch, tmp_path: Path):
     """Report publication must verify links after every target is atomically written."""
     from antenna_diversity.studies.runner import _publication_for, _report
     from antenna_diversity.studies.artifacts import StudyStore
@@ -171,7 +171,7 @@ def test_report_stage_publishes_eight_linked_tables_and_figures(monkeypatch, tmp
     store = StudyStore.create(resolved)
     tables = completed_tables_for_reporting()
     checkpoints = {
-        "baseline": {"tables": {"direction": tables["direction_scan"], "power": tables["power_scan"]}},
+        "baseline": {"tables": {"direction": tables["direction_scan"], "power": tables["power_scan"], "antenna_diagnostics": tables["antenna_diagnostics"]}},
         "single_factor": {"tables": {"single_factor": tables["robustness_scans"]}},
         "combined_error": {"tables": {"combined_error": tables["combined_errors"]}},
         "multi_jammer": {"tables": {"multi_jammer": tables["multi_jammer"]}},
@@ -185,12 +185,13 @@ def test_report_stage_publishes_eight_linked_tables_and_figures(monkeypatch, tmp
     payload = _report(context)
 
     assert set(payload["artifacts"]["tables"]) == set(tables)
-    assert len(payload["artifacts"]["figures"]) == 8
+    assert len(payload["artifacts"]["tables"]) == 9
+    assert len(payload["artifacts"]["figures"]) == 12
     verify_report_links((store.study_dir / "report.md").read_text(encoding="utf-8"), store.study_dir / "report.md")
 
 
 def test_publication_repeatedly_saves_without_leaking_owned_figures(tmp_path: Path):
-    """Repeated report publication must not accumulate its eight owned figures."""
+    """Repeated report publication must not accumulate its twelve owned figures."""
     from antenna_diversity.studies.runner import _publication_for
     from tests.study_helpers import completed_tables_for_reporting
 

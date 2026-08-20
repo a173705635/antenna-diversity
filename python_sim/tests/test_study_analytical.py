@@ -5,6 +5,13 @@ from dataclasses import replace
 import numpy as np
 import pytest
 
+from antenna_diversity.array.antenna_config import (
+    AntennaStateConfig,
+    PhoneAntennaConfig,
+)
+from antenna_diversity.array.effects import AttenuationRegion, CouplingPath
+from antenna_diversity.array.patterns import ParametricPatternParameters
+from antenna_diversity.array.polarization import WavePolarization
 from antenna_diversity.config import CWInterferer, Direction
 from antenna_diversity.experiments.spatial_scan import evaluate_configuration_spatially
 from antenna_diversity.studies.analytical import (
@@ -23,6 +30,57 @@ from antenna_diversity.studies.models import (
     ResolvedStudyConfig,
     StudyCase,
 )
+
+
+_ANTENNA_DIAGNOSTIC_FIELDS = {
+    "record_kind", "model_source", "model_label", "model_view",
+    "element_name", "receiver", "source", "source_name", "azimuth_deg",
+    "elevation_deg", "response_real", "response_imag", "response_db",
+    "attenuation_db", "polarization_match_db", "measured_pattern_sha256",
+}
+
+
+def _diagnostic_resolved() -> ResolvedStudyConfig:
+    base = resolve_study_config(preset="quick")
+    simulation = copy.deepcopy(base.simulation)
+    parameters = {
+        corner: ParametricPatternParameters(
+            peak_gain_db=float(index),
+            cosine_exponent=1.0 + 0.2 * index,
+            nominal_polarization=WavePolarization("rhcp"),
+        )
+        for index, corner in enumerate(("TL", "TR", "BL", "BR"))
+    }
+    true_state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=parameters,
+        attenuation_regions=(
+            AttenuationRegion((), 37.0, 55.0, 25.0, 6.0, 10.0),
+        ),
+        coupling_paths=(CouplingPath("TL", "BR", -18.0, 35.0),),
+    )
+    assumed_state = copy.deepcopy(true_state)
+    assumed_state.attenuation_regions = ()
+    assumed_state.coupling_paths = ()
+    simulation.array.antenna_model = PhoneAntennaConfig(
+        "diagnostic fixture", "parametric", true_state, assumed_state
+    )
+    simulation.signal.true_polarization = WavePolarization("rhcp")
+    simulation.signal.assumed_polarization = WavePolarization("linear", tilt_deg=20.0)
+    simulation.interferers = tuple(
+        replace(interferer, polarization=WavePolarization("linear", tilt_deg=45.0))
+        for interferer in simulation.interferers
+    )
+    study = replace(
+        base.study,
+        combinations=(("TL", "BR"),),
+        spatial_modes=("mvdr",),
+        single_antennas=("TL",),
+        azimuths_deg=[0.0, 37.0, 180.0],
+        elevations_deg=[10.0, 55.0],
+        powers_dbm=[-90.0],
+    )
+    return ResolvedStudyConfig.from_parts(study, simulation)
 
 
 def test_baseline_emits_single_corner_references_and_requested_subarrays():
@@ -61,6 +119,48 @@ def test_baseline_direction_rows_have_exact_quick_grid_size():
     assert target is not None
     assert all(row["target_azimuth_deg"] == target.azimuth_deg for row in result.tables["direction"])
     assert all(row["target_elevation_deg"] == target.elevation_deg for row in result.tables["direction"])
+
+
+def test_baseline_saves_complete_scalar_antenna_diagnostics(monkeypatch):
+    import antenna_diversity.studies.analytical as analytical
+
+    resolved = _diagnostic_resolved()
+    before = copy.deepcopy(resolved.to_dict())
+    calls = []
+    real_model = analytical.PhoneAntennaModel
+
+    class CountingPhoneAntennaModel:
+        @classmethod
+        def from_config(cls, config):
+            calls.append(config)
+            return real_model.from_config(config)
+
+    monkeypatch.setattr(analytical, "PhoneAntennaModel", CountingPhoneAntennaModel)
+
+    result = run_baseline(resolved)
+    rows = result.tables["antenna_diagnostics"]
+
+    assert len(calls) == 1
+    assert {row["record_kind"] for row in rows} == {
+        "pattern_grid", "source_match", "coupling_entry", "blockage_grid"
+    }
+    assert {row["model_source"] for row in rows} == {"parametric"}
+    assert {row["model_view"] for row in rows} == {"true", "assumed"}
+    assert {
+        row["element_name"] for row in rows if row["element_name"] is not None
+    } == {"TL", "TR", "BL", "BR"}
+    assert {row["source_name"] for row in rows if row["record_kind"] == "source_match"} == {
+        "gps", "jammer_0"
+    }
+    assert all(set(row) == _ANTENNA_DIAGNOSTIC_FIELDS for row in rows)
+    for row in rows:
+        for name in (
+            "azimuth_deg", "elevation_deg", "response_real", "response_imag",
+            "response_db", "attenuation_db", "polarization_match_db",
+        ):
+            assert row[name] is None or np.isfinite(row[name])
+    assert resolved.to_dict() == before
+    json.dumps(result.to_dict(), allow_nan=False)
 
 
 def test_baseline_orders_direction_axes_cases_and_never_runs_receiver(monkeypatch):
@@ -102,7 +202,11 @@ def test_baseline_orders_direction_axes_cases_and_never_runs_receiver(monkeypatc
         (1, 0, 40.0, 5.0),
         (1, 1, 40.0, 15.0),
     ]
-    all_rows = tuple(row for table in result.tables.values() for row in table)
+    all_rows = tuple(
+        row
+        for table_name in ("reference", "direction", "power")
+        for row in result.tables[table_name]
+    )
     assert len({row["case_id"] for row in all_rows}) == len(all_rows)
     assert all(row["num_antennas"] == 1 for row in result.tables["reference"][:4])
     assert all(len(row["active_antennas"]) == 1 for row in result.tables["reference"][:4])

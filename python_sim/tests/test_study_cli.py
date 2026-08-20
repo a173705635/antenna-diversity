@@ -23,6 +23,14 @@ TABLE_NAMES = (
     "multi_jammer",
     "full_chain_validation",
     "full_chain_cn0",
+    "antenna_diagnostics",
+)
+FIGURE_NAMES = (
+    "baseline_rankings", "direction_heatmaps", "power_curves",
+    "robustness_curves", "combined_error_distributions",
+    "multi_jammer_comparison", "full_chain_validation", "cn0_validation",
+    "element_patterns", "polarization_losses", "coupling_matrices",
+    "blockage_comparison",
 )
 
 
@@ -45,8 +53,10 @@ def _completed_study(tmp_path: Path) -> Path:
     figures.mkdir()
     report = completed / "report.md"
     report.write_text("complete\n", encoding="utf-8")
-    (tables / "baseline_rankings.csv").write_text("rank\n1\n", encoding="utf-8")
-    (figures / "baseline_rankings.png").write_bytes(b"png")
+    for name in TABLE_NAMES:
+        (tables / f"{name}.csv").write_text("record\n1\n", encoding="utf-8")
+    for name in FIGURE_NAMES:
+        (figures / f"{name}.png").write_bytes(b"png")
     report_checkpoint = checkpoints / "report.json"
     report_checkpoint.write_text(json.dumps({
         "stage": "report",
@@ -54,8 +64,8 @@ def _completed_study(tmp_path: Path) -> Path:
             "artifacts": {
                 "summary": "summary.json",
                 "report": "report.md",
-                "tables": {"baseline_rankings": "tables/baseline_rankings.csv"},
-                "figures": {"baseline_rankings": "figures/baseline_rankings.png"},
+                "tables": {name: f"tables/{name}.csv" for name in TABLE_NAMES},
+                "figures": {name: f"figures/{name}.png" for name in FIGURE_NAMES},
             },
             "record_counts": {"baseline_rankings": 1},
         },
@@ -252,17 +262,25 @@ def test_real_minimal_cli_runs_all_stages_and_publishes_complete_evidence(
         assert path.is_file() and path.stat().st_size > 0
         with path.open(encoding="utf-8", newline="") as stream:
             rows_by_table[name] = list(csv.DictReader(stream))
-    for name in TABLE_NAMES[:-1]:
-        assert rows_by_table[name], name
+    for name in TABLE_NAMES:
+        if name != "full_chain_cn0":
+            assert rows_by_table[name], name
     if not rows_by_table["full_chain_cn0"]:
         assert all(row["tracking"] == "False" for row in rows_by_table["full_chain_validation"])
+    assert tuple(rows_by_table["antenna_diagnostics"][0]) == (
+        "record_kind", "model_source", "model_label", "model_view",
+        "element_name", "receiver", "source", "source_name", "azimuth_deg",
+        "elevation_deg", "response_real", "response_imag", "response_db",
+        "attenuation_db", "polarization_match_db", "measured_pattern_sha256",
+    )
 
     figure_paths = sorted((study_dir / "figures").glob("*.png"))
-    assert len(figure_paths) == 8
+    assert len(figure_paths) == 12
     assert all(path.stat().st_size > 0 for path in figure_paths)
     report_path = study_dir / "report.md"
     assert report_path.is_file() and report_path.stat().st_size > 0
     report = report_path.read_text(encoding="utf-8")
+    assert "ideal" in report
     for target in re.findall(r"\[[^]]*\]\(([^)]+)\)", report):
         assert not Path(target).is_absolute()
         assert (study_dir / target).resolve().is_file()
@@ -278,5 +296,5 @@ def test_real_minimal_cli_runs_all_stages_and_publishes_complete_evidence(
         Path(line.split(": ", 1)[1])
         for line in capsys.readouterr().out.splitlines()
     ]
-    assert len(printed_paths) == 18
+    assert len(printed_paths) == 23
     assert all(path.is_absolute() and path.is_file() for path in printed_paths)

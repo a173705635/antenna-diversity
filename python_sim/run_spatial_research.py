@@ -23,6 +23,18 @@ _MANIFEST_FIELDS = {
 _STAGE_FIELDS = {
     "status", "record_count", "checkpoint_sha256", "checkpoint_path", "error",
 }
+_TABLE_NAMES = {
+    "baseline_rankings", "direction_scan", "power_scan", "robustness_scans",
+    "combined_errors", "multi_jammer", "full_chain_validation", "full_chain_cn0",
+    "antenna_diagnostics",
+}
+_FIGURE_NAMES = {
+    "baseline_rankings", "direction_heatmaps", "power_curves",
+    "robustness_curves", "combined_error_distributions",
+    "multi_jammer_comparison", "full_chain_validation", "cn0_validation",
+    "element_patterns", "polarization_losses", "coupling_matrices",
+    "blockage_comparison",
+}
 
 
 def _modes(value: str) -> tuple[str, ...]:
@@ -120,6 +132,10 @@ def _completed_artifacts(study_dir: Path) -> tuple[Path, Path, dict[str, Path], 
         str(name): _confined_file(study_dir, value, f"figure {name}")
         for name, value in _mapping(artifacts.get("figures"), "report figures").items()
     }
+    if set(tables) != _TABLE_NAMES:
+        raise RuntimeError("completed study has invalid fixed table set")
+    if set(figures) != _FIGURE_NAMES:
+        raise RuntimeError("completed study has invalid fixed figure set")
     return manifest_path.resolve(), report_path, tables, figures
 
 

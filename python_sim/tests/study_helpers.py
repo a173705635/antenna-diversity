@@ -36,6 +36,82 @@ def completed_tables_for_reporting() -> dict[str, tuple[dict[str, object], ...]]
         for el_index, elevation in enumerate((10.0, 20.0))
         for az_index, azimuth in enumerate((90.0, 120.0))
     )
+    diagnostic_fields = {
+        "record_kind": None,
+        "model_source": "parametric",
+        "model_label": "synthetic_phone_corner_v1",
+        "model_view": None,
+        "element_name": None,
+        "receiver": None,
+        "source": None,
+        "source_name": None,
+        "azimuth_deg": None,
+        "elevation_deg": None,
+        "response_real": None,
+        "response_imag": None,
+        "response_db": None,
+        "attenuation_db": None,
+        "polarization_match_db": None,
+        "measured_pattern_sha256": None,
+    }
+    corners = ("TL", "TR", "BL", "BR")
+    pattern_rows = tuple({
+        **diagnostic_fields,
+        "record_kind": "pattern_grid",
+        "model_view": view,
+        "element_name": corner,
+        "azimuth_deg": azimuth,
+        "elevation_deg": elevation,
+        "response_real": 1.0 + corner_index * 0.1,
+        "response_imag": 0.05 * corner_index,
+        "response_db": gain + corner_index,
+    } for view, gain in (("true", -2.0), ("assumed", -1.0))
+      for corner_index, corner in enumerate(corners)
+      for elevation in (5.0, 50.0)
+      for azimuth in (0.0, 35.0, 210.0))
+    blockage_rows = tuple({
+        **diagnostic_fields,
+        "record_kind": "blockage_grid",
+        "model_view": view,
+        "element_name": corner,
+        "azimuth_deg": azimuth,
+        "elevation_deg": elevation,
+        "response_db": -attenuation,
+        "attenuation_db": attenuation,
+    } for view, base_attenuation in (("true", 4.0), ("assumed", 1.0))
+      for corner_index, corner in enumerate(corners)
+      for elevation in (5.0, 50.0)
+      for azimuth in (0.0, 35.0, 210.0)
+      for attenuation in (base_attenuation + 0.1 * corner_index,))
+    source_rows = tuple({
+        **diagnostic_fields,
+        "record_kind": "source_match",
+        "model_view": view,
+        "element_name": corner,
+        "source_name": source_name,
+        "azimuth_deg": azimuth,
+        "elevation_deg": elevation,
+        "response_real": 0.8,
+        "response_imag": 0.1,
+        "response_db": -2.0,
+        "polarization_match_db": match_db - corner_index,
+    } for view in ("true", "assumed")
+      for corner_index, corner in enumerate(corners)
+      for source_name, azimuth, elevation, match_db in (
+          ("gps", 33.0, 22.0, -0.5),
+          ("jammer_0", 120.0, 10.0, -3.0),
+      ))
+    coupling_rows = tuple({
+        **diagnostic_fields,
+        "record_kind": "coupling_entry",
+        "model_view": view,
+        "receiver": receiver,
+        "source": source,
+        "response_real": 1.0 if receiver == source else 0.05,
+        "response_imag": 0.0 if receiver == source else phase_sign * 0.02,
+        "response_db": 0.0 if receiver == source else -25.0,
+    } for view, phase_sign in (("true", 1.0), ("assumed", -1.0))
+      for receiver in corners for source in corners)
     return {
         "baseline_rankings": ({
             "active_antennas": combination,
@@ -105,4 +181,7 @@ def completed_tables_for_reporting() -> dict[str, tuple[dict[str, object], ...]]
             "time_ms": float(epoch),
             "cn0_db_hz": 36.0 + epoch,
         } for mode in ("egc", "mvdr") for epoch in (0, 1)),
+        "antenna_diagnostics": (
+            *pattern_rows, *source_rows, *coupling_rows, *blockage_rows,
+        ),
     }

@@ -11,10 +11,13 @@ from typing import Any
 
 import numpy as np
 
+from antenna_diversity.array.geometry import CORNER_ORDER
+
 
 _REQUIRED_TABLES = (
     "baseline_rankings", "direction_scan", "power_scan", "robustness_scans",
     "combined_errors", "multi_jammer", "full_chain_validation", "full_chain_cn0",
+    "antenna_diagnostics",
 )
 
 
@@ -56,6 +59,7 @@ def build_summary(
         "combined_errors": {level: _statistics(values) for level, values in sorted(by_level.items())},
         "multi_jammer": [_multi_snapshot(row) for row in sorted(tables["multi_jammer"], key=lambda row: (str(row.get("template", "")), _combo(row), str(row.get("mode", ""))))],
         "full_chain": full_chain, "cn0_curves": cn0_by_mode,
+        "antenna_model": _antenna_summary(tables["antenna_diagnostics"]),
         "selection": _strict(selection),
     }
     strict = _strict(output)
@@ -71,6 +75,7 @@ def render_report(
     tables = _relative_paths(table_paths)
     study = dict(summary.get("study", {}))
     baseline = dict(summary.get("baseline", {}))
+    antenna_model = dict(summary.get("antenna_model", {}))
     config_hash = study.get("config_sha256", manifest.get("config_sha256", manifest.get("configuration_sha256", "不可用")))
     lines = [
         "# 空间抗干扰研究报告", "", "## 概览", "",
@@ -82,8 +87,13 @@ def render_report(
         "", "## 鲁棒性", "", _knee_text(dict(summary.get("knee", {}))), _link_line("鲁棒性曲线", figures.get("robustness_curves")),
         "", "## 组合误差", "", _combined_text(dict(summary.get("combined_errors", {}))), _link_line("组合误差分布", figures.get("combined_error_distributions")),
         "", "## 多干扰压力", "", _multi_text(summary.get("multi_jammer", ())), _link_line("多干扰比较", figures.get("multi_jammer_comparison")),
+        "", "## 手机天线模型证据", "", _antenna_text(antenna_model),
+        _link_line("单阵元方向图", figures.get("element_patterns")),
+        _link_line("极化匹配损耗", figures.get("polarization_losses")),
+        _link_line("互耦幅相矩阵", figures.get("coupling_matrices")),
+        _link_line("遮挡衰减对比", figures.get("blockage_comparison")),
         "", "## RF 到跟踪验证", "", "完整链路字段保留 `analytic_output_sinr_db` 与 `final_cn0_db_hz`；捕获或跟踪失败是有效结果，并以不可用原因呈现。", _full_chain_text(dict(summary.get("full_chain", {}))), _link_line("完整链路验证", figures.get("full_chain_validation")), _link_line("C/N₀ 验证", figures.get("cn0_validation")),
-        "", "## 结论与限制", "", "模型包括理想角点子阵、窄带各向同性流形、静态 CW 干扰、SINGLE/EGC/MVDR、解析空间指标和 RF/ADC/DFE/捕获/跟踪/C/N₀ 链路。", "", "### 未建模", "", "- 真实 Mate 70 天线位置、方向图、极化、互耦和人体握持效应。", "- 多径、NLOS、动态到达方向和宽带/调制干扰。", "- 多颗卫星、导航电文、定位解算与 PVT，以及实时权值更新和硬件实现限制。",
+        "", "## 结论与限制", "", "仿真框架可表示四角子阵、窄带复数双极化阵元响应、安装姿态、可配置遮挡与互耦、真实/假设模型失配、静态 CW 干扰、SINGLE/EGC/MVDR、解析空间指标和 RF/ADC/DFE/捕获/跟踪/C/N₀ 链路。本次工件实际启用的天线来源由上节明确标记；参数化模型不代表真实 Mate 70 产品测量。", "", "### 未建模", "", "- 多径、NLOS、运动与动态到达方向，以及非 CW、宽带、扫频、脉冲或调制干扰。", "- 多颗卫星、多 PRN、导航电文、定位解算与 PVT，以及实时权值更新和硬件实现限制。", "- 互耦导致的相关外部天线噪声，以及机壳/人体的全波平台散射和产品级电磁验证。",
         "", "## 复现", "", "以下链接指向本研究目录中的固定工件：",
     ]
     lines.extend(_link_line(name, path) for name, path in sorted(tables.items()))
@@ -143,6 +153,32 @@ def _ranking_snapshot(row: Mapping[str, object]) -> dict[str, object]:
 
 def _multi_snapshot(row: Mapping[str, object]) -> dict[str, object]:
     return {"template": row.get("template"), "combination": _combo(row), "mode": row.get("mode"), "output_sinr_db": _finite(row.get("output_sinr_db")), "worst_interferer_gain": _finite(row.get("worst_interferer_gain"))}
+
+
+def _antenna_summary(
+    rows: Sequence[Mapping[str, object]],
+) -> dict[str, object]:
+    sources = {str(row["model_source"]) for row in rows if row.get("model_source")}
+    labels = {str(row["model_label"]) for row in rows if row.get("model_label")}
+    if len(sources) > 1 or len(labels) > 1:
+        raise ValueError("antenna diagnostics contain inconsistent model metadata")
+    true_digests = {
+        str(row["measured_pattern_sha256"])
+        for row in rows
+        if row.get("model_view") == "true" and row.get("measured_pattern_sha256")
+    }
+    if len(true_digests) > 1:
+        raise ValueError("antenna diagnostics contain inconsistent measured pattern digests")
+    present = {
+        str(row["element_name"])
+        for row in rows if row.get("element_name") in CORNER_ORDER
+    }
+    return {
+        "source": next(iter(sources), "unknown"),
+        "label": next(iter(labels), "unavailable"),
+        "measured_pattern_sha256": next(iter(true_digests), None),
+        "active_antennas": [corner for corner in CORNER_ORDER if corner in present],
+    }
 
 
 def _strict(value: object) -> object:
@@ -230,6 +266,18 @@ def _multi_text(outcomes: object) -> str:
         else:
             evidence.append(f"{template}/{combination}/{mode}：输出 SINR {sinr} dB，最差干扰增益 {gain}。")
     return " ".join(evidence) or "没有多干扰结果。"
+
+
+def _antenna_text(model: Mapping[str, object]) -> str:
+    active = model.get("active_antennas", ())
+    active_text = "+".join(str(value) for value in active) if isinstance(active, Sequence) and not isinstance(active, str) else str(active)
+    digest = model.get("measured_pattern_sha256")
+    digest_text = f"；测量文件 SHA-256：`{digest}`" if digest else ""
+    return (
+        f"模型来源：`{model.get('source', 'unknown')}`；标签："
+        f"`{model.get('label', 'unavailable')}`；诊断阵元：`{active_text}`"
+        f"{digest_text}。以下图均由基线阶段保存的标量诊断行生成，不在报告阶段重算模型。"
+    )
 
 
 def _ranked_rows(rows: Sequence[Mapping[str, object]]) -> list[Mapping[str, object]]:
