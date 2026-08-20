@@ -399,12 +399,18 @@ def _periodic_neighbors(
     if axis.size == 1:
         return 0, 0, 0.0
     upper = int(np.searchsorted(axis, value, side="right"))
-    if upper == axis.size:
+    if upper == 0:
         lower = axis.size - 1
         upper = 0
+        lower_value = axis[lower] - 360.0
+        upper_value = axis[upper]
+    elif upper == axis.size:
+        lower = axis.size - 1
+        upper = 0
+        lower_value = axis[lower]
         upper_value = axis[0] + 360.0
     else:
         lower = upper - 1
+        lower_value = axis[lower]
         upper_value = axis[upper]
-    lower_value = axis[lower]
     return lower, upper, float((value - lower_value) / (upper_value - lower_value))

@@ -136,6 +136,27 @@ def test_tabulated_pattern_interpolates_complex_components_and_wraps_azimuth(tmp
     np.testing.assert_allclose(at_270, expected, atol=1e-12)
 
 
+def test_tabulated_pattern_interpolates_across_zero_for_shifted_azimuth_grid(tmp_path):
+    path = tmp_path / "shifted-grid.csv"
+    path.write_text(
+        _HEADER
+        + "TL,1575420000,90,-45,2,1,10,-1\n"
+        + "TL,1575420000,270,-45,6,5,30,3\n"
+        + "TL,1575420000,90,45,2,1,10,-1\n"
+        + "TL,1575420000,270,45,6,5,30,3\n",
+        encoding="utf-8",
+    )
+    pattern = TabulatedElementPattern.from_csv(path, _FREQUENCY_HZ)
+
+    at_zero = pattern.effective_height("TL", LocalDirection(0.0, 0.0), _FREQUENCY_HZ)
+
+    # Around the periodic seam, 270 degrees is the -90-degree neighbor of
+    # zero and 90 degrees is the +90-degree neighbor, so zero is their mean.
+    np.testing.assert_allclose(
+        at_zero, np.array([4.0 + 3.0j, 20.0 + 1.0j]), atol=1e-12
+    )
+
+
 def test_tabulated_pattern_verifies_sha256(tmp_path):
     path = write_rectangular_pattern_csv(tmp_path)
     digest = hashlib.sha256(path.read_bytes()).hexdigest()
