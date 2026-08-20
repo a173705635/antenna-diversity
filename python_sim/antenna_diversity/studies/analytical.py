@@ -25,23 +25,45 @@ from .scenarios import build_multi_jammer_cases, sample_combined_errors, stable_
 def run_baseline(resolved: ResolvedStudyConfig) -> StageRecords:
     """Run no-sample references, scans and one saved antenna diagnostic pass."""
 
-    reference_power_dbm = float(resolved.simulation.interferers[0].power_dbm)
+    simulation = resolved.simulation
+    interferer_index = next(
+        (
+            index
+            for index, interferer in enumerate(simulation.interferers)
+            if interferer.enable
+        ),
+        None,
+    )
+    reference_power_dbm = (
+        None
+        if interferer_index is None
+        else float(simulation.interferers[interferer_index].power_dbm)
+    )
     references = [
-        _reference_row(resolved, _single_case(corner))
+        _reference_row(resolved, _single_case(corner), reference_power_dbm)
         for corner in resolved.study.single_antennas
     ]
     references.extend(
-        _reference_row(resolved, _array_case(resolved, combination, mode))
+        _reference_row(
+            resolved,
+            _array_case(resolved, combination, mode),
+            reference_power_dbm,
+        )
         for combination in resolved.study.combinations
         for mode in resolved.study.spatial_modes
     )
     direction_rows = []
     power_rows = []
-    for combination in resolved.study.combinations:
-        for mode in resolved.study.spatial_modes:
-            case = _array_case(resolved, combination, mode)
-            direction_rows.extend(_direction_rows(resolved, case, reference_power_dbm))
-            power_rows.extend(_power_rows(resolved, case, reference_power_dbm))
+    if interferer_index is not None:
+        for combination in resolved.study.combinations:
+            for mode in resolved.study.spatial_modes:
+                case = _array_case(resolved, combination, mode)
+                direction_rows.extend(_direction_rows(
+                    resolved, case, reference_power_dbm, interferer_index
+                ))
+                power_rows.extend(_power_rows(
+                    resolved, case, reference_power_dbm, interferer_index
+                ))
 
     return StageRecords(
         name="baseline",
@@ -488,19 +510,26 @@ def _matched_metrics_match(first, second) -> bool:
     )
 
 
-def _reference_row(resolved: ResolvedStudyConfig, case: dict[str, object]) -> dict[str, object]:
+def _reference_row(
+    resolved: ResolvedStudyConfig,
+    case: dict[str, object],
+    reference_power_dbm: float | None,
+) -> dict[str, object]:
     simulation = _simulation_for_case(resolved, case, no_interferers=True)
     metrics = evaluate_configuration_spatially(simulation, str(case["mode"])).metrics
     return _row(
         table="reference",
         case=case,
         metrics=metrics,
-        reference_interferer_power_dbm=float(resolved.simulation.interferers[0].power_dbm),
+        reference_interferer_power_dbm=reference_power_dbm,
     )
 
 
 def _direction_rows(
-    resolved: ResolvedStudyConfig, case: dict[str, object], reference_power_dbm: float
+    resolved: ResolvedStudyConfig,
+    case: dict[str, object],
+    reference_power_dbm: float,
+    interferer_index: int,
 ) -> Iterable[dict[str, object]]:
     simulation = _simulation_for_case(resolved, case)
     target = resolved.simulation.signal.true_direction
@@ -508,7 +537,7 @@ def _direction_rows(
         raise ValueError("direction rows require a true target direction")
     scan = scan_interferer_directions(
         simulation,
-        interferer_index=0,
+        interferer_index=interferer_index,
         azimuths_deg=resolved.study.azimuths_deg,
         elevations_deg=resolved.study.elevations_deg,
         mode=str(case["mode"]),
@@ -535,12 +564,15 @@ def _direction_rows(
 
 
 def _power_rows(
-    resolved: ResolvedStudyConfig, case: dict[str, object], reference_power_dbm: float
+    resolved: ResolvedStudyConfig,
+    case: dict[str, object],
+    reference_power_dbm: float,
+    interferer_index: int,
 ) -> Iterable[dict[str, object]]:
     simulation = _simulation_for_case(resolved, case)
     scan = scan_interferer_powers(
         simulation,
-        interferer_index=0,
+        interferer_index=interferer_index,
         powers_dbm=resolved.study.powers_dbm,
         mode=str(case["mode"]),
     )
@@ -553,8 +585,12 @@ def _power_rows(
             reference_interferer_power_dbm=reference_power_dbm,
             power_index=power_index,
             power_dbm=float(power_dbm),
-            azimuth_deg=float(simulation.interferers[0].direction.azimuth_deg),
-            elevation_deg=float(simulation.interferers[0].direction.elevation_deg),
+            azimuth_deg=float(
+                simulation.interferers[interferer_index].direction.azimuth_deg
+            ),
+            elevation_deg=float(
+                simulation.interferers[interferer_index].direction.elevation_deg
+            ),
         )
 
 
@@ -604,7 +640,7 @@ def _row(
     table: str,
     case: dict[str, object],
     metrics: dict[str, object],
-    reference_interferer_power_dbm: float,
+    reference_interferer_power_dbm: float | None,
     **axes: object,
 ) -> dict[str, object]:
     parameters = {

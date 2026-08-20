@@ -333,6 +333,51 @@ def test_resolved_state_cannot_be_mutated_through_public_arrays_cases_or_simulat
     assert resolved.simulation.signal.carrier_hz != 1.2e9
 
 
+@pytest.mark.parametrize(
+    "axis_name",
+    (
+        "azimuths_deg",
+        "elevations_deg",
+        "powers_dbm",
+        "direction_errors_deg",
+        "position_errors_m",
+        "amplitude_errors_db",
+        "phase_errors_deg",
+        "loading_factors",
+    ),
+)
+def test_resolved_scientific_axes_cannot_have_write_access_restored(axis_name):
+    resolved = resolve_study_config(preset="quick")
+    before = resolved.to_dict()
+    digest = resolved.config_sha256
+    axis = getattr(resolved.study, axis_name)
+
+    with pytest.raises(ValueError):
+        axis.setflags(write=True)
+    with pytest.raises(ValueError):
+        axis[0] = axis[0] + 1.0
+
+    assert resolved.to_dict() == before
+    assert resolved.config_sha256 == digest
+
+
+def test_from_parts_irreversibly_freezes_detached_caller_axis():
+    base = resolve_study_config(preset="quick")
+    caller_axis = np.array([10.0, 20.0])
+    study = __import__("dataclasses").replace(base.study, azimuths_deg=caller_axis)
+
+    resolved = ResolvedStudyConfig.from_parts(study, base.simulation)
+    before = resolved.to_dict()
+    digest = resolved.config_sha256
+    caller_axis[0] = 99.0
+
+    with pytest.raises(ValueError):
+        resolved.study.azimuths_deg.setflags(write=True)
+    assert resolved.to_dict() == before
+    assert resolved.study.azimuths_deg.tolist() == [10.0, 20.0]
+    assert resolved.config_sha256 == digest
+
+
 @pytest.mark.parametrize("single_antennas", [(), ("TL", "TL"), ("TL", "XX")])
 def test_single_antennas_must_be_a_nonempty_unique_corner_subset(single_antennas):
     with pytest.raises(ValueError, match="single_antennas"):

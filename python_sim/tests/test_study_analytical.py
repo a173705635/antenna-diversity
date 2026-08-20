@@ -30,6 +30,10 @@ from antenna_diversity.studies.models import (
     ResolvedStudyConfig,
     StudyCase,
 )
+from antenna_diversity.studies.ranking import (
+    select_representative_cases,
+    summarize_and_rank,
+)
 
 
 _ANTENNA_DIAGNOSTIC_FIELDS = {
@@ -121,6 +125,81 @@ def test_baseline_direction_rows_have_exact_quick_grid_size():
     assert all(row["target_elevation_deg"] == target.elevation_deg for row in result.tables["direction"])
 
 
+def _minimal_baseline_with(interferers) -> ResolvedStudyConfig:
+    base = resolve_study_config(preset="quick")
+    simulation = base.simulation
+    simulation.interferers = tuple(interferers)
+    study = replace(
+        base.study,
+        combinations=(("TL", "BR"),),
+        spatial_modes=("mvdr",),
+        single_antennas=("TL",),
+        azimuths_deg=[80.0],
+        elevations_deg=[20.0],
+        powers_dbm=[-88.0],
+        automatic_roles=("best",),
+        multi_jammer_templates=(),
+    )
+    return ResolvedStudyConfig.from_parts(study, simulation)
+
+
+def test_baseline_without_enabled_interferers_keeps_reference_and_empty_scans():
+    resolved = _minimal_baseline_with(())
+
+    result = run_baseline(resolved)
+
+    assert result.tables["reference"]
+    assert result.tables["direction"] == ()
+    assert result.tables["power"] == ()
+    assert all(
+        row["reference_interferer_power_dbm"] is None
+        for row in result.tables["reference"]
+    )
+    json.dumps(result.to_dict(), allow_nan=False)
+
+
+def test_baseline_and_selection_use_first_enabled_interferer_not_leading_disabled():
+    base = resolve_study_config(preset="quick")
+    first = base.simulation.interferers[0]
+    disabled = replace(
+        first,
+        enable=False,
+        power_dbm=-101.0,
+        direction=Direction(5.0, 5.0),
+    )
+    enabled = replace(
+        first,
+        enable=True,
+        power_dbm=-77.0,
+        direction=Direction(211.0, 33.0),
+    )
+    resolved = _minimal_baseline_with((disabled, enabled))
+
+    baseline = run_baseline(resolved)
+    ranking = summarize_and_rank(baseline.tables["direction"], resolved)
+    selection = select_representative_cases(
+        ranking,
+        baseline.tables["direction"],
+        (),
+        (),
+        resolved,
+    )
+
+    assert len(baseline.tables["direction"]) == 1
+    assert len(baseline.tables["power"]) == 1
+    assert all(
+        row["reference_interferer_power_dbm"] == -77.0
+        for table in ("reference", "direction", "power")
+        for row in baseline.tables[table]
+    )
+    assert baseline.tables["power"][0]["azimuth_deg"] == 211.0
+    assert baseline.tables["power"][0]["elevation_deg"] == 33.0
+    selected_interferers = selection.cases[0].parameters["interferers"]
+    assert len(selected_interferers) == 1
+    assert selected_interferers[0]["enable"] is True
+    assert selected_interferers[0]["power_dbm"] == -77.0
+
+
 def test_baseline_saves_complete_scalar_antenna_diagnostics(monkeypatch):
     import antenna_diversity.studies.analytical as analytical
 
@@ -153,6 +232,9 @@ def test_baseline_saves_complete_scalar_antenna_diagnostics(monkeypatch):
         "gps", "jammer_0"
     }
     assert all(set(row) == _ANTENNA_DIAGNOSTIC_FIELDS for row in rows)
+    match_rows = [row for row in rows if row["record_kind"] == "source_match"]
+    assert match_rows
+    assert all(float(row["polarization_match_db"]) <= 0.0 for row in match_rows)
     for row in rows:
         for name in (
             "azimuth_deg", "elevation_deg", "response_real", "response_imag",

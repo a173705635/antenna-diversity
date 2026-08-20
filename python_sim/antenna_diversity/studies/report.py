@@ -95,7 +95,7 @@ def render_report(
         "", "## 多干扰压力", "", _multi_text(summary.get("multi_jammer", ())), _link_line("多干扰比较", figures.get("multi_jammer_comparison")),
         "", "## 手机天线模型证据", "", _antenna_text(antenna_model),
         _link_line("单阵元方向图", figures.get("element_patterns")),
-        _link_line("极化匹配损耗", figures.get("polarization_losses")),
+        _link_line("极化匹配增益", figures.get("polarization_losses")),
         _link_line("互耦幅相矩阵", figures.get("coupling_matrices")),
         _link_line("遮挡衰减对比", figures.get("blockage_comparison")),
         "", "## RF 到跟踪验证", "", "完整链路字段保留 `analytic_output_sinr_db` 与 `final_cn0_db_hz`；捕获或跟踪失败是有效结果，并以不可用原因呈现。", _full_chain_text(dict(summary.get("full_chain", {}))), _link_line("完整链路验证", figures.get("full_chain_validation")), _link_line("C/N₀ 验证", figures.get("cn0_validation")),

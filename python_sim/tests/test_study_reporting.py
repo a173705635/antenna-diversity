@@ -444,7 +444,15 @@ def test_report_contains_evidence_boundaries_and_reproduction_links(tmp_path: Pa
     assert "手机天线模型证据" in report
     assert "parametric" in report
     assert "单阵元方向图" in report
-    assert "极化匹配损耗" in report
+    assert "极化匹配增益" in report
+    assert "极化匹配损耗" not in report
+    match_rows = [
+        row for row in tables["antenna_diagnostics"]
+        if row["record_kind"] == "source_match"
+    ]
+    assert match_rows
+    assert all("polarization_match_db" in row for row in match_rows)
+    assert all(float(row["polarization_match_db"]) <= 0.0 for row in match_rows)
     assert "互耦幅相矩阵" in report
     assert "遮挡衰减对比" in report
     assert "相关外部天线噪声" in report

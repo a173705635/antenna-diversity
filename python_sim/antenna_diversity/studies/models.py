@@ -49,6 +49,13 @@ def _freeze(value: object) -> object:
     return copy.deepcopy(value)
 
 
+def _immutable_array(value: object) -> np.ndarray:
+    """Detach an axis onto a bytes buffer whose write access cannot be restored."""
+
+    array = np.array(value, copy=True)
+    return np.frombuffer(array.tobytes(), dtype=array.dtype).reshape(array.shape)
+
+
 def _canonical_study(study: StudyConfig) -> StudyConfig:
     """Copy and normalize every public StudyConfig container at the boundary."""
 
@@ -354,9 +361,7 @@ class StudyConfig:
             "azimuths_deg", "elevations_deg", "powers_dbm", "direction_errors_deg",
             "position_errors_m", "amplitude_errors_db", "phase_errors_deg", "loading_factors",
         ):
-            array = np.array(getattr(self, name), copy=True)
-            array.setflags(write=False)
-            object.__setattr__(self, name, array)
+            object.__setattr__(self, name, _immutable_array(getattr(self, name)))
         object.__setattr__(self, "manual_cases", tuple(_freeze(case) for case in self.manual_cases))
 
 

@@ -1,4 +1,5 @@
 from dataclasses import replace
+import json
 from pathlib import Path
 
 import matplotlib
@@ -9,6 +10,7 @@ import matplotlib.pyplot as plt
 import pytest
 
 from antenna_diversity.studies.runner import STAGES, run_research
+from antenna_diversity.studies.models import ResolvedStudyConfig
 from tests.study_helpers import resolved_for_test
 
 
@@ -158,6 +160,73 @@ def test_real_minimal_analytical_stages_reach_selection(monkeypatch, tmp_path: P
 
     selection = __import__("json").loads((output / "checkpoints" / "selection.json").read_text(encoding="utf-8"))["payload"]
     assert selection["selection"]["cases"][0]["selection_reasons"] == ["best"]
+
+
+@pytest.mark.parametrize(
+    ("interferer_case", "expected_scan_rows", "expected_reference_power"),
+    (("none", 0, None), ("leading_disabled", 1, -77.0)),
+)
+def test_real_seven_stage_minimal_run_supports_enabled_interferer_edges(
+    tmp_path: Path,
+    interferer_case: str,
+    expected_scan_rows: int,
+    expected_reference_power: float | None,
+):
+    base = resolved_for_test(output_dir=tmp_path, name=f"edge-{interferer_case}")
+    simulation = base.simulation
+    first = simulation.interferers[0]
+    if interferer_case == "none":
+        simulation.interferers = ()
+    else:
+        simulation.interferers = (
+            replace(first, enable=False, power_dbm=-101.0),
+            replace(first, enable=True, power_dbm=-77.0),
+        )
+    study = replace(
+        base.study,
+        combinations=(("TL", "BR"),),
+        spatial_modes=("mvdr",),
+        full_chain_modes=("mvdr",),
+        single_antennas=("TL",),
+        azimuths_deg=[80.0],
+        elevations_deg=[20.0],
+        powers_dbm=[-88.0],
+        direction_errors_deg=[0.0],
+        position_errors_m=[0.0],
+        amplitude_errors_db=[0.0],
+        phase_errors_deg=[0.0],
+        loading_factors=[base.simulation.diversity.diagonal_loading_factor],
+        combined_error_samples_per_level=1,
+        full_chain_run_count=1,
+        multi_jammer_templates=(),
+        automatic_roles=(
+            base.study.automatic_roles if interferer_case == "none" else ()
+        ),
+    )
+    resolved = ResolvedStudyConfig.from_parts(study, simulation)
+
+    output = run_research(resolved)
+
+    manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
+    baseline = json.loads(
+        (output / "checkpoints" / "baseline.json").read_text(encoding="utf-8")
+    )["payload"]["tables"]
+    assert manifest["status"] == "completed"
+    assert len(baseline["direction"]) == expected_scan_rows
+    assert len(baseline["power"]) == expected_scan_rows
+    assert baseline["reference"]
+    assert all(
+        row["reference_interferer_power_dbm"] == expected_reference_power
+        for row in baseline["reference"]
+    )
+    for path in output.rglob("*.json"):
+        json.loads(
+            path.read_text(encoding="utf-8"),
+            parse_constant=lambda value: (_ for _ in ()).throw(
+                ValueError(f"non-finite JSON constant: {value}")
+            ),
+        )
+    assert (output / "report.md").is_file()
 
 
 def test_report_stage_publishes_nine_linked_tables_and_twelve_figures(monkeypatch, tmp_path: Path):

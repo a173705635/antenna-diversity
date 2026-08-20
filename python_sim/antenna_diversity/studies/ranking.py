@@ -42,6 +42,8 @@ def summarize_and_rank(
         if row.get("mode") == resolved.study.ranking_mode:
             grouped[tuple(str(name) for name in row["active_antennas"])] .append(row)
     if not grouped:
+        if not any(interferer.enable for interferer in resolved.simulation.interferers):
+            return RankingResult((), ())
         raise ValueError("no ranking-mode direction rows")
 
     summaries = []
@@ -106,15 +108,12 @@ def select_representative_cases(
 ) -> SelectionResult:
     """Select only from saved normalized records; never invoke study execution."""
 
-    if not ranking.ranked_combinations:
-        raise ValueError("cannot select cases from an empty ranking")
     directions = tuple(direction_rows)
     robust = tuple(robustness_rows)
     multi = tuple(multi_rows)
     summaries = {tuple(summary["active_antennas"]): summary for summary in ranking.summaries}
     cases: list[StudyCase] = []
     unselected: dict[str, str] = {}
-    best = ranking.ranked_combinations[0]
 
     def add(case: StudyCase) -> None:
         _validate_case(case, resolved)
@@ -131,6 +130,17 @@ def select_representative_cases(
         cases.append(case)
 
     automatic = set(resolved.study.automatic_roles)
+    if not ranking.ranked_combinations:
+        if any(interferer.enable for interferer in resolved.simulation.interferers):
+            raise ValueError("cannot select cases from an empty ranking")
+        unselected.update(
+            {role: "no enabled interferers" for role in sorted(automatic)}
+        )
+        for manual in resolved.study.manual_cases:
+            add(_manual_case(manual))
+        return SelectionResult(tuple(cases), unselected)
+
+    best = ranking.ranked_combinations[0]
     for role, combination in (
         ("best", best),
         ("typical", ranking.ranked_combinations[(len(ranking.ranked_combinations) - 1) // 2]),
@@ -174,7 +184,17 @@ def select_representative_cases(
 
 def _direction_case(role: str, combination: tuple[str, ...], summary: Mapping[str, object], resolved: ResolvedStudyConfig) -> StudyCase:
     direction = dict(summary["representative_p10_direction"])
-    interferer = strict_snapshot(resolved.simulation.interferers[0])
+    interferer = next(
+        (
+            interferer
+            for interferer in resolved.simulation.interferers
+            if interferer.enable
+        ),
+        None,
+    )
+    if interferer is None:
+        raise ValueError("representative direction requires an enabled interferer")
+    interferer = strict_snapshot(interferer)
     parameters = {
         "interferers": [{**interferer, "direction": {"azimuth_deg": direction["azimuth_deg"], "elevation_deg": direction["elevation_deg"]}}],
         "direction_row_case_id": direction["case_id"],
