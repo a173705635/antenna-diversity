@@ -1,11 +1,154 @@
 import json
+import hashlib
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
 import pytest
 
+from antenna_diversity.array.antenna_config import AntennaStateConfig, PhoneAntennaConfig
+from antenna_diversity.array.effects import AttenuationRegion, CouplingPath, ElementOrientation
+from antenna_diversity.array.patterns import ParametricPatternParameters
+from antenna_diversity.array.polarization import WavePolarization
+from antenna_diversity.config import default_config
+from antenna_diversity.studies import config as study_config_module
 from antenna_diversity.studies.config import resolve_study_config
 from antenna_diversity.studies.models import InterfererTemplate, ResolvedStudyConfig
+
+
+_CORNERS = ("TL", "TR", "BL", "BR")
+
+
+def _polarization(kind: str = "rhcp", *, tilt_deg: float = 0.0) -> dict[str, object]:
+    return {
+        "kind": kind,
+        "tilt_deg": tilt_deg,
+        "az_real": 1.0,
+        "az_imag": 0.0,
+        "el_real": 0.0,
+        "el_imag": 0.0,
+    }
+
+
+def _parametric_state(*, gain_db: float, polarization_kind: str) -> dict[str, object]:
+    return {
+        "pattern_kind": "parametric",
+        "parametric_patterns": {
+            corner: {
+                "peak_gain_db": gain_db + index,
+                "cosine_exponent": 1.5,
+                "back_lobe_gain_db": -18.0,
+                "nominal_polarization": _polarization(polarization_kind),
+                "cross_polar_discrimination_db": 24.0,
+                "cross_phase_deg": 12.0,
+            }
+            for index, corner in enumerate(_CORNERS)
+        },
+        "measured_pattern_csv": None,
+        "measured_pattern_sha256": None,
+        "orientations": {
+            corner: {
+                "yaw_deg": float(index * 5),
+                "pitch_deg": float(index),
+                "roll_deg": float(-index),
+            }
+            for index, corner in enumerate(_CORNERS)
+        },
+        "attenuation_regions": [{
+            "elements": ["TL", "BR"],
+            "center_azimuth_deg": 110.0,
+            "center_elevation_deg": 25.0,
+            "radius_deg": 20.0,
+            "attenuation_db": 4.0,
+            "transition_width_deg": 5.0,
+        }],
+        "coupling_paths": [{
+            "source": "TL",
+            "receiver": "BR",
+            "magnitude_db": -22.0,
+            "phase_deg": 40.0,
+        }],
+    }
+
+
+def _parametric_override() -> dict[str, object]:
+    return {
+        "simulation": {
+            "signal": {
+                "true_polarization": _polarization("rhcp"),
+                "assumed_polarization": _polarization("lhcp"),
+            },
+            "array": {
+                "antenna_model": {
+                    "model_label": "strict parametric fixture",
+                    "model_source": "parametric",
+                    "true_state": _parametric_state(
+                        gain_db=1.0, polarization_kind="rhcp"
+                    ),
+                    "assumed_state": _parametric_state(
+                        gain_db=-1.0, polarization_kind="linear"
+                    ),
+                }
+            },
+            "interferers": [{
+                "direction": {"azimuth_deg": 120.0, "elevation_deg": 10.0},
+                "enable": True,
+                "power_dbm": -90.0,
+                "offset_hz": 250e3,
+                "initial_phase_rad": 0.8,
+                "start_ms": 0.0,
+                "stop_ms": None,
+                "polarization": _polarization("linear", tilt_deg=35.0),
+            }],
+        }
+    }
+
+
+def _isotropic_state() -> dict[str, object]:
+    return {
+        "pattern_kind": "isotropic",
+        "parametric_patterns": {},
+        "measured_pattern_csv": None,
+        "measured_pattern_sha256": None,
+        "orientations": {
+            corner: {"yaw_deg": 0.0, "pitch_deg": 0.0, "roll_deg": 0.0}
+            for corner in _CORNERS
+        },
+        "attenuation_regions": [],
+        "coupling_paths": [],
+    }
+
+
+def _measured_override(
+    csv_name: str, *, expected_sha256: str | None = None
+) -> dict[str, object]:
+    true_state = _isotropic_state()
+    true_state["pattern_kind"] = "measured"
+    true_state["measured_pattern_csv"] = csv_name
+    if expected_sha256 is None:
+        true_state.pop("measured_pattern_sha256")
+    else:
+        true_state["measured_pattern_sha256"] = expected_sha256
+    return {
+        "simulation": {
+            "array": {
+                "antenna_model": {
+                    "model_label": "measured fixture",
+                    "model_source": "measured",
+                    "true_state": true_state,
+                    "assumed_state": _isotropic_state(),
+                }
+            }
+        }
+    }
+
+
+def _write_pattern_csv(path: Path, *, component: float = 1.0) -> None:
+    rows = [
+        "element_name,frequency_hz,azimuth_deg,elevation_deg,h_az_real,h_az_imag,h_el_real,h_el_imag",
+        *(f"{corner},1575420000,0,0,{component},0,0,0" for corner in _CORNERS),
+    ]
+    path.write_text("\n".join(rows) + "\n", encoding="utf-8")
 
 
 def test_quick_preset_has_exact_axes_and_counts():
@@ -236,5 +379,272 @@ def test_from_parts_canonicalizes_inner_interferer_template_containers():
     assert isinstance(resolved.study.multi_jammer_templates[0].interferers, tuple)
     with pytest.raises(AttributeError):
         resolved.study.multi_jammer_templates[0].interferers.append(cw)
+    assert resolved.to_dict() == before
+    assert resolved.config_sha256 == digest
+
+
+def test_resolver_parses_complete_parametric_antenna_and_polarization_records(
+    tmp_path: Path,
+):
+    path = tmp_path / "study.json"
+    path.write_text(json.dumps(_parametric_override()), encoding="utf-8")
+
+    resolved = resolve_study_config(path, preset="quick")
+    model = resolved.simulation.array.antenna_model
+
+    assert isinstance(model, PhoneAntennaConfig)
+    assert model.model_source == "parametric"
+    assert isinstance(model.true_state.parametric_patterns["TL"], ParametricPatternParameters)
+    assert model.true_state.parametric_patterns["TL"].peak_gain_db == 1.0
+    assert model.assumed_state.parametric_patterns["TL"].nominal_polarization.kind == "linear"
+    assert isinstance(model.true_state.orientations["TR"], ElementOrientation)
+    assert model.true_state.orientations["TR"].yaw_deg == 5.0
+    assert model.true_state.attenuation_regions == (
+        AttenuationRegion(("TL", "BR"), 110.0, 25.0, 20.0, 4.0, 5.0),
+    )
+    assert model.true_state.coupling_paths == (
+        CouplingPath("TL", "BR", -22.0, 40.0),
+    )
+    assert resolved.simulation.signal.true_polarization.kind == "rhcp"
+    assert resolved.simulation.signal.assumed_polarization.kind == "lhcp"
+    assert resolved.simulation.interferers[0].polarization.kind == "linear"
+
+
+def test_antenna_and_source_polarization_fields_change_scientific_hash(tmp_path: Path):
+    first_path = tmp_path / "first.json"
+    first_path.write_text(json.dumps(_parametric_override()), encoding="utf-8")
+    changed_override = _parametric_override()
+    changed_override["simulation"]["array"]["antenna_model"]["assumed_state"][  # type: ignore[index]
+        "parametric_patterns"
+    ]["TL"]["peak_gain_db"] = 9.0  # type: ignore[index]
+    changed_override["simulation"]["signal"]["assumed_polarization"] = (  # type: ignore[index]
+        _polarization("linear", tilt_deg=22.0)
+    )
+    second_path = tmp_path / "second.json"
+    second_path.write_text(json.dumps(changed_override), encoding="utf-8")
+
+    first = resolve_study_config(first_path, preset="quick")
+    second = resolve_study_config(second_path, preset="quick")
+
+    assert first.config_sha256 != second.config_sha256
+
+
+def test_measured_pattern_relative_path_and_missing_digest_are_resolved(tmp_path: Path):
+    config_dir = tmp_path / "config"
+    config_dir.mkdir()
+    csv_path = config_dir / "patterns.csv"
+    _write_pattern_csv(csv_path)
+    path = config_dir / "study.json"
+    original_json = json.dumps(_measured_override("patterns.csv"))
+    path.write_text(original_json, encoding="utf-8")
+
+    resolved = resolve_study_config(path, preset="quick")
+    state = resolved.simulation.array.antenna_model.true_state
+    expected_digest = hashlib.sha256(csv_path.read_bytes()).hexdigest()
+
+    assert state.measured_pattern_csv == csv_path.resolve()
+    assert state.measured_pattern_sha256 == expected_digest
+    assert path.read_text(encoding="utf-8") == original_json
+
+
+def test_measured_pattern_digest_changes_scientific_hash_without_pinned_sha(
+    tmp_path: Path,
+):
+    csv_path = tmp_path / "patterns.csv"
+    _write_pattern_csv(csv_path, component=1.0)
+    path = tmp_path / "study.json"
+    path.write_text(json.dumps(_measured_override(csv_path.name)), encoding="utf-8")
+
+    first = resolve_study_config(path, preset="quick")
+    first_snapshot = first.to_dict()
+    _write_pattern_csv(csv_path, component=0.5)
+    second = resolve_study_config(path, preset="quick")
+
+    assert first.config_sha256 != second.config_sha256
+    assert first.to_dict() == first_snapshot
+
+
+def test_measured_pattern_changed_pinned_digest_is_rejected_without_mutation(
+    tmp_path: Path,
+):
+    csv_path = tmp_path / "patterns.csv"
+    _write_pattern_csv(csv_path, component=1.0)
+    digest = hashlib.sha256(csv_path.read_bytes()).hexdigest()
+    path = tmp_path / "study.json"
+    original_json = json.dumps(_measured_override(csv_path.name, expected_sha256=digest))
+    path.write_text(original_json, encoding="utf-8")
+    resolve_study_config(path, preset="quick")
+    _write_pattern_csv(csv_path, component=0.25)
+
+    with pytest.raises(ValueError, match="SHA-256.*match"):
+        resolve_study_config(path, preset="quick")
+
+    assert path.read_text(encoding="utf-8") == original_json
+
+
+def test_measured_pattern_missing_file_is_a_contextual_value_error(tmp_path: Path):
+    path = tmp_path / "study.json"
+    path.write_text(json.dumps(_measured_override("missing.csv")), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="measured pattern CSV"):
+        resolve_study_config(path, preset="quick")
+
+
+def test_resolve_pattern_resources_returns_a_detached_resolved_copy(tmp_path: Path):
+    assert hasattr(study_config_module, "resolve_pattern_resources")
+    csv_path = tmp_path / "patterns.csv"
+    _write_pattern_csv(csv_path)
+    digest = hashlib.sha256(csv_path.read_bytes()).hexdigest()
+    simulation = default_config()
+    simulation.array.antenna_model = PhoneAntennaConfig(
+        "measured direct fixture",
+        "measured",
+        AntennaStateConfig(
+            pattern_kind="measured",
+            measured_pattern_csv=Path("patterns.csv"),
+            measured_pattern_sha256=digest,
+        ),
+        AntennaStateConfig(),
+    )
+
+    resolved = study_config_module.resolve_pattern_resources(simulation, tmp_path)
+
+    assert resolved is not simulation
+    assert resolved.array.antenna_model.true_state.measured_pattern_csv == csv_path.resolve()
+    assert simulation.array.antenna_model.true_state.measured_pattern_csv == Path(
+        "patterns.csv"
+    )
+
+
+def test_old_json_without_antenna_or_polarization_fields_stays_ideal(tmp_path: Path):
+    path = tmp_path / "study.json"
+    path.write_text(json.dumps({
+        "simulation": {
+            "signal": {"carrier_hz": 1_575_420_000.0},
+            "interferers": [{
+                "direction": {"azimuth_deg": 120.0, "elevation_deg": 10.0},
+                "enable": True,
+                "power_dbm": -90.0,
+                "offset_hz": 250e3,
+                "initial_phase_rad": 0.8,
+                "start_ms": 0.0,
+                "stop_ms": None,
+            }],
+        }
+    }), encoding="utf-8")
+
+    resolved = resolve_study_config(path, preset="quick")
+
+    assert resolved.simulation.array.antenna_model is None
+    assert resolved.simulation.signal.true_polarization.kind == "rhcp"
+    assert resolved.simulation.interferers[0].polarization.kind == "rhcp"
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        pytest.param(
+            lambda data: data["simulation"]["array"]["antenna_model"]["true_state"][  # type: ignore[index]
+                "parametric_patterns"
+            ]["TL"].pop("cross_phase_deg"),  # type: ignore[index]
+            id="incomplete-parametric-pattern",
+        ),
+        pytest.param(
+            lambda data: data["simulation"]["array"]["antenna_model"]["true_state"].update(  # type: ignore[index]
+                {"orientations": []}
+            ),
+            id="orientation-list-instead-of-map",
+        ),
+        pytest.param(
+            lambda data: data["simulation"]["array"]["antenna_model"]["true_state"][  # type: ignore[index]
+                "attenuation_regions"
+            ][0].update({"elements": "TL"}),  # type: ignore[index]
+            id="region-elements-string",
+        ),
+        pytest.param(
+            lambda data: data["simulation"]["array"]["antenna_model"]["true_state"][  # type: ignore[index]
+                "coupling_paths"
+            ][0].pop("phase_deg"),  # type: ignore[index]
+            id="incomplete-coupling-path",
+        ),
+        pytest.param(
+            lambda data: data["simulation"]["signal"].update(  # type: ignore[index]
+                {"true_polarization": _polarization("invalid")}
+            ),
+            id="invalid-source-polarization",
+        ),
+        pytest.param(
+            lambda data: data["simulation"]["signal"]["true_polarization"].update(  # type: ignore[index]
+                {"tilt_deg": True}
+            ),
+            id="boolean-source-polarization-number",
+        ),
+        pytest.param(
+            lambda data: data["simulation"]["interferers"][0].update(  # type: ignore[index]
+                {"power_dbm": True}
+            ),
+            id="boolean-interferer-number",
+        ),
+        pytest.param(
+            lambda data: data["simulation"]["array"]["antenna_model"]["true_state"][  # type: ignore[index]
+                "parametric_patterns"
+            ]["TL"].update({"peak_gain_db": float("nan")}),  # type: ignore[index]
+            id="nonfinite-pattern-number",
+        ),
+    ],
+)
+def test_nested_antenna_records_fail_strictly_without_mutating_json(
+    tmp_path: Path, mutate
+):
+    data = _parametric_override()
+    mutate(data)
+    path = tmp_path / "study.json"
+    original_json = json.dumps(data)
+    path.write_text(original_json, encoding="utf-8")
+
+    with pytest.raises(ValueError):
+        resolve_study_config(path, preset="quick")
+
+    assert path.read_text(encoding="utf-8") == original_json
+
+
+def test_from_parts_detaches_complete_antenna_scientific_snapshot():
+    simulation = default_config()
+    patterns = {
+        corner: ParametricPatternParameters(peak_gain_db=float(index))
+        for index, corner in enumerate(_CORNERS)
+    }
+    orientations = {
+        corner: ElementOrientation(yaw_deg=float(index))
+        for index, corner in enumerate(_CORNERS)
+    }
+    state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=patterns,
+        measured_pattern_csv=Path("unused.csv"),
+        orientations=orientations,
+        attenuation_regions=(
+            AttenuationRegion(("TL",), 0.0, 20.0, 10.0, 3.0),
+        ),
+        coupling_paths=(CouplingPath("TL", "BR", -20.0, 15.0),),
+    )
+    model = PhoneAntennaConfig("detached fixture", "parametric", state, AntennaStateConfig())
+    source_polarization = WavePolarization("linear", tilt_deg=30.0)
+    simulation.array.antenna_model = model
+    simulation.signal.true_polarization = source_polarization
+    base = resolve_study_config(preset="quick")
+
+    resolved = ResolvedStudyConfig.from_parts(base.study, simulation)
+    before = resolved.to_dict()
+    digest = resolved.config_sha256
+    patterns["TL"] = ParametricPatternParameters(peak_gain_db=99.0)
+    orientations["TL"] = ElementOrientation(yaw_deg=99.0)
+    state.attenuation_regions += (
+        AttenuationRegion(("BR",), 180.0, 30.0, 5.0, 8.0),
+    )
+    state.coupling_paths += (CouplingPath("BR", "TL", -10.0, 90.0),)
+    state.measured_pattern_csv = Path("changed.csv")
+    object.__setattr__(source_polarization, "tilt_deg", 80.0)
+
     assert resolved.to_dict() == before
     assert resolved.config_sha256 == digest
