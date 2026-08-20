@@ -26,6 +26,7 @@ from .patterns import (
     ScalarPatternAdapter,
     TabulatedElementPattern,
 )
+from .phone_model import PhoneAntennaModel
 from .steering import steering_vector
 
 __all__ = [
@@ -41,6 +42,7 @@ __all__ = [
     "ParametricElementPattern",
     "ParametricPatternParameters",
     "PolarizedElementPattern",
+    "PhoneAntennaModel",
     "rotation_matrix_ypr",
     "select_phase_centers",
     "ScalarPatternAdapter",
