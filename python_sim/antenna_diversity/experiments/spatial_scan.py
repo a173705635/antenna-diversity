@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 from collections.abc import Callable
+from dataclasses import replace
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -221,15 +222,7 @@ def scan_interferer_powers(
         case = copy.deepcopy(cfg)
         interferers = list(case.interferers)
         original = interferers[interferer_index]
-        interferers[interferer_index] = CWInterferer(
-            direction=original.direction,
-            enable=original.enable,
-            power_dbm=power,
-            offset_hz=original.offset_hz,
-            initial_phase_rad=original.initial_phase_rad,
-            start_ms=original.start_ms,
-            stop_ms=original.stop_ms,
-        )
+        interferers[interferer_index] = replace(original, power_dbm=power)
         case.interferers = tuple(interferers)
         return evaluate_configuration_spatially(case, mode)
 
@@ -381,15 +374,7 @@ def _require_phone(cfg: SimulationConfig) -> None:
 
 
 def _replace_interferer(interferer: CWInterferer, direction: Direction) -> CWInterferer:
-    return CWInterferer(
-        direction=direction,
-        enable=interferer.enable,
-        power_dbm=interferer.power_dbm,
-        offset_hz=interferer.offset_hz,
-        initial_phase_rad=interferer.initial_phase_rad,
-        start_ms=interferer.start_ms,
-        stop_ms=interferer.stop_ms,
-    )
+    return replace(interferer, direction=direction)
 
 
 def _dbm_to_watts(name: str, power_dbm: float) -> float:

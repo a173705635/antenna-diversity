@@ -43,7 +43,7 @@ def _desired_responses(
     dict[str, object] | None,
     dict[str, object] | None,
 ]:
-    """Return true nominal, assumed nominal, and true effective steering."""
+    """Return nominal/open-circuit, assumed constraint, and true effective responses."""
 
     if isinstance(cfg.array, ArrayConfig):
         nominal = steering_vector(
