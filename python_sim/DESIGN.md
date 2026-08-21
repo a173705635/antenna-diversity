@@ -1,6 +1,6 @@
 # GPS L1 C/A 手机角点空域抗干扰仿真：设计与实现
 
-> 当前默认模型：HUAWEI Mate 70 外形上的四个**理想角点相位中心**，不是已知真实天线。阵元方向图首版为各向同性接口。
+> 当前默认模型仍是 HUAWEI Mate 70 外形上的四个**理想角点相位中心**，用于保持既有数值基线；代码同时支持明确标注的合成参数化天线和用户提供的测量表格。三者都不是产品级验证。
 
 ![端到端信号流与模型边界](docs/antenna_diversity_chain.svg)
 
@@ -15,13 +15,14 @@ L1 载频 1575.42 MHz 用于波长、空间相位和码 Doppler 比例；实际�
 ## 2. 配置族
 
 - `default_config()` / `mate70_default_config()`：Mate 70 外形 160.9 × 75.9 × 7.8 mm，默认 `("TL", "TR", "BL", "BR")` 四个理想共面角点。
+- `parametric_phone_config(active_antennas)`：确定性的 `synthetic_phone_corner_v1`，含四个不同 yaw、有限余弦滚降双极化方向图、一个合成遮挡区和弱非对称互耦；该预设明确是非实测敏感性模型。
 - `PhoneArrayConfig.active_antennas`：任意不重复的 2–4 角点子集；[`antenna_diversity/array/geometry.py`](antenna_diversity/array/geometry.py) 枚举全部 11 种组合。
 - `legacy_ula_config()`：原始双阵元、L1 半波长 ULA，供旧结论回归。
 - `interferers`：0–3 个 `CWInterferer`；每个有独立方向、功率、频偏、初相、`start_ms` 和 `stop_ms`。
 
 手机阵列和 legacy ULA 都进入相同的 `(channels, samples)` RF/DFE/合并链。`jammer` 字段只服务 legacy 配置；手机配置读取 `interferers`。
 
-## 3. 手机坐标和 3-D 阵列流形
+## 3. 手机坐标和分层天线流形
 
 手机中心是原点；`+x` 向右、`+y` 向顶端、`+z` 垂直屏幕向外。方位角 `az` 从 `+x` 朝 `+y` 逆时针增加，仰角 `el` 从手机平面向 `+z` 增加：
 
@@ -37,9 +38,35 @@ a_m(az,el,f)=g_m(az,el,f)
 \exp\left(-j\frac{2\pi f}{c}\mathbf p_m^T\mathbf u\right).
 \]
 
-`ElementPattern.complex_gain()` 是可替换的复数方向图协议；当前 `IsotropicElementPattern` 对每个阵元返回 `1+0j`。因为默认理想角点共面且 `z=0`，天顶方向的点积全部为零，空间相位相同。
+`WavePolarization` 在手机球面切向基中保存单位功率 Jones 向量 `[E_az,E_el]`。RHCP/LHCP 手性按“从阵列朝辐射源观察”的方向定义；外部方向和电场先变换到每个阵元的本地 yaw/pitch/roll 坐标，再与本地复数有效高度 `h=[h_az,h_el]` 做共轭内积。
 
-角点坐标只是按手机外形边界生成的接口初值。代码没有输入或推断真实天线位置、朝向、增益或相位方向图。
+第 `m` 个互耦前端口电压为
+
+```text
+x_m = b_m(u) · h_m(u_m,f)^H e_m · exp(-j 2π f p_m·u/c)
+a_effective = D_channel · C_coupling · x
+```
+
+`b_m` 是一个或多个方向性衰减区在 dB 域叠加后的电压因子；`C_coupling` 从固定四角有向路径构造并按激活顺序抽取；`D_channel` 是逐接收通道幅相响应。运算顺序是 `D(Cx)`，不能交换。默认 ideal/isotropic 路径显式保持与极化无关的 `1+0j`，因此旧数值不因 Jones 接口引入 `1/sqrt(2)` 缩放。
+
+每个手机天线配置都有独立的 true state 和 assumed state。目标、干扰、解析协方差与生成样本使用 true state；EGC/MVDR 的目标导向约束使用 assumed state。这样能单独研究方向、相位中心、姿态、方向图、遮挡、互耦、通道幅相和目标极化的模型失配。
+
+信号与干扰的 `power_dbm` 都表示到达“单位增益且极化完全匹配的参考天线端口”的功率。方向图绝对增益、交叉极化损失和遮挡不会在流形生成后重新归一化，而是进入真实链路预算。
+
+方向图来源固定为三类：
+
+- `ideal`：兼容旧各向同性响应；
+- `parametric`：峰值增益、余弦指数、有限后瓣、名义极化、XPD 和交叉分量相位；
+- `measured`：规则方位/仰角网格的复数双极化有效高度。
+
+测量 CSV 的固定列为：
+
+```text
+element_name,frequency_hz,azimuth_deg,elevation_deg,
+h_az_real,h_az_imag,h_el_real,h_el_imag
+```
+
+同一阵元/频率必须形成完整无重复规则网格；方位按周期插值，仰角只在声明范围内双线性插值，复数实部/虚部分别插值。首版不做频率插值。配置解析时计算并校验 SHA-256，摘要进入科学配置哈希、summary 和报告。角点坐标仍只是按手机外形边界生成的接口初值；仓库没有 Mate 70 实测相位中心或方向图。
 
 ## 4. 场景与干扰
 
@@ -57,7 +84,7 @@ j_k[n]=w_k[n]\sqrt{P_kR}
 \exp\{j[2\pi(f_{IF}+\Delta f_k)n/f_s+\phi_k]\},
 \]
 
-其中 `w_k[n]` 由各自的起止时间门产生。场景输出分别保留每个干扰的 truth 分量；零干扰时保持合法的空集合。阵元通道还可配置真实/估计幅相误差，用于导向矢量失配研究。
+其中 `w_k[n]` 由各自的起止时间门产生。场景输出分别保留每个干扰的 truth 分量；零干扰时保持合法的空集合。GPS 有独立 true/assumed 极化，每个干扰有自己的实际极化；阵元通道还可配置真实/估计幅相误差，用于导向矢量失配研究。
 
 ## 5. RF、ADC 和 DFE
 
@@ -92,7 +119,7 @@ MVDR 使用
 
 ## 8. 分析与扫描
 
-端到端结果由 [`antenna_diversity/analysis/metrics.py`](antenna_diversity/analysis/metrics.py) 压缩为分支指标。绘图覆盖 RF/DFE 与合并频谱、手机阵列方位/仰角响应（标出目标及所有干扰）、捕获热力图和跟踪曲线。
+端到端结果由 [`antenna_diversity/analysis/metrics.py`](antenna_diversity/analysis/metrics.py) 压缩为分支指标。绘图覆盖 RF/DFE 与合并频谱、手机阵列方位/仰角响应（标出目标及所有干扰）、捕获热力图和跟踪曲线。七阶段研究还把单阵元 true/assumed 方向图、逐源极化匹配、复数互耦幅相和遮挡前后响应保存为 `antenna_diagnostics.csv`，再仅从已保存行生成四幅证据图；报告阶段不重新调用模型。
 
 [`antenna_diversity/experiments/spatial_scan.py`](antenna_diversity/experiments/spatial_scan.py) 是不生成时域样本的快速解析路径。它报告目标/逐干扰方向增益、最差干扰增益、输出信号/干扰/噪声功率、输出 SINR、权值范数、白噪声增益、协方差秩/条件数、加载量和快拍策略。入口包括：
 
@@ -112,6 +139,7 @@ MVDR 使用
 
 ```python
 import numpy as np
+from antenna_diversity import parametric_phone_config
 from antenna_diversity.config import default_config, legacy_ula_config
 from antenna_diversity.experiments import (
     compare_corner_combinations, run_monte_carlo,
@@ -133,12 +161,23 @@ mc = run_monte_carlo(phone, seeds=(101, 102, 103))
 legacy = legacy_ula_config()
 legacy.plot.enable = False
 legacy_result = run_end_to_end(legacy)
+
+synthetic = parametric_phone_config(("TL", "BR"))
+synthetic.plot.enable = False
+synthetic_result = run_end_to_end(synthetic)
 ```
 
-命令行入口是 [`run_end_to_end.py`](run_end_to_end.py) 和 [`run_legacy_ula.py`](run_legacy_ula.py)。
+命令行入口是 [`run_end_to_end.py`](run_end_to_end.py)、[`run_legacy_ula.py`](run_legacy_ula.py) 和七阶段 [`run_spatial_research.py`](run_spatial_research.py)。小型参数化研究可直接运行：
+
+```powershell
+$env:MPLBACKEND='Agg'
+python -W error run_spatial_research.py `
+  --config antenna_diversity/studies/example_antenna_realism.json `
+  --preset quick --name antenna-realism-smoke
+```
 
 ## 11. 明确未建模项
 
-以下均不在当前结论中：真实 Mate 70 天线位置；真实测量方向图；互耦；极化；人体、机身遮挡与散射；多径/NLOS；动态 DOA；非 CW 干扰；多颗卫星与多 PRN 并发；导航数据、位/帧同步和 PVT；在线 DOA 与鲁棒导向矢量估计；实时 MVDR 更新；完整 RF 非理想。
+以下均不在当前结论中：真实 Mate 70 相位中心标定和产品级暗室方向图；全波机壳/人体散射；互耦导致的外部噪声相关性；多径/NLOS；运动与动态 DOA；宽带、扫频、脉冲或调制等非 CW 干扰；多颗卫星与多 PRN 并发；导航数据、位/帧同步和 PVT；在线 DOA 与鲁棒导向矢量估计；实时滑窗 MVDR；完整 RF 非理想。
 
-因此“理想角点”和“各向同性”只能描述首版接口，不能扩展为实际硬件声明。下一步应以测量得到的相位中心、复数方向图、耦合矩阵和动态传播数据替换这些接口，再重新验证空间自由度、捕获和跟踪结论。
+因此 `ideal` 只能说明旧基线，`parametric` 只能说明人为参数敏感性，`measured` 只说明输入由可追溯表格驱动。下一步应输入经坐标、极化和功率标定的相位中心、复数方向图与耦合测量，再在真实传播数据上重新验证空间自由度、捕获和跟踪结论。

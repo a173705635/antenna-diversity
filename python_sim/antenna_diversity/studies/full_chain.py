@@ -7,6 +7,7 @@ from collections.abc import Mapping
 
 import numpy as np
 
+from antenna_diversity.array.polarization import WavePolarization
 from antenna_diversity.config import CWInterferer, Direction, PhoneArrayConfig
 from antenna_diversity.experiments.spatial_scan import evaluate_configuration_spatially
 from antenna_diversity.pipeline import run_end_to_end
@@ -87,6 +88,7 @@ def _interferers(value: object) -> tuple[CWInterferer, ...]:
             enable=raw["enable"], power_dbm=raw["power_dbm"],
             offset_hz=raw["offset_hz"], initial_phase_rad=raw["initial_phase_rad"],
             start_ms=raw["start_ms"], stop_ms=raw["stop_ms"],
+            polarization=WavePolarization(**raw["polarization"]),
         ))
     return tuple(built)
 
@@ -110,9 +112,11 @@ def _apply_single_factor(simulation, raw: object) -> None:
         base[index] += value
         simulation.phone.assumed_phase_centers_m[str(corner)] = tuple(base)
     elif factor == "amplitude":
-        simulation.array.estimated_channel_amplitude_error_db[str(corner)] = value
+        name = str(corner)
+        simulation.array.estimated_channel_amplitude_error_db[name] += value
     elif factor == "phase":
-        simulation.array.estimated_channel_phase_error_deg[str(corner)] = value
+        name = str(corner)
+        simulation.array.estimated_channel_phase_error_deg[name] += value
     elif factor == "loading":
         simulation.diversity.diagonal_loading_factor = value
     else:
@@ -131,9 +135,11 @@ def _apply_combined_realization(simulation, raw: object) -> None:
         base = np.asarray(simulation.phone.assumed_phase_centers_m[str(corner)], dtype=float)
         simulation.phone.assumed_phase_centers_m[str(corner)] = tuple(base + np.asarray(error, dtype=float))
     for corner, value in dict(raw["amplitude_errors_db"]).items():
-        simulation.array.estimated_channel_amplitude_error_db[str(corner)] = float(value)
+        name = str(corner)
+        simulation.array.estimated_channel_amplitude_error_db[name] += float(value)
     for corner, value in dict(raw["phase_errors_deg"]).items():
-        simulation.array.estimated_channel_phase_error_deg[str(corner)] = float(value)
+        name = str(corner)
+        simulation.array.estimated_channel_phase_error_deg[name] += float(value)
 
 
 def _metric_row(case, run_index, seed, mode, metric, tracking, analytic_sinr, target_doppler_hz):

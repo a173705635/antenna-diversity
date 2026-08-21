@@ -8,6 +8,7 @@ import numpy as np
 
 from antenna_diversity.array.geometry import CORNER_ORDER
 from antenna_diversity.array.manifold import direction_unit_vector
+from antenna_diversity.array.polarization import WavePolarization
 from antenna_diversity.config import Direction
 
 from .models import RankingResult, ResolvedStudyConfig, SelectionResult, StudyCase, strict_snapshot
@@ -41,6 +42,8 @@ def summarize_and_rank(
         if row.get("mode") == resolved.study.ranking_mode:
             grouped[tuple(str(name) for name in row["active_antennas"])] .append(row)
     if not grouped:
+        if not any(interferer.enable for interferer in resolved.simulation.interferers):
+            return RankingResult((), ())
         raise ValueError("no ranking-mode direction rows")
 
     summaries = []
@@ -105,15 +108,12 @@ def select_representative_cases(
 ) -> SelectionResult:
     """Select only from saved normalized records; never invoke study execution."""
 
-    if not ranking.ranked_combinations:
-        raise ValueError("cannot select cases from an empty ranking")
     directions = tuple(direction_rows)
     robust = tuple(robustness_rows)
     multi = tuple(multi_rows)
     summaries = {tuple(summary["active_antennas"]): summary for summary in ranking.summaries}
     cases: list[StudyCase] = []
     unselected: dict[str, str] = {}
-    best = ranking.ranked_combinations[0]
 
     def add(case: StudyCase) -> None:
         _validate_case(case, resolved)
@@ -130,6 +130,17 @@ def select_representative_cases(
         cases.append(case)
 
     automatic = set(resolved.study.automatic_roles)
+    if not ranking.ranked_combinations:
+        if any(interferer.enable for interferer in resolved.simulation.interferers):
+            raise ValueError("cannot select cases from an empty ranking")
+        unselected.update(
+            {role: "no enabled interferers" for role in sorted(automatic)}
+        )
+        for manual in resolved.study.manual_cases:
+            add(_manual_case(manual))
+        return SelectionResult(tuple(cases), unselected)
+
+    best = ranking.ranked_combinations[0]
     for role, combination in (
         ("best", best),
         ("typical", ranking.ranked_combinations[(len(ranking.ranked_combinations) - 1) // 2]),
@@ -173,7 +184,17 @@ def select_representative_cases(
 
 def _direction_case(role: str, combination: tuple[str, ...], summary: Mapping[str, object], resolved: ResolvedStudyConfig) -> StudyCase:
     direction = dict(summary["representative_p10_direction"])
-    interferer = strict_snapshot(resolved.simulation.interferers[0])
+    interferer = next(
+        (
+            interferer
+            for interferer in resolved.simulation.interferers
+            if interferer.enable
+        ),
+        None,
+    )
+    if interferer is None:
+        raise ValueError("representative direction requires an enabled interferer")
+    interferer = strict_snapshot(interferer)
     parameters = {
         "interferers": [{**interferer, "direction": {"azimuth_deg": direction["azimuth_deg"], "elevation_deg": direction["elevation_deg"]}}],
         "direction_row_case_id": direction["case_id"],
@@ -322,9 +343,12 @@ def validate_interferer_snapshots(value: object) -> None:
         raise ValueError("selected case parameters.interferers must be a sequence")
     required = {
         "direction", "enable", "power_dbm", "offset_hz", "initial_phase_rad",
-        "start_ms", "stop_ms",
+        "start_ms", "stop_ms", "polarization",
     }
     direction_fields = {"azimuth_deg", "elevation_deg"}
+    polarization_fields = {
+        "kind", "tilt_deg", "az_real", "az_imag", "el_real", "el_imag",
+    }
     for raw in value:
         if not isinstance(raw, Mapping) or set(raw) != required:
             raise ValueError("selected case interferer must contain the exact CWInterferer fields")
@@ -337,6 +361,15 @@ def validate_interferer_snapshots(value: object) -> None:
             Direction(direction["azimuth_deg"], direction["elevation_deg"]).validate()
         except (TypeError, ValueError) as error:
             raise ValueError("selected case interferer direction is invalid") from error
+        polarization = raw["polarization"]
+        if not isinstance(polarization, Mapping) or set(polarization) != polarization_fields:
+            raise ValueError(
+                "selected case interferer polarization must contain exact polarization fields"
+            )
+        try:
+            WavePolarization(**polarization).jones_vector()
+        except (TypeError, ValueError) as error:
+            raise ValueError("selected case interferer polarization is invalid") from error
         if type(raw["enable"]) is not bool:
             raise ValueError("selected case interferer enable must be a bool")
         for name in ("power_dbm", "offset_hz", "initial_phase_rad", "start_ms"):

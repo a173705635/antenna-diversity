@@ -6,11 +6,15 @@ import matplotlib
 matplotlib.use("Agg", force=True)
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pytest
 
 from antenna_diversity.studies.plots import plot_study_tables, save_study_figures
 from antenna_diversity.studies.report import build_summary, render_report, verify_report_links
 from tests.study_helpers import completed_tables_for_reporting
+
+
+_ACTIVE_ANTENNAS = ("TL", "TR", "BL", "BR")
 
 
 def completed_manifest():
@@ -36,6 +40,8 @@ def test_study_plots_have_stable_keys_and_shared_heatmap_limits():
         "baseline_rankings", "direction_heatmaps", "power_curves",
         "robustness_curves", "combined_error_distributions",
         "multi_jammer_comparison", "full_chain_validation", "cn0_validation",
+        "element_patterns", "polarization_losses", "coupling_matrices",
+        "blockage_comparison",
     )
     heatmaps = figures["direction_heatmaps"].axes
     limits = {image.get_clim() for axis in heatmaps for image in axis.images}
@@ -44,6 +50,80 @@ def test_study_plots_have_stable_keys_and_shared_heatmap_limits():
     assert axis.lines[0].get_xdata()[0] == pytest.approx(33.0)
     assert axis.lines[0].get_ydata()[0] == pytest.approx(22.0)
     assert axis.patches[0].center == pytest.approx((33.0, 22.0))
+
+
+def test_antenna_plots_use_saved_rows_only_and_share_comparison_limits(monkeypatch):
+    import antenna_diversity.array.phone_model as phone_model
+
+    monkeypatch.setattr(
+        phone_model,
+        "PhoneAntennaModel",
+        lambda *_args, **_kwargs: pytest.fail("plotting must not evaluate antenna model"),
+    )
+
+    figures = plot_study_tables(completed_tables_for_reporting())
+
+    assert {
+        "element_patterns", "polarization_losses", "coupling_matrices",
+        "blockage_comparison",
+    } <= set(figures)
+    for key in ("element_patterns", "blockage_comparison"):
+        limits = {
+            image.get_clim()
+            for axis in figures[key].axes
+            for image in axis.images
+        }
+        assert len(limits) == 1
+    coupling_axes = [axis for axis in figures["coupling_matrices"].axes if axis.images]
+    assert len({axis.images[0].get_clim() for axis in coupling_axes[:2]}) == 1
+    assert len({axis.images[0].get_clim() for axis in coupling_axes[2:]}) == 1
+    pattern_axis = next(axis for axis in figures["element_patterns"].axes if axis.images)
+    assert tuple(pattern_axis.images[0]._Ax) == pytest.approx((0.0, 35.0, 210.0))
+
+
+def test_antenna_plot_builders_ignore_missing_and_nonfinite_optional_values():
+    tables = completed_tables_for_reporting()
+    rows = list(tables["antenna_diagnostics"])
+    rows[0] = {**rows[0], "response_db": float("nan")}
+    rows[1] = {**rows[1], "azimuth_deg": None}
+    rows.append({"record_kind": "source_match", "polarization_match_db": None})
+    tables["antenna_diagnostics"] = tuple(rows)
+
+    figures = plot_study_tables(tables)
+
+    assert all(key in figures for key in (
+        "element_patterns", "polarization_losses", "coupling_matrices",
+        "blockage_comparison",
+    ))
+
+
+def test_blockage_figure_compares_saved_unblocked_and_blocked_response_values():
+    tables = completed_tables_for_reporting()
+    diagnostics = tables["antenna_diagnostics"]
+
+    figure = plot_study_tables(tables)["blockage_comparison"]
+    axes = {axis.get_title(): axis for axis in figure.axes if axis.images}
+    unblocked = axes["True TL unblocked"].images[0].get_array()
+    blocked = axes["True TL blocked"].images[0].get_array()
+    expected_unblocked = sorted(
+        float(row["response_db"])
+        for row in diagnostics
+        if row["record_kind"] == "pattern_grid"
+        and row["model_view"] == "true" and row["element_name"] == "TL"
+    )
+    expected_blocked = sorted(
+        float(row["response_db"])
+        for row in diagnostics
+        if row["record_kind"] == "blockage_grid"
+        and row["model_view"] == "true" and row["element_name"] == "TL"
+    )
+
+    assert sorted(np.asarray(unblocked, dtype=float).ravel()) == pytest.approx(
+        expected_unblocked
+    )
+    assert sorted(np.asarray(blocked, dtype=float).ravel()) == pytest.approx(
+        expected_blocked
+    )
 
 
 def _rendered_rgba_at(image, x: float, y: float) -> tuple[int, ...]:
@@ -272,6 +352,36 @@ def test_each_later_builder_closes_its_current_figure_on_mid_build_error(
     assert plt.fignum_exists(external.number)
 
 
+@pytest.mark.parametrize(
+    ("record_kind", "field"),
+    [
+        ("pattern_grid", "response_db"),
+        ("source_match", "polarization_match_db"),
+        ("coupling_entry", "response_real"),
+        ("blockage_grid", "response_db"),
+    ],
+)
+def test_each_antenna_builder_closes_its_partial_figure_on_error(
+    record_kind, field,
+):
+    tables = completed_tables_for_reporting()
+    rows = list(tables["antenna_diagnostics"])
+    index = next(
+        index for index, row in enumerate(rows)
+        if row["record_kind"] == record_kind
+    )
+    rows[index] = {**rows[index], field: _ExplodingFloat()}
+    tables["antenna_diagnostics"] = tuple(rows)
+    external = plt.figure()
+    figures_before = set(plt.get_fignums())
+
+    with pytest.raises(RuntimeError, match="builder exploded"):
+        plot_study_tables(tables)
+
+    assert set(plt.get_fignums()) == figures_before
+    assert plt.fignum_exists(external.number)
+
+
 def test_successful_builders_and_generic_save_leave_caller_owned_figures_open(tmp_path: Path):
     external = plt.figure()
     figures = plot_study_tables(completed_tables_for_reporting())
@@ -308,7 +418,9 @@ def test_report_contains_evidence_boundaries_and_reproduction_links(tmp_path: Pa
     }
     figures = {"baseline_rankings": Path("figures/baseline_rankings.png")}
     table_paths = {name: Path("tables") / f"{name}.csv" for name in tables}
-    summary = build_summary(tables, manifest, selection)
+    summary = build_summary(
+        tables, manifest, selection, active_antennas=_ACTIVE_ANTENNAS
+    )
     report = render_report(summary, manifest, figures, table_paths)
 
     assert "比较性研究" in report
@@ -323,7 +435,43 @@ def test_report_contains_evidence_boundaries_and_reproduction_links(tmp_path: Pa
     assert "最佳组合" in report
     assert "全方向" in report
     assert "可分辨区域" in report
+    assert summary["antenna_model"] == {
+        "source": "parametric",
+        "label": "synthetic_phone_corner_v1",
+        "measured_pattern_sha256": None,
+        "active_antennas": ["TL", "TR", "BL", "BR"],
+    }
+    assert "手机天线模型证据" in report
+    assert "parametric" in report
+    assert "单阵元方向图" in report
+    assert "极化匹配增益" in report
+    assert "极化匹配损耗" not in report
+    match_rows = [
+        row for row in tables["antenna_diagnostics"]
+        if row["record_kind"] == "source_match"
+    ]
+    assert match_rows
+    assert all("polarization_match_db" in row for row in match_rows)
+    assert all(float(row["polarization_match_db"]) <= 0.0 for row in match_rows)
+    assert "互耦幅相矩阵" in report
+    assert "遮挡衰减对比" in report
+    assert "相关外部天线噪声" in report
+    assert "全波平台散射" in report
     json.dumps(summary, allow_nan=False)
+
+
+@pytest.mark.parametrize("active_antennas", [("TL", "BR"), ("TL", "TR", "BR")])
+def test_summary_uses_resolved_active_antennas_not_four_corner_diagnostic_rows(
+    active_antennas,
+):
+    summary = build_summary(
+        completed_tables_for_reporting(),
+        completed_manifest(),
+        {},
+        active_antennas=active_antennas,
+    )
+
+    assert summary["antenna_model"]["active_antennas"] == list(active_antennas)
 
 
 def test_plots_allow_constant_and_failure_only_rows_without_warnings(tmp_path: Path):
@@ -363,14 +511,18 @@ def test_summary_rejects_missing_required_table():
     tables.pop("power_scan")
 
     with pytest.raises(ValueError, match="missing required table: power_scan"):
-        build_summary(tables, completed_manifest(), {})
+        build_summary(
+            tables, completed_manifest(), {}, active_antennas=_ACTIVE_ANTENNAS
+        )
 
 
 def test_reporting_rejects_missing_or_invalid_saved_metadata():
     tables = completed_tables_for_reporting()
     tables["baseline_rankings"] = ({**tables["baseline_rankings"][0], "rank": None},)
     with pytest.raises(ValueError, match="rank"):
-        build_summary(tables, completed_manifest(), {})
+        build_summary(
+            tables, completed_manifest(), {}, active_antennas=_ACTIVE_ANTENNAS
+        )
     with pytest.raises(ValueError, match="rank"):
         plot_study_tables(tables)
 
@@ -398,14 +550,22 @@ def test_summary_names_rank_roles_and_validates_knee_evidence():
     second = {**tables["baseline_rankings"][0], "active_antennas": ["TR", "BL"], "display_label": "MVDR(TR+BL)", "rank": 2}
     third = {**tables["baseline_rankings"][0], "active_antennas": ["TL", "TR"], "display_label": "MVDR(TL+TR)", "rank": 3}
     tables["baseline_rankings"] = (tables["baseline_rankings"][0], second, third)
-    summary = build_summary(tables, completed_manifest(), {"cases": [], "unselected_roles": {}})
+    summary = build_summary(
+        tables, completed_manifest(), {"cases": [], "unselected_roles": {}},
+        active_antennas=_ACTIVE_ANTENNAS,
+    )
 
     assert summary["baseline"]["best"]["rank"] == 1
     assert summary["baseline"]["typical"]["rank"] == 2
     assert summary["baseline"]["worst"]["rank"] == 3
     assert summary["knee"] == {"status": "unavailable", "reason": "not selected"}
     with pytest.raises(ValueError, match="knee"):
-        build_summary(tables, completed_manifest(), {"cases": [{"selection_reasons": ["knee"]}], "unselected_roles": {"knee": "no crossing"}})
+        build_summary(
+            tables, completed_manifest(),
+            {"cases": [{"selection_reasons": ["knee"]}],
+             "unselected_roles": {"knee": "no crossing"}},
+            active_antennas=_ACTIVE_ANTENNAS,
+        )
 
 
 @pytest.mark.parametrize("rank_values", [(2, 3), (1, 3), (1, 1), (0, 1), (True, 2)])
@@ -416,7 +576,9 @@ def test_reporting_requires_contiguous_one_based_ranks(rank_values):
     tables["baseline_rankings"] = (first, second)
 
     with pytest.raises(ValueError, match="rank"):
-        build_summary(tables, completed_manifest(), {})
+        build_summary(
+            tables, completed_manifest(), {}, active_antennas=_ACTIVE_ANTENNAS
+        )
     with pytest.raises(ValueError, match="rank"):
         plot_study_tables(tables)
 
@@ -443,7 +605,11 @@ def test_curve_plots_ignore_partial_and_all_unavailable_coordinates_without_erro
     assert tuple(partial) == (
         "baseline_rankings", "direction_heatmaps", "power_curves", "robustness_curves",
         "combined_error_distributions", "multi_jammer_comparison", "full_chain_validation", "cn0_validation",
+        "element_patterns", "polarization_losses", "coupling_matrices",
+        "blockage_comparison",
     )
+    for figure in partial.values():
+        plt.close(figure)
     tables["power_scan"] = ({"mode": "mvdr", "active_antennas": ["TL", "BR"], "power_dbm": None, "output_sinr_db": None},)
     tables["robustness_scans"] = ({"factor": "phase", "active_antennas": ["TL", "BR"], "normalized_severity": None, "mvdr_minus_egc_sinr_db": None},)
     tables["full_chain_cn0"] = ({"case_id": "x", "mode": "mvdr", "run_index": 0, "time_ms": None, "cn0_db_hz": None},)
@@ -464,14 +630,14 @@ def test_summary_binds_each_role_reason_to_its_own_selected_case():
                 {"active_antennas": ["TR", "BL"], "selection_reasons": ["best"]},
                 {"active_antennas": ["TL", "BR"], "selection_reasons": ["manual"]},
             ],
-        })
+        }, active_antennas=_ACTIVE_ANTENNAS)
     summary = build_summary(tables, completed_manifest(), {
         "cases": [
             {"active_antennas": ["TL", "BR"], "selection_reasons": ["best"]},
             {"active_antennas": ["TR", "BL"], "selection_reasons": ["worst"]},
             {"active_antennas": ["TL", "BR"], "selection_reasons": ["manual"]},
         ],
-    })
+    }, active_antennas=_ACTIVE_ANTENNAS)
     assert summary["baseline"]["best"]["combination"] == "TL+BR"
 
 
@@ -484,7 +650,10 @@ def test_report_link_validation_requires_existing_confined_targets(tmp_path: Pat
     for name in completed_tables_for_reporting():
         (tables / f"{name}.csv").write_text("header\n", encoding="utf-8")
     report = render_report(
-        build_summary(completed_tables_for_reporting(), completed_manifest(), {}),
+        build_summary(
+            completed_tables_for_reporting(), completed_manifest(), {},
+            active_antennas=_ACTIVE_ANTENNAS,
+        ),
         completed_manifest(),
         {"baseline_rankings": Path("figures/baseline_rankings.png")},
         {name: Path("tables") / f"{name}.csv" for name in completed_tables_for_reporting()},

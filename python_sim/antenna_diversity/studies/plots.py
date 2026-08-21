@@ -15,21 +15,26 @@ from matplotlib.figure import Figure
 from matplotlib.image import NonUniformImage
 import numpy as np
 
+from antenna_diversity.array.geometry import CORNER_ORDER
+
 
 FIGURE_KEYS = (
     "baseline_rankings", "direction_heatmaps", "power_curves", "robustness_curves",
     "combined_error_distributions", "multi_jammer_comparison", "full_chain_validation",
     "cn0_validation",
+    "element_patterns", "polarization_losses", "coupling_matrices",
+    "blockage_comparison",
 )
 _MODES = ("single", "egc", "mvdr")
 _REQUIRED_TABLES = (
     "baseline_rankings", "direction_scan", "power_scan", "robustness_scans",
     "combined_errors", "multi_jammer", "full_chain_validation", "full_chain_cn0",
+    "antenna_diagnostics",
 )
 
 
 def plot_study_tables(tables: Mapping[str, Sequence[Mapping[str, object]]]) -> dict[str, Figure]:
-    """Build the eight fixed research figures from saved table rows only."""
+    """Build the twelve fixed research figures from saved table rows only."""
 
     _require_tables(tables)
     figures: dict[str, Figure] = {}
@@ -44,6 +49,14 @@ def plot_study_tables(tables: Mapping[str, Sequence[Mapping[str, object]]]) -> d
         figures["cn0_validation"] = _cn0(
             tables["full_chain_cn0"], tables["full_chain_validation"]
         )
+        diagnostics = tables["antenna_diagnostics"]
+        figures["element_patterns"] = _diagnostic_heatmaps(
+            diagnostics, "pattern_grid", "response_db", "Element pattern response",
+            "Response (dB)",
+        )
+        figures["polarization_losses"] = _polarization_losses(diagnostics)
+        figures["coupling_matrices"] = _coupling_matrices(diagnostics)
+        figures["blockage_comparison"] = _blockage_comparison(diagnostics)
     except BaseException:
         for figure in figures.values():
             plt.close(figure)
@@ -332,6 +345,280 @@ def _cn0(rows: Sequence[Mapping[str, object]], validation_rows: Sequence[Mapping
             _empty_axis(axis, "C/N₀ unavailable: " + (", ".join(unavailable) or "no finite epoch rows"))
         axis.set(xlabel="Time (ms)", ylabel="C/N₀ (dB-Hz)", title="C/N₀ validation")
     return figure
+
+
+def _diagnostic_heatmaps(
+    rows: Sequence[Mapping[str, object]],
+    record_kind: str,
+    value_field: str,
+    title: str,
+    colorbar_label: str,
+) -> Figure:
+    selected = [row for row in rows if row.get("record_kind") == record_kind]
+    views = ("true", "assumed")
+    figure, axes = plt.subplots(
+        len(views), len(CORNER_ORDER), figsize=(4 * len(CORNER_ORDER), 7.5),
+        squeeze=False, layout="constrained",
+    )
+    with _close_on_error(figure):
+        values = [
+            value for row in selected
+            if (value := _finite(row.get(value_field))) is not None
+        ]
+        lo, hi = _finite_limits(values)
+        images = []
+        for row_index, view in enumerate(views):
+            for column_index, element_name in enumerate(CORNER_ORDER):
+                axis = axes[row_index, column_index]
+                group = [
+                    row for row in selected
+                    if row.get("model_view") == view
+                    and row.get("element_name") == element_name
+                ]
+                image = _saved_grid_image(axis, group, value_field, lo, hi)
+                if image is None:
+                    _empty_axis(axis, "No finite saved rows")
+                else:
+                    images.append(image)
+                axis.set(
+                    title=f"{view.title()} {element_name}",
+                    xlabel="Azimuth (deg)", ylabel="Elevation (deg)",
+                )
+        if images:
+            figure.colorbar(
+                images[0], ax=axes.ravel().tolist(), shrink=0.82,
+                label=colorbar_label,
+            )
+        figure.suptitle(title)
+    return figure
+
+
+def _saved_grid_image(
+    axis: Any,
+    rows: Sequence[Mapping[str, object]],
+    value_field: str,
+    lo: float,
+    hi: float,
+):
+    cells: dict[tuple[float, float], float] = {}
+    for row in rows:
+        azimuth = _finite(row.get("azimuth_deg"))
+        elevation = _finite(row.get("elevation_deg"))
+        value = _finite(row.get(value_field))
+        if azimuth is None or elevation is None or value is None:
+            continue
+        coordinate = (elevation, azimuth)
+        if coordinate in cells:
+            raise ValueError(
+                f"duplicate antenna diagnostic coordinate: {coordinate}"
+            )
+        cells[coordinate] = value
+    azimuths = sorted({azimuth for _, azimuth in cells})
+    elevations = sorted({elevation for elevation, _ in cells})
+    if not azimuths or not elevations:
+        return None
+    data = np.array([
+        [cells.get((elevation, azimuth), np.nan) for azimuth in azimuths]
+        for elevation in elevations
+    ], dtype=float)
+    image = NonUniformImage(
+        axis,
+        interpolation="nearest",
+        extent=(*_cell_edges(azimuths), *_cell_edges(elevations, lower=0.0, upper=90.0)),
+    )
+    image.set_clim(lo, hi)
+    image.set_data(azimuths, elevations, data)
+    axis.add_image(image)
+    axis.set_xlim(*_cell_edges(azimuths))
+    axis.set_ylim(*_cell_edges(elevations, lower=0.0, upper=90.0))
+    return image
+
+
+def _polarization_losses(rows: Sequence[Mapping[str, object]]) -> Figure:
+    figure, axis = plt.subplots(figsize=(11, 5), layout="constrained")
+    with _close_on_error(figure):
+        selected = [
+            row for row in rows
+            if row.get("record_kind") == "source_match"
+            and _finite(row.get("polarization_match_db")) is not None
+            and row.get("element_name") in CORNER_ORDER
+            and isinstance(row.get("source_name"), str)
+        ]
+        labels = sorted({
+            (str(row["source_name"]), str(row["element_name"]))
+            for row in selected
+        })
+        views = ("true", "assumed")
+        if labels:
+            x = np.arange(len(labels), dtype=float)
+            width = 0.38
+            for offset, view in zip((-width / 2.0, width / 2.0), views, strict=True):
+                lookup = {
+                    (str(row["source_name"]), str(row["element_name"])):
+                    _finite(row.get("polarization_match_db"))
+                    for row in selected if row.get("model_view") == view
+                }
+                positions, values = [], []
+                for index, label in enumerate(labels):
+                    value = lookup.get(label)
+                    if value is not None:
+                        positions.append(x[index] + offset)
+                        values.append(value)
+                if values:
+                    axis.bar(positions, values, width, label=view.title())
+            axis.set_xticks(x, [f"{source}\n{element}" for source, element in labels])
+            if axis.patches:
+                axis.legend()
+        else:
+            _empty_axis(axis, "No finite saved polarization rows")
+        axis.set(
+            ylabel="Polarization match (dB)",
+            title="Saved source polarization match",
+        )
+    return figure
+
+
+def _blockage_comparison(
+    rows: Sequence[Mapping[str, object]],
+) -> Figure:
+    views = ("true", "assumed")
+    states = (("unblocked", "pattern_grid"), ("blocked", "blockage_grid"))
+    selected = [
+        row for row in rows
+        if row.get("record_kind") in {record_kind for _, record_kind in states}
+    ]
+    figure, axes = plt.subplots(
+        len(views) * len(states), len(CORNER_ORDER),
+        figsize=(4 * len(CORNER_ORDER), 13), squeeze=False, layout="constrained",
+    )
+    with _close_on_error(figure):
+        values = [
+            value for row in selected
+            if (value := _finite(row.get("response_db"))) is not None
+        ]
+        lo, hi = _finite_limits(values)
+        images = []
+        for view_index, view in enumerate(views):
+            for state_index, (state_label, record_kind) in enumerate(states):
+                row_index = view_index * len(states) + state_index
+                for column_index, element_name in enumerate(CORNER_ORDER):
+                    axis = axes[row_index, column_index]
+                    group = [
+                        row for row in selected
+                        if row.get("record_kind") == record_kind
+                        and row.get("model_view") == view
+                        and row.get("element_name") == element_name
+                    ]
+                    image = _saved_grid_image(
+                        axis, group, "response_db", lo, hi
+                    )
+                    if image is None:
+                        _empty_axis(axis, "No finite saved rows")
+                    else:
+                        images.append(image)
+                    axis.set(
+                        title=f"{view.title()} {element_name} {state_label}",
+                        xlabel="Azimuth (deg)", ylabel="Elevation (deg)",
+                    )
+        if images:
+            figure.colorbar(
+                images[0], ax=axes.ravel().tolist(), shrink=0.82,
+                label="Element response (dB)",
+            )
+        figure.suptitle("Saved unblocked versus blocked element response")
+    return figure
+
+
+def _coupling_matrices(rows: Sequence[Mapping[str, object]]) -> Figure:
+    selected = [row for row in rows if row.get("record_kind") == "coupling_entry"]
+    views = ("true", "assumed")
+    figure, axes = plt.subplots(2, 2, figsize=(9, 8), layout="constrained")
+    with _close_on_error(figure):
+        matrices = {
+            view: _saved_coupling_matrix(selected, view)
+            for view in views
+        }
+        magnitude_values = [
+            value for matrix in matrices.values() for value in matrix[0].ravel()
+            if np.isfinite(value)
+        ]
+        phase_values = [
+            value for matrix in matrices.values() for value in matrix[1].ravel()
+            if np.isfinite(value)
+        ]
+        magnitude_limits = _finite_limits(magnitude_values)
+        phase_limits = _finite_limits(phase_values)
+        magnitude_images = []
+        phase_images = []
+        for column, view in enumerate(views):
+            magnitude, phase = matrices[view]
+            magnitude_image = axes[0, column].imshow(
+                magnitude, vmin=magnitude_limits[0], vmax=magnitude_limits[1],
+                interpolation="nearest",
+            )
+            phase_image = axes[1, column].imshow(
+                phase, vmin=phase_limits[0], vmax=phase_limits[1],
+                interpolation="nearest", cmap="twilight",
+            )
+            magnitude_images.append(magnitude_image)
+            phase_images.append(phase_image)
+            for row_index, label in enumerate(("Magnitude (dB)", "Phase (deg)")):
+                axis = axes[row_index, column]
+                axis.set_xticks(range(len(CORNER_ORDER)), CORNER_ORDER)
+                axis.set_yticks(range(len(CORNER_ORDER)), CORNER_ORDER)
+                axis.set(
+                    xlabel="Source", ylabel="Receiver",
+                    title=f"{view.title()} {label}",
+                )
+        figure.colorbar(
+            magnitude_images[0], ax=axes[0, :].tolist(), shrink=0.8,
+            label="Magnitude (dB)",
+        )
+        figure.colorbar(
+            phase_images[0], ax=axes[1, :].tolist(), shrink=0.8,
+            label="Phase (deg)",
+        )
+        figure.suptitle("Saved mutual-coupling matrices")
+    return figure
+
+
+def _saved_coupling_matrix(
+    rows: Sequence[Mapping[str, object]], view: str,
+) -> tuple[np.ndarray, np.ndarray]:
+    size = len(CORNER_ORDER)
+    magnitude = np.full((size, size), np.nan, dtype=float)
+    phase = np.full((size, size), np.nan, dtype=float)
+    indices = {name: index for index, name in enumerate(CORNER_ORDER)}
+    seen: set[tuple[str, str]] = set()
+    for row in rows:
+        if row.get("model_view") != view:
+            continue
+        receiver = row.get("receiver")
+        source = row.get("source")
+        real = _finite(row.get("response_real"))
+        imaginary = _finite(row.get("response_imag"))
+        magnitude_db = _finite(row.get("response_db"))
+        if (
+            receiver not in indices or source not in indices
+            or real is None or imaginary is None or magnitude_db is None
+        ):
+            continue
+        key = (str(receiver), str(source))
+        if key in seen:
+            raise ValueError(f"duplicate coupling diagnostic entry: {key}")
+        seen.add(key)
+        row_index, column_index = indices[str(receiver)], indices[str(source)]
+        magnitude[row_index, column_index] = magnitude_db
+        phase[row_index, column_index] = float(np.rad2deg(np.angle(complex(real, imaginary))))
+    return magnitude, phase
+
+
+def _finite_limits(values: Sequence[float]) -> tuple[float, float]:
+    finite = [float(value) for value in values if np.isfinite(value)]
+    if not finite:
+        return 0.0, 1.0
+    lo, hi = min(finite), max(finite)
+    return (lo - 0.5, hi + 0.5) if lo == hi else (lo, hi)
 
 
 def _ranked_rows(rows: Sequence[Mapping[str, object]]) -> list[Mapping[str, object]]:

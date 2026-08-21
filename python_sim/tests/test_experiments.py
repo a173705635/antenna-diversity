@@ -1,10 +1,20 @@
 import copy
 import json
+from dataclasses import replace
 
 import numpy as np
 import pytest
 
+import antenna_diversity.experiments.spatial_scan as spatial_scan_module
+from antenna_diversity.array.antenna_config import (
+    AntennaStateConfig,
+    PhoneAntennaConfig,
+)
+from antenna_diversity.array.effects import AttenuationRegion, CouplingPath
 from antenna_diversity.array.geometry import active_corner_combinations
+from antenna_diversity.array.patterns import ParametricPatternParameters
+from antenna_diversity.array.phone_model import PhoneAntennaModel
+from antenna_diversity.array.polarization import WavePolarization
 from antenna_diversity.config import CWInterferer, Direction, mate70_default_config
 from antenna_diversity.experiments.spatial_scan import (
     compare_corner_combinations,
@@ -15,6 +25,42 @@ from antenna_diversity.experiments.spatial_scan import (
     scan_interferer_powers,
     scan_position_errors,
 )
+
+
+def _polarized_scan_config():
+    cfg = mate70_default_config()
+    rhcp = WavePolarization("rhcp")
+    parameters = {
+        name: ParametricPatternParameters(
+            nominal_polarization=rhcp,
+            cross_polar_discrimination_db=20.0,
+        )
+        for name in ("TL", "TR", "BL", "BR")
+    }
+    state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=parameters,
+    )
+    cfg.array.antenna_model = PhoneAntennaConfig(
+        model_label="polarized scan fixture",
+        model_source="parametric",
+        true_state=state,
+        assumed_state=copy.deepcopy(state),
+    )
+    cfg.interferers = (
+        replace(cfg.interferers[0], polarization=WavePolarization("lhcp")),
+    )
+    return cfg
+
+
+def _unit_parametric_patterns():
+    return {
+        name: ParametricPatternParameters(
+            back_lobe_gain_db=0.0,
+            cross_polar_discrimination_db=300.0,
+        )
+        for name in ("TL", "TR", "BL", "BR")
+    }
 
 
 def test_combination_comparison_returns_all_eleven_phone_subarrays():
@@ -152,6 +198,91 @@ def test_single_case_returns_json_serializable_dataclass():
     json.dumps(result.to_dict(), allow_nan=False)
 
 
+def test_single_case_uses_true_effective_covariance_and_assumed_mvdr_constraint(
+    monkeypatch,
+):
+    cfg = mate70_default_config()
+    cfg.array.active_antennas = ("TL", "TR")
+    true_state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=_unit_parametric_patterns(),
+        attenuation_regions=(
+            AttenuationRegion(
+                ("TL",),
+                cfg.signal.true_direction.azimuth_deg,
+                cfg.signal.true_direction.elevation_deg,
+                1.0,
+                6.020599913279624,
+            ),
+        ),
+        coupling_paths=(CouplingPath("TL", "TR", -6.020599913279624, 90.0),),
+    )
+    assumed_state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=_unit_parametric_patterns(),
+        coupling_paths=(CouplingPath("TR", "TL", -12.041199826559248, 0.0),),
+    )
+    cfg.array.antenna_model = PhoneAntennaConfig(
+        model_label="analytical integration",
+        model_source="parametric",
+        true_state=true_state,
+        assumed_state=assumed_state,
+    )
+    model = PhoneAntennaModel.from_config(cfg)
+    expected_true = model.effective_manifold(
+        cfg.signal.true_direction,
+        cfg.signal.true_polarization,
+        cfg.signal.carrier_hz,
+        estimated=False,
+    )
+    expected_assumed = model.effective_manifold(
+        cfg.signal.assumed_direction,
+        cfg.signal.assumed_polarization,
+        cfg.signal.carrier_hz,
+        estimated=True,
+    )
+    expected_interferers = tuple(
+        model.effective_manifold(
+            interferer.direction,
+            interferer.polarization,
+            cfg.signal.carrier_hz,
+            estimated=False,
+        )
+        for interferer in cfg.interferers
+        if interferer.enable
+    )
+    covariance_inputs = {}
+    constraint_inputs = {}
+    real_analytic_covariance = spatial_scan_module.analytic_covariance
+    real_compute_weights = spatial_scan_module.compute_weights
+
+    def capture_covariance(desired, signal_power, interferers, powers, noise_power):
+        covariance_inputs["desired"] = np.array(desired, copy=True)
+        covariance_inputs["interferers"] = tuple(
+            np.array(value, copy=True) for value in interferers
+        )
+        return real_analytic_covariance(
+            desired, signal_power, interferers, powers, noise_power
+        )
+
+    def capture_constraint(covariance, desired, mode, diversity):
+        constraint_inputs["desired"] = np.array(desired, copy=True)
+        return real_compute_weights(covariance, desired, mode, diversity)
+
+    monkeypatch.setattr(spatial_scan_module, "analytic_covariance", capture_covariance)
+    monkeypatch.setattr(spatial_scan_module, "compute_weights", capture_constraint)
+
+    evaluate_configuration_spatially(cfg, mode="mvdr")
+
+    np.testing.assert_allclose(covariance_inputs["desired"], expected_true)
+    assert len(covariance_inputs["interferers"]) == len(expected_interferers)
+    for actual, expected in zip(
+        covariance_inputs["interferers"], expected_interferers, strict=True
+    ):
+        np.testing.assert_allclose(actual, expected)
+    np.testing.assert_allclose(constraint_inputs["desired"], expected_assumed)
+
+
 def test_direction_scan_reports_gain_for_selected_enabled_interferer():
     cfg = mate70_default_config()
     cfg.interferers = (
@@ -164,6 +295,56 @@ def test_direction_scan_reports_gain_for_selected_enabled_interferer():
 
     assert result.interferer_gain[0, 0] == pytest.approx(
         expected.metrics["interferer_direction_gains"][1]
+    )
+
+
+def test_direction_scan_preserves_nondefault_interferer_polarization_in_results():
+    cfg = _polarized_scan_config()
+    direction = Direction(80.0, 20.0)
+    manual = copy.deepcopy(cfg)
+    manual.interferers = (replace(manual.interferers[0], direction=direction),)
+    expected = evaluate_configuration_spatially(manual, mode="single")
+
+    result = scan_interferer_directions(
+        cfg,
+        interferer_index=0,
+        azimuths_deg=[direction.azimuth_deg],
+        elevations_deg=[direction.elevation_deg],
+        mode="single",
+    )
+
+    assert result.output_sinr_db[0, 0] == pytest.approx(
+        expected.metrics["output_sinr_db"]
+    )
+    assert result.interferer_gain[0, 0] == pytest.approx(
+        expected.metrics["interferer_direction_gains"][0]
+    )
+
+
+def test_power_scan_preserves_nondefault_interferer_polarization_in_results():
+    cfg = _polarized_scan_config()
+    powers_dbm = np.array([-95.0, -85.0])
+    expected_sinr = []
+    expected_gain = []
+    for power_dbm in powers_dbm:
+        manual = copy.deepcopy(cfg)
+        manual.interferers = (
+            replace(manual.interferers[0], power_dbm=float(power_dbm)),
+        )
+        metrics = evaluate_configuration_spatially(manual, mode="single").metrics
+        expected_sinr.append(metrics["output_sinr_db"])
+        expected_gain.append(metrics["interferer_direction_gains"][0])
+
+    result = scan_interferer_powers(
+        cfg,
+        interferer_index=0,
+        powers_dbm=powers_dbm,
+        mode="single",
+    )
+
+    np.testing.assert_allclose(result.output_sinr_db, expected_sinr)
+    np.testing.assert_allclose(
+        result.metrics["interferer_direction_gains"][:, 0], expected_gain
     )
 
 

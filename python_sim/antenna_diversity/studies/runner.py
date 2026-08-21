@@ -171,7 +171,12 @@ def _report(context: StageContext) -> dict[str, object]:
     figure_paths = context.publication.save_figures(tables)
     selection = _mapping(_mapping(context.prerequisites["selection"], "selection checkpoint").get("selection"), "selection")
     final_manifest = {**context.manifest, "status": "completed"}
-    summary = build_summary(tables, final_manifest, selection)
+    summary = build_summary(
+        tables,
+        final_manifest,
+        selection,
+        active_antennas=context.resolved.simulation.array.active_antennas,
+    )
     summary_path = context.publication.write_summary(summary)
     report = render_report(summary, final_manifest, figure_paths, table_paths)
     report_path = context.publication.publish_report(report)
@@ -200,6 +205,7 @@ _STAGE_FUNCTIONS: dict[str, Callable[[StageContext], dict[str, object]]] = {
 _TABLE_ORDER = (
     "baseline_rankings", "direction_scan", "power_scan", "robustness_scans",
     "combined_errors", "multi_jammer", "full_chain_validation", "full_chain_cn0",
+    "antenna_diagnostics",
 )
 _CSV_FIELDS: dict[str, tuple[str, ...]] = {
     "baseline_rankings": ("rank", "active_antennas", "combination_name", "mode", "all_count", "resolvable_count", "p10_all_db", "median_all_db", "minimum_all_db", "maximum_all_db", "p10_resolvable_db", "median_resolvable_db", "minimum_resolvable_db", "maximum_resolvable_db", "white_noise_gain", "maximum_baseline_m", "representative_p10_direction"),
@@ -210,6 +216,12 @@ _CSV_FIELDS: dict[str, tuple[str, ...]] = {
     "multi_jammer": ("stage", "case_id", "active_antennas", "num_antennas", "mode", "template", "child_seed", "enabled_interferer_count", "output_sinr_db", "worst_interferer_gain", "covariance_rank", "covariance_condition_number", "interferers", "enabled_interferers", "metrics"),
     "full_chain_validation": ("case_id", "stage", "role", "run_index", "seed", "active_antennas", "mode", "acquired", "acquisition_metric", "tracking", "status", "reason", "final_cn0_db_hz", "final_doppler_error_hz", "target_direction_gain", "interferer_direction_gains", "worst_interferer_gain", "analytic_output_sinr_db"),
     "full_chain_cn0": ("case_id", "stage", "role", "run_index", "seed", "active_antennas", "mode", "time_ms", "cn0_db_hz"),
+    "antenna_diagnostics": (
+        "record_kind", "model_source", "model_label", "model_view",
+        "element_name", "receiver", "source", "source_name", "azimuth_deg",
+        "elevation_deg", "response_real", "response_imag", "response_db",
+        "attenuation_db", "polarization_match_db", "measured_pattern_sha256",
+    ),
 }
 
 
@@ -230,6 +242,7 @@ def _report_tables(prerequisites: Mapping[str, object]) -> dict[str, tuple[Mappi
         "multi_jammer": _rows(multi, "multi_jammer"),
         "full_chain_validation": _rows(full, "metrics"),
         "full_chain_cn0": _rows(full, "cn0"),
+        "antenna_diagnostics": _rows(baseline, "antenna_diagnostics"),
     }
 
 

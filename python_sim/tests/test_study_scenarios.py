@@ -145,10 +145,14 @@ def test_multi_jammer_cases_preserve_exact_template_values_and_json_snapshots():
     assert cases[0].parameters["interferers"] == [
         {"direction": {"azimuth_deg": 120, "elevation_deg": 10}, "enable": True,
          "power_dbm": -90.0, "offset_hz": 250000.0, "initial_phase_rad": 0.8,
-         "start_ms": 0.0, "stop_ms": None},
+         "start_ms": 0.0, "stop_ms": None,
+         "polarization": {"kind": "rhcp", "tilt_deg": 0.0, "az_real": 1.0,
+                          "az_imag": 0.0, "el_real": 0.0, "el_imag": 0.0}},
         {"direction": {"azimuth_deg": 250, "elevation_deg": 25}, "enable": True,
          "power_dbm": -90.0, "offset_hz": -180000.0, "initial_phase_rad": 1.1,
-         "start_ms": 0.0, "stop_ms": None},
+         "start_ms": 0.0, "stop_ms": None,
+         "polarization": {"kind": "rhcp", "tilt_deg": 0.0, "az_real": 1.0,
+                          "az_imag": 0.0, "el_real": 0.0, "el_imag": 0.0}},
     ]
     cases[0].parameters["interferers"][0]["power_dbm"] = 0.0
     assert resolved.study.multi_jammer_templates[0].interferers[0].power_dbm == -90.0

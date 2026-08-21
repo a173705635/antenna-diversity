@@ -1,4 +1,4 @@
-"""Ideal, purely analytical spatial-study baseline records."""
+"""Purely analytical spatial-study records and saved antenna evidence."""
 
 from __future__ import annotations
 
@@ -8,6 +8,9 @@ from collections.abc import Iterable
 import numpy as np
 
 from antenna_diversity.array.geometry import CORNER_ORDER, maximum_baseline_m, select_phase_centers
+from antenna_diversity.array.patterns import LocalDirection
+from antenna_diversity.array.phone_model import PhoneAntennaModel
+from antenna_diversity.array.polarization import wave_in_element_frame
 from antenna_diversity.config import Direction, PhoneArrayConfig
 from antenna_diversity.experiments.spatial_scan import (
     evaluate_configuration_spatially,
@@ -20,25 +23,47 @@ from .scenarios import build_multi_jammer_cases, sample_combined_errors, stable_
 
 
 def run_baseline(resolved: ResolvedStudyConfig) -> StageRecords:
-    """Run no-sample ideal references plus direction and power scans."""
+    """Run no-sample references, scans and one saved antenna diagnostic pass."""
 
-    reference_power_dbm = float(resolved.simulation.interferers[0].power_dbm)
+    simulation = resolved.simulation
+    interferer_index = next(
+        (
+            index
+            for index, interferer in enumerate(simulation.interferers)
+            if interferer.enable
+        ),
+        None,
+    )
+    reference_power_dbm = (
+        None
+        if interferer_index is None
+        else float(simulation.interferers[interferer_index].power_dbm)
+    )
     references = [
-        _reference_row(resolved, _single_case(corner))
+        _reference_row(resolved, _single_case(corner), reference_power_dbm)
         for corner in resolved.study.single_antennas
     ]
     references.extend(
-        _reference_row(resolved, _array_case(resolved, combination, mode))
+        _reference_row(
+            resolved,
+            _array_case(resolved, combination, mode),
+            reference_power_dbm,
+        )
         for combination in resolved.study.combinations
         for mode in resolved.study.spatial_modes
     )
     direction_rows = []
     power_rows = []
-    for combination in resolved.study.combinations:
-        for mode in resolved.study.spatial_modes:
-            case = _array_case(resolved, combination, mode)
-            direction_rows.extend(_direction_rows(resolved, case, reference_power_dbm))
-            power_rows.extend(_power_rows(resolved, case, reference_power_dbm))
+    if interferer_index is not None:
+        for combination in resolved.study.combinations:
+            for mode in resolved.study.spatial_modes:
+                case = _array_case(resolved, combination, mode)
+                direction_rows.extend(_direction_rows(
+                    resolved, case, reference_power_dbm, interferer_index
+                ))
+                power_rows.extend(_power_rows(
+                    resolved, case, reference_power_dbm, interferer_index
+                ))
 
     return StageRecords(
         name="baseline",
@@ -46,8 +71,233 @@ def run_baseline(resolved: ResolvedStudyConfig) -> StageRecords:
             "reference": tuple(references),
             "direction": tuple(direction_rows),
             "power": tuple(power_rows),
+            "antenna_diagnostics": antenna_diagnostic_rows(resolved),
         },
     )
+
+
+_ANTENNA_DIAGNOSTIC_FIELDS = (
+    "record_kind", "model_source", "model_label", "model_view",
+    "element_name", "receiver", "source", "source_name", "azimuth_deg",
+    "elevation_deg", "response_real", "response_imag", "response_db",
+    "attenuation_db", "polarization_match_db", "measured_pattern_sha256",
+)
+_DB_FLOOR = -300.0
+
+
+def antenna_diagnostic_rows(
+    resolved: ResolvedStudyConfig,
+) -> tuple[dict[str, object], ...]:
+    """Evaluate and detach the fixed phone-antenna evidence table once."""
+
+    simulation = copy.deepcopy(resolved.simulation)
+    if not isinstance(simulation.array, PhoneArrayConfig) or simulation.phone is None:
+        raise ValueError("antenna diagnostics require a phone-array configuration")
+    simulation.array.active_antennas = tuple(CORNER_ORDER)
+    model = PhoneAntennaModel.from_config(simulation)
+    frequency_hz = float(simulation.signal.carrier_hz)
+    rows: list[dict[str, object]] = []
+    for model_view, estimated in (("true", False), ("assumed", True)):
+        state = model.assumed_state if estimated else model.true_state
+        polarization = (
+            simulation.signal.assumed_polarization
+            if estimated
+            else simulation.signal.true_polarization
+        )
+        digest = _state_digest(simulation, estimated)
+        for elevation in resolved.study.elevations_deg:
+            for azimuth in resolved.study.azimuths_deg:
+                direction = Direction(float(azimuth), float(elevation))
+                diagnostic = model.diagnostics(
+                    direction, polarization, frequency_hz, estimated=estimated
+                )
+                blockage = np.asarray(
+                    diagnostic["blockage_voltage"], dtype=np.float64
+                )
+                for index, element_name in enumerate(CORNER_ORDER):
+                    pattern_voltage = _pattern_voltage_magnitude(
+                        state,
+                        element_name,
+                        direction,
+                        polarization,
+                        frequency_hz,
+                    )
+                    rows.append(_antenna_row(
+                        "pattern_grid", model, model_view, digest,
+                        element_name=element_name,
+                        azimuth_deg=float(azimuth),
+                        elevation_deg=float(elevation),
+                        response_real=pattern_voltage,
+                        response_imag=0.0,
+                        response_db=_voltage_db(pattern_voltage),
+                    ))
+                    blocked = pattern_voltage * float(blockage[index])
+                    rows.append(_antenna_row(
+                        "blockage_grid", model, model_view, digest,
+                        element_name=element_name,
+                        azimuth_deg=float(azimuth),
+                        elevation_deg=float(elevation),
+                        response_real=float(blocked.real),
+                        response_imag=float(blocked.imag),
+                        response_db=_voltage_db(blocked),
+                        attenuation_db=_attenuation_db(float(blockage[index])),
+                    ))
+
+        for source_name, direction, source_polarization in _diagnostic_sources(
+            simulation, estimated
+        ):
+            diagnostic = model.diagnostics(
+                direction,
+                source_polarization,
+                frequency_hz,
+                estimated=estimated,
+            )
+            voltages = np.asarray(
+                diagnostic["pattern_polarization_voltage"], dtype=np.complex128
+            )
+            for index, element_name in enumerate(CORNER_ORDER):
+                voltage = complex(voltages[index])
+                rows.append(_antenna_row(
+                    "source_match", model, model_view, digest,
+                    element_name=element_name,
+                    source_name=source_name,
+                    azimuth_deg=float(direction.azimuth_deg),
+                    elevation_deg=float(direction.elevation_deg),
+                    response_real=float(voltage.real),
+                    response_imag=float(voltage.imag),
+                    response_db=_voltage_db(voltage),
+                    polarization_match_db=_polarization_match_db(
+                        state,
+                        element_name,
+                        direction,
+                        source_polarization,
+                        frequency_hz,
+                    ),
+                ))
+
+        coupling = model.coupling_matrix(estimated=estimated)
+        for receiver_index, receiver in enumerate(CORNER_ORDER):
+            for source_index, source in enumerate(CORNER_ORDER):
+                response = complex(coupling[receiver_index, source_index])
+                rows.append(_antenna_row(
+                    "coupling_entry", model, model_view, digest,
+                    receiver=receiver,
+                    source=source,
+                    response_real=float(response.real),
+                    response_imag=float(response.imag),
+                    response_db=_voltage_db(response),
+                ))
+    return tuple(rows)
+
+
+def _antenna_row(
+    record_kind: str,
+    model: PhoneAntennaModel,
+    model_view: str,
+    measured_pattern_sha256: str | None,
+    **values: object,
+) -> dict[str, object]:
+    row = {field: None for field in _ANTENNA_DIAGNOSTIC_FIELDS}
+    row.update({
+        "record_kind": record_kind,
+        "model_source": model.model_source,
+        "model_label": model.model_label,
+        "model_view": model_view,
+        "measured_pattern_sha256": measured_pattern_sha256,
+        **values,
+    })
+    return row
+
+
+def _diagnostic_sources(simulation, estimated: bool):
+    signal_direction = (
+        simulation.signal.assumed_direction
+        if estimated
+        else simulation.signal.true_direction
+    )
+    signal_polarization = (
+        simulation.signal.assumed_polarization
+        if estimated
+        else simulation.signal.true_polarization
+    )
+    if signal_direction is None:
+        raise ValueError("antenna diagnostics require signal directions")
+    sources = [("gps", signal_direction, signal_polarization)]
+    sources.extend(
+        (f"jammer_{index}", interferer.direction, interferer.polarization)
+        for index, interferer in enumerate(simulation.interferers)
+        if interferer.enable
+    )
+    return tuple(sources)
+
+
+def _state_digest(simulation, estimated: bool) -> str | None:
+    antenna_model = simulation.array.antenna_model
+    if antenna_model is None:
+        return None
+    state = antenna_model.assumed_state if estimated else antenna_model.true_state
+    return state.measured_pattern_sha256
+
+
+def _voltage_db(value: complex | float) -> float:
+    magnitude = abs(value)
+    return max(_DB_FLOOR, float(20.0 * np.log10(max(magnitude, 1e-15))))
+
+
+def _attenuation_db(voltage: float) -> float:
+    return max(0.0, -_voltage_db(voltage))
+
+
+def _polarization_match_db(
+    state,
+    element_name: str,
+    direction: Direction,
+    polarization,
+    frequency_hz: float,
+) -> float:
+    if state.scalar_pattern is not None:
+        return 0.0
+    local_wave = wave_in_element_frame(
+        direction.azimuth_deg,
+        direction.elevation_deg,
+        polarization,
+        state.rotations[element_name],
+    )
+    height = np.asarray(state.pattern.effective_height(
+        element_name,
+        LocalDirection(local_wave.azimuth_deg, local_wave.elevation_deg),
+        frequency_hz,
+    ), dtype=np.complex128)
+    denominator = float(np.linalg.norm(height))
+    if denominator <= 0.0:
+        return _DB_FLOOR
+    match = abs(np.vdot(height, local_wave.jones)) / denominator
+    return _voltage_db(float(np.clip(match, 0.0, 1.0)))
+
+
+def _pattern_voltage_magnitude(
+    state,
+    element_name: str,
+    direction: Direction,
+    polarization,
+    frequency_hz: float,
+) -> float:
+    if state.scalar_pattern is not None:
+        return abs(complex(state.scalar_pattern.complex_gain(
+            element_name, direction, frequency_hz
+        )))
+    local_wave = wave_in_element_frame(
+        direction.azimuth_deg,
+        direction.elevation_deg,
+        polarization,
+        state.rotations[element_name],
+    )
+    height = np.asarray(state.pattern.effective_height(
+        element_name,
+        LocalDirection(local_wave.azimuth_deg, local_wave.elevation_deg),
+        frequency_hz,
+    ), dtype=np.complex128)
+    return float(np.linalg.norm(height))
 
 
 def run_single_factor_studies(resolved: ResolvedStudyConfig) -> StageRecords:
@@ -161,13 +411,13 @@ def _single_factor_variants(resolved: ResolvedStudyConfig, combination: tuple[st
                 elif factor == "amplitude":
                     for corner in combination:
                         estimated = _case_configuration(resolved, combination)
-                        estimated.array.estimated_channel_amplitude_error_db[corner] = value  # type: ignore[union-attr]
+                        estimated.array.estimated_channel_amplitude_error_db[corner] += value  # type: ignore[union-attr]
                         variants.append((value, corner, None, estimated))
                     continue
                 elif factor == "phase":
                     for corner in combination:
                         estimated = _case_configuration(resolved, combination)
-                        estimated.array.estimated_channel_phase_error_deg[corner] = value  # type: ignore[union-attr]
+                        estimated.array.estimated_channel_phase_error_deg[corner] += value  # type: ignore[union-attr]
                         variants.append((value, corner, None, estimated))
                     continue
                 else:
@@ -218,9 +468,9 @@ def _apply_combined_realization(simulation, realization) -> None:
         base = np.asarray(simulation.phone.assumed_phase_centers_m[corner], dtype=float)
         simulation.phone.assumed_phase_centers_m[corner] = tuple(base + np.asarray(error, dtype=float))
     for corner, value in realization.amplitude_errors_db.items():
-        simulation.array.estimated_channel_amplitude_error_db[corner] = value
+        simulation.array.estimated_channel_amplitude_error_db[corner] += value
     for corner, value in realization.phase_errors_deg.items():
-        simulation.array.estimated_channel_phase_error_deg[corner] = value
+        simulation.array.estimated_channel_phase_error_deg[corner] += value
 
 
 def _robustness_row(*, stage, combination, metrics, parameters, **fields):
@@ -260,19 +510,26 @@ def _matched_metrics_match(first, second) -> bool:
     )
 
 
-def _reference_row(resolved: ResolvedStudyConfig, case: dict[str, object]) -> dict[str, object]:
+def _reference_row(
+    resolved: ResolvedStudyConfig,
+    case: dict[str, object],
+    reference_power_dbm: float | None,
+) -> dict[str, object]:
     simulation = _simulation_for_case(resolved, case, no_interferers=True)
     metrics = evaluate_configuration_spatially(simulation, str(case["mode"])).metrics
     return _row(
         table="reference",
         case=case,
         metrics=metrics,
-        reference_interferer_power_dbm=float(resolved.simulation.interferers[0].power_dbm),
+        reference_interferer_power_dbm=reference_power_dbm,
     )
 
 
 def _direction_rows(
-    resolved: ResolvedStudyConfig, case: dict[str, object], reference_power_dbm: float
+    resolved: ResolvedStudyConfig,
+    case: dict[str, object],
+    reference_power_dbm: float,
+    interferer_index: int,
 ) -> Iterable[dict[str, object]]:
     simulation = _simulation_for_case(resolved, case)
     target = resolved.simulation.signal.true_direction
@@ -280,7 +537,7 @@ def _direction_rows(
         raise ValueError("direction rows require a true target direction")
     scan = scan_interferer_directions(
         simulation,
-        interferer_index=0,
+        interferer_index=interferer_index,
         azimuths_deg=resolved.study.azimuths_deg,
         elevations_deg=resolved.study.elevations_deg,
         mode=str(case["mode"]),
@@ -307,12 +564,15 @@ def _direction_rows(
 
 
 def _power_rows(
-    resolved: ResolvedStudyConfig, case: dict[str, object], reference_power_dbm: float
+    resolved: ResolvedStudyConfig,
+    case: dict[str, object],
+    reference_power_dbm: float,
+    interferer_index: int,
 ) -> Iterable[dict[str, object]]:
     simulation = _simulation_for_case(resolved, case)
     scan = scan_interferer_powers(
         simulation,
-        interferer_index=0,
+        interferer_index=interferer_index,
         powers_dbm=resolved.study.powers_dbm,
         mode=str(case["mode"]),
     )
@@ -325,8 +585,12 @@ def _power_rows(
             reference_interferer_power_dbm=reference_power_dbm,
             power_index=power_index,
             power_dbm=float(power_dbm),
-            azimuth_deg=float(simulation.interferers[0].direction.azimuth_deg),
-            elevation_deg=float(simulation.interferers[0].direction.elevation_deg),
+            azimuth_deg=float(
+                simulation.interferers[interferer_index].direction.azimuth_deg
+            ),
+            elevation_deg=float(
+                simulation.interferers[interferer_index].direction.elevation_deg
+            ),
         )
 
 
@@ -376,7 +640,7 @@ def _row(
     table: str,
     case: dict[str, object],
     metrics: dict[str, object],
-    reference_interferer_power_dbm: float,
+    reference_interferer_power_dbm: float | None,
     **axes: object,
 ) -> dict[str, object]:
     parameters = {

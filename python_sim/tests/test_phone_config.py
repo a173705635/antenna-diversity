@@ -1,12 +1,521 @@
+from dataclasses import replace
+from pathlib import Path
+
 import numpy as np
 import pytest
 
+from antenna_diversity.array.antenna_config import (
+    AntennaStateConfig,
+    PhoneAntennaConfig,
+    resolved_phone_antenna_config,
+)
+from antenna_diversity.array.effects import (
+    AttenuationRegion,
+    CouplingPath,
+    ElementOrientation,
+)
+from antenna_diversity.array.patterns import ParametricPatternParameters
+from antenna_diversity.array.polarization import WavePolarization
 from antenna_diversity.config import (
     CWInterferer,
     Direction,
+    default_config,
     legacy_ula_config,
     mate70_default_config,
+    parametric_phone_config,
 )
+from antenna_diversity.experiments import evaluate_configuration_spatially
+
+
+CORNERS = ("TL", "TR", "BL", "BR")
+
+
+def orientations_for_test() -> dict[str, ElementOrientation]:
+    return {corner: ElementOrientation() for corner in CORNERS}
+
+
+def parameters_for_test() -> dict[str, ParametricPatternParameters]:
+    return {corner: ParametricPatternParameters() for corner in CORNERS}
+
+
+def phone_antenna_config_for_test(
+    *,
+    source: str = "ideal",
+    true_state: AntennaStateConfig | None = None,
+    assumed_state: AntennaStateConfig | None = None,
+) -> PhoneAntennaConfig:
+    if true_state is None:
+        true_state = AntennaStateConfig()
+    if assumed_state is None:
+        assumed_state = AntennaStateConfig()
+    return PhoneAntennaConfig("test antenna", source, true_state, assumed_state)
+
+
+def test_default_phone_resolves_to_ideal_antenna_without_changing_old_fields():
+    cfg = default_config()
+
+    cfg.validate()
+
+    assert cfg.array.pattern_model == "isotropic"
+    assert cfg.array.antenna_model is None
+
+
+def test_parametric_phone_preset_is_explicit_nonmeasured_and_runnable():
+    from antenna_diversity import parametric_phone_config as published_preset
+
+    assert published_preset is parametric_phone_config
+    cfg = parametric_phone_config(("TL", "BR"))
+
+    cfg.validate()
+    result = evaluate_configuration_spatially(cfg, "mvdr")
+
+    assert cfg.array.active_antennas == ("TL", "BR")
+    assert cfg.array.antenna_model.model_source == "parametric"
+    assert cfg.array.antenna_model.model_label == "synthetic_phone_corner_v1"
+    true_state = cfg.array.antenna_model.true_state
+    assert true_state.pattern_kind == "parametric"
+    assert true_state.measured_pattern_csv is None
+    assert len({item.yaw_deg for item in true_state.orientations.values()}) == 4
+    assert set(true_state.parametric_patterns) == set(CORNERS)
+    assert all(
+        np.isfinite(item.cosine_exponent) and item.cosine_exponent > 0.0
+        for item in true_state.parametric_patterns.values()
+    )
+    assert cfg.signal.true_polarization.kind == "rhcp"
+    assert all(
+        interferer.polarization.kind == "linear"
+        for interferer in cfg.interferers
+    )
+    assert len(true_state.attenuation_regions) == 1
+    coupling = {
+        (item.source, item.receiver): item.magnitude_db
+        for item in true_state.coupling_paths
+    }
+    assert coupling[("TL", "TR")] != coupling[("TR", "TL")]
+    assert np.isfinite(result.metrics["output_sinr_db"])
+
+
+def test_legacy_isotropic_selector_resolves_two_complete_independent_ideal_states():
+    cfg = default_config()
+
+    resolved = resolved_phone_antenna_config(cfg.array)
+
+    assert resolved.model_source == "ideal"
+    assert resolved.true_state.pattern_kind == "isotropic"
+    assert resolved.assumed_state.pattern_kind == "isotropic"
+    assert set(resolved.true_state.orientations) == set(CORNERS)
+    assert set(resolved.assumed_state.orientations) == set(CORNERS)
+    assert resolved.true_state is not resolved.assumed_state
+    assert resolved.true_state.orientations is not resolved.assumed_state.orientations
+
+
+def test_structured_state_requires_exact_four_corner_maps():
+    cfg = default_config()
+    cfg.array.antenna_model = phone_antenna_config_for_test()
+    del cfg.array.antenna_model.true_state.orientations["BR"]
+
+    with pytest.raises(ValueError, match="TL/TR/BL/BR"):
+        cfg.validate()
+
+
+def test_structured_model_is_returned_by_resolver_after_validation():
+    cfg = default_config()
+    model = phone_antenna_config_for_test()
+    cfg.array.antenna_model = model
+
+    cfg.validate()
+
+    assert resolved_phone_antenna_config(cfg.array) is model
+
+
+def test_effect_free_isotropic_ideal_model_remains_valid():
+    cfg = default_config()
+    cfg.array.antenna_model = phone_antenna_config_for_test()
+
+    cfg.validate()
+
+    resolved = resolved_phone_antenna_config(cfg.array)
+    assert resolved.model_source == "ideal"
+    assert resolved.true_state.attenuation_regions == ()
+    assert resolved.assumed_state.coupling_paths == ()
+
+
+@pytest.mark.parametrize("state_name", ["true_state", "assumed_state"])
+@pytest.mark.parametrize("effect_kind", ["blockage", "coupling"])
+def test_ideal_model_rejects_true_or_assumed_blockage_and_coupling(
+    state_name, effect_kind
+):
+    state = AntennaStateConfig(
+        attenuation_regions=(
+            (AttenuationRegion(("TL",), 0.0, 30.0, 10.0, 3.0),)
+            if effect_kind == "blockage"
+            else ()
+        ),
+        coupling_paths=(
+            (CouplingPath("TL", "BR", -20.0, 0.0),)
+            if effect_kind == "coupling"
+            else ()
+        ),
+    )
+    states = {
+        "true_state": AntennaStateConfig(),
+        "assumed_state": AntennaStateConfig(),
+    }
+    states[state_name] = state
+    cfg = default_config()
+    cfg.array.antenna_model = phone_antenna_config_for_test(**states)
+
+    with pytest.raises(ValueError, match="ideal.*effects"):
+        cfg.validate()
+
+
+@pytest.mark.parametrize("state_name", ["true_state", "assumed_state"])
+def test_ideal_model_requires_both_states_to_be_isotropic(state_name):
+    parametric_state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=parameters_for_test(),
+    )
+    states = {
+        "true_state": AntennaStateConfig(),
+        "assumed_state": AntennaStateConfig(),
+    }
+    states[state_name] = parametric_state
+    cfg = default_config()
+    cfg.array.antenna_model = phone_antenna_config_for_test(**states)
+
+    with pytest.raises(ValueError, match="ideal.*isotropic.*true.*assumed"):
+        cfg.validate()
+
+
+def test_parametric_states_accept_blockage_and_coupling_effects():
+    true_state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=parameters_for_test(),
+        attenuation_regions=(
+            AttenuationRegion(("TL",), 0.0, 30.0, 10.0, 3.0),
+        ),
+    )
+    assumed_state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=parameters_for_test(),
+        coupling_paths=(CouplingPath("TL", "BR", -20.0, 0.0),),
+    )
+    cfg = default_config()
+    cfg.array.antenna_model = phone_antenna_config_for_test(
+        source="parametric",
+        true_state=true_state,
+        assumed_state=assumed_state,
+    )
+
+    cfg.validate()
+
+
+def test_structured_effects_require_parametric_or_measured_state():
+    true_state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=parameters_for_test(),
+    )
+    assumed_state = AntennaStateConfig(
+        coupling_paths=(CouplingPath("TL", "BR", -20.0, 0.0),),
+    )
+    cfg = default_config()
+    cfg.array.antenna_model = phone_antenna_config_for_test(
+        source="parametric",
+        true_state=true_state,
+        assumed_state=assumed_state,
+    )
+
+    with pytest.raises(ValueError, match="effects.*parametric.*measured"):
+        cfg.validate()
+
+
+def test_default_signal_and_interferer_polarizations_are_rhcp():
+    cfg = default_config()
+
+    cfg.validate()
+
+    np.testing.assert_allclose(
+        cfg.signal.true_polarization.jones_vector(), [2**-0.5, -1j * 2**-0.5]
+    )
+    np.testing.assert_allclose(
+        cfg.signal.assumed_polarization.jones_vector(), [2**-0.5, -1j * 2**-0.5]
+    )
+    np.testing.assert_allclose(
+        cfg.interferers[0].polarization.jones_vector(), [2**-0.5, -1j * 2**-0.5]
+    )
+
+
+def test_interferer_polarization_participates_in_equality_replace_and_snapshot():
+    from antenna_diversity.studies.models import strict_snapshot
+
+    polarization = WavePolarization("linear", tilt_deg=45.0)
+    interferer = CWInterferer(Direction(120.0, 10.0), polarization=polarization)
+    default_interferer = CWInterferer(Direction(120.0, 10.0))
+    changed_power = replace(interferer, power_dbm=-80.0)
+
+    assert interferer.polarization is polarization
+    assert interferer != default_interferer
+    assert changed_power.polarization is polarization
+    assert strict_snapshot(interferer) == {
+        "direction": {"azimuth_deg": 120.0, "elevation_deg": 10.0},
+        "enable": True,
+        "power_dbm": -90.0,
+        "offset_hz": 250e3,
+        "initial_phase_rad": 0.8,
+        "start_ms": 0.0,
+        "stop_ms": None,
+        "polarization": {
+            "kind": "linear",
+            "tilt_deg": 45.0,
+            "az_real": 1.0,
+            "az_imag": 0.0,
+            "el_real": 0.0,
+            "el_imag": 0.0,
+        },
+    }
+    assert strict_snapshot(interferer) != strict_snapshot(default_interferer)
+
+
+def test_interferer_polarization_changes_scientific_configuration_hash():
+    from antenna_diversity.studies.config import resolve_study_config
+    from antenna_diversity.studies.models import ResolvedStudyConfig
+
+    base = resolve_study_config(preset="quick")
+    simulation = base.simulation
+    simulation.interferers = (
+        replace(
+            simulation.interferers[0],
+            polarization=WavePolarization("linear", tilt_deg=30.0),
+        ),
+    )
+
+    changed = ResolvedStudyConfig.from_parts(base.study, simulation)
+
+    assert changed.config_sha256 != base.config_sha256
+
+
+@pytest.mark.parametrize(
+    "polarization",
+    [
+        WavePolarization("invalid"),
+        WavePolarization("jones", az_real=0.0, el_real=0.0),
+    ],
+)
+def test_root_validation_rejects_bad_signal_polarization(polarization):
+    cfg = default_config()
+    cfg.signal.true_polarization = polarization
+
+    with pytest.raises(ValueError, match="polarization"):
+        cfg.validate()
+
+
+def test_root_validation_rejects_bad_interferer_polarization():
+    cfg = default_config()
+    cfg.interferers = (
+        CWInterferer(
+            direction=Direction(120.0, 10.0),
+            polarization=WavePolarization("invalid"),
+        ),
+    )
+
+    with pytest.raises(ValueError, match="polarization"):
+        cfg.validate()
+
+
+@pytest.mark.parametrize("pattern_model", ["parametric", "measured", "unknown"])
+def test_structured_selector_conflicts_with_nonlegacy_pattern_selector(pattern_model):
+    cfg = default_config()
+    cfg.array.pattern_model = pattern_model
+    cfg.array.antenna_model = phone_antenna_config_for_test()
+
+    with pytest.raises(ValueError, match="pattern_model.*antenna_model"):
+        cfg.validate()
+
+
+def test_legacy_pattern_selector_must_be_isotropic():
+    cfg = default_config()
+    cfg.array.pattern_model = "parametric"
+
+    with pytest.raises(ValueError, match="pattern_model"):
+        cfg.validate()
+
+
+@pytest.mark.parametrize("model_source", ["", "isotropic", "unknown", True])
+def test_model_source_must_name_supported_provenance(model_source):
+    cfg = default_config()
+    cfg.array.antenna_model = phone_antenna_config_for_test(source=model_source)
+
+    with pytest.raises(ValueError, match="model_source"):
+        cfg.validate()
+
+
+@pytest.mark.parametrize("pattern_kind", ["", "ideal", "unknown", True])
+def test_state_pattern_kind_must_name_supported_pattern(pattern_kind):
+    cfg = default_config()
+    cfg.array.antenna_model = phone_antenna_config_for_test(
+        true_state=AntennaStateConfig(pattern_kind=pattern_kind)
+    )
+
+    with pytest.raises(ValueError, match="pattern_kind"):
+        cfg.validate()
+
+
+def test_parametric_state_requires_exact_four_parameter_records():
+    cfg = default_config()
+    state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=parameters_for_test(),
+    )
+    del state.parametric_patterns["BR"]
+    cfg.array.antenna_model = phone_antenna_config_for_test(
+        source="parametric", true_state=state
+    )
+
+    with pytest.raises(ValueError, match="parametric.*TL/TR/BL/BR"):
+        cfg.validate()
+
+
+def test_parametric_state_accepts_four_parameter_records():
+    cfg = default_config()
+    state = AntennaStateConfig(
+        pattern_kind="parametric",
+        parametric_patterns=parameters_for_test(),
+    )
+    cfg.array.antenna_model = phone_antenna_config_for_test(
+        source="parametric", true_state=state
+    )
+
+    cfg.validate()
+
+
+def test_nonempty_parametric_mapping_always_uses_exact_corner_names():
+    cfg = default_config()
+    state = AntennaStateConfig(
+        parametric_patterns={"XX": ParametricPatternParameters()}
+    )
+    cfg.array.antenna_model = phone_antenna_config_for_test(true_state=state)
+
+    with pytest.raises(ValueError, match="parametric.*TL/TR/BL/BR"):
+        cfg.validate()
+
+
+@pytest.mark.parametrize("missing_field", ["measured_pattern_csv", "measured_pattern_sha256"])
+def test_measured_state_requires_existing_path_and_digest(tmp_path: Path, missing_field):
+    csv_path = tmp_path / "pattern.csv"
+    csv_path.write_text("placeholder", encoding="utf-8")
+    values = {
+        "pattern_kind": "measured",
+        "measured_pattern_csv": csv_path,
+        "measured_pattern_sha256": "a" * 64,
+    }
+    values[missing_field] = None
+    cfg = default_config()
+    cfg.array.antenna_model = phone_antenna_config_for_test(
+        source="measured", true_state=AntennaStateConfig(**values)
+    )
+
+    with pytest.raises(ValueError, match="measured"):
+        cfg.validate()
+
+
+def test_measured_state_rejects_missing_file_and_bad_sha(tmp_path: Path):
+    cfg = default_config()
+    missing = AntennaStateConfig(
+        pattern_kind="measured",
+        measured_pattern_csv=tmp_path / "missing.csv",
+        measured_pattern_sha256="a" * 64,
+    )
+    cfg.array.antenna_model = phone_antenna_config_for_test(
+        source="measured", true_state=missing
+    )
+    with pytest.raises(ValueError, match="exist"):
+        cfg.validate()
+
+    source = tmp_path / "pattern.csv"
+    source.write_text("placeholder", encoding="utf-8")
+    cfg.array.antenna_model.true_state = replace(
+        missing,
+        measured_pattern_csv=source,
+        measured_pattern_sha256="not-a-sha",
+    )
+    with pytest.raises(ValueError, match="SHA-256"):
+        cfg.validate()
+
+
+def test_nonmeasured_state_does_not_probe_irrelevant_path(tmp_path: Path):
+    cfg = default_config()
+    state = AntennaStateConfig(measured_pattern_csv=tmp_path / "missing.csv")
+    cfg.array.antenna_model = phone_antenna_config_for_test(true_state=state)
+
+    cfg.validate()
+
+
+@pytest.mark.parametrize(
+    "region",
+    [
+        AttenuationRegion(("XX",), 0.0, 0.0, 10.0, 1.0),
+        AttenuationRegion(("TL", "TL"), 0.0, 0.0, 10.0, 1.0),
+        AttenuationRegion(("TL",), 0.0, 0.0, -1.0, 1.0),
+        AttenuationRegion(("TL",), 0.0, 0.0, 1.0, -1.0),
+        AttenuationRegion(("TL",), 0.0, 0.0, 1.0, 1.0, -1.0),
+    ],
+)
+def test_root_validation_rejects_invalid_attenuation_regions(region):
+    cfg = default_config()
+    state = AntennaStateConfig(attenuation_regions=(region,))
+    cfg.array.antenna_model = phone_antenna_config_for_test(true_state=state)
+
+    with pytest.raises(ValueError):
+        cfg.validate()
+
+
+@pytest.mark.parametrize(
+    "paths",
+    [
+        (CouplingPath("TL", "TL", -20.0, 0.0),),
+        (
+            CouplingPath("TL", "BR", -20.0, 0.0),
+            CouplingPath("TL", "BR", -10.0, 90.0),
+        ),
+        (CouplingPath("XX", "BR", -20.0, 0.0),),
+    ],
+)
+def test_root_validation_rejects_self_duplicate_or_unknown_coupling_paths(paths):
+    cfg = default_config()
+    state = AntennaStateConfig(coupling_paths=paths)
+    cfg.array.antenna_model = phone_antenna_config_for_test(true_state=state)
+
+    with pytest.raises(ValueError):
+        cfg.validate()
+
+
+def test_state_rejects_wrong_record_types_and_non_tuple_effect_collections():
+    cfg = default_config()
+    state = AntennaStateConfig()
+    state.orientations["TL"] = object()
+    state.attenuation_regions = []
+    state.coupling_paths = []
+    cfg.array.antenna_model = phone_antenna_config_for_test(true_state=state)
+
+    with pytest.raises(ValueError):
+        cfg.validate()
+
+
+@pytest.mark.parametrize(
+    "orientation",
+    [
+        ElementOrientation(yaw_deg=0.0),
+        ElementOrientation(pitch_deg=0.0),
+        ElementOrientation(roll_deg=0.0),
+    ],
+)
+def test_orientation_records_are_accepted_for_all_axes(orientation):
+    cfg = default_config()
+    state = AntennaStateConfig()
+    state.orientations["TL"] = orientation
+    cfg.array.antenna_model = phone_antenna_config_for_test(true_state=state)
+
+    cfg.validate()
 
 
 def test_mate70_config_uses_all_four_ideal_corners():

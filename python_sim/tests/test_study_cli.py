@@ -23,7 +23,40 @@ TABLE_NAMES = (
     "multi_jammer",
     "full_chain_validation",
     "full_chain_cn0",
+    "antenna_diagnostics",
 )
+FIGURE_NAMES = (
+    "baseline_rankings", "direction_heatmaps", "power_curves",
+    "robustness_curves", "combined_error_distributions",
+    "multi_jammer_comparison", "full_chain_validation", "cn0_validation",
+    "element_patterns", "polarization_losses", "coupling_matrices",
+    "blockage_comparison",
+)
+
+
+def _parametric_antenna_model() -> dict[str, object]:
+    polarization = {
+        "kind": "rhcp", "tilt_deg": 0.0,
+        "az_real": 1.0, "az_imag": 0.0, "el_real": 0.0, "el_imag": 0.0,
+    }
+    patterns = {
+        corner: {
+            "peak_gain_db": float(index),
+            "cosine_exponent": 1.5,
+            "back_lobe_gain_db": -18.0,
+            "nominal_polarization": polarization,
+            "cross_polar_discrimination_db": 24.0,
+            "cross_phase_deg": 10.0,
+        }
+        for index, corner in enumerate(("TL", "TR", "BL", "BR"))
+    }
+    state = {"pattern_kind": "parametric", "parametric_patterns": patterns}
+    return {
+        "model_label": "minimal parametric fixture",
+        "model_source": "parametric",
+        "true_state": state,
+        "assumed_state": state,
+    }
 
 
 def _strict_load(path: Path):
@@ -45,8 +78,10 @@ def _completed_study(tmp_path: Path) -> Path:
     figures.mkdir()
     report = completed / "report.md"
     report.write_text("complete\n", encoding="utf-8")
-    (tables / "baseline_rankings.csv").write_text("rank\n1\n", encoding="utf-8")
-    (figures / "baseline_rankings.png").write_bytes(b"png")
+    for name in TABLE_NAMES:
+        (tables / f"{name}.csv").write_text("record\n1\n", encoding="utf-8")
+    for name in FIGURE_NAMES:
+        (figures / f"{name}.png").write_bytes(b"png")
     report_checkpoint = checkpoints / "report.json"
     report_checkpoint.write_text(json.dumps({
         "stage": "report",
@@ -54,8 +89,8 @@ def _completed_study(tmp_path: Path) -> Path:
             "artifacts": {
                 "summary": "summary.json",
                 "report": "report.md",
-                "tables": {"baseline_rankings": "tables/baseline_rankings.csv"},
-                "figures": {"baseline_rankings": "figures/baseline_rankings.png"},
+                "tables": {name: f"tables/{name}.csv" for name in TABLE_NAMES},
+                "figures": {name: f"figures/{name}.png" for name in FIGURE_NAMES},
             },
             "record_counts": {"baseline_rankings": 1},
         },
@@ -201,6 +236,35 @@ def test_editable_quick_example_resolves_every_visible_axis():
     assert resolved.study.loading_factors.size
 
 
+def test_editable_antenna_realism_example_resolves_small_parametric_study():
+    path = (
+        Path(__file__).parents[1]
+        / "antenna_diversity"
+        / "studies"
+        / "example_antenna_realism.json"
+    )
+
+    resolved = resolve_study_config(path, preset="quick")
+
+    assert resolved.study.combinations == (("TL", "BR"), ("TL", "TR", "BR"))
+    assert resolved.study.spatial_modes == ("egc", "mvdr")
+    assert resolved.study.full_chain_modes == ("single", "egc", "mvdr")
+    assert resolved.study.azimuths_deg.tolist() == [0.0, 120.0, 240.0]
+    assert resolved.study.elevations_deg.tolist() == [10.0, 60.0]
+    assert resolved.study.powers_dbm.tolist() == [-95.0, -85.0]
+    assert resolved.study.combined_error_samples_per_level == 1
+    assert resolved.study.full_chain_run_count == 1
+    model = resolved.simulation.array.antenna_model
+    assert model.model_source == "parametric"
+    assert model.model_label == "synthetic_phone_corner_v1"
+    assert len(model.true_state.attenuation_regions) == 1
+    assert model.true_state.coupling_paths
+    assert all(
+        interferer.polarization.kind == "linear"
+        for interferer in resolved.simulation.interferers
+    )
+
+
 def test_real_minimal_cli_runs_all_stages_and_publishes_complete_evidence(
     tmp_path: Path, capsys,
 ):
@@ -226,6 +290,10 @@ def test_real_minimal_cli_runs_all_stages_and_publishes_complete_evidence(
         "automatic_roles": ["best"],
     })
     data["simulation"]["signal"]["duration_ms"] = 8
+    data["simulation"]["array"] = {
+        "active_antennas": ["TL", "BR"],
+        "antenna_model": _parametric_antenna_model(),
+    }
     config_path.write_text(json.dumps(data), encoding="utf-8")
 
     result = run_spatial_research.main(["--config", str(config_path), "--preset", "quick"])
@@ -245,6 +313,9 @@ def test_real_minimal_cli_runs_all_stages_and_publishes_complete_evidence(
     assert len(json_paths) == 10
     for path in json_paths:
         _strict_load(path)
+    summary = _strict_load(study_dir / "summary.json")
+    assert summary["antenna_model"]["source"] == "parametric"
+    assert summary["antenna_model"]["active_antennas"] == ["TL", "BR"]
 
     table_paths = {name: study_dir / "tables" / f"{name}.csv" for name in TABLE_NAMES}
     rows_by_table = {}
@@ -252,17 +323,26 @@ def test_real_minimal_cli_runs_all_stages_and_publishes_complete_evidence(
         assert path.is_file() and path.stat().st_size > 0
         with path.open(encoding="utf-8", newline="") as stream:
             rows_by_table[name] = list(csv.DictReader(stream))
-    for name in TABLE_NAMES[:-1]:
-        assert rows_by_table[name], name
+    for name in TABLE_NAMES:
+        if name != "full_chain_cn0":
+            assert rows_by_table[name], name
     if not rows_by_table["full_chain_cn0"]:
         assert all(row["tracking"] == "False" for row in rows_by_table["full_chain_validation"])
+    assert tuple(rows_by_table["antenna_diagnostics"][0]) == (
+        "record_kind", "model_source", "model_label", "model_view",
+        "element_name", "receiver", "source", "source_name", "azimuth_deg",
+        "elevation_deg", "response_real", "response_imag", "response_db",
+        "attenuation_db", "polarization_match_db", "measured_pattern_sha256",
+    )
 
     figure_paths = sorted((study_dir / "figures").glob("*.png"))
-    assert len(figure_paths) == 8
+    assert len(figure_paths) == 12
     assert all(path.stat().st_size > 0 for path in figure_paths)
     report_path = study_dir / "report.md"
     assert report_path.is_file() and report_path.stat().st_size > 0
     report = report_path.read_text(encoding="utf-8")
+    assert "parametric" in report
+    assert "minimal parametric fixture" in report
     for target in re.findall(r"\[[^]]*\]\(([^)]+)\)", report):
         assert not Path(target).is_absolute()
         assert (study_dir / target).resolve().is_file()
@@ -278,5 +358,5 @@ def test_real_minimal_cli_runs_all_stages_and_publishes_complete_evidence(
         Path(line.split(": ", 1)[1])
         for line in capsys.readouterr().out.splitlines()
     ]
-    assert len(printed_paths) == 18
+    assert len(printed_paths) == 23
     assert all(path.is_absolute() and path.is_file() for path in printed_paths)

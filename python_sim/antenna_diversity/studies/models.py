@@ -5,13 +5,17 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
-from dataclasses import dataclass, fields, is_dataclass
+from dataclasses import dataclass, fields, is_dataclass, replace
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
-from antenna_diversity.config import CWInterferer, SimulationConfig
+from antenna_diversity.array.antenna_config import AntennaStateConfig, PhoneAntennaConfig
+from antenna_diversity.array.effects import AttenuationRegion, CouplingPath, ElementOrientation
+from antenna_diversity.array.patterns import ParametricPatternParameters
+from antenna_diversity.array.polarization import WavePolarization
+from antenna_diversity.config import CWInterferer, PhoneArrayConfig, SimulationConfig
 
 
 class _FrozenDict(dict[str, object]):
@@ -45,6 +49,13 @@ def _freeze(value: object) -> object:
     return copy.deepcopy(value)
 
 
+def _immutable_array(value: object) -> np.ndarray:
+    """Detach an axis onto a bytes buffer whose write access cannot be restored."""
+
+    array = np.array(value, copy=True)
+    return np.frombuffer(array.tobytes(), dtype=array.dtype).reshape(array.shape)
+
+
 def _canonical_study(study: StudyConfig) -> StudyConfig:
     """Copy and normalize every public StudyConfig container at the boundary."""
 
@@ -52,7 +63,7 @@ def _canonical_study(study: StudyConfig) -> StudyConfig:
         field.name: copy.deepcopy(getattr(study, field.name))
         for field in fields(StudyConfig)
     }
-    values["output_dir"] = Path(values["output_dir"])
+    values["output_dir"] = Path(str(values["output_dir"]))
     values["combinations"] = tuple(tuple(combo) for combo in values["combinations"])
     for name in ("spatial_modes", "full_chain_modes", "single_antennas", "automatic_roles"):
         values[name] = tuple(values[name])
@@ -75,6 +86,133 @@ def _canonical_study(study: StudyConfig) -> StudyConfig:
     )
     values["manual_cases"] = tuple(values["manual_cases"])
     return StudyConfig(**values)
+
+
+def _canonical_polarization(value: object) -> object:
+    if not isinstance(value, WavePolarization):
+        return copy.deepcopy(value)
+    return WavePolarization(
+        kind=copy.deepcopy(value.kind),
+        tilt_deg=copy.deepcopy(value.tilt_deg),
+        az_real=copy.deepcopy(value.az_real),
+        az_imag=copy.deepcopy(value.az_imag),
+        el_real=copy.deepcopy(value.el_real),
+        el_imag=copy.deepcopy(value.el_imag),
+    )
+
+
+def _canonical_pattern(value: object) -> object:
+    if not isinstance(value, ParametricPatternParameters):
+        return copy.deepcopy(value)
+    return ParametricPatternParameters(
+        peak_gain_db=copy.deepcopy(value.peak_gain_db),
+        cosine_exponent=copy.deepcopy(value.cosine_exponent),
+        back_lobe_gain_db=copy.deepcopy(value.back_lobe_gain_db),
+        nominal_polarization=_canonical_polarization(value.nominal_polarization),
+        cross_polar_discrimination_db=copy.deepcopy(
+            value.cross_polar_discrimination_db
+        ),
+        cross_phase_deg=copy.deepcopy(value.cross_phase_deg),
+    )
+
+
+def _canonical_orientation(value: object) -> object:
+    if not isinstance(value, ElementOrientation):
+        return copy.deepcopy(value)
+    return ElementOrientation(
+        copy.deepcopy(value.yaw_deg),
+        copy.deepcopy(value.pitch_deg),
+        copy.deepcopy(value.roll_deg),
+    )
+
+
+def _canonical_region(value: object) -> object:
+    if not isinstance(value, AttenuationRegion):
+        return copy.deepcopy(value)
+    return AttenuationRegion(
+        tuple(copy.deepcopy(value.elements)),
+        copy.deepcopy(value.center_azimuth_deg),
+        copy.deepcopy(value.center_elevation_deg),
+        copy.deepcopy(value.radius_deg),
+        copy.deepcopy(value.attenuation_db),
+        copy.deepcopy(value.transition_width_deg),
+    )
+
+
+def _canonical_coupling(value: object) -> object:
+    if not isinstance(value, CouplingPath):
+        return copy.deepcopy(value)
+    return CouplingPath(
+        copy.deepcopy(value.source),
+        copy.deepcopy(value.receiver),
+        copy.deepcopy(value.magnitude_db),
+        copy.deepcopy(value.phase_deg),
+    )
+
+
+def _canonical_antenna_state(value: object) -> object:
+    if not isinstance(value, AntennaStateConfig):
+        return copy.deepcopy(value)
+    csv_path = value.measured_pattern_csv
+    return AntennaStateConfig(
+        pattern_kind=copy.deepcopy(value.pattern_kind),
+        parametric_patterns={
+            copy.deepcopy(name): _canonical_pattern(parameters)
+            for name, parameters in value.parametric_patterns.items()
+        },
+        measured_pattern_csv=(
+            None if csv_path is None else Path(str(csv_path))
+        ),
+        measured_pattern_sha256=copy.deepcopy(value.measured_pattern_sha256),
+        orientations={
+            copy.deepcopy(name): _canonical_orientation(orientation)
+            for name, orientation in value.orientations.items()
+        },
+        attenuation_regions=tuple(
+            _canonical_region(region) for region in value.attenuation_regions
+        ),
+        coupling_paths=tuple(
+            _canonical_coupling(path) for path in value.coupling_paths
+        ),
+    )
+
+
+def _canonical_antenna_model(value: object) -> object:
+    if not isinstance(value, PhoneAntennaConfig):
+        return copy.deepcopy(value)
+    return PhoneAntennaConfig(
+        model_label=copy.deepcopy(value.model_label),
+        model_source=copy.deepcopy(value.model_source),
+        true_state=_canonical_antenna_state(value.true_state),
+        assumed_state=_canonical_antenna_state(value.assumed_state),
+    )
+
+
+def _canonical_simulation(simulation: SimulationConfig) -> SimulationConfig:
+    """Detach and normalize every antenna-related scientific input."""
+
+    result = copy.deepcopy(simulation)
+    result.signal.true_polarization = _canonical_polarization(
+        simulation.signal.true_polarization
+    )
+    result.signal.assumed_polarization = _canonical_polarization(
+        simulation.signal.assumed_polarization
+    )
+    result.interferers = tuple(
+        replace(
+            copy.deepcopy(interferer),
+            polarization=_canonical_polarization(interferer.polarization),
+        )
+        if isinstance(interferer, CWInterferer)
+        else copy.deepcopy(interferer)
+        for interferer in simulation.interferers
+    )
+    if isinstance(result.array, PhoneArrayConfig):
+        result.array.antenna_model = _canonical_antenna_model(
+            simulation.array.antenna_model
+        )
+    result.plot.output_dir = Path(str(simulation.plot.output_dir))
+    return result
 
 
 def strict_snapshot(value: object) -> object:
@@ -223,9 +361,7 @@ class StudyConfig:
             "azimuths_deg", "elevations_deg", "powers_dbm", "direction_errors_deg",
             "position_errors_m", "amplitude_errors_db", "phase_errors_deg", "loading_factors",
         ):
-            array = np.array(getattr(self, name), copy=True)
-            array.setflags(write=False)
-            object.__setattr__(self, name, array)
+            object.__setattr__(self, name, _immutable_array(getattr(self, name)))
         object.__setattr__(self, "manual_cases", tuple(_freeze(case) for case in self.manual_cases))
 
 
@@ -328,7 +464,7 @@ class ResolvedStudyConfig:
     @classmethod
     def from_parts(cls, study: StudyConfig, simulation: SimulationConfig) -> "ResolvedStudyConfig":
         study_copy = _canonical_study(study)
-        simulation_copy = copy.deepcopy(simulation)
+        simulation_copy = _canonical_simulation(simulation)
         validate_study_config(study_copy)
         simulation_copy.validate()
         unhashed = cls(study_copy, simulation_copy, "")

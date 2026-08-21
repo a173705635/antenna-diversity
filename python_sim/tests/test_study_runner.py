@@ -1,4 +1,5 @@
 from dataclasses import replace
+import json
 from pathlib import Path
 
 import matplotlib
@@ -9,6 +10,7 @@ import matplotlib.pyplot as plt
 import pytest
 
 from antenna_diversity.studies.runner import STAGES, run_research
+from antenna_diversity.studies.models import ResolvedStudyConfig
 from tests.study_helpers import resolved_for_test
 
 
@@ -160,7 +162,74 @@ def test_real_minimal_analytical_stages_reach_selection(monkeypatch, tmp_path: P
     assert selection["selection"]["cases"][0]["selection_reasons"] == ["best"]
 
 
-def test_report_stage_publishes_eight_linked_tables_and_figures(monkeypatch, tmp_path: Path):
+@pytest.mark.parametrize(
+    ("interferer_case", "expected_scan_rows", "expected_reference_power"),
+    (("none", 0, None), ("leading_disabled", 1, -77.0)),
+)
+def test_real_seven_stage_minimal_run_supports_enabled_interferer_edges(
+    tmp_path: Path,
+    interferer_case: str,
+    expected_scan_rows: int,
+    expected_reference_power: float | None,
+):
+    base = resolved_for_test(output_dir=tmp_path, name=f"edge-{interferer_case}")
+    simulation = base.simulation
+    first = simulation.interferers[0]
+    if interferer_case == "none":
+        simulation.interferers = ()
+    else:
+        simulation.interferers = (
+            replace(first, enable=False, power_dbm=-101.0),
+            replace(first, enable=True, power_dbm=-77.0),
+        )
+    study = replace(
+        base.study,
+        combinations=(("TL", "BR"),),
+        spatial_modes=("mvdr",),
+        full_chain_modes=("mvdr",),
+        single_antennas=("TL",),
+        azimuths_deg=[80.0],
+        elevations_deg=[20.0],
+        powers_dbm=[-88.0],
+        direction_errors_deg=[0.0],
+        position_errors_m=[0.0],
+        amplitude_errors_db=[0.0],
+        phase_errors_deg=[0.0],
+        loading_factors=[base.simulation.diversity.diagonal_loading_factor],
+        combined_error_samples_per_level=1,
+        full_chain_run_count=1,
+        multi_jammer_templates=(),
+        automatic_roles=(
+            base.study.automatic_roles if interferer_case == "none" else ()
+        ),
+    )
+    resolved = ResolvedStudyConfig.from_parts(study, simulation)
+
+    output = run_research(resolved)
+
+    manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
+    baseline = json.loads(
+        (output / "checkpoints" / "baseline.json").read_text(encoding="utf-8")
+    )["payload"]["tables"]
+    assert manifest["status"] == "completed"
+    assert len(baseline["direction"]) == expected_scan_rows
+    assert len(baseline["power"]) == expected_scan_rows
+    assert baseline["reference"]
+    assert all(
+        row["reference_interferer_power_dbm"] == expected_reference_power
+        for row in baseline["reference"]
+    )
+    for path in output.rglob("*.json"):
+        json.loads(
+            path.read_text(encoding="utf-8"),
+            parse_constant=lambda value: (_ for _ in ()).throw(
+                ValueError(f"non-finite JSON constant: {value}")
+            ),
+        )
+    assert (output / "report.md").is_file()
+
+
+def test_report_stage_publishes_nine_linked_tables_and_twelve_figures(monkeypatch, tmp_path: Path):
     """Report publication must verify links after every target is atomically written."""
     from antenna_diversity.studies.runner import _publication_for, _report
     from antenna_diversity.studies.artifacts import StudyStore
@@ -168,10 +237,13 @@ def test_report_stage_publishes_eight_linked_tables_and_figures(monkeypatch, tmp
     from tests.study_helpers import completed_tables_for_reporting
 
     resolved = resolved_for_test(output_dir=tmp_path, name="report-runner")
+    simulation = resolved.simulation
+    simulation.array.active_antennas = ("TL", "TR", "BR")
+    resolved = type(resolved).from_parts(resolved.study, simulation)
     store = StudyStore.create(resolved)
     tables = completed_tables_for_reporting()
     checkpoints = {
-        "baseline": {"tables": {"direction": tables["direction_scan"], "power": tables["power_scan"]}},
+        "baseline": {"tables": {"direction": tables["direction_scan"], "power": tables["power_scan"], "antenna_diagnostics": tables["antenna_diagnostics"]}},
         "single_factor": {"tables": {"single_factor": tables["robustness_scans"]}},
         "combined_error": {"tables": {"combined_error": tables["combined_errors"]}},
         "multi_jammer": {"tables": {"multi_jammer": tables["multi_jammer"]}},
@@ -185,12 +257,17 @@ def test_report_stage_publishes_eight_linked_tables_and_figures(monkeypatch, tmp
     payload = _report(context)
 
     assert set(payload["artifacts"]["tables"]) == set(tables)
-    assert len(payload["artifacts"]["figures"]) == 8
+    assert len(payload["artifacts"]["tables"]) == 9
+    assert len(payload["artifacts"]["figures"]) == 12
+    summary = __import__("json").loads(
+        (store.study_dir / "summary.json").read_text(encoding="utf-8")
+    )
+    assert summary["antenna_model"]["active_antennas"] == ["TL", "TR", "BR"]
     verify_report_links((store.study_dir / "report.md").read_text(encoding="utf-8"), store.study_dir / "report.md")
 
 
 def test_publication_repeatedly_saves_without_leaking_owned_figures(tmp_path: Path):
-    """Repeated report publication must not accumulate its eight owned figures."""
+    """Repeated report publication must not accumulate its twelve owned figures."""
     from antenna_diversity.studies.runner import _publication_for
     from tests.study_helpers import completed_tables_for_reporting
 
