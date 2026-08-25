@@ -38,6 +38,35 @@ python -W error run_legacy_ula.py
 
 `default_config()` 是四个理想手机角点的当前默认；`parametric_phone_config()` 提供确定性的 `synthetic_phone_corner_v1` 合成方向图、姿态、遮挡、极化和弱非对称互耦；`legacy_ula_config()` 保留原始双阵元半波长 ULA 基线。三者共享 channels-by-samples 的 RF、DFE、合并、捕获和跟踪链路。
 
+## Carrier NCO 定点验证
+
+TRK 默认仍使用浮点 Carrier NCO。需要验证硬件频率控制字时，可单独启用固定模式；RF、DFE、捕获、相关器、鉴相器、环路滤波器和 Code NCO 不随之定点化：
+
+```python
+from antenna_diversity.config import default_config
+from antenna_diversity.pipeline import run_end_to_end
+
+cfg = default_config()
+cfg.tracking.carrier_nco_mode = "fixed"
+cfg.tracking.carrier_nco_clock_hz = 6.6e6
+cfg.tracking.carrier_nco_word_bits = 30
+cfg.plot.enable = False
+result = run_end_to_end(cfg)
+```
+
+固定模式把浮点环路命令量化成 N 位有符号 FCW，并用同样位宽的无符号相位累加器更新历元起始相位。`carrier_frequency_command_hz` 是量化前环路命令，`carrier_frequency_hz` 是实际用于载波副本的量化频率；`carrier_fcw`、`carrier_phase_word` 和 `carrier_frequency_quantization_error_hz` 提供逐历元证据。研究 JSON 可直接覆盖同名的三个 `tracking` 字段。
+
+L1 默认时钟 6.6 MHz 下，30-bit 频率 LSB 为 `6.6e6 / 2^30 ≈ 0.006147 Hz`；43-bit 在相同时钟下细 8192 倍。可用同一确定性场景比较浮点、30-bit 和 43-bit：
+
+```powershell
+$env:MPLBACKEND='Agg'
+python -W error run_tracking_nco_comparison.py `
+  --clock-hz 6600000 --word-bits 30,43 `
+  --output-dir results/tracking_nco
+```
+
+命令生成 `tracking_nco_comparison.csv`、独立的载波频率图和量化误差图。该实验用于隔离 Carrier NCO 量化影响，不能单独证明实测偏差由 NCO 引起。
+
 ## 可复现空间研究套件
 
 `run_spatial_research.py` 顺序运行解析扫描、鲁棒性研究、代表场景筛选、完整样本链验证和报告发布。它不打开 GUI；成功后会打印 manifest、报告、9 张表和 12 幅图的绝对路径。[理想快速示例](studies/example_quick.json) 保留旧用法；[参数化天线示例](antenna_diversity/studies/example_antenna_realism.json) 显式列出可编辑的载频/IF/采样率、两个角点组合、天线 true/assumed state、GPS/干扰极化、遮挡和互耦。
