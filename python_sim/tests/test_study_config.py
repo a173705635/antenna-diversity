@@ -199,6 +199,31 @@ def test_cli_overrides_json_which_overrides_preset(tmp_path: Path):
     assert resolved.simulation.signal.carrier_hz == 1.2e9
 
 
+def test_json_overrides_tracking_carrier_nco_fields(tmp_path: Path):
+    path = tmp_path / "tracking-nco.json"
+    path.write_text(
+        json.dumps(
+            {
+                "simulation": {
+                    "tracking": {
+                        "carrier_nco_mode": "fixed",
+                        "carrier_nco_clock_hz": 6_600_000.0,
+                        "carrier_nco_word_bits": 43,
+                    }
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    resolved = resolve_study_config(path, preset="quick")
+
+    assert resolved.simulation.tracking.carrier_nco_mode == "fixed"
+    assert resolved.simulation.tracking.carrier_nco_clock_hz == 6.6e6
+    assert resolved.simulation.tracking.carrier_nco_word_bits == 43
+    resolved.simulation.validate()
+
+
 def test_unknown_json_key_is_rejected(tmp_path: Path):
     path = tmp_path / "study.json"
     path.write_text('{"study":{"exlusion_angle_deg":15}}', encoding="utf-8")

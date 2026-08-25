@@ -90,7 +90,7 @@ j_k[n]=w_k[n]\sqrt{P_kR}
 
 [`antenna_diversity/rf/frontend.py`](antenna_diversity/rf/frontend.py) 计算 Friis 级联增益与噪声系数，在输入参考温度/带宽下加入热噪声，再执行 I/Q 限幅和复数 ADC 量化。RF 采样率为 16.368 Msps。
 
-[`antenna_diversity/dfe/processing.py`](antenna_diversity/dfe/processing.py) 对所有通道使用公共 NCO 做 −4.092 MHz DDC，随后经过 129-tap Hamming-windowed sinc FIR、64 样点群延迟对齐、4 倍抽取和 8-bit 重量化。输出率为 4.092 Msps，即 4 samples/chip。公共处理保持通道间相对相位。
+[`antenna_diversity/dfe/processing.py`](antenna_diversity/dfe/processing.py) 对所有通道使用公共 NCO 做 −4.092 MHz DDC，随后经过 129-tap Hamming-windowed sinc FIR、64 样点群延迟对齐、4 倍抽取和 8-bit 重量化。输出率为 4.092 Msps，即 4 samples/chip。公共处理保持通道间相对相位。当前 DDC NCO、FIR 系数和 FIR 累加仍为浮点运算；只有 DFE 输出边界按配置对 I/Q 舍入、移位并饱和到整数码值，数组容器仍为 `complex128`。
 
 ## 6. SINGLE、EGC 和 MVDR
 
@@ -116,6 +116,25 @@ MVDR 使用
 捕获对每个 Doppler bin 做载波擦除，以 FFT 相关搜索全部 C/A 码相位，并用排除主峰邻域后的 peak/second-peak 比值判决。默认是 1 ms coherent × 4 noncoherent，门限 2.5。
 
 捕获失败的分支明确记录 `acquisition_failed`。成功分支进入 1 ms epoch 的 Early/Prompt/Late DLL 与 FLL-assisted PLL，输出载波频率、码相位、鉴别器、prompt 和 C/N₀ 记录。
+
+Carrier NCO 有 `float` 和 `fixed` 两种模式，默认 `float` 保持原数值路径。固定模式只量化载波 NCO 状态。设时钟为 (f_{clk})、字长为 (N)、模数为 (M=2^N)，浮点环路频率命令为 (f_{cmd})：
+
+```text
+FCW = round_away_from_zero(f_cmd / f_clk * 2^N)
+f_actual = FCW * f_clk / 2^N
+phase_correction_word = round_away_from_zero(
+    pll_kp * phase_error_rad / (2*pi) * 2^N
+)
+phase_word[k+1] = (
+    phase_word[k] + FCW[k+1] * n_ticks + phase_correction_word
+) mod 2^N
+```
+
+FCW 是 N 位有符号二进制补码，支持 `[-f_clk/2, f_clk/2)`；相位字是 N 位无符号整数。每个历元必须包含整数个 NCO 时钟 `n_ticks = f_clk * coherent_interval_s`，溢出直接报错，不做饱和或回绕。
+
+固定模式的历元顺序为：用当前量化频率和相位字相关；计算同一套 DLL/PLL/FLL 误差；浮点环路滤波器产生下一频率命令；量化下一 FCW；量化 PLL 比例相位修正并更新相位字；记录历元后状态。历元内载波副本为 `2*pi*phase_word/2^N + 2*pi*f_actual*n/fs`。Code NCO 的载波 Doppler 耦合读取实际量化频率，但 Code NCO 自身仍是浮点。
+
+所有成功跟踪结果都给出 `carrier_frequency_command_hz`、实际 `carrier_frequency_hz`、量化误差和 NCO 模式；固定模式另给出整数 `carrier_fcw`、`carrier_phase_word` 和频率 LSB。`run_tracking_nco_comparison.py` 深拷贝同一配置，以相同随机种子分别运行 float、30-bit 和 43-bit，并输出逐分支 CSV、载波频率图和量化误差图。它隔离的是 Carrier NCO 量化，不能据此直接归因任何实测偏差。
 
 ## 8. 分析与扫描
 
@@ -178,6 +197,6 @@ python -W error run_spatial_research.py `
 
 ## 11. 明确未建模项
 
-以下均不在当前结论中：真实 Mate 70 相位中心标定和产品级暗室方向图；全波机壳/人体散射；互耦导致的外部噪声相关性；多径/NLOS；运动与动态 DOA；宽带、扫频、脉冲或调制等非 CW 干扰；多颗卫星与多 PRN 并发；导航数据、位/帧同步和 PVT；在线 DOA 与鲁棒导向矢量估计；实时滑窗 MVDR；完整 RF 非理想。
+以下均不在当前结论中：真实 Mate 70 相位中心标定和产品级暗室方向图；全波机壳/人体散射；互耦导致的外部噪声相关性；多径/NLOS；运动与动态 DOA；宽带、扫频、脉冲或调制等非 CW 干扰；多颗卫星与多 PRN 并发；导航数据、位/帧同步和 PVT；在线 DOA 与鲁棒导向矢量估计；实时滑窗 MVDR；完整 RF 非理想；完整 TRK 定点运算；固定字长相关累加器、鉴相器、环路滤波器和 Code NCO；异步 DDS/采样时钟保持效应与 DDS 杂散；L5 信号、码和端到端链路。
 
 因此 `ideal` 只能说明旧基线，`parametric` 只能说明人为参数敏感性，`measured` 只说明输入由可追溯表格驱动。下一步应输入经坐标、极化和功率标定的相位中心、复数方向图与耦合测量，再在真实传播数据上重新验证空间自由度、捕获和跟踪结论。

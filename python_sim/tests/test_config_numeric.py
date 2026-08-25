@@ -39,3 +39,51 @@ def test_invalid_even_fir_length_is_rejected():
 
     with pytest.raises(ValueError, match="odd"):
         cfg.validate()
+
+
+@pytest.mark.parametrize("mode", ["integer", "FIXED", "", None, ["fixed"]])
+def test_tracking_rejects_unknown_carrier_nco_mode(mode):
+    cfg = default_config()
+    cfg.tracking.carrier_nco_mode = mode
+
+    with pytest.raises(ValueError, match="carrier_nco_mode"):
+        cfg.validate()
+
+
+@pytest.mark.parametrize(
+    "clock_hz",
+    [
+        0.0,
+        -1.0,
+        np.nan,
+        np.inf,
+        True,
+        1.0 + 0.0j,
+        np.array(6.6e6),
+        np.array([6.6e6]),
+    ],
+)
+def test_tracking_rejects_invalid_carrier_nco_clock(clock_hz):
+    cfg = default_config()
+    cfg.tracking.carrier_nco_clock_hz = clock_hz
+
+    with pytest.raises(ValueError, match="carrier_nco_clock_hz"):
+        cfg.validate()
+
+
+@pytest.mark.parametrize("word_bits", [True, 1, 63, 30.5])
+def test_tracking_rejects_invalid_carrier_nco_word_bits(word_bits):
+    cfg = default_config()
+    cfg.tracking.carrier_nco_word_bits = word_bits
+
+    with pytest.raises(ValueError, match="carrier_nco_word_bits"):
+        cfg.validate()
+
+
+def test_fixed_tracking_rejects_fractional_nco_ticks_per_epoch():
+    cfg = default_config()
+    cfg.tracking.carrier_nco_mode = "fixed"
+    cfg.tracking.carrier_nco_clock_hz = 6_600_000.5
+
+    with pytest.raises(ValueError, match="integer number of NCO ticks"):
+        cfg.validate()
