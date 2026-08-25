@@ -23,7 +23,8 @@ class CarrierNCOUpdate:
 def _finite_real_scalar(value: object, name: str) -> float:
     candidate = np.asarray(value)
     if (
-        candidate.ndim != 0
+        not np.isscalar(value)
+        or candidate.ndim != 0
         or not np.issubdtype(candidate.dtype, np.number)
         or np.issubdtype(candidate.dtype, np.complexfloating)
         or isinstance(value, (bool, np.bool_))

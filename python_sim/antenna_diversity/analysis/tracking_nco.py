@@ -54,7 +54,8 @@ def _validate_sweep(
 ) -> tuple[float, tuple[int, ...]]:
     clock = np.asarray(clock_hz)
     if (
-        clock.ndim != 0
+        not np.isscalar(clock_hz)
+        or clock.ndim != 0
         or not np.issubdtype(clock.dtype, np.number)
         or np.issubdtype(clock.dtype, np.complexfloating)
         or isinstance(clock_hz, (bool, np.bool_))

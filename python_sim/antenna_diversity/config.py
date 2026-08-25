@@ -451,7 +451,10 @@ class SimulationConfig:
                 'tracking.carrier_nco_mode must be "float" or "fixed"'
             )
         if (
-            isinstance(self.tracking.carrier_nco_clock_hz, (bool, np.bool_))
+            not np.isscalar(self.tracking.carrier_nco_clock_hz)
+            or isinstance(
+                self.tracking.carrier_nco_clock_hz, (bool, np.bool_)
+            )
             or not _is_finite_real_scalar(
                 self.tracking.carrier_nco_clock_hz
             )

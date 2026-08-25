@@ -97,6 +97,8 @@ def test_signed_frequency_range_includes_negative_nyquist_only():
     [
         ({"clock_hz": 0.0}, "clock_hz"),
         ({"clock_hz": np.nan}, "clock_hz"),
+        ({"clock_hz": np.array(6.6e6)}, "clock_hz"),
+        ({"clock_hz": np.array([6.6e6])}, "clock_hz"),
         ({"word_bits": True}, "word_bits"),
         ({"word_bits": 1}, "word_bits"),
         ({"word_bits": 63}, "word_bits"),
@@ -124,8 +126,30 @@ def test_update_rejects_nonfinite_or_overflowing_frequency(command_hz):
         nco.update(command_hz, 0.0)
 
 
+@pytest.mark.parametrize(
+    "command_hz",
+    [np.array(1.0), np.array([1.0])],
+)
+def test_update_rejects_array_frequency_commands(command_hz):
+    nco = make_nco()
+
+    with pytest.raises(ValueError, match="command_frequency_hz"):
+        nco.update(command_hz, 0.0)
+
+
 @pytest.mark.parametrize("correction_rad", [np.nan, np.inf, -np.inf])
 def test_update_rejects_nonfinite_phase_correction(correction_rad):
+    nco = make_nco()
+
+    with pytest.raises(ValueError, match="phase_correction_rad"):
+        nco.update(0.0, correction_rad)
+
+
+@pytest.mark.parametrize(
+    "correction_rad",
+    [np.array(0.1), np.array([0.1])],
+)
+def test_update_rejects_array_phase_corrections(correction_rad):
     nco = make_nco()
 
     with pytest.raises(ValueError, match="phase_correction_rad"):

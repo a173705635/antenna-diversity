@@ -52,7 +52,16 @@ def test_tracking_rejects_unknown_carrier_nco_mode(mode):
 
 @pytest.mark.parametrize(
     "clock_hz",
-    [0.0, -1.0, np.nan, np.inf, True, 1.0 + 0.0j],
+    [
+        0.0,
+        -1.0,
+        np.nan,
+        np.inf,
+        True,
+        1.0 + 0.0j,
+        np.array(6.6e6),
+        np.array([6.6e6]),
+    ],
 )
 def test_tracking_rejects_invalid_carrier_nco_clock(clock_hz):
     cfg = default_config()

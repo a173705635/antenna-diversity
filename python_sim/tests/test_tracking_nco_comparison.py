@@ -170,6 +170,8 @@ def test_comparison_saves_fixed_csv_and_nonempty_figures(
     [
         (0.0, (30, 43)),
         (np.nan, (30, 43)),
+        (np.array(6.6e6), (30, 43)),
+        (np.array([6.6e6]), (30, 43)),
         (6.6e6, ()),
         (6.6e6, (30, 30)),
         (6.6e6, (True, 43)),
