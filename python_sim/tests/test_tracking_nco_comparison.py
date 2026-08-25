@@ -13,6 +13,7 @@ from antenna_diversity.analysis.tracking_nco import (
     save_tracking_nco_comparison,
 )
 from antenna_diversity.config import SPEED_OF_LIGHT_MPS, default_config
+from run_tracking_nco_comparison import build_parser, main
 
 
 @pytest.fixture(scope="module")
@@ -185,3 +186,36 @@ def test_comparison_rejects_invalid_nco_sweep(clock_hz, word_bits):
             clock_hz=clock_hz,
             fixed_word_bits=word_bits,
         )
+
+
+def test_cli_defaults_match_l1_validation_case():
+    args = build_parser().parse_args([])
+
+    assert args.clock_hz == 6.6e6
+    assert args.word_bits == (30, 43)
+    assert args.output_dir == Path("results/tracking_nco")
+
+
+def test_cli_parses_unique_comma_separated_word_lengths():
+    parser = build_parser()
+
+    assert parser.parse_args(["--word-bits", "24,40"]).word_bits == (24, 40)
+    with pytest.raises(SystemExit):
+        parser.parse_args(["--word-bits", "30,30"])
+    with pytest.raises(SystemExit):
+        parser.parse_args(["--word-bits", "1,43"])
+
+
+def test_cli_writes_comparison_artifacts(tmp_path: Path, capsys):
+    exit_code = main(["--output-dir", str(tmp_path)])
+
+    assert exit_code == 0
+    assert (tmp_path / "tracking_nco_comparison.csv").stat().st_size > 0
+    assert (tmp_path / "tracking_nco_frequency.png").stat().st_size > 0
+    assert (
+        tmp_path / "tracking_nco_quantization_error.png"
+    ).stat().st_size > 0
+    output = capsys.readouterr().out
+    assert str(
+        (tmp_path / "tracking_nco_comparison.csv").resolve()
+    ) in output
