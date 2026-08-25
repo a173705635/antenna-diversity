@@ -92,6 +92,110 @@ def test_tracking_converges_after_successful_acquisition():
     )
     assert np.sqrt(np.mean(trk["dll_error"][-10:] ** 2)) < 0.5
     assert np.sqrt(np.mean(trk["pll_error_rad"][-10:] ** 2)) < 0.5
+    assert trk["carrier_nco_mode"] == "float"
+    np.testing.assert_array_equal(
+        trk["carrier_frequency_command_hz"],
+        trk["carrier_frequency_hz"],
+    )
+    np.testing.assert_array_equal(
+        trk["carrier_frequency_quantization_error_hz"],
+        np.zeros_like(trk["carrier_frequency_hz"]),
+    )
+    assert trk["carrier_nco_frequency_lsb_hz"] == 0.0
+    assert "carrier_fcw" not in trk
+    assert "carrier_phase_word" not in trk
+
+
+@pytest.mark.parametrize("word_bits", [30, 43])
+def test_fixed_carrier_nco_tracks_and_exposes_hardware_state(word_bits):
+    cfg = default_config()
+    cfg.tracking.carrier_nco_mode = "fixed"
+    cfg.tracking.carrier_nco_word_bits = word_bits
+    x = make_tracking_signal(cfg)
+    acq = acquire(x, cfg.dfe.fs_out_hz, cfg.signal.prn, cfg.acquisition)
+
+    trk = track(
+        x,
+        cfg.dfe.fs_out_hz,
+        cfg.signal.prn,
+        acq,
+        cfg.tracking,
+        cfg.signal.carrier_hz,
+        cfg.signal.code_rate_hz,
+    )
+
+    assert trk["success"]
+    assert trk["carrier_nco_mode"] == "fixed"
+    assert trk["carrier_nco_frequency_lsb_hz"] == pytest.approx(
+        6.6e6 / 2**word_bits
+    )
+    assert trk["carrier_fcw"].dtype == np.int64
+    assert trk["carrier_phase_word"].dtype == np.uint64
+    assert len(trk["carrier_fcw"]) == len(trk["prompt"])
+    assert np.all(trk["carrier_phase_word"] < 2**word_bits)
+    np.testing.assert_allclose(
+        trk["carrier_frequency_hz"],
+        trk["carrier_fcw"].astype(np.float64) * 6.6e6 / 2**word_bits,
+        rtol=0.0,
+        atol=np.finfo(float).eps * 6.6e6,
+    )
+    np.testing.assert_allclose(
+        trk["carrier_frequency_quantization_error_hz"],
+        trk["carrier_frequency_hz"]
+        - trk["carrier_frequency_command_hz"],
+        rtol=0.0,
+        atol=np.finfo(float).eps * 6.6e6,
+    )
+    assert (
+        abs(trk["carrier_frequency_hz"][-1] - cfg.signal.doppler_hz)
+        <= cfg.tracking.max_final_doppler_error_hz
+    )
+
+
+def test_fixed_nco_quantization_error_stays_within_each_word_length_bound():
+    for word_bits in (30, 43):
+        cfg = default_config()
+        cfg.tracking.carrier_nco_mode = "fixed"
+        cfg.tracking.carrier_nco_word_bits = word_bits
+        x = make_tracking_signal(cfg)
+        acq = acquire(
+            x, cfg.dfe.fs_out_hz, cfg.signal.prn, cfg.acquisition
+        )
+
+        trk = track(
+            x,
+            cfg.dfe.fs_out_hz,
+            cfg.signal.prn,
+            acq,
+            cfg.tracking,
+            cfg.signal.carrier_hz,
+            cfg.signal.code_rate_hz,
+        )
+
+        assert np.max(
+            np.abs(trk["carrier_frequency_quantization_error_hz"])
+        ) <= (
+            0.5 * trk["carrier_nco_frequency_lsb_hz"]
+            + np.finfo(float).eps * 6.6e6
+        )
+
+
+def test_direct_tracking_call_rejects_unknown_carrier_nco_mode():
+    cfg = default_config()
+    cfg.tracking.carrier_nco_mode = "integer"
+    x = make_tracking_signal(cfg)
+    acq = acquire(x, cfg.dfe.fs_out_hz, cfg.signal.prn, cfg.acquisition)
+
+    with pytest.raises(ValueError, match="carrier_nco_mode"):
+        track(
+            x,
+            cfg.dfe.fs_out_hz,
+            cfg.signal.prn,
+            acq,
+            cfg.tracking,
+            cfg.signal.carrier_hz,
+            cfg.signal.code_rate_hz,
+        )
 
 
 def test_tracking_returns_failed_status_without_successful_acquisition():

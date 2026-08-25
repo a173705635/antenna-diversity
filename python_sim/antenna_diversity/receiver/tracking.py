@@ -9,6 +9,7 @@ from numpy.typing import ArrayLike, NDArray
 
 from antenna_diversity.config import TrackingConfig
 from antenna_diversity.gnss.ca_code import ca_code
+from antenna_diversity.receiver.carrier_nco import FixedCarrierNCO
 
 
 def _sample_code(
@@ -71,6 +72,8 @@ def track(
             "status": "acquisition_failed",
             "prompt": np.array([], dtype=np.complex128),
         }
+    if cfg.carrier_nco_mode not in {"float", "fixed"}:
+        raise ValueError('carrier_nco_mode must be "float" or "fixed"')
     if fs_hz <= 0 or carrier_hz <= 0 or nominal_code_rate_hz <= 0:
         raise ValueError("sample, carrier, and code frequencies must be positive")
 
@@ -94,8 +97,24 @@ def track(
     code = ca_code(prn)
     sample_index = np.arange(samples_per_epoch, dtype=np.float64)
     epoch_duration_s = samples_per_epoch / fs_hz
-    carrier_frequency_hz = float(acq["doppler_hz"])
-    carrier_phase_rad = 0.0
+    carrier_frequency_command_hz = float(acq["doppler_hz"])
+    fixed_nco: FixedCarrierNCO | None = None
+    if cfg.carrier_nco_mode == "fixed":
+        fixed_nco = FixedCarrierNCO(
+            clock_hz=cfg.carrier_nco_clock_hz,
+            word_bits=cfg.carrier_nco_word_bits,
+            coherent_interval_s=epoch_duration_s,
+            initial_frequency_hz=carrier_frequency_command_hz,
+        )
+        carrier_frequency_hz = fixed_nco.frequency_hz
+        carrier_phase_rad = fixed_nco.phase_rad
+        frequency_lsb_hz = fixed_nco.frequency_lsb_hz
+        carrier_fcw_history = np.zeros(n_epochs, dtype=np.int64)
+        carrier_phase_word_history = np.zeros(n_epochs, dtype=np.uint64)
+    else:
+        carrier_frequency_hz = carrier_frequency_command_hz
+        carrier_phase_rad = 0.0
+        frequency_lsb_hz = 0.0
     code_phase_chips = 0.0
     dll_frequency_correction_hz = 0.0
     code_rate_hz = nominal_code_rate_hz * (
@@ -109,7 +128,13 @@ def track(
     dll_error = np.zeros(n_epochs, dtype=np.float64)
     pll_error_rad = np.zeros(n_epochs, dtype=np.float64)
     fll_error_hz = np.zeros(n_epochs, dtype=np.float64)
+    carrier_frequency_command_history = np.zeros(
+        n_epochs, dtype=np.float64
+    )
     carrier_frequency_history = np.zeros(n_epochs, dtype=np.float64)
+    carrier_frequency_quantization_error_history = np.zeros(
+        n_epochs, dtype=np.float64
+    )
     code_rate_history = np.zeros(n_epochs, dtype=np.float64)
     code_phase_history = np.zeros(n_epochs, dtype=np.float64)
     phase_lock_metric = np.zeros(n_epochs, dtype=np.float64)
@@ -158,14 +183,28 @@ def track(
         fll_correction = 0.0
         if 0 < epoch < cfg.fll_assist_epochs:
             fll_correction = cfg.fll_gain * fll_error_hz[epoch]
-        carrier_frequency_hz += (
+        carrier_frequency_command_hz += (
             fll_correction + cfg.pll_ki_hz * pll_error_rad[epoch]
         )
-        carrier_phase_rad = _wrap_phase(
-            carrier_phase_rad
-            + 2.0 * np.pi * carrier_frequency_hz * epoch_duration_s
-            + cfg.pll_kp * pll_error_rad[epoch]
-        )
+        phase_correction_rad = cfg.pll_kp * pll_error_rad[epoch]
+        if fixed_nco is None:
+            carrier_frequency_hz = carrier_frequency_command_hz
+            carrier_phase_rad = _wrap_phase(
+                carrier_phase_rad
+                + 2.0 * np.pi * carrier_frequency_hz * epoch_duration_s
+                + phase_correction_rad
+            )
+            quantization_error_hz = 0.0
+        else:
+            nco_update = fixed_nco.update(
+                carrier_frequency_command_hz,
+                phase_correction_rad,
+            )
+            carrier_frequency_hz = nco_update.frequency_hz
+            carrier_phase_rad = fixed_nco.phase_rad
+            quantization_error_hz = nco_update.quantization_error_hz
+            carrier_fcw_history[epoch] = nco_update.fcw
+            carrier_phase_word_history[epoch] = nco_update.phase_word
 
         dll_frequency_correction_hz += cfg.dll_ki_hz * dll_error[epoch]
         code_rate_hz = (
@@ -182,7 +221,13 @@ def track(
             )
         )
 
+        carrier_frequency_command_history[epoch] = (
+            carrier_frequency_command_hz
+        )
         carrier_frequency_history[epoch] = carrier_frequency_hz
+        carrier_frequency_quantization_error_history[epoch] = (
+            quantization_error_hz
+        )
         code_rate_history[epoch] = code_rate_hz
         code_phase_history[epoch] = code_phase_chips
         previous_prompt = prompt[epoch]
@@ -197,7 +242,7 @@ def track(
             epoch_duration_s,
         )
 
-    return {
+    result = {
         "success": True,
         "status": "tracking",
         "first_epoch_sample": first_epoch,
@@ -208,10 +253,20 @@ def track(
         "dll_error": dll_error,
         "pll_error_rad": pll_error_rad,
         "fll_error_hz": fll_error_hz,
+        "carrier_nco_mode": cfg.carrier_nco_mode,
+        "carrier_frequency_command_hz": carrier_frequency_command_history,
         "carrier_frequency_hz": carrier_frequency_history,
+        "carrier_frequency_quantization_error_hz": (
+            carrier_frequency_quantization_error_history
+        ),
+        "carrier_nco_frequency_lsb_hz": frequency_lsb_hz,
         "code_rate_hz": code_rate_history,
         "code_phase_chips": code_phase_history,
         "prompt_magnitude": np.abs(prompt),
         "phase_lock_metric": phase_lock_metric,
         "cn0_db_hz": cn0_db_hz,
     }
+    if fixed_nco is not None:
+        result["carrier_fcw"] = carrier_fcw_history
+        result["carrier_phase_word"] = carrier_phase_word_history
+    return result
