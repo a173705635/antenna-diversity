@@ -225,6 +225,9 @@ class TrackingConfig:
     cn0_window_epochs: int = 10
     max_epochs: int = 30
     max_final_doppler_error_hz: float = 250.0
+    carrier_nco_mode: str = "float"
+    carrier_nco_clock_hz: float = 6.6e6
+    carrier_nco_word_bits: int = 30
 
 
 @dataclass
@@ -440,6 +443,45 @@ class SimulationConfig:
             raise ValueError("acquisition threshold and code rate must be positive")
         if self.tracking.coherent_ms < 1 or self.tracking.max_epochs < 1:
             raise ValueError("tracking integration length and epoch count must be positive")
+        if (
+            not isinstance(self.tracking.carrier_nco_mode, str)
+            or self.tracking.carrier_nco_mode not in {"float", "fixed"}
+        ):
+            raise ValueError(
+                'tracking.carrier_nco_mode must be "float" or "fixed"'
+            )
+        if (
+            isinstance(self.tracking.carrier_nco_clock_hz, (bool, np.bool_))
+            or not _is_finite_real_scalar(
+                self.tracking.carrier_nco_clock_hz
+            )
+            or self.tracking.carrier_nco_clock_hz <= 0.0
+        ):
+            raise ValueError(
+                "tracking.carrier_nco_clock_hz must be a finite positive real scalar"
+            )
+        if (
+            isinstance(self.tracking.carrier_nco_word_bits, (bool, np.bool_))
+            or not isinstance(
+                self.tracking.carrier_nco_word_bits, (int, np.integer)
+            )
+            or not 2 <= int(self.tracking.carrier_nco_word_bits) <= 62
+        ):
+            raise ValueError(
+                "tracking.carrier_nco_word_bits must be an integer in [2, 62]"
+            )
+        if self.tracking.carrier_nco_mode == "fixed":
+            nco_ticks = (
+                self.tracking.carrier_nco_clock_hz
+                * self.tracking.coherent_ms
+                * 1e-3
+            )
+            if not np.isclose(
+                nco_ticks, round(nco_ticks), rtol=0.0, atol=1e-9
+            ):
+                raise ValueError(
+                    "tracking coherent interval must contain an integer number of NCO ticks"
+                )
 
 
 def legacy_ula_config() -> SimulationConfig:
