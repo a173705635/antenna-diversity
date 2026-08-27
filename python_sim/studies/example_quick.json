@@ -10,7 +10,7 @@
       ["TL", "TR", "BR"]
     ],
     "spatial_modes": ["egc", "mvdr"],
-    "full_chain_modes": ["single", "egc", "mvdr"],
+    "full_chain_modes": ["single", "egc", "mvdr", "blind_null"],
     "single_antennas": ["TL", "TR", "BL", "BR"],
     "ranking_mode": "mvdr",
     "exclusion_angle_deg": 15.0,

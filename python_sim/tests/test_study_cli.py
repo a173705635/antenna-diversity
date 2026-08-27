@@ -225,7 +225,9 @@ def test_editable_quick_example_resolves_every_visible_axis():
     assert resolved.study.preset == "quick"
     assert resolved.study.combinations == (("TL", "BR"), ("TL", "TR", "BR"))
     assert resolved.study.spatial_modes == ("egc", "mvdr")
-    assert resolved.study.full_chain_modes == ("single", "egc", "mvdr")
+    assert resolved.study.full_chain_modes == (
+        "single", "egc", "mvdr", "blind_null",
+    )
     assert resolved.study.azimuths_deg.size
     assert resolved.study.elevations_deg.size
     assert resolved.study.powers_dbm.size
@@ -248,7 +250,9 @@ def test_editable_antenna_realism_example_resolves_small_parametric_study():
 
     assert resolved.study.combinations == (("TL", "BR"), ("TL", "TR", "BR"))
     assert resolved.study.spatial_modes == ("egc", "mvdr")
-    assert resolved.study.full_chain_modes == ("single", "egc", "mvdr")
+    assert resolved.study.full_chain_modes == (
+        "single", "egc", "mvdr", "blind_null",
+    )
     assert resolved.study.azimuths_deg.tolist() == [0.0, 120.0, 240.0]
     assert resolved.study.elevations_deg.tolist() == [10.0, 60.0]
     assert resolved.study.powers_dbm.tolist() == [-95.0, -85.0]
@@ -348,7 +352,9 @@ def test_real_minimal_cli_runs_all_stages_and_publishes_complete_evidence(
         assert (study_dir / target).resolve().is_file()
 
     validation = rows_by_table["full_chain_validation"]
-    assert {row["mode"] for row in validation} == {"single", "egc", "mvdr"}
+    assert {row["mode"] for row in validation} == {
+        "single", "egc", "mvdr", "blind_null",
+    }
     for row in validation:
         assert row["status"]
         cn0 = row["final_cn0_db_hz"]

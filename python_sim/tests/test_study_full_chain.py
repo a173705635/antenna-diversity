@@ -140,6 +140,36 @@ def test_full_chain_uses_explicit_analytic_sinr_name(monkeypatch):
     assert all("output_sinr_db" not in row for row in records.metrics)
 
 
+def test_blind_full_chain_row_has_no_analytic_sinr(monkeypatch):
+    analytic_calls = []
+
+    def controlled_analytic(_simulation, mode):
+        analytic_calls.append(mode)
+        return SimpleNamespace(metrics={"output_sinr_db": 12.5})
+
+    monkeypatch.setattr(
+        "antenna_diversity.studies.full_chain.evaluate_configuration_spatially",
+        controlled_analytic,
+    )
+    monkeypatch.setattr(
+        "antenna_diversity.studies.full_chain.run_end_to_end",
+        controlled_results,
+    )
+    records = run_selected_full_chain(
+        resolved_for_test(
+            combinations=(("TL", "BR"),),
+            full_chain_modes=("mvdr", "blind_null"),
+            full_chain_run_count=1,
+        ),
+        one_selected_case(),
+    )
+
+    assert analytic_calls == ["mvdr"]
+    rows = {row["mode"]: row for row in records.metrics}
+    assert isinstance(rows["mvdr"]["analytic_output_sinr_db"], float)
+    assert rows["blind_null"]["analytic_output_sinr_db"] is None
+
+
 @pytest.mark.parametrize("replacement", [
     {},
     {**one_selected_case().cases[0].parameters["interferers"][0], "enable": "false"},
@@ -274,14 +304,16 @@ def test_full_chain_runs_one_default_duration_case_without_raw_arrays():
     records = run_selected_full_chain(
         resolved_for_test(
             combinations=(("TL", "BR"),),
-            full_chain_modes=("single", "egc", "mvdr"),
+            full_chain_modes=("single", "egc", "mvdr", "blind_null"),
             full_chain_run_count=1,
         ),
         one_selected_case(),
     )
 
-    assert len(records.metrics) == 3
-    assert {row["mode"] for row in records.metrics} == {"single", "egc", "mvdr"}
+    assert len(records.metrics) == 4
+    assert {row["mode"] for row in records.metrics} == {
+        "single", "egc", "mvdr", "blind_null",
+    }
     assert all(np.isfinite(row["cn0_db_hz"]) for row in records.cn0)
     assert "ndarray" not in repr(records.to_dict())
     json.dumps(records.to_dict(), allow_nan=False)

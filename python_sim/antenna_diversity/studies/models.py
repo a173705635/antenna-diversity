@@ -395,10 +395,15 @@ def validate_study_config(study: StudyConfig) -> None:
         or set(study.single_antennas) - allowed_antennas
     ):
         raise ValueError("study.single_antennas must be a nonempty unique corner subset")
-    allowed_modes = {"single", "egc", "mvdr"}
-    if not study.spatial_modes or set(study.spatial_modes) - allowed_modes:
+    analytical_modes = {"single", "egc", "mvdr"}
+    full_chain_modes = analytical_modes | {"blind_null"}
+    if "blind_null" in study.spatial_modes:
+        raise ValueError(
+            "blind_null requires DFE samples and is valid only in full-chain modes"
+        )
+    if not study.spatial_modes or set(study.spatial_modes) - analytical_modes:
         raise ValueError("study.spatial_modes contains an unknown mode")
-    if not study.full_chain_modes or set(study.full_chain_modes) - allowed_modes:
+    if not study.full_chain_modes or set(study.full_chain_modes) - full_chain_modes:
         raise ValueError("study.full_chain_modes contains an unknown mode")
     if study.ranking_mode not in study.spatial_modes:
         raise ValueError("study.ranking_mode must be included in study.spatial_modes")

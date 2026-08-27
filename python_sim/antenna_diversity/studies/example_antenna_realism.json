@@ -10,7 +10,7 @@
       ["TL", "TR", "BR"]
     ],
     "spatial_modes": ["egc", "mvdr"],
-    "full_chain_modes": ["single", "egc", "mvdr"],
+    "full_chain_modes": ["single", "egc", "mvdr", "blind_null"],
     "single_antennas": ["TL", "BR"],
     "ranking_mode": "mvdr",
     "azimuths_deg": [0.0, 120.0, 240.0],

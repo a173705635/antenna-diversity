@@ -64,7 +64,8 @@ def _study_for_preset(preset: str) -> StudyConfig:
     return StudyConfig(
         schema_version=1, name="spatial-research", preset=preset, seed=42,
         output_dir=Path("results") / "studies", combinations=_ALL_COMBINATIONS,
-        spatial_modes=("egc", "mvdr"), full_chain_modes=("single", "egc", "mvdr"),
+        spatial_modes=("egc", "mvdr"),
+        full_chain_modes=("single", "egc", "mvdr", "blind_null"),
         single_antennas=("TL", "TR", "BL", "BR"), ranking_mode="mvdr", exclusion_angle_deg=15.0,
         azimuths_deg=np.arange(0, 360, az_step), elevations_deg=np.arange(0, 91, el_step), powers_dbm=powers,
         direction_errors_deg=np.linspace(-12, 12, linear_count), position_errors_m=np.linspace(-0.012, 0.012, linear_count),
