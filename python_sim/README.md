@@ -1,6 +1,6 @@
 # 手机角点 GPS L1 C/A 空域抗干扰仿真
 
-本目录是 GPS L1 C/A 的 Python 原生端到端仿真：入射方向/极化 → 分层手机天线 → 等效复数 IF → RF/ADC → DFE → SINGLE/EGC/MVDR → 捕获/跟踪。`default_config()` 仍使用 **HUAWEI Mate 70 的 160.9 × 75.9 × 7.8 mm 外形尺寸**和理想、共面、各向同性角点，保证旧基线不变；另有明确标为非实测的参数化预设，以及需要外部 CSV 与摘要的测量输入接口。任何预设都**不代表已知的真实 Mate 70 天线位置或产品性能**。
+本目录是 GPS L1 C/A 的 Python 原生端到端仿真：入射方向/极化 → 分层手机天线 → 等效复数 IF → RF/ADC → DFE → SINGLE/EGC/MVDR/blind_null → 捕获/跟踪。`default_config()` 仍使用 **HUAWEI Mate 70 的 160.9 × 75.9 × 7.8 mm 外形尺寸**和理想、共面、各向同性角点，保证旧基线不变；另有明确标为非实测的参数化预设，以及需要外部 CSV 与摘要的测量输入接口。任何预设都**不代表已知的真实 Mate 70 天线位置或产品性能**。
 
 ![手机角点空域抗干扰仿真架构](docs/simulation_architecture.svg)
 
@@ -37,6 +37,30 @@ python -W error run_legacy_ula.py
 ```
 
 `default_config()` 是四个理想手机角点的当前默认；`parametric_phone_config()` 提供确定性的 `synthetic_phone_corner_v1` 合成方向图、姿态、遮挡、极化和弱非对称互耦；`legacy_ula_config()` 保留原始双阵元半波长 ULA 基线。三者共享 channels-by-samples 的 RF、DFE、合并、捕获和跟踪链路。
+
+## 捕获前 Blind Nulling
+
+默认的四个分支为 `single`、`egc`、`mvdr` 和 `blind_null`。前三者分别使用参考通道、假设目标导向矢量的等增益合并，以及同一目标约束下的 loaded MVDR；`blind_null` 在捕获前仅从 DFE 的多通道样本估计一个占主导的相关干扰模态，再对配置的参考通道进行投影。它不接收、也不推断目标方向，因此不能宣称保护未知目标；目标损失必须由后续捕获/跟踪证据检验。
+
+```python
+from antenna_diversity.config import default_config
+from antenna_diversity.pipeline import run_end_to_end
+
+cfg = default_config()
+cfg.diversity.modes = ("single", "egc", "mvdr", "blind_null")
+cfg.diversity.blind_null.detection_threshold_db = 6.0
+cfg.diversity.blind_null.reference_channel = 0
+cfg.diversity.blind_null.min_reference_projection_power = 0.01
+result = run_end_to_end(cfg)
+blind = result.branches["blind_null"]
+print(blind.combining["detection_score_db"])
+print(blind.combining["nulling_enabled"])
+print(blind.combining["bypass_reason"])
+```
+
+`detection_score_db` 是归一化样本协方差主特征值相对其余特征值均值的 dB 比；`interference_detected` 表示它是否达到门限；`nulling_enabled` 表示参考投影是否安全且实际使用了零陷；`bypass_reason` 为 `None` 或 `no_interference_detected`、`unsafe_reference_projection`、`zero_input_power`、`degenerate_interference_vector` 之一。盲权值由整段 DFE 数据块估计一次，并固定应用于该完整数据块，不是在线或滑窗算法。
+
+固定的通道间相位偏置会被样本协方差观察到，因而可包含在所估计的干扰向量中；但在权值估计窗口和权值使用窗口之间，**相对相位必须稳定**。相位漂移会降低零陷深度。本实现没有解决动态相位、多干扰子空间估计或真实 Mate 70 校准。
 
 ## Carrier NCO 定点验证
 
@@ -115,7 +139,7 @@ python run_spatial_research.py --config studies/example_quick.json --resume
 └── report.md
 ```
 
-表中的 `output_sinr_db` / `analytic_output_sinr_db` 是由功率、阵列流形和协方差得到的解析空间指标，不生成时域 RF 样本。`acquisition_metric`、`acquired`、`tracking` 和最终 Doppler 来自 RF → ADC → DFE → 合并 → 捕获/跟踪的样本链；`final_cn0_db_hz` 仅在跟踪给出有限估计时存在，否则为 JSON `null`，原因见同一行的 `status`/`reason`。解析 SINR、捕获指标与 C/N₀不是可互换的量，报告把它们并列作为不同证据。
+表中的 `output_sinr_db` / `analytic_output_sinr_db` 是由功率、阵列流形和协方差得到的解析空间指标，不生成时域 RF 样本。`acquisition_metric`、`acquired`、`tracking` 和最终 Doppler 来自 RF → ADC → DFE → 合并 → 捕获/跟踪的样本链；`final_cn0_db_hz` 仅在跟踪给出有限估计时存在，否则为 JSON `null`，原因见同一行的 `status`/`reason`。`blind_null` 只允许在完整样本链中运行，故其 `analytic_output_sinr_db` 为 `None`，绝不能作为零值绘制或与解析 MVDR SINR 混同。解析 SINR、捕获指标与 C/N₀不是可互换的量，报告把它们并列作为不同证据。
 
 > **证据标签：** 报告中的 `ideal` 是旧各向同性基线，`parametric` 是人为合成敏感性模型，`measured` 才表示由带 SHA-256 的外部表格驱动。三者都不等于 Mate 70 产品级验证。
 

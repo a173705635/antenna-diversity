@@ -8,7 +8,7 @@
 
 ## 1. 研究问题和边界
 
-仿真比较 `single`、`egc`、`mvdr` 三个分支。比较不仅限于阵列响应：每个合并输出经过相同的 Doppler–码相位捕获，捕获成功后再进入闭环跟踪。因此问题是“空间处理后的信号能否被 GNSS 基带捕获并跟踪”。
+仿真比较 `single`、`egc`、`mvdr`、`blind_null` 四个分支。比较不仅限于阵列响应：每个合并输出经过相同的 Doppler–码相位捕获，捕获成功后再进入闭环跟踪。因此问题是“空间处理后的信号能否被 GNSS 基带捕获并跟踪”。
 
 L1 载频 1575.42 MHz 用于波长、空间相位和码 Doppler 比例；实际生成并采样的是 4.092 MHz 等效复数 IF。默认强 CW 案例中可重复看到 MVDR 空域抑制和后续捕获/跟踪成功，但这只适用于当前理想几何、静态方向和已知目标导向矢量，不是实际手机性能结论。
 
@@ -92,13 +92,14 @@ j_k[n]=w_k[n]\sqrt{P_kR}
 
 [`antenna_diversity/dfe/processing.py`](antenna_diversity/dfe/processing.py) 对所有通道使用公共 NCO 做 −4.092 MHz DDC，随后经过 129-tap Hamming-windowed sinc FIR、64 样点群延迟对齐、4 倍抽取和 8-bit 重量化。输出率为 4.092 Msps，即 4 samples/chip。公共处理保持通道间相对相位。当前 DDC NCO、FIR 系数和 FIR 累加仍为浮点运算；只有 DFE 输出边界按配置对 I/Q 舍入、移位并饱和到整数码值，数组容器仍为 `complex128`。
 
-## 6. SINGLE、EGC 和 MVDR
+## 6. SINGLE、EGC、MVDR 和 Blind Nulling
 
-三个合并器接受 2、3 或 4 通道并产生一维样本：
+四个合并器接受 2、3 或 4 通道并产生一维样本：
 
 - SINGLE 选第一激活通道；
 - EGC 按假设目标导向矢量做相位对齐和等增益合并；
-- MVDR 从 DFE 样本协方差计算 loaded 权值。
+- MVDR 从 DFE 样本协方差计算 loaded 权值；
+- `blind_null` 从 DFE 样本协方差检测单个占主导的相关干扰模态，并对配置的参考通道投影。
 
 MVDR 使用
 
@@ -110,6 +111,35 @@ MVDR 使用
 \]
 
 并保持 \(\mathbf w^H\mathbf a_0=1\) 的目标约束。当前端到端权值对整段 DFE 数据一次计算，不是在线滑窗 MVDR。
+
+Blind Nulling 的函数边界是 `combine_blind_null(x, cfg)`，其中 `x` 仅为 shape `(channels, samples)` 的 DFE 样本，`cfg` 只包含 `detection_threshold_db`、`reference_channel` 和 `min_reference_projection_power`；接口没有目标导向矢量。令 \(N\) 为样本数、\(\mathbf X\) 为该数据块，先计算
+
+\[
+\widehat{\mathbf R}=\frac{\mathbf X\mathbf X^H}{N},\qquad
+\mathbf C=\mathbf D^{-1/2}\widehat{\mathbf R}\mathbf D^{-1/2},\qquad
+\mathbf D=\operatorname{diag}(\widehat{\mathbf R}).
+\]
+
+令 \(\lambda_1\le\cdots\le\lambda_M\) 为 Hermitian \(\mathbf C\) 的特征值，检测分数为
+
+\[
+S_{\mathrm{dB}}=10\log_{10}\!\left(
+\frac{\lambda_M}{\frac{1}{M-1}\sum_{m=1}^{M-1}\lambda_m}
+\right).
+\]
+
+最大特征向量按通道功率映射并归一化，得到 \(\hat{\mathbf v}\)。若 \(S_{\mathrm{dB}}\) 达到阈值，参考通道基向量为 \(\mathbf q=\mathbf e_r\)，则
+
+\[
+\mathbf P_\perp=\mathbf I-\hat{\mathbf v}\hat{\mathbf v}^H,\qquad
+\gamma=\mathbf q^H\mathbf P_\perp\mathbf q,\qquad
+\mathbf w=\frac{\mathbf P_\perp\mathbf q}{\gamma},\qquad
+y[n]=\mathbf w^H\mathbf x[n].
+\]
+
+这保证 \(\mathbf w^H\hat{\mathbf v}=0\) 且 \(\mathbf w^H\mathbf q=1\)。若输入零功率、相关归一化/向量退化、检测未过门限，或 \(\gamma\) 小于 `min_reference_projection_power`，分支分别以 `zero_input_power`、`degenerate_interference_vector`、`no_interference_detected`、`unsafe_reference_projection` 旁路到原始参考通道。权值从整段 DFE 数据块形成并固定用于同一完整块；它不处理滑窗更新、动态相位或多干扰子空间。
+
+固定的跨通道相位偏置会出现在 \(\widehat{\mathbf R}\) 中，因而能被 \(\hat{\mathbf v}\) 吸收；但权值估计与使用期间的相对相位必须稳定，漂移会降低零陷深度。该事实不是对真实 Mate 70 通道校准、动态相位容限或多个干扰源的验证。
 
 ## 7. 捕获与跟踪
 
@@ -147,6 +177,8 @@ FCW 是 N 位有符号二进制补码，支持 `[-f_clk/2, f_clk/2)`；相位字
 - `scan_interferer_powers()`、`scan_diagonal_loading()`、`scan_position_errors()`。
 
 所有扫描深拷贝配置，并保持调用者提供的参数顺序。
+
+`blind_null` 的权值必须从实际 DFE 样本协方差得到，因而只属于完整样本链，不能作为解析扫描模式；研究全链行中的 `analytic_output_sinr_db` 对该分支明确为 `None`。
 
 ## 9. 顺序 Monte Carlo
 
