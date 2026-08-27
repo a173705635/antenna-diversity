@@ -202,7 +202,7 @@ class BlindNullConfig:
 
 @dataclass
 class DiversityConfig:
-    modes: tuple[str, ...] = ("single", "egc", "mvdr")
+    modes: tuple[str, ...] = ("single", "egc", "mvdr", "blind_null")
     diagonal_loading_factor: float = 1e-2
     blind_null: BlindNullConfig = field(default_factory=BlindNullConfig)
 
@@ -471,6 +471,26 @@ class SimulationConfig:
         ):
             raise ValueError(
                 "blind-null projection power must lie in (0, 1]"
+            )
+
+        allowed_diversity_modes = {"single", "egc", "mvdr", "blind_null"}
+        modes = self.diversity.modes
+        if (
+            not isinstance(modes, tuple)
+            or not modes
+            or any(
+                not isinstance(mode, str)
+                or mode.lower() not in allowed_diversity_modes
+                for mode in modes
+            )
+        ):
+            raise ValueError(
+                "diversity.modes must be a nonempty unique tuple of allowed modes"
+            )
+        normalized_modes = tuple(mode.lower() for mode in modes)
+        if len(set(normalized_modes)) != len(normalized_modes):
+            raise ValueError(
+                "diversity.modes must be a nonempty unique tuple of allowed modes"
             )
 
         bins = np.asarray(self.acquisition.doppler_bins_hz)

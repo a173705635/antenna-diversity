@@ -12,6 +12,7 @@ from antenna_diversity.array.effects import AttenuationRegion, CouplingPath
 from antenna_diversity.array.patterns import ParametricPatternParameters
 from antenna_diversity.array.phone_model import PhoneAntennaModel
 from antenna_diversity.config import (
+    Direction,
     default_config,
     legacy_ula_config,
     mate70_default_config,
@@ -36,7 +37,7 @@ def test_legacy_pipeline_preserves_original_diversity_conclusion():
 
     results = run_end_to_end(cfg)
 
-    assert set(results.branches) == {"single", "egc", "mvdr"}
+    assert set(results.branches) == {"single", "egc", "mvdr", "blind_null"}
     assert not results.branches["single"].acquisition["success"]
     assert not results.branches["egc"].acquisition["success"]
     assert results.branches["mvdr"].acquisition["success"]
@@ -66,7 +67,37 @@ def test_legacy_pipeline_preserves_original_diversity_conclusion():
         )
     )
     assert mvdr_gain < single_gain
-    assert len(results.metrics) == 3
+    assert len(results.metrics) == 4
+
+
+def test_legacy_pipeline_blind_null_recovers_before_acquisition():
+    cfg = legacy_ula_config()
+    cfg.plot.enable = False
+
+    results = run_end_to_end(cfg)
+
+    assert not results.branches["single"].acquisition["success"]
+    blind = results.branches["blind_null"]
+    assert blind.combining["interference_detected"]
+    assert blind.combining["nulling_enabled"]
+    assert blind.acquisition["success"]
+    assert blind.tracking["success"]
+
+
+def test_blind_branch_does_not_depend_on_assumed_target_steering():
+    first_cfg = mate70_default_config()
+    first_cfg.diversity.modes = ("blind_null",)
+    first_cfg.plot.enable = False
+    second_cfg = copy.deepcopy(first_cfg)
+    second_cfg.signal.assumed_direction = Direction(300.0, 5.0)
+
+    first = run_end_to_end(first_cfg).branches["blind_null"]
+    second = run_end_to_end(second_cfg).branches["blind_null"]
+
+    np.testing.assert_array_equal(first.combined, second.combined)
+    np.testing.assert_array_equal(
+        first.combining["weights"], second.combining["weights"]
+    )
 
 
 def test_mate70_baseline_mvdr_improves_spatial_and_receiver_metrics():
@@ -113,8 +144,9 @@ def test_phone_pipeline_uses_assumed_target_steering_for_weights():
     results = run_end_to_end(cfg)
 
     assert results.dfe_channels.shape[0] == 4
-    assert set(results.branches) == {"single", "egc", "mvdr"}
-    for branch in results.branches.values():
+    assert set(results.branches) == {"single", "egc", "mvdr", "blind_null"}
+    for mode in ("single", "egc", "mvdr"):
+        branch = results.branches[mode]
         np.testing.assert_allclose(
             branch.combining["constraint_steering"],
             results.truth["desired_steering_assumed"],
