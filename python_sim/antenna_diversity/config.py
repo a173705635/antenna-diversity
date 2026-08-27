@@ -194,9 +194,17 @@ class DFEConfig:
 
 
 @dataclass
+class BlindNullConfig:
+    detection_threshold_db: float = 6.0
+    reference_channel: int = 0
+    min_reference_projection_power: float = 0.01
+
+
+@dataclass
 class DiversityConfig:
     modes: tuple[str, ...] = ("single", "egc", "mvdr")
     diagonal_loading_factor: float = 1e-2
+    blind_null: BlindNullConfig = field(default_factory=BlindNullConfig)
 
 
 @dataclass
@@ -433,6 +441,37 @@ class SimulationConfig:
             samples_per_chip, round(samples_per_chip), atol=1e-12
         ):
             raise ValueError("DFE output must contain at least two integer samples per chip")
+
+        blind_null = self.diversity.blind_null
+        if not isinstance(blind_null, BlindNullConfig):
+            raise ValueError("diversity.blind_null must be a BlindNullConfig")
+        if (
+            isinstance(blind_null.detection_threshold_db, (bool, np.bool_))
+            or not np.isscalar(blind_null.detection_threshold_db)
+            or not _is_finite_real_scalar(blind_null.detection_threshold_db)
+        ):
+            raise ValueError(
+                "blind-null detection threshold must be a finite real scalar"
+            )
+        if (
+            isinstance(blind_null.reference_channel, (bool, np.bool_))
+            or not isinstance(blind_null.reference_channel, (int, np.integer))
+            or blind_null.reference_channel < 0
+        ):
+            raise ValueError(
+                "blind-null reference channel must be a nonnegative integer"
+            )
+        if (
+            isinstance(blind_null.min_reference_projection_power, (bool, np.bool_))
+            or not np.isscalar(blind_null.min_reference_projection_power)
+            or not _is_finite_real_scalar(
+                blind_null.min_reference_projection_power
+            )
+            or not 0.0 < blind_null.min_reference_projection_power <= 1.0
+        ):
+            raise ValueError(
+                "blind-null projection power must lie in (0, 1]"
+            )
 
         bins = np.asarray(self.acquisition.doppler_bins_hz)
         if bins.size == 0 or not np.all(np.isfinite(bins)):

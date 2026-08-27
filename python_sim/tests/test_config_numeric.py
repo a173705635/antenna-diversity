@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from antenna_diversity.config import default_config
+from antenna_diversity.config import default_config, mate70_default_config
 from antenna_diversity.numeric import matlab_round
 
 
@@ -21,6 +21,32 @@ def test_default_config_is_mate70_four_corner_array():
 
     assert cfg.array.active_antennas == ("TL", "TR", "BL", "BR")
     assert cfg.array.num_elements == 4
+
+
+def test_blind_null_defaults_are_explicit():
+    cfg = mate70_default_config()
+
+    assert cfg.diversity.blind_null.detection_threshold_db == 6.0
+    assert cfg.diversity.blind_null.reference_channel == 0
+    assert cfg.diversity.blind_null.min_reference_projection_power == 0.01
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("detection_threshold_db", np.nan, "detection threshold"),
+        ("reference_channel", True, "reference channel"),
+        ("reference_channel", -1, "reference channel"),
+        ("min_reference_projection_power", 0.0, "projection power"),
+        ("min_reference_projection_power", 1.1, "projection power"),
+    ],
+)
+def test_blind_null_config_rejects_invalid_values(field, value, message):
+    cfg = mate70_default_config()
+    setattr(cfg.diversity.blind_null, field, value)
+
+    with pytest.raises(ValueError, match=message):
+        cfg.validate()
 
 
 def test_matlab_round_moves_half_ties_away_from_zero():
