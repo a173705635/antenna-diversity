@@ -60,7 +60,11 @@ def test_cn0_plot_shows_tracked_modes_and_failed_acquisition_status():
     figure = plot_cn0(results)
     axis = figure.axes[0]
 
-    assert [line.get_label() for line in axis.lines] == ["EGC", "MVDR"]
+    assert [line.get_label() for line in axis.lines] == [
+        "EGC",
+        "MVDR",
+        "BLIND_NULL",
+    ]
     assert axis.get_xlabel() == "Tracking time (ms)"
     assert axis.get_ylabel() == "Estimated C/N₀ (dB-Hz)"
     assert axis.get_title() == "Tracking C/N₀ comparison"
@@ -88,7 +92,7 @@ def test_cn0_plot_returns_annotated_figure_when_no_branch_tracks():
     axis = figure.axes[0]
 
     assert not axis.lines
-    assert len(axis.texts) == 3
+    assert len(axis.texts) == 4
     assert all("C/N₀ unavailable" in text.get_text() for text in axis.texts)
 
 
@@ -134,11 +138,12 @@ def test_combined_spectra_share_axes_and_show_all_modes(tmp_path):
     paths = save_figures({"combined_spectra": figure}, tmp_path)
     main_axes = figure.axes
 
-    assert len(main_axes) == 3
+    assert len(main_axes) == 4
     assert [axis.get_title() for axis in main_axes] == [
         "SINGLE combined output",
         "EGC combined output",
         "MVDR combined output",
+        "BLIND_NULL combined output",
     ]
     assert all(len(axis.lines) >= 3 for axis in main_axes)
     assert all(
@@ -153,7 +158,36 @@ def test_combined_spectra_share_axes_and_show_all_modes(tmp_path):
     plt.close(figure)
 
 
-def test_phone_array_response_contains_three_heatmaps_and_direction_markers():
+def test_combined_spectra_show_four_modes_in_stable_order():
+    results = run_end_to_end(mate70_default_config())
+    figure = plot_combined_spectra(results)
+    titles = [
+        axis.get_title()
+        for axis in figure.axes
+        if axis.get_ylabel() == "Magnitude (dB)"
+    ]
+    assert titles == [
+        "SINGLE combined output",
+        "EGC combined output",
+        "MVDR combined output",
+        "BLIND_NULL combined output",
+    ]
+
+
+def test_combined_spectra_accept_original_three_mode_configuration():
+    cfg = mate70_default_config()
+    cfg.diversity.modes = ("single", "egc", "mvdr")
+    results = run_end_to_end(cfg)
+    figure = plot_combined_spectra(results)
+    data_axes = [
+        axis
+        for axis in figure.axes
+        if axis.get_ylabel() == "Magnitude (dB)"
+    ]
+    assert len(data_axes) == 3
+
+
+def test_phone_array_response_contains_four_heatmaps_and_direction_markers():
     """Catch dispatch back to the legacy 1-D response or omitted directions."""
     cfg = mate70_default_config()
     cfg.plot.enable = False
@@ -169,7 +203,7 @@ def test_phone_array_response_contains_three_heatmaps_and_direction_markers():
     figure = plot_array_response(results)
     image_axes = [axis for axis in figure.axes if axis.images]
 
-    assert len(image_axes) == 3
+    assert len(image_axes) == 4
     assert all(axis.get_xlabel() == "Azimuth (deg)" for axis in image_axes)
     assert all(axis.get_ylabel() == "Elevation (deg)" for axis in image_axes)
     assert all(len(axis.lines) == 3 for axis in image_axes)
@@ -184,8 +218,8 @@ def test_phone_array_response_contains_three_heatmaps_and_direction_markers():
     plt.close(figure)
 
 
-def test_phone_array_response_uses_fixed_required_mode_order():
-    """Catch dict insertion order or extra branches changing the three panels."""
+def test_phone_array_response_uses_stable_mode_order_with_extras():
+    """Catch dict insertion order from changing standard-then-extra panels."""
     cfg = mate70_default_config()
     cfg.plot.enable = False
     cfg.signal.duration_ms = 8
@@ -206,28 +240,30 @@ def test_phone_array_response_uses_fixed_required_mode_order():
         "SINGLE array response",
         "EGC array response",
         "MVDR array response",
+        "DIAGNOSTIC array response",
     ]
     plt.close(figure)
 
 
-def test_phone_array_response_rejects_missing_required_branch():
+def test_phone_array_response_renders_nonempty_supported_subset():
     """Catch incomplete phone response reports silently rendering fewer panels."""
     cfg = mate70_default_config()
     cfg.plot.enable = False
     cfg.signal.duration_ms = 8
     cfg.tracking.max_epochs = 2
     results = run_end_to_end(cfg)
+    branches = results.branches
     results.branches = {
-        mode: branch
-        for mode, branch in results.branches.items()
-        if mode != "egc"
+        "mvdr": branches["mvdr"],
+        "single": branches["single"],
     }
 
-    with pytest.raises(
-        ValueError,
-        match="phone array response requires single, egc, and mvdr branches",
-    ):
-        plot_array_response(results)
+    figure = plot_array_response(results)
+    image_axes = [axis for axis in figure.axes if axis.images]
+    assert [axis.get_title() for axis in image_axes] == [
+        "SINGLE array response",
+        "MVDR array response",
+    ]
 
 
 def test_phone_spectra_mark_enabled_interferers_in_each_sampling_domain():
