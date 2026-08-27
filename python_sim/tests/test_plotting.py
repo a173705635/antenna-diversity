@@ -18,6 +18,7 @@ from antenna_diversity.analysis.plotting import (
     plot_cn0,
     plot_results,
     plot_spectra,
+    plot_tracking,
     save_figures,
 )
 from antenna_diversity.config import (
@@ -47,6 +48,7 @@ def test_acquisition_plot_contains_maps_slices_and_peak_markers(tmp_path):
     assert len(figure.axes) >= 6
     assert sum(bool(axis.images) for axis in figure.axes) >= 3
     assert sum(len(axis.lines) for axis in figure.axes) >= 9
+    assert any("BLIND_NULL" in axis.get_title() for axis in figure.axes)
     assert paths["acquisition_search"].is_file()
     assert paths["acquisition_search"].stat().st_size > 0
     plt.close(figure)
@@ -74,6 +76,22 @@ def test_cn0_plot_shows_tracked_modes_and_failed_acquisition_status():
     )
     for line in axis.lines:
         assert np.all(np.isfinite(line.get_ydata()))
+
+
+def test_tracking_plot_shows_blind_null_on_carrier_and_prompt_axes():
+    cfg = default_config()
+    cfg.plot.enable = False
+    results = run_end_to_end(cfg)
+
+    assert results.branches["blind_null"].tracking["success"]
+    figure = plot_tracking(results)
+
+    assert "BLIND_NULL" in {
+        line.get_label() for line in figure.axes[0].lines
+    }
+    assert "BLIND_NULL" in {
+        line.get_label() for line in figure.axes[1].lines
+    }
 
 
 def test_cn0_plot_returns_annotated_figure_when_no_branch_tracks():
