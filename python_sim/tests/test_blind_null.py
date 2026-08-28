@@ -25,6 +25,34 @@ def test_independent_noise_bypasses_exact_reference_channel():
     assert info["bypass_reason"] == "no_interference_detected"
 
 
+def test_zero_input_power_bypasses_exact_reference_channel():
+    x = np.zeros((3, 16), dtype=np.complex128)
+    cfg = BlindNullConfig(reference_channel=2)
+
+    y, info = combine_blind_null(x, cfg)
+
+    np.testing.assert_array_equal(y, x[2])
+    np.testing.assert_array_equal(info["weights"], [0.0, 0.0, 1.0])
+    assert not info["nulling_enabled"]
+    assert info["bypass_reason"] == "zero_input_power"
+
+
+def test_degenerate_interference_vector_bypasses_exact_reference_channel():
+    x = np.array([
+        [1.0 + 2.0j, -3.0 + 4.0j, 5.0 - 6.0j, -7.0 - 8.0j],
+        [0.0, 0.0, 0.0, 0.0],
+        [2.0 - 1.0j, 4.0 + 3.0j, -6.0 + 5.0j, 8.0 - 7.0j],
+    ])
+    cfg = BlindNullConfig(reference_channel=2)
+
+    y, info = combine_blind_null(x, cfg)
+
+    np.testing.assert_array_equal(y, x[2])
+    np.testing.assert_array_equal(info["weights"], [0.0, 0.0, 1.0])
+    assert not info["nulling_enabled"]
+    assert info["bypass_reason"] == "degenerate_interference_vector"
+
+
 @pytest.mark.parametrize("channels", [2, 3, 4])
 def test_dominant_correlated_interferer_is_detected_and_nulled(channels):
     rng = np.random.default_rng(121 + channels)
