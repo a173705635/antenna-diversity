@@ -114,6 +114,8 @@ MVDR 使用
 
 Blind Nulling 的函数边界是 `combine_blind_null(x, cfg)`，其中 `x` 仅为 shape `(channels, samples)` 的 DFE 样本，`cfg` 只包含 `detection_threshold_db`、`reference_channel` 和 `min_reference_projection_power`；接口没有目标导向矢量。令 \(N\) 为样本数、\(\mathbf X\) 为该数据块，先计算
 
+这里必须区分算法输入和评估 truth：`combine_blind_null()` 的检测与权值形成只读取 `x` 和 `cfg`。pipeline 在权值形成完成、合并输出产生之后，才使用场景生成的真实目标/干扰导向量计算 `target_direction_gain`、`interferer_direction_gains` 和 `worst_interferer_gain`；这三个字段是 post-combining 的 truth-only 诊断量，绝不参与 `combine_blind_null()` 的检测或权值形成。
+
 \[
 \widehat{\mathbf R}=\frac{\mathbf X\mathbf X^H}{N},\qquad
 \mathbf C=\mathbf D^{-1/2}\widehat{\mathbf R}\mathbf D^{-1/2},\qquad

@@ -60,6 +60,8 @@ print(blind.combining["bypass_reason"])
 
 `detection_score_db` 是归一化样本协方差主特征值相对其余特征值均值的 dB 比；`interference_detected` 表示它是否达到门限；`nulling_enabled` 表示参考投影是否安全且实际使用了零陷；`bypass_reason` 为 `None` 或 `no_interference_detected`、`unsafe_reference_projection`、`zero_input_power`、`degenerate_interference_vector` 之一。盲权值由整段 DFE 数据块估计一次，并固定应用于该完整数据块，不是在线或滑窗算法。
 
+**算法输入与 truth-only 诊断边界：** `target_direction_gain`、`interferer_direction_gains` 和 `worst_interferer_gain` 是权值形成完成后，由 pipeline 使用场景的真实目标/干扰导向量计算的 post-combining 诊断量；它们只用于评估，不是 `combine_blind_null()` 的输入，绝不参与干扰检测或权值形成。Blind Nulling 的检测和权值形成只使用上文所述的 DFE 样本 `x` 与 blind 配置。
+
 固定的通道间相位偏置会被样本协方差观察到，因而可包含在所估计的干扰向量中；但在权值估计窗口和权值使用窗口之间，**相对相位必须稳定**。相位漂移会降低零陷深度。本实现没有解决动态相位、多干扰子空间估计或真实 Mate 70 校准。
 
 ## Carrier NCO 定点验证
