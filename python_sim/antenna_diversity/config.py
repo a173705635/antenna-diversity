@@ -63,7 +63,7 @@ class SignalConfig:
     doppler_hz: float = 1_500.0
     code_delay_chips: float = 137.25
     initial_phase_rad: float = 0.35
-    duration_ms: int = 40
+    duration_ms: int = 100
     power_dbm: float = -128.5
     resistance_ohm: float = 50.0
     true_direction: Direction | None = None
@@ -231,7 +231,7 @@ class TrackingConfig:
     dll_kp_chips: float = 0.08
     dll_ki_hz: float = 0.5
     cn0_window_epochs: int = 10
-    max_epochs: int = 30
+    max_epochs: int = 100
     max_final_doppler_error_hz: float = 250.0
     carrier_nco_mode: str = "float"
     carrier_nco_clock_hz: float = 6.6e6

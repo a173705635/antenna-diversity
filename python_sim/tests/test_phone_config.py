@@ -708,12 +708,29 @@ def test_phone_config_rejects_non_real_scalar_interferer_directions(direction):
         ({"start_ms": -0.1}, "interferer.start_ms"),
         ({"stop_ms": np.inf}, "interferer.stop_ms"),
         ({"start_ms": 4.0, "stop_ms": 3.9}, "interferer.stop_ms"),
-        ({"start_ms": 40.1}, "interferer.start_ms.*signal.duration_ms"),
-        ({"stop_ms": 40.1}, "interferer.stop_ms.*signal.duration_ms"),
     ],
 )
 def test_phone_config_rejects_invalid_interferer_fields(overrides, match):
     cfg = mate70_default_config()
+    cfg.interferers = (CWInterferer(Direction(120.0, 10.0), **overrides),)
+
+    with pytest.raises(ValueError, match=match):
+        cfg.validate()
+
+
+@pytest.mark.parametrize(
+    ("field_name", "match"),
+    [
+        ("start_ms", "interferer.start_ms.*signal.duration_ms"),
+        ("stop_ms", "interferer.stop_ms.*signal.duration_ms"),
+    ],
+)
+def test_phone_config_rejects_interferer_gate_after_signal_duration(
+    field_name,
+    match,
+):
+    cfg = mate70_default_config()
+    overrides = {field_name: cfg.signal.duration_ms + 0.1}
     cfg.interferers = (CWInterferer(Direction(120.0, 10.0), **overrides),)
 
     with pytest.raises(ValueError, match=match):
@@ -746,8 +763,14 @@ def test_phone_config_rejects_non_real_scalar_interferer_fields(overrides, match
 def test_phone_config_accepts_interferer_gate_at_signal_duration_boundary():
     cfg = mate70_default_config()
     cfg.interferers = (
-        CWInterferer(Direction(120.0, 10.0), start_ms=40.0),
-        CWInterferer(Direction(220.0, 20.0), stop_ms=40.0),
+        CWInterferer(
+            Direction(120.0, 10.0),
+            start_ms=cfg.signal.duration_ms,
+        ),
+        CWInterferer(
+            Direction(220.0, 20.0),
+            stop_ms=cfg.signal.duration_ms,
+        ),
     )
 
     cfg.validate()
