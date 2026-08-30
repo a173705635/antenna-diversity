@@ -545,6 +545,31 @@ def test_plots_do_not_fabricate_zero_bars_for_unavailable_science_values():
     assert not figures["full_chain_validation"].axes[1].patches
 
 
+def test_full_chain_plot_includes_blind_rates_without_fake_analytic_bar():
+    tables = completed_tables_for_reporting()
+    tables["full_chain_validation"] += ({
+        "case_id": "best-001",
+        "selection_reasons": ["best"],
+        "mode": "blind_null",
+        "run_index": 0,
+        "seed": 7,
+        "acquired": True,
+        "tracking": True,
+        "status": "tracking",
+        "acquisition_metric": 3.2,
+        "analytic_output_sinr_db": None,
+        "final_cn0_db_hz": 36.5,
+        "final_doppler_error_hz": 4.0,
+    },)
+
+    figure = plot_study_tables(tables)["full_chain_validation"]
+
+    rate_labels = [tick.get_text() for tick in figure.axes[0].get_xticklabels()]
+    analytic_labels = [tick.get_text() for tick in figure.axes[1].get_xticklabels()]
+    assert "BLIND_NULL" in rate_labels
+    assert "BLIND_NULL" not in analytic_labels
+
+
 def test_summary_names_rank_roles_and_validates_knee_evidence():
     tables = completed_tables_for_reporting()
     second = {**tables["baseline_rankings"][0], "active_antennas": ["TR", "BL"], "display_label": "MVDR(TR+BL)", "rank": 2}

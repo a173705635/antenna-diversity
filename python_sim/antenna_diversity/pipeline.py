@@ -7,6 +7,7 @@ import numpy as np
 from antenna_diversity.analysis.metrics import compute_metrics
 from antenna_diversity.config import SimulationConfig, default_config
 from antenna_diversity.dfe.processing import process_channels
+from antenna_diversity.diversity.blind_null import combine_blind_null
 from antenna_diversity.diversity.combiner import combine
 from antenna_diversity.gnss.scenario import generate_scenario
 from antenna_diversity.models import BranchResult, SimulationResults
@@ -31,12 +32,19 @@ def run_end_to_end(cfg: SimulationConfig | None = None) -> SimulationResults:
     desired_steering = truth["desired_steering_assumed"]
     branches: dict[str, BranchResult] = {}
     for mode in cfg.diversity.modes:
-        combined, combining_info = combine(
-            dfe_channels,
-            desired_steering,
-            mode,
-            cfg.diversity,
-        )
+        normalized_mode = mode.lower()
+        if normalized_mode == "blind_null":
+            combined, combining_info = combine_blind_null(
+                dfe_channels,
+                cfg.diversity.blind_null,
+            )
+        else:
+            combined, combining_info = combine(
+                dfe_channels,
+                desired_steering,
+                normalized_mode,
+                cfg.diversity,
+            )
         weights = combining_info["weights"]
         interferer_direction_gains = [
             float(abs(np.vdot(weights, steering)))
@@ -77,7 +85,7 @@ def run_end_to_end(cfg: SimulationConfig | None = None) -> SimulationResults:
                 "status": "acquisition_failed",
                 "prompt": np.array([], dtype=np.complex128),
             }
-        branches[mode.lower()] = BranchResult(
+        branches[normalized_mode] = BranchResult(
             combined=combined,
             combining=combining_info,
             acquisition=acquisition,

@@ -172,12 +172,30 @@ def _unresolved_measured_simulation() -> object:
 def test_quick_preset_has_exact_axes_and_counts():
     resolved = resolve_study_config(preset="quick")
 
+    assert resolved.study.spatial_modes == ("egc", "mvdr")
+    assert resolved.study.full_chain_modes == (
+        "single", "egc", "mvdr", "blind_null",
+    )
     np.testing.assert_array_equal(resolved.study.azimuths_deg, np.arange(0, 360, 30))
     np.testing.assert_array_equal(resolved.study.elevations_deg, np.arange(0, 91, 15))
     np.testing.assert_allclose(resolved.study.powers_dbm, [-110, -100, -90, -80])
     assert resolved.study.combined_error_samples_per_level == 50
     assert resolved.study.full_chain_run_count == 3
     assert resolved.study.ranking_mode == "mvdr"
+
+
+def test_blind_null_is_full_chain_only():
+    resolved = resolve_study_config(
+        preset="quick",
+        cli_overrides={"full_chain_modes": ["single", "blind_null"]},
+    )
+    assert resolved.study.full_chain_modes == ("single", "blind_null")
+
+    with pytest.raises(ValueError, match="blind_null.*full-chain"):
+        resolve_study_config(
+            preset="quick",
+            cli_overrides={"spatial_modes": ["mvdr", "blind_null"]},
+        )
 
 
 def test_cli_overrides_json_which_overrides_preset(tmp_path: Path):

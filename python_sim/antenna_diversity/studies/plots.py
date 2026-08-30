@@ -25,7 +25,7 @@ FIGURE_KEYS = (
     "element_patterns", "polarization_losses", "coupling_matrices",
     "blockage_comparison",
 )
-_MODES = ("single", "egc", "mvdr")
+_MODES = ("single", "egc", "mvdr", "blind_null")
 _REQUIRED_TABLES = (
     "baseline_rankings", "direction_scan", "power_scan", "robustness_scans",
     "combined_errors", "multi_jammer", "full_chain_validation", "full_chain_cn0",

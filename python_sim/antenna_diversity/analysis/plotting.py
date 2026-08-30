@@ -14,6 +14,19 @@ from antenna_diversity.config import PhoneArrayConfig
 from antenna_diversity.models import SimulationResults
 
 
+_STANDARD_BRANCH_ORDER = ("single", "egc", "mvdr", "blind_null")
+
+
+def _ordered_branch_names(results: SimulationResults) -> tuple[str, ...]:
+    if not results.branches:
+        raise ValueError("results must contain at least one combined branch")
+    ordered = tuple(
+        mode for mode in _STANDARD_BRANCH_ORDER if mode in results.branches
+    )
+    extras = tuple(mode for mode in results.branches if mode not in ordered)
+    return ordered + extras
+
+
 def _calculate_spectrum(
     x: np.ndarray,
     fs_hz: float,
@@ -112,21 +125,12 @@ def plot_spectra(results: SimulationResults) -> Figure:
 
 
 def plot_combined_spectra(results: SimulationResults) -> Figure:
-    """Compare absolute spectra after SINGLE, EGC, and MVDR combining."""
+    """Compare absolute spectra after each available combining branch."""
 
-    required_modes = ("single", "egc", "mvdr")
-    if not results.branches:
-        raise ValueError("results must contain at least one combined branch")
-    missing_modes = [
-        mode for mode in required_modes if mode not in results.branches
-    ]
-    if missing_modes:
-        raise ValueError(
-            "combined spectrum requires single, egc, and mvdr branches"
-        )
+    mode_names = _ordered_branch_names(results)
 
     combined: dict[str, np.ndarray] = {}
-    for mode in required_modes:
+    for mode in mode_names:
         values = np.asarray(results.branches[mode].combined)
         if values.ndim != 1 or values.size == 0:
             raise ValueError(
@@ -151,14 +155,16 @@ def plot_combined_spectra(results: SimulationResults) -> Figure:
     y_padding = max(1.0, 0.03 * (y_max - y_min))
 
     figure, axes = plt.subplots(
-        3,
+        len(mode_names),
         1,
-        figsize=(10, 9),
+        figsize=(10, 3 * len(mode_names)),
         sharex=True,
         sharey=True,
+        squeeze=False,
         constrained_layout=True,
     )
-    for axis, mode in zip(axes, required_modes, strict=True):
+    data_axes = axes[:, 0]
+    for axis, mode in zip(data_axes, mode_names, strict=True):
         frequency_mhz, magnitude_db = spectra[mode]
         axis.plot(
             frequency_mhz,
@@ -172,8 +178,8 @@ def plot_combined_spectra(results: SimulationResults) -> Figure:
         axis.set_ylabel("Magnitude (dB)")
         axis.set_title(f"{mode.upper()} combined output")
         axis.grid(True)
-    axes[-1].set_xlabel("Frequency (MHz)")
-    axes[0].legend(loc="best")
+    data_axes[-1].set_xlabel("Frequency (MHz)")
+    data_axes[0].legend(loc="best")
     figure.suptitle("Spectra after antenna combining")
     return figure
 
@@ -225,11 +231,7 @@ def _plot_legacy_array_response(results: SimulationResults) -> Figure:
 
 def _plot_phone_array_response(results: SimulationResults) -> Figure:
     cfg = results.config
-    required_modes = ("single", "egc", "mvdr")
-    if any(mode not in results.branches for mode in required_modes):
-        raise ValueError(
-            "phone array response requires single, egc, and mvdr branches"
-        )
+    mode_names = _ordered_branch_names(results)
     azimuths = np.arange(0.0, 360.0 + 2.0, 2.0)
     elevations = np.arange(0.0, 90.0 + 1.0, 1.0)
     grids = {
@@ -239,12 +241,12 @@ def _plot_phone_array_response(results: SimulationResults) -> Figure:
             azimuths,
             elevations,
         )
-        for mode in required_modes
+        for mode in mode_names
     }
     figure, axes = plt.subplots(
         1,
         len(grids),
-        figsize=(16, 5),
+        figsize=(5 * len(grids), 5),
         squeeze=False,
         constrained_layout=True,
     )

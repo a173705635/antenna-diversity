@@ -143,7 +143,7 @@ def test_comparison_saves_fixed_csv_and_nonempty_figures(
     comparison_bundle,
     tmp_path: Path,
 ):
-    _, _, comparison = comparison_bundle
+    cfg, _, comparison = comparison_bundle
 
     paths = save_tracking_nco_comparison(comparison, tmp_path)
 
@@ -160,7 +160,7 @@ def test_comparison_saves_fixed_csv_and_nonempty_figures(
         reader = csv.DictReader(handle)
         rows = list(reader)
     assert tuple(reader.fieldnames or ()) == CSV_COLUMNS
-    assert len(rows) == 9
+    assert len(rows) == len(comparison.runs) * len(cfg.diversity.modes)
     assert "nan" not in paths["csv"].read_text(encoding="utf-8").lower()
     assert "inf" not in paths["csv"].read_text(encoding="utf-8").lower()
 

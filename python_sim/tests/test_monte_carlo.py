@@ -19,8 +19,9 @@ def test_monte_carlo_runs_each_seed_and_summarizes_branch_rates():
     result = run_monte_carlo(_fast_config(), seeds=(101, 102))
 
     assert [run.seed for run in result.runs] == [101, 102]
-    assert set(result.capture_rate) == {"single", "egc", "mvdr"}
-    assert set(result.tracking_rate) == {"single", "egc", "mvdr"}
+    expected_modes = {"single", "egc", "mvdr", "blind_null"}
+    assert set(result.capture_rate) == expected_modes
+    assert set(result.tracking_rate) == expected_modes
     assert all(0.0 <= value <= 1.0 for value in result.capture_rate.values())
     json.dumps(result.to_dict(), allow_nan=False)
 

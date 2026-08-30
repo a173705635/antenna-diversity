@@ -6,7 +6,7 @@
 
 ## 一句话定位
 
-这是一个以 HUAWEI Mate 70 外形尺寸为几何边界、支持任意 2–4 个角点和分层窄带天线模型的 GPS L1 C/A 端到端研究链，用于比较 SINGLE、EGC 和 MVDR 在 0–3 个静态 CW 干扰下的空间响应、捕获与跟踪结果。默认仍是旧理想角点，参数化模型只用于合成敏感性研究。
+这是一个以 HUAWEI Mate 70 外形尺寸为几何边界、支持任意 2–4 个角点和分层窄带天线模型的 GPS L1 C/A 端到端研究链，用于比较 SINGLE、EGC、MVDR 和捕获前 `blind_null` 在 0–3 个静态 CW 干扰下的空间响应、捕获与跟踪结果。默认仍是旧理想角点，参数化模型只用于合成敏感性研究。
 
 ## 中央数据路径
 
@@ -18,13 +18,13 @@ GPS L1 C/A + 0–3 CW interferers
 → complex port coupling → channel amplitude / phase
 → RF / complex ADC
 → coherent DFE
-→ SINGLE / EGC / loaded MVDR
+→ SINGLE / EGC / loaded MVDR / blind_null
 → Doppler × code-phase ACQ
 → gated DLL / FLL-assisted PLL TRK
 → branch metrics, spatial scans, sequential Monte Carlo
 ```
 
-RF 到 DFE 始终保留 `(channels, samples)` 形状，因此同一处理链可接受 2、3 或 4 个激活角点。三种合并器输出单通道样本后共享同一捕获与跟踪配置；只有捕获成功的分支才进入跟踪。
+RF 到 DFE 始终保留 `(channels, samples)` 形状，因此同一处理链可接受 2、3 或 4 个激活角点。四种合并器输出单通道样本后共享同一捕获与跟踪配置；只有捕获成功的分支才进入跟踪。`blind_null` 只读取 DFE 样本和选定参考通道，从样本协方差检测一个主导相关模态后投影零陷；它不接收目标导向矢量，不能表述为对未知目标的保护。
 
 ## Studies 研究编排层
 
@@ -39,7 +39,7 @@ JSON / preset / explicit CLI overrides
         ┌────────┴─────────┐
         ▼                  ▼
 analytical spatial path    selected full-chain path
-baseline / direction /     RF → ADC → DFE → SINGLE/EGC/MVDR
+baseline / direction /     RF → ADC → DFE → SINGLE/EGC/MVDR/blind_null
 power / error / jammer     → acquisition → tracking / C/N₀
         │                  │
         └────────┬─────────┘
@@ -54,7 +54,7 @@ power / error / jammer     → acquisition → tracking / C/N₀
 
 selection 只根据已保存的归一化解析记录选择代表场景；full-chain 只运行这些已选场景。report 再从七阶段 checkpoint 中装配固定 9 表、12 图、摘要和本地链接，其中天线证据来自 baseline 保存的 `antenna_diagnostics` 标量行。**报告阶段绝不重新运行天线模型、解析扫描或 RF/DFE/捕获/跟踪仿真**，因此报告内容与已保存证据保持一致，也不会因制图而消耗新的随机数。
 
-解析 `output_sinr_db` 衡量当前已解析天线模型下的空间功率与协方差关系；完整链的 `acquisition_metric`、捕获/跟踪状态和可空 `final_cn0_db_hz` 衡量样本接收机表现。这些量共享配置和 case ID 以便追溯，但含义不同，架构不把解析 SINR 当作采样 C/N₀。
+解析 `output_sinr_db` 衡量当前已解析天线模型下的空间功率与协方差关系；完整链的 `acquisition_metric`、捕获/跟踪状态和可空 `final_cn0_db_hz` 衡量样本接收机表现。这些量共享配置和 case ID 以便追溯，但含义不同，架构不把解析 SINR 当作采样 C/N₀。`blind_null` 仅在完整链中有效，其 `analytic_output_sinr_db` 为 `None`，不可用零值替代。
 
 ## 当前已建模
 
@@ -67,7 +67,7 @@ selection 只根据已保存的归一化解析记录选择代表场景；full-ch
 - 单星 GPS L1 C/A、码延迟、载波/码 Doppler、等效复数 IF；
 - 0–3 个静态 CW 干扰，每个具有独立方向、功率、频偏、相位与起止时间门；
 - RF 级联增益/NF、热噪声、限幅、复数 ADC，以及相干 DDC/FIR/抽取/重量化；
-- SINGLE、EGC、loaded MVDR，FFT 捕获和 E/P/L DLL + FLL-assisted PLL；
+- SINGLE、EGC、loaded MVDR 和样本驱动、参考通道投影的 `blind_null`，FFT 捕获和 E/P/L DLL + FLL-assisted PLL；
 - 功率分解、输出 SINR、协方差诊断、逐干扰增益的解析空间指标和扫描；
 - 顺序、种子有序、严格 JSON 的 Monte Carlo 汇总；
 - 9 张 CSV 表、12 幅 PNG 图及模型来源/标签/测量摘要证据。
@@ -81,13 +81,14 @@ selection 只根据已保存的归一化解析记录选择代表场景；full-ch
 - 宽带、扫频、脉冲或其他非 CW 干扰；
 - 多颗卫星、多 PRN 并发、导航数据、位/帧同步和 PVT；
 - 在线 DOA、鲁棒导向矢量估计和 MVDR 滑窗实时更新；
+- `blind_null` 的滑动协方差、相位漂移/校准容限和多干扰子空间估计；
 - 完整硬件非理想，例如相位噪声、I/Q 失衡、时钟抖动和逐级压缩。
 
 ## 对外表述边界
 
 推荐：
 
-> 已构建一套以 Mate 70 外形为几何边界的 GPS L1 C/A 空域抗干扰研究链，覆盖任意 2–4 角点、理想/参数化/测量表格天线接口、0–3 个静态 CW 干扰、RF/DFE、SINGLE/EGC/MVDR、捕获跟踪和可追溯七阶段报告。
+> 已构建一套以 Mate 70 外形为几何边界的 GPS L1 C/A 空域抗干扰研究链，覆盖任意 2–4 角点、理想/参数化/测量表格天线接口、0–3 个静态 CW 干扰、RF/DFE、SINGLE/EGC/MVDR/Blind Nulling、捕获跟踪和可追溯七阶段报告。
 
 只有用户提供可追溯测量表时才能称为“测量方向图驱动”；仍不得称为“Mate 70 产品级验证”，因为真实相位中心、平台全波响应、传播环境及硬件标定未被验证。
 

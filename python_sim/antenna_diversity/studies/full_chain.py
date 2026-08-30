@@ -34,13 +34,16 @@ def run_selected_full_chain(
                 resolved.study.seed, f"full-chain:{case.case_id}", run_index
             )
             simulation = _reconstruct_case(resolved, case, seed)
-            analytic_sinr = {
-                mode: float(
-                    evaluate_configuration_spatially(copy.deepcopy(simulation), mode)
-                    .metrics["output_sinr_db"]
-                )
-                for mode in simulation.diversity.modes
-            }
+            analytic_sinr: dict[str, float | None] = {}
+            for mode in simulation.diversity.modes:
+                if mode == "blind_null":
+                    analytic_sinr[mode] = None
+                else:
+                    analytic_sinr[mode] = float(
+                        evaluate_configuration_spatially(
+                            copy.deepcopy(simulation), mode
+                        ).metrics["output_sinr_db"]
+                    )
             results = run_end_to_end(simulation)
             metrics_by_mode = {str(row["mode"]): row for row in results.metrics}
             for mode, branch in results.branches.items():
