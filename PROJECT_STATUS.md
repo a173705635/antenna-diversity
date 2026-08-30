@@ -1,6 +1,6 @@
 # GNSS 天线分集与空域抗干扰仿真——项目状态
 
-> 最后更新：2026-08-27  
+> 最后更新：2026-08-30
 > 当前主开发语言：Python  
 > 当前阶段：端到端仿真、空间研究基线与捕获前单主导干扰 Blind Nulling V1 已完成。
 
@@ -155,7 +155,7 @@ Carrier NCO 的 30-bit 与 43-bit 对比已经完成。当前实验中没有观�
 - 当前干扰主要是静态 CW，结论不能直接推广到宽带或动态干扰。
 - 多通道仿真默认公共采样与相干处理，真实多 RF 必须额外证明同步和相位稳定性。
 - C/N₀ 只在成功跟踪后有意义；解析 SINR、捕获指标和 C/N₀ 不能互相替代。
-- MATLAB 代码仅作为历史或参考，后续新增能力默认只维护 Python，除非重新明确要求双语言同步。
+- 旧 MATLAB 与 Galileo E5/AltBOC 实现已从当前工作树移除；如需追溯可从 Git 提交 `6f5e686` 恢复。后续新增能力默认只维护 Python。
 
 ## 9. 关键入口
 
@@ -165,7 +165,8 @@ Carrier NCO 的 30-bit 与 43-bit 对比已经完成。当前实验中没有观�
 - 默认端到端入口：[`python_sim/run_end_to_end.py`](python_sim/run_end_to_end.py)
 - 空间研究入口：[`python_sim/run_spatial_research.py`](python_sim/run_spatial_research.py)
 - Carrier NCO 对比入口：[`python_sim/run_tracking_nco_comparison.py`](python_sim/run_tracking_nco_comparison.py)
-- 历史背景与早期推导：[`CODEX_MEMORY_GNSS_ANTENNA_DIVERSITY.md`](CODEX_MEMORY_GNSS_ANTENNA_DIVERSITY.md)
+- 理论知识库入口：[`基础知识/README.md`](基础知识/README.md)
+- 旧 MATLAB/E5 实现恢复点：Git 提交 `6f5e686`
 
 ## 10. 维护规则
 

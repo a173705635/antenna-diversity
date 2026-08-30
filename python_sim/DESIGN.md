@@ -4,7 +4,7 @@
 
 ![端到端信号流与模型边界](docs/antenna_diversity_chain.svg)
 
-图源包括 [`docs/antenna_diversity_chain.svg`](docs/antenna_diversity_chain.svg)、[`docs/antenna_diversity_chain.mmd`](docs/antenna_diversity_chain.mmd) 和 [`docs/antenna_diversity_chain.png`](docs/antenna_diversity_chain.png)；对外范围图见 [`docs/simulation_architecture.svg`](docs/simulation_architecture.svg)，视觉规范见 [`docs/diagram-style.md`](docs/diagram-style.md)。
+图源包括 [`docs/antenna_diversity_chain.svg`](docs/antenna_diversity_chain.svg)、[`docs/antenna_diversity_chain.mmd`](docs/antenna_diversity_chain.mmd) 和 [`docs/antenna_diversity_chain.png`](docs/antenna_diversity_chain.png)；对外范围图见 [`docs/simulation_architecture.svg`](docs/simulation_architecture.svg)，视觉规范见 [`ARCHITECTURE.md`](ARCHITECTURE.md#制图与维护约定)。
 
 ## 1. 研究问题和边界
 

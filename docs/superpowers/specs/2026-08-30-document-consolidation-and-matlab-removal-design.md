@@ -57,4 +57,3 @@ MATLAB 中独有的 Galileo E5/AltBOC 代码不会迁入 Python；如以后重�
 3. 当前文档中不存在失效的 `matlab_sim` 或 `diagram-style.md` 链接；
 4. Python 测试仍通过，证明纯文档/目录清理未影响主工程；
 5. Git 差异只包含已确认的删除和文档整合，不包含未跟踪的 Word、IDE 配置、requirements 或项目记忆。
-
