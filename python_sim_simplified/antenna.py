@@ -1,0 +1,358 @@
+"""Readable composition of the complete phone antenna response."""
+
+import csv
+from dataclasses import dataclass
+from pathlib import Path
+
+import numpy as np
+
+from config import (
+    AntennaState,
+    Direction,
+    ElementOrientation,
+    ParametricPattern,
+    SimulationConfig,
+    SPEED_OF_LIGHT_MPS,
+    WavePolarization,
+    channel_response,
+)
+
+
+@dataclass
+class LocalDirection:
+    azimuth_deg: float
+    elevation_deg: float
+
+
+@dataclass
+class MeasuredGrid:
+    azimuths_deg: np.ndarray
+    elevations_deg: np.ndarray
+    heights: np.ndarray
+
+
+@dataclass
+class AntennaModel:
+    cfg: SimulationConfig
+    true_measured: dict[str, MeasuredGrid] | None
+    assumed_measured: dict[str, MeasuredGrid] | None
+
+
+def direction_vector(direction: Direction) -> np.ndarray:
+    azimuth, elevation = np.deg2rad(
+        [direction.azimuth_deg, direction.elevation_deg]
+    )
+    return np.array(
+        [
+            np.cos(elevation) * np.cos(azimuth),
+            np.cos(elevation) * np.sin(azimuth),
+            np.sin(elevation),
+        ]
+    )
+
+
+def jones_vector(polarization: WavePolarization) -> np.ndarray:
+    if polarization.kind == "rhcp":
+        vector = np.array([1.0, -1.0j])
+    elif polarization.kind == "lhcp":
+        vector = np.array([1.0, 1.0j])
+    elif polarization.kind == "linear":
+        tilt = np.deg2rad(polarization.tilt_deg)
+        vector = np.array([np.cos(tilt), np.sin(tilt)], dtype=complex)
+    else:
+        vector = np.array(
+            [
+                complex(polarization.az_real, polarization.az_imag),
+                complex(polarization.el_real, polarization.el_imag),
+            ]
+        )
+    return vector / np.linalg.norm(vector)
+
+
+def rotation_matrix_ypr(orientation: ElementOrientation) -> np.ndarray:
+    yaw, pitch, roll = np.deg2rad(
+        [orientation.yaw_deg, orientation.pitch_deg, orientation.roll_deg]
+    )
+    cz, sz = np.cos(yaw), np.sin(yaw)
+    cy, sy = np.cos(pitch), np.sin(pitch)
+    cx, sx = np.cos(roll), np.sin(roll)
+    rz = np.array([[cz, -sz, 0.0], [sz, cz, 0.0], [0.0, 0.0, 1.0]])
+    ry = np.array([[cy, 0.0, sy], [0.0, 1.0, 0.0], [-sy, 0.0, cy]])
+    rx = np.array([[1.0, 0.0, 0.0], [0.0, cx, -sx], [0.0, sx, cx]])
+    return rz @ ry @ rx
+
+
+def spherical_frame(azimuth_deg: float, elevation_deg: float):
+    azimuth, elevation = np.deg2rad([azimuth_deg, elevation_deg])
+    radial = np.array(
+        [
+            np.cos(elevation) * np.cos(azimuth),
+            np.cos(elevation) * np.sin(azimuth),
+            np.sin(elevation),
+        ]
+    )
+    azimuth_basis = np.array([-np.sin(azimuth), np.cos(azimuth), 0.0])
+    elevation_basis = np.array(
+        [
+            -np.sin(elevation) * np.cos(azimuth),
+            -np.sin(elevation) * np.sin(azimuth),
+            np.cos(elevation),
+        ]
+    )
+    return radial, azimuth_basis, elevation_basis
+
+
+def wave_in_element_frame(
+    direction: Direction,
+    polarization: WavePolarization,
+    rotation: np.ndarray,
+) -> tuple[LocalDirection, np.ndarray]:
+    unit_phone, az_phone, el_phone = spherical_frame(
+        direction.azimuth_deg, direction.elevation_deg
+    )
+    jones_phone = jones_vector(polarization)
+    field_phone = jones_phone[0] * az_phone + jones_phone[1] * el_phone
+    unit_local = rotation.T @ unit_phone
+    field_local = rotation.T @ field_phone
+    local_azimuth = np.rad2deg(np.arctan2(unit_local[1], unit_local[0])) % 360.0
+    local_elevation = np.rad2deg(np.arcsin(np.clip(unit_local[2], -1.0, 1.0)))
+    _, az_local, el_local = spherical_frame(local_azimuth, local_elevation)
+    local_jones = np.array(
+        [np.vdot(az_local, field_local), np.vdot(el_local, field_local)]
+    )
+    local_jones /= np.linalg.norm(local_jones)
+    return LocalDirection(local_azimuth, local_elevation), local_jones
+
+
+def parametric_height(
+    parameters: ParametricPattern,
+    local_elevation_deg: float,
+) -> np.ndarray:
+    front_power = max(np.sin(np.deg2rad(local_elevation_deg)), 0.0) ** (
+        parameters.cosine_exponent
+    )
+    relative_db = -np.inf if front_power == 0.0 else 10.0 * np.log10(front_power)
+    gain_db = parameters.peak_gain_db + max(
+        relative_db,
+        parameters.back_lobe_gain_db - parameters.peak_gain_db,
+    )
+    nominal = jones_vector(parameters.nominal_polarization)
+    orthogonal = np.array([-np.conj(nominal[1]), np.conj(nominal[0])])
+    cross = 10.0 ** (-parameters.cross_polar_discrimination_db / 20.0)
+    mixture = nominal + cross * np.exp(
+        1j * np.deg2rad(parameters.cross_phase_deg)
+    ) * orthogonal
+    return 10.0 ** (gain_db / 20.0) * mixture / np.linalg.norm(mixture)
+
+
+def load_measured_pattern(
+    path: Path,
+    frequency_hz: float,
+) -> dict[str, MeasuredGrid]:
+    grouped: dict[str, list[tuple[float, float, complex, complex]]] = {}
+    with Path(path).open(newline="", encoding="utf-8-sig") as stream:
+        for row in csv.DictReader(stream):
+            if np.isclose(float(row["frequency_hz"]), frequency_hz, atol=1.0):
+                grouped.setdefault(row["element_name"], []).append(
+                    (
+                        float(row["azimuth_deg"]) % 360.0,
+                        float(row["elevation_deg"]),
+                        complex(float(row["h_az_real"]), float(row["h_az_imag"])),
+                        complex(float(row["h_el_real"]), float(row["h_el_imag"])),
+                    )
+                )
+    grids = {}
+    for name, samples in grouped.items():
+        azimuths = np.array(sorted({sample[0] for sample in samples}))
+        elevations = np.array(sorted({sample[1] for sample in samples}))
+        coordinates = {
+            (azimuth, elevation): (h_az, h_el)
+            for azimuth, elevation, h_az, h_el in samples
+        }
+        heights = np.empty((elevations.size, azimuths.size, 2), dtype=complex)
+        for row, elevation in enumerate(elevations):
+            for column, azimuth in enumerate(azimuths):
+                heights[row, column] = coordinates[(azimuth, elevation)]
+        grids[name] = MeasuredGrid(azimuths, elevations, heights)
+    return grids
+
+
+def _bounded_neighbors(axis: np.ndarray, value: float):
+    if axis.size == 1 or value <= axis[0]:
+        return 0, 0, 0.0
+    if value >= axis[-1]:
+        last = axis.size - 1
+        return last, last, 0.0
+    upper = int(np.searchsorted(axis, value, side="right"))
+    lower = upper - 1
+    return lower, upper, (value - axis[lower]) / (axis[upper] - axis[lower])
+
+
+def _periodic_neighbors(axis: np.ndarray, value: float):
+    value %= 360.0
+    upper = int(np.searchsorted(axis, value, side="right"))
+    if upper == 0:
+        lower, upper = axis.size - 1, 0
+        low_value, high_value = axis[lower] - 360.0, axis[upper]
+    elif upper == axis.size:
+        lower, upper = axis.size - 1, 0
+        low_value, high_value = axis[lower], axis[upper] + 360.0
+    else:
+        lower = upper - 1
+        low_value, high_value = axis[lower], axis[upper]
+    return lower, upper, (value - low_value) / (high_value - low_value)
+
+
+def interpolate_measured(
+    grid: MeasuredGrid,
+    azimuth_deg: float,
+    elevation_deg: float,
+) -> np.ndarray:
+    el0, el1, el_fraction = _bounded_neighbors(
+        grid.elevations_deg, elevation_deg
+    )
+    az0, az1, az_fraction = _periodic_neighbors(
+        grid.azimuths_deg, azimuth_deg
+    )
+    low = (1.0 - az_fraction) * grid.heights[el0, az0] + (
+        az_fraction * grid.heights[el0, az1]
+    )
+    high = (1.0 - az_fraction) * grid.heights[el1, az0] + (
+        az_fraction * grid.heights[el1, az1]
+    )
+    return (1.0 - el_fraction) * low + el_fraction * high
+
+
+def attenuation_voltage(
+    state: AntennaState,
+    names: tuple[str, ...],
+    direction: Direction,
+) -> np.ndarray:
+    direction_unit = direction_vector(direction)
+    attenuation_db = np.zeros(len(names))
+    for region in state.attenuation_regions:
+        center = direction_vector(
+            Direction(region.center_azimuth_deg, region.center_elevation_deg)
+        )
+        separation = np.rad2deg(
+            np.arccos(np.clip(np.dot(direction_unit, center), -1.0, 1.0))
+        )
+        if region.transition_width_deg == 0.0:
+            fraction = float(separation <= region.radius_deg)
+        else:
+            inner = region.radius_deg - region.transition_width_deg / 2.0
+            outer = region.radius_deg + region.transition_width_deg / 2.0
+            if separation <= inner:
+                fraction = 1.0
+            elif separation >= outer:
+                fraction = 0.0
+            else:
+                phase = np.pi * (separation - inner) / region.transition_width_deg
+                fraction = 0.5 * (1.0 + np.cos(phase))
+        selected = region.elements or names
+        for index, name in enumerate(names):
+            if name in selected:
+                attenuation_db[index] += fraction * region.attenuation_db
+    return 10.0 ** (-attenuation_db / 20.0)
+
+
+def coupling_matrix(state: AntennaState, names: tuple[str, ...]) -> np.ndarray:
+    matrix = np.eye(len(names), dtype=complex)
+    indices = {name: index for index, name in enumerate(names)}
+    for path in state.coupling_paths:
+        if path.source in indices and path.receiver in indices:
+            matrix[indices[path.receiver], indices[path.source]] = 10.0 ** (
+                path.magnitude_db / 20.0
+            ) * np.exp(1j * np.deg2rad(path.phase_deg))
+    return matrix
+
+
+def build_antenna_model(cfg: SimulationConfig) -> AntennaModel:
+    true_state = cfg.phone.antenna_model.true_state
+    assumed_state = cfg.phone.antenna_model.assumed_state
+    true_measured = (
+        load_measured_pattern(true_state.measured_pattern_csv, cfg.signal.carrier_hz)
+        if true_state.pattern_kind == "measured"
+        else None
+    )
+    assumed_measured = (
+        load_measured_pattern(
+            assumed_state.measured_pattern_csv, cfg.signal.carrier_hz
+        )
+        if assumed_state.pattern_kind == "measured"
+        else None
+    )
+    return AntennaModel(cfg, true_measured, assumed_measured)
+
+
+def antenna_response(
+    model: AntennaModel,
+    direction: Direction,
+    polarization: WavePolarization,
+    estimated: bool = False,
+) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+    cfg = model.cfg
+    names = cfg.phone.active_antennas
+    state = (
+        cfg.phone.antenna_model.assumed_state
+        if estimated
+        else cfg.phone.antenna_model.true_state
+    )
+    position_map = (
+        cfg.phone.assumed_phase_centers_m
+        if estimated
+        else cfg.phone.phase_centers_m
+    )
+    measured = model.assumed_measured if estimated else model.true_measured
+    positions = np.array([position_map[name] for name in names])
+    spatial = np.exp(
+        -1j
+        * 2.0
+        * np.pi
+        * cfg.signal.carrier_hz
+        / SPEED_OF_LIGHT_MPS
+        * (positions @ direction_vector(direction))
+    )
+
+    pattern_voltage = []
+    for name in names:
+        if state.pattern_kind == "ideal":
+            voltage = 1.0 + 0.0j
+        else:
+            local_direction, local_jones = wave_in_element_frame(
+                direction,
+                polarization,
+                rotation_matrix_ypr(state.orientations[name]),
+            )
+            if state.pattern_kind == "parametric":
+                height = parametric_height(
+                    state.parametric_patterns[name],
+                    local_direction.elevation_deg,
+                )
+            else:
+                height = interpolate_measured(
+                    measured[name],
+                    local_direction.azimuth_deg,
+                    local_direction.elevation_deg,
+                )
+            voltage = np.vdot(height, local_jones)
+        pattern_voltage.append(voltage)
+    pattern_voltage = np.asarray(pattern_voltage)
+
+    blockage = attenuation_voltage(state, names, direction)
+    open_circuit = spatial * pattern_voltage * blockage
+    coupling = coupling_matrix(state, names)
+    coupled = coupling @ open_circuit
+    channel = channel_response(cfg.phone, estimated)
+    effective = channel * coupled
+    return effective, {
+        "positions_m": positions,
+        "spatial_phase": spatial,
+        "pattern_polarization_voltage": pattern_voltage,
+        "blockage_voltage": blockage,
+        "open_circuit_response": open_circuit,
+        "coupling_matrix": coupling,
+        "coupled_response": coupled,
+        "channel_response": channel,
+        "effective_manifold": effective,
+    }
