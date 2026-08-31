@@ -159,6 +159,17 @@ cfg.plot.enable = False
 results = run_end_to_end(cfg)
 ```
 
+每个角点还可以分别配置真实通道延迟和接收机使用的估计延迟，单位均为 ns：
+
+```python
+cfg = default_config()
+cfg.array.active_antennas = ("TL", "TR")
+cfg.array.channel_delay_ns["TR"] = 10.0
+cfg.array.estimated_channel_delay_ns["TR"] = 8.0
+```
+
+`channel_delay_ns` 会延迟目标和每个干扰源的实际复中频序列，并保留对应的射频载波相位；`estimated_channel_delay_ns` 只修正 EGC/MVDR 等已知目标导向矢量。`blind_null` 不读取估计延迟，只观察真实延迟后的多通道样本。当前 DFE 不执行通道间时间对齐，因此真实值与估计值不一致时会保留相干合并和码域损失。默认四个角点全部为 `0.0 ns`，与旧模型一致。
+
 若要直接运行参数化模型：
 
 ```python
