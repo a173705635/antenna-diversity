@@ -17,6 +17,7 @@ L1 载频 1575.42 MHz 用于波长、空间相位和码 Doppler 比例；实际�
 - `default_config()` / `mate70_default_config()`：Mate 70 外形 160.9 × 75.9 × 7.8 mm，默认 `("TL", "TR", "BL", "BR")` 四个理想共面角点。
 - `parametric_phone_config(active_antennas)`：确定性的 `synthetic_phone_corner_v1`，含四个不同 yaw、有限余弦滚降双极化方向图、一个合成遮挡区和弱非对称互耦；该预设明确是非实测敏感性模型。
 - `PhoneArrayConfig.active_antennas`：任意不重复的 2–4 角点子集；[`antenna_diversity/array/geometry.py`](antenna_diversity/array/geometry.py) 枚举全部 11 种组合。
+- `channel_delay_ns` / `estimated_channel_delay_ns`：四角真实通道真时延和接收机假设时延，默认全部为零。
 - `legacy_ula_config()`：原始双阵元、L1 半波长 ULA，供旧结论回归。
 - `interferers`：0–3 个 `CWInterferer`；每个有独立方向、功率、频偏、初相、`start_ms` 和 `stop_ms`。
 
@@ -86,11 +87,24 @@ j_k[n]=w_k[n]\sqrt{P_kR}
 
 其中 `w_k[n]` 由各自的起止时间门产生。场景输出分别保留每个干扰的 truth 分量；零干扰时保持合法的空集合。GPS 有独立 true/assumed 极化，每个干扰有自己的实际极化；阵元通道还可配置真实/估计幅相误差，用于导向矢量失配研究。
 
+第 (m) 个通道的真实延迟为 (	au_m) 时，复中频源分量按
+
+\[
+x_m(t)=a_m\,s_{IF}(t-\tau_m)
+\exp\{-j2\pi(f_c-f_{IF})\tau_m\}
+\]
+
+生成。序列移位已经产生 (f_{IF}+f_D) 或 (f_{IF}+\Delta f_k) 对应的相位，额外因子补回下变频移除的载波部分，因此单频分量的总相位等价于 (exp[-j2\pi f_{src}\tau_m])。目标取 (f_{src}=f_c+f_D)，每个干扰分别取 (f_{src}=f_c+\Delta f_k)。非整数样点使用 33 抽头 Hamming 窗 sinc 插值；记录外样本视为零，输出保持原长度。
+
+`channel_delay_ns` 作用于实际目标和干扰序列；`estimated_channel_delay_ns` 只进入目标假设导向矢量。现有天线几何空间相位和静态通道幅相响应仍独立保留，不重复计入时延。`blind_null` 不读取估计时延，只观察延迟后的实际样本。
+
 ## 5. RF、ADC 和 DFE
 
 [`antenna_diversity/rf/frontend.py`](antenna_diversity/rf/frontend.py) 计算 Friis 级联增益与噪声系数，在输入参考温度/带宽下加入热噪声，再执行 I/Q 限幅和复数 ADC 量化。RF 采样率为 16.368 Msps。
 
 [`antenna_diversity/dfe/processing.py`](antenna_diversity/dfe/processing.py) 对所有通道使用公共 NCO 做 −4.092 MHz DDC，随后经过 129-tap Hamming-windowed sinc FIR、64 样点群延迟对齐、4 倍抽取和 8-bit 重量化。输出率为 4.092 Msps，即 4 samples/chip。公共处理保持通道间相对相位。当前 DDC NCO、FIR 系数和 FIR 累加仍为浮点运算；只有 DFE 输出边界按配置对 I/Q 舍入、移位并饱和到整数码值，数组容器仍为 `complex128`。
+
+这里的“群延迟对齐”只补偿公共 FIR 的固定群延迟，不估计或消除阵元之间配置的 `channel_delay_ns`。因此真实/估计时延不一致会继续进入合并、捕获和跟踪。
 
 ## 6. SINGLE、EGC、MVDR 和 Blind Nulling
 
@@ -231,6 +245,6 @@ python -W error run_spatial_research.py `
 
 ## 11. 明确未建模项
 
-以下均不在当前结论中：真实 Mate 70 相位中心标定和产品级暗室方向图；全波机壳/人体散射；互耦导致的外部噪声相关性；多径/NLOS；运动与动态 DOA；宽带、扫频、脉冲或调制等非 CW 干扰；多颗卫星与多 PRN 并发；导航数据、位/帧同步和 PVT；在线 DOA 与鲁棒导向矢量估计；实时滑窗 MVDR；完整 RF 非理想；完整 TRK 定点运算；固定字长相关累加器、鉴相器、环路滤波器和 Code NCO；异步 DDS/采样时钟保持效应与 DDS 杂散；L5 信号、码和端到端链路。
+以下均不在当前结论中：真实 Mate 70 相位中心标定和产品级暗室方向图；全波机壳/人体散射；互耦导致的外部噪声相关性；多径/NLOS；运动与动态 DOA；宽带、扫频、脉冲或调制等非 CW 干扰；多颗卫星与多 PRN 并发；导航数据、位/帧同步和 PVT；在线 DOA 与鲁棒导向矢量估计；实时滑窗 MVDR；通道延迟估计与 DFE 自动对齐；随时间变化的群时延、独立采样时钟偏差和漂移；完整 RF 非理想；完整 TRK 定点运算；固定字长相关累加器、鉴相器、环路滤波器和 Code NCO；异步 DDS/采样时钟保持效应与 DDS 杂散；L5 信号、码和端到端链路。
 
 因此 `ideal` 只能说明旧基线，`parametric` 只能说明人为参数敏感性，`measured` 只说明输入由可追溯表格驱动。下一步应输入经坐标、极化和功率标定的相位中心、复数方向图与耦合测量，再在真实传播数据上重新验证空间自由度、捕获和跟踪结论。
