@@ -37,3 +37,52 @@ def test_channel_phase_is_present_before_rf():
         deg=True,
     )
     assert np.isclose(phase, 60.0)
+
+
+def test_estimated_delay_changes_assumed_steering_not_actual_samples():
+    cfg = default_config()
+    cfg.signal.duration_ms = 1
+    cfg.phone.active_antennas = ("TL", "TR")
+    cfg.interferers = []
+    cfg.phone.channel_delay_ns["TR"] = 1e9 / cfg.signal.fs_rf_hz
+
+    first, first_truth = generate_scenario(cfg)
+    cfg.phone.estimated_channel_delay_ns["TR"] = 5.0
+    second, second_truth = generate_scenario(cfg)
+
+    np.testing.assert_allclose(first_truth["channel_delay_true_samples"], [0.0, 1.0])
+    assert first_truth["desired_component"][1, 0] == 0.0j
+    np.testing.assert_array_equal(second, first)
+    np.testing.assert_array_equal(
+        second_truth["desired_component"], first_truth["desired_component"]
+    )
+    assert not np.array_equal(
+        second_truth["desired_steering_assumed"],
+        first_truth["desired_steering_assumed"],
+    )
+
+
+def test_interferer_delay_phase_uses_its_rf_offset():
+    cfg = default_config()
+    cfg.signal.duration_ms = 1
+    cfg.phone.active_antennas = ("TL", "TR")
+    _, baseline_truth = generate_scenario(cfg)
+
+    delay_ns = 10.0
+    cfg.phone.channel_delay_ns["TR"] = delay_ns
+    _, delayed_truth = generate_scenario(cfg)
+
+    expected_phase = np.exp(
+        -1j
+        * 2.0
+        * np.pi
+        * (cfg.signal.carrier_hz + cfg.interferers[0].offset_hz)
+        * np.array([0.0, delay_ns * 1e-9])
+    )
+    np.testing.assert_allclose(
+        delayed_truth["interferer_delay_phases_true"][0], expected_phase
+    )
+    np.testing.assert_allclose(
+        delayed_truth["interferer_steering_effective"][0],
+        baseline_truth["interferer_steering_effective"][0] * expected_phase,
+    )

@@ -3,6 +3,7 @@
 import numpy as np
 
 from antenna import antenna_response, build_antenna_model
+from channel_delay import apply_channel_delays, delay_phase
 from config import SimulationConfig
 
 
@@ -40,6 +41,18 @@ def generate_scenario(
     """Generate target and CW-interference voltages at the antenna ports."""
 
     n_samples = round(cfg.signal.fs_rf_hz * cfg.signal.duration_ms * 1e-3)
+    true_delays_s = 1e-9 * np.asarray(
+        [
+            cfg.phone.channel_delay_ns[name]
+            for name in cfg.phone.active_antennas
+        ]
+    )
+    estimated_delays_s = 1e-9 * np.asarray(
+        [
+            cfg.phone.estimated_channel_delay_ns[name]
+            for name in cfg.phone.active_antennas
+        ]
+    )
     n = np.arange(n_samples)
     time_s = n / cfg.signal.fs_rf_hz
     received_code_rate = cfg.signal.code_rate_hz * (
@@ -67,26 +80,50 @@ def generate_scenario(
     desired_waveform = signal_amplitude_v * sampled_code * carrier
 
     antenna_model = build_antenna_model(cfg)
-    desired_true, desired_true_stages = antenna_response(
+    desired_true_base, desired_true_stages = antenna_response(
         antenna_model,
         cfg.signal.true_direction,
         cfg.signal.true_polarization,
     )
-    desired_assumed, desired_assumed_stages = antenna_response(
+    desired_assumed_base, desired_assumed_stages = antenna_response(
         antenna_model,
         cfg.signal.assumed_direction,
         cfg.signal.assumed_polarization,
         estimated=True,
     )
-    desired_component = desired_true[:, None] * desired_waveform[None, :]
+    desired_component = apply_channel_delays(
+        desired_true_base[:, None] * desired_waveform[None, :],
+        true_delays_s,
+        cfg.signal.fs_rf_hz,
+        cfg.signal.carrier_hz,
+        cfg.signal.if_hz,
+    )
+    desired_rf_frequency_hz = cfg.signal.carrier_hz + cfg.signal.doppler_hz
+    desired_delay_phase_true = delay_phase(
+        true_delays_s, desired_rf_frequency_hz
+    )
+    desired_delay_phase_assumed = delay_phase(
+        estimated_delays_s, desired_rf_frequency_hz
+    )
+    desired_true = (
+        desired_true_base
+        if np.all(true_delays_s == 0.0)
+        else desired_true_base * desired_delay_phase_true
+    )
+    desired_assumed = (
+        desired_assumed_base
+        if np.all(estimated_delays_s == 0.0)
+        else desired_assumed_base * desired_delay_phase_assumed
+    )
 
     interferer_responses = []
     interferer_components = []
+    interferer_delay_phases_true = []
     interferer_stages = []
     for interferer in cfg.interferers:
         if not interferer.enable:
             continue
-        response, stages = antenna_response(
+        response_base, stages = antenna_response(
             antenna_model,
             interferer.direction,
             interferer.polarization,
@@ -113,9 +150,25 @@ def generate_scenario(
         )
         gate = np.zeros(n_samples)
         gate[first:stop] = 1.0
-        component = response[:, None] * (waveform * gate)[None, :]
+        interferer_delay_phase = delay_phase(
+            true_delays_s,
+            cfg.signal.carrier_hz + interferer.offset_hz,
+        )
+        response = (
+            response_base
+            if np.all(true_delays_s == 0.0)
+            else response_base * interferer_delay_phase
+        )
+        component = apply_channel_delays(
+            response_base[:, None] * (waveform * gate)[None, :],
+            true_delays_s,
+            cfg.signal.fs_rf_hz,
+            cfg.signal.carrier_hz,
+            cfg.signal.if_hz,
+        )
         interferer_responses.append(response)
         interferer_components.append(component)
+        interferer_delay_phases_true.append(interferer_delay_phase)
         interferer_stages.append(stages)
 
     scene = desired_component.copy()
@@ -139,6 +192,15 @@ def generate_scenario(
         "interferer_components": interferer_components,
         "active_antennas": cfg.phone.active_antennas,
         "positions_m": desired_true_stages["positions_m"],
+        "channel_delay_true_ns": true_delays_s * 1e9,
+        "channel_delay_estimated_ns": estimated_delays_s * 1e9,
+        "channel_delay_true_samples": true_delays_s * cfg.signal.fs_rf_hz,
+        "channel_delay_estimated_samples": (
+            estimated_delays_s * cfg.signal.fs_rf_hz
+        ),
+        "desired_delay_phase_true": desired_delay_phase_true,
+        "desired_delay_phase_assumed": desired_delay_phase_assumed,
+        "interferer_delay_phases_true": interferer_delay_phases_true,
         "doppler_hz": cfg.signal.doppler_hz,
         "code_rate_hz": received_code_rate,
         "code_delay_chips": cfg.signal.code_delay_chips,

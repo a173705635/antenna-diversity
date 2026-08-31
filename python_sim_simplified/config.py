@@ -124,8 +124,10 @@ class PhoneConfig:
     assumed_phase_centers_m: dict[str, tuple[float, float, float]]
     channel_amplitude_error_db: dict[str, float]
     channel_phase_error_deg: dict[str, float]
+    channel_delay_ns: dict[str, float]
     estimated_channel_amplitude_error_db: dict[str, float]
     estimated_channel_phase_error_deg: dict[str, float]
+    estimated_channel_delay_ns: dict[str, float]
     antenna_model: AntennaModelConfig
 
 
@@ -286,8 +288,10 @@ def default_config() -> SimulationConfig:
             assumed_phase_centers_m=positions.copy(),
             channel_amplitude_error_db=zero.copy(),
             channel_phase_error_deg=zero.copy(),
+            channel_delay_ns=zero.copy(),
             estimated_channel_amplitude_error_db=zero.copy(),
             estimated_channel_phase_error_deg=zero.copy(),
+            estimated_channel_delay_ns=zero.copy(),
             antenna_model=ideal,
         ),
         interferers=[CWInterferer(Direction(120.0, 10.0))],

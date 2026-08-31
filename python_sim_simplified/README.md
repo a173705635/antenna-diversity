@@ -22,8 +22,12 @@ cfg.signal.if_hz = 4.092e6
 cfg.dfe.if_hz = cfg.signal.if_hz
 cfg.phone.active_antennas = ("TL", "BR")
 cfg.phone.channel_phase_error_deg["BR"] = 45.0
+cfg.phone.channel_delay_ns["BR"] = 10.0
+cfg.phone.estimated_channel_delay_ns["BR"] = 8.0
 cfg.interferers[0].power_dbm = -95.0
 ```
+
+`channel_delay_ns` 延迟实际目标/干扰序列，`estimated_channel_delay_ns` 只改变已知目标导向矢量。当前精简版 DFE 不会自动对齐通道，因此两者不一致时会保留合并损失。
 
 天线配置入口：
 
