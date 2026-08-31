@@ -244,3 +244,96 @@ def test_ideal_phone_steering_arrays_remain_exactly_compatible():
     np.testing.assert_allclose(
         truth["jammer_steering_effective"], expected_jammer, rtol=0.0, atol=1e-15
     )
+
+
+def test_default_zero_delay_keeps_exact_component_product():
+    cfg = mate70_default_config()
+    cfg.signal.duration_ms = 1
+
+    _, truth = generate_scenario(cfg)
+
+    np.testing.assert_array_equal(
+        truth["desired_component"],
+        truth["desired_steering_true"][:, None]
+        * truth["desired_waveform"][None, :],
+    )
+
+
+def test_true_delay_changes_samples_while_estimated_delay_only_changes_steering():
+    cfg = mate70_default_config()
+    cfg.signal.duration_ms = 1
+    cfg.array.active_antennas = ("TL", "TR")
+    cfg.interferers = ()
+    baseline_samples, baseline_truth = generate_scenario(cfg)
+
+    one_sample_ns = 1e9 / cfg.signal.fs_rf_hz
+    cfg.array.channel_delay_ns["TR"] = one_sample_ns
+    true_delayed_samples, true_delayed_truth = generate_scenario(cfg)
+
+    np.testing.assert_allclose(
+        true_delayed_truth["channel_delay_true_samples"], [0.0, 1.0]
+    )
+    np.testing.assert_allclose(
+        true_delayed_truth["channel_delay_estimated_samples"], [0.0, 0.0]
+    )
+    assert true_delayed_truth["desired_component"][1, 0] == 0.0j
+    assert not np.array_equal(true_delayed_samples, baseline_samples)
+    baseline_covariance = (
+        baseline_samples @ baseline_samples.conj().T / baseline_samples.shape[1]
+    )
+    delayed_covariance = (
+        true_delayed_samples
+        @ true_delayed_samples.conj().T
+        / true_delayed_samples.shape[1]
+    )
+    assert not np.array_equal(delayed_covariance, baseline_covariance)
+
+    cfg.array.estimated_channel_delay_ns["TR"] = one_sample_ns / 2.0
+    estimated_changed_samples, estimated_changed_truth = generate_scenario(cfg)
+
+    np.testing.assert_array_equal(estimated_changed_samples, true_delayed_samples)
+    np.testing.assert_array_equal(
+        estimated_changed_truth["desired_component"],
+        true_delayed_truth["desired_component"],
+    )
+    assert not np.array_equal(
+        estimated_changed_truth["desired_steering_assumed"],
+        true_delayed_truth["desired_steering_assumed"],
+    )
+
+
+@pytest.mark.parametrize(
+    "active_antennas",
+    [
+        ("TL", "BR"),
+        ("BR", "TL", "TR"),
+        ("TL", "TR", "BL", "BR"),
+    ],
+)
+def test_delay_diagnostics_follow_active_antenna_order(active_antennas):
+    cfg = mate70_default_config()
+    cfg.signal.duration_ms = 1
+    cfg.array.active_antennas = active_antennas
+    cfg.array.channel_delay_ns = {
+        "TL": 1.0,
+        "TR": 2.0,
+        "BL": 3.0,
+        "BR": 4.0,
+    }
+    cfg.array.estimated_channel_delay_ns = {
+        "TL": 5.0,
+        "TR": 6.0,
+        "BL": 7.0,
+        "BR": 8.0,
+    }
+
+    _, truth = generate_scenario(cfg)
+
+    np.testing.assert_allclose(
+        truth["channel_delay_true_ns"],
+        [cfg.array.channel_delay_ns[name] for name in active_antennas],
+    )
+    np.testing.assert_allclose(
+        truth["channel_delay_estimated_ns"],
+        [cfg.array.estimated_channel_delay_ns[name] for name in active_antennas],
+    )

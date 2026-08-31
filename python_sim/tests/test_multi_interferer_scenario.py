@@ -55,6 +55,54 @@ def test_cw_start_and_stop_times_gate_only_that_interferer():
     assert np.all(component[:, stop:] == 0)
 
 
+def test_cw_delay_phase_uses_its_own_rf_offset():
+    cfg = mate70_default_config()
+    cfg.signal.duration_ms = 1
+    cfg.array.active_antennas = ("TL", "TR")
+    cfg.interferers = (
+        CWInterferer(Direction(120.0, 10.0), offset_hz=250e3),
+    )
+    _, baseline_truth = generate_scenario(cfg)
+
+    delay_ns = 10.0
+    cfg.array.channel_delay_ns["TR"] = delay_ns
+    _, delayed_truth = generate_scenario(cfg)
+
+    delays_s = np.array([0.0, delay_ns * 1e-9])
+    expected_phase = np.exp(
+        -1j
+        * 2.0
+        * np.pi
+        * (cfg.signal.carrier_hz + cfg.interferers[0].offset_hz)
+        * delays_s
+    )
+    np.testing.assert_allclose(
+        delayed_truth["interferer_delay_phases_true"][0], expected_phase
+    )
+    np.testing.assert_allclose(
+        delayed_truth["interferer_steering_effective"][0],
+        baseline_truth["interferer_steering_effective"][0] * expected_phase,
+    )
+
+
+def test_integer_channel_delay_moves_interferer_gate_edge():
+    cfg = mate70_default_config()
+    cfg.signal.duration_ms = 1
+    cfg.array.active_antennas = ("TL", "TR")
+    cfg.array.channel_delay_ns["TR"] = 1e9 / cfg.signal.fs_rf_hz
+    cfg.interferers = (
+        CWInterferer(Direction(120.0, 10.0), start_ms=0.2),
+    )
+
+    _, truth = generate_scenario(cfg)
+
+    component = truth["interferer_components"][0]
+    first = round(0.2e-3 * cfg.signal.fs_rf_hz)
+    assert component[0, first] != 0.0j
+    assert component[1, first] == 0.0j
+    assert component[1, first + 1] != 0.0j
+
+
 def test_true_and_assumed_target_manifolds_are_distinct_under_doa_error():
     cfg = mate70_default_config()
     cfg.signal.assumed_direction = Direction(35.0, 60.0)

@@ -19,6 +19,7 @@ from antenna_diversity.config import (
 )
 
 from .ca_code import ca_code
+from .channel_delay import apply_channel_delays, delay_phase
 
 
 def _legacy_channel_response(cfg: SimulationConfig) -> NDArray[np.complex128]:
@@ -265,6 +266,25 @@ def generate_scenario(
     if n_samples <= 0:
         raise ValueError("signal duration must produce at least one sample")
 
+    if isinstance(cfg.array, PhoneArrayConfig):
+        true_delays_s = 1e-9 * np.asarray(
+            [
+                cfg.array.channel_delay_ns[name]
+                for name in cfg.array.active_antennas
+            ],
+            dtype=np.float64,
+        )
+        estimated_delays_s = 1e-9 * np.asarray(
+            [
+                cfg.array.estimated_channel_delay_ns[name]
+                for name in cfg.array.active_antennas
+            ],
+            dtype=np.float64,
+        )
+    else:
+        true_delays_s = np.zeros(n_antennas, dtype=np.float64)
+        estimated_delays_s = np.zeros(n_antennas, dtype=np.float64)
+
     code = ca_code(cfg.signal.prn)
     n = np.arange(n_samples, dtype=np.float64)
     time_s = n / cfg.signal.fs_rf_hz
@@ -299,19 +319,43 @@ def generate_scenario(
     )
     (
         desired_nominal,
-        desired_assumed,
-        desired_true,
+        desired_assumed_base,
+        desired_true_base,
         desired_true_diagnostics,
         desired_assumed_diagnostics,
     ) = _desired_responses(cfg, phone_model)
-    desired_component = desired_true[:, np.newaxis] * desired_waveform[np.newaxis, :]
+    desired_component = apply_channel_delays(
+        desired_true_base[:, np.newaxis] * desired_waveform[np.newaxis, :],
+        true_delays_s,
+        cfg.signal.fs_rf_hz,
+        cfg.signal.carrier_hz,
+        cfg.signal.if_hz,
+    )
+    desired_rf_frequency_hz = cfg.signal.carrier_hz + cfg.signal.doppler_hz
+    desired_delay_phase_true = delay_phase(
+        true_delays_s, desired_rf_frequency_hz
+    )
+    desired_delay_phase_assumed = delay_phase(
+        estimated_delays_s, desired_rf_frequency_hz
+    )
+    desired_true = (
+        desired_true_base
+        if np.all(true_delays_s == 0.0)
+        else desired_true_base * desired_delay_phase_true
+    )
+    desired_assumed = (
+        desired_assumed_base
+        if np.all(estimated_delays_s == 0.0)
+        else desired_assumed_base * desired_delay_phase_assumed
+    )
 
     interferer_steering_nominal: list[NDArray[np.complex128]] = []
     interferer_steering_effective: list[NDArray[np.complex128]] = []
     interferer_components: list[NDArray[np.complex128]] = []
+    interferer_delay_phases_true: list[NDArray[np.complex128]] = []
     interferer_diagnostics: list[dict[str, object]] = []
     for interferer in _active_interferers(cfg):
-        nominal, effective, diagnostics = _interferer_response(
+        nominal, effective_base, diagnostics = _interferer_response(
             cfg, interferer, phone_model
         )
         power_w = 10.0 ** ((interferer.power_dbm - 30.0) / 10.0)
@@ -332,9 +376,26 @@ def generate_scenario(
             interferer.start_ms,
             interferer.stop_ms,
         )
+        interferer_delay_phase = delay_phase(
+            true_delays_s,
+            cfg.signal.carrier_hz + interferer.offset_hz,
+        )
+        effective = (
+            effective_base
+            if np.all(true_delays_s == 0.0)
+            else effective_base * interferer_delay_phase
+        )
+        component = apply_channel_delays(
+            effective_base[:, np.newaxis] * waveform[np.newaxis, :],
+            true_delays_s,
+            cfg.signal.fs_rf_hz,
+            cfg.signal.carrier_hz,
+            cfg.signal.if_hz,
+        )
         interferer_steering_nominal.append(nominal)
         interferer_steering_effective.append(effective)
-        interferer_components.append(effective[:, np.newaxis] * waveform[np.newaxis, :])
+        interferer_components.append(component)
+        interferer_delay_phases_true.append(interferer_delay_phase)
         if diagnostics is not None:
             interferer_diagnostics.append(diagnostics)
 
@@ -384,6 +445,15 @@ def generate_scenario(
         "jammer_steering_effective": jammer_steering_effective,
         "jammer_component": jammer_component,
         "channel_response": channel_response,
+        "channel_delay_true_ns": true_delays_s * 1e9,
+        "channel_delay_estimated_ns": estimated_delays_s * 1e9,
+        "channel_delay_true_samples": true_delays_s * cfg.signal.fs_rf_hz,
+        "channel_delay_estimated_samples": (
+            estimated_delays_s * cfg.signal.fs_rf_hz
+        ),
+        "desired_delay_phase_true": desired_delay_phase_true,
+        "desired_delay_phase_assumed": desired_delay_phase_assumed,
+        "interferer_delay_phases_true": interferer_delay_phases_true,
         "doppler_hz": cfg.signal.doppler_hz,
         "code_rate_hz": received_code_rate_hz,
         "code_delay_chips": cfg.signal.code_delay_chips,
