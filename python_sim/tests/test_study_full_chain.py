@@ -257,6 +257,8 @@ def test_selected_case_keeps_complete_true_model_and_offsets_only_assumed_fields
     simulation.array.channel_phase_error_deg["TL"] = 70.0
     simulation.array.estimated_channel_amplitude_error_db["TL"] = 1.5
     simulation.array.estimated_channel_phase_error_deg["TL"] = 10.0
+    simulation.array.channel_delay_ns["TL"] = 12.0
+    simulation.array.estimated_channel_delay_ns["TL"] = 8.0
     simulation.phone.assumed_phase_centers_m["TL"] = (0.1, 0.2, 0.3)
     resolved = ResolvedStudyConfig.from_parts(base.study, simulation)
     model_before = strict_snapshot(resolved.simulation.array.antenna_model)
@@ -293,6 +295,8 @@ def test_selected_case_keeps_complete_true_model_and_offsets_only_assumed_fields
     assert rebuilt.array.channel_phase_error_deg["TL"] == 70.0
     assert rebuilt.array.estimated_channel_amplitude_error_db["TL"] == 2.0
     assert rebuilt.array.estimated_channel_phase_error_deg["TL"] == 6.0
+    assert rebuilt.array.channel_delay_ns["TL"] == 12.0
+    assert rebuilt.array.estimated_channel_delay_ns["TL"] == 8.0
     assert rebuilt.signal.true_polarization.kind == "rhcp"
     assert rebuilt.signal.assumed_polarization.kind == "lhcp"
     rebuilt.array.antenna_model.model_label = "mutated rebuilt copy"

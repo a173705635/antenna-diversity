@@ -602,6 +602,43 @@ def test_phone_channel_response_uses_estimated_errors_in_active_antenna_order():
     np.testing.assert_allclose(response, [-0.5j, -10.0 + 0.0j, 2.0 + 0.0j], atol=1e-12)
 
 
+def test_phone_channel_delays_default_to_zero_for_all_corners():
+    cfg = mate70_default_config()
+
+    assert cfg.array.channel_delay_ns == {name: 0.0 for name in CORNERS}
+    assert cfg.array.estimated_channel_delay_ns == {
+        name: 0.0 for name in CORNERS
+    }
+
+
+def test_phone_delay_maps_require_exact_four_corner_names():
+    cfg = mate70_default_config()
+    del cfg.array.channel_delay_ns["BR"]
+
+    with pytest.raises(ValueError, match="corner-name"):
+        cfg.validate()
+
+
+def test_phone_delay_maps_require_finite_nonnegative_values():
+    cfg = mate70_default_config()
+    cfg.array.channel_delay_ns["TR"] = -0.1
+    with pytest.raises(ValueError, match="delay.*nonnegative"):
+        cfg.validate()
+
+    cfg = mate70_default_config()
+    cfg.array.estimated_channel_delay_ns["BL"] = np.inf
+    with pytest.raises(ValueError, match="delay.*finite"):
+        cfg.validate()
+
+
+def test_phone_delay_maps_allow_a_positive_common_delay():
+    cfg = mate70_default_config()
+    cfg.array.channel_delay_ns = {name: 5.0 for name in CORNERS}
+    cfg.array.estimated_channel_delay_ns = {name: 5.0 for name in CORNERS}
+
+    cfg.validate()
+
+
 def test_phone_config_accepts_arbitrary_unique_two_to_four_corner_subset():
     cfg = mate70_default_config()
     cfg.array.active_antennas = ("TR", "BL")

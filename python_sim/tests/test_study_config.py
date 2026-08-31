@@ -242,6 +242,32 @@ def test_json_overrides_tracking_carrier_nco_fields(tmp_path: Path):
     resolved.simulation.validate()
 
 
+def test_json_overrides_channel_delay_maps_and_hashes_them(tmp_path: Path):
+    true_delays = {"TL": 0.0, "TR": 10.0, "BL": 2.0, "BR": 4.0}
+    estimated_delays = {"TL": 0.0, "TR": 8.0, "BL": 1.0, "BR": 3.0}
+    path = tmp_path / "channel-delays.json"
+    path.write_text(
+        json.dumps(
+            {
+                "simulation": {
+                    "array": {
+                        "channel_delay_ns": true_delays,
+                        "estimated_channel_delay_ns": estimated_delays,
+                    }
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    baseline = resolve_study_config(preset="quick")
+    resolved = resolve_study_config(path, preset="quick")
+
+    assert resolved.simulation.array.channel_delay_ns == true_delays
+    assert resolved.simulation.array.estimated_channel_delay_ns == estimated_delays
+    assert resolved.config_sha256 != baseline.config_sha256
+
+
 def test_unknown_json_key_is_rejected(tmp_path: Path):
     path = tmp_path / "study.json"
     path.write_text('{"study":{"exlusion_angle_deg":15}}', encoding="utf-8")

@@ -105,8 +105,10 @@ class PhoneArrayConfig:
     active_antennas: tuple[str, ...]
     channel_amplitude_error_db: dict[str, float]
     channel_phase_error_deg: dict[str, float]
+    channel_delay_ns: dict[str, float]
     estimated_channel_amplitude_error_db: dict[str, float]
     estimated_channel_phase_error_deg: dict[str, float]
+    estimated_channel_delay_ns: dict[str, float]
     pattern_model: str = "isotropic"
     antenna_model: PhoneAntennaConfig | None = None
 
@@ -316,17 +318,28 @@ class SimulationConfig:
             self.signal.assumed_direction.validate()
 
             corner_names = set(self.phone.phase_centers_m)
-            corner_maps = (
-                self.phone.assumed_phase_centers_m,
+            channel_error_maps = (
                 self.array.channel_amplitude_error_db,
                 self.array.channel_phase_error_deg,
                 self.array.estimated_channel_amplitude_error_db,
                 self.array.estimated_channel_phase_error_deg,
             )
+            delay_maps = (
+                self.array.channel_delay_ns,
+                self.array.estimated_channel_delay_ns,
+            )
+            corner_maps = (
+                self.phone.assumed_phase_centers_m,
+                *channel_error_maps,
+                *delay_maps,
+            )
             if corner_names != PHONE_CORNER_NAMES or any(
                 set(corner_map) != PHONE_CORNER_NAMES for corner_map in corner_maps
             ):
-                raise ValueError("phone coordinate and channel-error maps must use the same corner-name set")
+                raise ValueError(
+                    "phone coordinate, channel-error, and delay maps must use "
+                    "the same corner-name set"
+                )
             if any(
                 np.asarray(coordinates).shape != (3,)
                 or not np.all(np.isfinite(coordinates))
@@ -338,10 +351,22 @@ class SimulationConfig:
                 raise ValueError("phone phase-center coordinates must be finite 3-vectors")
             if any(
                 not np.isfinite(error)
-                for error_map in corner_maps[1:]
+                for error_map in channel_error_maps
                 for error in error_map.values()
             ):
                 raise ValueError("phone channel errors must be finite")
+            if any(
+                not _is_finite_real_scalar(delay)
+                for delay_map in delay_maps
+                for delay in delay_map.values()
+            ):
+                raise ValueError("phone channel delays must be finite real values")
+            if any(
+                delay < 0.0
+                for delay_map in delay_maps
+                for delay in delay_map.values()
+            ):
+                raise ValueError("phone channel delays must be nonnegative")
             if (
                 not 2 <= self.array.num_elements <= 4
                 or len(set(self.array.active_antennas)) != self.array.num_elements
@@ -593,8 +618,10 @@ def mate70_default_config() -> SimulationConfig:
         active_antennas=("TL", "TR", "BL", "BR"),
         channel_amplitude_error_db=zero_errors.copy(),
         channel_phase_error_deg=zero_errors.copy(),
+        channel_delay_ns=zero_errors.copy(),
         estimated_channel_amplitude_error_db=zero_errors.copy(),
         estimated_channel_phase_error_deg=zero_errors.copy(),
+        estimated_channel_delay_ns=zero_errors.copy(),
     )
     cfg = SimulationConfig(
         random_seed=42,
