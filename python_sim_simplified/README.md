@@ -10,7 +10,16 @@
 python python_sim_simplified/run_end_to_end.py
 ```
 
-程序打印 SINGLE、EGC、MVDR、Blind Null 的捕获、跟踪和 C/N₀ 指标，并把七张独立图片保存到 `python_sim_simplified/results/`。
+程序打印 SINGLE、EGC、MVDR、Blind Null 的捕获、跟踪和 C/N₀ 指标，并把图片保存到 `python_sim_simplified/results/`。
+
+原有七张总览图保持不变。此外会生成便于逐项观察的详细图：
+
+- `detailed_rf_dfe_<天线名>.png`：每个活动天线独立的 RF、ADC 和 DFE 频谱。
+- `detailed_combined_<分支名>.png`：每种合并方式独立的绝对幅度频谱，各分支使用相同纵轴范围。
+- `detailed_array_response_<分支名>.png`：每种合并方式独立的方位角–俯仰角二维响应。
+- `detailed_acquisition_<分支名>.png`：每种合并方式独立的捕获搜索面和码相位切片。
+
+默认四天线、四分支配置共保存 23 张 PNG：7 张总览图和 16 张详细图。
 
 ## 配置入口
 

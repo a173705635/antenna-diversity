@@ -31,7 +31,17 @@ def test_standalone_copy_runs_without_research_package(tmp_path):
     )
 
     assert completed.returncode == 0, completed.stderr
-    assert len(list((standalone / "results").glob("*.png"))) == 7
+    output_names = {
+        path.stem for path in (standalone / "results").glob("*.png")
+    }
+    assert len(output_names) == 23
+    assert output_names >= {
+        "rf_spectrum",
+        "detailed_rf_dfe_TL",
+        "detailed_combined_mvdr",
+        "detailed_array_response_blind_null",
+        "detailed_acquisition_egc",
+    }
 
 
 def test_all_eleven_two_to_four_corner_combinations_form_a_response():

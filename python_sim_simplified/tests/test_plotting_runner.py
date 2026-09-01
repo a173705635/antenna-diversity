@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from pipeline import run_end_to_end
 from plotting import plot_detailed_results, plot_results
 from presets import default_config
+from run_end_to_end import save_results_figures
 
 
 def test_plot_results_returns_seven_independent_figures():
@@ -99,6 +100,29 @@ def test_detailed_spatial_and_acquisition_figures_keep_diagnostics_separate():
         )
     for figure in figures.values():
         plt.close(figure)
+
+
+def test_save_results_figures_writes_overview_and_detailed_outputs(tmp_path):
+    cfg = default_config()
+    cfg.signal.duration_ms = 20
+    cfg.tracking.max_epochs = 10
+    cfg.plot.show = False
+    results = run_end_to_end(cfg)
+
+    paths = save_results_figures(results, tmp_path)
+
+    assert len(paths) == 23
+    assert set(paths) >= {
+        "rf_spectrum",
+        "detailed_rf_dfe_TL",
+        "detailed_combined_mvdr",
+        "detailed_array_response_blind_null",
+        "detailed_acquisition_egc",
+    }
+    assert all(
+        path.is_file() and path.stat().st_size > 0
+        for path in paths.values()
+    )
 
 
 def test_direct_runner_does_not_show_on_noninteractive_backend():
