@@ -4,7 +4,11 @@ from pathlib import Path
 
 from metrics import format_metrics
 from pipeline import run_end_to_end
-from plotting import plot_detailed_results, plot_results
+from plotting import (
+    plot_cn0,
+    plot_detailed_results,
+    plot_tracking,
+)
 from presets import default_config
 
 
@@ -15,9 +19,13 @@ def save_results_figures(results, output_dir):
     directory.mkdir(parents=True, exist_ok=True)
     with plt.rc_context({"figure.max_open_warning": 0}):
         figures = {
-            **plot_results(results),
             **plot_detailed_results(results),
+            "tracking": plot_tracking(results),
+            "cn0": plot_cn0(results),
         }
+
+    for old_path in directory.glob("*.png"):
+        old_path.unlink()
 
     paths = {}
     for name, figure in figures.items():
@@ -31,7 +39,12 @@ def save_results_figures(results, output_dir):
 
 def main():
     cfg = default_config()
-
+    cfg.phone.channel_delay_ns = {
+        "BL": 1,
+        "BR": 20,
+        "TL": 3,
+        "TR": 10,
+    }
     # Edit cfg here when studying frequency, antenna combinations, or phase.
     results = run_end_to_end(cfg)
     print(format_metrics(results["metrics"]))

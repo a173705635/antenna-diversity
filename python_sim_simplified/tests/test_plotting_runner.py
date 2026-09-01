@@ -102,23 +102,27 @@ def test_detailed_spatial_and_acquisition_figures_keep_diagnostics_separate():
         plt.close(figure)
 
 
-def test_save_results_figures_writes_overview_and_detailed_outputs(tmp_path):
+def test_save_results_figures_writes_only_eighteen_nonduplicate_outputs(tmp_path):
     cfg = default_config()
     cfg.signal.duration_ms = 20
     cfg.tracking.max_epochs = 10
     cfg.plot.show = False
     results = run_end_to_end(cfg)
+    stale_overview = tmp_path / "rf_spectrum.png"
+    stale_overview.write_bytes(b"stale")
 
     paths = save_results_figures(results, tmp_path)
 
-    assert len(paths) == 23
+    assert len(paths) == 18
     assert set(paths) >= {
-        "rf_spectrum",
         "detailed_rf_dfe_TL",
         "detailed_combined_mvdr",
         "detailed_array_response_blind_null",
         "detailed_acquisition_egc",
+        "tracking",
+        "cn0",
     }
+    assert not stale_overview.exists()
     assert all(
         path.is_file() and path.stat().st_size > 0
         for path in paths.values()

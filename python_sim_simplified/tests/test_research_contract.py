@@ -34,13 +34,14 @@ def test_standalone_copy_runs_without_research_package(tmp_path):
     output_names = {
         path.stem for path in (standalone / "results").glob("*.png")
     }
-    assert len(output_names) == 23
+    assert len(output_names) == 18
     assert output_names >= {
-        "rf_spectrum",
         "detailed_rf_dfe_TL",
         "detailed_combined_mvdr",
         "detailed_array_response_blind_null",
         "detailed_acquisition_egc",
+        "tracking",
+        "cn0",
     }
 
 

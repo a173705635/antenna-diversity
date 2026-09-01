@@ -509,7 +509,6 @@ def _plot_detailed_acquisition(results):
         figures[f"detailed_acquisition_{mode}"] = figure
     return figures
 
-
 def plot_detailed_results(results):
     return {
         **_plot_detailed_rf_dfe(results),
