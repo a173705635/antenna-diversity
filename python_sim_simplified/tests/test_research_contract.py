@@ -6,8 +6,8 @@ import subprocess
 import sys
 
 from antenna import antenna_response, build_antenna_model
-from config import default_config
 from pipeline import run_end_to_end
+from presets import default_config
 
 
 def test_standalone_copy_runs_without_research_package(tmp_path):
@@ -42,7 +42,7 @@ def test_all_eleven_two_to_four_corner_combinations_form_a_response():
             cfg = default_config()
             cfg.phone.active_antennas = active
             response, _ = antenna_response(
-                build_antenna_model(cfg),
+                build_antenna_model(cfg.phone, cfg.signal.carrier_hz),
                 cfg.signal.true_direction,
                 cfg.signal.true_polarization,
             )

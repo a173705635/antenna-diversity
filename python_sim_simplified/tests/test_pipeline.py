@@ -1,7 +1,7 @@
 import numpy as np
 
-from config import default_config
 from pipeline import run_end_to_end
+from presets import default_config
 
 
 def test_pipeline_runs_four_branches_and_tracks_an_antijam_branch():
@@ -11,6 +11,17 @@ def test_pipeline_runs_four_branches_and_tracks_an_antijam_branch():
 
     results = run_end_to_end(cfg)
 
+    assert set(results) == {
+        "config",
+        "truth",
+        "scene_input_v",
+        "adc_codes",
+        "rf_info",
+        "dfe_channels",
+        "dfe_info",
+        "branches",
+        "metrics",
+    }
     assert set(results["branches"]) == {
         "single", "egc", "mvdr", "blind_null"
     }

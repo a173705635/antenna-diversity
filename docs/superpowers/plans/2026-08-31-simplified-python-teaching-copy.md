@@ -1,5 +1,7 @@
 # Simplified Python Teaching Copy Implementation Plan
 
+> Current status (2026-09-01): this plan records the original copy creation. The directory is now maintained as the personal simplified research simulation described by `2026-09-01-simplified-research-refactor.md`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build an independent, readable `python_sim_simplified/` copy of the RF → DFE → antenna combining → acquisition → tracking simulation while leaving `python_sim/` unchanged.

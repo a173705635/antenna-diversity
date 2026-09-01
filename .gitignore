@@ -11,6 +11,7 @@ venv/
 
 # Generated Python simulation figures
 python_sim/results/
+python_sim_simplified/results/
 
 # MATLAB generated and temporary files
 *.asv

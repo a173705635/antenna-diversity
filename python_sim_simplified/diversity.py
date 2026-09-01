@@ -2,8 +2,16 @@
 
 import numpy as np
 
+from config import BlindNullConfig
+from models import CombiningInfo
 
-def combine_known(channels, desired, mode, diagonal_loading_factor):
+
+def combine_known(
+    channels: np.ndarray,
+    desired: np.ndarray,
+    mode: str,
+    diagonal_loading_factor: float,
+) -> tuple[np.ndarray, CombiningInfo]:
     covariance = channels @ channels.conj().T / channels.shape[1]
     loading = (
         diagonal_loading_factor
@@ -21,7 +29,7 @@ def combine_known(channels, desired, mode, diagonal_loading_factor):
         weights = solved / np.vdot(desired, solved)
 
     combined = weights.conj() @ channels
-    return combined, {
+    info: CombiningInfo = {
         "mode": mode,
         "weights": weights,
         "constraint_steering": desired,
@@ -33,9 +41,13 @@ def combine_known(channels, desired, mode, diagonal_loading_factor):
         "condition_number": np.linalg.cond(loaded),
         "weights_are_fixed": True,
     }
+    return combined, info
 
 
-def combine_blind_null(channels, cfg):
+def combine_blind_null(
+    channels: np.ndarray,
+    cfg: BlindNullConfig,
+) -> tuple[np.ndarray, CombiningInfo]:
     snapshots = channels.shape[1]
     covariance = channels @ channels.conj().T / snapshots
     covariance = (covariance + covariance.conj().T) / 2.0
@@ -51,7 +63,7 @@ def combine_blind_null(channels, cfg):
     interference_vector /= np.linalg.norm(interference_vector)
     reference = np.eye(channels.shape[0], dtype=complex)[:, cfg.reference_channel]
 
-    info = {
+    info: CombiningInfo = {
         "mode": "blind_null",
         "sample_covariance": covariance,
         "condition_number": np.linalg.cond(covariance),

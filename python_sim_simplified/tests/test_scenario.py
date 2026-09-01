@@ -1,7 +1,39 @@
 import numpy as np
 
-from config import default_config
 from gnss import generate_scenario
+from presets import default_config
+
+
+def test_scenario_public_keys_remain_stable():
+    _, truth = generate_scenario(default_config())
+
+    assert set(truth) == {
+        "time_s",
+        "code",
+        "desired_waveform",
+        "desired_component",
+        "desired_steering_true",
+        "desired_steering_assumed",
+        "desired_open_circuit_response_true",
+        "desired_open_circuit_response_assumed",
+        "interferer_steering_effective",
+        "interferer_components",
+        "active_antennas",
+        "positions_m",
+        "channel_delay_true_ns",
+        "channel_delay_estimated_ns",
+        "channel_delay_true_samples",
+        "channel_delay_estimated_samples",
+        "desired_delay_phase_true",
+        "desired_delay_phase_assumed",
+        "interferer_delay_phases_true",
+        "doppler_hz",
+        "code_rate_hz",
+        "code_delay_chips",
+        "fs_rf_hz",
+        "if_hz",
+        "antenna_model_diagnostics",
+    }
 
 
 def test_scenario_contains_code_doppler_and_interferer_time_gate():

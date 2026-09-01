@@ -1,10 +1,13 @@
 """GPS L1 C/A code and RF-input scene generation."""
 
+from dataclasses import dataclass
+
 import numpy as np
 
-from antenna import antenna_response, build_antenna_model
+from antenna import AntennaModel, antenna_response, build_antenna_model
 from channel_delay import apply_channel_delays, delay_phase
-from config import SimulationConfig
+from config import CWInterferer, PhoneConfig, SimulationConfig
+from models import AntennaDiagnostics, ScenarioTruth
 
 
 G2_TAPS = np.array(
@@ -15,6 +18,14 @@ G2_TAPS = np.array(
         [5, 7], [6, 8], [7, 9], [8, 10], [1, 6], [2, 7], [3, 8], [4, 9],
     ]
 )
+
+
+@dataclass
+class _InterfererScene:
+    response: np.ndarray
+    component: np.ndarray
+    delay_phase: np.ndarray
+    diagnostics: AntennaDiagnostics
 
 
 def ca_code(prn: int) -> np.ndarray:
@@ -35,38 +46,36 @@ def ca_code(prn: int) -> np.ndarray:
     return code
 
 
-def generate_scenario(
-    cfg: SimulationConfig,
-) -> tuple[np.ndarray, dict[str, object]]:
-    """Generate target and CW-interference voltages at the antenna ports."""
+def _channel_delays_s(phone: PhoneConfig, estimated: bool) -> np.ndarray:
+    delay_map = (
+        phone.estimated_channel_delay_ns
+        if estimated
+        else phone.channel_delay_ns
+    )
+    return 1e-9 * np.asarray(
+        [delay_map[name] for name in phone.active_antennas]
+    )
 
-    n_samples = round(cfg.signal.fs_rf_hz * cfg.signal.duration_ms * 1e-3)
-    true_delays_s = 1e-9 * np.asarray(
-        [
-            cfg.phone.channel_delay_ns[name]
-            for name in cfg.phone.active_antennas
-        ]
-    )
-    estimated_delays_s = 1e-9 * np.asarray(
-        [
-            cfg.phone.estimated_channel_delay_ns[name]
-            for name in cfg.phone.active_antennas
-        ]
-    )
-    n = np.arange(n_samples)
-    time_s = n / cfg.signal.fs_rf_hz
-    received_code_rate = cfg.signal.code_rate_hz * (
+
+def _desired_waveform(
+    cfg: SimulationConfig,
+    sample_index: np.ndarray,
+    time_s: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, float]:
+    received_code_rate_hz = cfg.signal.code_rate_hz * (
         1.0 + cfg.signal.doppler_hz / cfg.signal.carrier_hz
     )
     code = ca_code(cfg.signal.prn)
     code_phase = np.mod(
-        n * received_code_rate / cfg.signal.fs_rf_hz
+        sample_index * received_code_rate_hz / cfg.signal.fs_rf_hz
         - cfg.signal.code_delay_chips,
         1023.0,
     )
     sampled_code = code[np.floor(code_phase).astype(int)]
     signal_power_w = 10.0 ** ((cfg.signal.power_dbm - 30.0) / 10.0)
-    signal_amplitude_v = np.sqrt(signal_power_w * cfg.signal.resistance_ohm)
+    signal_amplitude_v = np.sqrt(
+        signal_power_w * cfg.reference_impedance_ohm
+    )
     carrier = np.exp(
         1j
         * (
@@ -77,9 +86,84 @@ def generate_scenario(
             + cfg.signal.initial_phase_rad
         )
     )
-    desired_waveform = signal_amplitude_v * sampled_code * carrier
+    return signal_amplitude_v * sampled_code * carrier, code, received_code_rate_hz
 
-    antenna_model = build_antenna_model(cfg)
+
+def _interferer_scene(
+    interferer: CWInterferer,
+    cfg: SimulationConfig,
+    antenna_model: AntennaModel,
+    time_s: np.ndarray,
+    true_delays_s: np.ndarray,
+) -> _InterfererScene:
+    response_base, diagnostics = antenna_response(
+        antenna_model,
+        interferer.direction,
+        interferer.polarization,
+    )
+    amplitude_v = np.sqrt(
+        10.0 ** ((interferer.power_dbm - 30.0) / 10.0)
+        * cfg.reference_impedance_ohm
+    )
+    waveform = amplitude_v * np.exp(
+        1j
+        * (
+            2.0
+            * np.pi
+            * (cfg.signal.if_hz + interferer.offset_hz)
+            * time_s
+            + interferer.initial_phase_rad
+        )
+    )
+    first = round(interferer.start_ms * 1e-3 * cfg.signal.fs_rf_hz)
+    stop = (
+        time_s.size
+        if interferer.stop_ms is None
+        else round(interferer.stop_ms * 1e-3 * cfg.signal.fs_rf_hz)
+    )
+    gate = np.zeros(time_s.size)
+    gate[first:stop] = 1.0
+    interferer_delay_phase = delay_phase(
+        true_delays_s,
+        cfg.signal.carrier_hz + interferer.offset_hz,
+    )
+    response = (
+        response_base
+        if np.all(true_delays_s == 0.0)
+        else response_base * interferer_delay_phase
+    )
+    component = apply_channel_delays(
+        response_base[:, None] * (waveform * gate)[None, :],
+        true_delays_s,
+        cfg.signal.fs_rf_hz,
+        cfg.signal.carrier_hz,
+        cfg.signal.if_hz,
+    )
+    return _InterfererScene(
+        response,
+        component,
+        interferer_delay_phase,
+        diagnostics,
+    )
+
+
+def generate_scenario(
+    cfg: SimulationConfig,
+) -> tuple[np.ndarray, ScenarioTruth]:
+    """Generate target and CW-interference voltages at the antenna ports."""
+
+    n_samples = round(cfg.signal.fs_rf_hz * cfg.signal.duration_ms * 1e-3)
+    true_delays_s = _channel_delays_s(cfg.phone, estimated=False)
+    estimated_delays_s = _channel_delays_s(cfg.phone, estimated=True)
+    sample_index = np.arange(n_samples)
+    time_s = sample_index / cfg.signal.fs_rf_hz
+    desired_waveform, code, received_code_rate_hz = _desired_waveform(
+        cfg,
+        sample_index,
+        time_s,
+    )
+
+    antenna_model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
     desired_true_base, desired_true_stages = antenna_response(
         antenna_model,
         cfg.signal.true_direction,
@@ -100,10 +184,12 @@ def generate_scenario(
     )
     desired_rf_frequency_hz = cfg.signal.carrier_hz + cfg.signal.doppler_hz
     desired_delay_phase_true = delay_phase(
-        true_delays_s, desired_rf_frequency_hz
+        true_delays_s,
+        desired_rf_frequency_hz,
     )
     desired_delay_phase_assumed = delay_phase(
-        estimated_delays_s, desired_rf_frequency_hz
+        estimated_delays_s,
+        desired_rf_frequency_hz,
     )
     desired_true = (
         desired_true_base
@@ -116,66 +202,22 @@ def generate_scenario(
         else desired_assumed_base * desired_delay_phase_assumed
     )
 
-    interferer_responses = []
-    interferer_components = []
-    interferer_delay_phases_true = []
-    interferer_stages = []
-    for interferer in cfg.interferers:
-        if not interferer.enable:
-            continue
-        response_base, stages = antenna_response(
+    interferer_scenes = [
+        _interferer_scene(
+            interferer,
+            cfg,
             antenna_model,
-            interferer.direction,
-            interferer.polarization,
-        )
-        amplitude_v = np.sqrt(
-            10.0 ** ((interferer.power_dbm - 30.0) / 10.0)
-            * cfg.signal.resistance_ohm
-        )
-        waveform = amplitude_v * np.exp(
-            1j
-            * (
-                2.0
-                * np.pi
-                * (cfg.signal.if_hz + interferer.offset_hz)
-                * time_s
-                + interferer.initial_phase_rad
-            )
-        )
-        first = round(interferer.start_ms * 1e-3 * cfg.signal.fs_rf_hz)
-        stop = (
-            n_samples
-            if interferer.stop_ms is None
-            else round(interferer.stop_ms * 1e-3 * cfg.signal.fs_rf_hz)
-        )
-        gate = np.zeros(n_samples)
-        gate[first:stop] = 1.0
-        interferer_delay_phase = delay_phase(
+            time_s,
             true_delays_s,
-            cfg.signal.carrier_hz + interferer.offset_hz,
         )
-        response = (
-            response_base
-            if np.all(true_delays_s == 0.0)
-            else response_base * interferer_delay_phase
-        )
-        component = apply_channel_delays(
-            response_base[:, None] * (waveform * gate)[None, :],
-            true_delays_s,
-            cfg.signal.fs_rf_hz,
-            cfg.signal.carrier_hz,
-            cfg.signal.if_hz,
-        )
-        interferer_responses.append(response)
-        interferer_components.append(component)
-        interferer_delay_phases_true.append(interferer_delay_phase)
-        interferer_stages.append(stages)
-
+        for interferer in cfg.interferers
+        if interferer.enable
+    ]
     scene = desired_component.copy()
-    for component in interferer_components:
-        scene += component
+    for interferer in interferer_scenes:
+        scene += interferer.component
 
-    truth = {
+    truth: ScenarioTruth = {
         "time_s": time_s,
         "code": code,
         "desired_waveform": desired_waveform,
@@ -188,8 +230,12 @@ def generate_scenario(
         "desired_open_circuit_response_assumed": desired_assumed_stages[
             "open_circuit_response"
         ],
-        "interferer_steering_effective": interferer_responses,
-        "interferer_components": interferer_components,
+        "interferer_steering_effective": [
+            interferer.response for interferer in interferer_scenes
+        ],
+        "interferer_components": [
+            interferer.component for interferer in interferer_scenes
+        ],
         "active_antennas": cfg.phone.active_antennas,
         "positions_m": desired_true_stages["positions_m"],
         "channel_delay_true_ns": true_delays_s * 1e9,
@@ -200,16 +246,20 @@ def generate_scenario(
         ),
         "desired_delay_phase_true": desired_delay_phase_true,
         "desired_delay_phase_assumed": desired_delay_phase_assumed,
-        "interferer_delay_phases_true": interferer_delay_phases_true,
+        "interferer_delay_phases_true": [
+            interferer.delay_phase for interferer in interferer_scenes
+        ],
         "doppler_hz": cfg.signal.doppler_hz,
-        "code_rate_hz": received_code_rate,
+        "code_rate_hz": received_code_rate_hz,
         "code_delay_chips": cfg.signal.code_delay_chips,
         "fs_rf_hz": cfg.signal.fs_rf_hz,
         "if_hz": cfg.signal.if_hz,
         "antenna_model_diagnostics": {
             "desired_true": desired_true_stages,
             "desired_assumed": desired_assumed_stages,
-            "interferers": interferer_stages,
+            "interferers": [
+                interferer.diagnostics for interferer in interferer_scenes
+            ],
         },
     }
     return scene, truth

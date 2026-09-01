@@ -72,7 +72,7 @@ def plot_combined_spectra(results):
 
 def plot_array_response(results):
     cfg = results["config"]
-    model = build_antenna_model(cfg)
+    model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
     azimuths = np.linspace(0.0, 360.0, 181)
     manifolds = np.column_stack(
         [

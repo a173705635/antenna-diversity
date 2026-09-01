@@ -27,7 +27,7 @@ def test_acquisition_and_tracking_follow_valid_signal():
     fs_hz = 4.092e6
     samples = receiver_signal(fs_hz)
 
-    acquisition = acquire(samples, fs_hz, 1, AcquisitionConfig())
+    acquisition = acquire(samples, fs_hz, 1, 1.023e6, AcquisitionConfig())
     tracking = track(
         samples,
         fs_hz,
@@ -43,6 +43,24 @@ def test_acquisition_and_tracking_follow_valid_signal():
     assert tracking["success"]
     assert tracking["prompt"].size > 5
     assert np.isfinite(tracking["cn0_db_hz"][-1])
+    assert set(tracking) == {
+        "success",
+        "status",
+        "first_epoch_sample",
+        "epoch_start_samples",
+        "early",
+        "prompt",
+        "late",
+        "dll_error",
+        "pll_error_rad",
+        "fll_error_hz",
+        "carrier_frequency_hz",
+        "code_rate_hz",
+        "code_phase_chips",
+        "prompt_magnitude",
+        "phase_lock_metric",
+        "cn0_db_hz",
+    }
 
 
 def test_cn0_matches_coherent_to_noise_power_ratio():
