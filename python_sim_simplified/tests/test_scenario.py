@@ -1,7 +1,7 @@
 import numpy as np
 
-from config import default_config
 from gnss import generate_scenario
+from presets import default_config
 
 
 def test_scenario_contains_code_doppler_and_interferer_time_gate():

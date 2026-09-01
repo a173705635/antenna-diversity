@@ -26,12 +26,17 @@ def design_decimator(fs_in_hz, decimation, cutoff_hz, num_taps):
     }
 
 
-def process_dfe(adc_codes, cfg):
+def process_dfe(adc_codes, cfg, fs_in_hz, signal_if_hz):
+    nco_frequency_hz = (
+        signal_if_hz
+        if cfg.nco_frequency_hz is None
+        else cfg.nco_frequency_hz
+    )
     h, info = design_decimator(
-        cfg.fs_in_hz, cfg.decimation, cfg.cutoff_hz, cfg.num_taps
+        fs_in_hz, cfg.decimation, cfg.cutoff_hz, cfg.num_taps
     )
     n = np.arange(adc_codes.shape[1])
-    nco = np.exp(-1j * 2.0 * np.pi * cfg.if_hz * n / cfg.fs_in_hz)
+    nco = np.exp(-1j * 2.0 * np.pi * nco_frequency_hz * n / fs_in_hz)
     mixed = adc_codes * nco[None, :]
     filtered = lfilter(h, [1.0], mixed, axis=1)
     output = filtered[:, info["group_delay_input_samples"] :: cfg.decimation]
@@ -55,7 +60,7 @@ def process_dfe(adc_codes, cfg):
 
     info.update(
         {
-            "if_hz": cfg.if_hz,
+            "if_hz": nco_frequency_hz,
             "output_bits": cfg.output_bits,
             "output_scale": output_scale,
             "output_length": output.shape[1],

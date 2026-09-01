@@ -66,7 +66,9 @@ def generate_scenario(
     )
     sampled_code = code[np.floor(code_phase).astype(int)]
     signal_power_w = 10.0 ** ((cfg.signal.power_dbm - 30.0) / 10.0)
-    signal_amplitude_v = np.sqrt(signal_power_w * cfg.signal.resistance_ohm)
+    signal_amplitude_v = np.sqrt(
+        signal_power_w * cfg.reference_impedance_ohm
+    )
     carrier = np.exp(
         1j
         * (
@@ -130,7 +132,7 @@ def generate_scenario(
         )
         amplitude_v = np.sqrt(
             10.0 ** ((interferer.power_dbm - 30.0) / 10.0)
-            * cfg.signal.resistance_ohm
+            * cfg.reference_impedance_ohm
         )
         waveform = amplitude_v * np.exp(
             1j

@@ -1,9 +1,9 @@
 """Run the complete simplified simulation and save its figures."""
 
-from config import default_config
 from metrics import format_metrics
 from pipeline import run_end_to_end
 from plotting import plot_results
+from presets import default_config
 
 
 def main():

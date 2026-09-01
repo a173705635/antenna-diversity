@@ -7,9 +7,9 @@ import sys
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from config import default_config
 from pipeline import run_end_to_end
 from plotting import plot_results
+from presets import default_config
 
 
 def test_plot_results_returns_seven_independent_figures():

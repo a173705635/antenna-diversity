@@ -27,7 +27,7 @@ def test_acquisition_and_tracking_follow_valid_signal():
     fs_hz = 4.092e6
     samples = receiver_signal(fs_hz)
 
-    acquisition = acquire(samples, fs_hz, 1, AcquisitionConfig())
+    acquisition = acquire(samples, fs_hz, 1, 1.023e6, AcquisitionConfig())
     tracking = track(
         samples,
         fs_hz,

@@ -3,11 +3,11 @@
 import numpy as np
 
 from acquisition import acquire
-from config import default_config
 from dfe import process_dfe
 from diversity import combine_blind_null, combine_known
 from gnss import generate_scenario
 from metrics import compute_metrics
+from presets import default_config
 from rf import process_rf
 from tracking import track
 
@@ -15,8 +15,18 @@ from tracking import track
 def run_end_to_end(cfg=None):
     cfg = default_config() if cfg is None else cfg
     scene_input_v, truth = generate_scenario(cfg)
-    adc_codes, rf_info = process_rf(scene_input_v, cfg.rf, cfg.random_seed)
-    dfe_channels, dfe_info = process_dfe(adc_codes, cfg.dfe)
+    adc_codes, rf_info = process_rf(
+        scene_input_v,
+        cfg.rf,
+        cfg.reference_impedance_ohm,
+        cfg.random_seed,
+    )
+    dfe_channels, dfe_info = process_dfe(
+        adc_codes,
+        cfg.dfe,
+        cfg.signal.fs_rf_hz,
+        cfg.signal.if_hz,
+    )
 
     branches = {}
     for mode in cfg.diversity.modes:
@@ -52,6 +62,7 @@ def run_end_to_end(cfg=None):
             combined,
             dfe_info["fs_out_hz"],
             cfg.signal.prn,
+            cfg.signal.code_rate_hz,
             cfg.acquisition,
         )
         if acquisition["success"]:

@@ -1,7 +1,7 @@
 import pytest
 
-from config import default_config
 from pipeline import run_end_to_end
+from presets import default_config
 
 
 EXPECTED = {

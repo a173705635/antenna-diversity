@@ -10,7 +10,7 @@ def _round_half_away_from_zero(values: np.ndarray) -> np.ndarray:
     return np.sign(values) * np.floor(np.abs(values) + 0.5)
 
 
-def process_rf(x_antenna_v, cfg, seed):
+def process_rf(x_antenna_v, cfg, reference_impedance_ohm, seed):
     gain_linear = 10.0 ** (
         np.array([stage.gain_db for stage in cfg.stages]) / 10.0
     )
@@ -32,7 +32,7 @@ def process_rf(x_antenna_v, cfg, seed):
         * cfg.noise_bandwidth_hz
         * cascade_noise_factor
     )
-    noise_rms_v = np.sqrt(input_noise_power_w * cfg.resistance_ohm)
+    noise_rms_v = np.sqrt(input_noise_power_w * reference_impedance_ohm)
     rng = np.random.Generator(np.random.MT19937(seed))
     noise = noise_rms_v / np.sqrt(2.0) * (
         rng.standard_normal(x_antenna_v.shape)

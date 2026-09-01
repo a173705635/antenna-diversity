@@ -5,11 +5,11 @@ import numpy as np
 from gnss import ca_code
 
 
-def acquire(x, fs_hz, prn, cfg):
+def acquire(x, fs_hz, prn, code_rate_hz, cfg):
     samples_per_ms = round(fs_hz * 1e-3)
     coherent_samples = samples_per_ms * cfg.coherent_ms
     n = np.arange(coherent_samples)
-    code_phase = np.mod(n * cfg.code_rate_hz / fs_hz, 1023.0)
+    code_phase = np.mod(n * code_rate_hz / fs_hz, 1023.0)
     local_code = ca_code(prn)[np.floor(code_phase).astype(int)]
     code_spectrum = np.conj(np.fft.fft(local_code))
     search_power = np.zeros((len(cfg.doppler_bins_hz), coherent_samples))
@@ -33,7 +33,7 @@ def acquire(x, fs_hz, prn, cfg):
     distance = np.abs(indices - best_code)
     circular_distance = np.minimum(distance, coherent_samples - distance)
     exclusion_samples = max(
-        1, round(cfg.exclusion_chips * fs_hz / cfg.code_rate_hz)
+        1, round(cfg.exclusion_chips * fs_hz / code_rate_hz)
     )
     row_without_peak[circular_distance <= exclusion_samples] = -np.inf
     second_code = int(np.argmax(row_without_peak))

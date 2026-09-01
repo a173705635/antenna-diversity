@@ -11,10 +11,8 @@ from antenna import (
 from config import (
     Direction,
     WavePolarization,
-    default_config,
-    measured_config,
-    parametric_config,
 )
+from presets import default_config, measured_config, parametric_config
 
 
 def test_response_composes_open_circuit_coupling_and_channel_phase():

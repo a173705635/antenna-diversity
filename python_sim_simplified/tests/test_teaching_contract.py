@@ -6,8 +6,8 @@ import subprocess
 import sys
 
 from antenna import antenna_response, build_antenna_model
-from config import default_config
 from pipeline import run_end_to_end
+from presets import default_config
 
 
 def test_standalone_copy_runs_without_research_package(tmp_path):
