@@ -1,4 +1,4 @@
-"""Small branch-comparison table for the teaching simulation."""
+"""Branch-comparison metrics for the simplified research simulation."""
 
 import numpy as np
 
