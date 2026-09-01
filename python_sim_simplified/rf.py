@@ -2,6 +2,9 @@
 
 import numpy as np
 
+from config import RFConfig
+from models import RFInfo
+
 
 BOLTZMANN_J_PER_K = 1.380649e-23
 
@@ -10,7 +13,12 @@ def _round_half_away_from_zero(values: np.ndarray) -> np.ndarray:
     return np.sign(values) * np.floor(np.abs(values) + 0.5)
 
 
-def process_rf(x_antenna_v, cfg, reference_impedance_ohm, seed):
+def process_rf(
+    x_antenna_v: np.ndarray,
+    cfg: RFConfig,
+    reference_impedance_ohm: float,
+    seed: int,
+) -> tuple[np.ndarray, RFInfo]:
     gain_linear = 10.0 ** (
         np.array([stage.gain_db for stage in cfg.stages]) / 10.0
     )
@@ -62,7 +70,7 @@ def process_rf(x_antenna_v, cfg, reference_impedance_ohm, seed):
         _round_half_away_from_zero(adc_input.imag / lsb_v), minimum, maximum
     )
     adc_codes = (i_code + 1j * q_code).astype(complex)
-    info = {
+    info: RFInfo = {
         "total_gain_db": 10.0 * np.log10(total_gain_linear),
         "noise_figure_db": 10.0 * np.log10(cascade_noise_factor),
         "input_noise_power_w": input_noise_power_w,

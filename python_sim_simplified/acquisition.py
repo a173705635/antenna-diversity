@@ -3,9 +3,17 @@
 import numpy as np
 
 from gnss import ca_code
+from config import AcquisitionConfig
+from models import AcquisitionResult
 
 
-def acquire(x, fs_hz, prn, code_rate_hz, cfg):
+def acquire(
+    x: np.ndarray,
+    fs_hz: float,
+    prn: int,
+    code_rate_hz: float,
+    cfg: AcquisitionConfig,
+) -> AcquisitionResult:
     samples_per_ms = round(fs_hz * 1e-3)
     coherent_samples = samples_per_ms * cfg.coherent_ms
     n = np.arange(coherent_samples)

@@ -3,6 +3,9 @@
 import numpy as np
 from scipy.signal import lfilter
 
+from config import DFEConfig
+from models import DFEInfo
+
 
 def _round_half_away_from_zero(values: np.ndarray) -> np.ndarray:
     return np.sign(values) * np.floor(np.abs(values) + 0.5)
@@ -26,20 +29,27 @@ def design_decimator(fs_in_hz, decimation, cutoff_hz, num_taps):
     }
 
 
-def process_dfe(adc_codes, cfg, fs_in_hz, signal_if_hz):
+def process_dfe(
+    adc_codes: np.ndarray,
+    cfg: DFEConfig,
+    fs_in_hz: float,
+    signal_if_hz: float,
+) -> tuple[np.ndarray, DFEInfo]:
     nco_frequency_hz = (
         signal_if_hz
         if cfg.nco_frequency_hz is None
         else cfg.nco_frequency_hz
     )
-    h, info = design_decimator(
+    h, raw_info = design_decimator(
         fs_in_hz, cfg.decimation, cfg.cutoff_hz, cfg.num_taps
     )
     n = np.arange(adc_codes.shape[1])
     nco = np.exp(-1j * 2.0 * np.pi * nco_frequency_hz * n / fs_in_hz)
     mixed = adc_codes * nco[None, :]
     filtered = lfilter(h, [1.0], mixed, axis=1)
-    output = filtered[:, info["group_delay_input_samples"] :: cfg.decimation]
+    output = filtered[
+        :, raw_info["group_delay_input_samples"] :: cfg.decimation
+    ]
 
     output_scale = 1
     if cfg.output_bits > 0:
@@ -58,13 +68,17 @@ def process_dfe(adc_codes, cfg, fs_in_hz, signal_if_hz):
         )
         output = (i_code + 1j * q_code).astype(complex)
 
-    info.update(
-        {
-            "if_hz": nco_frequency_hz,
-            "output_bits": cfg.output_bits,
-            "output_scale": output_scale,
-            "output_length": output.shape[1],
-            "filter_coefficients": h,
-        }
-    )
+    info: DFEInfo = {
+        "fs_in_hz": raw_info["fs_in_hz"],
+        "fs_out_hz": raw_info["fs_out_hz"],
+        "decimation": raw_info["decimation"],
+        "cutoff_hz": raw_info["cutoff_hz"],
+        "num_taps": raw_info["num_taps"],
+        "group_delay_input_samples": raw_info["group_delay_input_samples"],
+        "if_hz": nco_frequency_hz,
+        "output_bits": cfg.output_bits,
+        "output_scale": output_scale,
+        "output_length": output.shape[1],
+        "filter_coefficients": h,
+    }
     return output, info

@@ -18,6 +18,7 @@ from measured_pattern import (
     interpolate_measured,
     load_measured_pattern,
 )
+from models import AntennaDiagnostics
 
 
 @dataclass
@@ -241,7 +242,7 @@ def antenna_response(
     direction: Direction,
     polarization: WavePolarization,
     estimated: bool = False,
-) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+) -> tuple[np.ndarray, AntennaDiagnostics]:
     names = model.active_antennas
     state = (
         model.assumed_state
@@ -299,7 +300,7 @@ def antenna_response(
         else model.true_channel_response
     )
     effective = channel * coupled
-    return effective, {
+    diagnostics: AntennaDiagnostics = {
         "positions_m": positions,
         "spatial_phase": spatial,
         "pattern_polarization_voltage": pattern_voltage,
@@ -310,3 +311,4 @@ def antenna_response(
         "channel_response": channel,
         "effective_manifold": effective,
     }
+    return effective, diagnostics
