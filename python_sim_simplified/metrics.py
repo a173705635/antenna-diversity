@@ -2,16 +2,18 @@
 
 import numpy as np
 
+from models import MetricRecord, SimulationResults, TrackingResult
 
-def _final_cn0(tracking):
+
+def _final_cn0(tracking: TrackingResult) -> float | None:
     if not tracking["success"]:
         return None
     finite = tracking["cn0_db_hz"][np.isfinite(tracking["cn0_db_hz"])]
     return float(finite[-1]) if finite.size else None
 
 
-def compute_metrics(results):
-    records = []
+def compute_metrics(results: SimulationResults) -> list[MetricRecord]:
+    records: list[MetricRecord] = []
     for mode, branch in results["branches"].items():
         acquisition = branch["acquisition"]
         tracking = branch["tracking"]
@@ -43,7 +45,7 @@ def compute_metrics(results):
     return records
 
 
-def format_metrics(records):
+def format_metrics(records: list[MetricRecord]) -> str:
     header = (
         f"{'Mode':>10} {'Acq':>6} {'Metric':>9} {'Tracking':>9} "
         f"{'Doppler':>10} {'C/N0':>9}"
