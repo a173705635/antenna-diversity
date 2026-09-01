@@ -42,7 +42,7 @@ def test_all_eleven_two_to_four_corner_combinations_form_a_response():
             cfg = default_config()
             cfg.phone.active_antennas = active
             response, _ = antenna_response(
-                build_antenna_model(cfg),
+                build_antenna_model(cfg.phone, cfg.signal.carrier_hz),
                 cfg.signal.true_direction,
                 cfg.signal.true_polarization,
             )

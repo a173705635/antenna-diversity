@@ -237,17 +237,4 @@ class SimulationConfig:
     plot: PlotConfig
 
 
-def channel_response(phone: PhoneConfig, estimated: bool = False) -> np.ndarray:
-    amplitude = (
-        phone.estimated_channel_amplitude_error_db
-        if estimated
-        else phone.channel_amplitude_error_db
-    )
-    phase = (
-        phone.estimated_channel_phase_error_deg
-        if estimated
-        else phone.channel_phase_error_deg
-    )
-    amplitude_db = np.array([amplitude[name] for name in phone.active_antennas])
-    phase_deg = np.array([phase[name] for name in phone.active_antennas])
-    return 10.0 ** (amplitude_db / 20.0) * np.exp(1j * np.deg2rad(phase_deg))
+# Ready-to-run configuration factories are defined in presets.py.

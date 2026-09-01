@@ -1,8 +1,6 @@
 """Readable composition of the complete phone antenna response."""
 
-import csv
 from dataclasses import dataclass
-from pathlib import Path
 
 import numpy as np
 
@@ -11,10 +9,14 @@ from config import (
     Direction,
     ElementOrientation,
     ParametricPattern,
-    SimulationConfig,
+    PhoneConfig,
     SPEED_OF_LIGHT_MPS,
     WavePolarization,
-    channel_response,
+)
+from measured_pattern import (
+    MeasuredGrid,
+    interpolate_measured,
+    load_measured_pattern,
 )
 
 
@@ -25,15 +27,15 @@ class LocalDirection:
 
 
 @dataclass
-class MeasuredGrid:
-    azimuths_deg: np.ndarray
-    elevations_deg: np.ndarray
-    heights: np.ndarray
-
-
-@dataclass
 class AntennaModel:
-    cfg: SimulationConfig
+    active_antennas: tuple[str, ...]
+    carrier_hz: float
+    true_positions_m: dict[str, tuple[float, float, float]]
+    assumed_positions_m: dict[str, tuple[float, float, float]]
+    true_state: AntennaState
+    assumed_state: AntennaState
+    true_channel_response: np.ndarray
+    assumed_channel_response: np.ndarray
     true_measured: dict[str, MeasuredGrid] | None
     assumed_measured: dict[str, MeasuredGrid] | None
 
@@ -145,84 +147,6 @@ def parametric_height(
     return 10.0 ** (gain_db / 20.0) * mixture / np.linalg.norm(mixture)
 
 
-def load_measured_pattern(
-    path: Path,
-    frequency_hz: float,
-) -> dict[str, MeasuredGrid]:
-    grouped: dict[str, list[tuple[float, float, complex, complex]]] = {}
-    with Path(path).open(newline="", encoding="utf-8-sig") as stream:
-        for row in csv.DictReader(stream):
-            if np.isclose(float(row["frequency_hz"]), frequency_hz, atol=1.0):
-                grouped.setdefault(row["element_name"], []).append(
-                    (
-                        float(row["azimuth_deg"]) % 360.0,
-                        float(row["elevation_deg"]),
-                        complex(float(row["h_az_real"]), float(row["h_az_imag"])),
-                        complex(float(row["h_el_real"]), float(row["h_el_imag"])),
-                    )
-                )
-    grids = {}
-    for name, samples in grouped.items():
-        azimuths = np.array(sorted({sample[0] for sample in samples}))
-        elevations = np.array(sorted({sample[1] for sample in samples}))
-        coordinates = {
-            (azimuth, elevation): (h_az, h_el)
-            for azimuth, elevation, h_az, h_el in samples
-        }
-        heights = np.empty((elevations.size, azimuths.size, 2), dtype=complex)
-        for row, elevation in enumerate(elevations):
-            for column, azimuth in enumerate(azimuths):
-                heights[row, column] = coordinates[(azimuth, elevation)]
-        grids[name] = MeasuredGrid(azimuths, elevations, heights)
-    return grids
-
-
-def _bounded_neighbors(axis: np.ndarray, value: float):
-    if axis.size == 1 or value <= axis[0]:
-        return 0, 0, 0.0
-    if value >= axis[-1]:
-        last = axis.size - 1
-        return last, last, 0.0
-    upper = int(np.searchsorted(axis, value, side="right"))
-    lower = upper - 1
-    return lower, upper, (value - axis[lower]) / (axis[upper] - axis[lower])
-
-
-def _periodic_neighbors(axis: np.ndarray, value: float):
-    value %= 360.0
-    upper = int(np.searchsorted(axis, value, side="right"))
-    if upper == 0:
-        lower, upper = axis.size - 1, 0
-        low_value, high_value = axis[lower] - 360.0, axis[upper]
-    elif upper == axis.size:
-        lower, upper = axis.size - 1, 0
-        low_value, high_value = axis[lower], axis[upper] + 360.0
-    else:
-        lower = upper - 1
-        low_value, high_value = axis[lower], axis[upper]
-    return lower, upper, (value - low_value) / (high_value - low_value)
-
-
-def interpolate_measured(
-    grid: MeasuredGrid,
-    azimuth_deg: float,
-    elevation_deg: float,
-) -> np.ndarray:
-    el0, el1, el_fraction = _bounded_neighbors(
-        grid.elevations_deg, elevation_deg
-    )
-    az0, az1, az_fraction = _periodic_neighbors(
-        grid.azimuths_deg, azimuth_deg
-    )
-    low = (1.0 - az_fraction) * grid.heights[el0, az0] + (
-        az_fraction * grid.heights[el0, az1]
-    )
-    high = (1.0 - az_fraction) * grid.heights[el1, az0] + (
-        az_fraction * grid.heights[el1, az1]
-    )
-    return (1.0 - el_fraction) * low + el_fraction * high
-
-
 def attenuation_voltage(
     state: AntennaState,
     names: tuple[str, ...],
@@ -267,22 +191,49 @@ def coupling_matrix(state: AntennaState, names: tuple[str, ...]) -> np.ndarray:
     return matrix
 
 
-def build_antenna_model(cfg: SimulationConfig) -> AntennaModel:
-    true_state = cfg.phone.antenna_model.true_state
-    assumed_state = cfg.phone.antenna_model.assumed_state
+def channel_response(phone: PhoneConfig, estimated: bool = False) -> np.ndarray:
+    amplitude = (
+        phone.estimated_channel_amplitude_error_db
+        if estimated
+        else phone.channel_amplitude_error_db
+    )
+    phase = (
+        phone.estimated_channel_phase_error_deg
+        if estimated
+        else phone.channel_phase_error_deg
+    )
+    amplitude_db = np.array([amplitude[name] for name in phone.active_antennas])
+    phase_deg = np.array([phase[name] for name in phone.active_antennas])
+    return 10.0 ** (amplitude_db / 20.0) * np.exp(1j * np.deg2rad(phase_deg))
+
+
+def build_antenna_model(phone: PhoneConfig, carrier_hz: float) -> AntennaModel:
+    true_state = phone.antenna_model.true_state
+    assumed_state = phone.antenna_model.assumed_state
     true_measured = (
-        load_measured_pattern(true_state.measured_pattern_csv, cfg.signal.carrier_hz)
+        load_measured_pattern(true_state.measured_pattern_csv, carrier_hz)
         if true_state.pattern_kind == "measured"
         else None
     )
     assumed_measured = (
         load_measured_pattern(
-            assumed_state.measured_pattern_csv, cfg.signal.carrier_hz
+            assumed_state.measured_pattern_csv, carrier_hz
         )
         if assumed_state.pattern_kind == "measured"
         else None
     )
-    return AntennaModel(cfg, true_measured, assumed_measured)
+    return AntennaModel(
+        active_antennas=phone.active_antennas,
+        carrier_hz=carrier_hz,
+        true_positions_m=phone.phase_centers_m,
+        assumed_positions_m=phone.assumed_phase_centers_m,
+        true_state=true_state,
+        assumed_state=assumed_state,
+        true_channel_response=channel_response(phone, estimated=False),
+        assumed_channel_response=channel_response(phone, estimated=True),
+        true_measured=true_measured,
+        assumed_measured=assumed_measured,
+    )
 
 
 def antenna_response(
@@ -291,17 +242,16 @@ def antenna_response(
     polarization: WavePolarization,
     estimated: bool = False,
 ) -> tuple[np.ndarray, dict[str, np.ndarray]]:
-    cfg = model.cfg
-    names = cfg.phone.active_antennas
+    names = model.active_antennas
     state = (
-        cfg.phone.antenna_model.assumed_state
+        model.assumed_state
         if estimated
-        else cfg.phone.antenna_model.true_state
+        else model.true_state
     )
     position_map = (
-        cfg.phone.assumed_phase_centers_m
+        model.assumed_positions_m
         if estimated
-        else cfg.phone.phase_centers_m
+        else model.true_positions_m
     )
     measured = model.assumed_measured if estimated else model.true_measured
     positions = np.array([position_map[name] for name in names])
@@ -309,7 +259,7 @@ def antenna_response(
         -1j
         * 2.0
         * np.pi
-        * cfg.signal.carrier_hz
+        * model.carrier_hz
         / SPEED_OF_LIGHT_MPS
         * (positions @ direction_vector(direction))
     )
@@ -343,7 +293,11 @@ def antenna_response(
     open_circuit = spatial * pattern_voltage * blockage
     coupling = coupling_matrix(state, names)
     coupled = coupling @ open_circuit
-    channel = channel_response(cfg.phone, estimated)
+    channel = (
+        model.assumed_channel_response
+        if estimated
+        else model.true_channel_response
+    )
     effective = channel * coupled
     return effective, {
         "positions_m": positions,

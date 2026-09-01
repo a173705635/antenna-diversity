@@ -81,7 +81,7 @@ def generate_scenario(
     )
     desired_waveform = signal_amplitude_v * sampled_code * carrier
 
-    antenna_model = build_antenna_model(cfg)
+    antenna_model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
     desired_true_base, desired_true_stages = antenna_response(
         antenna_model,
         cfg.signal.true_direction,

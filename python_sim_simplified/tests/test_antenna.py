@@ -15,11 +15,21 @@ from config import (
 from presets import default_config, measured_config, parametric_config
 
 
+def test_antenna_model_owns_only_antenna_inputs():
+    cfg = default_config()
+
+    model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
+
+    assert not hasattr(model, "cfg")
+    assert model.active_antennas == cfg.phone.active_antennas
+    assert model.carrier_hz == cfg.signal.carrier_hz
+
+
 def test_response_composes_open_circuit_coupling_and_channel_phase():
     cfg = default_config()
     cfg.phone.channel_phase_error_deg["TR"] = 90.0
     response, stages = antenna_response(
-        build_antenna_model(cfg),
+        build_antenna_model(cfg.phone, cfg.signal.carrier_hz),
         cfg.signal.true_direction,
         cfg.signal.true_polarization,
     )
@@ -35,7 +45,7 @@ def test_response_composes_open_circuit_coupling_and_channel_phase():
 def test_parametric_model_applies_pattern_blockage_and_coupling():
     cfg = parametric_config(("TL", "TR", "BL", "BR"))
     response, stages = antenna_response(
-        build_antenna_model(cfg),
+        build_antenna_model(cfg.phone, cfg.signal.carrier_hz),
         Direction(225.0, 20.0),
         WavePolarization("rhcp"),
     )
@@ -77,7 +87,7 @@ def test_measured_csv_interpolates_complex_jones_components(tmp_path):
     np.testing.assert_allclose(height, [1.5 + 0.5j, 0.25 - 0.5j])
 
     response, stages = antenna_response(
-        build_antenna_model(cfg),
+        build_antenna_model(cfg.phone, cfg.signal.carrier_hz),
         Direction(90.0, 45.0),
         WavePolarization("rhcp"),
     )
