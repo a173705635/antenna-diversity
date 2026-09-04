@@ -143,6 +143,23 @@ class CWInterferer:
 
 
 @dataclass
+class WidebandInterferer:
+    direction: Direction
+    enable: bool = True
+    power_dbm: float = -90.0
+    center_offset_hz: float = 0.0
+    bandwidth_hz: float = 2.0e6
+    random_seed: int = 1001
+    filter_taps: int = 129
+    start_ms: float = 0.0
+    stop_ms: float | None = None
+    polarization: WavePolarization = field(default_factory=WavePolarization)
+
+
+Interferer = CWInterferer | WidebandInterferer
+
+
+@dataclass
 class RFStage:
     name: str
     gain_db: float
@@ -228,7 +245,7 @@ class SimulationConfig:
     reference_impedance_ohm: float
     signal: SignalConfig
     phone: PhoneConfig
-    interferers: list[CWInterferer]
+    interferers: list[Interferer]
     rf: RFConfig
     dfe: DFEConfig
     diversity: DiversityConfig
