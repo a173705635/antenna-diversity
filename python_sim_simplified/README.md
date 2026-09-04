@@ -56,6 +56,42 @@ cfg.dfe.nco_frequency_hz = cfg.signal.if_hz + 500.0
 
 设置为 `None` 时恢复为自动跟随信号中频。
 
+## CW与宽带干扰
+
+默认场景同时启用一个 `-90 dBm` CW干扰和一个 `-90 dBm`、`2 MHz` 带限复高斯噪声干扰，两者都位于方位角 `80°`、仰角 `10°`。宽带干扰的功率表示整个配置带宽内的总功率，不是功率谱密度。
+
+可以直接修改默认宽带干扰；它在 `cfg.interferers` 中位于CW之后：
+
+```python
+wideband = cfg.interferers[1]
+wideband.power_dbm = -95.0
+wideband.center_offset_hz = 200e3
+wideband.bandwidth_hz = 2.0e6
+wideband.random_seed = 1001
+wideband.start_ms = 10.0
+wideband.stop_ms = 80.0
+```
+
+也可以独立创建宽带干扰：
+
+```python
+from config import Direction, WidebandInterferer
+
+cfg.interferers = [
+    WidebandInterferer(
+        direction=Direction(80.0, 10.0),
+        power_dbm=-90.0,
+        center_offset_hz=0.0,
+        bandwidth_hz=2.0e6,
+        random_seed=1001,
+    )
+]
+```
+
+同一随机种子会生成相同的宽带波形，不影响RF热噪声使用的 `cfg.random_seed`。宽带干扰会接受完整的天线响应、时间门控和逐通道真实时延，并与其他干扰一起进入RF、DFE和后续接收机。
+
+当前MVDR仍在整个DFE带宽上使用一组固定复权值，并不是分频段宽带MVDR。`worst_interferer_gain` 对宽带干扰只表示中心频率处的空间增益；整个带宽的抑制效果应结合合并频谱、捕获指标、跟踪状态和C/N₀判断。
+
 ## 天线组合与通道误差
 
 ```python
@@ -92,6 +128,7 @@ element_name,frequency_hz,azimuth_deg,elevation_deg,h_az_real,h_az_imag,h_el_rea
 - `config.py`：配置数据类型和常量。
 - `antenna.py`：坐标变换、方向图、极化、遮挡、耦合和有效阵列流形。
 - `measured_pattern.py`：实测 CSV 加载与二维角度插值。
+- `interference.py`：带限复高斯宽带干扰波形生成和参数校验。
 - `gnss.py`：C/A 码、目标信号、干扰源和天线端场景。
 - `rf.py` / `dfe.py`：RF 噪声与量化、DDC 和抽取。
 - `diversity.py`：SINGLE、EGC、MVDR 和 Blind Null。
@@ -106,4 +143,4 @@ element_name,frequency_hz,azimuth_deg,elevation_deg,h_az_real,h_az_imag,h_el_rea
 
 本目录假定研究配置有效，没有包含完整版的配置全量校验、异常包装、文件哈希和 schema 审计、退化矩阵保护、Blind Null 安全旁路、断点恢复、Monte Carlo、批处理、报告系统和定点载波 NCO 对比。
 
-保留下来的内容包括 2～4 天线组合、手机四角几何、参数化/实测方向图、极化、遮挡、互耦、通道幅相误差、真实/估计通道延迟、RF/ADC、定点化 DFE 输出、四种合并方式、捕获、跟踪和 C/N₀。需要大规模鲁棒性研究或异常诊断时，使用 `../python_sim/`。
+保留下来的内容包括 2～4 天线组合、手机四角几何、参数化/实测方向图、极化、遮挡、互耦、通道幅相误差、真实/估计通道延迟、CW与带限噪声干扰、RF/ADC、定点化 DFE 输出、四种合并方式、捕获、跟踪和 C/N₀。需要大规模鲁棒性研究或异常诊断时，使用 `../python_sim/`。
