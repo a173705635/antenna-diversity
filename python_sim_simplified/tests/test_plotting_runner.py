@@ -74,7 +74,8 @@ def test_detailed_combined_spectra_share_absolute_limits_and_mark_frequencies():
 
     assert all(axis.get_ylim() == axes[0].get_ylim() for axis in axes)
     assert all(axis.get_ylabel() == "Magnitude (dB)" for axis in axes)
-    assert all(len(axis.lines) == 3 for axis in axes)
+    assert all(len(axis.lines) == 4 for axis in axes)
+    assert all(len(axis.patches) == 1 for axis in axes)
     for figure in figures.values():
         plt.close(figure)
 
@@ -90,7 +91,12 @@ def test_detailed_spatial_and_acquisition_figures_keep_diagnostics_separate():
         spatial = figures[f"detailed_array_response_{mode}"]
         spatial_axis = next(axis for axis in spatial.axes if axis.images)
         assert spatial_axis.images[0].get_clim() == (-60.0, 0.0)
-        assert len(spatial_axis.lines) == 2
+        assert len(spatial_axis.lines) == 3
+        assert {
+            "Target",
+            "CW 1",
+            "Wideband 2",
+        } <= {line.get_label() for line in spatial_axis.lines}
 
         acquisition = figures[f"detailed_acquisition_{mode}"]
         assert any(axis.images for axis in acquisition.axes)

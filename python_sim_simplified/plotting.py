@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from antenna import antenna_response, build_antenna_model
+from config import CWInterferer, WidebandInterferer
 
 
 MODE_ORDER = ("single", "egc", "mvdr", "blind_null")
@@ -48,12 +49,30 @@ def _mark_frequencies(axis, results, rf_domain):
         label="Target",
     )
     for index, interferer in enumerate(cfg.interferers, start=1):
-        if interferer.enable:
+        if not interferer.enable:
+            continue
+        if isinstance(interferer, CWInterferer):
             axis.axvline(
                 (frequency_shift_hz + interferer.offset_hz) / 1e6,
                 color="red",
                 linestyle=":",
-                label=f"Interferer {index}",
+                label=f"CW {index}",
+            )
+        elif isinstance(interferer, WidebandInterferer):
+            center_hz = frequency_shift_hz + interferer.center_offset_hz
+            half_bandwidth_hz = interferer.bandwidth_hz / 2.0
+            axis.axvspan(
+                (center_hz - half_bandwidth_hz) / 1e6,
+                (center_hz + half_bandwidth_hz) / 1e6,
+                color="red",
+                alpha=0.12,
+                label=f"Wideband {index} band",
+            )
+            axis.axvline(
+                center_hz / 1e6,
+                color="red",
+                linestyle=":",
+                label=f"Wideband {index} center",
             )
 
 
@@ -151,13 +170,14 @@ def plot_array_response(results):
         linestyle="--",
         label="Target",
     )
-    for index, interferer in enumerate(cfg.interferers):
+    for index, interferer in enumerate(cfg.interferers, start=1):
         if interferer.enable:
+            kind = "CW" if isinstance(interferer, CWInterferer) else "Wideband"
             axis.axvline(
                 interferer.direction.azimuth_deg,
                 color="red",
                 linestyle=":",
-                label="Interferer" if index == 0 else None,
+                label=f"{kind} {index}",
             )
     axis.set(
         title=f"Spatial response at elevation {cfg.signal.true_direction.elevation_deg:.1f}°",
@@ -387,6 +407,11 @@ def _plot_detailed_array_response(results):
         )
         for index, interferer in enumerate(cfg.interferers, start=1):
             if interferer.enable:
+                kind = (
+                    "CW"
+                    if isinstance(interferer, CWInterferer)
+                    else "Wideband"
+                )
                 axis.plot(
                     interferer.direction.azimuth_deg,
                     interferer.direction.elevation_deg,
@@ -395,7 +420,7 @@ def _plot_detailed_array_response(results):
                     linestyle="none",
                     markersize=9,
                     markeredgewidth=2,
-                    label=f"Interferer {index}",
+                    label=f"{kind} {index}",
                 )
         axis.set(
             title=f"{mode.upper()} array response",
