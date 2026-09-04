@@ -1,6 +1,6 @@
 import numpy as np
 
-from config import CORNER_NAMES
+from config import CORNER_NAMES, CWInterferer, WidebandInterferer
 from gnss import ca_code
 from presets import default_config
 
@@ -18,7 +18,10 @@ def test_default_config_uses_mate70_geometry_and_signal_values():
     assert cfg.phone.estimated_channel_delay_ns == {
         name: 0.0 for name in CORNER_NAMES
     }
-    assert len(cfg.interferers) == 1
+    assert len(cfg.interferers) == 2
+    assert isinstance(cfg.interferers[0], CWInterferer)
+    assert isinstance(cfg.interferers[1], WidebandInterferer)
+    assert cfg.interferers[1].bandwidth_hz == 2.0e6
 
 
 def test_shared_physical_parameters_have_one_default_source():

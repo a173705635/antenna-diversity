@@ -1,5 +1,6 @@
 import numpy as np
 
+from config import Direction, WidebandInterferer
 from gnss import generate_scenario
 from presets import default_config
 
@@ -118,3 +119,52 @@ def test_interferer_delay_phase_uses_its_rf_offset():
         delayed_truth["interferer_steering_effective"][0],
         baseline_truth["interferer_steering_effective"][0] * expected_phase,
     )
+
+
+def test_wideband_interferer_uses_time_gate_and_center_frequency_delay_phase():
+    cfg = default_config()
+    cfg.signal.duration_ms = 8
+    cfg.phone.active_antennas = ("TL", "TR")
+    cfg.phone.channel_delay_ns["TR"] = 10.0
+    cfg.interferers = [
+        WidebandInterferer(
+            Direction(80.0, 10.0),
+            center_offset_hz=100e3,
+            bandwidth_hz=2.0e6,
+            random_seed=1001,
+            start_ms=2.0,
+            stop_ms=5.0,
+        )
+    ]
+
+    _, truth = generate_scenario(cfg)
+
+    fs_hz = cfg.signal.fs_rf_hz
+    jammer = truth["interferer_components"][0]
+    start = round(0.002 * fs_hz)
+    stop = round(0.005 * fs_hz)
+    assert np.all(jammer[0, :start] == 0.0)
+    assert np.any(jammer[:, start:stop] != 0.0)
+    assert np.all(jammer[0, stop:] == 0.0)
+    expected_phase = np.exp(
+        -1j
+        * 2.0
+        * np.pi
+        * (cfg.signal.carrier_hz + cfg.interferers[0].center_offset_hz)
+        * np.array([0.0, 10.0e-9])
+    )
+    np.testing.assert_allclose(
+        truth["interferer_delay_phases_true"][0],
+        expected_phase,
+    )
+
+
+def test_default_scenario_contains_cw_then_wideband_components():
+    cfg = default_config()
+    cfg.signal.duration_ms = 2
+
+    _, truth = generate_scenario(cfg)
+
+    assert len(truth["interferer_components"]) == 2
+    assert len(truth["interferer_steering_effective"]) == 2
+    assert len(truth["interferer_delay_phases_true"]) == 2

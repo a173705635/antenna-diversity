@@ -21,6 +21,7 @@ from config import (
     SignalConfig,
     SimulationConfig,
     TrackingConfig,
+    WidebandInterferer,
 )
 
 
@@ -59,7 +60,10 @@ def default_config() -> SimulationConfig:
             estimated_channel_delay_ns=zero.copy(),
             antenna_model=ideal,
         ),
-        interferers=[CWInterferer(Direction(80.0, 10.0))],
+        interferers=[
+            CWInterferer(Direction(80.0, 10.0)),
+            WidebandInterferer(Direction(80.0, 10.0)),
+        ],
         rf=RFConfig(),
         dfe=DFEConfig(),
         diversity=DiversityConfig(),

@@ -6,7 +6,14 @@ import numpy as np
 
 from antenna import AntennaModel, antenna_response, build_antenna_model
 from channel_delay import apply_channel_delays, delay_phase
-from config import CWInterferer, PhoneConfig, SimulationConfig
+from config import (
+    CWInterferer,
+    Interferer,
+    PhoneConfig,
+    SimulationConfig,
+    WidebandInterferer,
+)
+from interference import generate_wideband_waveform
 from models import AntennaDiagnostics, ScenarioTruth
 
 
@@ -90,7 +97,7 @@ def _desired_waveform(
 
 
 def _interferer_scene(
-    interferer: CWInterferer,
+    interferer: Interferer,
     cfg: SimulationConfig,
     antenna_model: AntennaModel,
     time_s: np.ndarray,
@@ -101,20 +108,31 @@ def _interferer_scene(
         interferer.direction,
         interferer.polarization,
     )
-    amplitude_v = np.sqrt(
-        10.0 ** ((interferer.power_dbm - 30.0) / 10.0)
-        * cfg.reference_impedance_ohm
-    )
-    waveform = amplitude_v * np.exp(
-        1j
-        * (
-            2.0
-            * np.pi
-            * (cfg.signal.if_hz + interferer.offset_hz)
-            * time_s
-            + interferer.initial_phase_rad
+    if isinstance(interferer, CWInterferer):
+        center_offset_hz = interferer.offset_hz
+        amplitude_v = np.sqrt(
+            10.0 ** ((interferer.power_dbm - 30.0) / 10.0)
+            * cfg.reference_impedance_ohm
         )
-    )
+        waveform = amplitude_v * np.exp(
+            1j
+            * (
+                2.0
+                * np.pi
+                * (cfg.signal.if_hz + center_offset_hz)
+                * time_s
+                + interferer.initial_phase_rad
+            )
+        )
+    elif isinstance(interferer, WidebandInterferer):
+        center_offset_hz = interferer.center_offset_hz
+        waveform = generate_wideband_waveform(
+            interferer,
+            time_s.size,
+            cfg.signal.fs_rf_hz,
+            cfg.signal.if_hz,
+            cfg.reference_impedance_ohm,
+        )
     first = round(interferer.start_ms * 1e-3 * cfg.signal.fs_rf_hz)
     stop = (
         time_s.size
@@ -125,7 +143,7 @@ def _interferer_scene(
     gate[first:stop] = 1.0
     interferer_delay_phase = delay_phase(
         true_delays_s,
-        cfg.signal.carrier_hz + interferer.offset_hz,
+        cfg.signal.carrier_hz + center_offset_hz,
     )
     response = (
         response_base
