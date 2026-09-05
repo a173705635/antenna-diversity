@@ -41,10 +41,17 @@ def main():
     cfg = default_config()
     cfg.phone.channel_delay_ns = {
         "BL": 1,
-        "BR": 20,
+        "BR": 5,
         "TL": 3,
         "TR": 10,
     }
+    # cfg.phone.estimated_channel_delay_ns = {
+    #     "BL": 1,
+    #     "BR": 5,
+    #     "TL": 3,
+    #     "TR": 10,
+    # }
+
     # Edit cfg here when studying frequency, antenna combinations, or phase.
     results = run_end_to_end(cfg)
     print(format_metrics(results["metrics"]))

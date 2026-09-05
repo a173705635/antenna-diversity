@@ -1,44 +1,49 @@
 # GNSS 天线分集与空域抗干扰仿真
 
-本仓库以 Python 为唯一开发基线，面向手机四角的 2–4 天线组合，研究 GPS L1 C/A 从天线端口、RF/ADC、DFE、空域处理到捕获、跟踪和 C/N0 评估的完整链路。
+本仓库以 Python 为开发基线，面向手机四角的 2–4 天线组合，研究 GPS L1 C/A 从天线端口、RF/ADC、DFE、空域合并到捕获、跟踪和 C/N₀ 评估的完整链路。
 
-当前主信号流为：
+当前主要信号流为：
 
 ```text
-GPS L1 C/A + 0–3 个静态 CW 干扰
+GPS L1 C/A + CW / 带限宽带干扰
 → 2–4 个手机角点天线
 → RF / ADC
 → DFE
 → SINGLE / EGC / MVDR / Blind Nulling
 → 捕获 ACQ
-→ 跟踪 TRK / C/N0
-→ 扫描、Monte Carlo 与研究报告
+→ 跟踪 TRK / C/N₀
 ```
 
-## 从这里开始
+## 目录职责
 
-| 文档 | 职责 |
+| 目录或文件 | 用途 |
 |---|---|
-| [`PROJECT_STATUS.md`](PROJECT_STATUS.md) | 当前进度、已经证明的结论、风险与下一阶段 |
-| [`python_sim/README.md`](python_sim/README.md) | 环境安装、运行命令、配置示例和实验入口 |
-| [`python_sim/DESIGN.md`](python_sim/DESIGN.md) | 数学模型、配置接口、算法公式与代码映射 |
-| [`python_sim/ARCHITECTURE.md`](python_sim/ARCHITECTURE.md) | 对外架构、中央数据路径、已建模与未建模边界 |
-| [`基础知识/README.md`](基础知识/README.md) | GNSS 窄带阵列抗干扰理论知识库 |
+| [`python_sim_simplified/`](python_sim_simplified/) | 当前主开发版本；用于日常修改、单场景仿真和结果作图 |
+| [`python_sim/`](python_sim/) | 完整研究框架；保留批处理、扫描、Monte Carlo、报告和更完整的保护逻辑 |
+| [`PROJECT_STATUS.md`](PROJECT_STATUS.md) | 当前进度、结论、建模边界与下一阶段 |
+| [`基础知识/`](基础知识/) | 按学习顺序整理的 GNSS 与阵列抗干扰理论知识库 |
+| [`验证方案/`](验证方案/) | 专项验证方案和评审材料 |
+| [`docs/reports/`](docs/reports/) | 对外报告、原理章节和汇报材料 |
+| [`docs/archive/`](docs/archive/) | 仅供追溯的历史项目记录 |
+| [`docs/superpowers/`](docs/superpowers/) | 开发过程中的设计与实施记录，不代表当前状态 |
 
-`docs/superpowers/`保存开发过程中的设计和实施记录，用于追溯决策，不代表当前项目状态。发生冲突时，以`PROJECT_STATUS.md`和当前Python文档为准。
+发生内容冲突时，以 `PROJECT_STATUS.md`、当前代码及对应 Python 目录的 README 为准。
 
-## 快速运行
+## 快速运行当前版本
 
 ```powershell
-cd F:\antenna_diversity\python_sim
-python -m pip install -e ".[test]"
-$env:MPLBACKEND='Agg'
-python -W error -m pytest -q
-python -W error run_end_to_end.py
+cd F:\antenna_diversity
+python -m pip install -r python_sim_simplified/requirements.txt
+python python_sim_simplified/run_end_to_end.py
+python -m pytest -q python_sim_simplified/tests
 ```
 
-当前能力包括理想、合成参数化和外部测量表格三类天线接口，以及SINGLE、EGC、loaded MVDR和捕获前Blind Nulling。具体适用条件和未建模项以架构与设计文档为准，当前结果不代表真实Mate 70产品性能。
+仿真结果保存到 `python_sim_simplified/results/`。默认场景包含一个 CW 干扰和一个 2 MHz 带限复高斯噪声干扰；具体配置、18 张结果图及代码阅读顺序见 [`python_sim_simplified/README.md`](python_sim_simplified/README.md)。
 
-## 历史实现
+需要运行参数扫描、Monte Carlo 或完整研究报告流程时，再使用 [`python_sim/README.md`](python_sim/README.md)。完整版尚未同步精简版最新的宽带干扰模型，因此两套目录不是逐文件镜像。
 
-旧MATLAB与Galileo E5/AltBOC实现已经从当前工作树移除。需要追溯或重新实现时，可从Git提交`6f5e686`恢复；后续新增能力默认只维护Python版本。
+## 研究边界
+
+当前模型用于验证算法机制和敏感性，不代表真实 Mate 70 产品性能。仓库没有 Mate 70 的真实天线位置、复数方向图、S 参数和多 RF 校准数据；当前宽带空域处理仍是一组覆盖整个 DFE 带宽的固定复权值，并非分频段或时域宽带波束形成。
+
+旧 MATLAB 与 Galileo E5/AltBOC 实现已从当前工作树移除。如需追溯，可从 Git 提交 `6f5e686` 恢复；后续新增能力默认只维护 Python 版本。

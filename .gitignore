@@ -6,6 +6,11 @@ __pycache__/
 .venv/
 venv/
 
+# Local IDE and Codex working files
+**/.idea/
+.codex_docx_review/
+.superpowers/
+
 # Local git worktrees used for isolated feature execution
 .worktrees/
 
@@ -29,10 +34,3 @@ codegen/
 # Operating-system files
 .DS_Store
 Thumbs.db
-.superpowers/brainstorm/.last-port
-.superpowers/brainstorm/.last-token
-.superpowers/brainstorm/424-1786618606/state/server-instance-id
-.superpowers/brainstorm/424-1786618606/state/server.pid
-.superpowers/brainstorm/424-1786618606/content/waiting-terminal.html
-.superpowers/brainstorm/424-1786618606/content/report-layout.html
-.superpowers/brainstorm/424-1786618606/state/server-info
