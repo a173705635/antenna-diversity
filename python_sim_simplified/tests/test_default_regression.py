@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from pipeline import run_end_to_end
@@ -13,7 +14,11 @@ EXPECTED = {
 
 
 def test_default_simulation_matches_locked_baseline():
-    results = run_end_to_end(default_config())
+    cfg = default_config()
+    cfg.signal.multipath_paths = []
+    cfg.multipath_detection.enable = False
+    cfg.multipath_suppression.enable = False
+    results = run_end_to_end(cfg)
 
     assert results["scene_input_v"].shape == (4, 1_636_800)
     assert results["adc_codes"].shape == (4, 1_636_800)
@@ -36,3 +41,35 @@ def test_default_simulation_matches_locked_baseline():
                 cn0_db_hz,
                 rel=1e-10,
             )
+
+
+def test_default_multipath_pipeline_contract():
+    cfg = default_config()
+    results = run_end_to_end(cfg)
+
+    assert len(cfg.signal.multipath_paths) == 1
+    assert cfg.signal.multipath_paths[0].enable
+    assert cfg.multipath_detection.enable
+    assert cfg.multipath_suppression.enable
+    assert set(results["branches"]) == {
+        "single",
+        "egc",
+        "mvdr",
+        "blind_null",
+        "multipath_lcmv",
+    }
+    assert results["multipath_detection"]["status"] in {
+        "detected",
+        "no_multipath_detected",
+        "no_pilot_acquisition",
+    }
+    assert len(results["truth"]["multipath_paths"]) == 1
+    assert np.all(
+        np.isfinite(results["truth"]["multipath_paths"][0]["component"])
+    )
+    for branch in results["branches"].values():
+        assert np.all(np.isfinite(branch["combined"]))
+    for record in results["metrics"]:
+        assert np.isfinite(record["acquisition_metric"])
+        assert np.isfinite(record["worst_multipath_gain"])
+        assert np.isfinite(record["acquisition_code_bias_chips"])

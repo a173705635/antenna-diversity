@@ -10,7 +10,7 @@
 python python_sim_simplified/run_end_to_end.py
 ```
 
-程序打印 SINGLE、EGC、MVDR、Blind Null 的捕获、跟踪和 C/N₀ 指标，并把图片保存到 `python_sim_simplified/results/`。
+程序打印 SINGLE、EGC、MVDR、Blind Null 和 Multipath LCMV 的捕获、跟踪、C/N₀、码偏差与多径方向增益，并把图片保存到 `python_sim_simplified/results/`。
 
 程序只保存不重复的研究图，避免同一数据同时出现在总览图和详细图中：
 
@@ -20,8 +20,12 @@ python python_sim_simplified/run_end_to_end.py
 - `detailed_acquisition_<分支名>.png`：每种合并方式独立的捕获搜索面和码相位切片。
 - `tracking.png`：载波频率、Prompt、PLL误差和DLL误差对比。
 - `cn0.png`：各跟踪成功分支的 C/N₀ 对比。
+- `multipath_delay_profile.png`：直达径投影前后的延迟相关功率及检测门限。
+- `multipath_angle_path_<序号>.png`：每条已检测候选径的方位角–俯仰角扫描面。
+- `multipath_correlation_comparison.png`：各合并分支的码相关曲线对比。
+- `multipath_tracking_bias.png`：各合并分支的跟踪码偏差对比。
 
-默认四天线、四分支配置共保存 18 张 PNG。每次运行前会清理输出目录中的旧 PNG，避免历史图片与本次结果混合。
+图片数量随活动天线数、合并分支数和检测到的多径数变化。默认四天线、五分支时至少保存 24 张 PNG，每检测到一条候选多径再增加一张角度扫描图。每次运行前会清理输出目录中的旧 PNG，避免历史图片与本次结果混合。
 
 ## 配置入口
 
@@ -55,6 +59,40 @@ cfg.dfe.nco_frequency_hz = cfg.signal.if_hz + 500.0
 ```
 
 设置为 `None` 时恢复为自动跟随信号中频。
+
+## 静态多径检测与抑制
+
+默认加入一条相对功率 `-6 dB`、超额时延 `0.5 chip`、反射相位 `π`、方向为方位角 `110°`/仰角 `15°` 的镜面反射径。可直接替换为任意静态路径列表：
+
+```python
+from math import pi
+
+from config import Direction, MultipathPath
+
+cfg.signal.multipath_paths = [
+    MultipathPath(
+        direction=Direction(110.0, 15.0),
+        relative_power_db=-6.0,
+        excess_delay_chips=0.5,
+        reflection_phase_rad=pi,
+        doppler_offset_hz=0.0,
+    )
+]
+cfg.multipath_detection.max_excess_delay_chips = 3.0
+cfg.multipath_detection.delay_step_chips = 0.25
+cfg.multipath_detection.detection_threshold_db = 6.0
+cfg.multipath_suppression.max_steering_correlation = 0.95
+```
+
+每条反射径先生成独立的延迟、相位、多普勒与天线方向响应，再与直达径相加并进入同一 RF → DFE 链路，因此延迟作用于完整接收序列，不是只移动本地码。检测器使用捕获结果形成逐天线相关向量，投影去除 LOS 后搜索超额时延和到达方向；检测结果再作为 LOS 保持约束 LCMV 的零响应约束。真实多径参数只用于最后计算漏检、虚警及误差，不会送给检测器或权值计算器。
+
+当前是静态镜面多径 V1。DFE 约为 4 samples/chip，延迟搜索步长虽可设为 `0.25 chip`，实际可分辨能力仍受采样率、相关主瓣、信噪比和阵列孔径限制；与 LOS 空间导向高度相关的路径会标记为不可空间分辨，并不会强行加入 LCMV 约束。可完全关闭多径研究路径：
+
+```python
+cfg.signal.multipath_paths = []
+cfg.multipath_detection.enable = False
+cfg.multipath_suppression.enable = False
+```
 
 ## CW与宽带干扰
 
@@ -131,7 +169,8 @@ element_name,frequency_hz,azimuth_deg,elevation_deg,h_az_real,h_az_imag,h_el_rea
 - `interference.py`：带限复高斯宽带干扰波形生成和参数校验。
 - `gnss.py`：C/A 码、目标信号、干扰源和天线端场景。
 - `rf.py` / `dfe.py`：RF 噪声与量化、DDC 和抽取。
-- `diversity.py`：SINGLE、EGC、MVDR 和 Blind Null。
+- `diversity.py`：SINGLE、EGC、MVDR、Blind Null 和 LOS 保持 LCMV。
+- `multipath.py`：数据驱动的延迟/到达角检测及 truth-only 检测评估。
 - `acquisition.py` / `tracking.py`：捕获、DLL、PLL、FLL 和 C/N₀。
 - `pipeline.py`：端到端信号流与各合并分支编排。
 - `models.py`：阶段间结果字典的类型说明。
@@ -143,4 +182,4 @@ element_name,frequency_hz,azimuth_deg,elevation_deg,h_az_real,h_az_imag,h_el_rea
 
 本目录假定研究配置有效，没有包含完整版的配置全量校验、异常包装、文件哈希和 schema 审计、退化矩阵保护、Blind Null 安全旁路、断点恢复、Monte Carlo、批处理、报告系统和定点载波 NCO 对比。
 
-保留下来的内容包括 2～4 天线组合、手机四角几何、参数化/实测方向图、极化、遮挡、互耦、通道幅相误差、真实/估计通道延迟、CW与带限噪声干扰、RF/ADC、定点化 DFE 输出、四种合并方式、捕获、跟踪和 C/N₀。需要大规模鲁棒性研究或异常诊断时，使用 `../python_sim/`。
+保留下来的内容包括 2～4 天线组合、手机四角几何、参数化/实测方向图、极化、遮挡、互耦、通道幅相误差、真实/估计通道延迟、CW与带限噪声干扰、静态镜面多径、RF/ADC、定点化 DFE 输出、五种合并方式、捕获、跟踪、码偏差和 C/N₀。尚未包含连续延迟估计、弥散多径、动态路径、NLOS 判决、路径跟踪或多星联合处理。需要大规模鲁棒性研究或异常诊断时，使用 `../python_sim/`。
