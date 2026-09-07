@@ -1,7 +1,8 @@
 import numpy as np
+import pytest
 
 from config import BlindNullConfig
-from diversity import combine_blind_null, combine_known
+from diversity import combine_blind_null, combine_known, combine_lcmv
 
 
 def test_known_combiners_have_unit_target_response():
@@ -47,3 +48,44 @@ def test_blind_null_returns_reference_when_detection_threshold_is_not_met():
     np.testing.assert_array_equal(combined, channels[1])
     assert not info["interference_detected"]
     assert not info["nulling_enabled"]
+
+
+def test_lcmv_preserves_los_and_nulls_resolvable_multipath():
+    rng = np.random.default_rng(9)
+    channels = rng.normal(size=(4, 2000)) + 1j * rng.normal(size=(4, 2000))
+    los = np.array([1.0, 1.0j, -1.0, -1.0j])
+    echo = np.array([1.0, -1.0, 1.0j, -1.0j])
+
+    combined, info = combine_lcmv(channels, los, [echo], 1e-2, 0.95)
+
+    assert combined.shape == (channels.shape[1],)
+    assert np.vdot(info["weights"], los) == pytest.approx(1.0 + 0.0j, abs=1e-10)
+    assert np.vdot(info["weights"], echo) == pytest.approx(0.0 + 0.0j, abs=1e-10)
+    assert info["suppression_status"] == "multipath_constraints_applied"
+
+
+def test_lcmv_without_echo_constraints_matches_loaded_mvdr():
+    rng = np.random.default_rng(12)
+    channels = rng.normal(size=(3, 1000)) + 1j * rng.normal(size=(3, 1000))
+    los = np.array([1.0, np.exp(0.4j), np.exp(-0.8j)])
+
+    expected, expected_info = combine_known(channels, los, "mvdr", 1e-2)
+    actual, actual_info = combine_lcmv(channels, los, [], 1e-2, 0.95)
+
+    np.testing.assert_allclose(actual, expected)
+    np.testing.assert_allclose(actual_info["weights"], expected_info["weights"])
+    assert actual_info["mode"] == "multipath_lcmv"
+    assert actual_info["suppression_status"] == "no_multipath_detected"
+
+
+def test_lcmv_rejects_constraint_collinear_with_los():
+    rng = np.random.default_rng(14)
+    channels = rng.normal(size=(3, 1000)) + 1j * rng.normal(size=(3, 1000))
+    los = np.array([1.0, 1.0j, -1.0])
+    collinear = 2.0j * los
+
+    _, info = combine_lcmv(channels, los, [collinear], 1e-2, 0.95)
+
+    assert info["rejected_constraint_indices"] == [0]
+    assert info["suppression_status"] == "spatially_unresolvable"
+    assert np.vdot(info["weights"], los) == pytest.approx(1.0 + 0.0j, abs=1e-10)
