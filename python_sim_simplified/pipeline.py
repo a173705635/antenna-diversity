@@ -2,13 +2,21 @@
 
 import numpy as np
 
+from antenna import build_antenna_model
 from acquisition import acquire
 from config import SimulationConfig
 from dfe import process_dfe
-from diversity import combine_blind_null, combine_known
+from diversity import combine_blind_null, combine_known, combine_lcmv
 from gnss import generate_scenario
 from metrics import compute_metrics
-from models import BranchResult, ScenarioTruth, SimulationResults, TrackingResult
+from models import (
+    BranchResult,
+    CombiningInfo,
+    ScenarioTruth,
+    SimulationResults,
+    TrackingResult,
+)
+from multipath import detect_multipath, empty_detection
 from presets import default_config
 from rf import process_rf
 from tracking import track
@@ -34,10 +42,33 @@ def _run_branch(
             cfg.diversity.diagonal_loading_factor,
         )
 
+    return _finish_branch(
+        combined,
+        combining,
+        truth,
+        cfg,
+        fs_out_hz,
+        dfe_channels.shape[1],
+    )
+
+
+def _finish_branch(
+    combined: np.ndarray,
+    combining: CombiningInfo,
+    truth: ScenarioTruth,
+    cfg: SimulationConfig,
+    fs_out_hz: float,
+    covariance_snapshots: int,
+) -> BranchResult:
+
     weights = combining["weights"]
     interferer_gains = [
         float(abs(np.vdot(weights, steering)))
         for steering in truth["interferer_steering_effective"]
+    ]
+    multipath_gains = [
+        float(abs(np.vdot(weights, path["steering_true"])))
+        for path in truth["multipath_paths"]
     ]
     combining.update(
         {
@@ -46,7 +77,9 @@ def _run_branch(
             ),
             "interferer_direction_gains": interferer_gains,
             "worst_interferer_gain": max(interferer_gains, default=0.0),
-            "covariance_snapshots": dfe_channels.shape[1],
+            "multipath_direction_gains": multipath_gains,
+            "worst_multipath_gain": max(multipath_gains, default=0.0),
+            "covariance_snapshots": covariance_snapshots,
             "weights_are_fixed": True,
         }
     )
@@ -108,6 +141,62 @@ def run_end_to_end(cfg: SimulationConfig | None = None) -> SimulationResults:
         )
         for mode in cfg.diversity.modes
     }
+    successful = [
+        (mode, branch["acquisition"])
+        for mode, branch in branches.items()
+        if branch["acquisition"]["success"]
+    ]
+    pilot = (
+        max(successful, key=lambda item: item[1]["metric"])
+        if successful
+        else None
+    )
+    if not cfg.multipath_detection.enable:
+        detection = empty_detection("detection_disabled")
+    elif pilot is None:
+        detection = empty_detection("no_pilot_acquisition")
+    else:
+        pilot_mode, pilot_acquisition = pilot
+        antenna_model = build_antenna_model(
+            cfg.phone,
+            cfg.signal.carrier_hz,
+        )
+        detection = detect_multipath(
+            dfe_channels,
+            dfe_info["fs_out_hz"],
+            cfg.signal.prn,
+            cfg.signal.code_rate_hz,
+            pilot_acquisition,
+            cfg.acquisition,
+            antenna_model,
+            cfg.signal.assumed_direction,
+            cfg.signal.assumed_polarization,
+            cfg.multipath_detection,
+            cfg.multipath_suppression.max_steering_correlation,
+        )
+        detection["pilot_mode"] = pilot_mode
+
+    if cfg.multipath_suppression.enable:
+        estimated_multipath = [
+            candidate["steering_estimated"]
+            for candidate in detection["candidates"]
+            if candidate["spatial_status"] == "resolvable"
+        ]
+        combined, combining = combine_lcmv(
+            dfe_channels,
+            truth["desired_steering_assumed"],
+            estimated_multipath,
+            cfg.multipath_suppression.diagonal_loading_factor,
+            cfg.multipath_suppression.max_steering_correlation,
+        )
+        branches["multipath_lcmv"] = _finish_branch(
+            combined,
+            combining,
+            truth,
+            cfg,
+            dfe_info["fs_out_hz"],
+            dfe_channels.shape[1],
+        )
     results: SimulationResults = {
         "config": cfg,
         "truth": truth,
@@ -117,6 +206,7 @@ def run_end_to_end(cfg: SimulationConfig | None = None) -> SimulationResults:
         "dfe_channels": dfe_channels,
         "dfe_info": dfe_info,
         "branches": branches,
+        "multipath_detection": detection,
         "metrics": [],
     }
     results["metrics"] = compute_metrics(results)

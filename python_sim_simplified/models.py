@@ -151,6 +151,8 @@ class CombiningInfo(TypedDict):
     target_direction_gain: NotRequired[float]
     interferer_direction_gains: NotRequired[list[float]]
     worst_interferer_gain: NotRequired[float]
+    multipath_direction_gains: NotRequired[list[float]]
+    worst_multipath_gain: NotRequired[float]
 
 
 class AcquisitionResult(TypedDict):
@@ -219,4 +221,5 @@ class SimulationResults(TypedDict):
     dfe_channels: np.ndarray
     dfe_info: DFEInfo
     branches: dict[str, BranchResult]
+    multipath_detection: MultipathDetectionResult
     metrics: list[MetricRecord]
