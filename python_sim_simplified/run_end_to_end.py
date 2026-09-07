@@ -7,6 +7,7 @@ from pipeline import run_end_to_end
 from plotting import (
     plot_cn0,
     plot_detailed_results,
+    plot_multipath_results,
     plot_tracking,
 )
 from presets import default_config
@@ -22,6 +23,7 @@ def save_results_figures(results, output_dir):
             **plot_detailed_results(results),
             "tracking": plot_tracking(results),
             "cn0": plot_cn0(results),
+            **plot_multipath_results(results),
         }
 
     for old_path in directory.glob("*.png"):
