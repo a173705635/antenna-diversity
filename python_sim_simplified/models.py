@@ -4,7 +4,7 @@ from typing import NotRequired, TypedDict
 
 import numpy as np
 
-from config import SimulationConfig
+from config import Direction, SimulationConfig
 
 
 class AntennaDiagnostics(TypedDict):
@@ -23,6 +23,19 @@ class AntennaModelDiagnostics(TypedDict):
     desired_true: AntennaDiagnostics
     desired_assumed: AntennaDiagnostics
     interferers: list[AntennaDiagnostics]
+    multipath_paths: list[AntennaDiagnostics]
+
+
+class MultipathTruth(TypedDict):
+    component: np.ndarray
+    steering_true: np.ndarray
+    delay_phase_true: np.ndarray
+    excess_delay_chips: float
+    excess_delay_s: float
+    relative_power_db: float
+    reflection_phase_rad: float
+    doppler_offset_hz: float
+    direction: Direction
 
 
 class ScenarioTruth(TypedDict):
@@ -36,6 +49,7 @@ class ScenarioTruth(TypedDict):
     desired_open_circuit_response_assumed: np.ndarray
     interferer_steering_effective: list[np.ndarray]
     interferer_components: list[np.ndarray]
+    multipath_paths: list[MultipathTruth]
     active_antennas: tuple[str, ...]
     positions_m: np.ndarray
     channel_delay_true_ns: np.ndarray

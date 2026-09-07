@@ -1,6 +1,6 @@
 import numpy as np
 
-from config import CORNER_NAMES, CWInterferer, WidebandInterferer
+from config import CORNER_NAMES, CWInterferer, MultipathPath, WidebandInterferer
 from gnss import ca_code
 from presets import default_config
 
@@ -22,6 +22,21 @@ def test_default_config_uses_mate70_geometry_and_signal_values():
     assert isinstance(cfg.interferers[0], CWInterferer)
     assert isinstance(cfg.interferers[1], WidebandInterferer)
     assert cfg.interferers[1].bandwidth_hz == 2.0e6
+
+
+def test_default_scenario_contains_one_static_specular_multipath():
+    cfg = default_config()
+
+    assert len(cfg.signal.multipath_paths) == 1
+    path = cfg.signal.multipath_paths[0]
+    assert isinstance(path, MultipathPath)
+    assert path.direction.azimuth_deg == 110.0
+    assert path.direction.elevation_deg == 15.0
+    assert path.relative_power_db == -6.0
+    assert path.excess_delay_chips == 0.5
+    assert path.reflection_phase_rad == np.pi
+    assert cfg.multipath_detection.enable
+    assert cfg.multipath_suppression.enable
 
 
 def test_shared_physical_parameters_have_one_default_source():

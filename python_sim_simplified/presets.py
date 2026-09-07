@@ -1,5 +1,6 @@
 """Ready-to-run configurations for the simplified research simulation."""
 
+from math import pi
 from pathlib import Path
 
 from config import (
@@ -14,6 +15,9 @@ from config import (
     Direction,
     DiversityConfig,
     ElementOrientation,
+    MultipathDetectionConfig,
+    MultipathPath,
+    MultipathSuppressionConfig,
     ParametricPattern,
     PhoneConfig,
     PlotConfig,
@@ -47,7 +51,16 @@ def default_config() -> SimulationConfig:
     return SimulationConfig(
         random_seed=42,
         reference_impedance_ohm=50.0,
-        signal=SignalConfig(),
+        signal=SignalConfig(
+            multipath_paths=[
+                MultipathPath(
+                    direction=Direction(110.0, 15.0),
+                    relative_power_db=-6.0,
+                    excess_delay_chips=0.5,
+                    reflection_phase_rad=pi,
+                )
+            ]
+        ),
         phone=PhoneConfig(
             active_antennas=CORNER_NAMES,
             phase_centers_m=positions,
@@ -67,6 +80,8 @@ def default_config() -> SimulationConfig:
         rf=RFConfig(),
         dfe=DFEConfig(),
         diversity=DiversityConfig(),
+        multipath_detection=MultipathDetectionConfig(),
+        multipath_suppression=MultipathSuppressionConfig(),
         acquisition=AcquisitionConfig(),
         tracking=TrackingConfig(),
         plot=PlotConfig(),

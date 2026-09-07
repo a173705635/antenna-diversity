@@ -1,6 +1,9 @@
-import numpy as np
+from dataclasses import replace
 
-from config import Direction, WidebandInterferer
+import numpy as np
+import pytest
+
+from config import CORNER_NAMES, Direction, WidebandInterferer
 from gnss import generate_scenario
 from presets import default_config
 
@@ -19,6 +22,7 @@ def test_scenario_public_keys_remain_stable():
         "desired_open_circuit_response_assumed",
         "interferer_steering_effective",
         "interferer_components",
+        "multipath_paths",
         "active_antennas",
         "positions_m",
         "channel_delay_true_ns",
@@ -35,6 +39,67 @@ def test_scenario_public_keys_remain_stable():
         "if_hz",
         "antenna_model_diagnostics",
     }
+
+
+def test_empty_multipath_list_keeps_scene_equal_to_direct_component():
+    cfg = default_config()
+    cfg.interferers = []
+    cfg.signal.multipath_paths = []
+
+    scene, truth = generate_scenario(cfg)
+
+    np.testing.assert_array_equal(scene, truth["desired_component"])
+    assert truth["multipath_paths"] == []
+
+
+def test_multipath_applies_power_delay_reflection_phase_and_direction():
+    cfg = default_config()
+    cfg.interferers = []
+    cfg.signal.duration_ms = 4
+    cfg.phone.channel_delay_ns = {name: 0.0 for name in CORNER_NAMES}
+    path = cfg.signal.multipath_paths[0]
+
+    scene, truth = generate_scenario(cfg)
+
+    reflected = truth["multipath_paths"][0]
+    expected_delay_s = path.excess_delay_chips / cfg.signal.code_rate_hz
+    assert reflected["excess_delay_s"] == pytest.approx(expected_delay_s)
+    assert reflected["relative_power_db"] == path.relative_power_db
+    assert reflected["direction"] == path.direction
+    np.testing.assert_allclose(
+        scene,
+        truth["desired_component"] + reflected["component"],
+    )
+    expected_ratio = 10.0 ** (path.relative_power_db / 20.0)
+    first = round(expected_delay_s * cfg.signal.fs_rf_hz) + 32
+    measured_ratio = np.linalg.norm(reflected["component"][:, first:-32]) / np.linalg.norm(
+        truth["desired_component"][:, first:-32]
+    )
+    assert measured_ratio == pytest.approx(expected_ratio, rel=0.08)
+
+
+def test_two_multipath_paths_are_summed_independently():
+    cfg = default_config()
+    cfg.interferers = []
+    cfg.signal.duration_ms = 4
+    first = cfg.signal.multipath_paths[0]
+    second = replace(
+        first,
+        direction=Direction(220.0, 25.0),
+        relative_power_db=-10.0,
+        excess_delay_chips=1.25,
+    )
+    cfg.signal.multipath_paths = [first, second]
+
+    scene, truth = generate_scenario(cfg)
+
+    assert len(truth["multipath_paths"]) == 2
+    np.testing.assert_allclose(
+        scene,
+        truth["desired_component"]
+        + truth["multipath_paths"][0]["component"]
+        + truth["multipath_paths"][1]["component"],
+    )
 
 
 def test_scenario_contains_code_doppler_and_interferer_time_gate():

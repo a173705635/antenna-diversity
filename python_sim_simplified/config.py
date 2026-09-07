@@ -110,6 +110,7 @@ class SignalConfig:
     assumed_polarization: WavePolarization = field(
         default_factory=WavePolarization
     )
+    multipath_paths: list["MultipathPath"] = field(default_factory=list)
 
     @property
     def wavelength_m(self) -> float:
@@ -160,6 +161,17 @@ Interferer = CWInterferer | WidebandInterferer
 
 
 @dataclass
+class MultipathPath:
+    direction: Direction
+    enable: bool = True
+    relative_power_db: float = -6.0
+    excess_delay_chips: float = 0.5
+    reflection_phase_rad: float = 0.0
+    doppler_offset_hz: float = 0.0
+    polarization: WavePolarization = field(default_factory=WavePolarization)
+
+
+@dataclass
 class RFStage:
     name: str
     gain_db: float
@@ -206,6 +218,23 @@ class DiversityConfig:
 
 
 @dataclass
+class MultipathDetectionConfig:
+    enable: bool = True
+    max_excess_delay_chips: float = 3.0
+    delay_step_chips: float = 0.25
+    detection_threshold_db: float = 6.0
+    azimuth_step_deg: float = 5.0
+    elevation_step_deg: float = 5.0
+
+
+@dataclass
+class MultipathSuppressionConfig:
+    enable: bool = True
+    diagonal_loading_factor: float = 1e-2
+    max_steering_correlation: float = 0.95
+
+
+@dataclass
 class AcquisitionConfig:
     doppler_bins_hz: np.ndarray = field(
         default_factory=lambda: np.arange(-5_000.0, 5_000.1, 250.0)
@@ -249,6 +278,8 @@ class SimulationConfig:
     rf: RFConfig
     dfe: DFEConfig
     diversity: DiversityConfig
+    multipath_detection: MultipathDetectionConfig
+    multipath_suppression: MultipathSuppressionConfig
     acquisition: AcquisitionConfig
     tracking: TrackingConfig
     plot: PlotConfig

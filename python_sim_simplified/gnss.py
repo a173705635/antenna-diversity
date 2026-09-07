@@ -9,12 +9,13 @@ from channel_delay import apply_channel_delays, delay_phase
 from config import (
     CWInterferer,
     Interferer,
+    MultipathPath,
     PhoneConfig,
     SimulationConfig,
     WidebandInterferer,
 )
 from interference import generate_wideband_waveform
-from models import AntennaDiagnostics, ScenarioTruth
+from models import AntennaDiagnostics, MultipathTruth, ScenarioTruth
 
 
 G2_TAPS = np.array(
@@ -32,6 +33,12 @@ class _InterfererScene:
     response: np.ndarray
     component: np.ndarray
     delay_phase: np.ndarray
+    diagnostics: AntennaDiagnostics
+
+
+@dataclass
+class _MultipathScene:
+    truth: MultipathTruth
     diagnostics: AntennaDiagnostics
 
 
@@ -165,6 +172,68 @@ def _interferer_scene(
     )
 
 
+def _multipath_scene(
+    path: MultipathPath,
+    cfg: SimulationConfig,
+    antenna_model: AntennaModel,
+    desired_waveform: np.ndarray,
+    time_s: np.ndarray,
+    true_delays_s: np.ndarray,
+) -> _MultipathScene:
+    values = np.array(
+        [
+            path.relative_power_db,
+            path.excess_delay_chips,
+            path.reflection_phase_rad,
+            path.doppler_offset_hz,
+            path.direction.azimuth_deg,
+            path.direction.elevation_deg,
+        ]
+    )
+    if not np.all(np.isfinite(values)) or path.excess_delay_chips < 0.0:
+        raise ValueError("multipath parameters must be finite and delay nonnegative")
+
+    excess_delay_s = path.excess_delay_chips / cfg.signal.code_rate_hz
+    total_delays_s = true_delays_s + excess_delay_s
+    relative_voltage = 10.0 ** (path.relative_power_db / 20.0)
+    path_waveform = (
+        desired_waveform
+        * relative_voltage
+        * np.exp(1j * path.reflection_phase_rad)
+        * np.exp(1j * 2.0 * np.pi * path.doppler_offset_hz * time_s)
+    )
+    response_base, diagnostics = antenna_response(
+        antenna_model,
+        path.direction,
+        path.polarization,
+    )
+    component = apply_channel_delays(
+        response_base[:, None] * path_waveform[None, :],
+        total_delays_s,
+        cfg.signal.fs_rf_hz,
+        cfg.signal.carrier_hz,
+        cfg.signal.if_hz,
+    )
+    path_rf_frequency_hz = (
+        cfg.signal.carrier_hz
+        + cfg.signal.doppler_hz
+        + path.doppler_offset_hz
+    )
+    path_delay_phase = delay_phase(total_delays_s, path_rf_frequency_hz)
+    truth: MultipathTruth = {
+        "component": component,
+        "steering_true": response_base * path_delay_phase,
+        "delay_phase_true": path_delay_phase,
+        "excess_delay_chips": path.excess_delay_chips,
+        "excess_delay_s": excess_delay_s,
+        "relative_power_db": path.relative_power_db,
+        "reflection_phase_rad": path.reflection_phase_rad,
+        "doppler_offset_hz": path.doppler_offset_hz,
+        "direction": path.direction,
+    }
+    return _MultipathScene(truth, diagnostics)
+
+
 def generate_scenario(
     cfg: SimulationConfig,
 ) -> tuple[np.ndarray, ScenarioTruth]:
@@ -231,7 +300,21 @@ def generate_scenario(
         for interferer in cfg.interferers
         if interferer.enable
     ]
+    multipath_scenes = [
+        _multipath_scene(
+            path,
+            cfg,
+            antenna_model,
+            desired_waveform,
+            time_s,
+            true_delays_s,
+        )
+        for path in cfg.signal.multipath_paths
+        if path.enable
+    ]
     scene = desired_component.copy()
+    for path in multipath_scenes:
+        scene += path.truth["component"]
     for interferer in interferer_scenes:
         scene += interferer.component
 
@@ -254,6 +337,7 @@ def generate_scenario(
         "interferer_components": [
             interferer.component for interferer in interferer_scenes
         ],
+        "multipath_paths": [path.truth for path in multipath_scenes],
         "active_antennas": cfg.phone.active_antennas,
         "positions_m": desired_true_stages["positions_m"],
         "channel_delay_true_ns": true_delays_s * 1e9,
@@ -277,6 +361,9 @@ def generate_scenario(
             "desired_assumed": desired_assumed_stages,
             "interferers": [
                 interferer.diagnostics for interferer in interferer_scenes
+            ],
+            "multipath_paths": [
+                path.diagnostics for path in multipath_scenes
             ],
         },
     }
