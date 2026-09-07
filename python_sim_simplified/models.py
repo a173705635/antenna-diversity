@@ -38,6 +38,30 @@ class MultipathTruth(TypedDict):
     direction: Direction
 
 
+class MultipathCandidate(TypedDict):
+    excess_delay_chips: float
+    residual_power: float
+    detection_score_db: float
+    direction: Direction
+    steering_estimated: np.ndarray
+    steering_correlation_with_los: float
+    spatial_status: str
+    azimuths_deg: np.ndarray
+    elevations_deg: np.ndarray
+    angle_power: np.ndarray
+
+
+class MultipathDetectionResult(TypedDict):
+    status: str
+    pilot_mode: str | None
+    delay_axis_chips: np.ndarray
+    correlation_vectors: np.ndarray
+    raw_power: np.ndarray
+    residual_power: np.ndarray
+    threshold_power: float
+    candidates: list[MultipathCandidate]
+
+
 class ScenarioTruth(TypedDict):
     time_s: np.ndarray
     code: np.ndarray
