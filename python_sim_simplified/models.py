@@ -62,6 +62,20 @@ class MultipathDetectionResult(TypedDict):
     candidates: list[MultipathCandidate]
 
 
+class MultipathMatch(TypedDict):
+    detected_index: int
+    truth_index: int
+    delay_error_chips: float
+    direction_error_deg: float
+
+
+class MultipathEvaluation(TypedDict):
+    detected_count: int
+    missed_count: int
+    false_alarm_count: int
+    matches: list[MultipathMatch]
+
+
 class ScenarioTruth(TypedDict):
     time_s: np.ndarray
     code: np.ndarray
@@ -210,6 +224,11 @@ class MetricRecord(TypedDict):
     dll_rms: float | None
     mean_prompt_magnitude: float | None
     final_cn0_db_hz: float | None
+    multipath_direction_gains: list[float]
+    worst_multipath_gain: float
+    acquisition_code_bias_chips: float
+    tracking_code_bias_rms_chips: float | None
+    tracking_code_bias_rms_m: float | None
 
 
 class SimulationResults(TypedDict):
@@ -222,4 +241,5 @@ class SimulationResults(TypedDict):
     dfe_info: DFEInfo
     branches: dict[str, BranchResult]
     multipath_detection: MultipathDetectionResult
+    multipath_evaluation: MultipathEvaluation
     metrics: list[MetricRecord]

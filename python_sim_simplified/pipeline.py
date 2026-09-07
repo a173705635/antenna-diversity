@@ -16,7 +16,7 @@ from models import (
     SimulationResults,
     TrackingResult,
 )
-from multipath import detect_multipath, empty_detection
+from multipath import detect_multipath, empty_detection, evaluate_multipath
 from presets import default_config
 from rf import process_rf
 from tracking import track
@@ -197,6 +197,16 @@ def run_end_to_end(cfg: SimulationConfig | None = None) -> SimulationResults:
             dfe_info["fs_out_hz"],
             dfe_channels.shape[1],
         )
+    multipath_evaluation = evaluate_multipath(
+        detection,
+        truth["multipath_paths"],
+        max(0.5, 2.0 * cfg.multipath_detection.delay_step_chips),
+        2.0
+        * max(
+            cfg.multipath_detection.azimuth_step_deg,
+            cfg.multipath_detection.elevation_step_deg,
+        ),
+    )
     results: SimulationResults = {
         "config": cfg,
         "truth": truth,
@@ -207,6 +217,7 @@ def run_end_to_end(cfg: SimulationConfig | None = None) -> SimulationResults:
         "dfe_info": dfe_info,
         "branches": branches,
         "multipath_detection": detection,
+        "multipath_evaluation": multipath_evaluation,
         "metrics": [],
     }
     results["metrics"] = compute_metrics(results)

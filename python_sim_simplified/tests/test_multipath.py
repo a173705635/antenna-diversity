@@ -7,7 +7,7 @@ from antenna import antenna_response, build_antenna_model
 from channel_delay import fractional_delay
 from config import Direction
 from gnss import ca_code
-from multipath import detect_multipath, project_out_los
+from multipath import detect_multipath, evaluate_multipath, project_out_los
 from presets import default_config
 
 
@@ -142,3 +142,36 @@ def test_same_direction_echo_is_not_reported_as_resolvable():
         candidate["spatial_status"] == "resolvable"
         for candidate in result["candidates"]
     )
+
+
+def test_truth_evaluation_counts_match_miss_and_false_alarm():
+    detection = {
+        "candidates": [
+            {
+                "excess_delay_chips": 0.55,
+                "direction": Direction(105.0, 20.0),
+            },
+            {
+                "excess_delay_chips": 2.8,
+                "direction": Direction(15.0, 5.0),
+            },
+        ]
+    }
+    truth_paths = [
+        {
+            "excess_delay_chips": 0.5,
+            "direction": Direction(100.0, 20.0),
+        },
+        {
+            "excess_delay_chips": 1.5,
+            "direction": Direction(200.0, 30.0),
+        },
+    ]
+
+    evaluation = evaluate_multipath(detection, truth_paths, 0.5, 20.0)
+
+    assert evaluation["detected_count"] == 1
+    assert evaluation["missed_count"] == 1
+    assert evaluation["false_alarm_count"] == 1
+    assert evaluation["matches"][0]["delay_error_chips"] == pytest.approx(0.05)
+    assert evaluation["matches"][0]["direction_error_deg"] == pytest.approx(4.7, abs=0.3)

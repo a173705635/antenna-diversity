@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from antenna import AntennaModel, antenna_response
+from antenna import AntennaModel, antenna_response, direction_vector
 from config import (
     AcquisitionConfig,
     Direction,
@@ -10,7 +10,13 @@ from config import (
     WavePolarization,
 )
 from gnss import ca_code
-from models import AcquisitionResult, MultipathCandidate, MultipathDetectionResult
+from models import (
+    AcquisitionResult,
+    MultipathCandidate,
+    MultipathDetectionResult,
+    MultipathEvaluation,
+    MultipathTruth,
+)
 
 
 def empty_detection(
@@ -228,4 +234,66 @@ def detect_multipath(
         "residual_power": residual_power,
         "threshold_power": threshold,
         "candidates": candidates,
+    }
+
+
+def _direction_error_deg(first: Direction, second: Direction) -> float:
+    cosine = float(
+        np.clip(
+            np.dot(direction_vector(first), direction_vector(second)),
+            -1.0,
+            1.0,
+        )
+    )
+    return float(np.rad2deg(np.arccos(cosine)))
+
+
+def evaluate_multipath(
+    detection: MultipathDetectionResult,
+    truth_paths: list[MultipathTruth],
+    delay_tolerance_chips: float,
+    angle_tolerance_deg: float,
+) -> MultipathEvaluation:
+    possible = []
+    for detected_index, candidate in enumerate(detection["candidates"]):
+        for truth_index, truth in enumerate(truth_paths):
+            delay_error = abs(
+                candidate["excess_delay_chips"]
+                - truth["excess_delay_chips"]
+            )
+            direction_error = _direction_error_deg(
+                candidate["direction"],
+                truth["direction"],
+            )
+            possible.append(
+                (
+                    delay_error,
+                    direction_error,
+                    detected_index,
+                    truth_index,
+                )
+            )
+    matched_detections: set[int] = set()
+    matched_truth: set[int] = set()
+    matches = []
+    for delay_error, direction_error, detected_index, truth_index in sorted(possible):
+        if detected_index in matched_detections or truth_index in matched_truth:
+            continue
+        if delay_error > delay_tolerance_chips or direction_error > angle_tolerance_deg:
+            continue
+        matched_detections.add(detected_index)
+        matched_truth.add(truth_index)
+        matches.append(
+            {
+                "detected_index": detected_index,
+                "truth_index": truth_index,
+                "delay_error_chips": float(delay_error),
+                "direction_error_deg": float(direction_error),
+            }
+        )
+    return {
+        "detected_count": len(matches),
+        "missed_count": len(truth_paths) - len(matches),
+        "false_alarm_count": len(detection["candidates"]) - len(matches),
+        "matches": matches,
     }
