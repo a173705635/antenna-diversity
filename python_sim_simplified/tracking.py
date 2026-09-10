@@ -3,10 +3,12 @@
 from dataclasses import dataclass
 
 import numpy as np
+from scipy.optimize import minimize_scalar
 
 from config import TrackingConfig
 from gnss import ca_code
-from models import AcquisitionResult, TrackingResult
+from code_replica import bandlimited_code_replica, _sample_code
+from models import AcquisitionResult, TrackingResult, TrackingInitialization
 
 
 @dataclass
@@ -19,12 +21,52 @@ class _TrackingState:
     previous_prompt: complex | None = None
 
 
-def _sample_code(code: np.ndarray, phase_chips: np.ndarray) -> np.ndarray:
-    return code[np.floor(np.mod(phase_chips, 1023.0)).astype(int)]
-
-
 def _wrap_phase(phase_rad: float) -> float:
     return np.mod(phase_rad + np.pi, 2.0 * np.pi) - np.pi
+
+
+def _refine_initial_phase(
+    block: np.ndarray, code: np.ndarray, state: _TrackingState, fs_hz: float,
+) -> TrackingInitialization:
+    """Fit the received correlation peak, not necessarily the LOS in multipath.
+
+    Uses the first tracking block before replaying that block through the loops.
+    Frequency comes from acquisition; no truth or known path delay is supplied.
+    """
+    n = np.arange(block.size)
+    wiped = block * np.exp(-2j * np.pi * state.carrier_frequency_hz * n / fs_hz)
+    phase = n * state.code_rate_hz / fs_hz
+
+    def correlation(offset):
+        return np.sum(wiped * _sample_code(code, phase + offset))
+
+    def score(offset):
+        # Fit an unknown complex amplitude: remove phase-dependent replica
+        # energy so table interpolation cannot move the estimated peak.
+        replica = _sample_code(code, phase + offset)
+        energy = float(np.vdot(replica, replica).real)
+        return abs(np.sum(wiped * replica))**2 / energy
+
+    grid = np.linspace(-0.5, 0.5, 65)
+    powers = np.array([score(offset) for offset in grid])
+    best = int(np.argmax(powers))
+    if not np.isfinite(powers[best]) or powers[best] <= 0:
+        raise ValueError("initial phase refinement requires nonzero finite correlation")
+    left, right = grid[max(0, best-1)], grid[min(grid.size-1, best+1)]
+    scale = powers[best]
+    result = minimize_scalar(lambda offset: -score(offset) / scale,
+                             bounds=(left, right), method="bounded",
+                             options={"xatol": 1e-8})
+    # Retain grid endpoints too: a boundary peak is not an interior solution.
+    choices = [grid[best], float(result.x)]
+    offset = max(choices, key=score)
+    prompt = correlation(offset)
+    state.code_phase_chips = float(np.mod(offset, 1023.))
+    state.carrier_phase_rad = float(np.angle(prompt))
+    return {"code_phase_offset_chips": float(offset),
+            "carrier_phase_rad": state.carrier_phase_rad,
+            "at_search_boundary": bool(abs(offset) >= .5 - 1e-6),
+            "samples_used": int(block.size), "uses_truth": False}
 
 
 def estimate_cn0_db_hz(
@@ -131,6 +173,12 @@ def track(
     n_epochs = min(available_epochs, cfg.max_epochs)
 
     code = ca_code(prn)
+    if cfg.code_replica_bandwidth_hz is not None:
+        if cfg.code_replica_bandwidth_hz >= fs_hz / 2:
+            raise ValueError("local replica bandwidth must be below receiver Nyquist")
+        code = bandlimited_code_replica(
+            code, nominal_code_rate_hz, cfg.code_replica_bandwidth_hz
+        )
     sample_index = np.arange(samples_per_epoch)
     epoch_duration_s = samples_per_epoch / fs_hz
     carrier_frequency_hz = float(acquisition["doppler_hz"])
@@ -141,6 +189,15 @@ def track(
         code_rate_hz=nominal_code_rate_hz
         * (1.0 + carrier_frequency_hz / carrier_hz),
     )
+    initialization = None
+    if cfg.refine_initial_phase:
+        if cfg.code_replica_bandwidth_hz is None:
+            raise ValueError("phase refinement requires a continuous local code replica")
+        if n_epochs < 1:
+            raise ValueError("phase refinement requires a complete tracking epoch")
+        initialization = _refine_initial_phase(
+            x[first_epoch:first_epoch + samples_per_epoch], code, state, fs_hz
+        )
 
     early = np.zeros(n_epochs, dtype=complex)
     prompt = np.zeros(n_epochs, dtype=complex)
@@ -204,7 +261,7 @@ def track(
             epoch_duration_s,
         )
 
-    return {
+    result: TrackingResult = {
         "success": True,
         "status": "tracking",
         "first_epoch_sample": first_epoch,
@@ -222,3 +279,6 @@ def track(
         "phase_lock_metric": phase_lock_metric,
         "cn0_db_hz": cn0_db_hz,
     }
+    if initialization is not None:
+        result["initialization"] = initialization
+    return result

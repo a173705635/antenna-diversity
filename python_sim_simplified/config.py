@@ -111,6 +111,8 @@ class SignalConfig:
         default_factory=WavePolarization
     )
     multipath_paths: list["MultipathPath"] = field(default_factory=list)
+    # Optional ideal-lowpass source; None preserves the legacy sampled chips.
+    code_bandwidth_hz: float | None = None
 
     @property
     def wavelength_m(self) -> float:
@@ -258,6 +260,10 @@ class TrackingConfig:
     dll_ki_hz: float = 0.5
     cn0_window_epochs: int = 10
     max_epochs: int = 100
+    # None preserves the legacy rectangular replica. Positive Hz enables an
+    # ideal-lowpass research reference; this is a one-sided baseband cutoff.
+    code_replica_bandwidth_hz: float | None = None
+    refine_initial_phase: bool = False
 
 
 @dataclass

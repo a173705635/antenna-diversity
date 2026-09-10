@@ -1,8 +1,81 @@
+> 2026-09-10 多径专题阶段归档：当前是实验检测基线，未完成通用可靠性验证。详见[阶段总结](../docs/reports/2026-09-10-multipath-stage-summary.md)。下列研究命令生成的 `results/` 均相对本目录；入库快照见总结链接。
+
 # GNSS 天线分集精简研究仿真版
 
 本目录是用于个人研究的精简主代码，包含 RF → DFE → 天线合并 → 捕获 → 跟踪完整链路。它独立于 `python_sim/`，保留当前研究需要的物理模型和算法公式，同时省去批处理、报告和复杂异常诊断框架，便于修改参数和追踪数值结果。
 
 ## 运行
+
+当前多径检测研究入口（无外加干扰，含 RF 热噪声，只评估检测）：
+
+```powershell
+python python_sim_simplified/audit_detection_only.py --trials 20
+```
+
+输出 `results/detection_only/baseline.json`，不运行抑制与跟踪。研究前提、候选检出与正确识别的区别、
+同方向边界及门限验证计划见 [多径检测方案](../docs/reports/2026-09-08-multipath-detection-plan.md)。
+
+记录级存在性门限校准与独立评估：
+
+```powershell
+python python_sim_simplified/audit_detection_calibration.py
+```
+
+默认 500 条 H0 校准、1000 条独立 H0 评估、三组各 200 条 H1 评估；目标记录级虚警 1%。
+门限先冻结再评估，不修改默认检测器。输出在 `results/detection_calibration/`，
+统计口径与适用范围见 [门限校准记录](../docs/reports/2026-09-08-detection-threshold-calibration.md)。
+
+冻结门限的功率/时延/角间隔单因素扫描：
+
+```powershell
+python python_sim_simplified/audit_detection_boundaries.py
+```
+
+默认 22 点×100 次，复用逐点结果，输出 `results/detection_boundaries/summary.json`
+和 `boundaries.png`。不能将单因素结果当成完整联合性能地图，详见
+[检测边界](../docs/reports/2026-09-10-detection-boundaries.md)。
+
+纯多径研究的直达径基线自查（关闭外加干扰与多径，比较噪声、量化和采样率）：
+
+```powershell
+python python_sim_simplified/audit_multipath_baseline.py
+```
+
+诊断结果保存到 `results/multipath_baseline_audit/baseline.json`。详见
+[`基线自查记录`](../docs/reports/2026-09-08-multipath-baseline-audit.md)。
+该入口共用接收机代码，不更改以下默认演示场景。
+
+连续本地码研究参考与无噪声 DLL 鉴别曲线：
+
+```powershell
+python python_sim_simplified/audit_multipath_baseline.py --bandlimited
+python python_sim_simplified/audit_code_discriminator.py
+```
+
+`cfg.tracking.code_replica_bandwidth_hz = cfg.dfe.cutoff_hz` 可启用理想低通本地码，
+数值是单边基带截止频率，须低于接收采样率的一半。默认 `None` 保留矩形本地码。
+该参考使用矩形码片的解析傅里叶系数、64 samples/chip 周期表与线性插值，
+不等同于实际 DFE FIR，也未消除生成端有限采样误差。对比结果保存为
+`baseline_bandlimited.json`，不会覆盖原 `baseline.json`。
+
+连续带限信号源与单反射径理想参考：
+
+```powershell
+python python_sim_simplified/audit_multipath_oracle.py
+```
+
+该入口同时设置 `cfg.signal.code_bandwidth_hz` 与跟踪本地码截止频率，关闭外加干扰，
+使用线性无噪声链路。`oracle_lcmv` 使用真实方向，仅代表理想参考，不是检测结果。
+详见 [连续信号源与理想参考记录](../docs/reports/2026-09-08-continuous-source-oracle.md)。
+
+在连续本地码参考下，可设置 `cfg.tracking.refine_initial_phase = True` 启用数据驱动
+小数码相位/载波初相细化，或运行 `python python_sim_simplified/audit_multipath_oracle.py --refine`。
+该步骤拟合接收相关峰，不保证多径下的直达径识别；记录位于
+[初始化验证](../docs/reports/2026-09-08-tracking-initialization.md)。
+
+运行 `python python_sim_simplified/audit_multipath_oracle.py --refine --compare-detector`
+可比较原检测驱动 LCMV 与理想 LCMV，并检查研究用单反射径连续时延细化。
+包含非网格方向的失败场景；详见 [检测与理想参考差距](../docs/reports/2026-09-08-detector-versus-oracle.md)。
 
 在仓库根目录执行：
 

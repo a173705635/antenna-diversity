@@ -1,0 +1,4513 @@
+{
+  "threshold_db": 6.614366289709286,
+  "target_alpha": 0.01,
+  "decision": "strict score > threshold",
+  "calibration": [
+    {
+      "seed": 10000,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.562182117795054,
+      "code_delay_chips": 137.7283453663817,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.21203378195817
+    },
+    {
+      "seed": 10001,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.245609965599741,
+      "code_delay_chips": 137.95495813235019,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.9975113913151054
+    },
+    {
+      "seed": 10002,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.656828641316316,
+      "code_delay_chips": 137.6385196584634,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.738403305643671
+    },
+    {
+      "seed": 10003,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.08876685028179,
+      "code_delay_chips": 137.0125301090059,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.680139067279181
+    },
+    {
+      "seed": 10004,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.5680568447992,
+      "code_delay_chips": 137.77987116016774,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.0454674479188224
+    },
+    {
+      "seed": 10005,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.2556832527772235,
+      "code_delay_chips": 137.625966222937,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.09292373856487009
+    },
+    {
+      "seed": 10006,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.388132778091312,
+      "code_delay_chips": 137.64054339303644,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.1056373123874375
+    },
+    {
+      "seed": 10007,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.4954049511632643,
+      "code_delay_chips": 137.97438418744596,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.15452827711272538
+    },
+    {
+      "seed": 10008,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.653027843499321,
+      "code_delay_chips": 137.8324601238555,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.463354907131655
+    },
+    {
+      "seed": 10009,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.329682806321635,
+      "code_delay_chips": 137.9810110180818,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.657454064703535
+    },
+    {
+      "seed": 10010,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.7536782366464125,
+      "code_delay_chips": 137.076487905983,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.493658328279346
+    },
+    {
+      "seed": 10011,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.8751336787087456,
+      "code_delay_chips": 137.04168588393878,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.479111626264105
+    },
+    {
+      "seed": 10012,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.239775168234395,
+      "code_delay_chips": 137.9367475456032,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.769254688875706
+    },
+    {
+      "seed": 10013,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.22651080193476,
+      "code_delay_chips": 137.7547229582935,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.388726906746411
+    },
+    {
+      "seed": 10014,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.210816362987235,
+      "code_delay_chips": 137.16199007937942,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.32305005311351404
+    },
+    {
+      "seed": 10015,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.371083259487362,
+      "code_delay_chips": 137.33116764272543,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.3559013006729526
+    },
+    {
+      "seed": 10016,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.54358545525915,
+      "code_delay_chips": 137.54887687292793,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.27804111114199015
+    },
+    {
+      "seed": 10017,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.1364523146754903,
+      "code_delay_chips": 137.2090598714117,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.0557202940991233
+    },
+    {
+      "seed": 10018,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.5059852808125367,
+      "code_delay_chips": 137.65800522037082,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.365652012378421
+    },
+    {
+      "seed": 10019,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.671244801819409,
+      "code_delay_chips": 137.35443974662266,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.93840254567895
+    },
+    {
+      "seed": 10020,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.4034156186506688,
+      "code_delay_chips": 137.53232161395897,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.2688461017992303
+    },
+    {
+      "seed": 10021,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.9273034392403257,
+      "code_delay_chips": 137.4839920026025,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.369382619023721
+    },
+    {
+      "seed": 10022,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.8752857307870032,
+      "code_delay_chips": 137.78711930633995,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.3983674474184678
+    },
+    {
+      "seed": 10023,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 6.445682230892683,
+      "code_delay_chips": 137.33881313863276,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.552580489963862
+    },
+    {
+      "seed": 10024,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.974480907576847,
+      "code_delay_chips": 137.73424056538485,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.043478570011816
+    },
+    {
+      "seed": 10025,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.4887336982840835,
+      "code_delay_chips": 137.45414508721603,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.3623803759810573
+    },
+    {
+      "seed": 10026,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.4697405713160827,
+      "code_delay_chips": 137.78407775078196,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.8095956877741393
+    },
+    {
+      "seed": 10027,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.759175553012,
+      "code_delay_chips": 137.89876200791377,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.017115727888163
+    },
+    {
+      "seed": 10028,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.901097640112576,
+      "code_delay_chips": 137.45684766486085,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 6.219397723349148
+    },
+    {
+      "seed": 10029,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.762403380021753,
+      "code_delay_chips": 137.51860330724898,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.08452229168489
+    },
+    {
+      "seed": 10030,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.4780037692523584,
+      "code_delay_chips": 137.80218775650889,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.227334076763832
+    },
+    {
+      "seed": 10031,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.0597398796185478,
+      "code_delay_chips": 137.17505268380071,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.6939034335458847
+    },
+    {
+      "seed": 10032,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.11670664431211,
+      "code_delay_chips": 137.75416672985952,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.2274114483252765
+    },
+    {
+      "seed": 10033,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.365867042052894,
+      "code_delay_chips": 137.76693964264305,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.1303561895352994
+    },
+    {
+      "seed": 10034,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.9938177325716273,
+      "code_delay_chips": 137.7656566433879,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.8294068585607568
+    },
+    {
+      "seed": 10035,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.459609910044077,
+      "code_delay_chips": 137.71931102611953,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.161491249040823
+    },
+    {
+      "seed": 10036,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.1928801429377314,
+      "code_delay_chips": 137.54044585747172,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.5206396290428588
+    },
+    {
+      "seed": 10037,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.6005003288696615,
+      "code_delay_chips": 137.98001985145905,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.43288501123633216
+    },
+    {
+      "seed": 10038,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.217394122438178,
+      "code_delay_chips": 137.3911224465901,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.4846108222593704
+    },
+    {
+      "seed": 10039,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.8956784158465028,
+      "code_delay_chips": 137.56003715026273,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.707076699005148
+    },
+    {
+      "seed": 10040,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.946028650601983,
+      "code_delay_chips": 137.5168345516752,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.452707355692025
+    },
+    {
+      "seed": 10041,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.6530711767788624,
+      "code_delay_chips": 137.66515548557098,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.759696578499478
+    },
+    {
+      "seed": 10042,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.3769702190597743,
+      "code_delay_chips": 137.4667462877686,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.1131402174821765
+    },
+    {
+      "seed": 10043,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.4316336977318622,
+      "code_delay_chips": 137.16309786384585,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.845674427295113
+    },
+    {
+      "seed": 10044,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.475743222171437,
+      "code_delay_chips": 137.44377459663315,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.7835104496594163
+    },
+    {
+      "seed": 10045,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.1248196077501893,
+      "code_delay_chips": 137.45744222979536,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.047071052422083
+    },
+    {
+      "seed": 10046,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.65177087731167,
+      "code_delay_chips": 137.20024236741986,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.24354163952497834
+    },
+    {
+      "seed": 10047,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.6998641759565274,
+      "code_delay_chips": 137.20365649646314,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.0780714160688976
+    },
+    {
+      "seed": 10048,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.869975486985148,
+      "code_delay_chips": 137.7486530887449,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.8069885899139775
+    },
+    {
+      "seed": 10049,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.9427598419913394,
+      "code_delay_chips": 137.22812196346013,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.634222804892248
+    },
+    {
+      "seed": 10050,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.4204462180078368,
+      "code_delay_chips": 137.11627868828734,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.015608917275876459
+    },
+    {
+      "seed": 10051,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.9311865297657416,
+      "code_delay_chips": 137.1382519196993,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.525232802293605
+    },
+    {
+      "seed": 10052,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.3266899160433305,
+      "code_delay_chips": 137.6324162118492,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.4241038739590282
+    },
+    {
+      "seed": 10053,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 6.558669099342684,
+      "code_delay_chips": 137.41828085500805,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.929519110685773
+    },
+    {
+      "seed": 10054,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.509005163627716,
+      "code_delay_chips": 137.74120928677306,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.1509890117356694
+    },
+    {
+      "seed": 10055,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.739108102913056,
+      "code_delay_chips": 137.7707693937965,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.5748929163014402
+    },
+    {
+      "seed": 10056,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.9547672820234983,
+      "code_delay_chips": 137.7598996216591,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.568159104590853
+    },
+    {
+      "seed": 10057,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.472903138457972,
+      "code_delay_chips": 137.2750041634627,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.0911462903356561
+    },
+    {
+      "seed": 10058,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.1628285687936653,
+      "code_delay_chips": 137.34578650081636,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.7911421733658965
+    },
+    {
+      "seed": 10059,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.352056404008355,
+      "code_delay_chips": 137.1281928042497,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.5249691464854003
+    },
+    {
+      "seed": 10060,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.8093645126456606,
+      "code_delay_chips": 137.4227114553921,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.3988666554033666
+    },
+    {
+      "seed": 10061,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.668022382376043,
+      "code_delay_chips": 137.73226236372176,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.4397872327239318
+    },
+    {
+      "seed": 10062,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.4657426632874153,
+      "code_delay_chips": 137.9643683033768,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.2988399186457364
+    },
+    {
+      "seed": 10063,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.56570493051058,
+      "code_delay_chips": 137.4248752733424,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.467853351829336
+    },
+    {
+      "seed": 10064,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.9004720614392756,
+      "code_delay_chips": 137.02340027674367,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.371319331454204
+    },
+    {
+      "seed": 10065,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.637583467830126,
+      "code_delay_chips": 137.3634539983788,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.2755411128940692
+    },
+    {
+      "seed": 10066,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.958313451249348,
+      "code_delay_chips": 137.49336135509418,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.1782960446921353
+    },
+    {
+      "seed": 10067,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.9424642927821267,
+      "code_delay_chips": 137.71000870408108,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.6746748794656026
+    },
+    {
+      "seed": 10068,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.14697070034262,
+      "code_delay_chips": 137.66319424751782,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 6.144542477473724
+    },
+    {
+      "seed": 10069,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.737220384882565,
+      "code_delay_chips": 137.97249098035059,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.7165717325646451
+    },
+    {
+      "seed": 10070,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.4258661914126307,
+      "code_delay_chips": 137.6279480340462,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.4151806787239956
+    },
+    {
+      "seed": 10071,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.4039935875583236,
+      "code_delay_chips": 137.4904879434487,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.992494765764358
+    },
+    {
+      "seed": 10072,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.620859282733108,
+      "code_delay_chips": 137.5276388383441,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.8800782601840127
+    },
+    {
+      "seed": 10073,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.9148863945724655,
+      "code_delay_chips": 137.78674992586608,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.222183138181323
+    },
+    {
+      "seed": 10074,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.883435234505364,
+      "code_delay_chips": 137.50297501638175,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.1765394534358782
+    },
+    {
+      "seed": 10075,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.582306724437424,
+      "code_delay_chips": 137.67414615976654,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.1636881394790832
+    },
+    {
+      "seed": 10076,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.0128606379156535,
+      "code_delay_chips": 137.32437503304456,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.001915607083486
+    },
+    {
+      "seed": 10077,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.5044355888593604,
+      "code_delay_chips": 137.75265151185562,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.409669524911336
+    },
+    {
+      "seed": 10078,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.770194363419876,
+      "code_delay_chips": 137.2891386819203,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.153440250024625
+    },
+    {
+      "seed": 10079,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.639441499941746,
+      "code_delay_chips": 137.3436722848,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.1153381247618115
+    },
+    {
+      "seed": 10080,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.9729827538397005,
+      "code_delay_chips": 137.39445181511394,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 6.236353174045755
+    },
+    {
+      "seed": 10081,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.611099039230181,
+      "code_delay_chips": 137.88734202998856,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.358021538221831
+    },
+    {
+      "seed": 10082,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.054968207143238,
+      "code_delay_chips": 137.2047538194621,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.775254429685898
+    },
+    {
+      "seed": 10083,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.1136214152975037,
+      "code_delay_chips": 137.72564767328603,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 6.005404861954444
+    },
+    {
+      "seed": 10084,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.8907559494894706,
+      "code_delay_chips": 137.61773686010935,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.42822227384864714
+    },
+    {
+      "seed": 10085,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.2860783739890542,
+      "code_delay_chips": 137.34035960390398,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.541453116372543
+    },
+    {
+      "seed": 10086,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.7447082841772312,
+      "code_delay_chips": 137.343893001464,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.1918322980314886
+    },
+    {
+      "seed": 10087,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.4819175267843665,
+      "code_delay_chips": 137.943439478468,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 6.270103783885362
+    },
+    {
+      "seed": 10088,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.3335819626793373,
+      "code_delay_chips": 137.60796087819764,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.5538612663667
+    },
+    {
+      "seed": 10089,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.166385128277933,
+      "code_delay_chips": 137.93575621301358,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 6.084261627631766
+    },
+    {
+      "seed": 10090,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.8116958334117648,
+      "code_delay_chips": 137.0353838747925,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.2880978878949103
+    },
+    {
+      "seed": 10091,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.5822239953213906,
+      "code_delay_chips": 137.16882891302575,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.8566158463209277
+    },
+    {
+      "seed": 10092,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 6.227342247706997,
+      "code_delay_chips": 137.72431397586303,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.7799076869275403
+    },
+    {
+      "seed": 10093,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.713296189457335,
+      "code_delay_chips": 137.16125164809046,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.7503028611770002
+    },
+    {
+      "seed": 10094,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.794777128869239,
+      "code_delay_chips": 137.0641478942922,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.5307952147609925
+    },
+    {
+      "seed": 10095,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.065890163434372,
+      "code_delay_chips": 137.69346305474713,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.845441823199545
+    },
+    {
+      "seed": 10096,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.5955548606292,
+      "code_delay_chips": 137.39418925243086,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.8510945045286133
+    },
+    {
+      "seed": 10097,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.768247865831433,
+      "code_delay_chips": 137.1617284334719,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.501187378146902
+    },
+    {
+      "seed": 10098,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.5771184015782844,
+      "code_delay_chips": 137.40203832129663,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.3766841785566375
+    },
+    {
+      "seed": 10099,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.337031119137919,
+      "code_delay_chips": 137.8681349891816,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.9864413178869866
+    },
+    {
+      "seed": 10100,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.951574091855363,
+      "code_delay_chips": 137.90695803649572,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.589301307929144
+    },
+    {
+      "seed": 10101,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.8045290165574883,
+      "code_delay_chips": 137.231248112759,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.9428696311791104
+    },
+    {
+      "seed": 10102,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.453819498287985,
+      "code_delay_chips": 137.88727325449153,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.576904520544694
+    },
+    {
+      "seed": 10103,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.70795531800147,
+      "code_delay_chips": 137.24124989459136,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.2753591738307355
+    },
+    {
+      "seed": 10104,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.7465338084993505,
+      "code_delay_chips": 137.53433112061032,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.4613093412990363
+    },
+    {
+      "seed": 10105,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.1494218158939153,
+      "code_delay_chips": 137.83844660028728,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.654808025842448
+    },
+    {
+      "seed": 10106,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.3460298137735798,
+      "code_delay_chips": 137.98061301801283,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.12415444937993883
+    },
+    {
+      "seed": 10107,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.696707878139103,
+      "code_delay_chips": 137.77347224992974,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.570378505636527
+    },
+    {
+      "seed": 10108,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.7771049209179057,
+      "code_delay_chips": 137.5197620195018,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.3348143624590803
+    },
+    {
+      "seed": 10109,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.42011468823204,
+      "code_delay_chips": 137.11104248146708,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.414658546118196
+    },
+    {
+      "seed": 10110,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.1030149196377472,
+      "code_delay_chips": 137.5462920843302,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.0092035022331975
+    },
+    {
+      "seed": 10111,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.7113998925973362,
+      "code_delay_chips": 137.23207138310534,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.3959884604239425
+    },
+    {
+      "seed": 10112,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.58157715902359,
+      "code_delay_chips": 137.00230948957903,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.020650085370191
+    },
+    {
+      "seed": 10113,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.120626177401616,
+      "code_delay_chips": 137.62013940097538,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.206490422087953
+    },
+    {
+      "seed": 10114,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.731023729203918,
+      "code_delay_chips": 137.73567243651283,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.4491323706769776
+    },
+    {
+      "seed": 10115,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.108974677130098,
+      "code_delay_chips": 137.4412967284049,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.8205214395105557
+    },
+    {
+      "seed": 10116,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.8268561260892615,
+      "code_delay_chips": 137.74365756636783,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.323527526768499
+    },
+    {
+      "seed": 10117,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.276957466964132,
+      "code_delay_chips": 137.9565252000433,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.955177097607914
+    },
+    {
+      "seed": 10118,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.7711319753162535,
+      "code_delay_chips": 137.78131969398152,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.964637092829733
+    },
+    {
+      "seed": 10119,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.0528043016818174,
+      "code_delay_chips": 137.15596026796132,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.7481730842869633
+    },
+    {
+      "seed": 10120,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.514529110131015,
+      "code_delay_chips": 137.08017744215277,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.42188279981613125
+    },
+    {
+      "seed": 10121,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.4281570101635819,
+      "code_delay_chips": 137.9371738903822,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 6.007090951382397
+    },
+    {
+      "seed": 10122,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.70391473578613,
+      "code_delay_chips": 137.76480579987688,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.3947181205622552
+    },
+    {
+      "seed": 10123,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.5486585363536145,
+      "code_delay_chips": 137.5893796155304,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.2073876208181447
+    },
+    {
+      "seed": 10124,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.5466151494505431,
+      "code_delay_chips": 137.30272483030697,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.3689677204205611
+    },
+    {
+      "seed": 10125,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.054089676197016,
+      "code_delay_chips": 137.2662726852106,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.973459871634573
+    },
+    {
+      "seed": 10126,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.9600953417904674,
+      "code_delay_chips": 137.65136799762047,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.3480560120199334
+    },
+    {
+      "seed": 10127,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.498728035497301,
+      "code_delay_chips": 137.00552848383217,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.2502764396317625
+    },
+    {
+      "seed": 10128,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.1959748639465366,
+      "code_delay_chips": 137.84896657935334,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.418971164332064
+    },
+    {
+      "seed": 10129,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.3072932143017795,
+      "code_delay_chips": 137.8129715622672,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.481349331931286
+    },
+    {
+      "seed": 10130,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.919939694877747,
+      "code_delay_chips": 137.1483198852206,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.2531893912731964
+    },
+    {
+      "seed": 10131,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.915961903829355,
+      "code_delay_chips": 137.39356583537744,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.4065793554175166
+    },
+    {
+      "seed": 10132,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.76394226813612,
+      "code_delay_chips": 137.96977437233326,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.361704710248943
+    },
+    {
+      "seed": 10133,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.4631464462823263,
+      "code_delay_chips": 137.35275585750503,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.8669020539815746
+    },
+    {
+      "seed": 10134,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.8712296842975458,
+      "code_delay_chips": 137.93494267526665,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.676074083219164
+    },
+    {
+      "seed": 10135,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.788952775693275,
+      "code_delay_chips": 137.130329103911,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.524730486196018
+    },
+    {
+      "seed": 10136,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 0.9990992537297798,
+      "code_delay_chips": 137.8539203350367,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.3762170725010896
+    },
+    {
+      "seed": 10137,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.4993476010069635,
+      "code_delay_chips": 137.32881253389056,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.9819718881634595
+    },
+    {
+      "seed": 10138,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.3261403247294425,
+      "code_delay_chips": 137.20264499660598,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.836299150039772
+    },
+    {
+      "seed": 10139,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.3754477171663204,
+      "code_delay_chips": 137.13333847477114,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.373785863806872
+    },
+    {
+      "seed": 10140,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.221506639891735,
+      "code_delay_chips": 137.0124583002539,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.9790823900299572
+    },
+    {
+      "seed": 10141,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.898566446485306,
+      "code_delay_chips": 137.2595201100785,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.6021980173874955
+    },
+    {
+      "seed": 10142,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.6535097786871387,
+      "code_delay_chips": 137.73697021907046,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.24394920867238
+    },
+    {
+      "seed": 10143,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.9652379791677586,
+      "code_delay_chips": 137.6753152788522,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.9764356044401614
+    },
+    {
+      "seed": 10144,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.7504790044094076,
+      "code_delay_chips": 137.26897394564403,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.711084658598718
+    },
+    {
+      "seed": 10145,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.5728790841113813,
+      "code_delay_chips": 137.548747978889,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.228069127500124
+    },
+    {
+      "seed": 10146,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.092227038848539,
+      "code_delay_chips": 137.14986981030881,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.683055175904684
+    },
+    {
+      "seed": 10147,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.317700983548433,
+      "code_delay_chips": 137.75965701623446,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 6.132024272372648
+    },
+    {
+      "seed": 10148,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.148402289072699,
+      "code_delay_chips": 137.8441784173183,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 6.268897040722592
+    },
+    {
+      "seed": 10149,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.089292337516347,
+      "code_delay_chips": 137.20154924751338,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.106261135006743
+    },
+    {
+      "seed": 10150,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.786020709580306,
+      "code_delay_chips": 137.53494845356147,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.7111432935967144
+    },
+    {
+      "seed": 10151,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.724296236185058,
+      "code_delay_chips": 137.47631252614917,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.0269548651310925
+    },
+    {
+      "seed": 10152,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.417326113514481,
+      "code_delay_chips": 137.495715056503,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.8494270682987244
+    },
+    {
+      "seed": 10153,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.2105614673701894,
+      "code_delay_chips": 137.11736732385322,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.105822638343998
+    },
+    {
+      "seed": 10154,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.118318819674941,
+      "code_delay_chips": 137.10676224631388,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.25738699418271554
+    },
+    {
+      "seed": 10155,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.8223105930843038,
+      "code_delay_chips": 137.77561035250125,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.0646529090102317
+    },
+    {
+      "seed": 10156,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.0642716433790405,
+      "code_delay_chips": 137.76772356931,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.5788155235986212
+    },
+    {
+      "seed": 10157,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.7830126232727546,
+      "code_delay_chips": 137.64239349385122,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.8154869994089387
+    },
+    {
+      "seed": 10158,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.849610661942,
+      "code_delay_chips": 137.3078970445281,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.1514872494824346
+    },
+    {
+      "seed": 10159,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.8615861517043992,
+      "code_delay_chips": 137.10395442510986,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 6.170659540262384
+    },
+    {
+      "seed": 10160,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.8368604787662837,
+      "code_delay_chips": 137.234196316389,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.1866912242420282
+    },
+    {
+      "seed": 10161,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.6195477693589158,
+      "code_delay_chips": 137.10744983006958,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.39081483426861
+    },
+    {
+      "seed": 10162,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.220042380993018,
+      "code_delay_chips": 137.1890797878308,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.742433360189851
+    },
+    {
+      "seed": 10163,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.7074303386093286,
+      "code_delay_chips": 137.89111346838726,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.0847737568506135
+    },
+    {
+      "seed": 10164,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.3613526237590468,
+      "code_delay_chips": 137.73652873200697,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.1953159137821878
+    },
+    {
+      "seed": 10165,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.6312156836848635,
+      "code_delay_chips": 137.7837757495669,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.1142491716735092
+    },
+    {
+      "seed": 10166,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.030632243703654,
+      "code_delay_chips": 137.88450245076316,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.197462883483712
+    },
+    {
+      "seed": 10167,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.8341028313964223,
+      "code_delay_chips": 137.5237134893501,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.716194763455146
+    },
+    {
+      "seed": 10168,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.788660270432508,
+      "code_delay_chips": 137.98212557632246,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.3017091873600315
+    },
+    {
+      "seed": 10169,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.375615494065557,
+      "code_delay_chips": 137.95585064388894,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.504877225019136
+    },
+    {
+      "seed": 10170,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.7915520329729477,
+      "code_delay_chips": 137.91993776301047,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.989512094463016
+    },
+    {
+      "seed": 10171,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.134666018059865,
+      "code_delay_chips": 137.49440302513565,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 6.163467637765267
+    },
+    {
+      "seed": 10172,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.1836928456710485,
+      "code_delay_chips": 137.2985484713037,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.406903265650531
+    },
+    {
+      "seed": 10173,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.68824109496411,
+      "code_delay_chips": 137.21084734184637,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.1381203146084857
+    },
+    {
+      "seed": 10174,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.6049549880883847,
+      "code_delay_chips": 137.1586247967956,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.2954561808921987
+    },
+    {
+      "seed": 10175,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.9110188060812625,
+      "code_delay_chips": 137.38941445180856,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.134817551507606
+    },
+    {
+      "seed": 10176,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.271224850964637,
+      "code_delay_chips": 137.67893990535723,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.471021786339124
+    },
+    {
+      "seed": 10177,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.1451982152396982,
+      "code_delay_chips": 137.46489193393293,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.8582892011973353
+    },
+    {
+      "seed": 10178,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.1151840251581757,
+      "code_delay_chips": 137.90130968525364,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.071236951508013
+    },
+    {
+      "seed": 10179,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.5621454244293043,
+      "code_delay_chips": 137.54389504444336,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.41308801935292216
+    },
+    {
+      "seed": 10180,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.4939945497017355,
+      "code_delay_chips": 137.61486094293357,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.701923879997739
+    },
+    {
+      "seed": 10181,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.0571263331128886,
+      "code_delay_chips": 137.29566861446543,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.9768067436585747
+    },
+    {
+      "seed": 10182,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.775207345595834,
+      "code_delay_chips": 137.03724228359772,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.8351094577429565
+    },
+    {
+      "seed": 10183,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.15730081110361,
+      "code_delay_chips": 137.47565968555352,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.382483417258379
+    },
+    {
+      "seed": 10184,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.3805871470712985,
+      "code_delay_chips": 137.41416058445475,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.8678779688309389
+    },
+    {
+      "seed": 10185,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.3709498119354047,
+      "code_delay_chips": 137.09112887403603,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.510828687964483
+    },
+    {
+      "seed": 10186,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.239780928628611,
+      "code_delay_chips": 137.0347629011489,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.73701556678622
+    },
+    {
+      "seed": 10187,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.260392060519694,
+      "code_delay_chips": 137.8028696019914,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.5957058294822888
+    },
+    {
+      "seed": 10188,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.142672941298415,
+      "code_delay_chips": 137.97453634085008,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.964455332719545
+    },
+    {
+      "seed": 10189,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.978520101272442,
+      "code_delay_chips": 137.3212572902215,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.421201055731377
+    },
+    {
+      "seed": 10190,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.7382835099481286,
+      "code_delay_chips": 137.46800699210604,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.239108859941728
+    },
+    {
+      "seed": 10191,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.259685367985267,
+      "code_delay_chips": 137.92507343612942,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.781875202004151
+    },
+    {
+      "seed": 10192,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 6.615435586019128,
+      "code_delay_chips": 137.4470087227451,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.5159991902908816
+    },
+    {
+      "seed": 10193,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.9236488287266371,
+      "code_delay_chips": 137.57029053680267,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.446877289661156
+    },
+    {
+      "seed": 10194,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.406730647971645,
+      "code_delay_chips": 137.92571928005552,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.720238787753875
+    },
+    {
+      "seed": 10195,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.4266053333177575,
+      "code_delay_chips": 137.24846408130907,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.17185669583522087
+    },
+    {
+      "seed": 10196,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.488276847511309,
+      "code_delay_chips": 137.60311668443578,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.9039895605430189
+    },
+    {
+      "seed": 10197,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.7568393887197764,
+      "code_delay_chips": 137.5951823327796,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.031988663285648
+    },
+    {
+      "seed": 10198,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.80361554886082,
+      "code_delay_chips": 137.49203835494194,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.052175191578502
+    },
+    {
+      "seed": 10199,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.0272482888216135,
+      "code_delay_chips": 137.68416140058514,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.543092579451923
+    },
+    {
+      "seed": 10200,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.257789997572763,
+      "code_delay_chips": 137.78535214296102,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.019395981112944
+    },
+    {
+      "seed": 10201,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.051174825535327,
+      "code_delay_chips": 137.38781880564648,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 6.194716505447236
+    },
+    {
+      "seed": 10202,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.4732341351792204,
+      "code_delay_chips": 137.72941563642513,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.30903035400451
+    },
+    {
+      "seed": 10203,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.7288153641828654,
+      "code_delay_chips": 137.56496952115077,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.9647948915412488
+    },
+    {
+      "seed": 10204,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.5388374451140323,
+      "code_delay_chips": 137.9642769834139,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.9155504486304011
+    },
+    {
+      "seed": 10205,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.331914732736259,
+      "code_delay_chips": 137.72461134250756,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.437393747394373
+    },
+    {
+      "seed": 10206,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.450997776299121,
+      "code_delay_chips": 137.27367000214696,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.10550339900789
+    },
+    {
+      "seed": 10207,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.458889039049764,
+      "code_delay_chips": 137.13591134640993,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.111336146835876
+    },
+    {
+      "seed": 10208,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.7533576968392537,
+      "code_delay_chips": 137.96653756805588,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.05752629083885
+    },
+    {
+      "seed": 10209,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.626321410837146,
+      "code_delay_chips": 137.28572360933282,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.9863625717242228
+    },
+    {
+      "seed": 10210,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.2713500051822058,
+      "code_delay_chips": 137.8858872250868,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.3922577146808077
+    },
+    {
+      "seed": 10211,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.191994070465225,
+      "code_delay_chips": 137.91984200565923,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.279896932461859
+    },
+    {
+      "seed": 10212,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.8268166875923235,
+      "code_delay_chips": 137.34470337935116,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.4771743037272964
+    },
+    {
+      "seed": 10213,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.4484879686266074,
+      "code_delay_chips": 137.63217035755622,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.2611780944411777
+    },
+    {
+      "seed": 10214,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.3880272932504067,
+      "code_delay_chips": 137.6489079716059,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.060456940546837
+    },
+    {
+      "seed": 10215,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.6771173059656386,
+      "code_delay_chips": 137.06216062573793,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 6.150725906595722
+    },
+    {
+      "seed": 10216,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.697174377648687,
+      "code_delay_chips": 137.24658756803174,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.912402642093092
+    },
+    {
+      "seed": 10217,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.9031936540654093,
+      "code_delay_chips": 137.02593082956346,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.5136336069018017
+    },
+    {
+      "seed": 10218,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.875955233414203,
+      "code_delay_chips": 137.77108924898673,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.5557430096348341
+    },
+    {
+      "seed": 10219,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.1746675941722997,
+      "code_delay_chips": 137.81338989616992,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.223582106633038
+    },
+    {
+      "seed": 10220,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.7015112757842,
+      "code_delay_chips": 137.72218691055915,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.8435670445744663
+    },
+    {
+      "seed": 10221,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.255795517808702,
+      "code_delay_chips": 137.80765061141386,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.3240009839205165
+    },
+    {
+      "seed": 10222,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.9469389981995966,
+      "code_delay_chips": 137.83585901573937,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.478479545780004
+    },
+    {
+      "seed": 10223,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.5287597262635861,
+      "code_delay_chips": 137.57407804927306,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.5544735568616147
+    },
+    {
+      "seed": 10224,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.921319390991628,
+      "code_delay_chips": 137.53544681016982,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.81501755686451
+    },
+    {
+      "seed": 10225,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.5875533965864475,
+      "code_delay_chips": 137.74608724599446,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.0198757383215167
+    },
+    {
+      "seed": 10226,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.331266486745426,
+      "code_delay_chips": 137.01439519580404,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.549004833145121
+    },
+    {
+      "seed": 10227,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.210814973243505,
+      "code_delay_chips": 137.62810102627378,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.3813415658385937
+    },
+    {
+      "seed": 10228,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.03808416469066,
+      "code_delay_chips": 137.1155640376353,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 6.231068908605331
+    },
+    {
+      "seed": 10229,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.929733418598016,
+      "code_delay_chips": 137.26188584865156,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.645858579155339
+    },
+    {
+      "seed": 10230,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.9109357487611998,
+      "code_delay_chips": 137.92076800831666,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.4235682735443669
+    },
+    {
+      "seed": 10231,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 6.371761771606684,
+      "code_delay_chips": 137.17668712980108,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.6347908931021085
+    },
+    {
+      "seed": 10232,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.5361460381444156,
+      "code_delay_chips": 137.006758220162,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.1014323589276496
+    },
+    {
+      "seed": 10233,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 7.344718275066402,
+      "code_delay_chips": 137.107257205821,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.389768025382718
+    },
+    {
+      "seed": 10234,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.096958871075675,
+      "code_delay_chips": 137.63007615440515,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.8803723644354
+    },
+    {
+      "seed": 10235,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 6.398300335808942,
+      "code_delay_chips": 137.19388669948347,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.055174060435334
+    },
+    {
+      "seed": 10236,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.696481680760433,
+      "code_delay_chips": 137.50397695901967,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.3433641624562199
+    },
+    {
+      "seed": 10237,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.2371104731570317,
+      "code_delay_chips": 137.57097229914,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.945292976798793
+    },
+    {
+      "seed": 10238,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.9930353893952617,
+      "code_delay_chips": 137.70605553876038,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.444375405561071
+    },
+    {
+      "seed": 10239,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.080963261184566,
+      "code_delay_chips": 137.6895822597059,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.0701896799285513
+    },
+    {
+      "seed": 10240,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.4831210802828294,
+      "code_delay_chips": 137.70929900185232,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.592592597519267
+    },
+    {
+      "seed": 10241,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.8840806909528642,
+      "code_delay_chips": 137.802247375646,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 6.186623648683775
+    },
+    {
+      "seed": 10242,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.719921782899806,
+      "code_delay_chips": 137.73490643636694,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.24027114876362346
+    },
+    {
+      "seed": 10243,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.9919190535426448,
+      "code_delay_chips": 137.09975766368785,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.754041653775506
+    },
+    {
+      "seed": 10244,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.065667632209716,
+      "code_delay_chips": 137.89434476646144,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.869780076186144
+    },
+    {
+      "seed": 10245,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.604826338361118,
+      "code_delay_chips": 137.67038349524685,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.470076869539076
+    },
+    {
+      "seed": 10246,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.5960536341287983,
+      "code_delay_chips": 137.35792565835874,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.61684269608655
+    },
+    {
+      "seed": 10247,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.480141023370893,
+      "code_delay_chips": 137.6531199803696,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.894211602895309
+    },
+    {
+      "seed": 10248,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.8982583896989182,
+      "code_delay_chips": 137.72373886424742,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.598711814576009
+    },
+    {
+      "seed": 10249,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.294413438457202,
+      "code_delay_chips": 137.92094279054632,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.1703006821124531
+    },
+    {
+      "seed": 10250,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.430044863830881,
+      "code_delay_chips": 137.54445755210648,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.591488552242916
+    },
+    {
+      "seed": 10251,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.228846471022761,
+      "code_delay_chips": 137.13947611276865,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.633688055239269
+    },
+    {
+      "seed": 10252,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.768576845051284,
+      "code_delay_chips": 137.89351512925668,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.4691394522649213
+    },
+    {
+      "seed": 10253,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.270293654943151,
+      "code_delay_chips": 137.72839018502367,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.01983978510358
+    },
+    {
+      "seed": 10254,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.575839136979327,
+      "code_delay_chips": 137.2725087466953,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.107337807470582
+    },
+    {
+      "seed": 10255,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.426593176204673,
+      "code_delay_chips": 137.96377080938174,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.1759487501747543
+    },
+    {
+      "seed": 10256,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.3259729666133384,
+      "code_delay_chips": 137.19545612476654,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.55266605761525
+    },
+    {
+      "seed": 10257,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.1251642193643256,
+      "code_delay_chips": 137.47105320290288,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 6.197079680881517
+    },
+    {
+      "seed": 10258,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.2372969026664937,
+      "code_delay_chips": 137.27581564485092,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.9052018522871768
+    },
+    {
+      "seed": 10259,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.6313188574026163,
+      "code_delay_chips": 137.45830211747085,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.1749820458284272
+    },
+    {
+      "seed": 10260,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.791129216177221,
+      "code_delay_chips": 137.7211333119473,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.9233302274836832
+    },
+    {
+      "seed": 10261,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.305921518097997,
+      "code_delay_chips": 137.04862801295758,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.079948502476777
+    },
+    {
+      "seed": 10262,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.5954921642624647,
+      "code_delay_chips": 137.4801328357292,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.3015596038535335
+    },
+    {
+      "seed": 10263,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.2887169956556184,
+      "code_delay_chips": 137.46441231230568,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.6718209413909797
+    },
+    {
+      "seed": 10264,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.7672012739616894,
+      "code_delay_chips": 137.19984951049796,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.415516552395507
+    },
+    {
+      "seed": 10265,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.9435827797310106,
+      "code_delay_chips": 137.5301089848755,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.7791367872198344
+    },
+    {
+      "seed": 10266,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 7.336664581742407,
+      "code_delay_chips": 137.87894394401397,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.3888838512636426
+    },
+    {
+      "seed": 10267,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.1711303127789066,
+      "code_delay_chips": 137.58571845931408,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.785971239772126
+    },
+    {
+      "seed": 10268,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.626255390644098,
+      "code_delay_chips": 137.13537930909956,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.86352606976418
+    },
+    {
+      "seed": 10269,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.7550545704649037,
+      "code_delay_chips": 137.7561691386034,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.0412683978383588
+    },
+    {
+      "seed": 10270,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.4578476617720089,
+      "code_delay_chips": 137.84499017168056,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.318686229056105
+    },
+    {
+      "seed": 10271,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.274500998210184,
+      "code_delay_chips": 137.4970763394567,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.935111720793536
+    },
+    {
+      "seed": 10272,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.2213849252664157,
+      "code_delay_chips": 137.35525807938853,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.935669175311377
+    },
+    {
+      "seed": 10273,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.9153555171699177,
+      "code_delay_chips": 137.1418962512816,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.14441227078841554
+    },
+    {
+      "seed": 10274,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.7702323980345556,
+      "code_delay_chips": 137.26303444939424,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.4483550881971405
+    },
+    {
+      "seed": 10275,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.275643599583662,
+      "code_delay_chips": 137.24976231328301,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.551756317381204
+    },
+    {
+      "seed": 10276,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.81727115531667,
+      "code_delay_chips": 137.88624433291582,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.650979774091109
+    },
+    {
+      "seed": 10277,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.7361558332924574,
+      "code_delay_chips": 137.9922542852059,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.2920326644627
+    },
+    {
+      "seed": 10278,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.6613048877386385,
+      "code_delay_chips": 137.8570033406069,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.988024036451923
+    },
+    {
+      "seed": 10279,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.506583158156829,
+      "code_delay_chips": 137.48750939763198,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.5880981298677037
+    },
+    {
+      "seed": 10280,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.43672076328416,
+      "code_delay_chips": 137.48667647030925,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.8968251920112151
+    },
+    {
+      "seed": 10281,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.786869091088185,
+      "code_delay_chips": 137.58987340096718,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.403481222856312
+    },
+    {
+      "seed": 10282,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.6796458665999205,
+      "code_delay_chips": 137.54737966245665,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.2699278767968725
+    },
+    {
+      "seed": 10283,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.945510449305366,
+      "code_delay_chips": 137.92096529866336,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.17447650519808
+    },
+    {
+      "seed": 10284,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.5398852207996976,
+      "code_delay_chips": 137.7896111246292,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.143033748444748
+    },
+    {
+      "seed": 10285,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.508558197178613,
+      "code_delay_chips": 137.64519256498184,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.858837700779421
+    },
+    {
+      "seed": 10286,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.5549192233356657,
+      "code_delay_chips": 137.03962027517554,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.228624404504649
+    },
+    {
+      "seed": 10287,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.583324212826941,
+      "code_delay_chips": 137.6098996582253,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.5364671370886899
+    },
+    {
+      "seed": 10288,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.762230968238414,
+      "code_delay_chips": 137.7720429470638,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.08472045828236852
+    },
+    {
+      "seed": 10289,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.625303584632136,
+      "code_delay_chips": 137.47373181594304,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.8695948299716068
+    },
+    {
+      "seed": 10290,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.547601198917002,
+      "code_delay_chips": 137.86248469753258,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.073015270632036
+    },
+    {
+      "seed": 10291,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.2616005940108763,
+      "code_delay_chips": 137.4803273627671,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.029803534467267
+    },
+    {
+      "seed": 10292,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.4116402289348353,
+      "code_delay_chips": 137.98251996889783,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.067775711872786
+    },
+    {
+      "seed": 10293,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.1574649468422566,
+      "code_delay_chips": 137.87841385383334,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.343591845097904
+    },
+    {
+      "seed": 10294,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.83571069996968,
+      "code_delay_chips": 137.66667884084566,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.061850841077972
+    },
+    {
+      "seed": 10295,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.1119248282557255,
+      "code_delay_chips": 137.96773735409857,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 6.000146189534894
+    },
+    {
+      "seed": 10296,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.7164614465934553,
+      "code_delay_chips": 137.3300770411814,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.4690001074818535
+    },
+    {
+      "seed": 10297,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.9737605219269687,
+      "code_delay_chips": 137.27653867497946,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.855829248489665
+    },
+    {
+      "seed": 10298,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 7.64870313832172,
+      "code_delay_chips": 137.77763572469965,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.76763471359306
+    },
+    {
+      "seed": 10299,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.227301094229836,
+      "code_delay_chips": 137.63763684691236,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.484874014872345
+    },
+    {
+      "seed": 10300,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.763721835195943,
+      "code_delay_chips": 137.87796029833157,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.451511236814825
+    },
+    {
+      "seed": 10301,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.964681755999008,
+      "code_delay_chips": 137.09505428195743,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.7395281461770197
+    },
+    {
+      "seed": 10302,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.8508465989913376,
+      "code_delay_chips": 137.87367933521773,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.8885212220830069
+    },
+    {
+      "seed": 10303,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.4398237444370565,
+      "code_delay_chips": 137.36719141379632,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.377975699436153
+    },
+    {
+      "seed": 10304,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.7236548950046635,
+      "code_delay_chips": 137.4840715564527,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.242210323838198
+    },
+    {
+      "seed": 10305,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.3744044889030356,
+      "code_delay_chips": 137.32507665491548,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.3143537982598525
+    },
+    {
+      "seed": 10306,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.201617116983908,
+      "code_delay_chips": 137.15039967695748,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.9908304457596562
+    },
+    {
+      "seed": 10307,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.6100358318251295,
+      "code_delay_chips": 137.6344121264093,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.946447929622079
+    },
+    {
+      "seed": 10308,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.695442550253874,
+      "code_delay_chips": 137.6587412857508,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.057950731065194
+    },
+    {
+      "seed": 10309,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.4515583732096307,
+      "code_delay_chips": 137.58357552245798,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.7668731609198527
+    },
+    {
+      "seed": 10310,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.1542566234498306,
+      "code_delay_chips": 137.10543574844044,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.22798172932451208
+    },
+    {
+      "seed": 10311,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.4803487816796514,
+      "code_delay_chips": 137.9231065748296,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.721024693013748
+    },
+    {
+      "seed": 10312,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.5968492344305925,
+      "code_delay_chips": 137.30249147407616,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.485657382875205
+    },
+    {
+      "seed": 10313,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.131182647188437,
+      "code_delay_chips": 137.59246968446152,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.157193292797313
+    },
+    {
+      "seed": 10314,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.215498827845153,
+      "code_delay_chips": 137.92584878426382,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.3900052339722359
+    },
+    {
+      "seed": 10315,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.8337523594979341,
+      "code_delay_chips": 137.86134262102473,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.8419062562312822
+    },
+    {
+      "seed": 10316,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.8984866439970318,
+      "code_delay_chips": 137.25553106553383,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.940099994701027
+    },
+    {
+      "seed": 10317,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.2239241367143965,
+      "code_delay_chips": 137.6069772979297,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 6.082316854358449
+    },
+    {
+      "seed": 10318,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.958104883809343,
+      "code_delay_chips": 137.584535447566,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.420411047483903
+    },
+    {
+      "seed": 10319,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.459854104104985,
+      "code_delay_chips": 137.00258198303993,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.588247519942494
+    },
+    {
+      "seed": 10320,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.097398525159248,
+      "code_delay_chips": 137.88528613684218,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.1951112421644714
+    },
+    {
+      "seed": 10321,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.302707940308368,
+      "code_delay_chips": 137.2216708739695,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.962995984147879
+    },
+    {
+      "seed": 10322,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.007854300598517,
+      "code_delay_chips": 137.6162121973821,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.12719996040241968
+    },
+    {
+      "seed": 10323,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.807038529628509,
+      "code_delay_chips": 137.164968006157,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.0512579544187757
+    },
+    {
+      "seed": 10324,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.5729445946480487,
+      "code_delay_chips": 137.64628565804608,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.0643550683024214
+    },
+    {
+      "seed": 10325,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.297477858276982,
+      "code_delay_chips": 137.32410631471754,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.497208325749168
+    },
+    {
+      "seed": 10326,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.6440186858493402,
+      "code_delay_chips": 137.7572779487433,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.302584060184851
+    },
+    {
+      "seed": 10327,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.1788865546676774,
+      "code_delay_chips": 137.22688985943796,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.0273355836556517
+    },
+    {
+      "seed": 10328,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.580032109803411,
+      "code_delay_chips": 137.50953410200592,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.4454150128923466
+    },
+    {
+      "seed": 10329,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.178302167230633,
+      "code_delay_chips": 137.52975935751638,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.6949745614532976
+    },
+    {
+      "seed": 10330,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.451176938802611,
+      "code_delay_chips": 137.22327782400484,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.183675322112646
+    },
+    {
+      "seed": 10331,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.027973526150218,
+      "code_delay_chips": 137.726071529781,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.899990064451956
+    },
+    {
+      "seed": 10332,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.714417682109377,
+      "code_delay_chips": 137.61772364608188,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.248006220070444
+    },
+    {
+      "seed": 10333,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.231616590830539,
+      "code_delay_chips": 137.42710327296064,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.008441190920702
+    },
+    {
+      "seed": 10334,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.908489875723246,
+      "code_delay_chips": 137.1339698729994,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.075415167787244
+    },
+    {
+      "seed": 10335,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.8201714529112145,
+      "code_delay_chips": 137.57171971897168,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.233433802358985
+    },
+    {
+      "seed": 10336,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.9766092047643478,
+      "code_delay_chips": 137.02856639445028,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.371787776098616
+    },
+    {
+      "seed": 10337,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.1079335855384502,
+      "code_delay_chips": 137.76032624632037,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.393656032534276
+    },
+    {
+      "seed": 10338,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.241785406710442,
+      "code_delay_chips": 137.81793786325773,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.096534025912766
+    },
+    {
+      "seed": 10339,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.680599092034188,
+      "code_delay_chips": 137.72674733769918,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.914219605622578
+    },
+    {
+      "seed": 10340,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.9437403514743599,
+      "code_delay_chips": 137.02728591880594,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.2675341779864
+    },
+    {
+      "seed": 10341,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.4753098825830375,
+      "code_delay_chips": 137.04270395475413,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.3255640921699545
+    },
+    {
+      "seed": 10342,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.0255969132803586,
+      "code_delay_chips": 137.11985835052994,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.904221509550672
+    },
+    {
+      "seed": 10343,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.280831603228495,
+      "code_delay_chips": 137.87190317433098,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.926490882288292
+    },
+    {
+      "seed": 10344,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.7300120138376105,
+      "code_delay_chips": 137.70220702732607,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.879026598298586
+    },
+    {
+      "seed": 10345,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.8079572936558432,
+      "code_delay_chips": 137.75555009257013,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.2611783617257633
+    },
+    {
+      "seed": 10346,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.620832317046978,
+      "code_delay_chips": 137.01750656284034,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.137668587749825
+    },
+    {
+      "seed": 10347,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.7047693800124235,
+      "code_delay_chips": 137.16054626032238,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.4731560294879387
+    },
+    {
+      "seed": 10348,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.2226432658731516,
+      "code_delay_chips": 137.3435014915657,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.33678976447375747
+    },
+    {
+      "seed": 10349,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.597127506606589,
+      "code_delay_chips": 137.4081268039711,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.8918144542398827
+    },
+    {
+      "seed": 10350,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.879223608586179,
+      "code_delay_chips": 137.93915932764867,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.5991601779274376
+    },
+    {
+      "seed": 10351,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.1007182003985676,
+      "code_delay_chips": 137.78083462649448,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.951783358577369
+    },
+    {
+      "seed": 10352,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.348001516328077,
+      "code_delay_chips": 137.9201750804979,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.254488402127839
+    },
+    {
+      "seed": 10353,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.5143291184995225,
+      "code_delay_chips": 137.94567632812067,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.523365564346192
+    },
+    {
+      "seed": 10354,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.500475493743108,
+      "code_delay_chips": 137.60998091052917,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.009665004855094
+    },
+    {
+      "seed": 10355,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.4968056365396323,
+      "code_delay_chips": 137.0027366350177,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.652006227547112
+    },
+    {
+      "seed": 10356,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.036774612642743,
+      "code_delay_chips": 137.01224661927037,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.219913915736045
+    },
+    {
+      "seed": 10357,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.1676988458785673,
+      "code_delay_chips": 137.36867545138088,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.569077792080363
+    },
+    {
+      "seed": 10358,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.5158644114245678,
+      "code_delay_chips": 137.92405938231997,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.574832182672167
+    },
+    {
+      "seed": 10359,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.2419156427601075,
+      "code_delay_chips": 137.85166679854248,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.244435878731518
+    },
+    {
+      "seed": 10360,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.768870886877582,
+      "code_delay_chips": 137.13348925190803,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.143452694596101
+    },
+    {
+      "seed": 10361,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.087459151927642,
+      "code_delay_chips": 137.16113705539271,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.9066345991410314
+    },
+    {
+      "seed": 10362,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.470215828781015,
+      "code_delay_chips": 137.75674321409454,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.3680082930560085
+    },
+    {
+      "seed": 10363,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.59448078009597,
+      "code_delay_chips": 137.50526007884335,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.502028546541883
+    },
+    {
+      "seed": 10364,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.7352905244958705,
+      "code_delay_chips": 137.3558944195448,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.109348304495748
+    },
+    {
+      "seed": 10365,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.3766561800239385,
+      "code_delay_chips": 137.40196641741738,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.2136363012620164
+    },
+    {
+      "seed": 10366,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.898948630681667,
+      "code_delay_chips": 137.14926343422533,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.7304861075147255
+    },
+    {
+      "seed": 10367,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.9563225473470487,
+      "code_delay_chips": 137.00325483671,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.8648078628373905
+    },
+    {
+      "seed": 10368,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.0848423278922463,
+      "code_delay_chips": 137.65575491747663,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.6873749489452872
+    },
+    {
+      "seed": 10369,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.940066209945413,
+      "code_delay_chips": 137.05415900178576,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.5666752042764407
+    },
+    {
+      "seed": 10370,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.8659013292827136,
+      "code_delay_chips": 137.99023863740942,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.3579919597133205
+    },
+    {
+      "seed": 10371,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.4513678403958057,
+      "code_delay_chips": 137.65618852366927,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.299502385761482
+    },
+    {
+      "seed": 10372,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.5252447083758733,
+      "code_delay_chips": 137.84029431093532,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 6.078674426228878
+    },
+    {
+      "seed": 10373,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.113428814044479,
+      "code_delay_chips": 137.20845158754793,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.720244946088036
+    },
+    {
+      "seed": 10374,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.7007309539557125,
+      "code_delay_chips": 137.74023241086735,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 6.034365929530997
+    },
+    {
+      "seed": 10375,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.475794434268229,
+      "code_delay_chips": 137.54681442318483,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.1140802585224427
+    },
+    {
+      "seed": 10376,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.7456215045239,
+      "code_delay_chips": 137.57126263284079,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.03407854015469029
+    },
+    {
+      "seed": 10377,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.01404422222535,
+      "code_delay_chips": 137.51842363235846,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.03465932442841781
+    },
+    {
+      "seed": 10378,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.030264757604406,
+      "code_delay_chips": 137.48281537609378,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.365693753572632
+    },
+    {
+      "seed": 10379,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.0981706367361515,
+      "code_delay_chips": 137.762990015808,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.753159295969549
+    },
+    {
+      "seed": 10380,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.605670462438056,
+      "code_delay_chips": 137.1758980005292,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.825690289717878
+    },
+    {
+      "seed": 10381,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.235373750001806,
+      "code_delay_chips": 137.62980762743604,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.7438998544535718
+    },
+    {
+      "seed": 10382,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.804051960195051,
+      "code_delay_chips": 137.48637954541138,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.0461499581770073
+    },
+    {
+      "seed": 10383,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.6721561287287248,
+      "code_delay_chips": 137.840658955604,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.7968243180067528
+    },
+    {
+      "seed": 10384,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.1120166476819193,
+      "code_delay_chips": 137.84960731687826,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.079620568313193
+    },
+    {
+      "seed": 10385,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.747959314560062,
+      "code_delay_chips": 137.10227586209962,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 6.164281933259638
+    },
+    {
+      "seed": 10386,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.514612993772412,
+      "code_delay_chips": 137.03743663012318,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 6.223619366510475
+    },
+    {
+      "seed": 10387,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.6559773805242166,
+      "code_delay_chips": 137.66022127658312,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.7134436540650961
+    },
+    {
+      "seed": 10388,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.021008536903862,
+      "code_delay_chips": 137.2835481398141,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.9897167883407687
+    },
+    {
+      "seed": 10389,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.10557024564885,
+      "code_delay_chips": 137.7753982530512,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.16151106802956938
+    },
+    {
+      "seed": 10390,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.031771408870891,
+      "code_delay_chips": 137.97463343776218,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.1762873400280789
+    },
+    {
+      "seed": 10391,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.8039928042151634,
+      "code_delay_chips": 137.28516092575137,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.973705840548745
+    },
+    {
+      "seed": 10392,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 6.614366289709286,
+      "code_delay_chips": 137.40407532556944,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.5973638402552246
+    },
+    {
+      "seed": 10393,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.960068962546176,
+      "code_delay_chips": 137.08747613385677,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.9965684147339008
+    },
+    {
+      "seed": 10394,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.0301343538030316,
+      "code_delay_chips": 137.7843865621679,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.2846142978046267
+    },
+    {
+      "seed": 10395,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.534182205494896,
+      "code_delay_chips": 137.13628749255483,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.591872286692392
+    },
+    {
+      "seed": 10396,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.583641296613047,
+      "code_delay_chips": 137.51544437681596,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.037882007555699634
+    },
+    {
+      "seed": 10397,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.321141581352556,
+      "code_delay_chips": 137.0751644680587,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.1278770685773463
+    },
+    {
+      "seed": 10398,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.329133020573283,
+      "code_delay_chips": 137.4417744486542,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.419060041173465
+    },
+    {
+      "seed": 10399,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.984129310367534,
+      "code_delay_chips": 137.79003578713414,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.073683277383451
+    },
+    {
+      "seed": 10400,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.972713270700325,
+      "code_delay_chips": 137.04091515951825,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.222435724329468
+    },
+    {
+      "seed": 10401,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.520194635546356,
+      "code_delay_chips": 137.3490256128356,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.262368766110753
+    },
+    {
+      "seed": 10402,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.2793512675560477,
+      "code_delay_chips": 137.91282128276174,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.469620452120798
+    },
+    {
+      "seed": 10403,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.434300046070124,
+      "code_delay_chips": 137.5548904781654,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.0852051267963025
+    },
+    {
+      "seed": 10404,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.5119397801568235,
+      "code_delay_chips": 137.52805038573376,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 6.219991785585714
+    },
+    {
+      "seed": 10405,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.029230071135919,
+      "code_delay_chips": 137.01694536159746,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.948073371376959
+    },
+    {
+      "seed": 10406,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 0.8539589843397534,
+      "code_delay_chips": 137.45157817448865,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.732897211830012
+    },
+    {
+      "seed": 10407,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.433810130669872,
+      "code_delay_chips": 137.1192093336069,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.7455910391330298
+    },
+    {
+      "seed": 10408,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.7562740242695876,
+      "code_delay_chips": 137.0354106757841,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.268143947342497
+    },
+    {
+      "seed": 10409,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.439419085621921,
+      "code_delay_chips": 137.29317910622652,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.49442380864562
+    },
+    {
+      "seed": 10410,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.730415111243884,
+      "code_delay_chips": 137.67209713815635,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.1484341540187835
+    },
+    {
+      "seed": 10411,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.097260703536415,
+      "code_delay_chips": 137.98107284357997,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.25218601577101313
+    },
+    {
+      "seed": 10412,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.377674780228036,
+      "code_delay_chips": 137.67715353086732,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.6860695664386247
+    },
+    {
+      "seed": 10413,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.2258570063761987,
+      "code_delay_chips": 137.99063113858557,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.482864013222068
+    },
+    {
+      "seed": 10414,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.243915531686635,
+      "code_delay_chips": 137.01115873625352,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.6898042766724943
+    },
+    {
+      "seed": 10415,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.685942310493588,
+      "code_delay_chips": 137.2703602561112,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.8242941429117105
+    },
+    {
+      "seed": 10416,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.2435621197985376,
+      "code_delay_chips": 137.0780793676652,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.61518352963231
+    },
+    {
+      "seed": 10417,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.2062985578965675,
+      "code_delay_chips": 137.24290732485113,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.9960804377621684
+    },
+    {
+      "seed": 10418,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.085593202905918,
+      "code_delay_chips": 137.40928129134403,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.218030905616817
+    },
+    {
+      "seed": 10419,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.8589068374004887,
+      "code_delay_chips": 137.2122152357124,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.7749251351179383
+    },
+    {
+      "seed": 10420,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.7549071577891953,
+      "code_delay_chips": 137.7353568988053,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.219533893311719
+    },
+    {
+      "seed": 10421,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.342964495258665,
+      "code_delay_chips": 137.5348184608028,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.5491961516956807
+    },
+    {
+      "seed": 10422,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.357574821222195,
+      "code_delay_chips": 137.86819795485374,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.722458063504908
+    },
+    {
+      "seed": 10423,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.4196453131656366,
+      "code_delay_chips": 137.57563036537672,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.358028112713023
+    },
+    {
+      "seed": 10424,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.834937282392043,
+      "code_delay_chips": 137.43692001316805,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.288019365849682
+    },
+    {
+      "seed": 10425,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.067036198456872,
+      "code_delay_chips": 137.62539241736292,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.059287734427529
+    },
+    {
+      "seed": 10426,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.7133525322226943,
+      "code_delay_chips": 137.07214296490324,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.6936980089461071
+    },
+    {
+      "seed": 10427,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.022494679667609,
+      "code_delay_chips": 137.9472181073925,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.540667614013971
+    },
+    {
+      "seed": 10428,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.691143306951246,
+      "code_delay_chips": 137.2373893045941,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.9718777239809303
+    },
+    {
+      "seed": 10429,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.604730765793719,
+      "code_delay_chips": 137.30774774856556,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 6.074704790104992
+    },
+    {
+      "seed": 10430,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.956573284580166,
+      "code_delay_chips": 137.09645310204692,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.4597263650347427
+    },
+    {
+      "seed": 10431,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.6477585572080384,
+      "code_delay_chips": 137.22396238548797,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.215455139982195
+    },
+    {
+      "seed": 10432,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.1094420393786177,
+      "code_delay_chips": 137.720807325347,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.138177417786067
+    },
+    {
+      "seed": 10433,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.9054322398715597,
+      "code_delay_chips": 137.08672294905475,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.08951168353477
+    },
+    {
+      "seed": 10434,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.813961586012286,
+      "code_delay_chips": 137.73409912476714,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 6.020633371527416
+    },
+    {
+      "seed": 10435,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.9206828703678145,
+      "code_delay_chips": 137.1532405103403,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.32707093968575807
+    },
+    {
+      "seed": 10436,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.5483591294191648,
+      "code_delay_chips": 137.6081643668732,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.5717548614256491
+    },
+    {
+      "seed": 10437,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.045074295363548,
+      "code_delay_chips": 137.55184279926257,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.799092680458932
+    },
+    {
+      "seed": 10438,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.657037677777355,
+      "code_delay_chips": 137.84781755547863,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.870168205125487
+    },
+    {
+      "seed": 10439,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.035656852164127,
+      "code_delay_chips": 137.50428084766997,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.860260985761146
+    },
+    {
+      "seed": 10440,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.9370794503574835,
+      "code_delay_chips": 137.11414250980528,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.963223505820423
+    },
+    {
+      "seed": 10441,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.8910640689199423,
+      "code_delay_chips": 137.89598890275875,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.9444937842466525
+    },
+    {
+      "seed": 10442,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.7471076046994696,
+      "code_delay_chips": 137.6842733029527,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.05245664052653405
+    },
+    {
+      "seed": 10443,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.5769153311037405,
+      "code_delay_chips": 137.48742719253434,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.8515928759166052
+    },
+    {
+      "seed": 10444,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.028095022159167,
+      "code_delay_chips": 137.62601670804213,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.119322314194949
+    },
+    {
+      "seed": 10445,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.947462177145312,
+      "code_delay_chips": 137.90862904316074,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.911822717741112
+    },
+    {
+      "seed": 10446,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.1470278335723396,
+      "code_delay_chips": 137.1813200049925,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.4003274707807543
+    },
+    {
+      "seed": 10447,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.074540788731671,
+      "code_delay_chips": 137.68675327473156,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.8048203185157305
+    },
+    {
+      "seed": 10448,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.851874850408814,
+      "code_delay_chips": 137.12392257468042,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.3188334143495535
+    },
+    {
+      "seed": 10449,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.7174041706721894,
+      "code_delay_chips": 137.2093156878449,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.6568975730572744
+    },
+    {
+      "seed": 10450,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.780104237021798,
+      "code_delay_chips": 137.65050127040217,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.749381177319198
+    },
+    {
+      "seed": 10451,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.6070339580880515,
+      "code_delay_chips": 137.1261358102865,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.734706509202485
+    },
+    {
+      "seed": 10452,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.114362562608076,
+      "code_delay_chips": 137.43159639062858,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.699414086704463
+    },
+    {
+      "seed": 10453,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.7219006321941066,
+      "code_delay_chips": 137.50172467886495,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.414018618093086
+    },
+    {
+      "seed": 10454,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.1136032123181474,
+      "code_delay_chips": 137.65359611101178,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.289042273040451
+    },
+    {
+      "seed": 10455,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.394153792803165,
+      "code_delay_chips": 137.2860761881781,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 6.013076973198301
+    },
+    {
+      "seed": 10456,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.404575792599788,
+      "code_delay_chips": 137.2256073626426,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.771092541925466
+    },
+    {
+      "seed": 10457,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.92985780144131,
+      "code_delay_chips": 137.9278957922261,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 6.073026458652922
+    },
+    {
+      "seed": 10458,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.7866104887327674,
+      "code_delay_chips": 137.9014200853173,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.403314740232286
+    },
+    {
+      "seed": 10459,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.197296583085955,
+      "code_delay_chips": 137.51342832583322,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.2547896838583785
+    },
+    {
+      "seed": 10460,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.6207405991846815,
+      "code_delay_chips": 137.553477919527,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.9065163929698166
+    },
+    {
+      "seed": 10461,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.4008178301162326,
+      "code_delay_chips": 137.27600077145664,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.374618860333023
+    },
+    {
+      "seed": 10462,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.227966605117764,
+      "code_delay_chips": 137.6240744579569,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.013307235252174
+    },
+    {
+      "seed": 10463,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.4419465958766056,
+      "code_delay_chips": 137.88064044462556,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.1642505959687062
+    },
+    {
+      "seed": 10464,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.507888459064543,
+      "code_delay_chips": 137.58404380832755,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.07220956892378638
+    },
+    {
+      "seed": 10465,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.506901001200253,
+      "code_delay_chips": 137.0029305821018,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.564679089462043
+    },
+    {
+      "seed": 10466,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.427866251095696,
+      "code_delay_chips": 137.71878846116905,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.9198216697728454
+    },
+    {
+      "seed": 10467,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.329890599127427,
+      "code_delay_chips": 137.93436317439756,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.898115260602218
+    },
+    {
+      "seed": 10468,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.735002202154584,
+      "code_delay_chips": 137.15780883325425,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.4265577422749414
+    },
+    {
+      "seed": 10469,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.610496625206224,
+      "code_delay_chips": 137.6491355894043,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.6197202151548454
+    },
+    {
+      "seed": 10470,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.0015615465787153,
+      "code_delay_chips": 137.44146540837346,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 0.759630294778115
+    },
+    {
+      "seed": 10471,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.2664440419535685,
+      "code_delay_chips": 137.91367934162773,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.775689480709689
+    },
+    {
+      "seed": 10472,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.3484010598957883,
+      "code_delay_chips": 137.22348837253062,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.516961951364486
+    },
+    {
+      "seed": 10473,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.406803108097849,
+      "code_delay_chips": 137.4973604011546,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.380915139326348
+    },
+    {
+      "seed": 10474,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.421311319796435,
+      "code_delay_chips": 137.98423447766407,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.867725388904114
+    },
+    {
+      "seed": 10475,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.306342095133845,
+      "code_delay_chips": 137.80340327312922,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.11901364302873885
+    },
+    {
+      "seed": 10476,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.500488755244477,
+      "code_delay_chips": 137.98484144449174,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.478623518611243
+    },
+    {
+      "seed": 10477,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.6498393740741943,
+      "code_delay_chips": 137.48364413808605,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.9749798378247165
+    },
+    {
+      "seed": 10478,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.532388535156806,
+      "code_delay_chips": 137.90970282166515,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.48326634233597465
+    },
+    {
+      "seed": 10479,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.341841540013419,
+      "code_delay_chips": 137.1969570828082,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 6.122155950540415
+    },
+    {
+      "seed": 10480,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.6418629189859826,
+      "code_delay_chips": 137.278800129396,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.7604074564222514
+    },
+    {
+      "seed": 10481,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.496589202791732,
+      "code_delay_chips": 137.56080360896138,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.6030318477630114
+    },
+    {
+      "seed": 10482,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.093243252148153,
+      "code_delay_chips": 137.57774794892853,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 2.4754427795562495
+    },
+    {
+      "seed": 10483,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.7370791255029867,
+      "code_delay_chips": 137.0785982188005,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.910120148512207
+    },
+    {
+      "seed": 10484,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.920840419082422,
+      "code_delay_chips": 137.2304249038868,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.905813647688982
+    },
+    {
+      "seed": 10485,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.391626359461915,
+      "code_delay_chips": 137.2089540681938,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.489838390762946
+    },
+    {
+      "seed": 10486,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.5062930356669555,
+      "code_delay_chips": 137.78502079931357,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 1.0643158460374171
+    },
+    {
+      "seed": 10487,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.953059322774538,
+      "code_delay_chips": 137.99079822053116,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.35715931289384
+    },
+    {
+      "seed": 10488,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 5.031783279410217,
+      "code_delay_chips": 137.46261613098176,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 2.5362604804796463
+    },
+    {
+      "seed": 10489,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.4007259218828194,
+      "code_delay_chips": 137.91049926764612,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.03803406449986
+    },
+    {
+      "seed": 10490,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.893884921149681,
+      "code_delay_chips": 137.80324696122366,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 4.595571749430796
+    },
+    {
+      "seed": 10491,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.419989610947061,
+      "code_delay_chips": 137.57127274972754,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 5.866413920276773
+    },
+    {
+      "seed": 10492,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.7544625573275516,
+      "code_delay_chips": 137.8965023249942,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 3.0950949776200467
+    },
+    {
+      "seed": 10493,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 1.723192557603637,
+      "code_delay_chips": 137.7559969857302,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.813686834995373
+    },
+    {
+      "seed": 10494,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.8984357953204167,
+      "code_delay_chips": 137.87035400355276,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 3.93858390324614
+    },
+    {
+      "seed": 10495,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.105255634376904,
+      "code_delay_chips": 137.06182117712962,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 5.690961428403605
+    },
+    {
+      "seed": 10496,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 3.474413327411347,
+      "code_delay_chips": 137.17372851019474,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.07951188580086
+    },
+    {
+      "seed": 10497,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.2873147901772564,
+      "code_delay_chips": 137.1292001633342,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 4.493494604318365
+    },
+    {
+      "seed": 10498,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 4.160064815454077,
+      "code_delay_chips": 137.56227625451615,
+      "doppler_hz": 1500.0,
+      "initial_phase_rad": 1.7442290710319022
+    },
+    {
+      "seed": 10499,
+      "kind": "los_only",
+      "acquired": true,
+      "score_db": 2.6927552069065253,
+      "code_delay_chips": 137.5032041889302,
+      "doppler_hz": -1500.0,
+      "initial_phase_rad": 0.7990548532074978
+    }
+  ],
+  "seed_range": [
+    10000,
+    10499
+  ],
+  "statistic": "10log10(max residual correlation power / median power); 12 delays .25: .25: 3 chips",
+  "scope": "6 ms; 4 ms rectangular local-code correlation; ideal calibrated four antennas; thermal noise and quantization; continuous source 1.8 MHz; random code delay [137,138), phase [0,2pi), Doppler +/-1500 Hz; no external interference; fixed LOS geometry and power"
+}

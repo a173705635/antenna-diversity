@@ -1,0 +1,3 @@
+# Preserve archived bytes for SHA-256 verification on every platform.
+*.json -text whitespace=cr-at-eol
+*.png -text

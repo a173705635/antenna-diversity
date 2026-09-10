@@ -1,6 +1,8 @@
 """Code-delay and spatial multipath detection from DFE array samples."""
 
 import numpy as np
+from scipy.optimize import minimize_scalar
+from code_replica import bandlimited_code_replica, _sample_code
 
 from antenna import AntennaModel, antenna_response, direction_vector
 from config import (
@@ -17,6 +19,64 @@ from models import (
     MultipathEvaluation,
     MultipathTruth,
 )
+
+
+def refine_single_path_delays(
+    channels, fs_hz, prn, code_rate_hz, carrier_hz, acquisition,
+    los_steering, echo_steering, bandwidth_hz, max_excess_delay_chips,
+):
+    """Research-only two-direction demixing and continuous relative delay fit.
+
+    Requires one estimated, spatially resolvable echo and an assumed LOS.
+    Directions must be supplied by estimation, never scenario truth. This is
+    not a multi-path-count estimator and is not enabled in the normal pipeline.
+    """
+    matrix = np.column_stack([los_steering, echo_steering])
+    singular = np.linalg.svd(matrix, compute_uv=False)
+    if singular[-1] <= .05 * singular[0]:
+        return {"status": "spatially_unresolvable", "uses_truth": False}
+    if not 0 < bandwidth_hz < fs_hz/2 or max_excess_delay_chips <= 0:
+        raise ValueError("valid bandwidth and positive delay search range required")
+    # Skip the initial finite-record/filter transient; use up to three ms.
+    first = round(.001*fs_hz)
+    stop = min(channels.shape[1], round(.004*fs_hz))
+    if stop-first < round(.001*fs_hz):
+        return {"status": "insufficient_samples", "uses_truth": False}
+    n = np.arange(first, stop)
+    separated = np.linalg.pinv(matrix) @ channels[:,first:stop]
+    separated *= np.exp(-2j*np.pi*acquisition["doppler_hz"]*n/fs_hz)
+    received_rate = code_rate_hz*(1+acquisition["doppler_hz"]/carrier_hz)
+    replica = bandlimited_code_replica(ca_code(prn), received_rate, bandwidth_hz)
+    coarse_delay = acquisition["code_phase_samples"]*code_rate_hz/fs_hz
+    phase = n*received_rate/fs_hz - coarse_delay
+
+    def fit(samples, low, high):
+        def score(offset):
+            local = _sample_code(replica, phase-offset)
+            return abs(np.sum(samples*local))**2 / np.vdot(local,local).real
+        grid = np.linspace(low, high, int(np.ceil((high-low)/.025))+1)
+        powers = np.array([score(offset) for offset in grid])
+        index = int(np.argmax(powers))
+        if powers[index] <= 0 or not np.isfinite(powers[index]):
+            return None
+        bounds = (grid[max(0,index-1)],grid[min(grid.size-1,index+1)])
+        result = minimize_scalar(lambda offset: -score(offset)/powers[index],
+                                 bounds=bounds,method="bounded",options={"xatol":1e-8})
+        best = max([grid[index],float(result.x)],key=score)
+        return best, bool(best <= low+1e-5 or best >= high-1e-5)
+
+    direct = fit(separated[0],-.75,.75)
+    reflected = fit(separated[1],-.75,max_excess_delay_chips+.75)
+    if direct is None or reflected is None:
+        return {"status": "zero_correlation", "uses_truth": False}
+    excess = (reflected[0]-direct[0])*code_rate_hz/received_rate
+    valid = not (direct[1] or reflected[1]) and 0 <= excess <= max_excess_delay_chips
+    return {"status": "refined" if valid else "outside_search_range",
+            "los_offset_from_pilot_chips": float(direct[0]),
+            "echo_offset_from_pilot_chips": float(reflected[0]),
+            "excess_delay_chips": float(excess),
+            "spatial_condition_number": float(singular[0]/singular[-1]),
+            "uses_truth": False}
 
 
 def empty_detection(

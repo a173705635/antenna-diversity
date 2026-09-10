@@ -185,6 +185,14 @@ class AcquisitionResult(TypedDict):
     coherent_samples: int
 
 
+class TrackingInitialization(TypedDict):
+    code_phase_offset_chips: float
+    carrier_phase_rad: float
+    at_search_boundary: bool
+    samples_used: int
+    uses_truth: bool
+
+
 class TrackingResult(TypedDict):
     success: bool
     status: str
@@ -202,6 +210,7 @@ class TrackingResult(TypedDict):
     prompt_magnitude: NotRequired[np.ndarray]
     phase_lock_metric: NotRequired[np.ndarray]
     cn0_db_hz: NotRequired[np.ndarray]
+    initialization: NotRequired[TrackingInitialization]
 
 
 class BranchResult(TypedDict):

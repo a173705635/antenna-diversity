@@ -6,6 +6,7 @@ import numpy as np
 
 from antenna import AntennaModel, antenna_response, build_antenna_model
 from channel_delay import apply_channel_delays, delay_phase
+from code_replica import bandlimited_code_replica, _sample_code
 from config import (
     CWInterferer,
     Interferer,
@@ -86,6 +87,15 @@ def _desired_waveform(
         1023.0,
     )
     sampled_code = code[np.floor(code_phase).astype(int)]
+    if cfg.signal.code_bandwidth_hz is not None:
+        if abs(cfg.signal.if_hz + cfg.signal.doppler_hz) + cfg.signal.code_bandwidth_hz >= cfg.signal.fs_rf_hz / 2:
+            raise ValueError("bandlimited source must fit inside RF sampling Nyquist")
+        replica = bandlimited_code_replica(
+            code, received_code_rate_hz, cfg.signal.code_bandwidth_hz
+        )
+        # Preserve configured total signal power, not the unfiltered chip amplitude.
+        replica /= np.sqrt(np.mean(replica**2))
+        sampled_code = _sample_code(replica, code_phase)
     signal_power_w = 10.0 ** ((cfg.signal.power_dbm - 30.0) / 10.0)
     signal_amplitude_v = np.sqrt(
         signal_power_w * cfg.reference_impedance_ohm
