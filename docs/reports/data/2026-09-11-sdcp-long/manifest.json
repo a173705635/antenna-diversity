@@ -1,0 +1,196 @@
+{
+  "duration_ms": 3000,
+  "calibration_seeds": [
+    6200,
+    6202,
+    6204
+  ],
+  "evaluation_seeds": [
+    6300,
+    6302
+  ],
+  "window_ms": [
+    200,
+    500,
+    1000
+  ],
+  "onset_s": 0.5,
+  "evaluation_start_s": 1.5,
+  "source_hashes": {
+    "acquisition.py": "e6e805fc21a0270f80a06a59cdc1e531ac9c4108f70a03b636ee7dc04ce413de",
+    "antenna.py": "a29e60178f22d737a9e71668923f8edcaabf4af2fbc7d6d0abd6e46e51557c7b",
+    "audit_calibrated_sdcp.py": "feb37133d385c7516b817bfd2a52772781cbe705930a28cd96b717349fc54dc3",
+    "audit_code_carrier_float.py": "c84a89492e6c6632b8508afaa6d13f08d07a27637102793d05fc49569367c211",
+    "audit_code_discriminator.py": "92e82a40619d651515c2e922bda034d281275d9dea00a79dc2df92086fff2c84",
+    "audit_detection_boundaries.py": "fa29b360b0a68c31a09efd4229328a68aaa73ba6542bfa10c3fcbf95b0605a2d",
+    "audit_detection_calibration.py": "288f71b3d262967fb6861830e4f84f45473addec123b7927decd84f9bdada8a2",
+    "audit_detection_only.py": "a178bc388b96f252037438edec79f15df6356ca84fbf958fa059e9d9ea507da8",
+    "audit_dual_frequency_weights.py": "9f16490d81e0a724c9b11ee59d3a120029e807a392788fc193ed9895724874ef",
+    "audit_dual_tracking_phase.py": "d8921c8fd1a4d8210127aab2811f7d10e67bbd31f8898ac24aa4b1d116995e9f",
+    "audit_dual_tracking_stability.py": "024a4f25788578ca2bc64a99c1fe78e03b15311f68f99f67024aba6fd2b86aa4",
+    "audit_multipath_baseline.py": "e8358d1583c7fec37fed6846ea91ad059d82035c61bb2a11cec6399ab7277c8f",
+    "audit_multipath_oracle.py": "a80b8b76f35e9c4a98f8521d1ea11ff47a529b743134709ba4e9661a8c17e157",
+    "audit_phase_origin.py": "fb1438e070adecb17f2de2b19fc3e6d2c257cc9c47528f21c83e045569dc70b3",
+    "audit_pseudorange_bias.py": "22908c4c1bf823ad30f93caeda49364022e97837787087089893fb8c55822761",
+    "audit_sdcp_long.py": "1bb2ccec7b03d3466b8bcf145a94d6026bce6c0f3a0c2d0b9d0404e5070d7770",
+    "audit_sdcp_positioning.py": "db56dc24388f4e9e75e2040e28bc996ddefa79b42570588a299ea0a9e99c4538",
+    "audit_sdcp_windows.py": "0fd24d34bebb3137af901ea02e0168fba5b525261d0e574a9e43e3ca6542a935",
+    "audit_trimble_sdcp.py": "de1be7b0f90fadc396968dce09cb8664029105597b019e7870eeb17c3d21b9bf",
+    "channel_delay.py": "f357070e87dd1783e9845b97e46027ad1e7abfa5d9776a7af108413558a8c501",
+    "code_replica.py": "970336ae05dead945533f1ed58d4314fda83ac488ec4910c390e6f81595516cf",
+    "config.py": "c3b47604a074711a96272bf12f8470ea0bb1037938400a9afdb2daf1959e7355",
+    "detection_calibration.py": "be5b7e5e8659a86f6d14bb7bee14f991c68e960501065c849e67fc199a0fa3d2",
+    "dfe.py": "4bd74b6a6fb32768f3a7331340a3782e9329b20e0431c16eb8e3c41301a8a33f",
+    "diversity.py": "9dbc90ef1754c6937171f8bdb72bd48fb3c8cf57d3ac04fa66bca65e33771952",
+    "gnss.py": "bc1ce321f38ea27f9ec81c3f12fba6fc37acb89b80aaf2b597fcba12525d539c",
+    "interference.py": "585bae54cdb7581ee902c87c64c57e2403dd2cc95df64891115c17c3e263cc21",
+    "l5.py": "353a78496a675fa09175144c91337ddb797343537476fe8d87da3a35f5318287",
+    "measured_pattern.py": "c3b9ccec23d9431168cb8887d8f5a1c9d937f9720f8f9f730f938bf5dfed4edc",
+    "metrics.py": "668dfe8b7eb75627a3df22a44b5a18f2bda9b603c6822f9bba82f9c18d255ba9",
+    "models.py": "e2343351d7c7c949a281910c3f313ae9372da3fe534635d609e3a2229d6c9330",
+    "multipath.py": "38d14bcc96468915694e59b52046c41c577cf66095dbf4a130bc91e1c4a0dc97",
+    "pipeline.py": "a5e307d2a90fd8bfd59d84fb6e397cda2f8bed80184a5176504a9a97576d3584",
+    "plotting.py": "99bb0c195f3f0862a3be4e1e66d9de9d9b8b7183f0025c10a288ff970ea19e3f",
+    "positioning.py": "3b154153668bbcf985e07a57d7e5a809ec3f426bd921428411e30fff4375a1f3",
+    "presets.py": "c8f59f7fb2a4986dac888aa409c07cf914d8500bb49e12a1b7e456c6de02aecc",
+    "rf.py": "ae086d6229d97d954f4e2a8ef21995c64ec97fc550ea56fb9ff5b6dc142e0104",
+    "run_end_to_end.py": "09276035277e9bcc3a62ad13cb258f6450d0c15d29cfa41cc8f48afc56687dc0",
+    "run_gps_l1_l5.py": "5b715d7692fe5a19add492d1e5ca4f9629483d319ee1963c71e9f028204653fa",
+    "run_gps_spp.py": "fef3aea4e91a631c8f6093c8d8568db5d22c891920d8b53938bb701cbe20d465",
+    "sdcp.py": "7366ae0f33ec98f58a8307c72ed354a9f57120a4a4656bf58b3cc64b166680fa",
+    "tracking.py": "4a303109bc634ef7dcceecf43d529f385189205906e193fda4fcdc0cf45ff3ae"
+  },
+  "scope": "Three-second RF records for 200/500/1000 ms causal SDCP windows.",
+  "geometry": "known baseline, per epoch TL SPP, calibrated zero hardware bias",
+  "threshold": "independent LOS abs circular mean 99th percentile higher at t>=1.5",
+  "satellites": [
+    {
+      "prn": 1,
+      "position_m": [
+        -4787643.16853584,
+        864636.0312061622,
+        26110620.012253866
+      ],
+      "velocity_mps": [
+        -24.181411551323,
+        -46.97660411503805,
+        280.5080075366114
+      ],
+      "doppler_hz": -1500,
+      "range_at_zero_m": 23321416.42235382,
+      "coarse_range_m": 23320000.0
+    },
+    {
+      "prn": 2,
+      "position_m": [
+        -16526027.57825466,
+        10920337.346756786,
+        17693791.13462673
+      ],
+      "velocity_mps": [
+        -125.08536763991107,
+        56.848925971786976,
+        131.65687344507967
+      ],
+      "doppler_hz": -1000,
+      "range_at_zero_m": 20928713.265289612,
+      "coarse_range_m": 20930000.0
+    },
+    {
+      "prn": 3,
+      "position_m": [
+        -24809647.939863924,
+        6229131.68762826,
+        7149327.766873702
+      ],
+      "velocity_mps": [
+        -93.4755236534107,
+        6.540324827254162,
+        16.50669881131441
+      ],
+      "doppler_hz": -500,
+      "range_at_zero_m": 22459549.28929031,
+      "coarse_range_m": 22460000.0
+    },
+    {
+      "prn": 4,
+      "position_m": [
+        -15230327.429021003,
+        19481832.93078715,
+        9691692.94095247
+      ],
+      "velocity_mps": [
+        -0.0,
+        0.0,
+        0.0
+      ],
+      "doppler_hz": 0,
+      "range_at_zero_m": 20425299.320076253,
+      "coarse_range_m": 20430000.0
+    },
+    {
+      "prn": 5,
+      "position_m": [
+        -8894837.8880557,
+        22306066.61435011,
+        -11347019.482726913
+      ],
+      "velocity_mps": [
+        24.415038005418314,
+        -70.77815354536638,
+        58.71353657100982
+      ],
+      "doppler_hz": 500,
+      "range_at_zero_m": 23755636.422119163,
+      "coarse_range_m": 23760000.0
+    },
+    {
+      "prn": 6,
+      "position_m": [
+        -2490598.782930179,
+        25976938.097282663,
+        4942590.898750501
+      ],
+      "velocity_mps": [
+        -2.9201146832402585,
+        -189.68374903237853,
+        -14.940889878100423
+      ],
+      "doppler_hz": 1000,
+      "range_at_zero_m": 21429950.431942727,
+      "coarse_range_m": 21430000.0
+    },
+    {
+      "prn": 7,
+      "position_m": [
+        5946694.252840228,
+        22347474.569733806,
+        13063721.055592772
+      ],
+      "velocity_mps": [
+        -113.65234565164928,
+        -228.95220533826853,
+        -127.04454450930375
+      ],
+      "doppler_hz": 1500,
+      "range_at_zero_m": 22088479.462376535,
+      "coarse_range_m": 22090000.0
+    },
+    {
+      "prn": 8,
+      "position_m": [
+        -4893878.783012659,
+        17865050.944468282,
+        19034797.220058095
+      ],
+      "velocity_mps": [
+        38.248651846239056,
+        -242.7807722801627,
+        -290.5877920205141
+      ],
+      "doppler_hz": 2000,
+      "range_at_zero_m": 20727757.919424705,
+      "coarse_range_m": 20730000.0
+    }
+  ]
+}

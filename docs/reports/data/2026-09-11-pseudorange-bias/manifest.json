@@ -1,0 +1,329 @@
+{
+  "scope": "paired per-PRN pseudorange diagnosis, no default receiver change",
+  "source_sha256": {
+    "acquisition.py": "53b6d9fd1b325131bdd92b8050129b19c03efbffc5b88455e0243e611580f2f4",
+    "antenna.py": "a29e60178f22d737a9e71668923f8edcaabf4af2fbc7d6d0abd6e46e51557c7b",
+    "audit_code_carrier_float.py": "c84a89492e6c6632b8508afaa6d13f08d07a27637102793d05fc49569367c211",
+    "audit_code_discriminator.py": "92e82a40619d651515c2e922bda034d281275d9dea00a79dc2df92086fff2c84",
+    "audit_detection_boundaries.py": "fa29b360b0a68c31a09efd4229328a68aaa73ba6542bfa10c3fcbf95b0605a2d",
+    "audit_detection_calibration.py": "288f71b3d262967fb6861830e4f84f45473addec123b7927decd84f9bdada8a2",
+    "audit_detection_only.py": "a178bc388b96f252037438edec79f15df6356ca84fbf958fa059e9d9ea507da8",
+    "audit_dual_tracking_phase.py": "d8921c8fd1a4d8210127aab2811f7d10e67bbd31f8898ac24aa4b1d116995e9f",
+    "audit_dual_tracking_stability.py": "024a4f25788578ca2bc64a99c1fe78e03b15311f68f99f67024aba6fd2b86aa4",
+    "audit_multipath_baseline.py": "e8358d1583c7fec37fed6846ea91ad059d82035c61bb2a11cec6399ab7277c8f",
+    "audit_multipath_oracle.py": "a80b8b76f35e9c4a98f8521d1ea11ff47a529b743134709ba4e9661a8c17e157",
+    "audit_pseudorange_bias.py": "da2e93983c87656b963bdce3d740390f222c1289dfea23f19a85b9662308de49",
+    "audit_trimble_sdcp.py": "de1be7b0f90fadc396968dce09cb8664029105597b019e7870eeb17c3d21b9bf",
+    "channel_delay.py": "f357070e87dd1783e9845b97e46027ad1e7abfa5d9776a7af108413558a8c501",
+    "code_replica.py": "970336ae05dead945533f1ed58d4314fda83ac488ec4910c390e6f81595516cf",
+    "config.py": "d05620fedb584445e1525a38897e74eb71931b48eb72f136c828f4f70e9c6c6c",
+    "detection_calibration.py": "be5b7e5e8659a86f6d14bb7bee14f991c68e960501065c849e67fc199a0fa3d2",
+    "dfe.py": "4bd74b6a6fb32768f3a7331340a3782e9329b20e0431c16eb8e3c41301a8a33f",
+    "diversity.py": "9dbc90ef1754c6937171f8bdb72bd48fb3c8cf57d3ac04fa66bca65e33771952",
+    "gnss.py": "beb9ccf07a0ff290cdb28fe6a4add953a349d1709545c196ddb3dfec900bec05",
+    "interference.py": "585bae54cdb7581ee902c87c64c57e2403dd2cc95df64891115c17c3e263cc21",
+    "measured_pattern.py": "c3b9ccec23d9431168cb8887d8f5a1c9d937f9720f8f9f730f938bf5dfed4edc",
+    "metrics.py": "668dfe8b7eb75627a3df22a44b5a18f2bda9b603c6822f9bba82f9c18d255ba9",
+    "models.py": "e2343351d7c7c949a281910c3f313ae9372da3fe534635d609e3a2229d6c9330",
+    "multipath.py": "38d14bcc96468915694e59b52046c41c577cf66095dbf4a130bc91e1c4a0dc97",
+    "pipeline.py": "a5e307d2a90fd8bfd59d84fb6e397cda2f8bed80184a5176504a9a97576d3584",
+    "plotting.py": "99bb0c195f3f0862a3be4e1e66d9de9d9b8b7183f0025c10a288ff970ea19e3f",
+    "positioning.py": "a5f5ad1ec273ab5a47188073d02090f6afcb65495dd6a426069c5a3f3e3f3121",
+    "presets.py": "c8f59f7fb2a4986dac888aa409c07cf914d8500bb49e12a1b7e456c6de02aecc",
+    "rf.py": "ae086d6229d97d954f4e2a8ef21995c64ec97fc550ea56fb9ff5b6dc142e0104",
+    "run_end_to_end.py": "09276035277e9bcc3a62ad13cb258f6450d0c15d29cfa41cc8f48afc56687dc0",
+    "run_gps_spp.py": "de7d1671b697ace0a13d6deba1954eb572405a954d1b577b4ccf723c1fcfd61a",
+    "sdcp.py": "231b285b435e09450ae9b109ffd17fb64b4339e7480fc4b0c134d144122dc807",
+    "tracking.py": "054c6e8c4511153292e09e77e936419920420eca88f67fa5b774055d5817612a"
+  },
+  "input_sha256": {
+    "manifest.json": "eb7d551917058a140abb48f6fe14e4053102524a89d8148826d35de31ead03dc",
+    "seed_3000.json": "ce64a48cd3bfbaf724fa8d871f08be92f83fc103ca3977e871365406ee70b34e",
+    "seed_3001.json": "f064b99b44faa6a9829be8b9e4775488d67f0adb6b39585d43150f4319409784",
+    "seed_3002.json": "ad3ee18829368cebe4cca67179acf771fe7028189abb3ba8b5f00d3b710bb018"
+  },
+  "source_manifest": {
+    "scope": "single antenna assisted synthetic GPS L1 SPP; no multipath/interference",
+    "satellites": [
+      {
+        "prn": 1,
+        "position_m": [
+          -4787643.16853584,
+          864636.0312061622,
+          26110620.012253866
+        ],
+        "velocity_mps": [
+          -24.181411551323,
+          -46.97660411503805,
+          280.5080075366114
+        ],
+        "doppler_hz": -1500,
+        "range_at_zero_m": 23321416.42235382,
+        "coarse_range_m": 23320000.0
+      },
+      {
+        "prn": 2,
+        "position_m": [
+          -16526027.57825466,
+          10920337.346756786,
+          17693791.13462673
+        ],
+        "velocity_mps": [
+          -125.08536763991107,
+          56.848925971786976,
+          131.65687344507967
+        ],
+        "doppler_hz": -1000,
+        "range_at_zero_m": 20928713.265289612,
+        "coarse_range_m": 20930000.0
+      },
+      {
+        "prn": 3,
+        "position_m": [
+          -24809647.939863924,
+          6229131.68762826,
+          7149327.766873702
+        ],
+        "velocity_mps": [
+          -93.4755236534107,
+          6.540324827254162,
+          16.50669881131441
+        ],
+        "doppler_hz": -500,
+        "range_at_zero_m": 22459549.28929031,
+        "coarse_range_m": 22460000.0
+      },
+      {
+        "prn": 4,
+        "position_m": [
+          -15230327.429021003,
+          19481832.93078715,
+          9691692.94095247
+        ],
+        "velocity_mps": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "doppler_hz": 0,
+        "range_at_zero_m": 20425299.320076253,
+        "coarse_range_m": 20430000.0
+      },
+      {
+        "prn": 5,
+        "position_m": [
+          -8894837.8880557,
+          22306066.61435011,
+          -11347019.482726913
+        ],
+        "velocity_mps": [
+          24.415038005418314,
+          -70.77815354536638,
+          58.71353657100982
+        ],
+        "doppler_hz": 500,
+        "range_at_zero_m": 23755636.422119163,
+        "coarse_range_m": 23760000.0
+      },
+      {
+        "prn": 6,
+        "position_m": [
+          -2490598.782930179,
+          25976938.097282663,
+          4942590.898750501
+        ],
+        "velocity_mps": [
+          -2.9201146832402585,
+          -189.68374903237853,
+          -14.940889878100423
+        ],
+        "doppler_hz": 1000,
+        "range_at_zero_m": 21429950.431942727,
+        "coarse_range_m": 21430000.0
+      },
+      {
+        "prn": 7,
+        "position_m": [
+          5946694.252840228,
+          22347474.569733806,
+          13063721.055592772
+        ],
+        "velocity_mps": [
+          -113.65234565164928,
+          -228.95220533826853,
+          -127.04454450930375
+        ],
+        "doppler_hz": 1500,
+        "range_at_zero_m": 22088479.462376535,
+        "coarse_range_m": 22090000.0
+      },
+      {
+        "prn": 8,
+        "position_m": [
+          -4893878.783012659,
+          17865050.944468282,
+          19034797.220058095
+        ],
+        "velocity_mps": [
+          38.248651846239056,
+          -242.7807722801627,
+          -290.5877920205141
+        ],
+        "doppler_hz": 2000,
+        "range_at_zero_m": 20727757.919424705,
+        "coarse_range_m": 20730000.0
+      }
+    ],
+    "duration_ms": 1000,
+    "seeds": [
+      3000,
+      3001,
+      3002
+    ],
+    "satellite_frame": "synthetic reception ECEF, already rotation-corrected by definition",
+    "trajectory": "linear radial motion, not broadcast ephemeris/orbital propagation",
+    "time_aid": "per-PRN pseudorange rounded to 10 km at t=0; only selects 1 ms ambiguity",
+    "clock_bias_truth_m": 75000.0,
+    "receiver_truth_ecef_m": [
+      -2818297.0368929333,
+      4690433.933670169,
+      3265908.9677961944
+    ],
+    "satellite_clock_and_atmosphere": "zero in source and solver",
+    "quality_screen": "fixed >=200 ms; lock metric >=0.8 and abs PLL discriminator <pi/2",
+    "signal_config_last_prn": {
+      "prn": 8,
+      "carrier_hz": 1575420000.0,
+      "code_rate_hz": 1023000.0,
+      "fs_rf_hz": 16368000.0,
+      "if_hz": 4092000.0,
+      "doppler_hz": 2000,
+      "code_delay_chips": 143.58639644454524,
+      "initial_phase_rad": 5.965729884832513,
+      "duration_ms": 1000,
+      "power_dbm": -128.5,
+      "true_direction": {
+        "azimuth_deg": 30.0,
+        "elevation_deg": 60.0
+      },
+      "assumed_direction": {
+        "azimuth_deg": 30.0,
+        "elevation_deg": 60.0
+      },
+      "true_polarization": {
+        "kind": "rhcp",
+        "tilt_deg": 0.0,
+        "az_real": 1.0,
+        "az_imag": 0.0,
+        "el_real": 0.0,
+        "el_imag": 0.0
+      },
+      "assumed_polarization": {
+        "kind": "rhcp",
+        "tilt_deg": 0.0,
+        "az_real": 1.0,
+        "az_imag": 0.0,
+        "el_real": 0.0,
+        "el_imag": 0.0
+      },
+      "multipath_paths": [],
+      "code_bandwidth_hz": null
+    },
+    "rf_config": {
+      "temperature_k": 290.0,
+      "noise_bandwidth_hz": 8184000.0,
+      "stages": [
+        {
+          "name": "LNA",
+          "gain_db": 28.0,
+          "noise_figure_db": 1.2
+        },
+        {
+          "name": "Mixer",
+          "gain_db": 8.0,
+          "noise_figure_db": 8.0
+        },
+        {
+          "name": "VGA",
+          "gain_db": 44.0,
+          "noise_figure_db": 10.0
+        }
+      ],
+      "adc_bits": 10,
+      "adc_vpp": 1.0,
+      "enable_soft_limiting": true
+    },
+    "dfe_config": {
+      "decimation": 4,
+      "cutoff_hz": 1800000.0,
+      "num_taps": 129,
+      "output_bits": 8,
+      "output_binary_shift": 2,
+      "nco_frequency_hz": null
+    },
+    "tracking_config": {
+      "coherent_ms": 1,
+      "acquisition_ms": 4,
+      "early_late_spacing_chips": 0.5,
+      "fll_assist_epochs": 5,
+      "fll_gain": 0.5,
+      "pll_kp": 0.3,
+      "pll_ki_hz": 4.0,
+      "dll_kp_chips": 0.08,
+      "dll_ki_hz": 0.5,
+      "cn0_window_epochs": 10,
+      "max_epochs": 1000,
+      "code_replica_bandwidth_hz": null,
+      "refine_initial_phase": false
+    },
+    "source_sha256": {
+      "acquisition.py": "53b6d9fd1b325131bdd92b8050129b19c03efbffc5b88455e0243e611580f2f4",
+      "antenna.py": "a29e60178f22d737a9e71668923f8edcaabf4af2fbc7d6d0abd6e46e51557c7b",
+      "audit_code_discriminator.py": "92e82a40619d651515c2e922bda034d281275d9dea00a79dc2df92086fff2c84",
+      "audit_detection_boundaries.py": "fa29b360b0a68c31a09efd4229328a68aaa73ba6542bfa10c3fcbf95b0605a2d",
+      "audit_detection_calibration.py": "288f71b3d262967fb6861830e4f84f45473addec123b7927decd84f9bdada8a2",
+      "audit_detection_only.py": "a178bc388b96f252037438edec79f15df6356ca84fbf958fa059e9d9ea507da8",
+      "audit_dual_tracking_phase.py": "21ef53b975c89d12f528f245b0048ac55c98c5b874e91f47fd383e647a40c9f9",
+      "audit_dual_tracking_stability.py": "024a4f25788578ca2bc64a99c1fe78e03b15311f68f99f67024aba6fd2b86aa4",
+      "audit_multipath_baseline.py": "e8358d1583c7fec37fed6846ea91ad059d82035c61bb2a11cec6399ab7277c8f",
+      "audit_multipath_oracle.py": "a80b8b76f35e9c4a98f8521d1ea11ff47a529b743134709ba4e9661a8c17e157",
+      "audit_trimble_sdcp.py": "de1be7b0f90fadc396968dce09cb8664029105597b019e7870eeb17c3d21b9bf",
+      "channel_delay.py": "f357070e87dd1783e9845b97e46027ad1e7abfa5d9776a7af108413558a8c501",
+      "code_replica.py": "970336ae05dead945533f1ed58d4314fda83ac488ec4910c390e6f81595516cf",
+      "config.py": "d05620fedb584445e1525a38897e74eb71931b48eb72f136c828f4f70e9c6c6c",
+      "detection_calibration.py": "be5b7e5e8659a86f6d14bb7bee14f991c68e960501065c849e67fc199a0fa3d2",
+      "dfe.py": "4bd74b6a6fb32768f3a7331340a3782e9329b20e0431c16eb8e3c41301a8a33f",
+      "diversity.py": "9dbc90ef1754c6937171f8bdb72bd48fb3c8cf57d3ac04fa66bca65e33771952",
+      "gnss.py": "beb9ccf07a0ff290cdb28fe6a4add953a349d1709545c196ddb3dfec900bec05",
+      "interference.py": "585bae54cdb7581ee902c87c64c57e2403dd2cc95df64891115c17c3e263cc21",
+      "measured_pattern.py": "c3b9ccec23d9431168cb8887d8f5a1c9d937f9720f8f9f730f938bf5dfed4edc",
+      "metrics.py": "668dfe8b7eb75627a3df22a44b5a18f2bda9b603c6822f9bba82f9c18d255ba9",
+      "models.py": "e2343351d7c7c949a281910c3f313ae9372da3fe534635d609e3a2229d6c9330",
+      "multipath.py": "38d14bcc96468915694e59b52046c41c577cf66095dbf4a130bc91e1c4a0dc97",
+      "pipeline.py": "a5e307d2a90fd8bfd59d84fb6e397cda2f8bed80184a5176504a9a97576d3584",
+      "plotting.py": "99bb0c195f3f0862a3be4e1e66d9de9d9b8b7183f0025c10a288ff970ea19e3f",
+      "positioning.py": "48391ab39458999417032139a678e350fd83c487820714886ba0627a23966733",
+      "presets.py": "c8f59f7fb2a4986dac888aa409c07cf914d8500bb49e12a1b7e456c6de02aecc",
+      "rf.py": "ae086d6229d97d954f4e2a8ef21995c64ec97fc550ea56fb9ff5b6dc142e0104",
+      "run_end_to_end.py": "09276035277e9bcc3a62ad13cb258f6450d0c15d29cfa41cc8f48afc56687dc0",
+      "run_gps_spp.py": "5ba4fb8438467e5c9e14dfd98c01ce165052f77be2acbc09514ad4e603c7456e",
+      "sdcp.py": "231b285b435e09450ae9b109ffd17fb64b4339e7480fc4b0c134d144122dc807",
+      "tracking.py": "054c6e8c4511153292e09e77e936419920420eca88f67fa5b774055d5817612a"
+    }
+  },
+  "cross_seed_3000_3001_correlation_per_prn": [
+    0.8780422844582795,
+    0.9676788412787865,
+    0.9648610102375023,
+    -0.08767313631390934,
+    0.9593925953471777,
+    0.9671805400772525,
+    0.9397287278052647,
+    0.9265373979731114
+  ],
+  "linear_control": "RF/ADC bypassed, DFE output quantization disabled, original FIR retained; diagnostic only",
+  "local_control": "only existing 1.8 MHz continuous replica switched on; same loop gains, no phase refinement",
+  "source_control": "existing power-normalized ideal 1.8 MHz continuous source",
+  "isolated_control": "each PRN separately through linear DFE; not a simultaneous receiver performance result",
+  "baseline_reproduction_max_difference_m": 0.0
+}

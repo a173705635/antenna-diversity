@@ -1,0 +1,250 @@
+GNSS多径天线分集算法原理与实现说明
+精简版 Python 端到端仿真链路技术报告
+版本 V1.02026年9月8日
+摘要
+本报告整理当前精简版 Python 仿真中与全球导航卫星系统多径相关的天线分集算法。现有实现已经把静态镜面反射径作为完整采样序列加入天线端场景，经 RF、ADC 和 DFE 后，利用逐天线码相关向量完成超额时延检测、直达径空间投影和二维到达角扫描，再以直达径保持约束构造 LCMV 权值，对可空间分辨的反射径形成零响应约束。检测器与权值计算不读取仿真真实值，真实路径参数只用于结果评估。
+当前方案适合研究“反射径具有独立到达方向且可由手机四角阵列区分”的静态多径。它不是完整的多径估计器，也不是 MEDLL、STAP 或宽带抽头波束形成器。短时延相关主瓣重叠、反射径与直达径方向过近、天线流形失配、通道未校准或强干扰导致基线捕获失败时，检测与抑制都会受限。默认强干扰场景中没有检测到可分辨多径时，多径 LCMV 分支会明确回退到 loaded MVDR，而不会使用真实多径参数强行生成零陷。
+关键词：GNSS；天线分集；多径检测；到达角估计；LCMV；码跟踪偏差
+目录
+第1章 文档范围与主要结论4
+1.1 研究对象4
+1.2 核心结论4
+第2章 当前仿真总体架构5
+2.1 处理顺序5
+2.2 模块职责5
+第3章 静态多径信号与天线建模6
+3.1 反射径参数化6
+3.2 完整采样序列延迟6
+3.3 天线有效流形7
+3.4 场景叠加与真实值记录7
+第4章 基于接收数据的多径检测8
+4.1 Pilot选择与检测前提8
+4.2 逐时延天线相关向量8
+4.3 LOS空间投影9
+4.4 门限与局部峰值9
+4.5 二维到达角扫描9
+4.6 空间可分辨性判定10
+4.7 Truth隔离与事后评估11
+第5章 LOS保持LCMV多径抑制11
+5.1 与MVDR的关系11
+5.2 协方差与对角加载11
+5.3 闭式权值与输出11
+5.4 约束筛选与自由度12
+5.5 显式状态与回退12
+5.6 与现有合并算法的区别12
+第6章 端到端软件实现过程12
+6.1 场景阶段12
+6.2 RF与DFE阶段13
+6.3 基线分支阶段13
+6.4 检测与第五分支阶段13
+6.5 关键代码流程13
+6.6 数据结构与追溯14
+第7章 配置方法与关键参数14
+7.1 默认配置14
+7.2 增加多条路径14
+7.3 关闭多径研究路径15
+7.4 参数调整建议15
+第8章 指标与结果解释15
+8.1 空间方向增益15
+8.2 捕获与跟踪码偏差16
+8.3 默认强干扰运行结果16
+8.4 高信号功率验证结果17
+8.5 作图输出18
+第9章 当前设计边界与风险18
+9.1 时延分辨率边界18
+9.2 阵列空间分辨率边界19
+9.3 导向矢量与校准误差19
+9.4 协方差与动态性19
+9.5 算法范围19
+第10章 建议的后续研究20
+10.1 优先级一 参数扫描与统计验证20
+10.2 优先级二 通道真时延估计与序列对齐20
+10.3 优先级三 更强的多径估计20
+10.4 优先级四 宽带与动态阵列处理20
+第11章 代码核对与验证依据21
+11.1 自动化测试覆盖21
+11.2 关键测试用例21
+11.3 阅读顺序21
+文档范围与主要结论
+研究对象
+研究对象是手机四角 2 至 4 天线的 GPS L1 C/A 接收链路。代码主入口为 python_sim_simplified/pipeline.py 中的 run_end_to_end，数据依次经过场景生成、RF/ADC、DFE、四条基线合并分支、多径检测、LOS 保持 LCMV、捕获、跟踪和指标计算。多径新增功能只在 python_sim_simplified 中实现，完整研究框架 python_sim 未同步。
+核心结论
+• 多径不是只对本地码移位。当前实现对反射径的完整复数中频序列施加整数或分数采样延迟，因此码包络、载波相位和记录边界同时发生物理一致的变化。
+• 检测依赖接收数据与假设 LOS 导向矢量。算法先使用成功捕获分支的码相位和多普勒作为参考，再在各候选超额时延上形成天线相关向量。
+• LCMV 抑制需要可空间分辨的多径导向矢量。若反射径与 LOS 过于相关，或可用天线自由度不足，代码拒绝该约束并回退，不把数值奇异当成有效抑制。
+• 默认场景仍包含强 CW 与 2 MHz 带限噪声干扰。默认运行中多径未过检测门限，因此 Multipath LCMV 与 MVDR 相同；在无干扰高信号功率的验证场景中，0.5 chip 反射径被正确定位到 110° 方位和 15° 仰角，LCMV 将该方向增益压到约 5.93×10^-17。
+图 1-1 当前多径天线分集端到端处理链
+当前仿真总体架构
+处理顺序
+run_end_to_end 先调用 generate_scenario 生成每个天线端口的复数电压，再调用 process_rf 注入级联噪声、限幅和 ADC 量化，之后由 process_dfe 完成 DDC、低通滤波、抽取和输出重量化。DFE 输出保持 M×N 的多通道矩阵，其中 M 为活动天线数，N 为有效采样点数。
+SINGLE、EGC、MVDR 和 Blind Null 四条基线分支先独立完成合并、捕获和跟踪。程序从捕获成功的基线分支中选择捕获指标最大的分支作为多径检测 pilot，只借用它的码相位和多普勒结果。多径检测完成后，只有状态为 resolvable 的候选径才进入 combine_lcmv。最终第五条 multipath_lcmv 分支复用完全相同的捕获和跟踪流程，保证分支比较公平。
+模块职责
+表 2-1 多径研究相关模块及职责
+模块关键入口职责config.pyMultipathPath定义反射径、检测器和抑制器参数gnss.py_multipath_scene生成延迟后的完整反射序列并加入天线端场景channel_delay.pyfractional_delay用加窗 sinc 实现整数与分数采样延迟antenna.pyantenna_response生成方向图、极化、遮挡、互耦和通道误差后的有效流形multipath.pydetect_multipath相关时延搜索、LOS 投影、峰值判决和 DOA 扫描diversity.pycombine_lcmv筛选约束并求解 LOS 保持 LCMV 权值pipeline.pyrun_end_to_end组织基线、检测、第五分支和 truth-only 评估metrics.pycompute_metrics计算空间增益、捕获偏差、跟踪码偏差和 C/N0plotting.pyplot_multipath_results输出延迟谱、角度谱、相关曲线和跟踪偏差图
+静态多径信号与天线建模
+反射径参数化
+每条 MultipathPath 包含 enable、relative_power_db、excess_delay_chips、reflection_phase_rad、doppler_offset_hz、direction 和 polarization。相对功率采用 dB 表示，代码在电压域使用 10^(P/20)；超额时延以码片表示，并除以名义码率换算为秒；reflection_phase_rad 表示反射表面额外引入的相位，不与传播时延载波相位重复；doppler_offset_hz 表示该反射径相对直达径的附加多普勒。
+αp=10^(Pp/20)，τp=Δcp/Rc（3-1）
+式中，Pp 为相对功率 dB，αp 为相对电压，Δcp 为超额时延码片数，Rc 为 C/A 码率。默认反射径为 -6 dB、0.5 chip、反射相位 π、附加多普勒 0 Hz，方向为方位角 110°、仰角 15°。
+完整采样序列延迟
+路径总时延等于路径超额时延与逐通道真实时延之和。_multipath_scene 先构造带幅度、反射相位和附加多普勒的 path_waveform，再乘以该路径真实天线响应，最后把每个通道送入 apply_channel_delays。这样处理后，接收机看到的是一个真实错位的码包络和载波，而不是仅仅改变导向矢量。
+xp,m[n]=αp am(Ωp)s[n-dp,m]exp(jφp)exp(j2πΔfpn/fs)（3-2）
+fractional_delay 将总延迟拆成整数部分和小数部分。整数部分通过补零和序列移动实现；小数部分使用 33 抽头 Hamming 加窗 sinc 插值核。记录范围以外的样本视为零，因此路径到达之前不会发生循环回绕。对中频序列做真时延只产生中频相位，apply_channel_delays 额外乘以 residual_frequency_hz 等于 carrier_hz 减 if_hz 的相位项，使总相位等价于 RF 频率下的传播时延。
+h[k]=sinc(k-μ)w[k]，y[n]=x[n-D]*h[n]（3-3）
+天线有效流形
+每条直达径、反射径和干扰源都独立调用 antenna_response。其有效流形由阵元几何空间相位、复数方向图与极化投影、遮挡衰减、互耦矩阵以及逐通道幅相误差共同组成。true state 用于生成接收数据，assumed state 用于 MVDR、检测和 LCMV，二者可分离以研究校准误差。
+a(Ω)=gch⊙C[as(Ω)⊙hp(Ω)⊙b(Ω)]（3-4）
+手机相位中心采用 160.9 mm×75.9 mm 平面外形的四角理想坐标，天线名称 TL、TR、BL、BR 分别表示左上、右上、左下、右下。阵列可任选 2、3 或 4 个不重复角点。当前默认使用理想各向同性单元，参数化和实测复数方向图接口可替换该假设。
+图 3-1 手机四角阵列中的直达径与静态镜面反射径
+场景叠加与真实值记录
+generate_scenario 先复制直达径分量，再逐条加上启用的 multipath component，最后加上 CW 或宽带干扰分量。truth 中记录每条路径实际生成的 component、steering_true、delay_phase_true、时延、功率、相位、多普勒和方向。这些字段供单元测试、指标评估和作图使用；detect_multipath 的函数签名不接受 truth。
+基于接收数据的多径检测
+Pilot选择与检测前提
+多径检测并不自己完成全二维捕获。pipeline 先运行四条基线分支，筛选 acquisition.success 为真的结果，并选择 acquisition.metric 最大者。pilot 提供 PRN、已捕获多普勒、码相位和 coherent_samples。若没有任何基线捕获成功，检测状态为 no_pilot_acquisition；若配置关闭检测，则状态为 detection_disabled。
+图 4-1 多径检测与 LCMV 约束生成流程
+逐时延天线相关向量
+检测时延网格从 delay_step_chips 开始，不包含 0 chip 的 LOS 点，一直搜索到 max_excess_delay_chips。每个候选时延先换算成 DFE 整数样点偏移，并与捕获码相位相加；本地 C/A 码按该偏移滚动。接收通道先按捕获多普勒去载波，然后在相同时间窗内分别与本地码相乘并求均值，得到 M 维复相关向量 z(δ)。
+z(δ)=1Nn=0N-1x[n]c[n-δ]e^(-j2πfDn/fs)（4-1）
+相关时间长度取 DFE 有效数据长度与 acquisition.coherent_samples×noncoherent_ms 的较小值。当前实现对 noncoherent_ms 对应的整段数据直接求复均值，因此它更接近一个长的相干相关向量，而不是先分段取模再非相干累加。这个实现细节会影响附加多普勒较大时的相干损失。
+LOS空间投影
+相关向量在短时延处通常仍包含很强的 LOS 相关主瓣。代码使用 assumed antenna model 生成 LOS 导向矢量 a0，并构造正交投影矩阵 P⊥。该投影消除与 LOS 导向矢量平行的空间分量，保留与 LOS 空间上不同的反射分量。
+P⊥ = I - a0 a0ᴴa0ᴴ a0    zr(δ) = P⊥ z(δ)（4-2）
+这一步同时解释了算法的根本边界：当反射径与 LOS 的有效导向矢量相同或近似相同，投影也会把反射径一起删除。此时无法只依靠当前小孔径阵列在空间维分离两条路径。
+门限与局部峰值
+原始相关功率为各天线相关向量模平方之和，残差功率为 LOS 投影后向量模平方之和。检测门限以全部候选时延残差功率的中位数作为鲁棒背景估计，再乘以 detection_threshold_db 对应的线性倍率。只有不低于门限且不低于相邻时延点的局部极大值才成为候选。候选按残差功率降序排列，并最多保留 M−1 条，以符合阵列剩余空间自由度。
+T=median{‖zr(δ)‖²}×10^(Γ/10)（4-3）
+二维到达角扫描
+每个延迟候选都进行方位角和仰角网格扫描。对每个角度 Ω，程序使用 assumed antenna model 生成 a(Ω)，再投影出 LOS 分量。归一化 Bartlett 分数衡量候选残差向量与该投影流形的匹配程度。投影流形范数接近机器精度时，分数置零，因为该方向在当前模型下与 LOS 不可区分。
+B(Ω)=|ã(Ω)ᴴzr|²ã(Ω)ᴴã(Ω)，ã(Ω)=P⊥a(Ω)（4-4）
+默认角度网格为方位角 0° 至 355°、步长 5°，仰角 0° 至 90°、步长 5°。估计结果取二维分数最大网格点，因此角度误差下限受网格限制；阵列存在方向模糊或方向图对称时，最大值也可能落到等价方向。
+空间可分辨性判定
+代码计算候选导向矢量与 LOS 导向矢量的归一化相关系数 ρ。ρ 大于 max_steering_correlation 时，候选标记为 spatially_unresolvable；否则标记为 resolvable。默认阈值 0.95。该门限不是检测门限，而是决定能否安全地把候选径加入 LCMV 约束。
+ρ(a,b) = |aᴴb|√(aᴴa) √(bᴴb)（4-5）
+图 4-2 高信号功率验证场景的多径延迟谱
+图 4-3 0.5 chip 候选径的二维到达角扫描结果
+Truth隔离与事后评估
+evaluate_multipath 在检测完成后才读取 truth。它枚举检测候选与真实路径的组合，按绝对时延误差和三维单位方向向量夹角排序，执行一对一匹配。匹配容差由 pipeline 设置为 max(0.5 chip, 2×delay_step_chips) 和 2×max(azimuth_step_deg, elevation_step_deg)。最终输出 detected_count、missed_count、false_alarm_count 以及每个匹配的时延和方向误差。该评估不回馈检测器或波束形成器。
+LOS保持LCMV多径抑制
+与MVDR的关系
+MVDR 只有一个线性约束 wᴴa0=1，通过最小化输出功率抑制与目标导向不同的成分。LCMV 把约束扩展为 wᴴC=f，其中 C 的第一列是 LOS 导向矢量，响应设为 1；其余列是已检测且可分辨的多径估计导向矢量，响应设为 0。
+min  wᴴ R̃ w    s.t.  Cᴴw=f（5-1）C=[a0,a1,…,aK]    f=[1,0,…,0]ᵀ（5-2）
+协方差与对角加载
+样本协方差由整段 DFE 多通道数据一次性估计。对角加载量等于 diagonal_loading_factor×trace(R)/M，默认因子为 10^-2。加载后的 R̃=R+λI 用于 MVDR 和 LCMV，可改善有限快拍、通道相关或强干扰造成的条件数问题。权值在整段记录内固定，当前并未实现滑动窗更新。
+R = XXᴴN    λ=η Re{tr(R)}M    R̃=R+λI（5-3）
+闭式权值与输出
+代码先求解 R̃Y=C，再构造 Gram 矩阵 G=CᴴY，最后求 w=YG^-1f。这与直接写成 R̃^-1C(CᴴR̃^-1C)^-1f 数学等价，但使用线性方程求解避免显式计算大矩阵逆。合并输出为 y=wᴴX。
+w = R̃⁻¹ C (Cᴴ R̃⁻¹ C)⁻¹ f    y=wᴴX（5-4）
+约束筛选与自由度
+combine_lcmv 按候选顺序检查每条多径与 LOS 以及已接受约束之间的归一化相关系数。只有所有相关系数都不大于阈值，且已接受多径数少于 M−1 时才加入约束。M 个阵元最多提供 M 个独立线性约束，其中一个必须保护 LOS，因此最多只能给 M−1 条独立反射径置零。候选方向彼此接近时也会被拒绝，防止约束矩阵近奇异。
+显式状态与回退
+表 5-1 多径检测与抑制状态
+状态触发条件实际处理detection_disabled检测开关关闭不运行检测no_pilot_acquisition四条基线均未捕获无检测参考no_multipath_detected没有残差局部峰过门限LCMV 分支回退到 loaded MVDRspatially_unresolvable候选与 LOS 或已接受约束高度相关拒绝对应零约束并回退或减少约束multipath_constraints_applied至少一条候选可分辨求解 LOS 为 1、多径为 0 的 LCMV
+与现有合并算法的区别
+表 5-2 五种合并方式的已知信息与目标
+算法依赖信息主要目标多径风险SINGLE参考天线响应只使用一个天线不抑制反射径EGCLOS 相位直达径相干等增益合并反射径可能相干增强或相消MVDRLOS 导向与样本协方差保持 LOS 并最小输出功率若 LOS 失配可能自消除；不保证对指定多径置零Blind Null仅样本统计删除主导相关干扰模态不知道 LOS 和多径身份，可能误消除目标或反射径Multipath LCMVLOS 与检测到的多径导向保持 LOS 并对可分辨反射径置零依赖检测与流形精度，消耗阵列自由度
+端到端软件实现过程
+场景阶段
+第一步，default_config 或研究者自定义配置创建 SignalConfig、PhoneConfig、MultipathDetectionConfig 和 MultipathSuppressionConfig。第二步，generate_scenario 生成直达径 desired_waveform，分别计算 LOS true/assumed 导向矢量。第三步，对每条启用的 MultipathPath 调用 _multipath_scene，得到路径 component 和 truth 描述。第四步，把直达径、多径和干扰按电压叠加，输出 shape 为 M×Nrf 的 scene_input_v。
+RF与DFE阶段
+process_rf 对各通道施加相同 RF 级联模型，但保持天线间信号和干扰的相对幅相。热噪声、软限幅和 10 bit 复数 ADC 量化后，process_dfe 使用公共 NCO 下变频、129 抽头实系数低通 FIR 和 4 倍抽取，输出采样率 4.092 MHz，即每个 C/A 码片约 4 个样点。DFE 输出边界按 8 bit 与二进制移位配置重量化，容器类型仍为 complex128。
+基线分支阶段
+_run_branch 根据 mode 选择 combine_known 或 combine_blind_null，再统一调用 _finish_branch。_finish_branch 计算 true steering 下的目标、干扰和多径方向增益，然后运行 acquire 和 track。这样每个分支保存 combined、combining、acquisition 和 tracking 四类结果。
+检测与第五分支阶段
+run_end_to_end 从成功捕获的基线分支选 pilot，调用 detect_multipath。随后只收集 candidates 中 spatial_status 等于 resolvable 的 steering_estimated，传给 combine_lcmv。第五分支再进入 _finish_branch，使用与其他分支完全相同的 ACQ/TRK 参数。最后 evaluate_multipath 和 compute_metrics 完成事后评估。
+关键代码流程
+scene_input_v, truth = generate_scenario(cfg)
+adc_codes, rf_info = process_rf(scene_input_v, ...)
+dfe_channels, dfe_info = process_dfe(adc_codes, ...)
+
+branches = run_single_egc_mvdr_blind_null(...)
+pilot = successful_branch_with_highest_acquisition_metric(branches)
+detection = detect_multipath(dfe_channels, pilot.acquisition, assumed_model, ...)
+
+estimated_echoes = [c.steering_estimated for c in detection.candidates
+                    if c.spatial_status == "resolvable"]
+combined, combining = combine_lcmv(dfe_channels, assumed_los,
+                                   estimated_echoes, loading, correlation_limit)
+branches["multipath_lcmv"] = run_same_acquisition_and_tracking(combined)
+数据结构与追溯
+SimulationResults 同时保留 config、truth、RF/DFE 中间数据、branches、multipath_detection、multipath_evaluation 和 metrics。CombiningInfo 记录固定权值、样本协方差、加载量、条件数、约束矩阵、被拒绝候选索引、抑制状态以及 truth-only 空间增益。MultipathDetectionResult 保存延迟轴、相关向量、原始功率、残差功率、门限及每个候选的角度扫描面，便于复现实验。
+配置方法与关键参数
+默认配置
+表 7-1 默认多径检测与抑制参数
+参数默认值作用relative_power_db-6 dB反射径相对直达径功率excess_delay_chips0.5 chip反射径相对直达径超额码延迟reflection_phase_radπ反射表面附加相位doppler_offset_hz0 Hz相对直达径附加多普勒direction110° 方位 15° 仰角反射径真实入射方向max_excess_delay_chips3.0 chip检测延迟搜索上限delay_step_chips0.25 chip检测延迟网格步长detection_threshold_db6 dB中位残差功率以上的判决裕量azimuth_step_deg5°方位角扫描步长elevation_step_deg5°仰角扫描步长diagonal_loading_factor10^-2LCMV 协方差对角加载系数max_steering_correlation0.95约束可分辨性上限
+增加多条路径
+cfg.signal.multipath_paths 是列表，可以配置 0 条、1 条或多条静态路径。每条路径分别经过独立天线响应和完整序列延迟。路径数量可以超过阵列可用零陷数，但 LCMV 最多接受 M−1 条独立反射径约束。
+from math import pi
+from config import Direction, MultipathPath
+
+cfg.signal.multipath_paths = [
+    MultipathPath(Direction(110.0, 15.0), relative_power_db=-6.0,
+                  excess_delay_chips=0.5, reflection_phase_rad=pi),
+    MultipathPath(Direction(220.0, 25.0), relative_power_db=-10.0,
+                  excess_delay_chips=1.25, reflection_phase_rad=0.4,
+                  doppler_offset_hz=3.0),
+]
+关闭多径研究路径
+cfg.signal.multipath_paths = []
+cfg.multipath_detection.enable = False
+cfg.multipath_suppression.enable = False
+上述配置用于复现新增多径功能之前的四分支数值回归。若只关闭检测但保持 suppression.enable 为真，第五分支仍存在，但由于没有可用多径约束会按 MVDR 处理。若只删除 multipath_paths 而保持检测开启，检测器仍会对数据中的残差结构执行搜索，因此干扰、噪声或模型误差可能产生候选，研究时应明确区分“场景无人工多径”和“关闭检测器”。
+参数调整建议
+• 减小 delay_step_chips 可以加密搜索网格，但当前相关码移位最终 round 到整数 DFE 样点。在 4.092 MHz 下，小于 0.25 chip 的步长不会自动产生真正的分数码相关器。
+• 降低 detection_threshold_db 可提高弱多径检出率，同时增加噪声、干扰残差和相关旁瓣造成的虚警。应通过 Monte Carlo 而不是单次波形选门限。
+• 增大 max_steering_correlation 会接受更接近 LOS 的候选约束，但约束矩阵条件会恶化，目标自消除风险上升。
+• 改变 channel_delay_ns 会移动真实完整通道序列；estimated_channel_delay_ns 目前只改变 assumed LOS 导向中的等效相位，不会自动把 DFE 序列重新对齐。
+指标与结果解释
+空间方向增益
+每个分支权值固定后，pipeline 使用真实 LOS、干扰和多径导向矢量计算 |wᴴa|。这些量只用于评价，因此不会产生“用真实多径方向帮助算法”的信息泄漏。worst_multipath_gain 是所有真实反射径方向增益的最大值。它衡量空间响应，不包含反射径输入功率和相关时延结构，不能单独等同于最终伪距误差。
+捕获与跟踪码偏差
+捕获码偏差把 acquisition.code_phase_samples 换算为码片后，与 truth.code_delay_chips 作 1023 chip 周期的环形误差。跟踪偏差使用每个 epoch 的记录起点加一个 coherent_ms 后的样点作为比较时刻，与 tracking.code_phase_chips 比较。RMS 码偏差再乘以光速除以名义码率，换算为米。
+echip = mod(ĉ - c + 511.5, 1023) - 511.5（8-1）em = echip c0Rc（8-2）
+默认强干扰运行结果
+2026年9月7日的默认端到端运行包含 -90 dBm CW、-90 dBm 的 2 MHz 带限噪声干扰以及 -6 dB、0.5 chip 多径。检测状态为 no_multipath_detected，因此 Multipath LCMV 回退到 MVDR。表中相同的 MVDR 与 LCMV 数值正是回退逻辑的证据，不代表 LCMV 已经检测并抑制了多径。
+表 8-1 默认强干扰场景的控制台结果
+分支捕获捕获指标跟踪最终多普勒 HzC N0 dB Hz码偏差 mSINGLE否1.119否---EGC否1.113否---MVDR是22.470是1499.7646.4815.443Blind Null是14.516是1500.7448.1016.982Multipath LCMV是22.470是1499.7646.4815.443
+图 8-1 默认强干扰场景未检出可分辨多径的延迟谱
+高信号功率验证结果
+验证场景关闭干扰，将信号功率设为 -95 dBm、反射径相对功率设为 -3 dB、检测门限设为 3 dB。检测器估计超额时延 0.5 chip、方位角 110°、仰角 15°，状态为 resolvable。该场景用于验证算法机制，不代表真实手机信号功率或最终产品性能。
+表 8-2 可分辨多径验证场景的抑制与码偏差
+分支真实多径方向增益跟踪码偏差 chip跟踪码偏差 mSINGLE1.00000.2551474.770EGC0.101030.017245.051MVDR0.719010.019665.761Blind Null0.734750.73338214.918Multipath LCMV5.93×10^-170.015234.464
+该结果说明，在导向矢量准确且路径空间可分辨时，LCMV 的显式多径零约束能把真实反射方向增益压到数值零附近，并在该测试中把 RMS 码偏差降到 4.464 m。Blind Null 的目标是去除主导统计模态，它不知道哪一条是多径，因此在此场景中码偏差反而最大。不能据此断言 LCMV 在所有多径条件下都优于其他算法。
+图 8-2 可分辨多径验证场景的分支码相关曲线
+图 8-3 可分辨多径验证场景的跟踪码偏差
+作图输出
+plot_multipath_results 固定输出 multipath_delay_profile、multipath_correlation_comparison 和 multipath_tracking_bias；每检测到一条候选径，额外输出 multipath_angle_path_n。完整 direct runner 还保留每个天线的 RF/ADC/DFE 频谱、每个分支的合并频谱、阵列响应和捕获搜索面，以及 tracking 和 cn0 图。默认四天线、五分支且无角度候选时共 24 张 PNG。
+当前设计边界与风险
+时延分辨率边界
+DFE 输出采样率为 4.092 MHz，对 1.023 Mcps C/A 码约为 4 samples/chip。检测器把 delay_chips 乘以 fs/code_rate 后 round 到整数样点，所以当前最小独立时延格点约为 0.25 chip。即使加密配置网格，实际本地码仍不会获得更细的分数延迟。短于一个相关主瓣的多径会和 LOS 互相叠加，LOS 投影与简单峰值检测难以得到无偏估计。
+阵列空间分辨率边界
+手机四角孔径相对于 GPS L1 波长有限，且平面阵列、方向图对称、遮挡和互耦都会带来角度模糊。空间相关阈值只能阻止明显近共线的约束，不能证明 DOA 估计唯一。两根天线最多在保护 LOS 后形成一个独立零陷；三根和四根天线理论上最多形成两个和三个独立零陷，但实际还受条件数与流形误差限制。
+导向矢量与校准误差
+检测和 LCMV 使用 assumed state。真实方向图、相位中心、互耦、逐通道幅相误差和时延只要与 assumed state 不一致，就会造成 LOS 投影不干净、DOA 偏差和零陷偏移。尤其当通道间残余时延达到样点或码片尺度时，只在导向矢量中补载波相位不足以恢复码包络对齐。当前 DFE 尚未根据 estimated_channel_delay_ns 自动对齐完整多通道序列。
+协方差与动态性
+当前 R 由整段 DFE 数据一次估计，权值随后在整段记录固定。它适合静态机制验证，但没有覆盖滑动协方差的收敛时间、权值更新率、运动造成的 DOA 漂移、独立本振相位漂移和采样时钟偏差。固定单权值也不是真正的宽带波束形成；对宽带干扰或频率选择性多径，不同频率所需相位补偿不同。
+算法范围
+• 只支持静态镜面反射径，不支持弥散多径簇、NLOS 主径判决或路径出生消失。
+• 不做连续时延估计、超分辨时延估计、MEDLL 或稀疏重构。
+• 不做时域抽头波束形成、STAP 或分频段 LCMV。
+• 检测使用一个 PRN 和单星捕获结果，不包含多星联合处理、导航数据和 PVT。
+• 默认天线几何是 Mate 70 尺寸边界上的理想角点，不是实测相位中心和暗室复数方向图。
+• 指标中的真实方向增益与 truth 匹配仅用于仿真评估，真实接收机无法直接获得。
+建议的后续研究
+优先级一 参数扫描与统计验证
+对反射相对功率、0 至 2 chip 超额时延、反射相位、LOS 与多径夹角、活动天线组合和流形误差做扫描，并对随机噪声与反射相位进行 Monte Carlo。主要输出检测概率、虚警概率、时延误差、DOA 误差、LCMV 目标损失、码偏差和 C/N0。门限与相关系数阈值应由统计曲线选择，而不是只根据单个确定性场景。
+优先级二 通道真时延估计与序列对齐
+在空域合并前选择参考通道，对 DFE 输出执行整数和分数延迟估计，并移动完整采样序列到同一时间基准。需要分别记录真实时延、估计时延和残余误差，并比较对齐前后 LOS 相干增益、相关峰和零陷深度。这个步骤是把当前窄带相位补偿推进到真实多 RF 同步模型的关键。
+优先级三 更强的多径估计
+在保留当前网格相关检测为基线的基础上，引入分数码延迟相关器、早迟相关器组或 MEDLL，先提高码域路径分辨能力，再与阵列 DOA 联合。对于近 LOS 或短时延多径，空间和码域应联合估计，而不是依赖一次 LOS 投影。
+优先级四 宽带与动态阵列处理
+增加滑动协方差、权值更新与动态路径模型；对频率选择性问题比较子带 LCMV、STFT MVDR 和时域抽头 LCMV。进一步加入差分频偏、采样时钟偏差和互耦随频率变化，才能评估工程实时实现的稳定性与资源开销。
+表 10-1 后续阶段建议与验收输出
+阶段新增能力建议验收指标A多径参数扫描与 Monte CarloPd Pfa 时延误差 DOA误差 码偏差 C N0BDFE 多通道完整序列对齐残余时延 LOS相干增益 捕获峰 零陷深度C分数延迟与 MEDLL短时延双径分辨率 伪距偏差 复杂度D动态与宽带空域处理收敛时间 带内抑制度 目标损失 计算量
+代码核对与验证依据
+自动化测试覆盖
+当前精简版测试共 67 项通过并以警告作为错误运行。多径专用测试覆盖 LOS 投影正交性、检测器接口不接受 truth、0.5 chip 分离反射径检测、LOS-only 无峰、同方向反射径不可分辨、truth 匹配计数、LCMV 精确约束、回退逻辑、端到端第五分支、码偏差换算和高信号功率抑制结果。
+关键测试用例
+表 11-1 多径功能的主要测试契约
+测试对象核心断言场景生成空多径列表保持旧场景；两条路径独立叠加；功率时延方向正确检测器无 truth 参数；0.5 chip 与 110° 15° 可检出；同方向不标记可分辨LCMVwᴴaLOS=1；wᴴaMP=0；近共线约束被拒绝；空候选等于 MVDRPipeline先有四基线再检测；第五分支复用相同 ACQ/TRK；无 pilot 状态明确指标环形码误差正确；chip 到 metre 换算正确；truth 只用于评价绘图原有分支图保留；多径图独立；图数按候选动态变化回归关闭多径检测与抑制后，旧四分支确定性数值保持不变
+阅读顺序
+建议先阅读 presets.py 和 config.py 了解场景参数，再阅读 gnss.py、channel_delay.py 和 antenna.py 理解数据如何生成，然后阅读 multipath.py 和 diversity.py 掌握检测与 LCMV 数学实现，最后阅读 pipeline.py、metrics.py 和 plotting.py 核对执行顺序、评价边界和输出。

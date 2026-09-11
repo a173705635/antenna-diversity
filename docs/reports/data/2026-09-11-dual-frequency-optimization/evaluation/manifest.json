@@ -1,0 +1,73 @@
+{
+  "input": "python_sim_simplified\\results\\gps_l1_l5_holdout",
+  "seeds": [
+    4100,
+    4101,
+    4102
+  ],
+  "calibration": "frozen external weights",
+  "weight_file": "python_sim_simplified\\dual_frequency_weights.json",
+  "weights": {
+    "L1CA": {
+      "code_sigma_m": 2.7547157279988097,
+      "carrier_sigma_m": 0.0012063323105008716
+    },
+    "L5Q": {
+      "code_sigma_m": 0.4561339023678732,
+      "carrier_sigma_m": 0.0025384180327758755
+    }
+  },
+  "input_sha256": {
+    "comparison_4100.json": "3b0b76706b5e09f8720e59c56affbb6d4954c817e4478805b22a39cf483651fa",
+    "comparison_4101.json": "04548f34aab663770d38e189c55a7e429b4dc74c5b5d8ef8d12cb846e57a52f1",
+    "comparison_4102.json": "adc380800a78752282f03c7f654e20b19e3c5706fee9c7df6cc3a732bdddd456",
+    "L1CA_4100.json": "019550f34c233d8cc890528eec9ef43b0be0e90b3672d0855fbe28109f31b81d",
+    "L1CA_4101.json": "6466fd46cf6687f9f808280052d639d4b67d4fc0aebea11a4fa7df1676aa8771",
+    "L1CA_4102.json": "c2cda44bd9c24c4a20bafd463718739f62d6d879ceabef78bd7ce7de1fd8068c",
+    "L5Q_4100.json": "478d5adfe299487c3a92c8a52eadb9a0640b179461b60a51b6c43e01f0d64631",
+    "L5Q_4101.json": "faeed464b0818cea8a2e8634c140c2f2eae1fb69d909fad7f08336d16446911e",
+    "L5Q_4102.json": "601f75ec679993df940485affae4cc57511d1305db2b94f4f0605fbaca35cbee",
+    "manifest.json": "587bfda9c03abaee6d194e6bd1c4d37b20e02dc6cb78e13038495de07550a0a7",
+    "sha256.json": "81de148d41000572ed0b9e5a8b00d49a8bfbe3cdd23144f103b212b113619be2",
+    "summary.json": "c879490c898b79586cba04edde1e551568eaaf5001a5bf62cf32da31bb8b874c"
+  },
+  "source_sha256": {
+    "acquisition.py": "e6e805fc21a0270f80a06a59cdc1e531ac9c4108f70a03b636ee7dc04ce413de",
+    "antenna.py": "a29e60178f22d737a9e71668923f8edcaabf4af2fbc7d6d0abd6e46e51557c7b",
+    "audit_code_carrier_float.py": "c84a89492e6c6632b8508afaa6d13f08d07a27637102793d05fc49569367c211",
+    "audit_code_discriminator.py": "92e82a40619d651515c2e922bda034d281275d9dea00a79dc2df92086fff2c84",
+    "audit_detection_boundaries.py": "fa29b360b0a68c31a09efd4229328a68aaa73ba6542bfa10c3fcbf95b0605a2d",
+    "audit_detection_calibration.py": "288f71b3d262967fb6861830e4f84f45473addec123b7927decd84f9bdada8a2",
+    "audit_detection_only.py": "a178bc388b96f252037438edec79f15df6356ca84fbf958fa059e9d9ea507da8",
+    "audit_dual_frequency_weights.py": "9f16490d81e0a724c9b11ee59d3a120029e807a392788fc193ed9895724874ef",
+    "audit_dual_tracking_phase.py": "d8921c8fd1a4d8210127aab2811f7d10e67bbd31f8898ac24aa4b1d116995e9f",
+    "audit_dual_tracking_stability.py": "024a4f25788578ca2bc64a99c1fe78e03b15311f68f99f67024aba6fd2b86aa4",
+    "audit_multipath_baseline.py": "e8358d1583c7fec37fed6846ea91ad059d82035c61bb2a11cec6399ab7277c8f",
+    "audit_multipath_oracle.py": "a80b8b76f35e9c4a98f8521d1ea11ff47a529b743134709ba4e9661a8c17e157",
+    "audit_pseudorange_bias.py": "22908c4c1bf823ad30f93caeda49364022e97837787087089893fb8c55822761",
+    "audit_trimble_sdcp.py": "de1be7b0f90fadc396968dce09cb8664029105597b019e7870eeb17c3d21b9bf",
+    "channel_delay.py": "f357070e87dd1783e9845b97e46027ad1e7abfa5d9776a7af108413558a8c501",
+    "code_replica.py": "970336ae05dead945533f1ed58d4314fda83ac488ec4910c390e6f81595516cf",
+    "config.py": "c3b47604a074711a96272bf12f8470ea0bb1037938400a9afdb2daf1959e7355",
+    "detection_calibration.py": "be5b7e5e8659a86f6d14bb7bee14f991c68e960501065c849e67fc199a0fa3d2",
+    "dfe.py": "4bd74b6a6fb32768f3a7331340a3782e9329b20e0431c16eb8e3c41301a8a33f",
+    "diversity.py": "9dbc90ef1754c6937171f8bdb72bd48fb3c8cf57d3ac04fa66bca65e33771952",
+    "gnss.py": "bc1ce321f38ea27f9ec81c3f12fba6fc37acb89b80aaf2b597fcba12525d539c",
+    "interference.py": "585bae54cdb7581ee902c87c64c57e2403dd2cc95df64891115c17c3e263cc21",
+    "l5.py": "353a78496a675fa09175144c91337ddb797343537476fe8d87da3a35f5318287",
+    "measured_pattern.py": "c3b9ccec23d9431168cb8887d8f5a1c9d937f9720f8f9f730f938bf5dfed4edc",
+    "metrics.py": "668dfe8b7eb75627a3df22a44b5a18f2bda9b603c6822f9bba82f9c18d255ba9",
+    "models.py": "e2343351d7c7c949a281910c3f313ae9372da3fe534635d609e3a2229d6c9330",
+    "multipath.py": "38d14bcc96468915694e59b52046c41c577cf66095dbf4a130bc91e1c4a0dc97",
+    "pipeline.py": "a5e307d2a90fd8bfd59d84fb6e397cda2f8bed80184a5176504a9a97576d3584",
+    "plotting.py": "99bb0c195f3f0862a3be4e1e66d9de9d9b8b7183f0025c10a288ff970ea19e3f",
+    "positioning.py": "3b154153668bbcf985e07a57d7e5a809ec3f426bd921428411e30fff4375a1f3",
+    "presets.py": "c8f59f7fb2a4986dac888aa409c07cf914d8500bb49e12a1b7e456c6de02aecc",
+    "rf.py": "ae086d6229d97d954f4e2a8ef21995c64ec97fc550ea56fb9ff5b6dc142e0104",
+    "run_end_to_end.py": "09276035277e9bcc3a62ad13cb258f6450d0c15d29cfa41cc8f48afc56687dc0",
+    "run_gps_l1_l5.py": "5b715d7692fe5a19add492d1e5ca4f9629483d319ee1963c71e9f028204653fa",
+    "run_gps_spp.py": "8d6af0ee5415bb3517054faa307c958efbe47319bf2dbb9cdc34648ba6715725",
+    "sdcp.py": "231b285b435e09450ae9b109ffd17fb64b4339e7480fc4b0c134d144122dc807",
+    "tracking.py": "4a303109bc634ef7dcceecf43d529f385189205906e193fda4fcdc0cf45ff3ae"
+  }
+}

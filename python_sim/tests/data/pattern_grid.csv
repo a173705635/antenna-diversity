@@ -1,5 +1,0 @@
-element_name,frequency_hz,azimuth_deg,elevation_deg,h_az_real,h_az_imag,h_el_real,h_el_imag
-TL,1575420000,0,-90,1,1,10,-1
-TL,1575420000,180,-90,5,3,20,1
-TL,1575420000,0,90,9,5,30,3
-TL,1575420000,180,90,13,7,40,5

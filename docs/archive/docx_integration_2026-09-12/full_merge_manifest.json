@@ -1,0 +1,30 @@
+[
+  {
+    "name": "4.3_多天线GNSS工程实现关键问题与约束.docx",
+    "sha256": "405d70513b2b7d961c8dfb48ba80c5ff0496d2f25e576886c9a2ec9c75dd9c33"
+  },
+  {
+    "name": "5.2_MVDR波束形成算法_可行性报告章节.docx",
+    "sha256": "f3035731f38d364cb60147e26862addfab626a0fcb36c1b92e2d269f22d0b0a5"
+  },
+  {
+    "name": "6.1_Trimble多径检测方案_最终修订版.docx",
+    "sha256": "96b65782b22faa7073c0385ff969939ee91148e96a1599b4344a6b7617224107"
+  },
+  {
+    "name": "6.2_基于阵列载波相位姿态一致性的多径检测方案.docx",
+    "sha256": "739169dd8e6a4ae1f557dbf2d78d185fc278b8f5bc801fa080aa1b5f442a872d"
+  },
+  {
+    "name": "Blind_Nulling盲零陷原理章节.docx",
+    "sha256": "1ae2f1e77321afb0b30c698b8a00e47b84057221c51aac57544bb034ac734d75"
+  },
+  {
+    "name": "GNSS天线分集可行性与验证综合报告.docx",
+    "sha256": "d8d71198dc5305e5330a12bac6f03e425c48b3f066172e7fb721558216972a8e"
+  },
+  {
+    "name": "GNSS天线分集可行性研究报告_初稿.docx",
+    "sha256": "c0bfa82f5d0e24068686ed35842e4e9b38f953965d7401eff486323f94729448"
+  }
+]

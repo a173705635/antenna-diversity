@@ -88,10 +88,11 @@ class AntennaModelConfig:
 
 @dataclass
 class SignalConfig:
+    signal_kind: str = "L1CA"
     prn: int = 1
     carrier_hz: float = 1_575.42e6
     code_rate_hz: float = 1.023e6
-    fs_rf_hz: float = 16.368e6
+    fs_rf_hz: float = 33e6
     if_hz: float = 4.092e6
     doppler_hz: float = 1_500.0
     code_delay_chips: float = 137.25
@@ -198,7 +199,7 @@ class RFConfig:
 
 @dataclass
 class DFEConfig:
-    decimation: int = 4
+    decimation: int = 5
     cutoff_hz: float = 1.8e6
     num_taps: int = 129
     output_bits: int = 8
@@ -249,6 +250,7 @@ class AcquisitionConfig:
 
 @dataclass
 class TrackingConfig:
+    signal_kind: str = "L1CA"
     coherent_ms: int = 1
     acquisition_ms: int = 4
     early_late_spacing_chips: float = 0.5

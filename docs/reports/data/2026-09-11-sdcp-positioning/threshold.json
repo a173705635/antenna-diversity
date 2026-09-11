@@ -1,0 +1,9 @@
+{
+  "threshold_m": 0.0048993286249938706,
+  "epochs_times_prns": 960,
+  "calibration_seeds": [
+    6000,
+    6002,
+    6004
+  ]
+}

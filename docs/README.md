@@ -1,0 +1,15 @@
+# 文档导航
+
+先看 [项目状态](../PROJECT_STATUS.md) 了解当前结论，或阅读 [全量整合报告](reports/GNSS天线分集全量整合报告.docx)。运行代码见 [项目入口](../README.md)。
+
+| 想解决的问题 | 入口 | 收录内容 |
+|---|---|---|
+| 基础概念和公式是什么？ | [knowledge](knowledge/README.md) | 通用知识、教程与数学推导 |
+| 本项目算法如何工作？ | [theory](theory/README.md) | 算法原理、模型假设与实现说明 |
+| 准备怎样验证？ | [validation](validation/README.md) | 实验设计、指标、待实施方案及结果对应 |
+| 做过哪些实验，结论是什么？ | [reports](reports/README.md) | 按研究主题组织的结果与综合报告 |
+| 数据在哪里？ | [reports/data](reports/data/) | 支撑报告的固定快照；具体条件见对应报告 |
+| 专利和信号规范原文在哪里？ | [references](references/README.md) | 外部原始资料与来源记录 |
+| 如何查旧稿或恢复旧版本？ | [archive](archive/README.md) | 历史资料、来源备份与构建记录 |
+
+研究结果按接收链路、定位、多径检测分别查阅；外部干扰研究另有入口。目录按资料用途分类，报告内部按研究主题分组。历史版本集中从 archive 进入，避免与当前资料混淆。

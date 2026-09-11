@@ -1,0 +1,137 @@
+[
+  {
+    "seed": 3000,
+    "total_epochs": 80,
+    "accepted_epochs": 80,
+    "raw_spp_all": {
+      "epochs": 80,
+      "mean_error_ecef_m": [
+        -0.15294991120463236,
+        -8.965874373936094,
+        -1.2012487762840465
+      ],
+      "mean_bias_norm_m": 9.047281115731144,
+      "absolute_3d_rms_m": 30.011001788078314,
+      "absolute_3d_p95_m": 42.71810071270433,
+      "absolute_3d_max_m": 50.485929520583696,
+      "demeaned_3d_rms_m": 28.614802685620155
+    },
+    "raw_spp_matched": {
+      "epochs": 80,
+      "mean_error_ecef_m": [
+        -0.15294991120463236,
+        -8.965874373936094,
+        -1.2012487762840465
+      ],
+      "mean_bias_norm_m": 9.047281115731144,
+      "absolute_3d_rms_m": 30.011001788078314,
+      "absolute_3d_p95_m": 42.71810071270433,
+      "absolute_3d_max_m": 50.485929520583696,
+      "demeaned_3d_rms_m": 28.614802685620155
+    },
+    "joint_float": {
+      "epochs": 80,
+      "mean_error_ecef_m": [
+        -0.15294999681646004,
+        -8.965869454713538,
+        -1.2012455142859835
+      ],
+      "mean_bias_norm_m": 9.047275809108706,
+      "absolute_3d_rms_m": 9.047276377155304,
+      "absolute_3d_p95_m": 9.05060522367093,
+      "absolute_3d_max_m": 9.053168943930674,
+      "demeaned_3d_rms_m": 0.0032060175964454857
+    },
+    "carrier_residual_rms_m": 0.0012292241479933722
+  },
+  {
+    "seed": 3001,
+    "total_epochs": 80,
+    "accepted_epochs": 80,
+    "raw_spp_all": {
+      "epochs": 80,
+      "mean_error_ecef_m": [
+        1.3568540302396286,
+        -10.820042048709002,
+        -1.4028796518512536
+      ],
+      "mean_bias_norm_m": 10.994654797345241,
+      "absolute_3d_rms_m": 32.549489056088944,
+      "absolute_3d_p95_m": 48.88298144904099,
+      "absolute_3d_max_m": 52.96042171258868,
+      "demeaned_3d_rms_m": 30.636364074407837
+    },
+    "raw_spp_matched": {
+      "epochs": 80,
+      "mean_error_ecef_m": [
+        1.3568540302396286,
+        -10.820042048709002,
+        -1.4028796518512536
+      ],
+      "mean_bias_norm_m": 10.994654797345241,
+      "absolute_3d_rms_m": 32.549489056088944,
+      "absolute_3d_p95_m": 48.88298144904099,
+      "absolute_3d_max_m": 52.96042171258868,
+      "demeaned_3d_rms_m": 30.636364074407837
+    },
+    "joint_float": {
+      "epochs": 80,
+      "mean_error_ecef_m": [
+        1.3568537394399756,
+        -10.820035859383642,
+        -1.4028761125809979
+      ],
+      "mean_bias_norm_m": 10.994648218830402,
+      "absolute_3d_rms_m": 10.99464873420953,
+      "absolute_3d_p95_m": 10.998458514854931,
+      "absolute_3d_max_m": 11.000260753927133,
+      "demeaned_3d_rms_m": 0.0033664260983041444
+    },
+    "carrier_residual_rms_m": 0.001193026445470608
+  },
+  {
+    "seed": 3002,
+    "total_epochs": 80,
+    "accepted_epochs": 80,
+    "raw_spp_all": {
+      "epochs": 80,
+      "mean_error_ecef_m": [
+        2.299082128534792,
+        -11.471048591448925,
+        -2.1586739295744337
+      ],
+      "mean_bias_norm_m": 11.896663715317617,
+      "absolute_3d_rms_m": 31.613053403528774,
+      "absolute_3d_p95_m": 47.42195354362417,
+      "absolute_3d_max_m": 50.55824821705221,
+      "demeaned_3d_rms_m": 29.28915393006441
+    },
+    "raw_spp_matched": {
+      "epochs": 80,
+      "mean_error_ecef_m": [
+        2.299082128534792,
+        -11.471048591448925,
+        -2.1586739295744337
+      ],
+      "mean_bias_norm_m": 11.896663715317617,
+      "absolute_3d_rms_m": 31.613053403528774,
+      "absolute_3d_p95_m": 47.42195354362417,
+      "absolute_3d_max_m": 50.55824821705221,
+      "demeaned_3d_rms_m": 29.28915393006441
+    },
+    "joint_float": {
+      "epochs": 80,
+      "mean_error_ecef_m": [
+        2.2990805730922146,
+        -11.471041816857177,
+        -2.1586697004095186
+      ],
+      "mean_bias_norm_m": 11.896656115107394,
+      "absolute_3d_rms_m": 11.896656564441255,
+      "absolute_3d_p95_m": 11.900053947765935,
+      "absolute_3d_max_m": 11.902146576561966,
+      "demeaned_3d_rms_m": 0.003269731032904416
+    },
+    "carrier_residual_rms_m": 0.0011690307254439381
+  }
+]

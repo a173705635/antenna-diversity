@@ -1,0 +1,752 @@
+[
+  {
+    "kind": "los",
+    "seed": 6100,
+    "modes": {
+      "plain": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 4.41301941872302,
+          "demeaned_rms_m": 3.582041761121187,
+          "max_m": 9.341331136080843
+        },
+        "min_retained_prns": 8,
+        "prn1_mean_weight": 1.0,
+        "other_prns_mean_weight": 1.0,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 2.127662085986989,
+          "demeaned_rms_m": 0.0018388673879845615,
+          "max_m": 2.130515557879197
+        },
+        "used_phase_residual_max_m": 0.003941375310261286,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 0.0,
+        "float_paired_los_change_rms_m": 0.0
+      },
+      "soft": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 4.4604551114837205,
+          "demeaned_rms_m": 3.612529167427259,
+          "max_m": 9.516659131441742
+        },
+        "min_retained_prns": 8,
+        "prn1_mean_weight": 0.9528631366988876,
+        "other_prns_mean_weight": 0.909959219754693,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 2.1530739112385078,
+          "demeaned_rms_m": 0.0018332212517477035,
+          "max_m": 2.1560150981379436
+        },
+        "used_phase_residual_max_m": 0.0040701477631817085,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 0.0,
+        "float_paired_los_change_rms_m": 0.0
+      },
+      "hard": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 4.459343049860668,
+          "demeaned_rms_m": 3.6230458677572797,
+          "max_m": 9.341331136080843
+        },
+        "min_retained_prns": 6,
+        "prn1_mean_weight": 1.0,
+        "other_prns_mean_weight": 0.9857142857142858,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 2.1395506330470186,
+          "demeaned_rms_m": 0.0018283147213006658,
+          "max_m": 2.1425088371494163
+        },
+        "used_phase_residual_max_m": 0.0037993396981512717,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 0.0,
+        "float_paired_los_change_rms_m": 0.0
+      }
+    }
+  },
+  {
+    "kind": "strong",
+    "seed": 6100,
+    "modes": {
+      "plain": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 5.208627625811826,
+          "demeaned_rms_m": 3.3899198347318684,
+          "max_m": 10.457494237749614
+        },
+        "min_retained_prns": 8,
+        "prn1_mean_weight": 1.0,
+        "other_prns_mean_weight": 1.0,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 1.6316054123816879,
+          "demeaned_rms_m": 0.0017666194472634675,
+          "max_m": 1.6341696477485648
+        },
+        "used_phase_residual_max_m": 0.006777911431719019,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 6.263230486341609,
+        "float_paired_los_change_rms_m": 3.710379927832639
+      },
+      "soft": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 5.612902427060053,
+          "demeaned_rms_m": 5.169128756935255,
+          "max_m": 13.44380799754548
+        },
+        "min_retained_prns": 7,
+        "prn1_mean_weight": 0.0025096035177917773,
+        "other_prns_mean_weight": 0.9100122174343955,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 0.7018748619969278,
+          "demeaned_rms_m": 0.0022918413555402676,
+          "max_m": 0.7049599332296886
+        },
+        "used_phase_residual_max_m": 0.013729595881133427,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 5.870135878369019,
+        "float_paired_los_change_rms_m": 1.5654509071715226
+      },
+      "hard": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 5.771270344831313,
+          "demeaned_rms_m": 5.360512399251996,
+          "max_m": 13.838168410219458
+        },
+        "min_retained_prns": 5,
+        "prn1_mean_weight": 0.0,
+        "other_prns_mean_weight": 0.9821428571428571,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 0.7387923009563716,
+          "demeaned_rms_m": 0.002332337439614742,
+          "max_m": 0.7420837675229748
+        },
+        "used_phase_residual_max_m": 0.0037346579053294526,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 5.972648271200229,
+        "float_paired_los_change_rms_m": 1.5264292039661456
+      }
+    }
+  },
+  {
+    "kind": "weak",
+    "seed": 6100,
+    "modes": {
+      "plain": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 4.170424157480221,
+          "demeaned_rms_m": 3.5454437321968992,
+          "max_m": 8.871418102731548
+        },
+        "min_retained_prns": 8,
+        "prn1_mean_weight": 1.0,
+        "other_prns_mean_weight": 1.0,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 1.9491236518070292,
+          "demeaned_rms_m": 0.0018236395593955574,
+          "max_m": 1.9517418211545727
+        },
+        "used_phase_residual_max_m": 0.003956874703746394,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 0.5693388774810374,
+        "float_paired_los_change_rms_m": 0.20227668460498455
+      },
+      "soft": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 4.150919933482628,
+          "demeaned_rms_m": 3.5694639782756106,
+          "max_m": 8.890439241322943
+        },
+        "min_retained_prns": 8,
+        "prn1_mean_weight": 0.7755272624100198,
+        "other_prns_mean_weight": 0.9101433088414922,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 1.8188965295174688,
+          "demeaned_rms_m": 0.001859700054025917,
+          "max_m": 1.821571138206567
+        },
+        "used_phase_residual_max_m": 0.004132760692007409,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 0.7156852807671101,
+        "float_paired_los_change_rms_m": 0.3502760565661329
+      },
+      "hard": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 4.23622644231407,
+          "demeaned_rms_m": 3.605777046728319,
+          "max_m": 8.871418102731548
+        },
+        "min_retained_prns": 6,
+        "prn1_mean_weight": 0.925,
+        "other_prns_mean_weight": 0.9821428571428571,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 1.8675379390552114,
+          "demeaned_rms_m": 0.002106332182947664,
+          "max_m": 1.8703399685148905
+        },
+        "used_phase_residual_max_m": 0.003857083864795996,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 0.6622390314457186,
+        "float_paired_los_change_rms_m": 0.2903192235198435
+      }
+    }
+  },
+  {
+    "kind": "common",
+    "seed": 6100,
+    "modes": {
+      "plain": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 11.689624318160181,
+          "demeaned_rms_m": 3.292685992884414,
+          "max_m": 17.118444579889605
+        },
+        "min_retained_prns": 8,
+        "prn1_mean_weight": 1.0,
+        "other_prns_mean_weight": 1.0,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 5.879171708228017,
+          "demeaned_rms_m": 0.0016656004708919226,
+          "max_m": 5.881763222957359
+        },
+        "used_phase_residual_max_m": 0.004130259954308713,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 13.555478866890267,
+        "float_paired_los_change_rms_m": 7.97885460444059
+      },
+      "soft": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 11.690729730564732,
+          "demeaned_rms_m": 3.281198060268638,
+          "max_m": 16.98300970002268
+        },
+        "min_retained_prns": 8,
+        "prn1_mean_weight": 0.9534876402742821,
+        "other_prns_mean_weight": 0.9129468275373297,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 5.9384231141287,
+          "demeaned_rms_m": 0.0016667517818560332,
+          "max_m": 5.941357317410153
+        },
+        "used_phase_residual_max_m": 0.004598266159654418,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 13.625432464036459,
+        "float_paired_los_change_rms_m": 8.063461840512794
+      },
+      "hard": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 11.639933255672489,
+          "demeaned_rms_m": 3.296420073088015,
+          "max_m": 17.118444579889605
+        },
+        "min_retained_prns": 7,
+        "prn1_mean_weight": 1.0,
+        "other_prns_mean_weight": 0.9892857142857143,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 5.849002443766965,
+          "demeaned_rms_m": 0.0016441991066503828,
+          "max_m": 5.85158521083134
+        },
+        "used_phase_residual_max_m": 0.003816554723093571,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 13.5520393198151,
+        "float_paired_los_change_rms_m": 7.961004418082555
+      }
+    }
+  },
+  {
+    "kind": "static",
+    "seed": 6100,
+    "modes": {
+      "plain": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 5.136768958449034,
+          "demeaned_rms_m": 3.379928079075508,
+          "max_m": 10.382199365581323
+        },
+        "min_retained_prns": 8,
+        "prn1_mean_weight": 1.0,
+        "other_prns_mean_weight": 1.0,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 3.5852308139123013,
+          "demeaned_rms_m": 0.0017685635803387973,
+          "max_m": 3.587889932041864
+        },
+        "used_phase_residual_max_m": 0.003964989188450119,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 6.176263893861506,
+        "float_paired_los_change_rms_m": 5.685869688990456
+      },
+      "soft": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 5.103751762111601,
+          "demeaned_rms_m": 3.3723042754861963,
+          "max_m": 10.457829402213656
+        },
+        "min_retained_prns": 8,
+        "prn1_mean_weight": 0.9496293881142315,
+        "other_prns_mean_weight": 0.9064455914872561,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 3.578875636023891,
+          "demeaned_rms_m": 0.0017645705407313746,
+          "max_m": 3.581517884401228
+        },
+        "used_phase_residual_max_m": 0.004057701734527797,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 6.201467631993464,
+        "float_paired_los_change_rms_m": 5.704374394831984
+      },
+      "hard": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 5.1126808213602315,
+          "demeaned_rms_m": 3.4395528631113845,
+          "max_m": 10.382199365581323
+        },
+        "min_retained_prns": 6,
+        "prn1_mean_weight": 1.0,
+        "other_prns_mean_weight": 0.975,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 3.5674691155202427,
+          "demeaned_rms_m": 0.001742240060110391,
+          "max_m": 3.5701073720349514
+        },
+        "used_phase_residual_max_m": 0.0038483436107177305,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 6.171580431739723,
+        "float_paired_los_change_rms_m": 5.67787536846225
+      }
+    }
+  },
+  {
+    "kind": "los",
+    "seed": 6102,
+    "modes": {
+      "plain": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 4.4536583553785425,
+          "demeaned_rms_m": 3.103463686066931,
+          "max_m": 8.809961389323611
+        },
+        "min_retained_prns": 8,
+        "prn1_mean_weight": 1.0,
+        "other_prns_mean_weight": 1.0,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 2.337113284505735,
+          "demeaned_rms_m": 0.001770912117563124,
+          "max_m": 2.3416507708180845
+        },
+        "used_phase_residual_max_m": 0.003707718192035969,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 0.0,
+        "float_paired_los_change_rms_m": 0.0
+      },
+      "soft": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 4.501502378103177,
+          "demeaned_rms_m": 3.1338642873243603,
+          "max_m": 8.830083912757859
+        },
+        "min_retained_prns": 8,
+        "prn1_mean_weight": 0.9237418753944144,
+        "other_prns_mean_weight": 0.9233061455334136,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 2.315823091919982,
+          "demeaned_rms_m": 0.0017709735625311461,
+          "max_m": 2.3203635853162017
+        },
+        "used_phase_residual_max_m": 0.0044195958031858495,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 0.0,
+        "float_paired_los_change_rms_m": 0.0
+      },
+      "hard": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 4.543823761834762,
+          "demeaned_rms_m": 3.1702116966860725,
+          "max_m": 8.809961389323611
+        },
+        "min_retained_prns": 7,
+        "prn1_mean_weight": 1.0,
+        "other_prns_mean_weight": 0.9857142857142858,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 2.34574513354829,
+          "demeaned_rms_m": 0.0017734563196004582,
+          "max_m": 2.3502956934989174
+        },
+        "used_phase_residual_max_m": 0.002608698139592247,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 0.0,
+        "float_paired_los_change_rms_m": 0.0
+      }
+    }
+  },
+  {
+    "kind": "strong",
+    "seed": 6102,
+    "modes": {
+      "plain": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 4.27862610845889,
+          "demeaned_rms_m": 2.9455938390863787,
+          "max_m": 7.8914948643177985
+        },
+        "min_retained_prns": 8,
+        "prn1_mean_weight": 1.0,
+        "other_prns_mean_weight": 1.0,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 1.3835820619532666,
+          "demeaned_rms_m": 0.0016656293056174587,
+          "max_m": 1.38646265490354
+        },
+        "used_phase_residual_max_m": 0.00582923621716569,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 6.312849395789819,
+        "float_paired_los_change_rms_m": 3.6354443938217083
+      },
+      "soft": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 6.171846542872661,
+          "demeaned_rms_m": 5.158190954666238,
+          "max_m": 15.113610534053825
+        },
+        "min_retained_prns": 7,
+        "prn1_mean_weight": 0.0057807786531588285,
+        "other_prns_mean_weight": 0.9262418025699338,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 0.4851458400753271,
+          "demeaned_rms_m": 0.0023393852254406594,
+          "max_m": 0.488052922332856
+        },
+        "used_phase_residual_max_m": 0.015185661702246334,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 7.493308102314978,
+        "float_paired_los_change_rms_m": 2.2120426746855952
+      },
+      "hard": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 6.420905721785421,
+          "demeaned_rms_m": 5.444175849782123,
+          "max_m": 15.566315191096194
+        },
+        "min_retained_prns": 6,
+        "prn1_mean_weight": 0.0,
+        "other_prns_mean_weight": 0.9892857142857143,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 0.48745967496350084,
+          "demeaned_rms_m": 0.0023331468195670114,
+          "max_m": 0.49052407371603696
+        },
+        "used_phase_residual_max_m": 0.0030026473626056926,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 7.704744989247879,
+        "float_paired_los_change_rms_m": 2.228394900850335
+      }
+    }
+  },
+  {
+    "kind": "weak",
+    "seed": 6102,
+    "modes": {
+      "plain": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 4.236501830074498,
+          "demeaned_rms_m": 3.0464585768654775,
+          "max_m": 8.442386768902603
+        },
+        "min_retained_prns": 8,
+        "prn1_mean_weight": 1.0,
+        "other_prns_mean_weight": 1.0,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 2.2269369308083506,
+          "demeaned_rms_m": 0.0017310488146395746,
+          "max_m": 2.2314059362968246
+        },
+        "used_phase_residual_max_m": 0.003549690326659416,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 0.458177796356405,
+        "float_paired_los_change_rms_m": 0.15053450994307502
+      },
+      "soft": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 4.140008282811689,
+          "demeaned_rms_m": 3.06950986187914,
+          "max_m": 8.289037143406956
+        },
+        "min_retained_prns": 8,
+        "prn1_mean_weight": 0.8242929956101183,
+        "other_prns_mean_weight": 0.9244908589392707,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 2.132658035006328,
+          "demeaned_rms_m": 0.0017409212779232821,
+          "max_m": 2.137224828744964
+        },
+        "used_phase_residual_max_m": 0.004170160037803683,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 0.7879789628596078,
+        "float_paired_los_change_rms_m": 0.21241482605925452
+      },
+      "hard": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 4.169637505318028,
+          "demeaned_rms_m": 3.2333183641289076,
+          "max_m": 8.442386768902603
+        },
+        "min_retained_prns": 7,
+        "prn1_mean_weight": 0.925,
+        "other_prns_mean_weight": 0.9857142857142858,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 2.154390362794933,
+          "demeaned_rms_m": 0.0017880507000073488,
+          "max_m": 2.1589533116899733
+        },
+        "used_phase_residual_max_m": 0.002612093548124639,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 1.663460993438669,
+        "float_paired_los_change_rms_m": 0.2201285708829835
+      }
+    }
+  },
+  {
+    "kind": "common",
+    "seed": 6102,
+    "modes": {
+      "plain": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 10.668834327676336,
+          "demeaned_rms_m": 3.1400352415755575,
+          "max_m": 14.299282843212211
+        },
+        "min_retained_prns": 8,
+        "prn1_mean_weight": 1.0,
+        "other_prns_mean_weight": 1.0,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 5.536143055576079,
+          "demeaned_rms_m": 0.0016338201635153113,
+          "max_m": 5.538800060494208
+        },
+        "used_phase_residual_max_m": 0.0038080691987865123,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 13.434704328101466,
+        "float_paired_los_change_rms_m": 7.840939546731071
+      },
+      "soft": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 10.690803905748323,
+          "demeaned_rms_m": 3.1890956222926508,
+          "max_m": 14.435457451515337
+        },
+        "min_retained_prns": 8,
+        "prn1_mean_weight": 0.9209716305885255,
+        "other_prns_mean_weight": 0.9265499909729391,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 5.518131679857085,
+          "demeaned_rms_m": 0.0016583248334897712,
+          "max_m": 5.5208578270091335
+        },
+        "used_phase_residual_max_m": 0.004116655152417437,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 13.500307877049222,
+        "float_paired_los_change_rms_m": 7.804642003729191
+      },
+      "hard": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 10.684977108557323,
+          "demeaned_rms_m": 3.132299986179589,
+          "max_m": 14.684229477326198
+        },
+        "min_retained_prns": 7,
+        "prn1_mean_weight": 1.0,
+        "other_prns_mean_weight": 0.9928571428571429,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 5.540542115279449,
+          "demeaned_rms_m": 0.0016379444422258544,
+          "max_m": 5.543200542696517
+        },
+        "used_phase_residual_max_m": 0.0038068846356029695,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 13.544688151147966,
+        "float_paired_los_change_rms_m": 7.857298644775088
+      }
+    }
+  },
+  {
+    "kind": "static",
+    "seed": 6102,
+    "modes": {
+      "plain": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 4.221244271857108,
+          "demeaned_rms_m": 2.9525823712713044,
+          "max_m": 7.696944666111061
+        },
+        "min_retained_prns": 8,
+        "prn1_mean_weight": 1.0,
+        "other_prns_mean_weight": 1.0,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 3.310064260424474,
+          "demeaned_rms_m": 0.0016678874021929442,
+          "max_m": 3.313033149744444
+        },
+        "used_phase_residual_max_m": 0.0037378551686964023,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 6.22982597072831,
+        "float_paired_los_change_rms_m": 5.612626718344608
+      },
+      "soft": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 4.2039666820117745,
+          "demeaned_rms_m": 2.973092041337605,
+          "max_m": 7.766538208303236
+        },
+        "min_retained_prns": 8,
+        "prn1_mean_weight": 0.9290680411646498,
+        "other_prns_mean_weight": 0.9238377709105539,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 3.3050938761129376,
+          "demeaned_rms_m": 0.0016670770196084174,
+          "max_m": 3.3081003289893594
+        },
+        "used_phase_residual_max_m": 0.004477726385691216,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 6.240813340538229,
+        "float_paired_los_change_rms_m": 5.58903565234091
+      },
+      "hard": {
+        "code": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 4.20503069279237,
+          "demeaned_rms_m": 2.957369139996578,
+          "max_m": 7.696944666111061
+        },
+        "min_retained_prns": 7,
+        "prn1_mean_weight": 1.0,
+        "other_prns_mean_weight": 0.9892857142857143,
+        "float": {
+          "evaluation_epochs": 40,
+          "solved_epochs": 40,
+          "rms_m": 3.3083163639896314,
+          "demeaned_rms_m": 0.0016687349679533824,
+          "max_m": 3.3112753790619194
+        },
+        "used_phase_residual_max_m": 0.002992096241841047,
+        "phase_screen_passed": true,
+        "code_paired_los_change_rms_m": 6.285651725450688,
+        "float_paired_los_change_rms_m": 5.6228505114726115
+      }
+    }
+  }
+]

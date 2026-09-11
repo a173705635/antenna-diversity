@@ -1,6 +1,56 @@
+# GNSS 接收链路与定位研究代码
+
+当前唯一开发版本。代码和输出路径保持原位；下表用于选择实验入口。
+
+| 任务 | 脚本 | 输入与输出 |
+|---|---|---|
+| 双通道相位基准 | `audit_dual_tracking_phase.py` | 仿真双通道信号，默认输出 `results/dual_tracking_phase/` |
+| GPS 定位 | `run_gps_spp.py` | 仿真 GPS 观测，默认输出 `results/gps_spp/` |
+| L1/L5 定位 | `run_gps_l1_l5.py` | 双频仿真与权重对照，参数见下文 |
+| 校准取余 SDCP | `audit_calibrated_sdcp.py` | 复用已有双通道存档，见下文报告 |
+| 窗口检测 | `audit_sdcp_long.py` | 长记录窗口实验，见下文报告 |
+| SDCP 定位效果 | `audit_sdcp_positioning.py` | 多星双天线定位对照，见下文报告 |
+| 空域抗干扰 | `run_end_to_end.py` | 按配置生成信号并评估合并链路 |
+
+多径与外部干扰按不同研究任务评估。`results/` 是运行输出，正式实验快照在 `../docs/reports/data/`；完整报告导航见 [项目入口](../README.md#研究入口)。
+
+## 实验说明与历史边界
+
 > 2026-09-10 多径专题阶段归档：当前是实验检测基线，未完成通用可靠性验证。详见[阶段总结](../docs/reports/2026-09-10-multipath-stage-summary.md)。下列研究命令生成的 `results/` 均相对本目录；入库快照见总结链接。
 
+双 RF / 双 DFE / 双独立捕获和跟踪环路相位差评估：
+
+3秒记录、500 ms/1 s窗口：`python python_sim_simplified/audit_sdcp_long.py`。结果与边界见[长记录报告](../docs/reports/2026-09-11-sdcp-long.md)。
+
+校准取余SDCP：`audit_calibrated_sdcp.py` 复用双通道存档，验证启动静态多径和通道偏差灵敏度；函数尚未替换原定位权重流程。见[验证报告](../docs/reports/2026-09-11-calibrated-sdcp.md)。
+
+Trimble 单频 SDCP 观测加权验证：`python python_sim_simplified/audit_trimble_sdcp.py`。使用已有 H0 归档冻结门限后执行25条新记录；有干净参考段、共同理想时钟和几何已知等前提，不包含多星定位。方法与失败边界见[专利验证报告](../docs/reports/2026-09-11-trimble-single-frequency-validation.md)。
+
+1 秒 × 10 组长记录验证：`python python_sim_simplified/audit_dual_tracking_stability.py`。默认目录已存在时需用 `--output` 指定新目录；参数、固定统计窗口和结果见[长记录验证报告](../docs/reports/2026-09-11-dual-tracking-stability.md)。
+
+```powershell
+python python_sim_simplified/audit_dual_tracking_phase.py
+```
+
+固定 TL/TR、无人为通道延迟、无干扰与多径，保留热噪声；比较同一物理时刻的载波 NCO 相位。输出在本目录 `results/dual_tracking_phase/`。时钟假设、启动段与后段统计以及无噪声量化失效见[报告](../docs/reports/2026-09-10-dual-tracking-phase.md)。
+
 # GNSS 天线分集精简研究仿真版
+
+载波相位基准审计：`python python_sim_simplified/audit_phase_origin.py --output python_sim_simplified/results/phase_origin_repeat`。不拟合参考常数，分别改变启动时刻、NCO初相、共同信号初相和已知通道偏置，检查几何补偿后的小数周残差。[验证与适用边界](../docs/reports/2026-09-11-phase-origin.md)。
+
+单频SDCP定位评估：`python python_sim_simplified/audit_sdcp_positioning.py --output python_sim_simplified/results/sdcp_positioning_repeat`。当前L1链路重新独立标定门限，再比较双天线多星原始、软降权、硬剔除码/载波定位；含共同反射及静态参考污染边界。[评估设计与结果](../docs/reports/2026-09-11-sdcp-positioning.md)。
+
+双频入口现默认输出冻结权重对照，推荐 `L5_code_dual_phase`：L5码确定位置基准，两频载波加权约束变化；L1码显式不参与绝对约束。保留单频、原等权和全观测加权结果。权重配置见 `dual_frequency_weights.json`，适用于当前仿真参数。[优化方法与独立验证](../docs/reports/2026-09-11-dual-frequency-optimization.md)。
+
+单天线GPS L1/L5对比：`python python_sim_simplified/run_gps_l1_l5.py --output python_sim_simplified/results/gps_l1_l5_repeat`。L1继续33 MHz/5，L5 Q5使用33 MHz/1；两个频段各8条跟踪环路，共享物理时间轴，输出单频及双频码/载波浮点定位。包括Q5主码和NH同步，未含I5/CNAV、整周固定或电离层模型。[实现与验证](../docs/reports/2026-09-11-gps-l5.md)。
+
+当前默认采样链：**33 MHz RF → DFE抽取5倍 → 6.6 MHz捕获/跟踪**。继续使用矩形本地码副本；中频4.092 MHz。[新采样率验证及运行命令](../docs/reports/2026-09-11-sampling-33mhz.md)。下方较早研究报告的数值属于各自归档参数。
+
+逐星伪距偏差诊断：`python python_sim_simplified/audit_pseudorange_bias.py`。比较相同RF/DFE样本的矩形/连续本地副本，并运行线性、隔离PRN和连续源对照。只换本地副本的实验中，联合浮点三维RMS降至1.6～2.8 m；默认配置未切换。详见[伪距诊断报告](../docs/reports/2026-09-11-pseudorange-bias-diagnosis.md)。
+
+单天线码/载波联合浮点定位：`python python_sim_simplified/audit_code_carrier_float.py`。读取已有SPP归档做整段离线解算，估计每颗卫星的有效浮点相位偏差，不固定整周数。绝对三维RMS约9～12 m，去均值散布约3.2～3.4 mm；后者不是绝对定位精度。已发现一周突变可漏过粗残差门限，详见[浮点定位验证](../docs/reports/2026-09-11-code-carrier-float.md)。
+
+单天线 GPS L1 时间辅助仿真定位：`python python_sim_simplified/run_gps_spp.py`（从仓库根目录运行）。8个PRN在RF前叠加，共用一套RF/DFE，分别捕获跟踪后构造伪距并解算位置/钟差。无干扰、无多径，暂不包含导航电文或广播星历解码。默认输出已存在时用 `--output` 指定新目录。结果及边界见[定位验证报告](../docs/reports/2026-09-11-gps-spp-validation.md)。
 
 本目录是用于个人研究的精简主代码，包含 RF → DFE → 天线合并 → 捕获 → 跟踪完整链路。它独立于 `python_sim/`，保留当前研究需要的物理模型和算法公式，同时省去批处理、报告和复杂异常诊断框架，便于修改参数和追踪数值结果。
 
@@ -13,7 +63,7 @@ python python_sim_simplified/audit_detection_only.py --trials 20
 ```
 
 输出 `results/detection_only/baseline.json`，不运行抑制与跟踪。研究前提、候选检出与正确识别的区别、
-同方向边界及门限验证计划见 [多径检测方案](../docs/reports/2026-09-08-multipath-detection-plan.md)。
+同方向边界及门限验证计划见 [多径检测方案](../docs/validation/2026-09-08-multipath-detection-plan.md)。
 
 记录级存在性门限校准与独立评估：
 
@@ -114,7 +164,8 @@ cfg = default_config()
 
 ```python
 cfg.signal.carrier_hz = 1_575.42e6
-cfg.signal.fs_rf_hz = 16.368e6
+cfg.signal.fs_rf_hz = 33e6
+cfg.dfe.decimation = 5  # DFE / acquisition / tracking: 6.6 MHz
 cfg.signal.if_hz = 4.092e6
 cfg.signal.code_rate_hz = 1.023e6
 cfg.reference_impedance_ohm = 50.0
@@ -255,4 +306,4 @@ element_name,frequency_hz,azimuth_deg,elevation_deg,h_az_real,h_az_imag,h_el_rea
 
 本目录假定研究配置有效，没有包含完整版的配置全量校验、异常包装、文件哈希和 schema 审计、退化矩阵保护、Blind Null 安全旁路、断点恢复、Monte Carlo、批处理、报告系统和定点载波 NCO 对比。
 
-保留下来的内容包括 2～4 天线组合、手机四角几何、参数化/实测方向图、极化、遮挡、互耦、通道幅相误差、真实/估计通道延迟、CW与带限噪声干扰、静态镜面多径、RF/ADC、定点化 DFE 输出、五种合并方式、捕获、跟踪、码偏差和 C/N₀。尚未包含连续延迟估计、弥散多径、动态路径、NLOS 判决、路径跟踪或多星联合处理。需要大规模鲁棒性研究或异常诊断时，使用 `../python_sim/`。
+保留下来的内容包括 2～4 天线组合、手机四角几何、参数化/实测方向图、极化、遮挡、互耦、通道幅相误差、真实/估计通道延迟、CW与带限噪声干扰、静态镜面多径、RF/ADC、定点化 DFE 输出、五种合并方式、捕获、跟踪、码偏差和 C/N₀。尚未包含连续延迟估计、弥散多径、动态路径、NLOS 判决、路径跟踪或多星联合处理。旧版批量研究框架已[归档](../docs/archive/python_sim_2026-09-12/README.md)，需要追溯时先恢复环境。

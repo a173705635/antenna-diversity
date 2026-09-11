@@ -1,0 +1,93 @@
+{
+  "sources": [
+    {
+      "name": "4.3_多天线GNSS工程实现关键问题与约束.docx",
+      "full_text_contiguous": true,
+      "counts": {
+        "w:tbl": 15,
+        "m:oMath": 33,
+        "w:drawing": 0,
+        "w:pict": 0
+      },
+      "media_preserved": true
+    },
+    {
+      "name": "5.2_MVDR波束形成算法_可行性报告章节.docx",
+      "full_text_contiguous": true,
+      "counts": {
+        "w:tbl": 15,
+        "m:oMath": 13,
+        "w:drawing": 0,
+        "w:pict": 0
+      },
+      "media_preserved": true
+    },
+    {
+      "name": "6.1_Trimble多径检测方案_最终修订版.docx",
+      "full_text_contiguous": true,
+      "counts": {
+        "w:tbl": 14,
+        "m:oMath": 78,
+        "w:drawing": 0,
+        "w:pict": 0
+      },
+      "media_preserved": true
+    },
+    {
+      "name": "6.2_基于阵列载波相位姿态一致性的多径检测方案.docx",
+      "full_text_contiguous": true,
+      "counts": {
+        "w:tbl": 4,
+        "m:oMath": 228,
+        "w:drawing": 0,
+        "w:pict": 0
+      },
+      "media_preserved": true
+    },
+    {
+      "name": "Blind_Nulling盲零陷原理章节.docx",
+      "full_text_contiguous": true,
+      "counts": {
+        "w:tbl": 0,
+        "m:oMath": 98,
+        "w:drawing": 0,
+        "w:pict": 0
+      },
+      "media_preserved": true
+    },
+    {
+      "name": "GNSS天线分集可行性与验证综合报告.docx",
+      "full_text_contiguous": true,
+      "counts": {
+        "w:tbl": 8,
+        "m:oMath": 12,
+        "w:drawing": 0,
+        "w:pict": 0
+      },
+      "media_preserved": true
+    },
+    {
+      "name": "GNSS天线分集可行性研究报告_初稿.docx",
+      "full_text_contiguous": true,
+      "counts": {
+        "w:tbl": 19,
+        "m:oMath": 10,
+        "w:drawing": 0,
+        "w:pict": 0
+      },
+      "media_preserved": true
+    }
+  ],
+  "expected_counts": {
+    "w:tbl": 75,
+    "m:oMath": 472,
+    "w:drawing": 0,
+    "w:pict": 0
+  },
+  "actual_counts": {
+    "w:tbl": 75,
+    "m:oMath": 472,
+    "w:drawing": 0,
+    "w:pict": 0
+  }
+}

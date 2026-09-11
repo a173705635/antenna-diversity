@@ -52,7 +52,12 @@ def test_linear_tracking_is_consistent_across_output_sample_rates(doppler):
     n = np.arange(round(cfg.signal.fs_rf_hz * 0.1))
     waveform, _, _ = _desired_waveform(cfg, n, n / cfg.signal.fs_rf_hz)
     phases = []
-    for decimation in (1, 4):
+    common_decimation = cfg.dfe.decimation
+    common_start_rf = common_decimation * round(
+        cfg.signal.code_delay_chips * cfg.signal.fs_rf_hz
+        / cfg.signal.code_rate_hz / common_decimation
+    )
+    for decimation in (1, common_decimation):
         cfg.dfe.decimation = decimation
         channels, info = process_dfe(
             waveform[None, :], cfg.dfe, cfg.signal.fs_rf_hz, cfg.signal.if_hz
@@ -63,9 +68,7 @@ def test_linear_tracking_is_consistent_across_output_sample_rates(doppler):
         # Isolate the correlator: coarse acquisition may select different
         # physical epochs on different grids. Give both the same start time.
         # This known-delay initialization is confined to this reference test.
-        acquisition["code_phase_samples"] = round(
-            cfg.signal.code_delay_chips * fs_hz / cfg.signal.code_rate_hz
-        )
+        acquisition["code_phase_samples"] = common_start_rf // decimation
         result = track(channels[0], fs_hz, 1, acquisition, cfg.tracking,
                        cfg.signal.carrier_hz, cfg.signal.code_rate_hz)
         phases.append(result["code_phase_chips"])

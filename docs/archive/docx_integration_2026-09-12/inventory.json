@@ -1,0 +1,155 @@
+[
+  {
+    "id": 0,
+    "path": "4.3_多天线GNSS工程实现关键问题与约束.docx",
+    "sha256": "405d70513b2b7d961c8dfb48ba80c5ff0496d2f25e576886c9a2ec9c75dd9c33",
+    "chars": 12511,
+    "tables": 15,
+    "math": 33,
+    "extract": "source_00.txt"
+  },
+  {
+    "id": 1,
+    "path": "5.2_MVDR波束形成算法_可行性报告章节.docx",
+    "sha256": "f3035731f38d364cb60147e26862addfab626a0fcb36c1b92e2d269f22d0b0a5",
+    "chars": 5529,
+    "tables": 15,
+    "math": 13,
+    "extract": "source_01.txt"
+  },
+  {
+    "id": 2,
+    "path": "6.1_Trimble多径检测方案_最终修订版.docx",
+    "sha256": "96b65782b22faa7073c0385ff969939ee91148e96a1599b4344a6b7617224107",
+    "chars": 8723,
+    "tables": 14,
+    "math": 78,
+    "extract": "source_02.txt"
+  },
+  {
+    "id": 3,
+    "path": "6.2_基于阵列载波相位姿态一致性的多径检测方案.docx",
+    "sha256": "739169dd8e6a4ae1f557dbf2d78d185fc278b8f5bc801fa080aa1b5f442a872d",
+    "chars": 17360,
+    "tables": 4,
+    "math": 228,
+    "extract": "source_03.txt"
+  },
+  {
+    "id": 4,
+    "path": "Blind_Nulling盲零陷原理章节.docx",
+    "sha256": "1ae2f1e77321afb0b30c698b8a00e47b84057221c51aac57544bb034ac734d75",
+    "chars": 5081,
+    "tables": 0,
+    "math": 98,
+    "extract": "source_04.txt"
+  },
+  {
+    "id": 5,
+    "path": "docs\\reports\\5.2_MVDR波束形成算法_可行性报告章节.docx",
+    "sha256": "f3035731f38d364cb60147e26862addfab626a0fcb36c1b92e2d269f22d0b0a5",
+    "chars": 5529,
+    "tables": 15,
+    "math": 13,
+    "extract": "source_05.txt"
+  },
+  {
+    "id": 6,
+    "path": "docs\\reports\\Blind_Nulling实现方法_精简版.docx",
+    "sha256": "b980bf5b2701f7cc7c4893654119dd2a2236dd767ab8de0913425ceba1a5c9a9",
+    "chars": 1265,
+    "tables": 0,
+    "math": 29,
+    "extract": "source_06.txt"
+  },
+  {
+    "id": 7,
+    "path": "docs\\reports\\Blind_Nulling盲零陷原理章节.docx",
+    "sha256": "1ae2f1e77321afb0b30c698b8a00e47b84057221c51aac57544bb034ac734d75",
+    "chars": 5081,
+    "tables": 0,
+    "math": 98,
+    "extract": "source_07.txt"
+  },
+  {
+    "id": 8,
+    "path": "docs\\reports\\GNSS多天线_BlindNull到MVDR_原理与方案整理.docx",
+    "sha256": "12f6794cf0035cf16f1f008ba4575500a961e79c6ed7e0745ea5baf41cce4d52",
+    "chars": 17430,
+    "tables": 88,
+    "math": 0,
+    "extract": "source_08.txt"
+  },
+  {
+    "id": 9,
+    "path": "docs\\reports\\GNSS多径天线分集算法原理与实现说明.docx",
+    "sha256": "b3da82bf6beaf35d536449847d90135d775ce87ea16ad25df6b5f315daa7a676",
+    "chars": 14889,
+    "tables": 21,
+    "math": 15,
+    "extract": "source_09.txt"
+  },
+  {
+    "id": 10,
+    "path": "docs\\reports\\GNSS天线分集与空域抗干扰仿真_项目说明与基础理论_2026-08-29.docx",
+    "sha256": "b9e85c3a525fd0627977076c3114d45c22d43b6b689f770299ac9fafc965dfae",
+    "chars": 12985,
+    "tables": 25,
+    "math": 0,
+    "extract": "source_10.txt"
+  },
+  {
+    "id": 11,
+    "path": "docs\\reports\\GNSS天线分集可行性研究报告_初稿.docx",
+    "sha256": "c0bfa82f5d0e24068686ed35842e4e9b38f953965d7401eff486323f94729448",
+    "chars": 17946,
+    "tables": 19,
+    "math": 10,
+    "extract": "source_11.txt"
+  },
+  {
+    "id": 12,
+    "path": "docs\\reports\\MVDR实现方法_精简版.docx",
+    "sha256": "087e196f3c50a77350729b287b84f32613889970aef42f745444ef12fe2748ec",
+    "chars": 1439,
+    "tables": 0,
+    "math": 22,
+    "extract": "source_12.txt"
+  },
+  {
+    "id": 13,
+    "path": "GNSS天线分集可行性研究报告_初稿.docx",
+    "sha256": "c0bfa82f5d0e24068686ed35842e4e9b38f953965d7401eff486323f94729448",
+    "chars": 17946,
+    "tables": 19,
+    "math": 10,
+    "extract": "source_13.txt"
+  },
+  {
+    "id": 15,
+    "path": "验证方案\\双天线跨频GNSS物理路径差角度差分验证方案.docx",
+    "sha256": "a43e069d66fd0131e5eae6a9ffac4f34db7766f5b1d7f6a4c864528125f1c090",
+    "chars": 4372,
+    "tables": 9,
+    "math": 0,
+    "extract": "source_15.txt"
+  },
+  {
+    "id": 16,
+    "path": "验证方案\\基于最终FCW的载波NCO累加相位重建方案.docx",
+    "sha256": "9f75a9d691b296f9f9200983ec0382a7778049ebf19da12597adbddb24310feb",
+    "chars": 4345,
+    "tables": 5,
+    "math": 0,
+    "extract": "source_16.txt"
+  },
+  {
+    "id": 17,
+    "path": "验证方案\\手机双天线跨频GNSS相位稳定性验证方案.docx",
+    "sha256": "e8d45165e87422dcda8a85ff8138c4fc89042e2fc2b1df7959870ceee0e2bc28",
+    "chars": 2411,
+    "tables": 1,
+    "math": 36,
+    "extract": "source_17.txt"
+  }
+]

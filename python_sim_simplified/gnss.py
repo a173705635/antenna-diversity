@@ -80,11 +80,14 @@ def _desired_waveform(
     received_code_rate_hz = cfg.signal.code_rate_hz * (
         1.0 + cfg.signal.doppler_hz / cfg.signal.carrier_hz
     )
-    code = ca_code(cfg.signal.prn)
+    from l5 import l5q_code, NH20
+    if cfg.signal.signal_kind not in ('L1CA', 'L5Q'):
+        raise ValueError('unsupported signal kind')
+    code = l5q_code(cfg.signal.prn) if cfg.signal.signal_kind == 'L5Q' else ca_code(cfg.signal.prn)
     code_phase = np.mod(
         sample_index * received_code_rate_hz / cfg.signal.fs_rf_hz
         - cfg.signal.code_delay_chips,
-        1023.0,
+        float(code.size),
     )
     sampled_code = code[np.floor(code_phase).astype(int)]
     if cfg.signal.code_bandwidth_hz is not None:
@@ -95,7 +98,10 @@ def _desired_waveform(
         )
         # Preserve configured total signal power, not the unfiltered chip amplitude.
         replica /= np.sqrt(np.mean(replica**2))
-        sampled_code = _sample_code(replica, code_phase)
+        sampled_code = _sample_code(replica, code_phase, code.size)
+    if cfg.signal.signal_kind == 'L5Q':
+        transmit_chips = sample_index * received_code_rate_hz / cfg.signal.fs_rf_hz - cfg.signal.code_delay_chips
+        sampled_code = 1j * sampled_code * NH20[np.floor(transmit_chips / 10230).astype(np.int64) % 20]
     signal_power_w = 10.0 ** ((cfg.signal.power_dbm - 30.0) / 10.0)
     signal_amplitude_v = np.sqrt(
         signal_power_w * cfg.reference_impedance_ohm

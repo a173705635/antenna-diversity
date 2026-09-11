@@ -1,0 +1,285 @@
+GNSS 多天线 Blind Null 原理与 Blind Null→TRK→MVDR 演进方案
+从多通道协方差、特征子空间、参考通道投影，到捕获/跟踪影响与稳态 MVDR 架构
+学习与方案整理稿
+文档定位：本文不是只解释一段 Python 代码，而是从多天线 GNSS 信号模型出发，把 Blind Null 的检测、干扰向量估计、参考通道投影、零陷权值、捕获/PLL 副作用，以及跟踪后切换到 MVDR 的完整逻辑串成一套方案。
+目录
+1. 问题定义与总体思路
+2. 多天线接收信号模型
+3. 样本协方差：为什么能看见跨天线共同成分
+4. 归一化相关矩阵：检测的是相干结构而不是绝对功率
+5. 特征值分解与盲干扰检测
+6. 从最大特征向量恢复实际干扰空间向量
+7. Reference、投影矩阵与零陷权值的完整推导
+8. 双天线形式：Blind Null 最终就是复数相消器
+9. 正常 GNSS 为什么通常不会被检测成强干扰
+10. 对捕获的影响：相位差、码时延与双峰
+11. 对 PLL/DLL 的影响：固定时延、动态时延与权值跳变
+12. 从 Blind Null 过渡到 MVDR：跟踪后估计卫星 steering vector
+13. 多卫星条件下的架构选择
+14. 工程实现风险、保护与改进
+15. 推荐仿真验证路线与指标
+附录 A. 代码与数学公式逐行对应
+附录 B. 原始代码
+1. 问题定义与总体思路
+考虑 M 根天线同时采集同一射频频段。正常 GNSS 信号在解扩前远低于热噪声，而一个较强的外部干扰通常会以稳定的幅度与相位关系同时出现在多个天线通道中。Blind Null 的基本思想不是先知道干扰来自哪个方位角，而是直接从多通道数据中识别“是否存在一个突出的共同空间模态”，并估计该模态在各通道上的复数响应。
+多通道 IQ → 协方差 Rₓ → 归一化相关矩阵 C → EVD → 干扰向量 vⱼ → 正交投影 P⊥ → 权值 w → 单路输出 y
+因此，Blind Null 可以理解为“数据驱动的干扰空间识别 + 空间相消”。对于双天线，最终甚至可以化简成参考通道减去一个经过幅度和相位调整的辅助通道。
+y = x₁ − α x₂
+核心问题：整套算法最核心的问题只有两个：第一，怎样从多通道 IQ 中估计干扰在各天线上的复数幅相关系；第二，怎样用这个关系构造一个组合权值，使干扰在输出端相消。
+2. 多天线接收信号模型
+2.1 单个强干扰的空间模型
+假设一个干扰源产生时间波形 j[n]。由于传播路径、天线增益、天线耦合以及 RF 链路增益和相位不同，同一个干扰到达第 i 个通道后会乘上一个复数系数 aⱼ,ᵢ。
+xᵢ[n] = aⱼ,ᵢ j[n] + sᵢ[n] + nᵢ[n]
+其中 sᵢ[n] 表示所有 GNSS 有用信号的叠加，nᵢ[n] 表示该通道的噪声。把 M 个通道在同一时刻堆成向量：
+x[n] = aⱼ j[n] + s[n] + n[n]
+aⱼ = [aⱼ,₁, aⱼ,₂, …, aⱼ,ₘ]ᵀ
+aⱼ 不是干扰的时间波形，而是“干扰空间向量”：它描述同一个 j[n] 在所有天线通道上的相对幅度和相位。只要干扰源、手机姿态和通道状态在一个统计窗口内变化不大，aⱼ 就近似固定。
+2.2 时间波形与空间向量必须分开理解
+量含义主要变化维度j[n]干扰本身的时间序列，可为 CW、chirp、调制信号或宽带噪声随采样时间 n 变化aⱼ干扰在各天线/RF 通道上的复数幅相关系主要随方向、姿态、环境和硬件变化aⱼ j[n]某一时刻的多通道干扰向量时间波形沿固定空间方向伸缩/旋转
+如果在一个窗口内 xⱼ[n] = aⱼ j[n] 始终成立，那么所有干扰快拍都位于 aⱼ 所张成的一维子空间中。这就是强单干扰在空间统计意义上近似 rank-1 的根源。
+3. 样本协方差：为什么能看见跨天线共同成分
+3.1 数据矩阵
+代码中的 channels 形状为 (M, N)：M 为通道数，N 为协方差估计所使用的 snapshots 数。
+X = [x[1], x[2], …, x[N]] ∈ ℂᴹˣᴺ
+snapshots = channels.shape[1]covariance = channels @ channels.conj().T / snapshots
+R̂ₓ = (1/N) X Xᴴ = (1/N) Σₙ x[n] xᴴ[n]
+3.2 协方差矩阵每个元素的物理意义
+R̂ᵢⱼ = (1/N) Σₙ xᵢ[n] xⱼ*[n]
+对角元素 R̂ᵢᵢ 是第 i 个通道的平均功率；非对角元素 R̂ᵢⱼ 则测量第 i、j 个通道之间有没有长期稳定的共同复数成分。对于彼此独立的热噪声，理论上 E[nᵢ nⱼ*] = 0（i ≠ j）；对于同一个强干扰，则两个通道都包含同一个 j[n]，因而会产生明显的非零交叉相关。
+Rⱼ ≈ Pⱼ aⱼ aⱼᴴ
+因为 aⱼ aⱼᴴ 的所有列彼此线性相关，所以单一强干扰对应的协方差贡献为 rank-1。对 aⱼ 左乘 Rⱼ：
+Rⱼ aⱼ = Pⱼ aⱼ aⱼᴴ aⱼ = Pⱼ ‖aⱼ‖² aⱼ
+这正是特征向量定义，因此在“强单干扰 + 背景噪声”的理想模型中，最大特征向量会指向干扰空间方向。
+3.3 为什么强制 Hermitian 化
+covariance = (covariance + covariance.conj().T) / 2.0
+理论上的 X Xᴴ 一定满足 R = Rᴴ，但浮点运算会产生极小的不对称误差。重新做 (R + Rᴴ)/2 只是数值保护，使后续 eigh 更稳定，并确保得到实特征值。
+4. 归一化相关矩阵：检测的是相干结构而不是绝对功率
+4.1 提取通道功率与尺度
+powers = np.real(np.diag(covariance))scales = np.sqrt(powers)
+pᵢ = R̂ᵢᵢ ,    dᵢ = √pᵢ ,    D = diag(d₁,d₂,…,dₘ)
+不同手机天线、LNA 或 RF 链路可能存在较大的增益差。如果直接在原始协方差上判断最大特征值，某一路“功率天然更大”可能掩盖我们真正关心的空间相干性。因此代码把协方差转换为归一化相关矩阵。
+correlation = covariance / np.outer(scales, scales)
+C = D⁻¹ R̂ₓ D⁻¹
+Cᵢⱼ = R̂ᵢⱼ / √(R̂ᵢᵢ R̂ⱼⱼ)
+归一化后 Cᵢᵢ = 1。非对角项 Cᵢⱼ 是复相关系数，其模值反映两个通道的共同相干成分占总功率的比例，其相角反映这个共同成分在两通道之间的相对相位。
+4.2 “功率归一化”不等于“功率信息完全消失”
+归一化只是消除了“第 1 路整体比第 2 路大多少”的尺度差异，但共同信号在总功率中的占比仍然保留在 Cᵢⱼ 中。举例，如果两个通道各自总功率很大，但共同成分只占很小比例，那么 |C₁₂| 仍接近 0；如果绝大多数功率来自同一个共同信号，则 |C₁₂| 会接近 1。
+正确理解：检测器不是问“输入功率是不是变大了”，而是在问“各通道总功率中，有多少比例属于同一个稳定的跨天线复数成分”。
+4.3 噪声、GNSS 与强干扰的区别
+成分是否具有跨天线空间结构解扩前在原始 IQ 中的典型强度对 C/EVD 的表现独立热噪声理想情况下无稳定跨通道相干结构主导背景功率C≈I，各特征值接近 1正常 GNSS有，每颗卫星都有自己的 steering vector通常远低于噪声结构存在但被噪声淹没，主特征值不明显强单干扰有，且往往高度相干可接近或高于噪声形成突出的主特征值/主空间模态
+5. 特征值分解与盲干扰检测
+eigenvalues, eigenvectors = np.linalg.eigh(correlation)
+C = U Λ Uᴴ
+对于 Hermitian 矩阵，特征值为实数且 eigh 默认按从小到大排列，因此 eigenvalues[-1] 和 eigenvectors[:, -1] 分别是最大特征值 λₘₐₓ 及其特征向量 uₘₐₓ。
+5.1 双天线时最直观
+C = [[1, ρ], [ρ*, 1]]
+λₘₐₓ = 1 + |ρ| ,    λₘᵢₙ = 1 − |ρ|
+若两通道完全不相关，|ρ|=0，则特征值为 [1,1]；若 |ρ|=0.9，则特征值约为 [0.1,1.9]，说明大多数空间能量集中在一个主方向。
+5.2 detection_score_db 的含义
+score_db = 10.0 * np.log10(    eigenvalues[-1] / np.mean(eigenvalues[:-1]))
+Score = 10 log₁₀ { λₘₐₓ / mean(λ₁,…,λₘ₋₁) }
+这个分数衡量“最强空间模态相对剩余背景空间模态突出多少 dB”。无明显相干源时各特征值接近，Score≈0 dB；强单干扰出现后 λₘₐₓ 明显变大，Score 上升。
+双天线：Score = 10 log₁₀ [(1+|ρ|)/(1−|ρ|)]
+因此 detection_threshold_db 并不是简单的输入功率门限，而是空间相干结构突出程度的门限。门限最终需要结合天线数、snapshot 数、硬件串扰、天线耦合和目标虚警率进行标定。
+6. 从最大特征向量恢复实际干扰空间向量
+6.1 为什么 uₘₐₓ 还不能直接当作真实 aⱼ
+EVD 是在归一化相关矩阵 C 上进行的。若强干扰主导第 i 路功率，aⱼ,ᵢ = Aᵢ e^{jφᵢ}，则归一化会把 Aᵢ 消掉。强干扰极限下，C 只保留各通道之间的相位关系。
+Cᵢⱼ ≈ e^{j(φᵢ−φⱼ)}
+uₘₐₓ ∝ [e^{jφ₁}, e^{jφ₂}, …, e^{jφₘ}]ᵀ
+因此 uₘₐₓ 更像“归一化后的空间相位向量”，真实通道幅度关系需要乘回之前的 scales。
+interference_vector = scales * eigenvectors[:, -1]interference_vector /= np.linalg.norm(interference_vector)
+âⱼ = D uₘₐₓ ,    vⱼ = âⱼ / ‖âⱼ‖
+在强干扰极限下 D uₘₐₓ 与真实 aⱼ 只差一个全局复数比例因子。全局相位和绝对尺度都不影响后续的空间零陷，因为投影矩阵使用的是 vⱼ vⱼᴴ。
+6.2 为什么全局相位不重要
+若 v′ = v e^{jα}，则 v′v′ᴴ = v e^{jα} e^{-jα} vᴴ = vvᴴ
+因此 EVD 返回的特征向量即使整体乘了 −1 或任意 e^{jα}，最终构造的干扰子空间完全相同。
+7. Reference、投影矩阵与零陷权值的完整推导
+7.1 Reference 到底是什么
+reference = np.eye(channels.shape[0], dtype=complex)[:, cfg.reference_channel]
+若 reference_channel=0，则 eᵣ=[1,0,…,0]ᵀ。它不是“只在第 0 路内部处理”，而是表示：如果没有干扰抑制，系统本来准备直接输出该参考通道。
+无抗干扰时：y = eᵣᴴ x = xᵣ
+检测到干扰后，reference 通道仍作为输出主体，但其他通道会被作为辅助 cancellation channels 加入，最终输出的一般形式是：
+y = xᵣ + Σᵢ≠ᵣ αᵢ xᵢ
+7.2 零陷目标
+干扰部分为 xⱼ = vⱼ j。若组合输出 y = wᴴx，希望干扰完全消失，则必须满足：
+wᴴ vⱼ = 0
+因此问题变成：如何从原始 reference 权值 eᵣ 出发，构造一个既不响应 vⱼ、又尽量保留 reference 含义的新权值。
+7.3 正交投影矩阵
+projector = np.eye(M) - np.outer(    interference_vector, interference_vector.conj())
+P⊥ = I − vⱼ vⱼᴴ
+对任意向量 z，vⱼ(vⱼᴴz) 是 z 在干扰方向上的投影，而 P⊥z = z − vⱼ(vⱼᴴz) 则是删除干扰方向后剩下的正交分量。由于 ‖vⱼ‖=1：
+P⊥ vⱼ = (I−vⱼvⱼᴴ)vⱼ = vⱼ − vⱼ(vⱼᴴvⱼ) = 0
+所以所有沿 vⱼ 的成分经过 P⊥ 后都会被消掉。
+7.4 为什么是 projector @ reference
+projected_reference = projector @ reference
+w̃ = P⊥ eᵣ = eᵣ − vⱼ(vⱼᴴeᵣ)
+这里不是“从特征向量里只提取 reference 那一项”，而是先用 vⱼᴴeᵣ 计算 reference 方向与干扰方向重合了多少，再乘回完整的 vⱼ，从 eᵣ 中删除这整段干扰方向成分。最终 w̃ 使用了完整的 vⱼ，因此所有辅助通道都会自动获得相应的复权值。
+从几何角度看，w̃ 是 reference 向量投影到“干扰正交子空间”后的结果；从工程角度看，它是在必须打掉 jammer 的条件下，对原始“只用 reference”权值进行尽可能小的修改。
+7.5 gamma 的含义与归一化
+gamma = np.vdot(reference, projected_reference).realweights = projected_reference / gamma
+γ = eᵣᴴ P⊥ eᵣ = 1 − |vⱼ,ᵣ|²
+w = P⊥ eᵣ / (eᵣᴴP⊥eᵣ) = w̃/γ
+投影以后，reference 元素本身会从 1 变成 γ。再除以 γ，最终可以保证第 r 个权值重新等于 1，因此 reference 通道仍以单位系数直接进入输出，其他通道只负责附加补偿。
+wᵣ = 1
+同时由于 w 位于 vⱼ 的正交子空间中：
+wᴴ vⱼ = 0
+Reference 的最准确定义：Reference 不是“只处理一根天线”，而是“指定哪一根天线作为最终输出的基准；检测到干扰后，保留该通道系数为 1，并自动计算其他通道的复权值来抵消 reference 中的干扰”。
+7.6 gamma 与噪声放大
+‖w‖² = 1/γ
+若每个辅助通道都有独立白噪声且噪声功率相同，则输出噪声功率与 ‖w‖² 成正比。因此 γ 越小，零陷所付出的噪声代价越大。若 γ→0，说明干扰几乎只存在于 reference 通道，而辅助通道中可用于抵消的干扰副本很弱，此时需要极大的辅助权值，容易造成噪声放大和数值失稳。工程上必须设置 γ_min 或 weight-norm 限制。
+8. 双天线形式：Blind Null 最终就是复数相消器
+8.1 完整化简
+设两天线干扰单位空间向量为 v=[v₁,v₂]ᵀ，reference 为第 1 路 e₁=[1,0]ᵀ。可推导出最终权值：
+w = [1, −v₁*/v₂*]ᵀ
+由于真正的输出是 wᴴx，因此第二路实际乘上的系数是权值共轭：
+y = x₁ − (v₁/v₂) x₂
+如果两路 jammer 分别为 v₁j 和 v₂j，则：
+yⱼ = v₁j − (v₁/v₂)v₂j = 0
+所以复杂的协方差、归一化、EVD、投影和 gamma 归一化，最终都可以理解为“自动估计 v₁/v₂，并把第二路调幅调相后从 reference 中减掉”。
+8.2 数值例子
+假设两天线上的同一个干扰分别为 xⱼ,₁=2j，xⱼ,₂=e^{-j60°}j。为了抵消，应构造：
+y = x₁ − 2e^{j60°} x₂
+因为 2e^{j60°}·e^{-j60°}j = 2j。Blind Null 的 EVD 部分会从多通道统计中自动恢复这一幅度比 2 和相位补偿 +60°，无需人工知道干扰 DOA。
+9. 正常 GNSS 为什么通常不会被检测成强干扰
+9.1 GNSS 本身也有跨天线空间相干结构
+同一颗卫星在多根天线上的信号当然也满足空间模型。对于第 k 颗卫星：
+xₛ,ₖ[n] = aₛ,ₖ sₖ[n]
+Rₛ,ₖ = Pₛ,ₖ aₛ,ₖ aₛ,ₖᴴ
+因此不能说“只有干扰才有空间相干性”。真正的区别是：正常 GNSS 在解扩前远低于噪声，它的 rank-1 结构很难在原始 IQ 样本协方差里形成明显主特征值。
+9.2 一个双天线数值例子
+假设噪声功率归一为 1，某颗 GNSS 在原始 IQ 中的信号功率仅为 0.01，且两天线等幅同相，则：
+R ≈ [[1.01, 0.01], [0.01, 1.01]]
+C ≈ [[1, 0.0099], [0.0099, 1]]
+对应特征值约 [0.9901, 1.0099]，detection score 仅约 0.086 dB，基本不会触发。若 jammer 功率比噪声高 10 dB，则相关系数可能接近 0.9，score 可达到十几 dB。
+9.3 多颗卫星为什么更不容易形成单一主模态
+Rₓ = Σₖ Pₖ aₖaₖᴴ + Rₙ + Rⱼ
+不同卫星具有不同 PRN、Doppler 和 DOA，每颗都很弱，其空间贡献分散在不同方向；在未解扩的 raw IQ 中更接近背景项。相反，一个强单干扰可能占据绝大部分相干功率，因此表现为显著主特征向量。
+需要注意，实际硬件噪声不一定完全独立。天线耦合、PCB/RF 串扰、共模电源噪声、LO 泄漏等都可能造成背景相关性，因此 threshold 不能只依据理想白噪声模型设置。
+10. 对捕获的影响：相位差、码时延与双峰
+10.1 两通道载波相位差本身不会产生双峰
+同一颗卫星在两通道可写为：
+x₁(t)=A₁ c(t−τ₁)e^{jφ₁},    x₂(t)=A₂ c(t−τ₂)e^{jφ₂}
+若两路码时延近似相同 τ₁≈τ₂=τ，则合并后：
+y(t)=c(t−τ)[A₁e^{jφ₁}+αA₂e^{jφ₂}] = Gₛ c(t−τ)
+括号只是一个新的复数增益 Gₛ，因此 PRN 码延迟仍只有一个 τ。载波相位差会改变捕获峰幅度和合并后的整体相位，但不会凭空产生第二个码峰。极端情况下两路 GNSS 恰好反相，会使峰值大幅降低甚至消失，但仍不是“双峰”。
+10.2 真正会导致峰形畸变/双峰的是码时延差
+若 τ₁ 与 τ₂ 已不可忽略，则相关输出成为两个不同延迟相关函数的复数叠加：
+Y(τ̂)=A₁e^{jφ₁}R_c(τ̂−τ₁)+αA₂e^{jφ₂}R_c(τ̂−τ₂)
+当 |τ₁−τ₂| 足够大时，可能表现为相关峰变宽、峰形不对称、类似多径的次峰，严重时才出现可分离双峰。
+10.3 手机小阵列的空间传播时延通常极小
+以 8 cm 天线间距为例，最大路径差约 0.08 m，对应传播时延：
+Δτ_max = 0.08 / (3×10⁸) ≈ 0.27 ns
+对 GPS L1 C/A（1 chip≈977.5 ns）仅约 0.00028 chip；即使对 10.23 Mcps 信号（1 chip≈97.75 ns）也仅约 0.0028 chip。因此手机天线几何位置差通常不会直接造成可见双峰。
+但载波波长很短。例如 L1 波长约 19 cm，8 cm 距离就可对应约 151° 的载波相位差。因此“载波相位差很大、码时延差却几乎不可见”是完全正常的。
+10.4 更需要关注 RF/数字链路时延失配
+真正可能使码域失配变大的，往往不是几厘米空间路径差，而是模拟滤波器群时延、DDC/FIR pipeline、FIFO、sample alignment 或不同通道起始采样时刻。以 66 MHz 采样率为例，一个 sample 约为 15.15 ns，已经远大于 8 cm 空间路径带来的 0.27 ns。
+11. 对 PLL/DLL 的影响：固定时延、动态时延与权值跳变
+11.1 固定小延迟：主要体现为固定复增益
+对于载波 e^{j2πf_ct}，固定延迟 Δτ 对应固定相位：
+Δφ = −2π f_c Δτ
+若码域仍可近似对齐，则多通道合并可写为：
+yₛ(t) ≈ Gₛ s(t),    Gₛ = |Gₛ|e^{jφ_G}
+只要 Gₛ 固定，PLL 看到的是新的固定初始相位 φ_G 和新的信号幅度 |Gₛ|，本身不会持续破坏环路稳定。
+11.2 固定延迟仍可能通过 C/N₀ 间接伤害 PLL
+如果多通道的 GNSS 分量在当前 Blind Null 权值下发生严重抵消，|Gₛ| 会显著下降，导致有效 C/N₀ 变差，PLL 相位噪声增大，进一步可能造成 cycle slip 或失锁。因此固定相位差的风险主要不是“产生两个载波”，而是“空间组合增益可能很差”。
+11.3 动态时延会转化为附加载波动态
+Δφ(t)=−2πf_cΔτ(t)
+Δf = (1/2π)dΔφ/dt = −f_c dΔτ/dt
+因此随时间变化的通道相对延迟，会被 PLL 看成额外的相位/频率变化。对 L1 来说一个载波周期只有约 0.635 ns，所以非常小的时延抖动也可以造成明显的载波相位扰动。固定“晚 1 sample”与“在 1/2 sample 间来回跳”是完全不同的：前者可被吸收为固定关系，后者会形成突发相位跳变。
+11.4 大码时延失配先影响 DLL，再间接影响 PLL
+当 τ₁−τ₂ 大到影响相关峰时，首先会出现 DLL 相关峰形畸变、码跟踪偏差和 Prompt 幅度下降；Prompt C/N₀ 降低后，PLL discriminator 的相位噪声也会增大。因此时延失配可以通过 DLL→Prompt→PLL 的链路间接破坏载波跟踪。
+11.5 Blind Null 更值得关注的是“权值更新导致的相位跳变”
+Blind Null 的权值通常按 block 更新：R̂→vⱼ→w。对某一颗卫星 k，其等效空间增益是：
+Gₖ[n] = wᴴ[n] aₛ,ₖ
+Gₖ[n] = |Gₖ[n]| e^{jφₖ[n]}
+即使每个 RF 通道的物理时延固定，只要 w[n] 更新，φₖ[n] 也可能变化。PLL 会把这个变化当成真实载波相位动态。相邻两次更新应重点监控：
+Δφ_BF,ₖ[n] = angle{ Gₖ[n] / Gₖ[n−1] }
+若 20 ms 内 beamformer 额外产生 20° 相位变化，其等效频率量级约为 (20/360)/0.02 ≈ 2.78 Hz。若权值更新突然跳几十度甚至 90°，就可能明显冲击窄带 PLL。
+跟踪阶段重点：对 Blind Null→TRK 架构，固定几厘米天线间距造成的相位差通常不是主要风险；更值得验证的是权值更新引入的卫星等效相位跳变、C/N₀ 损失及 DLL/PLL jitter。
+12. 从 Blind Null 过渡到 MVDR：跟踪后估计卫星 steering vector
+12.1 为什么“先 Blind Null、再 MVDR”逻辑成立
+Blind Null 在启动阶段只需要估计干扰方向 vⱼ，不需要知道卫星方向，因此适合在 ACQ 之前提供“先活下来”的强干扰抑制。但它没有保护某一颗 GNSS 的约束，可能误伤卫星。等至少一颗星被捕获并进入稳定 TRK 后，接收机已经知道该卫星的 PRN、码相位、Doppler 和载波 NCO 状态，此时可以利用这些信息分别对原始各天线通道做相关，直接估计目标卫星的真实数字基带空间响应。
+Blind Null → ACQ → TRK → per-channel slave correlator → âₛ,ₖ → MVDR
+12.2 跟踪后如何估计两个通道的相对复响应
+对已跟踪的卫星 k，复用主 TRK 的本地码和本地载波，在每根原始通道上分别计算 Prompt 相关结果：
+Zₘ,ₖ = Σₙ xₘ[n] cₖ*[n−τ̂ₖ] e^{-jφ̂ₖ[n]}
+若主 TRK 已较稳定，则每个通道的相关输出近似为该卫星在该通道上的复幅度：
+Zₘ,ₖ ≈ Aₘ,ₖ e^{jθₘ,ₖ}
+以第 1 路为参考，可直接得到第 2 路相对于第 1 路的幅度比和相位差：
+Z₂,ₖ/Z₁,ₖ = (A₂,ₖ/A₁,ₖ) e^{j(θ₂,ₖ−θ₁,ₖ)}
+âₛ,ₖ = [1, Z₂,ₖ/Z₁,ₖ, …, Zₘ,ₖ/Z₁,ₖ]ᵀ
+这里估计到的 steering vector 不只是几何传播相位，它会自然包含天线增益、机身耦合、RF 通道增益/相位等真实数字基带响应。对复杂手机阵列而言，这往往比单纯根据理想阵列几何构造 a(θ) 更实用。
+12.3 不必给每根天线完整跑一套 PLL/DLL
+实现上可以保留一套主 TRK，由 Blind Null 输出负责闭环跟踪；其他原始通道只配置 slave correlators，复用主 TRK 的 code NCO/carrier NCO 进行积分并输出 Zₘ,ₖ。这样既能获得多通道相对幅相信息，又避免每根天线都复制一套完整 ACQ/TRK 环路，适合后续硬件资源评估。
+12.4 有 steering vector 后切换 MVDR
+w_MVDR,ₖ = R⁻¹ âₛ,ₖ / (âₛ,ₖᴴ R⁻¹ âₛ,ₖ)
+w_MVDR,ₖᴴ âₛ,ₖ = 1
+MVDR 的含义是：在显式保证目标卫星单位响应的条件下，最小化组合输出功率。因此它比 Blind Null 多了一条“保护目标卫星”的约束。Blind Null 更像“这个干扰方向一定不要”，MVDR 则是“这颗卫星一定保住，同时尽量降低其他功率”。
+12.5 steering vector 需要平滑和持续更新
+单次 Prompt 结果会受到热噪声、残余 Doppler、bit/secondary-code 跳变和 PLL jitter 影响，因此不应只用一个积分点直接计算 Z₂/Z₁。可对复比值或相关向量进行时间平滑，例如：
+ρ̂[n] = βρ̂[n−1] + (1−β) · Z₂[n]Z₁*[n] / (|Z₁[n]|²+ε)
+也可以对一段 correlator vectors 形成协方差，再取主特征向量估计该卫星的空间方向。无论采用哪种方式，都要做 reference phase normalization，避免特征向量全局相位不确定性。
+13. 多卫星条件下的架构选择
+13.1 为什么“单颗卫星 MVDR 权值”不适合作为所有卫星共享的前端权值
+不同卫星来自不同 DOA，真实空间向量一般满足 a_G01 ≠ a_G03 ≠ a_G07。若在 pre-correlation 阶段用 G01 的 MVDR 权值形成唯一一路 IQ，只能严格保证 wᴴa_G01=1，对其他卫星的增益 wᴴa_G03、wᴴa_G07 没有保证，甚至可能把某颗星压得很低。
+13.2 三种可选架构
+架构核心方式优势主要限制A. 前端 Blind Null + 后相关每星 MVDRACQ 前用一套公共 Blind Null；TRK 后每颗卫星独立空间组合启动无需卫星 steering；每星可独立保护；最适合 GNSS PRN 结构需要保留各原始通道并增加 slave correlator/每星空间处理B. 前端单目标 MVDR选某颗卫星 steering vector，raw IQ 直接 MVDR实现概念简单，目标星保护明确共享输出无法同时保证其他卫星C. 前端 LCMV 多约束A=[a₁,a₂,…]，同时对多颗卫星设置线性约束可以在前端同时保护若干目标自由度受天线数限制；2 天线尤其紧张
+13.3 LCMV 的形式
+w_LCMV = R⁻¹ A (AᴴR⁻¹A)⁻¹ f
+若希望若干卫星满足单位响应，可令 A=[a₁,a₂,…,a_K]，f=[1,1,…,1]ᵀ。但 M 根天线只有 M 维空间自由度，目标保护约束与干扰 null 都会消耗自由度。因此对 2 天线而言，想同时保护多颗卫星并额外形成独立零陷通常并不现实。
+13.4 推荐的混合架构
+Pre-correlation Blind Null + Post-correlation per-satellite MVDR
+这套架构利用 GNSS 的码域可分性解决了“不同卫星需要不同 steering vector”的冲突：启动时用 Blind Null 让系统在强干扰下有机会 ACQ/TRK；上星以后，利用 PRN 相关将卫星分离，再针对每颗卫星独立估计空间向量和权值。
+推荐方向：对于 2～4 天线手机 GNSS 的第一版可行性仿真，优先验证“Blind Null 负责启动生存 + TRK 后 per-satellite steering estimation + post-correlation MVDR”，比直接把整个 raw IQ 前端切成单颗星 MVDR 更完整。
+14. 工程实现风险、保护与改进
+14.1 多干扰问题
+当前代码只使用最大特征向量，因此只显式处理一个主干扰方向。若有 K 个线性独立强干扰，应估计干扰子空间 Uⱼ=[v₁,…,v_K]，并推广为：
+P⊥ = I − Uⱼ Uⱼᴴ    （当 Uⱼ 的列已正交归一）
+M 根天线最多只能提供 M 维空间自由度，能形成的独立 null 数受到明确限制。
+14.2 snapshot 长度：统计稳定性与动态跟踪的矛盾
+样本协方差 R̂ 是有限窗口估计。N 太小，随机噪声会造成虚假的交叉相关和特征向量抖动；N 太大，则手机姿态、干扰方向和环境变化可能在一个窗口内已经发生，rank-1 假设被“时间平均”冲淡。需要在统计精度和跟踪速度之间选择合适窗口。
+14.3 协方差/权值时间平滑
+R̄[n] = βR̄[n−1] + (1−β)R̂[n]
+对协方差进行指数平滑可减少特征向量和权值的随机跳动，从而减小前述 weight-induced phase jump。也可以直接对权值做幅相平滑，但要保证平滑后的权值仍满足零陷约束或进行重新投影。
+14.4 数值保护
+通道功率保护：powers = max(powers, ε)，避免归一化时除零。
+gamma 保护：若 γ < γ_min，则不启用 null、切换 reference、或限制最大 weight norm。
+协方差 diagonal loading：R ← R + δI，提升逆矩阵和特征分解的数值稳定性。
+检测滞回：启用阈值与退出阈值分开，避免 score 在门限附近导致模式频繁切换。
+权值更新速率限制：避免每个短 block 的估计噪声直接转化为 TRK 相位扰动。
+14.5 多通道同步是前提
+Blind spatial processing 依赖各通道在同一采样时刻描述同一个波前。固定 RF 群时延差可以标定或被数据驱动 steering vector 吸收，但通道间 sample slip、时钟不同步、FIFO 跳动或随机延迟会直接破坏复幅相关系，并可能冲击 ACQ/DLL/PLL。
+14.6 宽带问题
+当前代码每个通道只有一个复数权值，属于窄带阵列模型，默认通道间差异可以主要用复数幅相描述。对 L1 等手机小阵列通常较合理；当信号带宽很宽（如 L5/E5/AltBOC 全带宽）且存在显著群时延差时，一个固定复权值可能无法在整个频带上同时对齐。此时要进一步考虑子带 beamforming、频域权值或 tapped-delay-line beamformer。
+15. 推荐仿真验证路线与指标
+15.1 阶段 1：Blind Null 基础能力
+无干扰条件：score 分布、虚警率 P_FA、是否保持 reference 原始性能。
+单强干扰：检测概率 P_D、干扰抑制度、estimated_interference_response = wᴴvⱼ 是否接近 0。
+扫描 J/N、天线幅相差、snapshot 数、干扰 DOA/手机姿态。
+记录 γ、‖w‖、输出噪声提升，验证 ‖w‖²≈1/γ 的趋势。
+15.2 阶段 2：对 GNSS ACQ 的副作用
+比较 Null 前后每颗卫星 acquisition peak、峰值损失、峰位置偏移。
+统计次峰/主峰比和峰形变化，用于识别通道时延失配造成的多径样畸变。
+分别引入纯载波相位差与真实 sample delay，验证“相位差主要改变复增益，码时延才改变峰形”。
+15.3 阶段 3：对 TRK 的影响
+固定权值：比较 C/N₀、PLL phase jitter、DLL code jitter、cycle slip/失锁概率。
+动态权值：记录每颗卫星 Gₖ[n]=wᴴ[n]aₖ 的幅度和相位。
+重点统计 Δφ_BF,ₖ[n]=angle(Gₖ[n]/Gₖ[n−1])，并与 PLL 带宽、积分周期联合分析。
+扫描 covariance window、权值更新周期和平滑系数 β，寻找干扰跟踪速度与 PLL 稳定性的折中。
+15.4 阶段 4：Blind Null→TRK→MVDR 闭环
+使用 Blind Null 输出完成 ACQ/TRK，但保留所有原始天线通道。
+复用主 TRK code/carrier NCO，在原始各通道配置 slave correlators。
+估计并平滑每颗卫星的相对复幅相 Zₘ,ₖ/Z_ref,ₖ，形成 âₛ,ₖ。
+先离线计算 MVDR 权值，验证 wᴴâₛ≈1 与干扰抑制度。
+再进行动态切换实验：Blind Null→MVDR 时监控 C/N₀、PLL phase step、DLL/PLL jitter 和连续性。
+多颗星条件下优先尝试 post-correlation per-satellite MVDR；再根据资源评估是否需要 LCMV 或更复杂架构。
+15.5 建议输出的核心指标
+类别指标干扰检测Score、P_D、P_FA、特征值谱、主/次特征值比空间抑制Null depth、wᴴvⱼ、输出 J/N 或 jammer suppression dB代价γ、‖w‖、noise enhancement、通道峰值/动态范围ACQPeak、Peak ratio、code-bin 偏移、检测概率TRKC/N₀、PLL jitter、DLL jitter、cycle slip、失锁概率权值连续性Δφ_BF、|Gₖ|、权值变化率、模式切换相位阶跃MVDRwᴴâₛ、目标信号增益、干扰抑制、各卫星独立性能
+附录 A. 代码与数学公式逐行对应
+代码数学/物理意义snapshots = channels.shape[1]N：协方差统计快拍数channels @ channels.conj().T / snapshotsR̂ₓ=(1/N)XXᴴdiag(covariance)各通道功率 pᵢ=R̂ᵢᵢscales = sqrt(powers)D=diag(√pᵢ) 的对角元素covariance / outer(scales,scales)C=D⁻¹R̂ₓD⁻¹eigh(correlation)C=UΛUᴴeigenvalues[-1] / mean(others)主空间模态相对背景模态的突出程度scales * eigenvectors[:,-1]âⱼ=D uₘₐₓ，恢复归一化前的通道幅度关系interference_vector /= norm(...)vⱼ=âⱼ/‖âⱼ‖reference = e_r指定原始“只用哪一路”的基准权值I - outer(v,v.conj())P⊥=I−vvᴴ，删除干扰子空间projector @ referencew̃=P⊥eᵣ，reference 在非干扰空间中的最近投影gamma = eᵣᴴw̃γ=eᵣᴴP⊥eᵣ=1−|vᵣ|²weights = w̃/gammaw=P⊥eᵣ/(eᵣᴴP⊥eᵣ)，保证 wᵣ=1 且 wᴴv=0weights.conj() @ channelsy=wᴴX，形成单路输出
+附录 B. 原始代码
+def combine_blind_null(channels, cfg):    snapshots = channels.shape[1]    covariance = channels @ channels.conj().T / snapshots    covariance = (covariance + covariance.conj().T) / 2.0    powers = np.real(np.diag(covariance))    scales = np.sqrt(powers)    correlation = covariance / np.outer(scales, scales)    correlation = (correlation + correlation.conj().T) / 2.0    eigenvalues, eigenvectors = np.linalg.eigh(correlation)    score_db = 10.0 * np.log10(        eigenvalues[-1] / np.mean(eigenvalues[:-1])    )    interference_vector = scales * eigenvectors[:, -1]    interference_vector /= np.linalg.norm(interference_vector)    reference = np.eye(channels.shape[0], dtype=complex)[:, cfg.reference_channel]    info = {        "mode": "blind_null",        "sample_covariance": covariance,        "condition_number": np.linalg.cond(covariance),        "covariance_snapshots": snapshots,        "channel_powers": powers,        "normalized_correlation": correlation,        "correlation_eigenvalues": eigenvalues,        "detection_score_db": score_db,        "detection_threshold_db": cfg.detection_threshold_db,        "estimated_interference_vector": interference_vector,        "reference_channel": cfg.reference_channel,        "weights_are_fixed": True,    }    if score_db < cfg.detection_threshold_db:        info.update(            {                "weights": reference,                "weight_norm": 1.0,                "interference_detected": False,                "nulling_enabled": False,                "reference_projection_power": 1.0,            }        )        return channels[cfg.reference_channel].copy(), info    projector = np.eye(channels.shape[0], dtype=complex) - np.outer(        interference_vector, interference_vector.conj()    )    projected_reference = projector @ reference    gamma = np.vdot(reference, projected_reference).real    weights = projected_reference / gamma    info.update(        {            "weights": weights,            "weight_norm": np.linalg.norm(weights),            "interference_detected": True,            "nulling_enabled": True,            "reference_projection_power": gamma,            "estimated_interference_response": np.vdot(                weights, interference_vector            ),        }    )    return weights.conj() @ channels, info
+总结
+当前 Blind Null 的本质，是利用原始多通道 IQ 中强共同相干成分形成的主特征空间，估计干扰在各天线上的复数幅相关系，然后把“只使用 reference 通道”的原始权值投影到干扰正交空间，使 reference 保持单位系数、辅助通道产生幅相补偿，从而实现空间相消。
+对于 GNSS，正常卫星虽然同样存在跨天线空间结构，但在解扩前通常被热噪声淹没，因此不会像强 jammer 一样形成突出的主特征模态。Blind Null 的主要副作用不是天然产生捕获双峰，而是可能改变不同卫星的复空间增益；若通道存在明显码时延失配，则可能造成相关峰畸变；若权值随时间跳变，则可能给 PLL 引入额外相位动态。
+因此更完整的演进方案是：启动阶段使用 Blind Null 解决“未上星时不知道目标 steering vector”的问题；成功 TRK 后，复用主环路的 code/carrier NCO 对原始各通道进行 slave correlation，估计每颗卫星真实 steering vector；稳态阶段优先考虑 post-correlation per-satellite MVDR，以同时获得明确的目标保护和强干扰抑制。

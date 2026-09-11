@@ -90,6 +90,8 @@ def _correlate_epoch(
     state: _TrackingState,
     fs_hz: float,
     early_late_spacing_chips: float,
+    code_length: int = 1023,
+    secondary_code=None,
 ) -> tuple[complex, complex, complex]:
     carrier_phase = state.carrier_phase_rad + (
         2.0
@@ -104,12 +106,14 @@ def _correlate_epoch(
         + sample_index * state.code_rate_hz / fs_hz
     )
     half_spacing = early_late_spacing_chips / 2.0
+    if secondary_code is not None:
+        baseband = baseband * secondary_code[np.floor(prompt_phase/code_length).astype(np.int64) % len(secondary_code)]
     early = np.sum(
-        baseband * _sample_code(code, prompt_phase + half_spacing)
+        baseband * _sample_code(code, prompt_phase + half_spacing, code_length)
     )
-    prompt = np.sum(baseband * _sample_code(code, prompt_phase))
+    prompt = np.sum(baseband * _sample_code(code, prompt_phase, code_length))
     late = np.sum(
-        baseband * _sample_code(code, prompt_phase - half_spacing)
+        baseband * _sample_code(code, prompt_phase - half_spacing, code_length)
     )
     return early, prompt, late
 
@@ -127,6 +131,7 @@ def _update_tracking_loops(
     cfg: TrackingConfig,
     carrier_hz: float,
     nominal_code_rate_hz: float,
+    code_period_chips: int = 1023,
 ) -> None:
     fll_correction = 0.0
     if 0 < epoch < cfg.fll_assist_epochs:
@@ -147,7 +152,7 @@ def _update_tracking_loops(
         state.code_phase_chips
         + samples_per_epoch * state.code_rate_hz / fs_hz
         + cfg.dll_kp_chips * dll_error,
-        1023.0,
+        float(code_period_chips),
     )
     state.previous_prompt = prompt
 
@@ -172,7 +177,21 @@ def track(
     available_epochs = (len(x) - first_epoch) // samples_per_epoch
     n_epochs = min(available_epochs, cfg.max_epochs)
 
-    code = ca_code(prn)
+    if n_epochs < 1:
+        return {"success": False, "status": "insufficient_samples",
+                "prompt": np.array([], dtype=complex)}
+    if not np.isfinite(x).all() or not np.any(x):
+        return {"success": False, "status": "invalid_signal",
+                "prompt": np.array([], dtype=complex)}
+
+    from l5 import l5q_code, NH20, synchronize_nh
+    if cfg.signal_kind not in ('L1CA', 'L5Q'):
+        raise ValueError('unsupported signal kind')
+    is_l5 = cfg.signal_kind == 'L5Q'
+    code = l5q_code(prn) if is_l5 else ca_code(prn)
+    code_length = code.size
+    if is_l5 and (cfg.coherent_ms != 1 or cfg.refine_initial_phase):
+        raise ValueError('L5 uses 1 ms epochs without L1 initial refinement')
     if cfg.code_replica_bandwidth_hz is not None:
         if cfg.code_replica_bandwidth_hz >= fs_hz / 2:
             raise ValueError("local replica bandwidth must be below receiver Nyquist")
@@ -190,6 +209,24 @@ def track(
         * (1.0 + carrier_frequency_hz / carrier_hz),
     )
     initialization = None
+    nh_sync = None
+    if is_l5:
+        if available_epochs < 40:
+            return {'success': False, 'status': 'insufficient_nh_samples', 'prompt': np.array([], dtype=complex)}
+        sync_prompts = []
+        for k in range(40):
+            n = k*samples_per_epoch + sample_index
+            block = x[first_epoch+k*samples_per_epoch:first_epoch+(k+1)*samples_per_epoch]
+            sync_prompts.append(np.sum(block*np.exp(-2j*np.pi*carrier_frequency_hz*n/fs_hz)
+                *_sample_code(code, n*state.code_rate_hz/fs_hz, code_length)))
+        try:
+            nh_sync = synchronize_nh(sync_prompts)
+        except ValueError:
+            return {'success': False, 'status': 'nh_sync_failed', 'prompt': np.array([], dtype=complex)}
+        state.code_phase_chips = nh_sync['offset']*code_length
+        state.carrier_frequency_hz += nh_sync['frequency_hz']
+        state.code_rate_hz = nominal_code_rate_hz*(1+state.carrier_frequency_hz/carrier_hz)
+        state.carrier_phase_rad = nh_sync['phase_rad']
     if cfg.refine_initial_phase:
         if cfg.code_replica_bandwidth_hz is None:
             raise ValueError("phase refinement requires a continuous local code replica")
@@ -211,11 +248,22 @@ def track(
     phase_lock_metric = np.zeros(n_epochs)
     cn0_db_hz = np.full(n_epochs, np.nan)
     epoch_start_samples = np.zeros(n_epochs, dtype=int)
+    # Diagnostics at each block START, before using that block's discriminator.
+    # Keep whole turns so downstream phase comparison need not unwrap Doppler.
+    carrier_nco_phase = np.zeros(n_epochs)
+    carrier_nco_frequency = np.zeros(n_epochs)
+    code_nco_phase = np.zeros(n_epochs)
+    code_nco_rate = np.zeros(n_epochs)
+    accumulated_phase = state.carrier_phase_rad
 
     for epoch in range(n_epochs):
         first = first_epoch + epoch * samples_per_epoch
         block = x[first : first + samples_per_epoch]
         epoch_start_samples[epoch] = first
+        carrier_nco_phase[epoch] = accumulated_phase
+        carrier_nco_frequency[epoch] = state.carrier_frequency_hz
+        code_nco_phase[epoch] = state.code_phase_chips
+        code_nco_rate[epoch] = state.code_rate_hz
         early[epoch], prompt[epoch], late[epoch] = _correlate_epoch(
             block,
             sample_index,
@@ -223,11 +271,16 @@ def track(
             state,
             fs_hz,
             cfg.early_late_spacing_chips,
+            code_length,
+            NH20 if is_l5 else None,
         )
 
-        dll_error[epoch] = (abs(early[epoch]) - abs(late[epoch])) / (
-            abs(early[epoch]) + abs(late[epoch])
-        )
+        denominator = abs(early[epoch]) + abs(late[epoch])
+        if (not np.isfinite([early[epoch], prompt[epoch], late[epoch]]).all()
+                or denominator == 0 or abs(prompt[epoch]) == 0):
+            return {"success": False, "status": "invalid_correlation",
+                    "prompt": prompt[:epoch]}
+        dll_error[epoch] = (abs(early[epoch]) - abs(late[epoch])) / denominator
         pll_error_rad[epoch] = np.angle(prompt[epoch])
         if state.previous_prompt is not None:
             fll_error_hz[epoch] = np.angle(
@@ -247,8 +300,13 @@ def track(
             cfg,
             carrier_hz,
             nominal_code_rate_hz,
+            code_length * (20 if is_l5 else 1),
         )
         carrier_history[epoch] = state.carrier_frequency_hz
+        accumulated_phase += (
+            2.0 * np.pi * state.carrier_frequency_hz * epoch_duration_s
+            + cfg.pll_kp * pll_error_rad[epoch]
+        )
         code_rate_history[epoch] = state.code_rate_hz
         code_phase_history[epoch] = state.code_phase_chips
         window_first = max(0, epoch - cfg.cn0_window_epochs + 1)
@@ -273,6 +331,10 @@ def track(
         "pll_error_rad": pll_error_rad,
         "fll_error_hz": fll_error_hz,
         "carrier_frequency_hz": carrier_history,
+        "carrier_nco_phase_rad": carrier_nco_phase,
+        "carrier_nco_frequency_hz": carrier_nco_frequency,
+        "code_nco_phase_chips": code_nco_phase,
+        "code_nco_rate_hz": code_nco_rate,
         "code_rate_hz": code_rate_history,
         "code_phase_chips": code_phase_history,
         "prompt_magnitude": np.abs(prompt),
@@ -281,4 +343,6 @@ def track(
     }
     if initialization is not None:
         result["initialization"] = initialization
+    if nh_sync is not None:
+        result['nh_sync'] = nh_sync
     return result

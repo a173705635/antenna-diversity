@@ -10,7 +10,9 @@ def test_default_config_uses_mate70_geometry_and_signal_values():
 
     assert cfg.random_seed == 42
     assert cfg.signal.carrier_hz == 1_575.42e6
-    assert cfg.signal.fs_rf_hz == 16.368e6
+    assert cfg.signal.fs_rf_hz == 33e6
+    assert cfg.dfe.decimation == 5
+    assert cfg.signal.fs_rf_hz/cfg.dfe.decimation == 6.6e6
     assert cfg.signal.if_hz == 4.092e6
     assert cfg.phone.active_antennas == ("TL", "TR", "BL", "BR")
     assert cfg.phone.phase_centers_m["TL"] == (-0.0759 / 2, 0.1609 / 2, 0.0)

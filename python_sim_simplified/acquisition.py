@@ -13,24 +13,38 @@ def acquire(
     prn: int,
     code_rate_hz: float,
     cfg: AcquisitionConfig,
+    *, signal_kind: str = "L1CA",
 ) -> AcquisitionResult:
     samples_per_ms = round(fs_hz * 1e-3)
     coherent_samples = samples_per_ms * cfg.coherent_ms
     n = np.arange(coherent_samples)
-    code_phase = np.mod(n * code_rate_hz / fs_hz, 1023.0)
-    local_code = ca_code(prn)[np.floor(code_phase).astype(int)]
+    if signal_kind not in ('L1CA', 'L5Q'):
+        raise ValueError('unsupported signal kind')
+    from l5 import l5q_code
+    code = l5q_code(prn) if signal_kind == 'L5Q' else ca_code(prn)
+    if signal_kind == 'L5Q' and cfg.coherent_ms != 1:
+        raise ValueError('L5 acquisition requires 1 ms before NH synchronization')
+    code_phase = np.mod(n * code_rate_hz / fs_hz, code.size)
+    local_code = code[np.floor(code_phase).astype(int)]
     code_spectrum = np.conj(np.fft.fft(local_code))
+    if signal_kind == 'L5Q':
+        # Linear 1-ms correlations inside 2-ms windows. At the correct delay,
+        # integration starts on a primary-code/NH boundary, avoiding sign loss.
+        if len(x) < (cfg.noncoherent_ms+1)*coherent_samples:
+            raise ValueError('L5 acquisition needs one extra millisecond')
+        code_spectrum = np.conj(np.fft.fft(np.pad(local_code, (0, coherent_samples))))
+        n = np.arange(2*coherent_samples)
     search_power = np.zeros((len(cfg.doppler_bins_hz), coherent_samples))
 
     for row, doppler_hz in enumerate(cfg.doppler_bins_hz):
         wipeoff = np.exp(-1j * 2.0 * np.pi * doppler_hz * n / fs_hz)
         for block_index in range(cfg.noncoherent_ms):
             first = block_index * coherent_samples
-            block = x[first : first + coherent_samples]
+            block = x[first : first + len(n)]
             correlation = np.fft.ifft(
                 np.fft.fft(block * wipeoff) * code_spectrum
             )
-            search_power[row] += np.abs(correlation) ** 2
+            search_power[row] += np.abs(correlation[:coherent_samples]) ** 2
 
     best_row, best_code = np.unravel_index(
         np.argmax(search_power), search_power.shape

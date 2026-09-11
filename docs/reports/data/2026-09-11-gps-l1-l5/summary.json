@@ -1,0 +1,161 @@
+[
+  {
+    "seed": 4000,
+    "modes": {
+      "L1": {
+        "code": {
+          "epochs": 80,
+          "solved_epochs": 80,
+          "position_rms_m": 6.373466929010594,
+          "demeaned_rms_m": 5.286090648083021
+        },
+        "float": {
+          "epochs": 80,
+          "solved_epochs": 80,
+          "position_rms_m": 3.560664327878709,
+          "demeaned_rms_m": 0.002395590890283894
+        },
+        "carrier_postfit_max_m": 0.0027423790465865294,
+        "phase_residual_screen_passed": true
+      },
+      "L5": {
+        "code": {
+          "epochs": 80,
+          "solved_epochs": 80,
+          "position_rms_m": 0.998985938112793,
+          "demeaned_rms_m": 0.9982040997192366
+        },
+        "float": {
+          "epochs": 80,
+          "solved_epochs": 80,
+          "position_rms_m": 0.03979706621275323,
+          "demeaned_rms_m": 0.004726119823639523
+        },
+        "carrier_postfit_max_m": 0.005623245082516493,
+        "phase_residual_screen_passed": true
+      },
+      "L1_L5": {
+        "code": {
+          "epochs": 80,
+          "solved_epochs": 80,
+          "position_rms_m": 3.240427270462533,
+          "demeaned_rms_m": 2.7084670876217043
+        },
+        "float": {
+          "epochs": 80,
+          "solved_epochs": 80,
+          "position_rms_m": 1.7789273077227448,
+          "demeaned_rms_m": 0.002791406452786675
+        },
+        "carrier_postfit_max_m": 0.0059975197040688655,
+        "phase_residual_screen_passed": true
+      }
+    }
+  },
+  {
+    "seed": 4001,
+    "modes": {
+      "L1": {
+        "code": {
+          "epochs": 80,
+          "solved_epochs": 80,
+          "position_rms_m": 6.4067453284587454,
+          "demeaned_rms_m": 5.039226471430767
+        },
+        "float": {
+          "epochs": 80,
+          "solved_epochs": 80,
+          "position_rms_m": 3.956334857886257,
+          "demeaned_rms_m": 0.002290567074608619
+        },
+        "carrier_postfit_max_m": 0.0026987419419213232,
+        "phase_residual_screen_passed": true
+      },
+      "L5": {
+        "code": {
+          "epochs": 80,
+          "solved_epochs": 80,
+          "position_rms_m": 0.8603948206458721,
+          "demeaned_rms_m": 0.8310940499482015
+        },
+        "float": {
+          "epochs": 80,
+          "solved_epochs": 80,
+          "position_rms_m": 0.22266854291308194,
+          "demeaned_rms_m": 0.004403901807916357
+        },
+        "carrier_postfit_max_m": 0.005833795160284025,
+        "phase_residual_screen_passed": true
+      },
+      "L1_L5": {
+        "code": {
+          "epochs": 80,
+          "solved_epochs": 80,
+          "position_rms_m": 3.164447201342617,
+          "demeaned_rms_m": 2.5445777827090867
+        },
+        "float": {
+          "epochs": 80,
+          "solved_epochs": 80,
+          "position_rms_m": 1.881184705554372,
+          "demeaned_rms_m": 0.0024246483430979855
+        },
+        "carrier_postfit_max_m": 0.005929785184593861,
+        "phase_residual_screen_passed": true
+      }
+    }
+  },
+  {
+    "seed": 4002,
+    "modes": {
+      "L1": {
+        "code": {
+          "epochs": 80,
+          "solved_epochs": 80,
+          "position_rms_m": 6.298928490298172,
+          "demeaned_rms_m": 4.959795365500006
+        },
+        "float": {
+          "epochs": 80,
+          "solved_epochs": 80,
+          "position_rms_m": 3.882902467499751,
+          "demeaned_rms_m": 0.0019282148807751199
+        },
+        "carrier_postfit_max_m": 0.0023752423215488427,
+        "phase_residual_screen_passed": true
+      },
+      "L5": {
+        "code": {
+          "epochs": 80,
+          "solved_epochs": 80,
+          "position_rms_m": 0.932195185863938,
+          "demeaned_rms_m": 0.8948290956178604
+        },
+        "float": {
+          "epochs": 80,
+          "solved_epochs": 80,
+          "position_rms_m": 0.2613263253104904,
+          "demeaned_rms_m": 0.004774363760582786
+        },
+        "carrier_postfit_max_m": 0.006575759244870971,
+        "phase_residual_screen_passed": true
+      },
+      "L1_L5": {
+        "code": {
+          "epochs": 80,
+          "solved_epochs": 80,
+          "position_rms_m": 3.315298787523555,
+          "demeaned_rms_m": 2.623578474819019
+        },
+        "float": {
+          "epochs": 80,
+          "solved_epochs": 80,
+          "position_rms_m": 2.0268319239881007,
+          "demeaned_rms_m": 0.002472669538279863
+        },
+        "carrier_postfit_max_m": 0.008315951396393406,
+        "phase_residual_screen_passed": true
+      }
+    }
+  }
+]

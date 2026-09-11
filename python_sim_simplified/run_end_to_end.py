@@ -42,10 +42,10 @@ def save_results_figures(results, output_dir):
 def main():
     cfg = default_config()
     cfg.phone.channel_delay_ns = {
-        "BL": 1,
-        "BR": 5,
-        "TL": 3,
-        "TR": 10,
+        "BL": 0,
+        "BR": 0,
+        "TL": 0,
+        "TR": 0,
     }
     # cfg.phone.estimated_channel_delay_ns = {
     #     "BL": 1,

@@ -1,0 +1,70 @@
+[
+  {
+    "manifest": "docs\\reports\\data\\2026-09-10-multipath\\sha256.json",
+    "verified": 36
+  },
+  {
+    "manifest": "docs\\reports\\data\\2026-09-11-calibrated-sdcp\\sha256.json",
+    "verified": 12
+  },
+  {
+    "manifest": "docs\\reports\\data\\2026-09-11-code-carrier-float\\sha256.json",
+    "verified": 7
+  },
+  {
+    "manifest": "docs\\reports\\data\\2026-09-11-code-carrier-float-33mhz\\sha256.json",
+    "verified": 7
+  },
+  {
+    "manifest": "docs\\reports\\data\\2026-09-11-dual-tracking-stability\\sha256.json",
+    "verified": 13
+  },
+  {
+    "manifest": "docs\\reports\\data\\2026-09-11-gps-l1-l5\\sha256.json",
+    "verified": 11
+  },
+  {
+    "manifest": "docs\\reports\\data\\2026-09-11-gps-spp\\sha256.json",
+    "verified": 7
+  },
+  {
+    "manifest": "docs\\reports\\data\\2026-09-11-gps-spp-33mhz\\sha256.json",
+    "verified": 7
+  },
+  {
+    "manifest": "docs\\reports\\data\\2026-09-11-phase-origin\\sha256.json",
+    "verified": 38
+  },
+  {
+    "manifest": "docs\\reports\\data\\2026-09-11-pseudorange-bias\\sha256.json",
+    "verified": 16
+  },
+  {
+    "manifest": "docs\\reports\\data\\2026-09-11-sdcp-long\\sha256.json",
+    "verified": 66
+  },
+  {
+    "manifest": "docs\\reports\\data\\2026-09-11-sdcp-positioning\\sha256.json",
+    "verified": 33
+  },
+  {
+    "manifest": "docs\\reports\\data\\2026-09-11-sdcp-windows\\sha256.json",
+    "verified": 42
+  },
+  {
+    "manifest": "docs\\reports\\data\\2026-09-11-trimble-sdcp\\sha256.json",
+    "verified": 28
+  },
+  {
+    "manifest": "docs\\reports\\data\\2026-09-11-dual-frequency-optimization\\calibration\\sha256.json",
+    "verified": 6
+  },
+  {
+    "manifest": "docs\\reports\\data\\2026-09-11-dual-frequency-optimization\\evaluation\\sha256.json",
+    "verified": 6
+  },
+  {
+    "manifest": "docs\\reports\\data\\2026-09-11-dual-frequency-optimization\\holdout_rf\\sha256.json",
+    "verified": 11
+  }
+]

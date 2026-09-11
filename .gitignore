@@ -34,3 +34,8 @@ codegen/
 # Operating-system files
 .DS_Store
 Thumbs.db
+
+# Rebuildable Word integration dependencies and page renders
+docs/archive/docx_integration_2026-09-12/vendor/
+docs/archive/docx_integration_2026-09-12/render/
+docs/archive/docx_integration_2026-09-12/full_render/

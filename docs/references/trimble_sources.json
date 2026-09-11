@@ -1,0 +1,15 @@
+{
+  "retrieved": "2026-09-11",
+  "sources": {
+    "US20240219581A1.pdf": {
+      "url": "https://patentimages.storage.googleapis.com/a1/97/b5/dac4b8e7041907/US20240219581A1.pdf",
+      "reviewed": "physical PDF pages 18-20; paragraphs 0047-0060; process 400; equations 1-2",
+      "sha256": "82c1ec8ef5f4e4126f7a33b8f9c52c0b7a716240f75641223106c6e32e97539c"
+    },
+    "US12656504B2.pdf": {
+      "url": "https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12656504",
+      "reviewed": "physical PDF pages 25-26; independent claims distinguish multi-frequency scope",
+      "sha256": "b5d629fa2908e5076f4d09345d43ec6e163e7cbca8a6a5fd41eab702eafc82cf"
+    }
+  }
+}

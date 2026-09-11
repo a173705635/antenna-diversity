@@ -1,0 +1,97 @@
+{
+  "threshold_m": 0.005634760246333938,
+  "calibration_epochs": 3990,
+  "source_sha256": {
+    "acquisition.py": "53b6d9fd1b325131bdd92b8050129b19c03efbffc5b88455e0243e611580f2f4",
+    "antenna.py": "a29e60178f22d737a9e71668923f8edcaabf4af2fbc7d6d0abd6e46e51557c7b",
+    "audit_code_discriminator.py": "92e82a40619d651515c2e922bda034d281275d9dea00a79dc2df92086fff2c84",
+    "audit_detection_boundaries.py": "fa29b360b0a68c31a09efd4229328a68aaa73ba6542bfa10c3fcbf95b0605a2d",
+    "audit_detection_calibration.py": "288f71b3d262967fb6861830e4f84f45473addec123b7927decd84f9bdada8a2",
+    "audit_detection_only.py": "a178bc388b96f252037438edec79f15df6356ca84fbf958fa059e9d9ea507da8",
+    "audit_dual_tracking_phase.py": "21ef53b975c89d12f528f245b0048ac55c98c5b874e91f47fd383e647a40c9f9",
+    "audit_dual_tracking_stability.py": "024a4f25788578ca2bc64a99c1fe78e03b15311f68f99f67024aba6fd2b86aa4",
+    "audit_multipath_baseline.py": "e8358d1583c7fec37fed6846ea91ad059d82035c61bb2a11cec6399ab7277c8f",
+    "audit_multipath_oracle.py": "a80b8b76f35e9c4a98f8521d1ea11ff47a529b743134709ba4e9661a8c17e157",
+    "audit_trimble_sdcp.py": "de1be7b0f90fadc396968dce09cb8664029105597b019e7870eeb17c3d21b9bf",
+    "channel_delay.py": "f357070e87dd1783e9845b97e46027ad1e7abfa5d9776a7af108413558a8c501",
+    "code_replica.py": "970336ae05dead945533f1ed58d4314fda83ac488ec4910c390e6f81595516cf",
+    "config.py": "d05620fedb584445e1525a38897e74eb71931b48eb72f136c828f4f70e9c6c6c",
+    "detection_calibration.py": "be5b7e5e8659a86f6d14bb7bee14f991c68e960501065c849e67fc199a0fa3d2",
+    "dfe.py": "4bd74b6a6fb32768f3a7331340a3782e9329b20e0431c16eb8e3c41301a8a33f",
+    "diversity.py": "9dbc90ef1754c6937171f8bdb72bd48fb3c8cf57d3ac04fa66bca65e33771952",
+    "gnss.py": "beb9ccf07a0ff290cdb28fe6a4add953a349d1709545c196ddb3dfec900bec05",
+    "interference.py": "585bae54cdb7581ee902c87c64c57e2403dd2cc95df64891115c17c3e263cc21",
+    "measured_pattern.py": "c3b9ccec23d9431168cb8887d8f5a1c9d937f9720f8f9f730f938bf5dfed4edc",
+    "metrics.py": "668dfe8b7eb75627a3df22a44b5a18f2bda9b603c6822f9bba82f9c18d255ba9",
+    "models.py": "a20656f244e1a1506174b0b8e0f4ecf3db80076ee65b230b93c5e5805ef54d4f",
+    "multipath.py": "38d14bcc96468915694e59b52046c41c577cf66095dbf4a130bc91e1c4a0dc97",
+    "pipeline.py": "a5e307d2a90fd8bfd59d84fb6e397cda2f8bed80184a5176504a9a97576d3584",
+    "plotting.py": "99bb0c195f3f0862a3be4e1e66d9de9d9b8b7183f0025c10a288ff970ea19e3f",
+    "presets.py": "c8f59f7fb2a4986dac888aa409c07cf914d8500bb49e12a1b7e456c6de02aecc",
+    "rf.py": "ae086d6229d97d954f4e2a8ef21995c64ec97fc550ea56fb9ff5b6dc142e0104",
+    "run_end_to_end.py": "09276035277e9bcc3a62ad13cb258f6450d0c15d29cfa41cc8f48afc56687dc0",
+    "sdcp.py": "231b285b435e09450ae9b109ffd17fb64b4339e7480fc4b0c134d144122dc807",
+    "tracking.py": "6e793d3fa7a77f2057ed4d39c0c4f47f3b2c2f2bd75132a7a91c99280f9e6abf"
+  },
+  "calibration_sha256": {
+    "seed_1000.json": "e7c057c67a07997879c3e2b00b57e72cb4955a23fb8a8acfc24dc494f7ab0121",
+    "seed_1002.json": "a1831ed53457a4be4ae2582ec0d91b25728e388c209f3a2714e596e15b45b817",
+    "seed_1004.json": "9b5fdbab2806d3fb044a54532661c9159ac366dd733e03193a7febea8c7d827d",
+    "seed_1006.json": "c64c7b632d28c980c322c08cbe59222e22bb4f209f20f7ca499cec6acee87900",
+    "seed_1008.json": "ceac505230253e560f7635662741e4bb7017c2e8177bb9e01e7b3ab681718532",
+    "seed_1010.json": "d633ccc0adfd3acaac82efc9f43c78feff98e3651ea23dfc9b800206d435e4bd",
+    "seed_1012.json": "3ab89506267839680c56ee5f14b6cc9989bb1f33595448b4b9a0e62994a9c5bb",
+    "seed_1014.json": "599ee7bea1f3302047f1220de285c5f3f66fef47e01d010e1aa7e82fb8ea9064",
+    "seed_1016.json": "8bfbce2fe5eb402fea273876f0f2123c9b3894f059cf86f8fb936033ee057411",
+    "seed_1018.json": "6146082c19fa9a05cb107d267a0f72c6142ffbfc7dcdd37dcce42986d30068ab"
+  },
+  "calibration_rf_seeds": [
+    1000,
+    1001,
+    1002,
+    1003,
+    1004,
+    1005,
+    1006,
+    1007,
+    1008,
+    1009,
+    1010,
+    1011,
+    1012,
+    1013,
+    1014,
+    1015,
+    1016,
+    1017,
+    1018,
+    1019
+  ],
+  "calibration_rule": "99th percentile of absolute residual in t>=0.6s; per-record reference median on [0.2,0.4)s; correlated epochs, not record-level CFAR",
+  "soft_rule": "expit((threshold-abs(residual))/(threshold/4)); same weight for both antennas",
+  "hard_rule": "1 when abs(residual)<=threshold else 0",
+  "evaluation_rf_pairs": [
+    [
+      2000,
+      2001
+    ],
+    [
+      2002,
+      2003
+    ],
+    [
+      2004,
+      2005
+    ],
+    [
+      2006,
+      2007
+    ],
+    [
+      2008,
+      2009
+    ]
+  ],
+  "scope": "single L1 satellite, TL/TR 75.9 mm ideal baseline, assumed exact geometry, common ideal clock, no interference; process 400 observation weighting only; no RTK/PVT",
+  "reference_warning": "reference presumed clean for onset tests; static contamination deliberately violates this assumption"
+}

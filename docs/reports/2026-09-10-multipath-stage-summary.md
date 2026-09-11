@@ -34,7 +34,7 @@
 
 - [门限校准及独立评估](2026-09-08-detection-threshold-calibration.md)
 - [功率、时延和角度边界](2026-09-10-detection-boundaries.md)
-- [初期方案及 80 条候选试验](2026-09-08-multipath-detection-plan.md)
+- [初期方案及 80 条候选试验](../validation/2026-09-08-multipath-detection-plan.md)
 - [数值基线自查](2026-09-08-multipath-baseline-audit.md)、[连续源/理想参考](2026-09-08-continuous-source-oracle.md)、[初始化](2026-09-08-tracking-initialization.md)、[检测与理想方向对照](2026-09-08-detector-versus-oracle.md)
 - 本阶段入库快照：[`data/2026-09-10-multipath/`](data/2026-09-10-multipath/README.md)，含原始记录、图、SHA-256 清单和可重复核验脚本。
 
@@ -43,3 +43,5 @@
 ## 恢复研究时的优先顺序
 
 先核对文献检测器的同步、噪声和阵列条件，选择可复现的对照；再考虑保留 LOS 的单路径/双路径时间结构比较。模型拟合改善本身不是多径证据，新增方法必须单独定义统计假设并校准与独立评估。继续保持无外加干扰场景。本阶段不启动这些后续实现。
+
+相关方案、状态与证据对应见 [验证导航](../validation/README.md)。

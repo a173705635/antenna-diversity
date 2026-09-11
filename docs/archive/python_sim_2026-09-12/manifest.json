@@ -1,0 +1,947 @@
+[
+  {
+    "path": "python_sim/ARCHITECTURE.md",
+    "bytes": 7806,
+    "sha256": "5aa9a2e2abf6f118d47650e5bc1939809934ce485d1bf3724498d5555e777b02"
+  },
+  {
+    "path": "python_sim/DESIGN.md",
+    "bytes": 17489,
+    "sha256": "83b4dd1db0a3c1dbe24213473f501f785029044341402cbdeb0b1e5b43ac1da6"
+  },
+  {
+    "path": "python_sim/pyproject.toml",
+    "bytes": 533,
+    "sha256": "155d4a928004ae63794d48c9d9b672c209633d66c5feee27fd1fb307c2f22ec0"
+  },
+  {
+    "path": "python_sim/README.md",
+    "bytes": 14052,
+    "sha256": "eb7c97aa0040780152302a2aa8f0c219b4e6246a25bf75de773a6cf461c0f97b"
+  },
+  {
+    "path": "python_sim/requirements.txt",
+    "bytes": 129,
+    "sha256": "592e0f5dbe5d2d0e37b1aa0ffe806458c2c3ae08abb3a2d3c36a90aa2dc9d566"
+  },
+  {
+    "path": "python_sim/run_end_to_end.py",
+    "bytes": 1286,
+    "sha256": "58718fa0227252ac366bdd7a8ad6caf863e7434b4c8599ca48a8e187c604bf5d"
+  },
+  {
+    "path": "python_sim/run_legacy_ula.py",
+    "bytes": 1360,
+    "sha256": "af7172ba9ddb3e3aa135c4fd2c2dcd6b387d74604d81ba0b2e6a32a9d4415329"
+  },
+  {
+    "path": "python_sim/run_spatial_research.py",
+    "bytes": 7318,
+    "sha256": "9d253059059898c7d719d3e5918c7fd56767075d953083085366d833288a3c2a"
+  },
+  {
+    "path": "python_sim/run_tracking_nco_comparison.py",
+    "bytes": 2110,
+    "sha256": "f7e1e2ec12457923c4a381466f392212f91f1dcf7cb566417a3e299f02c9edff"
+  },
+  {
+    "path": "python_sim/.idea/.gitignore",
+    "bytes": 50,
+    "sha256": "a733dbdc2ce56ea1138c7261582b33d325b8aca0ed8fc04c4dbf172e3492912a"
+  },
+  {
+    "path": "python_sim/.idea/misc.xml",
+    "bytes": 429,
+    "sha256": "d4ea1dcbe2dc869cde1884bf0c5cb17c1b1f09b884bd9c008aa8fc5b11dbfb78"
+  },
+  {
+    "path": "python_sim/.idea/modules.xml",
+    "bytes": 279,
+    "sha256": "9dc0a1163ef5252554042bb9197054754a22541512464f6b0d52d513c7267e01"
+  },
+  {
+    "path": "python_sim/.idea/python_sim.iml",
+    "bytes": 685,
+    "sha256": "b7fa3e971695d740f97b327015f6751e48708385810185bf69054f2f1d7eb811"
+  },
+  {
+    "path": "python_sim/.idea/vcs.xml",
+    "bytes": 188,
+    "sha256": "d0df76de3a966f51606b564edccc430dbc21c32ee5c3f35dccf95597fad81392"
+  },
+  {
+    "path": "python_sim/.idea/workspace.xml",
+    "bytes": 7738,
+    "sha256": "9eda54e7093485d40dc8fe9ea255eb51be81d1bf11a5b4218d3914ef8050f18b"
+  },
+  {
+    "path": "python_sim/antenna_diversity/config.py",
+    "bytes": 29889,
+    "sha256": "bf8534c0a6a1e080bde8d3318ef5e8dc35d0e48dfda85b003e829ea66c000ca8"
+  },
+  {
+    "path": "python_sim/antenna_diversity/models.py",
+    "bytes": 3110,
+    "sha256": "e47fd48af2a5901cb5b8f07b891eaf93b77763ee9960b506eb0d7efb4e5fed6a"
+  },
+  {
+    "path": "python_sim/antenna_diversity/numeric.py",
+    "bytes": 406,
+    "sha256": "37db3e457add0352dd6efdf4a4be0521b57f7705ee8137d8bf81cdaa0e414bd9"
+  },
+  {
+    "path": "python_sim/antenna_diversity/pipeline.py",
+    "bytes": 3812,
+    "sha256": "03f85bc91e5728d4d15d655feba364aa830284b071c86dbf771c3e8fa21ed85d"
+  },
+  {
+    "path": "python_sim/antenna_diversity/__init__.py",
+    "bytes": 335,
+    "sha256": "0de82a0a4ab5ba365abaeb70acb0e161a69ac433e3bf1effc36128bb9445adea"
+  },
+  {
+    "path": "python_sim/docs/antenna_diversity_chain.mmd",
+    "bytes": 2129,
+    "sha256": "a8a6ca56dd44f8078d73acb27c7206b0c5405f2cfed299ee8fe8e8d473a802c0"
+  },
+  {
+    "path": "python_sim/docs/antenna_diversity_chain.png",
+    "bytes": 430363,
+    "sha256": "86156043f1a1b799a0a87dbf4c8402d5aea534a12bc2b99353a396e8eeb9a412"
+  },
+  {
+    "path": "python_sim/docs/antenna_diversity_chain.svg",
+    "bytes": 14428,
+    "sha256": "c759933dfe6a30badb1df93368a7e56e996ebeeac3fcdccdfa3e0d9412ecfe25"
+  },
+  {
+    "path": "python_sim/docs/simulation_architecture.png",
+    "bytes": 290514,
+    "sha256": "589703bae2b73bbed7f63b528bcc54b09d79f808e9db2eb88fdbea78d0b47f32"
+  },
+  {
+    "path": "python_sim/docs/simulation_architecture.svg",
+    "bytes": 13439,
+    "sha256": "bdcda345f00aef39be4dfad477306f94ee5efb41aaa1a8a9d6153b0d6e203d01"
+  },
+  {
+    "path": "python_sim/results/acquisition_search.png",
+    "bytes": 1400169,
+    "sha256": "76aa3ecfff75680f96e02f10a39be03965c7fa83a740e37a51ac61bbeca399bf"
+  },
+  {
+    "path": "python_sim/results/array_response.png",
+    "bytes": 267457,
+    "sha256": "21480c6b1b4f844ca4b92b734e59fb57d6a1d413ad7dc481859aebbea7a032d2"
+  },
+  {
+    "path": "python_sim/results/cn0_comparison.png",
+    "bytes": 129988,
+    "sha256": "55e07be0bbbb26ea3796b3809e6b21a0f2dd3e829d748893ca158f7f34c0528d"
+  },
+  {
+    "path": "python_sim/results/combined_spectra.png",
+    "bytes": 242373,
+    "sha256": "e6cee4135d5f0414ef442e781f540c82e883a20353c99a3735d827dfdedff427"
+  },
+  {
+    "path": "python_sim/results/rf_dfe_spectra.png",
+    "bytes": 174273,
+    "sha256": "2cb7bca0eebd5af92146cbb90c1ed3fc6d641cbe8a7c165aeae32142b9a37ff5"
+  },
+  {
+    "path": "python_sim/results/tracking_comparison.png",
+    "bytes": 211600,
+    "sha256": "2d01dedfbcf5e3a1d5635dc4692775386208b6b953f376ac134c6a9c2c798008"
+  },
+  {
+    "path": "python_sim/studies/example_quick.json",
+    "bytes": 5013,
+    "sha256": "8087845b5419d823929920aa64309800321b23d7e9f2751c1306e66ba13a4084"
+  },
+  {
+    "path": "python_sim/tests/study_helpers.py",
+    "bytes": 7491,
+    "sha256": "5fcdc404ae629de164a901651899e733c459907a130e9ea01a11d8cfda1247ce"
+  },
+  {
+    "path": "python_sim/tests/test_acquisition.py",
+    "bytes": 2499,
+    "sha256": "63c265c7f6e39e9d8a7dcfd2356de3c6071ddb508e1a65b92c4027cb32fca335"
+  },
+  {
+    "path": "python_sim/tests/test_antenna_effects.py",
+    "bytes": 6232,
+    "sha256": "20d053d7ff6ecbcfae24b16e18dda85e18a29b3280e679d03f4c1fd3276fbbe8"
+  },
+  {
+    "path": "python_sim/tests/test_antenna_patterns.py",
+    "bytes": 9902,
+    "sha256": "cb33a13bb74cb0d68315ddba71cb7ce3d59f2c01c5edb40dea7e600f483e7ff6"
+  },
+  {
+    "path": "python_sim/tests/test_blind_null.py",
+    "bytes": 4644,
+    "sha256": "1da1fc865ae7f09f769643789b2ea52fabfe1b113aa45b12b4aa4a7c7de7be98"
+  },
+  {
+    "path": "python_sim/tests/test_carrier_nco.py",
+    "bytes": 4650,
+    "sha256": "f470c5ffec8bc52e234cb845b0216c6302a1fd460df7e0f6e4458ca4d166e368"
+  },
+  {
+    "path": "python_sim/tests/test_channel_delay.py",
+    "bytes": 1483,
+    "sha256": "504ad6b4c568d28f5f8089905d89524146f3b9fd86be272754678fb8b3a9ac6e"
+  },
+  {
+    "path": "python_sim/tests/test_config_numeric.py",
+    "bytes": 4390,
+    "sha256": "2396352cabd31a20890917d515c361939c3e850f1a29f14a370895b4c1f92322"
+  },
+  {
+    "path": "python_sim/tests/test_core.py",
+    "bytes": 1465,
+    "sha256": "00aa05f38b1d981e5a30a5d5800d5807cc51e9c0ad971c07199924eee1428de2"
+  },
+  {
+    "path": "python_sim/tests/test_dfe.py",
+    "bytes": 2210,
+    "sha256": "21ee0f49455642638619d2ac850e0681b7a1a94aec5bb8606fcb7a5db314c62c"
+  },
+  {
+    "path": "python_sim/tests/test_diversity.py",
+    "bytes": 4490,
+    "sha256": "30aea3ae0a3dfcd41629d174eb1eeab5019dfa5db2d279fc27682595d1091876"
+  },
+  {
+    "path": "python_sim/tests/test_end_to_end.py",
+    "bytes": 7707,
+    "sha256": "fd5566215003aa85a04e5e721d6882871cb3ea8223035eeb0bc1f2031cba9eb3"
+  },
+  {
+    "path": "python_sim/tests/test_experiments.py",
+    "bytes": 16404,
+    "sha256": "7927682f4471b7492a4b5f05184d07c62c489530dcf2681a08ee6cf228c43afe"
+  },
+  {
+    "path": "python_sim/tests/test_geometry.py",
+    "bytes": 1114,
+    "sha256": "e5ef3cec9491060ec858c0d4e1f5f5af097b936a20415347a164d13d93669747"
+  },
+  {
+    "path": "python_sim/tests/test_manifold.py",
+    "bytes": 3001,
+    "sha256": "2bc66b2fe6e1996ffb3d315e35ff9d06b3786a496bfb81333f30e40c555486d5"
+  },
+  {
+    "path": "python_sim/tests/test_monte_carlo.py",
+    "bytes": 2130,
+    "sha256": "f478f667ac67eb1c4a0ebdba4988bdb58935b0048a92800a06ed96dd03184741"
+  },
+  {
+    "path": "python_sim/tests/test_multi_interferer_scenario.py",
+    "bytes": 7832,
+    "sha256": "97c235c24f951abb89cfb8e89f3ba499c6ef4f1050fefd7119df1aebe206f9d6"
+  },
+  {
+    "path": "python_sim/tests/test_phone_antenna_model.py",
+    "bytes": 25297,
+    "sha256": "ccb4dc67e9ef2ed877173df2bdad23ef58f2e5817f6792019a395c1b284242e0"
+  },
+  {
+    "path": "python_sim/tests/test_phone_config.py",
+    "bytes": 27388,
+    "sha256": "fa1f50731c326ed98c4e465ca2c816bfa0d4cb7c160831f8614d9772c833a50d"
+  },
+  {
+    "path": "python_sim/tests/test_plotting.py",
+    "bytes": 11456,
+    "sha256": "8a6a8a7862e71b1650986464633ffb5ec350c7b5a21772a956a5c64279e81c0d"
+  },
+  {
+    "path": "python_sim/tests/test_polarization.py",
+    "bytes": 3706,
+    "sha256": "3a2ba86292e101f2878676b86d395b5d25849628e3bcb9008a416d04ac556e22"
+  },
+  {
+    "path": "python_sim/tests/test_rf.py",
+    "bytes": 2031,
+    "sha256": "58f52a9640f5dd288d3bf1646b62a32cd7fe0b999e1a53d4cf6deea7f43febf9"
+  },
+  {
+    "path": "python_sim/tests/test_scenario.py",
+    "bytes": 11763,
+    "sha256": "87033dab0f8432e5587073cb065075751bd4d287673a149d311bf3953b4aa0cd"
+  },
+  {
+    "path": "python_sim/tests/test_spatial_analysis.py",
+    "bytes": 12055,
+    "sha256": "b2ac57a2d78f9ca9ed3f7beef5383485c8c1c9e67ea1b942effda0766573720d"
+  },
+  {
+    "path": "python_sim/tests/test_study_analytical.py",
+    "bytes": 20931,
+    "sha256": "3de3321b994dc4d66851e83daae62c9e75a97476ca133d220b022b786df79451"
+  },
+  {
+    "path": "python_sim/tests/test_study_artifacts.py",
+    "bytes": 8653,
+    "sha256": "5dce737a228384c6db37dea3a964c509dddeca326c55517cd6b9258a058cf98f"
+  },
+  {
+    "path": "python_sim/tests/test_study_cli.py",
+    "bytes": 13975,
+    "sha256": "7de230125dae61d03420d0160b2f97d1567c36eea8d5510dcab93358935244a8"
+  },
+  {
+    "path": "python_sim/tests/test_study_config.py",
+    "bytes": 33789,
+    "sha256": "b68e6f294ea10595ec5136fe5220b9de42c5fc1cf3c1ba8336d25daf99b55e1b"
+  },
+  {
+    "path": "python_sim/tests/test_study_full_chain.py",
+    "bytes": 12857,
+    "sha256": "8acdc7c8d996c1c806c4f44388bc45f7f262b5a5fa6d0b71c9c156a828ab5b4d"
+  },
+  {
+    "path": "python_sim/tests/test_study_ranking.py",
+    "bytes": 17612,
+    "sha256": "b31206d99f2ae9c3bd04c061548db1bc4c1baaf6c463bf058cf294cf51e213f0"
+  },
+  {
+    "path": "python_sim/tests/test_study_reporting.py",
+    "bytes": 27311,
+    "sha256": "df951156e84a58b7a852f0b1f58e6ce04cb65a8846eb79124862f0b7b079ba8b"
+  },
+  {
+    "path": "python_sim/tests/test_study_runner.py",
+    "bytes": 14367,
+    "sha256": "b402e53a2252c6d92fd330d258a5514a72ae2afab847e7a575ce857da5a88dd1"
+  },
+  {
+    "path": "python_sim/tests/test_study_scenarios.py",
+    "bytes": 6472,
+    "sha256": "510b2704aa58438dc59d4e45c6cf31e92fae75ac94ca5d5714ef26ff7f07fbcb"
+  },
+  {
+    "path": "python_sim/tests/test_tracking.py",
+    "bytes": 7089,
+    "sha256": "962da6a35145662b268b62c05dd3464568b3a700fe06fcca23d77a936e48763e"
+  },
+  {
+    "path": "python_sim/tests/test_tracking_nco_comparison.py",
+    "bytes": 7666,
+    "sha256": "222253e016d512d22e9511786468a52076032f0734aecfd4b978ff76de650e3e"
+  },
+  {
+    "path": "python_sim/tests/__init__.py",
+    "bytes": 60,
+    "sha256": "d7b496b95d910a8a248245869b0ab761dacf19c61d7fbbd02e1ea585b69b088c"
+  },
+  {
+    "path": "python_sim/.idea/inspectionProfiles/profiles_settings.xml",
+    "bytes": 174,
+    "sha256": "6172c5997eeb3cd19c9ca2b5b97d6e2983cdd1fa60b2460d7bbb74055edcaa46"
+  },
+  {
+    "path": "python_sim/antenna_diversity/analysis/metrics.py",
+    "bytes": 4595,
+    "sha256": "a7c97066926b208e2fc243c72909c80051377ce3acd6ae95fad46895ecda3992"
+  },
+  {
+    "path": "python_sim/antenna_diversity/analysis/plotting.py",
+    "bytes": 18161,
+    "sha256": "84394ee032ffd56ce7b4f35fed8e039cc8e8901f319f719aa5b8e7def98812d5"
+  },
+  {
+    "path": "python_sim/antenna_diversity/analysis/spatial.py",
+    "bytes": 10885,
+    "sha256": "40e9bf1af85027ce012806e76dada70a27061bcd3457a438d7a6594523a504b0"
+  },
+  {
+    "path": "python_sim/antenna_diversity/analysis/tracking_nco.py",
+    "bytes": 10775,
+    "sha256": "ca49c89bfb7aa11fe29fb030fe31f97f5d75d1ab45da6ec99e521fd7a83d7a70"
+  },
+  {
+    "path": "python_sim/antenna_diversity/analysis/__init__.py",
+    "bytes": 553,
+    "sha256": "612c941538cdf4eb199e388ae63d5cdc711096774d7f97253dcbfdddaf664602"
+  },
+  {
+    "path": "python_sim/antenna_diversity/array/antenna_config.py",
+    "bytes": 7415,
+    "sha256": "6b1867a72efcafdbfa9b285c3f9f31b1a96154b4af002878fcad2a09a6752d8e"
+  },
+  {
+    "path": "python_sim/antenna_diversity/array/effects.py",
+    "bytes": 8415,
+    "sha256": "36906b221ea2ceebf491dd89300d7689dce5e677aeab96b23686020000b672c8"
+  },
+  {
+    "path": "python_sim/antenna_diversity/array/geometry.py",
+    "bytes": 3615,
+    "sha256": "7bdc860133fe207ece90d85a9ded2aac4871dd74a9276110b8248d30fc48db0b"
+  },
+  {
+    "path": "python_sim/antenna_diversity/array/manifold.py",
+    "bytes": 2884,
+    "sha256": "a2d73eea38b859db4e8796565e8282f8c7d41256d080124e4ea871a1c5a4ab7f"
+  },
+  {
+    "path": "python_sim/antenna_diversity/array/patterns.py",
+    "bytes": 17482,
+    "sha256": "ec216b41ac3adf09c36a2acb2eba00e407ac21d618306e31bcbd597eb853f0de"
+  },
+  {
+    "path": "python_sim/antenna_diversity/array/phone_model.py",
+    "bytes": 16526,
+    "sha256": "7464339ece570659a6bb5464c07594c31237ed8ab8ea2d35714dbaa542bc25ef"
+  },
+  {
+    "path": "python_sim/antenna_diversity/array/polarization.py",
+    "bytes": 9543,
+    "sha256": "ef67550a201b63b32df7bc8cdefcf921853eee87230e7807957a6d860d859d0d"
+  },
+  {
+    "path": "python_sim/antenna_diversity/array/steering.py",
+    "bytes": 1009,
+    "sha256": "f693254fd066985fd79430179f59bc31daedc3298f3f9d53c0b014bd52d1a61a"
+  },
+  {
+    "path": "python_sim/antenna_diversity/array/__init__.py",
+    "bytes": 1294,
+    "sha256": "4d14546b3efa00546f6da698af6bcb3fa766347afec82dd44449fce2bba18441"
+  },
+  {
+    "path": "python_sim/antenna_diversity/dfe/decimator.py",
+    "bytes": 1683,
+    "sha256": "f958555bfd03d71b206847fd1a58c5571e188ff1f4fec10ba30590843bb408dc"
+  },
+  {
+    "path": "python_sim/antenna_diversity/dfe/processing.py",
+    "bytes": 2470,
+    "sha256": "2e127eacfc442265c0d59ab88c4f487df1dba93aa01fedb4dcd5eb2e827d04e3"
+  },
+  {
+    "path": "python_sim/antenna_diversity/dfe/__init__.py",
+    "bytes": 170,
+    "sha256": "43f532ca06663deea91dcc1d23034b663df615680efe0c0c0346289be63e045b"
+  },
+  {
+    "path": "python_sim/antenna_diversity/diversity/blind_null.py",
+    "bytes": 10565,
+    "sha256": "88b848b39c22815fc5329868b4e6ac9392ee67ccdc60f4422521d766a9e803b4"
+  },
+  {
+    "path": "python_sim/antenna_diversity/diversity/combiner.py",
+    "bytes": 5157,
+    "sha256": "89bd980f03f42b2aa132f94b8479aca6dcee477b8d5d61dcdafb83d352164e02"
+  },
+  {
+    "path": "python_sim/antenna_diversity/diversity/__init__.py",
+    "bytes": 177,
+    "sha256": "d6c8da5fc84686c16e7309691cd266814a2a6c32b9e17b3c680da1ebfebb5574"
+  },
+  {
+    "path": "python_sim/antenna_diversity/experiments/monte_carlo.py",
+    "bytes": 5092,
+    "sha256": "48d839303a9ac749334e17bddf133ce719c3e5cb7d25f2e2b4b8908621e065c7"
+  },
+  {
+    "path": "python_sim/antenna_diversity/experiments/spatial_scan.py",
+    "bytes": 14153,
+    "sha256": "8a3beb358b881c76ba3be6940a3ae10f5060d39d23a94f3ad51b9c02eb3bc93d"
+  },
+  {
+    "path": "python_sim/antenna_diversity/experiments/__init__.py",
+    "bytes": 734,
+    "sha256": "abedb37f45608773874e7e7e35cac1f525102ef58dd4381dc8e75eea7500bdcd"
+  },
+  {
+    "path": "python_sim/antenna_diversity/gnss/ca_code.py",
+    "bytes": 1260,
+    "sha256": "1d6d401bd574b2a140e10a611cb8fa18d1a71cd64ed1a0c31ee423fa47f3d0b9"
+  },
+  {
+    "path": "python_sim/antenna_diversity/gnss/channel_delay.py",
+    "bytes": 2993,
+    "sha256": "51b61bef19d685108733f3b044884df746bd0d180ebde7b5b2865a92fe8d1043"
+  },
+  {
+    "path": "python_sim/antenna_diversity/gnss/scenario.py",
+    "bytes": 19517,
+    "sha256": "4e59c28a9f0d6a6a0478d08c3adc414d4269306f5cdfadbe17f225209954b5be"
+  },
+  {
+    "path": "python_sim/antenna_diversity/gnss/__init__.py",
+    "bytes": 153,
+    "sha256": "4a99a38896b5f1ab7146286f11168c4612b192212eb12ae4d51347d9fb296203"
+  },
+  {
+    "path": "python_sim/antenna_diversity/receiver/acquisition.py",
+    "bytes": 4451,
+    "sha256": "08573a6440c742003eda5d5a092efd6cc5223f583e2e32868d52f3c36f8a516b"
+  },
+  {
+    "path": "python_sim/antenna_diversity/receiver/carrier_nco.py",
+    "bytes": 4998,
+    "sha256": "ad7d2d9c7145659fc9e264c786935806c608241feb03911ed4b0d60f18e3b793"
+  },
+  {
+    "path": "python_sim/antenna_diversity/receiver/tracking.py",
+    "bytes": 10562,
+    "sha256": "a98772ab80f15c422625d9aa7261db309bfcb26201af1b318dbf00c02008d164"
+  },
+  {
+    "path": "python_sim/antenna_diversity/receiver/__init__.py",
+    "bytes": 142,
+    "sha256": "81ff944c1723f5a91edbb799ceabc6d5048587673c3c2bcfb72fa4503f449fee"
+  },
+  {
+    "path": "python_sim/antenna_diversity/rf/cascade.py",
+    "bytes": 1589,
+    "sha256": "48551b62882f5f69f16335d51750fa33d53c5783f6d6d44536954fa2e43eada7"
+  },
+  {
+    "path": "python_sim/antenna_diversity/rf/frontend.py",
+    "bytes": 3403,
+    "sha256": "124aceeb6e01851cfcc3238ddbabec2fec5da97edc8ad75fdbaf525cdb59ad13"
+  },
+  {
+    "path": "python_sim/antenna_diversity/rf/__init__.py",
+    "bytes": 166,
+    "sha256": "9052972a558e6279f2f7481fa9007ae4e76295e2f730f0c750db084edae144b2"
+  },
+  {
+    "path": "python_sim/antenna_diversity/studies/analytical.py",
+    "bytes": 28635,
+    "sha256": "ce7fc12e5a7b0e9f1d6055940088f4e933a84d1b3e71e7d577d8b49562d67d64"
+  },
+  {
+    "path": "python_sim/antenna_diversity/studies/artifacts.py",
+    "bytes": 16322,
+    "sha256": "dd6cff98d75a426c1396719663445bb23df7f5932f9b966a74d630836bb875db"
+  },
+  {
+    "path": "python_sim/antenna_diversity/studies/config.py",
+    "bytes": 27593,
+    "sha256": "1781168672cde95bcffc1b83c5a23da5a9480e25d115e6f917341df0f068c640"
+  },
+  {
+    "path": "python_sim/antenna_diversity/studies/example_antenna_realism.json",
+    "bytes": 10473,
+    "sha256": "8b88ec76d387ba411325494a0d9eaf3dc0fb3768bdf6ab6fe910846345e4a237"
+  },
+  {
+    "path": "python_sim/antenna_diversity/studies/full_chain.py",
+    "bytes": 9078,
+    "sha256": "d3229884de927c72587f8dda679ed4622f77c2be2e14b1129132395f6993af90"
+  },
+  {
+    "path": "python_sim/antenna_diversity/studies/models.py",
+    "bytes": 18506,
+    "sha256": "7f2932b2297309b470deff8e440417cbde6d4450fdb50074ca83d60872ea67a6"
+  },
+  {
+    "path": "python_sim/antenna_diversity/studies/plots.py",
+    "bytes": 28720,
+    "sha256": "a546a9cf23b2732b34fb4aa5938ce4bd99f2c474425e0d7e5d8a27dd84f1bb05"
+  },
+  {
+    "path": "python_sim/antenna_diversity/studies/ranking.py",
+    "bytes": 20751,
+    "sha256": "cf98b71dc317d2f1e5d802f97a00b5478f98f6063cb0d6cb0b3270314ff6ccc0"
+  },
+  {
+    "path": "python_sim/antenna_diversity/studies/report.py",
+    "bytes": 18613,
+    "sha256": "11730d7fdd0684370b33b3de5e0eb63c944f17c64d9d31aa9903138e0d960629"
+  },
+  {
+    "path": "python_sim/antenna_diversity/studies/runner.py",
+    "bytes": 15237,
+    "sha256": "bf58e46d8252d047bc3e85e1e6f3b4035dd35fb49a204a89dcdcc70def361d68"
+  },
+  {
+    "path": "python_sim/antenna_diversity/studies/scenarios.py",
+    "bytes": 7408,
+    "sha256": "bf82f7835c56307b16a7dde07d67d693d0ddeb2eb9f23655b5c8d85330beaf1d"
+  },
+  {
+    "path": "python_sim/antenna_diversity/studies/__init__.py",
+    "bytes": 439,
+    "sha256": "93017a8cbd0c466e94ae4970f8e605f03544606b3859720022b87cbac9e81b87"
+  },
+  {
+    "path": "python_sim/results/legacy_ula/acquisition_search.png",
+    "bytes": 1583696,
+    "sha256": "22874e0e79cea1b6c687c185b309149d360637572cf0d9ffc41df29fd6327d67"
+  },
+  {
+    "path": "python_sim/results/legacy_ula/array_response.png",
+    "bytes": 90801,
+    "sha256": "beedf49153610300a61732b61aecbdc5d578b955f6f47e3dd48ee6a2cc1b9e47"
+  },
+  {
+    "path": "python_sim/results/legacy_ula/cn0_comparison.png",
+    "bytes": 111228,
+    "sha256": "06b46eae589674cc680f7c9bc1959598b7bb02d91c89a1e0961b49fee6266174"
+  },
+  {
+    "path": "python_sim/results/legacy_ula/combined_spectra.png",
+    "bytes": 244722,
+    "sha256": "39bce4406a414e8e0e6954859977b14050a429961d2a84ae23928309cdf3fc14"
+  },
+  {
+    "path": "python_sim/results/legacy_ula/rf_dfe_spectra.png",
+    "bytes": 174709,
+    "sha256": "0eda8ba22b6b21573c0dd426d804834573a8f1612ca4a3a2161f312810d8e353"
+  },
+  {
+    "path": "python_sim/results/legacy_ula/tracking_comparison.png",
+    "bytes": 169507,
+    "sha256": "9f98246ecf53417c296b4d649f47fe078d7a2ab26c156795d6824ac770350a46"
+  },
+  {
+    "path": "python_sim/results/tracking_nco/tracking_nco_comparison.csv",
+    "bytes": 2072,
+    "sha256": "ce4f2c24512e2f0e6f96e74d3286445800da109fec9f2ba4263a390cefda91ec"
+  },
+  {
+    "path": "python_sim/results/tracking_nco/tracking_nco_frequency.png",
+    "bytes": 140327,
+    "sha256": "76a6260feb204258f6878a8edf23990cdf7c7df0bfde02c71d6b44c8ee8aca1d"
+  },
+  {
+    "path": "python_sim/results/tracking_nco/tracking_nco_quantization_error.png",
+    "bytes": 152634,
+    "sha256": "d3cd30a174d5b80a5f4ce62d3dda26e2dbaf5e129c7a9fdd9df4e55e652fe74f"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/manifest.json",
+    "bytes": 2335,
+    "sha256": "45b65b01e0f939e2c18f01b5f3de20d94a3958893732ec7f6369ba072c27bd7d"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/report.md",
+    "bytes": 4674,
+    "sha256": "668a9da2a4f75931728026b4593abf785c5037e7cc59966b2055c50066f6eed7"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/resolved-config.json",
+    "bytes": 8532,
+    "sha256": "98adb7e27c275c5c0c5e25ee59bb38037ac50617d16d649661488e426e34aed2"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/summary.json",
+    "bytes": 4621,
+    "sha256": "0f8b6385e06c70420b1dae12db2fe718bbb57262e391580acbe34891642cedaf"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/manifest.json",
+    "bytes": 2345,
+    "sha256": "6257b66390bea0b402a1ddc80953f08aaff3ad145fdf92b492102f7525d351c4"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/report.md",
+    "bytes": 4674,
+    "sha256": "5c846c34a99b8f812a48e9e5277511c7fae2544199ddd003e68612ed46227b3c"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/resolved-config.json",
+    "bytes": 8542,
+    "sha256": "9c324b3ef786be98e8097bf90e859d70b63fa9c582c83a0a9c3175b87219a926"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/summary.json",
+    "bytes": 4631,
+    "sha256": "497aee200b1dfbb51de869d15a1258c1b22887c928bd1d83ee823653293fa925"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/checkpoints/baseline.json",
+    "bytes": 95187,
+    "sha256": "e1cf1935fc5da96a73f1fb5d8c0041fdb73c4c2d361aed71dad8bdf3c4dddec0"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/checkpoints/combined_error.json",
+    "bytes": 5671,
+    "sha256": "2d21b332178cbe28cc563e5c2a1abb912a6911e8e013708ffa0c45419433da0a"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/checkpoints/full_chain.json",
+    "bytes": 2744,
+    "sha256": "79c08ba812f7e30166bd1512dba7a715fadf213b388e623e094c84325f80de0d"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/checkpoints/multi_jammer.json",
+    "bytes": 8678,
+    "sha256": "1a50137d993d67c49e59a7a066e1ff95307828e3dde1cc84b7fbad5f8ff67836"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/checkpoints/report.json",
+    "bytes": 1405,
+    "sha256": "211ff7cd80f53c5503574a0c55b9090431f26b4182fd392babd66ea4060ba117"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/checkpoints/selection.json",
+    "bytes": 3840,
+    "sha256": "f8615613a21a3a5b2edb7ddf33cffd38caae707c60a6fac592c6a973e9e4f5b3"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/checkpoints/single_factor.json",
+    "bytes": 212525,
+    "sha256": "fdac7e3bf27eeed881b771c50351596cf370226f57841c8c075cd4f7c5b15da6"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/figures/baseline_rankings.png",
+    "bytes": 27129,
+    "sha256": "9f57f164d0e3a92c41f6e15d09a2df6ba96963936ec3c7b601c9a0940c157af4"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/figures/blockage_comparison.png",
+    "bytes": 332373,
+    "sha256": "79d9dea3d8398c94739a6b9f87aa57a6a8f2af270618eeaa60ad57a3289d4b2f"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/figures/cn0_validation.png",
+    "bytes": 74534,
+    "sha256": "045a1ff50b6b2a58113ca40e852818578b3f2fa593b11c6ea5808bc24a829205"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/figures/combined_error_distributions.png",
+    "bytes": 34478,
+    "sha256": "2176b538814e2c206ddbe8125d370bf7710886f5bdd84acc0f8ef08a29b2c122"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/figures/coupling_matrices.png",
+    "bytes": 88399,
+    "sha256": "f19bb3050cb86b643d31b89cc51d16af56b5e14ccade4ef9d929cc33d5cbc8e8"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/figures/direction_heatmaps.png",
+    "bytes": 137080,
+    "sha256": "20f8b7c88642f8752a3fe52e63943b42171292b4aa8101d827b649715356a514"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/figures/element_patterns.png",
+    "bytes": 178921,
+    "sha256": "986e86b23a87eb337c4f90c113f5ef912f0f9204887d59e180fbdd8599dbfe96"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/figures/full_chain_validation.png",
+    "bytes": 46746,
+    "sha256": "afe76d71d39a04858f4b44217963bf1a56d73e2cec02c8f6155eba509b0e4077"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/figures/multi_jammer_comparison.png",
+    "bytes": 46409,
+    "sha256": "8f31bb86ad610c60ef5e2b126d7c4544228bb5afe3864b632772804715c348c6"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/figures/polarization_losses.png",
+    "bytes": 45267,
+    "sha256": "35420fc5394f9aaf1dd60beb006ba8ff2da88ad78a028b56c3ce2e463a3f1308"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/figures/power_curves.png",
+    "bytes": 71681,
+    "sha256": "0f70940e980749d49f17313fbb47a145bbbd7f5851c7fbc4d3d5a6786f055540"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/figures/robustness_curves.png",
+    "bytes": 112591,
+    "sha256": "b062b815043a22c14527f19825f617ab7aaedda5d8a8b376abec3e576241e4f4"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/tables/antenna_diagnostics.csv",
+    "bytes": 17512,
+    "sha256": "515168c81e7951a1d6d6f49047281909931fb8c581627ee11e4d4a0660c1ba34"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/tables/baseline_rankings.csv",
+    "bytes": 2977,
+    "sha256": "95e9b0344dc8195a0b3f2856930013fcf85e37c628e764d365181c0e9d5bf19e"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/tables/combined_errors.csv",
+    "bytes": 5377,
+    "sha256": "42ae1c9dd0197847adebd8132bf36c146b8fd542255ee4ad5f428ac8a7f7a8dd"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/tables/direction_scan.csv",
+    "bytes": 5578,
+    "sha256": "3ee9f313e500f4cb24187be1acffb3bd6d55d820ec7986403af0da6255f810fc"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/tables/full_chain_cn0.csv",
+    "bytes": 731,
+    "sha256": "78c8b79b5a42e0c649a6ec192e6c483c26f3291f0a4feab9b61f3dbcaa79e391"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/tables/full_chain_validation.csv",
+    "bytes": 1093,
+    "sha256": "1a687ef787a2e21a1aefcac176e099d634367b481852807a96b304324adb6daf"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/tables/multi_jammer.csv",
+    "bytes": 8519,
+    "sha256": "739943e4b09fec31b0184b323cb5f1b70a137ed1155f426bf55c5567fa417e68"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/tables/power_scan.csv",
+    "bytes": 1788,
+    "sha256": "4e9df5eadff2ae6714763ff986df13ac2d7000d4d093f46ba9273451fdaf3b0d"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825/tables/robustness_scans.csv",
+    "bytes": 190196,
+    "sha256": "c983ced2005518dd423b7dc9ff68f69ed1e4360ee7cdb33f5db79a54e83a8a1f"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/checkpoints/baseline.json",
+    "bytes": 95187,
+    "sha256": "e1cf1935fc5da96a73f1fb5d8c0041fdb73c4c2d361aed71dad8bdf3c4dddec0"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/checkpoints/combined_error.json",
+    "bytes": 5671,
+    "sha256": "2d21b332178cbe28cc563e5c2a1abb912a6911e8e013708ffa0c45419433da0a"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/checkpoints/full_chain.json",
+    "bytes": 2744,
+    "sha256": "79c08ba812f7e30166bd1512dba7a715fadf213b388e623e094c84325f80de0d"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/checkpoints/multi_jammer.json",
+    "bytes": 8678,
+    "sha256": "1a50137d993d67c49e59a7a066e1ff95307828e3dde1cc84b7fbad5f8ff67836"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/checkpoints/report.json",
+    "bytes": 1405,
+    "sha256": "211ff7cd80f53c5503574a0c55b9090431f26b4182fd392babd66ea4060ba117"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/checkpoints/selection.json",
+    "bytes": 3840,
+    "sha256": "f8615613a21a3a5b2edb7ddf33cffd38caae707c60a6fac592c6a973e9e4f5b3"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/checkpoints/single_factor.json",
+    "bytes": 212525,
+    "sha256": "fdac7e3bf27eeed881b771c50351596cf370226f57841c8c075cd4f7c5b15da6"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/figures/baseline_rankings.png",
+    "bytes": 27129,
+    "sha256": "9f57f164d0e3a92c41f6e15d09a2df6ba96963936ec3c7b601c9a0940c157af4"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/figures/blockage_comparison.png",
+    "bytes": 332373,
+    "sha256": "79d9dea3d8398c94739a6b9f87aa57a6a8f2af270618eeaa60ad57a3289d4b2f"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/figures/cn0_validation.png",
+    "bytes": 74534,
+    "sha256": "045a1ff50b6b2a58113ca40e852818578b3f2fa593b11c6ea5808bc24a829205"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/figures/combined_error_distributions.png",
+    "bytes": 34478,
+    "sha256": "2176b538814e2c206ddbe8125d370bf7710886f5bdd84acc0f8ef08a29b2c122"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/figures/coupling_matrices.png",
+    "bytes": 88399,
+    "sha256": "f19bb3050cb86b643d31b89cc51d16af56b5e14ccade4ef9d929cc33d5cbc8e8"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/figures/direction_heatmaps.png",
+    "bytes": 137080,
+    "sha256": "20f8b7c88642f8752a3fe52e63943b42171292b4aa8101d827b649715356a514"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/figures/element_patterns.png",
+    "bytes": 178921,
+    "sha256": "986e86b23a87eb337c4f90c113f5ef912f0f9204887d59e180fbdd8599dbfe96"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/figures/full_chain_validation.png",
+    "bytes": 46746,
+    "sha256": "afe76d71d39a04858f4b44217963bf1a56d73e2cec02c8f6155eba509b0e4077"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/figures/multi_jammer_comparison.png",
+    "bytes": 46409,
+    "sha256": "8f31bb86ad610c60ef5e2b126d7c4544228bb5afe3864b632772804715c348c6"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/figures/polarization_losses.png",
+    "bytes": 45267,
+    "sha256": "35420fc5394f9aaf1dd60beb006ba8ff2da88ad78a028b56c3ce2e463a3f1308"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/figures/power_curves.png",
+    "bytes": 71681,
+    "sha256": "0f70940e980749d49f17313fbb47a145bbbd7f5851c7fbc4d3d5a6786f055540"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/figures/robustness_curves.png",
+    "bytes": 112591,
+    "sha256": "b062b815043a22c14527f19825f617ab7aaedda5d8a8b376abec3e576241e4f4"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/tables/antenna_diagnostics.csv",
+    "bytes": 17512,
+    "sha256": "515168c81e7951a1d6d6f49047281909931fb8c581627ee11e4d4a0660c1ba34"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/tables/baseline_rankings.csv",
+    "bytes": 2977,
+    "sha256": "95e9b0344dc8195a0b3f2856930013fcf85e37c628e764d365181c0e9d5bf19e"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/tables/combined_errors.csv",
+    "bytes": 5377,
+    "sha256": "42ae1c9dd0197847adebd8132bf36c146b8fd542255ee4ad5f428ac8a7f7a8dd"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/tables/direction_scan.csv",
+    "bytes": 5578,
+    "sha256": "3ee9f313e500f4cb24187be1acffb3bd6d55d820ec7986403af0da6255f810fc"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/tables/full_chain_cn0.csv",
+    "bytes": 731,
+    "sha256": "78c8b79b5a42e0c649a6ec192e6c483c26f3291f0a4feab9b61f3dbcaa79e391"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/tables/full_chain_validation.csv",
+    "bytes": 1093,
+    "sha256": "1a687ef787a2e21a1aefcac176e099d634367b481852807a96b304324adb6daf"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/tables/multi_jammer.csv",
+    "bytes": 8519,
+    "sha256": "739943e4b09fec31b0184b323cb5f1b70a137ed1155f426bf55c5567fa417e68"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/tables/power_scan.csv",
+    "bytes": 1788,
+    "sha256": "4e9df5eadff2ae6714763ff986df13ac2d7000d4d093f46ba9273451fdaf3b0d"
+  },
+  {
+    "path": "python_sim/results/studies/tracking-nco-regression-20260825-reviewfix/tables/robustness_scans.csv",
+    "bytes": 190196,
+    "sha256": "c983ced2005518dd423b7dc9ff68f69ed1e4360ee7cdb33f5db79a54e83a8a1f"
+  },
+  {
+    "path": "python_sim/tests/data/pattern_grid.csv",
+    "bytes": 217,
+    "sha256": "a678348a8482fbb4f356b0c56904bbaa463e6d2041606a440b13ec0bfc84ecdb"
+  }
+]

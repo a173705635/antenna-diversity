@@ -1,0 +1,71 @@
+[
+  {
+    "seed": 3000,
+    "epochs": 80,
+    "solved_epochs": 80,
+    "availability": 1.0,
+    "acquired_satellites": 8,
+    "enu_mean_m": [
+      4.748870339967335,
+      2.887955288450379,
+      -7.1387141932672575
+    ],
+    "enu_std_m": [
+      13.69636298715951,
+      12.774731575655505,
+      21.63383476942753
+    ],
+    "horizontal_rms_m": 19.53653452278558,
+    "position_rms_m": 30.011001788078314,
+    "position_p95_m": 42.71810071270433,
+    "position_max_m": 50.4859295205837,
+    "clock_error_mean_m": -3.8819418097822562,
+    "used_satellites_min": 8
+  },
+  {
+    "seed": 3001,
+    "epochs": 80,
+    "solved_epochs": 80,
+    "availability": 1.0,
+    "acquired_satellites": 8,
+    "enu_mean_m": [
+      4.4096827206656375,
+      3.934187300478084,
+      -9.2714239845132
+    ],
+    "enu_std_m": [
+      14.17688505447122,
+      13.068337732840032,
+      23.80800879436177
+    ],
+    "horizontal_rms_m": 20.16652306074203,
+    "position_rms_m": 32.549489056088944,
+    "position_p95_m": 48.882981449041004,
+    "position_max_m": 52.96042171258869,
+    "clock_error_mean_m": -5.677841225661723,
+    "used_satellites_min": 8
+  },
+  {
+    "seed": 3002,
+    "epochs": 80,
+    "solved_epochs": 80,
+    "availability": 1.0,
+    "acquired_satellites": 8,
+    "enu_mean_m": [
+      3.9373287615309094,
+      3.8236868897236933,
+      -10.554973630868595
+    ],
+    "enu_std_m": [
+      12.940913427788072,
+      12.620825158186792,
+      23.04565186580717
+    ],
+    "horizontal_rms_m": 18.891151559024923,
+    "position_rms_m": 31.613053403528777,
+    "position_p95_m": 47.42195354362418,
+    "position_max_m": 50.55824821705221,
+    "clock_error_mean_m": -6.33641768123216,
+    "used_satellites_min": 8
+  }
+]

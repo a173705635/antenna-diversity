@@ -8,7 +8,7 @@ def test_continuous_source_responds_to_subsample_delay():
     cfg = default_config()
     cfg.signal.code_bandwidth_hz = 1.8e6
     cfg.signal.doppler_hz = 0
-    n = np.arange(16368)
+    n = np.arange(round(cfg.signal.fs_rf_hz*.001))
     cfg.signal.code_delay_chips = 137.251
     first, _, _ = _desired_waveform(cfg, n, n / cfg.signal.fs_rf_hz)
     cfg.signal.code_delay_chips = 137.26

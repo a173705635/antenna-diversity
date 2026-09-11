@@ -13,8 +13,11 @@ EXPECTED = {
 }
 
 
-def test_default_simulation_matches_locked_baseline():
+def test_legacy_sample_rates_match_locked_baseline():
     cfg = default_config()
+    # This numerical snapshot was frozen at the original rates.
+    cfg.signal.fs_rf_hz = 16.368e6
+    cfg.dfe.decimation = 4
     cfg.signal.multipath_paths = []
     cfg.multipath_detection.enable = False
     cfg.multipath_suppression.enable = False

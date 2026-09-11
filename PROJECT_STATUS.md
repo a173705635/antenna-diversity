@@ -1,6 +1,34 @@
 # GNSS 天线分集与空域抗干扰仿真——项目状态
 
-> 最后更新：2026-09-10
+> 最后更新：2026-09-11
+>
+> 已整理[多径检测可信度自检可行性方案](docs/validation/2026-09-11-sdcp-self-check-feasibility.md)：观测质量、多星一致性、受约束阈值及三态输出；当前为待实现设计，不代表已有在线自检能力。
+>
+> 3秒SDCP验证：完成20条RF记录、160个跟踪历史。500 ms/1 s窗口两组强及启动强多径100%检出，弱/共模0%；LOS误报分别0%～2.92%/0%～3.08%。长窗没有消除逐星均值偏差，见[长记录报告](docs/reports/2026-09-11-sdcp-long.md)。
+>
+> SDCP窗口比较：200 ms窗将本批LOS时间标准差均值从1.545降至0.341 mm，弱多径检出由7.5%升至55%～82.5%，但独立LOS误报为0.94%～4.06%，尚非严格同误报收益。见[窗口报告](docs/reports/2026-09-11-sdcp-windows.md)。
+>
+> 校准取余SDCP回放：已知零通道偏差下，启动静态强多径两组样本检出比例由0%升至100%；LOS误报10/640，3 mm未校准偏差可使误报升至17.5%～19.7%。尚未接入定位权重，见[验证报告](docs/reports/2026-09-11-calibrated-sdcp.md)。
+>
+> 载波相位基准审计：无参考去均值的36组对照表明，当前理想/线性链路锁定后保留正确小数周，独立起点/NCO初相只改变整数分支；已知通道偏置则保留为实数误差。量化可见电平对照最坏约0.0295 mm，标称无噪声DFE不可用。116项测试通过，见[审计报告](docs/reports/2026-09-11-phase-origin.md)。
+>
+> SDCP已接入单频双天线定位：独立冻结当前链路4.899 mm门限，完成5场景×2噪声对。强非共同多径下软降权使浮点绝对RMS降低57%～65%，但纯码定位变差；弱反射、共模、参考静态污染不能保证收益。115项测试通过，见[定位有效性评估](docs/reports/2026-09-11-sdcp-positioning.md)。
+>
+> 双频融合优化：新增逐观测加权解算，保留等权基线；推荐L5码提供绝对基准、两频载波加权约束变化，显式排除未校准L1码绝对偏差。权重由4000～4002观测标定，4100～4102独立验证。见[优化报告](docs/reports/2026-09-11-dual-frequency-optimization.md)。
+>
+> 2026-09-11 新增单天线GPS L5 Q5：独立33 MHz频段链路，保留L1的6.6 MHz；包括标准主码、NH同步、跟踪观测和L1/L5/双频定位对比。见[L5实现与验证](docs/reports/2026-09-11-gps-l5.md)。
+>
+> 2026-09-11 默认采样链更新为33 MHz RF、DFE抽取5倍、6.6 MHz捕获/跟踪。矩形本地副本下完成3组1秒多星验证，240/240位置有效；SPP三维RMS 5.416～6.502 m，联合浮点三维RMS 2.786～3.647 m。见[新采样率验证](docs/reports/2026-09-11-sampling-33mhz.md)。
+>
+> 2026-09-11 逐星伪距诊断：完成相同RF数据上的本地副本对照及源端/线性/隔离PRN实验。确认矩形本地副本是大波动的重要来源；只换连续本地副本的配对实验中，联合浮点三维RMS为1.610～2.798 m。源端表示和PRN交互仍有残余，默认配置未切换。见[诊断报告](docs/reports/2026-09-11-pseudorange-bias-diagnosis.md)。
+>
+> 2026-09-11 码/载波浮点联合定位：复用三组单天线SPP观测做多历元离线解算，不固定整周数。三维绝对RMS降至9.047～11.897 m，去均值散布3.206～3.366 mm；固定位置偏差仍受伪距约束。一周相位突变反例可漏过粗残差门限，不具备完整周跳保护。见[联合浮点解报告](docs/reports/2026-09-11-code-carrier-float.md)。
+>
+> 2026-09-11 单天线定位框架：8个GPS L1 PRN共用RF/DFE，独立捕获跟踪后以时间辅助构造伪距，完成位置/钟差解算。3组1秒记录共240次定位全部成功，三维RMS 30.011～32.549 m，当前仅证明框架闭环；尚无导航电文/广播星历解码及多径定位收益验证。见[单天线SPP报告](docs/reports/2026-09-11-gps-spp-validation.md)。
+>
+> 2026-09-11 单频 SDCP：按 Trimble A1 说明书流程400实现双天线载波单差、几何补偿、参考常数处理及同权降权，完成25条端到端记录。强异方向反射可降权，共同偏差及参考段静态污染暴露盲区；不含多星RTK/PVT，不宣称定位改善。见[专利实现与验证](docs/reports/2026-09-11-trimble-single-frequency-validation.md)。
+>
+> 2026-09-11 接收链路基线补充：双独立 RF/DFE/跟踪链完成 1 秒 × 10 组无干扰、无多径、零通道延迟验证。200 ms 后路径差误差标准差 1.981～2.386 mm，跨组中位数 2.176 mm；单点绝对误差最高 9.044 mm。有限理想时钟条件下的经验结果，不代表锁定认证或多径判决门限。见[完整报告](docs/reports/2026-09-11-dual-tracking-stability.md)。
 
 > 多径专题本阶段暂停，已归档实验与限制。当前仅为实验检测基线，未完成通用可靠性验证。
 > 以[阶段总结](docs/reports/2026-09-10-multipath-stage-summary.md)作为本专题当前结论入口；下方早期记录保留历史过程。
@@ -13,7 +41,7 @@
 > 指定角度切面 5°为 6/100、10°为 39/100、20°为 97/100。弱反射及近 LOS 方向是主要盲区。
 > [边界记录](docs/reports/2026-09-10-detection-boundaries.md)仅为存在性检测，不代表时延/角度参数分辨率。
 > 已完成 80 次无外加干扰、含热噪声的检测基准；异方向场景有候选但角度误差显著，同方向存在结构性盲区。
-> [检测方案与基准](docs/reports/2026-09-08-multipath-detection-plan.md)明确已知 LOS 方向、至多单反射、待校准门限等边界。
+> [检测方案与基准](docs/validation/2026-09-08-multipath-detection-plan.md)明确已知 LOS 方向、至多单反射、待校准门限等边界。
 >
 > 当前主开发语言：Python
 >
@@ -35,7 +63,7 @@
 > 单反射径研究用连续时延估计已修正捕获峰偏移，但角度失配仍未解决。
 > 详见 [检测对照](docs/reports/2026-09-08-detector-versus-oracle.md)。
 
-本文是仓库中查看“项目做到哪里、已经证明什么、下一步做什么”的统一入口。日常配置和运行方法以 [`python_sim_simplified/README.md`](python_sim_simplified/README.md) 为准；批量研究能力以 [`python_sim/README.md`](python_sim/README.md) 为准。
+本文是仓库中查看“项目做到哪里、已经证明什么、下一步做什么”的统一入口。日常配置和运行方法以 [`python_sim_simplified/README.md`](python_sim_simplified/README.md) 为准；旧版批量研究能力见[历史归档](docs/archive/python_sim_2026-09-12/README.md)，已停止维护。
 
 ## 1. 项目目标
 
@@ -61,7 +89,7 @@ GPS L1 C/A 直达径 + 静态镜面多径 + CW / 带限宽带干扰
 ## 2. 当前总体结论
 
 1. Python 端到端研究链已经打通，MATLAB 不再是开发基线。
-2. `python_sim_simplified/` 是当前日常研究主版本；`python_sim/` 是完整批量研究框架，两者并非逐文件镜像。
+2. `python_sim_simplified/` 是当前日常研究主版本；旧版 `python_sim/` 已于 2026-09-12 归档并移除，后续只维护当前版本。
 3. 支持 `TL`、`TR`、`BL`、`BR` 中任意不重复的 2、3 或 4 天线组合，共 11 种组合。
 4. 支持理想、参数化和外部测量表格三类天线接口，但没有真实 Mate 70 天线测量数据。
 5. 在目标导向矢量准确、通道相干且窄带假设成立时，loaded MVDR 可形成目标无失真约束和干扰零陷；导向矢量失配可能造成目标自消除。
@@ -110,7 +138,7 @@ GPS L1 C/A 直达径 + 静态镜面多径 + CW / 带限宽带干扰
 ### 4.3 两套 Python 目录的分工
 
 - `python_sim_simplified/`：个人研究主代码；结构平直，便于改参数和追踪数值，已包含最新宽带干扰模型。
-- `python_sim/`：完整研究框架；包含更完整的校验、退化保护、批处理、扫描、Monte Carlo、checkpoint 和报告能力，但尚未同步最新宽带干扰功能。
+- `python_sim/`（已归档移除）：历史完整研究框架；包含更完整的校验、退化保护、批处理、扫描、Monte Carlo、checkpoint 和报告能力，但尚未同步最新宽带干扰功能。
 
 ## 5. 定点化状态
 
@@ -197,10 +225,10 @@ Carrier NCO 30-bit 与 43-bit 对比当前标记为“已验证、非主要因�
 
 - 当前运行与配置：[`python_sim_simplified/README.md`](python_sim_simplified/README.md)
 - 当前端到端入口：[`python_sim_simplified/run_end_to_end.py`](python_sim_simplified/run_end_to_end.py)
-- 完整研究框架：[`python_sim/README.md`](python_sim/README.md)
-- 完整数学设计：[`python_sim/DESIGN.md`](python_sim/DESIGN.md)
-- 对外架构说明：[`python_sim/ARCHITECTURE.md`](python_sim/ARCHITECTURE.md)
-- 理论知识库：[`基础知识/README.md`](基础知识/README.md)
+- 完整研究框架：[旧版归档说明](docs/archive/python_sim_2026-09-12/README.md)
+- 完整数学设计：[归档包中的 DESIGN.md](docs/archive/python_sim_2026-09-12/README.md)
+- 对外架构说明：[归档包中的 ARCHITECTURE.md](docs/archive/python_sim_2026-09-12/README.md)
+- 理论知识库：[`基础知识/README.md`](docs/knowledge/README.md)
 - 汇报与原理文档：[`docs/reports/README.md`](docs/reports/README.md)
 - 历史项目记忆：[`docs/archive/CODEX_MEMORY_GNSS_ANTENNA_DIVERSITY.md`](docs/archive/CODEX_MEMORY_GNSS_ANTENNA_DIVERSITY.md)
 

@@ -1,0 +1,438 @@
+[
+  {
+    "window_ms": 10,
+    "threshold_mm": 4.440441279683683,
+    "cases": [
+      {
+        "seed": 6100,
+        "kind": "los",
+        "late_prn1_fraction": 0.0,
+        "late_other_fraction": 0.017857142857142856,
+        "first_available_s": 0.2,
+        "first_alarm_s": 0.47000000000000003,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 1,
+        "late_all_false_fraction": 0.015625
+      },
+      {
+        "seed": 6100,
+        "kind": "strong",
+        "late_prn1_fraction": 1.0,
+        "late_other_fraction": 0.02142857142857143,
+        "first_available_s": 0.2,
+        "first_alarm_s": 0.47000000000000003,
+        "first_post_onset_delay_ms": 10.000000000000009,
+        "pre_onset_prn1_alarms": 1
+      },
+      {
+        "seed": 6100,
+        "kind": "weak",
+        "late_prn1_fraction": 0.075,
+        "late_other_fraction": 0.017857142857142856,
+        "first_available_s": 0.2,
+        "first_alarm_s": 0.47000000000000003,
+        "first_post_onset_delay_ms": 20.000000000000018,
+        "pre_onset_prn1_alarms": 1
+      },
+      {
+        "seed": 6100,
+        "kind": "common",
+        "late_prn1_fraction": 0.0,
+        "late_other_fraction": 0.017857142857142856,
+        "first_available_s": 0.2,
+        "first_alarm_s": 0.47000000000000003,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 1
+      },
+      {
+        "seed": 6100,
+        "kind": "static",
+        "late_prn1_fraction": 1.0,
+        "late_other_fraction": 0.02142857142857143,
+        "first_available_s": 0.2,
+        "first_alarm_s": 0.2,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 30
+      },
+      {
+        "seed": 6102,
+        "kind": "los",
+        "late_prn1_fraction": 0.0,
+        "late_other_fraction": 0.017857142857142856,
+        "first_available_s": 0.2,
+        "first_alarm_s": null,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 0,
+        "late_all_false_fraction": 0.015625
+      },
+      {
+        "seed": 6102,
+        "kind": "strong",
+        "late_prn1_fraction": 1.0,
+        "late_other_fraction": 0.010714285714285714,
+        "first_available_s": 0.2,
+        "first_alarm_s": 0.51,
+        "first_post_onset_delay_ms": 10.000000000000009,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6102,
+        "kind": "weak",
+        "late_prn1_fraction": 0.075,
+        "late_other_fraction": 0.010714285714285714,
+        "first_available_s": 0.2,
+        "first_alarm_s": 0.68,
+        "first_post_onset_delay_ms": 180.00000000000006,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6102,
+        "kind": "common",
+        "late_prn1_fraction": 0.0,
+        "late_other_fraction": 0.010714285714285714,
+        "first_available_s": 0.2,
+        "first_alarm_s": null,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6102,
+        "kind": "static",
+        "late_prn1_fraction": 1.0,
+        "late_other_fraction": 0.010714285714285714,
+        "first_available_s": 0.2,
+        "first_alarm_s": 0.2,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 30
+      }
+    ],
+    "los_mean_temporal_std_mm": 1.5447183593319889
+  },
+  {
+    "window_ms": 50,
+    "threshold_mm": 2.779723876089643,
+    "cases": [
+      {
+        "seed": 6100,
+        "kind": "los",
+        "late_prn1_fraction": 0.0,
+        "late_other_fraction": 0.010714285714285714,
+        "first_available_s": 0.24,
+        "first_alarm_s": null,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 0,
+        "late_all_false_fraction": 0.009375
+      },
+      {
+        "seed": 6100,
+        "kind": "strong",
+        "late_prn1_fraction": 1.0,
+        "late_other_fraction": 0.0035714285714285713,
+        "first_available_s": 0.24,
+        "first_alarm_s": 0.52,
+        "first_post_onset_delay_ms": 20.000000000000018,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6100,
+        "kind": "weak",
+        "late_prn1_fraction": 0.075,
+        "late_other_fraction": 0.010714285714285714,
+        "first_available_s": 0.24,
+        "first_alarm_s": 0.55,
+        "first_post_onset_delay_ms": 50.00000000000004,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6100,
+        "kind": "common",
+        "late_prn1_fraction": 0.0,
+        "late_other_fraction": 0.014285714285714285,
+        "first_available_s": 0.24,
+        "first_alarm_s": null,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6100,
+        "kind": "static",
+        "late_prn1_fraction": 1.0,
+        "late_other_fraction": 0.0035714285714285713,
+        "first_available_s": 0.24,
+        "first_alarm_s": 0.24,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 26
+      },
+      {
+        "seed": 6102,
+        "kind": "los",
+        "late_prn1_fraction": 0.0,
+        "late_other_fraction": 0.02142857142857143,
+        "first_available_s": 0.24,
+        "first_alarm_s": null,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 0,
+        "late_all_false_fraction": 0.01875
+      },
+      {
+        "seed": 6102,
+        "kind": "strong",
+        "late_prn1_fraction": 1.0,
+        "late_other_fraction": 0.017857142857142856,
+        "first_available_s": 0.24,
+        "first_alarm_s": 0.52,
+        "first_post_onset_delay_ms": 20.000000000000018,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6102,
+        "kind": "weak",
+        "late_prn1_fraction": 0.1,
+        "late_other_fraction": 0.017857142857142856,
+        "first_available_s": 0.24,
+        "first_alarm_s": 0.8200000000000001,
+        "first_post_onset_delay_ms": 320.00000000000006,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6102,
+        "kind": "common",
+        "late_prn1_fraction": 0.0,
+        "late_other_fraction": 0.025,
+        "first_available_s": 0.24,
+        "first_alarm_s": 0.53,
+        "first_post_onset_delay_ms": 30.00000000000003,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6102,
+        "kind": "static",
+        "late_prn1_fraction": 1.0,
+        "late_other_fraction": 0.017857142857142856,
+        "first_available_s": 0.24,
+        "first_alarm_s": 0.24,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 26
+      }
+    ],
+    "los_mean_temporal_std_mm": 0.6898049701120595
+  },
+  {
+    "window_ms": 100,
+    "threshold_mm": 2.2741177772688395,
+    "cases": [
+      {
+        "seed": 6100,
+        "kind": "los",
+        "late_prn1_fraction": 0.0,
+        "late_other_fraction": 0.017857142857142856,
+        "first_available_s": 0.29,
+        "first_alarm_s": null,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 0,
+        "late_all_false_fraction": 0.015625
+      },
+      {
+        "seed": 6100,
+        "kind": "strong",
+        "late_prn1_fraction": 1.0,
+        "late_other_fraction": 0.010714285714285714,
+        "first_available_s": 0.29,
+        "first_alarm_s": 0.53,
+        "first_post_onset_delay_ms": 30.00000000000003,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6100,
+        "kind": "weak",
+        "late_prn1_fraction": 0.375,
+        "late_other_fraction": 0.017857142857142856,
+        "first_available_s": 0.29,
+        "first_alarm_s": 0.58,
+        "first_post_onset_delay_ms": 79.99999999999996,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6100,
+        "kind": "common",
+        "late_prn1_fraction": 0.0,
+        "late_other_fraction": 0.017857142857142856,
+        "first_available_s": 0.29,
+        "first_alarm_s": null,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6100,
+        "kind": "static",
+        "late_prn1_fraction": 1.0,
+        "late_other_fraction": 0.010714285714285714,
+        "first_available_s": 0.29,
+        "first_alarm_s": 0.29,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 21
+      },
+      {
+        "seed": 6102,
+        "kind": "los",
+        "late_prn1_fraction": 0.0,
+        "late_other_fraction": 0.03571428571428571,
+        "first_available_s": 0.29,
+        "first_alarm_s": null,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 0,
+        "late_all_false_fraction": 0.03125
+      },
+      {
+        "seed": 6102,
+        "kind": "strong",
+        "late_prn1_fraction": 1.0,
+        "late_other_fraction": 0.025,
+        "first_available_s": 0.29,
+        "first_alarm_s": 0.53,
+        "first_post_onset_delay_ms": 30.00000000000003,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6102,
+        "kind": "weak",
+        "late_prn1_fraction": 0.175,
+        "late_other_fraction": 0.03571428571428571,
+        "first_available_s": 0.29,
+        "first_alarm_s": 0.8200000000000001,
+        "first_post_onset_delay_ms": 320.00000000000006,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6102,
+        "kind": "common",
+        "late_prn1_fraction": 0.0,
+        "late_other_fraction": 0.05714285714285714,
+        "first_available_s": 0.29,
+        "first_alarm_s": 0.58,
+        "first_post_onset_delay_ms": 79.99999999999996,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6102,
+        "kind": "static",
+        "late_prn1_fraction": 1.0,
+        "late_other_fraction": 0.025,
+        "first_available_s": 0.29,
+        "first_alarm_s": 0.29,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 21
+      }
+    ],
+    "los_mean_temporal_std_mm": 0.47054836627479324
+  },
+  {
+    "window_ms": 200,
+    "threshold_mm": 1.865881244252136,
+    "cases": [
+      {
+        "seed": 6100,
+        "kind": "los",
+        "late_prn1_fraction": 0.0,
+        "late_other_fraction": 0.010714285714285714,
+        "first_available_s": 0.39,
+        "first_alarm_s": null,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 0,
+        "late_all_false_fraction": 0.009375
+      },
+      {
+        "seed": 6100,
+        "kind": "strong",
+        "late_prn1_fraction": 1.0,
+        "late_other_fraction": 0.0,
+        "first_available_s": 0.39,
+        "first_alarm_s": 0.54,
+        "first_post_onset_delay_ms": 40.000000000000036,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6100,
+        "kind": "weak",
+        "late_prn1_fraction": 0.825,
+        "late_other_fraction": 0.0035714285714285713,
+        "first_available_s": 0.39,
+        "first_alarm_s": 0.67,
+        "first_post_onset_delay_ms": 170.00000000000003,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6100,
+        "kind": "common",
+        "late_prn1_fraction": 0.0,
+        "late_other_fraction": 0.014285714285714285,
+        "first_available_s": 0.39,
+        "first_alarm_s": null,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6100,
+        "kind": "static",
+        "late_prn1_fraction": 1.0,
+        "late_other_fraction": 0.0035714285714285713,
+        "first_available_s": 0.39,
+        "first_alarm_s": 0.39,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 11
+      },
+      {
+        "seed": 6102,
+        "kind": "los",
+        "late_prn1_fraction": 0.0,
+        "late_other_fraction": 0.04642857142857143,
+        "first_available_s": 0.39,
+        "first_alarm_s": null,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 0,
+        "late_all_false_fraction": 0.040625
+      },
+      {
+        "seed": 6102,
+        "kind": "strong",
+        "late_prn1_fraction": 1.0,
+        "late_other_fraction": 0.025,
+        "first_available_s": 0.39,
+        "first_alarm_s": 0.56,
+        "first_post_onset_delay_ms": 60.00000000000006,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6102,
+        "kind": "weak",
+        "late_prn1_fraction": 0.55,
+        "late_other_fraction": 0.05,
+        "first_available_s": 0.39,
+        "first_alarm_s": 0.75,
+        "first_post_onset_delay_ms": 250.0,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6102,
+        "kind": "common",
+        "late_prn1_fraction": 0.075,
+        "late_other_fraction": 0.060714285714285714,
+        "first_available_s": 0.39,
+        "first_alarm_s": 0.65,
+        "first_post_onset_delay_ms": 150.00000000000003,
+        "pre_onset_prn1_alarms": 0
+      },
+      {
+        "seed": 6102,
+        "kind": "static",
+        "late_prn1_fraction": 1.0,
+        "late_other_fraction": 0.025,
+        "first_available_s": 0.39,
+        "first_alarm_s": 0.39,
+        "first_post_onset_delay_ms": null,
+        "pre_onset_prn1_alarms": 11
+      }
+    ],
+    "los_mean_temporal_std_mm": 0.340761309707566
+  }
+]
