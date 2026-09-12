@@ -1,0 +1,114 @@
+{
+  "scope": "Deterministic lifecycle event replay; no RF performance or runtime benchmark.",
+  "illustrative_settings": {
+    "threshold_m": 0.01,
+    "residual_m": 0.02,
+    "bound_m": 0.001,
+    "max_gap_s": 0.025,
+    "anomaly_multiplier": 0.25
+  },
+  "events": [
+    {
+      "event": "boot",
+      "time_s": 0,
+      "state": -1,
+      "reason": "await_current_branch_confirmation",
+      "base_weight_multiplier": 1.0,
+      "branch_approved": false
+    },
+    {
+      "event": "confirm",
+      "time_s": 0.01,
+      "state": 1,
+      "reason": "suspected_anomaly",
+      "base_weight_multiplier": 0.25,
+      "branch_approved": true
+    },
+    {
+      "event": "loss",
+      "time_s": 0.02,
+      "state": -1,
+      "reason": "invalid_observation_or_calibration",
+      "base_weight_multiplier": 1.0,
+      "branch_approved": false
+    },
+    {
+      "event": "reacquired",
+      "time_s": 0.03,
+      "state": -1,
+      "reason": "await_current_branch_confirmation",
+      "base_weight_multiplier": 1.0,
+      "branch_approved": false
+    },
+    {
+      "event": "reconfirm",
+      "time_s": 0.04,
+      "state": 1,
+      "reason": "suspected_anomaly",
+      "base_weight_multiplier": 0.25,
+      "branch_approved": true
+    },
+    {
+      "event": "temperature_outside_calibration",
+      "time_s": 0.05,
+      "state": -1,
+      "reason": "invalid_observation_or_calibration",
+      "base_weight_multiplier": 1.0,
+      "branch_approved": false
+    },
+    {
+      "event": "temperature_back",
+      "time_s": 0.06,
+      "state": -1,
+      "reason": "await_current_branch_confirmation",
+      "base_weight_multiplier": 1.0,
+      "branch_approved": false
+    },
+    {
+      "event": "confirm_again",
+      "time_s": 0.07,
+      "state": 1,
+      "reason": "suspected_anomaly",
+      "base_weight_multiplier": 0.25,
+      "branch_approved": true
+    },
+    {
+      "event": "gap",
+      "time_s": 0.2,
+      "state": -1,
+      "reason": "time_gap_requires_confirmation",
+      "base_weight_multiplier": 1.0,
+      "branch_approved": false
+    },
+    {
+      "event": "gap_reconfirm",
+      "time_s": 0.21,
+      "state": 1,
+      "reason": "suspected_anomaly",
+      "base_weight_multiplier": 0.25,
+      "branch_approved": true
+    },
+    {
+      "event": "new_arc",
+      "time_s": 0.22,
+      "state": -1,
+      "reason": "await_current_branch_confirmation",
+      "base_weight_multiplier": 1.0,
+      "branch_approved": false
+    },
+    {
+      "event": "new_arc_confirm",
+      "time_s": 0.23,
+      "state": 1,
+      "reason": "suspected_anomaly",
+      "base_weight_multiplier": 0.25,
+      "branch_approved": true
+    }
+  ],
+  "external_confirmation": "Injected test events, not receiver-derived integrity evidence.",
+  "source_sha256": {
+    "audit_gf_runtime.py": "48ba02a05d21485de485863a3ca508298f0843fbfd9901f5a4171af0b8d2b712",
+    "gf_runtime.py": "d23bc2781f9d4f929da2ce71af7a8b95adb2ac9e46201fa88b52210098740eff",
+    "gf_quality_gate.py": "5877be8612967a2a7d29b1cf0581d6a3c4c88ea9cc33cf9f7b02c7901e7553bf"
+  }
+}

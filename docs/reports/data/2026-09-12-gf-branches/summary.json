@@ -1,0 +1,177 @@
+{
+  "scope": "Archived LOS RF branch diagnostic plus labelled observation-domain injections.\n\nGeometry comes from A L1 code positioning and configured baseline. Zero hardware\nbias is an external simulation assumption, not estimated from a clean interval.\nNearest branches are hypotheses, not ambiguity-fixed navigation solutions.\n",
+  "epochs": 20,
+  "rows": [
+    {
+      "prn": 1,
+      "l1_branches": [
+        0
+      ],
+      "l5_branches": [
+        0
+      ],
+      "raw_mean_mm": 0.41516952414824004,
+      "branch_corrected_mean_mm": 0.41516952414824004,
+      "std_mm": 4.26441654361345
+    },
+    {
+      "prn": 2,
+      "l1_branches": [
+        0
+      ],
+      "l5_branches": [
+        0
+      ],
+      "raw_mean_mm": -0.31976107534923415,
+      "branch_corrected_mean_mm": -0.31976107534923415,
+      "std_mm": 2.447344228575665
+    },
+    {
+      "prn": 3,
+      "l1_branches": [
+        1
+      ],
+      "l5_branches": [
+        0
+      ],
+      "raw_mean_mm": 188.8499335687534,
+      "branch_corrected_mean_mm": -1.443739229611457,
+      "std_mm": 3.2762849758604844
+    },
+    {
+      "prn": 4,
+      "l1_branches": [
+        0
+      ],
+      "l5_branches": [
+        0
+      ],
+      "raw_mean_mm": -0.47918325497856507,
+      "branch_corrected_mean_mm": -0.47918325497856507,
+      "std_mm": 2.718527276559329
+    },
+    {
+      "prn": 5,
+      "l1_branches": [
+        0
+      ],
+      "l5_branches": [
+        0
+      ],
+      "raw_mean_mm": -0.04085958715194238,
+      "branch_corrected_mean_mm": -0.04085958715194238,
+      "std_mm": 3.5248809782472654
+    },
+    {
+      "prn": 6,
+      "l1_branches": [
+        0
+      ],
+      "l5_branches": [
+        0
+      ],
+      "raw_mean_mm": 2.854163197525139,
+      "branch_corrected_mean_mm": 2.854163197525139,
+      "std_mm": 3.5187088909477553
+    },
+    {
+      "prn": 7,
+      "l1_branches": [
+        0
+      ],
+      "l5_branches": [
+        0
+      ],
+      "raw_mean_mm": -1.603687193648895,
+      "branch_corrected_mean_mm": -1.603687193648895,
+      "std_mm": 3.6615711404038853
+    },
+    {
+      "prn": 8,
+      "l1_branches": [
+        0
+      ],
+      "l5_branches": [
+        0
+      ],
+      "raw_mean_mm": 0.25930846594164336,
+      "branch_corrected_mean_mm": 0.25930846594164336,
+      "std_mm": 3.0706232348527944
+    }
+  ],
+  "geometry_stress": [
+    {
+      "baseline_rotation_deg": 0,
+      "changed_branch_count": 0,
+      "max_gf_change_mm": 0.0
+    },
+    {
+      "baseline_rotation_deg": 3,
+      "changed_branch_count": 0,
+      "max_gf_change_mm": 0.0
+    },
+    {
+      "baseline_rotation_deg": 5,
+      "changed_branch_count": 0,
+      "max_gf_change_mm": 0.0
+    },
+    {
+      "baseline_rotation_deg": 10,
+      "changed_branch_count": 0,
+      "max_gf_change_mm": 0.0
+    },
+    {
+      "baseline_rotation_deg": 30,
+      "changed_branch_count": 0,
+      "max_gf_change_mm": 0.0
+    },
+    {
+      "baseline_rotation_deg": 60,
+      "changed_branch_count": 0,
+      "max_gf_change_mm": 0.0
+    },
+    {
+      "baseline_rotation_deg": 90,
+      "changed_branch_count": 0,
+      "max_gf_change_mm": 0.0
+    },
+    {
+      "baseline_rotation_deg": 180,
+      "changed_branch_count": 41,
+      "max_gf_change_mm": 190.29367279836487
+    }
+  ],
+  "observation_injections_not_rf": [
+    {
+      "label": "static_multipath",
+      "injected_l1_prn1_m": 0.008,
+      "output_change_mm": 8.000000000000002,
+      "branch_changes": 0
+    },
+    {
+      "label": "hardware_bias",
+      "injected_l1_prn1_m": 0.008,
+      "output_change_mm": 8.000000000000002,
+      "branch_changes": 0
+    },
+    {
+      "label": "large_offset",
+      "injected_l1_prn1_m": 0.11,
+      "output_change_mm": -80.29367279836488,
+      "branch_changes": 20
+    }
+  ],
+  "branch_sufficient_bound_m": [
+    0.09514683639918244,
+    0.12741402439542693
+  ],
+  "input_hashes": {
+    "L1CA_0.json": "f7bd50d9ef935ce990b73fe767780d0b5eda947b2c25922a1d78bba92cf9eeac",
+    "L1CA_1.json": "7bd7c3bf0dd88e23b4bad5ccb30a0040104368e95209ae5ad26ffb88a650361c",
+    "L5Q_0.json": "f077daed4b1811a151cfb843df0ad8fb098a6a21cebdd4d7ad0490ac14140597",
+    "L5Q_1.json": "1d18d2d0c5cc78e09420f26f1bfef5397d74c43b201d1632d0a319b1747d22dd",
+    "manifest.json": "179f52c58745c180126e26491e58a50984025530e1b3b2f5fe99a332744ba31c",
+    "summary.json": "cd1d9b09aff403cf2ba9109cf0198e6636d78428a94adb8aa8c01bc9db51bd9e"
+  },
+  "source_sha256": "b09c117dc216d75e6296b4f02be8bc4a8720e4099610ba2f89301105b9eeec24"
+}

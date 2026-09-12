@@ -1,0 +1,16 @@
+{
+  "frozen_at": "2026-09-12T00:58:13.166304",
+  "evaluation_seeds": [
+    6400,
+    6402
+  ],
+  "development_seeds": [
+    6300,
+    6302
+  ],
+  "code_hashes": {
+    "sdcp_self_check.py": "29017bc8f937d7d3a52ff373779807917bd858d8597afa67a023dfc19091f2a9",
+    "audit_sdcp_self_check.py": "66bf53f400b68466fb658bc0bf9f26e714fdca016a9d0504302b6d40d5cd72a8",
+    "generate_sdcp_self_check_rf.py": "a414dcffc8a820de9dfecbdeff131405b2bb7352d3dd3d84341735ab6ae259eb"
+  }
+}

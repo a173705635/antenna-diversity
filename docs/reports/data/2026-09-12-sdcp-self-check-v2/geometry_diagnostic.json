@@ -1,0 +1,14 @@
+[
+  {
+    "seed": 6200,
+    "geometry_spp_vs_truth_max_mm": 2.9802322387695312e-05
+  },
+  {
+    "seed": 6202,
+    "geometry_spp_vs_truth_max_mm": 2.9802322387695312e-05
+  },
+  {
+    "seed": 6204,
+    "geometry_spp_vs_truth_max_mm": 2.9802322387695312e-05
+  }
+]

@@ -1,0 +1,44 @@
+{
+  "scope": "Controlled Jones/array counterexamples. No RF, field data or detector rates.",
+  "polarization": {
+    "los_rhcp": {
+      "rhcp_lhcp_power_ratio_db": 20.000000000000004,
+      "rhcp_phase_rad": 0.0
+    },
+    "nlos_lhcp": {
+      "rhcp_lhcp_power_ratio_db": -20.000000000000004,
+      "rhcp_phase_rad": 0.0
+    },
+    "nlos_rhcp_counterexample": {
+      "rhcp_lhcp_power_ratio_db": 20.000000000000004,
+      "rhcp_phase_rad": 0.0
+    },
+    "los_plus_inphase_rhcp_echo": {
+      "rhcp_lhcp_power_ratio_db": 19.999999999999996,
+      "rhcp_phase_rad": 0.0
+    },
+    "los_plus_quadrature_rhcp_echo": {
+      "rhcp_lhcp_power_ratio_db": 20.000000000000004,
+      "rhcp_phase_rad": 0.4636476090008061
+    }
+  },
+  "spatial_oracle": {
+    "distinct_direction": {
+      "los_response_abs": 1.0000000000000284,
+      "echo_response_abs": 2.842170943040401e-14,
+      "rejected_constraints": []
+    },
+    "same_direction": {
+      "los_response_abs": 1.0,
+      "echo_response_abs": 1.0,
+      "rejected_constraints": [
+        0
+      ]
+    }
+  },
+  "source_sha256": {
+    "audit_diversity_observability.py": "06cc225ebaf8436ded663fbfaf2016b7df5cc8d178f163de4d8820c7a103f1f9",
+    "antenna.py": "a29e60178f22d737a9e71668923f8edcaabf4af2fbc7d6d0abd6e46e51557c7b",
+    "diversity.py": "9dbc90ef1754c6937171f8bdb72bd48fb3c8cf57d3ac04fa66bca65e33771952"
+  }
+}

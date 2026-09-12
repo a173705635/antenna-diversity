@@ -1,0 +1,14 @@
+{
+  "sha256_entries_checked": 357,
+  "sha256_failures": [],
+  "local_links_checked": 178,
+  "missing_local_links": [],
+  "scope": "2026-09-12 evidence hashes and current stage/report navigation; existing RF not regenerated",
+  "tests": {
+    "command": "D:/Python/Python311/python.exe -m pytest -q python_sim_simplified/tests",
+    "passed": 145,
+    "warnings": 1,
+    "duration_s": 90.18,
+    "warning": "Existing noise-free C/N0 divide by zero at tracking.py:82"
+  }
+}

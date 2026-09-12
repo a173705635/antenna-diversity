@@ -1,0 +1,46 @@
+{
+  "scope": "Deterministic observation-model identifiability audit; NOT RF or PVT evidence.",
+  "epochs": 1000,
+  "baseline_amplitude_m": 0.0759,
+  "wavelengths_m": [
+    0.19029367279836487,
+    0.25482804879085386
+  ],
+  "cases": {
+    "changing_geometry": {
+      "mean_m": 0.0,
+      "std_m": 0.0,
+      "max_abs_m": 0.0
+    },
+    "static_l1_multipath_8mm": {
+      "mean_m": 0.008000000000000004,
+      "std_m": 5.3199757880913376e-18,
+      "max_abs_m": 0.008000000000000007
+    },
+    "hardware_l1_bias_8mm": {
+      "mean_m": 0.008000000000000004,
+      "std_m": 5.3199757880913376e-18,
+      "max_abs_m": 0.008000000000000007
+    },
+    "common_frequency_error_20mm": {
+      "mean_m": 0.0,
+      "std_m": 0.0,
+      "max_abs_m": 0.0
+    },
+    "one_cycle_each_frequency": {
+      "mean_m": -0.06453437599248898,
+      "std_m": 1.8706722612343424e-17,
+      "max_abs_m": 0.06453437599248901
+    },
+    "l1_cycle_slip_at_500ms": {
+      "mean_m": 0.09514683639918245,
+      "std_m": 0.09514683639918244,
+      "max_abs_m": 0.1902936727983649
+    }
+  },
+  "static_multipath_vs_hardware_max_difference_m": 0.0,
+  "source_sha256": {
+    "audit_geometry_free_sdcp.py": "d724b250a3998ed24ea99330847cdbab826bf2337172c4094c27f9a20869c099",
+    "sdcp.py": "c638b9d9f8e885f6bb65313dff58409795f38bd5e1d47d3f41a23d4e84b25899"
+  }
+}

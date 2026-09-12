@@ -1,0 +1,3884 @@
+[
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "los",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.825,
+    "reasons": {
+      "clear": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "offset_10mm",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 1.0,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 1.0,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "common_ambiguity": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "drift_10mm_s",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 1.0,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 1.0,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.25,
+    "reasons": {
+      "common_ambiguity": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "noise_x3",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.03333333333333333,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.010833333333333334,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "quality": 1194,
+      "noise_limit": 6
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "geometry_unreported",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.6258333333333334,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.625,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "common_ambiguity": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "geometry_reported",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.6258333333333334,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.625,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "quality": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "loss_flag",
+    "coverage": 0.9841666666666666,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.8733333333333333,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.7852678571428572,
+    "reasons": {
+      "quality": 19,
+      "clear": 1181
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "missing",
+    "coverage": 0.9833333333333333,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.8666666666666667,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.7848214285714286,
+    "reasons": {
+      "quality": 20,
+      "clear": 1180
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "half_cycle",
+    "coverage": 0.875,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.125,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.125,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.721875,
+    "reasons": {
+      "quality": 150,
+      "clear": 1050
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "skew",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "quality": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "one_static_25mm",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 1.0,
+    "detection_judged": 1.0,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.825,
+    "reasons": {
+      "persistent_anomaly": 150,
+      "clear": 1050
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": true,
+        "delay_s": 0.78
+      }
+    ]
+  },
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "three_static_25mm",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 1.0,
+    "detection_judged": 1.0,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.825,
+    "reasons": {
+      "persistent_anomaly": 450,
+      "clear": 750
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": true,
+        "delay_s": 0.78
+      },
+      {
+        "column": 1,
+        "detected": true,
+        "delay_s": 0.78
+      },
+      {
+        "column": 2,
+        "detected": true,
+        "delay_s": 0.78
+      }
+    ]
+  },
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "five_static_25mm",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": 0.0,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "common_ambiguity": 1200
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 1,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 2,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 3,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 4,
+        "detected": false,
+        "delay_s": null
+      }
+    ]
+  },
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "all_static_25mm",
+    "coverage": 0.0,
+    "false_alarm_all": null,
+    "false_alarm_judged": null,
+    "detection_all": 0.0,
+    "detection_judged": null,
+    "fixed_false_alarm": null,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": null,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "common_ambiguity": 1200
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 1,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 2,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 3,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 4,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 5,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 6,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 7,
+        "detected": false,
+        "delay_s": null
+      }
+    ]
+  },
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "combined",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": 0.0,
+    "detection_judged": null,
+    "fixed_false_alarm": 1.0,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 1.0,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.22991071428571427,
+    "reasons": {
+      "common_ambiguity": 1200
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": true,
+        "delay_s": 0.5700000000000001
+      }
+    ]
+  },
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "integer_jump_unreported",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.825,
+    "reasons": {
+      "clear": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "RF_replay",
+    "case": "los",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.825,
+    "reasons": {
+      "clear": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "RF_replay",
+    "case": "strong",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 1.0,
+    "detection_judged": 1.0,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.8129464285714286,
+    "reasons": {
+      "persistent_anomaly": 150,
+      "clear": 1050
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": true,
+        "delay_s": 0.55
+      }
+    ]
+  },
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "RF_replay",
+    "case": "weak",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 0.0,
+    "detection_judged": 0.0,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": 0.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 0.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.825,
+    "reasons": {
+      "clear": 1200
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": false,
+        "delay_s": null
+      }
+    ]
+  },
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "RF_replay",
+    "case": "static",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 1.0,
+    "detection_judged": 1.0,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.825,
+    "reasons": {
+      "persistent_anomaly": 150,
+      "clear": 1050
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": true,
+        "delay_s": 0.78
+      }
+    ]
+  },
+  {
+    "seed": 6300,
+    "window_ms": 500,
+    "domain": "RF_replay",
+    "case": "common",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 0.0,
+    "detection_judged": 0.0,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": 0.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 0.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.825,
+    "reasons": {
+      "clear": 1200
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": false,
+        "delay_s": null
+      }
+    ]
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "los",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6464285714285715,
+    "reasons": {
+      "clear": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "offset_10mm",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 1.0,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 1.0,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "common_ambiguity": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "drift_10mm_s",
+    "coverage": 0.11083333333333334,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 1.0,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.9916666666666667,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.12666666666666668,
+      0.12666666666666668,
+      0.0,
+      0.12666666666666668,
+      0.12666666666666668,
+      0.12666666666666668,
+      0.12666666666666668,
+      0.12666666666666668
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.16383928571428572,
+    "reasons": {
+      "clear": 114,
+      "noise_limit": 83,
+      "confirming": 19,
+      "common_ambiguity": 984
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "noise_x3",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.0008333333333333334,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "quality": 1194,
+      "noise_limit": 4,
+      "few_satellites": 2
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "geometry_unreported",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.6483333333333333,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.6408333333333334,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "common_ambiguity": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "geometry_reported",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.6483333333333333,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.6408333333333334,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "quality": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "loss_flag",
+    "coverage": 0.9425,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.54,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6017857142857143,
+    "reasons": {
+      "quality": 69,
+      "clear": 1131
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "missing",
+    "coverage": 0.9416666666666667,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.5333333333333333,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6013392857142857,
+    "reasons": {
+      "quality": 70,
+      "clear": 1130
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "half_cycle",
+    "coverage": 0.875,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.125,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.125,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.565625,
+    "reasons": {
+      "quality": 150,
+      "clear": 1050
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "skew",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "quality": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "one_static_25mm",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 1.0,
+    "detection_judged": 1.0,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6464285714285715,
+    "reasons": {
+      "persistent_anomaly": 150,
+      "clear": 1050
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": true,
+        "delay_s": 1.28
+      }
+    ]
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "three_static_25mm",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 1.0,
+    "detection_judged": 1.0,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6464285714285715,
+    "reasons": {
+      "persistent_anomaly": 450,
+      "clear": 750
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": true,
+        "delay_s": 1.28
+      },
+      {
+        "column": 1,
+        "detected": true,
+        "delay_s": 1.28
+      },
+      {
+        "column": 2,
+        "detected": true,
+        "delay_s": 1.28
+      }
+    ]
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "five_static_25mm",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": 0.0,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "common_ambiguity": 1200
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 1,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 2,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 3,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 4,
+        "detected": false,
+        "delay_s": null
+      }
+    ]
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "all_static_25mm",
+    "coverage": 0.0,
+    "false_alarm_all": null,
+    "false_alarm_judged": null,
+    "detection_all": 0.0,
+    "detection_judged": null,
+    "fixed_false_alarm": null,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": null,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "common_ambiguity": 1200
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 1,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 2,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 3,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 4,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 5,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 6,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 7,
+        "detected": false,
+        "delay_s": null
+      }
+    ]
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "combined",
+    "coverage": 0.11083333333333334,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 0.08,
+    "detection_judged": 0.631578947368421,
+    "fixed_false_alarm": 1.0,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.9904761904761905,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      0.12666666666666668,
+      0.12666666666666668,
+      0.0,
+      0.12666666666666668,
+      0.12666666666666668,
+      0.12666666666666668,
+      0.12666666666666668,
+      0.12666666666666668
+    ],
+    "per_prn_alarm": [
+      0.08,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.15089285714285713,
+    "reasons": {
+      "confirming": 25,
+      "clear": 96,
+      "noise_limit": 83,
+      "persistent_anomaly": 12,
+      "common_ambiguity": 984
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": true,
+        "delay_s": 1.07
+      }
+    ]
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "integer_jump_unreported",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6464285714285715,
+    "reasons": {
+      "clear": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "RF_replay",
+    "case": "los",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6464285714285715,
+    "reasons": {
+      "clear": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "RF_replay",
+    "case": "strong",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 1.0,
+    "detection_judged": 1.0,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6366071428571428,
+    "reasons": {
+      "persistent_anomaly": 150,
+      "clear": 1050
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": true,
+        "delay_s": 1.0
+      }
+    ]
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "RF_replay",
+    "case": "weak",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 0.0,
+    "detection_judged": 0.0,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": 0.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 0.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6464285714285715,
+    "reasons": {
+      "clear": 1200
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": false,
+        "delay_s": null
+      }
+    ]
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "RF_replay",
+    "case": "static",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 1.0,
+    "detection_judged": 1.0,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6464285714285715,
+    "reasons": {
+      "persistent_anomaly": 150,
+      "clear": 1050
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": true,
+        "delay_s": 1.28
+      }
+    ]
+  },
+  {
+    "seed": 6300,
+    "window_ms": 1000,
+    "domain": "RF_replay",
+    "case": "common",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 0.0,
+    "detection_judged": 0.0,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": 0.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 0.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6464285714285715,
+    "reasons": {
+      "clear": 1200
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": false,
+        "delay_s": null
+      }
+    ]
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "los",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.029166666666666667,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.021666666666666667,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.825,
+    "reasons": {
+      "clear": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "offset_10mm",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 1.0,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 1.0,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "common_ambiguity": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "drift_10mm_s",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 1.0,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 1.0,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.24642857142857144,
+    "reasons": {
+      "common_ambiguity": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "noise_x3",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.09916666666666667,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.04083333333333333,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "quality": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "geometry_unreported",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.625,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.625,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "common_ambiguity": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "geometry_reported",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.625,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.625,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "quality": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "loss_flag",
+    "coverage": 0.9841666666666666,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.029166666666666667,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.021666666666666667,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.8733333333333333,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.7852678571428572,
+    "reasons": {
+      "quality": 19,
+      "clear": 1181
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "missing",
+    "coverage": 0.9833333333333333,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.029166666666666667,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.021666666666666667,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.8666666666666667,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.7848214285714286,
+    "reasons": {
+      "quality": 20,
+      "clear": 1180
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "half_cycle",
+    "coverage": 0.875,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.15416666666666667,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.14666666666666667,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.721875,
+    "reasons": {
+      "quality": 150,
+      "clear": 1050
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "skew",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.029166666666666667,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.021666666666666667,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "quality": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "one_static_25mm",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 1.0,
+    "detection_judged": 1.0,
+    "fixed_false_alarm": 0.03333333333333333,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.024761904761904763,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.825,
+    "reasons": {
+      "persistent_anomaly": 150,
+      "clear": 1050
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": true,
+        "delay_s": 0.78
+      }
+    ]
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "three_static_25mm",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 1.0,
+    "detection_judged": 1.0,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.825,
+    "reasons": {
+      "persistent_anomaly": 450,
+      "clear": 750
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": true,
+        "delay_s": 0.78
+      },
+      {
+        "column": 1,
+        "detected": true,
+        "delay_s": 0.78
+      },
+      {
+        "column": 2,
+        "detected": true,
+        "delay_s": 0.78
+      }
+    ]
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "five_static_25mm",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": 0.0,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "common_ambiguity": 1200
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 1,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 2,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 3,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 4,
+        "detected": false,
+        "delay_s": null
+      }
+    ]
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "all_static_25mm",
+    "coverage": 0.0,
+    "false_alarm_all": null,
+    "false_alarm_judged": null,
+    "detection_all": 0.0,
+    "detection_judged": null,
+    "fixed_false_alarm": null,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": null,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "common_ambiguity": 1200
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 1,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 2,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 3,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 4,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 5,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 6,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 7,
+        "detected": false,
+        "delay_s": null
+      }
+    ]
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "combined",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": 0.0,
+    "detection_judged": null,
+    "fixed_false_alarm": 1.0,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 1.0,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.215625,
+    "reasons": {
+      "common_ambiguity": 1200
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": true,
+        "delay_s": 0.5700000000000001
+      }
+    ]
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "observation",
+    "case": "integer_jump_unreported",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.029166666666666667,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.021666666666666667,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.825,
+    "reasons": {
+      "clear": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "RF_replay",
+    "case": "los",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.029166666666666667,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.021666666666666667,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.825,
+    "reasons": {
+      "clear": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "RF_replay",
+    "case": "strong",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 1.0,
+    "detection_judged": 1.0,
+    "fixed_false_alarm": 0.005714285714285714,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.8133928571428571,
+    "reasons": {
+      "persistent_anomaly": 150,
+      "clear": 1050
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": true,
+        "delay_s": 0.54
+      }
+    ]
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "RF_replay",
+    "case": "weak",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 0.0,
+    "detection_judged": 0.0,
+    "fixed_false_alarm": 0.03238095238095238,
+    "fixed_detection": 0.0,
+    "fixed_confirmed_false_alarm": 0.023809523809523808,
+    "fixed_confirmed_detection": 0.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.825,
+    "reasons": {
+      "clear": 1200
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": false,
+        "delay_s": null
+      }
+    ]
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "RF_replay",
+    "case": "static",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 1.0,
+    "detection_judged": 1.0,
+    "fixed_false_alarm": 0.005714285714285714,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.825,
+    "reasons": {
+      "persistent_anomaly": 150,
+      "clear": 1050
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": true,
+        "delay_s": 0.78
+      }
+    ]
+  },
+  {
+    "seed": 6302,
+    "window_ms": 500,
+    "domain": "RF_replay",
+    "case": "common",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 0.0,
+    "detection_judged": 0.0,
+    "fixed_false_alarm": 0.0380952380952381,
+    "fixed_detection": 0.0,
+    "fixed_confirmed_false_alarm": 0.029523809523809525,
+    "fixed_confirmed_detection": 0.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.825,
+    "reasons": {
+      "clear": 1200
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": false,
+        "delay_s": null
+      }
+    ]
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "los",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.030833333333333334,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.023333333333333334,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6464285714285715,
+    "reasons": {
+      "clear": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "offset_10mm",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 1.0,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 1.0,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "common_ambiguity": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "drift_10mm_s",
+    "coverage": 0.1225,
+    "false_alarm_all": 0.005833333333333334,
+    "false_alarm_judged": 0.047619047619047616,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 1.0,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.9891666666666666,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.14,
+      0.14,
+      0.0,
+      0.14,
+      0.14,
+      0.14,
+      0.14,
+      0.14
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.04666666666666667,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.16919642857142858,
+    "reasons": {
+      "clear": 125,
+      "noise_limit": 65,
+      "confirming": 15,
+      "persistent_anomaly": 7,
+      "common_ambiguity": 988
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "noise_x3",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.09333333333333334,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.05583333333333333,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "quality": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "geometry_unreported",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.6266666666666667,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.6266666666666667,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "common_ambiguity": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "geometry_reported",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.6266666666666667,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.6266666666666667,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "quality": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "loss_flag",
+    "coverage": 0.9425,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.030833333333333334,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.023333333333333334,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.54,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6017857142857143,
+    "reasons": {
+      "quality": 69,
+      "clear": 1131
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "missing",
+    "coverage": 0.9416666666666667,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.030833333333333334,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.023333333333333334,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.5333333333333333,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6013392857142857,
+    "reasons": {
+      "quality": 70,
+      "clear": 1130
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "half_cycle",
+    "coverage": 0.875,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.15583333333333332,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.14833333333333334,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.565625,
+    "reasons": {
+      "quality": 150,
+      "clear": 1050
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "skew",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.030833333333333334,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.023333333333333334,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "quality": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "one_static_25mm",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 1.0,
+    "detection_judged": 1.0,
+    "fixed_false_alarm": 0.035238095238095235,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.02666666666666667,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6464285714285715,
+    "reasons": {
+      "persistent_anomaly": 150,
+      "clear": 1050
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": true,
+        "delay_s": 1.28
+      }
+    ]
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "three_static_25mm",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 1.0,
+    "detection_judged": 1.0,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6464285714285715,
+    "reasons": {
+      "persistent_anomaly": 450,
+      "clear": 750
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": true,
+        "delay_s": 1.28
+      },
+      {
+        "column": 1,
+        "detected": true,
+        "delay_s": 1.28
+      },
+      {
+        "column": 2,
+        "detected": true,
+        "delay_s": 1.28
+      }
+    ]
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "five_static_25mm",
+    "coverage": 0.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": null,
+    "detection_all": 0.0,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "common_ambiguity": 1200
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 1,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 2,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 3,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 4,
+        "detected": false,
+        "delay_s": null
+      }
+    ]
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "all_static_25mm",
+    "coverage": 0.0,
+    "false_alarm_all": null,
+    "false_alarm_judged": null,
+    "detection_all": 0.0,
+    "detection_judged": null,
+    "fixed_false_alarm": null,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": null,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.0,
+    "reasons": {
+      "common_ambiguity": 1200
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 1,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 2,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 3,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 4,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 5,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 6,
+        "detected": false,
+        "delay_s": null
+      },
+      {
+        "column": 7,
+        "detected": false,
+        "delay_s": null
+      }
+    ]
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "combined",
+    "coverage": 0.1225,
+    "false_alarm_all": 0.006666666666666667,
+    "false_alarm_judged": 0.05555555555555555,
+    "detection_all": 0.09333333333333334,
+    "detection_judged": 0.6666666666666666,
+    "fixed_false_alarm": 1.0,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.9895238095238095,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      0.14,
+      0.14,
+      0.0,
+      0.14,
+      0.14,
+      0.14,
+      0.14,
+      0.14
+    ],
+    "per_prn_alarm": [
+      0.09333333333333334,
+      0.0,
+      0.0,
+      0.04666666666666667,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.15625,
+    "reasons": {
+      "confirming": 22,
+      "clear": 104,
+      "noise_limit": 65,
+      "persistent_anomaly": 21,
+      "common_ambiguity": 988
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": true,
+        "delay_s": 1.07
+      }
+    ]
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "observation",
+    "case": "integer_jump_unreported",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.030833333333333334,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.023333333333333334,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6464285714285715,
+    "reasons": {
+      "clear": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "RF_replay",
+    "case": "los",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": null,
+    "detection_judged": null,
+    "fixed_false_alarm": 0.030833333333333334,
+    "fixed_detection": null,
+    "fixed_confirmed_false_alarm": 0.023333333333333334,
+    "fixed_confirmed_detection": null,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6464285714285715,
+    "reasons": {
+      "clear": 1200
+    },
+    "events": []
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "RF_replay",
+    "case": "strong",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 1.0,
+    "detection_judged": 1.0,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6366071428571428,
+    "reasons": {
+      "persistent_anomaly": 150,
+      "clear": 1050
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": true,
+        "delay_s": 1.0
+      }
+    ]
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "RF_replay",
+    "case": "weak",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 0.0,
+    "detection_judged": 0.0,
+    "fixed_false_alarm": 0.02857142857142857,
+    "fixed_detection": 0.0,
+    "fixed_confirmed_false_alarm": 0.014285714285714285,
+    "fixed_confirmed_detection": 0.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6464285714285715,
+    "reasons": {
+      "clear": 1200
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": false,
+        "delay_s": null
+      }
+    ]
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "RF_replay",
+    "case": "static",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 1.0,
+    "detection_judged": 1.0,
+    "fixed_false_alarm": 0.0,
+    "fixed_detection": 1.0,
+    "fixed_confirmed_false_alarm": 0.0,
+    "fixed_confirmed_detection": 1.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6464285714285715,
+    "reasons": {
+      "persistent_anomaly": 150,
+      "clear": 1050
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": true,
+        "delay_s": 1.28
+      }
+    ]
+  },
+  {
+    "seed": 6302,
+    "window_ms": 1000,
+    "domain": "RF_replay",
+    "case": "common",
+    "coverage": 1.0,
+    "false_alarm_all": 0.0,
+    "false_alarm_judged": 0.0,
+    "detection_all": 0.0,
+    "detection_judged": 0.0,
+    "fixed_false_alarm": 0.04476190476190476,
+    "fixed_detection": 0.0,
+    "fixed_confirmed_false_alarm": 0.035238095238095235,
+    "fixed_confirmed_detection": 0.0,
+    "per_prn_coverage": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "per_prn_alarm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "whole_record_coverage": 0.6464285714285715,
+    "reasons": {
+      "clear": 1200
+    },
+    "events": [
+      {
+        "column": 0,
+        "detected": false,
+        "delay_s": null
+      }
+    ]
+  }
+]

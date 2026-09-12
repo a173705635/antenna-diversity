@@ -14,6 +14,13 @@
 
 多径与外部干扰按不同研究任务评估。`results/` 是运行输出，正式实验快照在 `../docs/reports/data/`；完整报告导航见 [项目入口](../README.md#研究入口)。
 
+## SDCP 自检研究入口
+
+- `sdcp_self_check.py`：因果三态检测，输入必须附带观测有效性和几何不确定性；不自动消除公共偏差。
+- `generate_sdcp_self_check_rf.py`：独立RF记录生成；`audit_sdcp_self_check.py`：固定参数压力测试与离线定位对照。
+- `audit_sdcp_geometry_stress.py`：假设基线方向误差回放；`audit_sdcp_low_signal.py`：输入降低6 dB的RF对照。
+- [详细报告及复现命令](../docs/reports/2026-09-12-sdcp-self-check.md)。这组研究不替换默认定位入口。
+
 ## 实验说明与历史边界
 
 > 2026-09-10 多径专题阶段归档：当前是实验检测基线，未完成通用可靠性验证。详见[阶段总结](../docs/reports/2026-09-10-multipath-stage-summary.md)。下列研究命令生成的 `results/` 均相对本目录；入库快照见总结链接。

@@ -1,0 +1,127 @@
+{
+  "scope": "Independent-event dual-polarization correlator model, not RF/tracking/PVT.",
+  "calibration_seed": 8100,
+  "calibration_events": 1000,
+  "threshold_db": 17.794552578254486,
+  "decision": "ratio below frozen LOS 1st percentile => polarization anomaly, NOT NLOS proof",
+  "assumptions": {
+    "coherent_s": 0.1,
+    "cn0_db_hz": 45,
+    "xpd_calibration_db": 20,
+    "mp_voltage": 0.5,
+    "mp_delay_chips": 0.25,
+    "reference": "ideal common aligned reference; no PLL/DLL"
+  },
+  "rows": [
+    {
+      "case": "los",
+      "xpd_db": 20.0,
+      "unreported_lhcp_gain_db": 0.0,
+      "seed": 8200,
+      "events": 2000,
+      "anomaly_events": 18,
+      "anomaly_fraction": 0.009,
+      "wilson95": [
+        0.005700499728577407,
+        0.014182040701612969
+      ],
+      "ratio_db_median": 19.95743544599153,
+      "noiseless_prompt_phase_abs_max_rad": 0.0
+    },
+    {
+      "case": "mp_lhcp",
+      "xpd_db": 20.0,
+      "unreported_lhcp_gain_db": 0.0,
+      "seed": 8201,
+      "events": 2000,
+      "anomaly_events": 2000,
+      "anomaly_fraction": 1.0,
+      "wilson95": [
+        0.9980829527187469,
+        0.9999999999999998
+      ],
+      "ratio_db_median": 8.253113330534386,
+      "noiseless_prompt_phase_abs_max_rad": 0.03750874093129036
+    },
+    {
+      "case": "mp_rhcp",
+      "xpd_db": 20.0,
+      "unreported_lhcp_gain_db": 0.0,
+      "seed": 8202,
+      "events": 2000,
+      "anomaly_events": 44,
+      "anomaly_fraction": 0.022,
+      "wilson95": [
+        0.0164289081143177,
+        0.0294037890865601
+      ],
+      "ratio_db_median": 19.934915097690798,
+      "noiseless_prompt_phase_abs_max_rad": 0.3843961725145485
+    },
+    {
+      "case": "nlos_lhcp",
+      "xpd_db": 20.0,
+      "unreported_lhcp_gain_db": 0.0,
+      "seed": 8203,
+      "events": 2000,
+      "anomaly_events": 2000,
+      "anomaly_fraction": 1.0,
+      "wilson95": [
+        0.9980829527187469,
+        0.9999999999999998
+      ],
+      "ratio_db_median": -19.910841679677056,
+      "noiseless_prompt_phase_abs_max_rad": 0.0
+    },
+    {
+      "case": "nlos_rhcp",
+      "xpd_db": 20.0,
+      "unreported_lhcp_gain_db": 0.0,
+      "seed": 8204,
+      "events": 2000,
+      "anomaly_events": 23,
+      "anomaly_fraction": 0.0115,
+      "wilson95": [
+        0.007675227286212753,
+        0.01719772790757136
+      ],
+      "ratio_db_median": 20.00938825438682,
+      "noiseless_prompt_phase_abs_max_rad": 0.0
+    },
+    {
+      "case": "los",
+      "xpd_db": 10.0,
+      "unreported_lhcp_gain_db": 0.0,
+      "seed": 8205,
+      "events": 2000,
+      "anomaly_events": 2000,
+      "anomaly_fraction": 1.0,
+      "wilson95": [
+        0.9980829527187469,
+        0.9999999999999998
+      ],
+      "ratio_db_median": 10.001950774204694,
+      "noiseless_prompt_phase_abs_max_rad": 0.0
+    },
+    {
+      "case": "los",
+      "xpd_db": 20.0,
+      "unreported_lhcp_gain_db": 3.0,
+      "seed": 8206,
+      "events": 2000,
+      "anomaly_events": 1556,
+      "anomaly_fraction": 0.778,
+      "wilson95": [
+        0.7592629744365406,
+        0.7956711472750827
+      ],
+      "ratio_db_median": 16.959249900342144,
+      "noiseless_prompt_phase_abs_max_rad": 0.0
+    }
+  ],
+  "source_sha256": {
+    "audit_dual_polarization.py": "45ed5fd3ca8b51585d8a4d81a65e6c6c8d827a69c4de3f84d788c3b7a87ab518",
+    "antenna.py": "a29e60178f22d737a9e71668923f8edcaabf4af2fbc7d6d0abd6e46e51557c7b",
+    "config.py": "c3b47604a074711a96272bf12f8470ea0bb1037938400a9afdb2daf1959e7355"
+  }
+}

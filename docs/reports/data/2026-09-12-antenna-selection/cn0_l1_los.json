@@ -1,0 +1,34 @@
+{
+  "scope": "Code-only per-satellite selection baseline; no carrier switching or truth weights.",
+  "metric": "cn0_db_hz",
+  "inputs": {
+    "docs\\reports\\data\\2026-09-12-geometry-free-rf\\L1CA_0.json": "f7bd50d9ef935ce990b73fe767780d0b5eda947b2c25922a1d78bba92cf9eeac",
+    "docs\\reports\\data\\2026-09-12-geometry-free-rf\\L1CA_1.json": "7bd7c3bf0dd88e23b4bad5ccb30a0040104368e95209ae5ad26ffb88a650361c"
+  },
+  "modes": {
+    "fixed_A": {
+      "epochs": 20,
+      "solved": 20,
+      "switches": 0,
+      "B_fraction": 0.0,
+      "rms_m": 4.9932900292224565,
+      "p95_m": 7.814885837076711
+    },
+    "fixed_B": {
+      "epochs": 20,
+      "solved": 20,
+      "switches": 0,
+      "B_fraction": 1.0,
+      "rms_m": 4.447704992300402,
+      "p95_m": 7.199123925848677
+    },
+    "quality_selection": {
+      "epochs": 20,
+      "solved": 20,
+      "switches": 70,
+      "B_fraction": 0.6,
+      "rms_m": 4.853395586789884,
+      "p95_m": 7.580931674292849
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "tests_passed": 124,
+  "warnings": 1,
+  "frozen_hashes_match": true,
+  "rf_records_main": 14,
+  "rf_records_low_signal": 1,
+  "detection_cases": 84,
+  "geometry_cases": 40,
+  "low_signal_window_cases": 2,
+  "pvt_cases": 10,
+  "pvt_modes": 4
+}

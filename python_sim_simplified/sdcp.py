@@ -7,6 +7,27 @@ import numpy as np
 from scipy.special import expit
 
 
+def geometry_free_sdcp(time_l1_s, a_l1_m, b_l1_m,
+                       time_l5_s, a_l5_m, b_l5_m):
+    """Raw (B-A)L1 - (B-A)L5, in range metres, columns in identical PRN order.
+
+    Common geometry cancels, but ambiguities and hardware biases remain.
+    This is neither a calibrated multipath residual nor a detector. No fitting,
+    wrapping or interpolation is performed; callers must select a valid arc.
+    """
+    t, u = np.asarray(time_l1_s, float), np.asarray(time_l5_s, float)
+    values = [np.asarray(v, float) for v in (a_l1_m, b_l1_m, a_l5_m, b_l5_m)]
+    if (t.ndim != 1 or not t.size or not np.isfinite(t).all()
+            or np.any(np.diff(t) <= 0) or not np.array_equal(t, u)
+            or values[0].ndim != 2 or values[0].shape[0] != t.size
+            or values[0].shape[1] == 0
+            or any(v.shape != values[0].shape or not np.isfinite(v).all()
+                   for v in values)):
+        raise ValueError('finite same-PRN matrices and exactly aligned increasing times required')
+    a1, b1, a5, b5 = values
+    return (b1-a1)-(b5-a5)
+
+
 def geometry_offset_m(baseline_m, azimuth_deg, elevation_deg):
     baseline = np.asarray(baseline_m, dtype=float)
     if baseline.shape != (3,) or not np.all(np.isfinite(baseline)):

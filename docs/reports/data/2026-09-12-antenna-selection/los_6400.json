@@ -1,0 +1,34 @@
+{
+  "scope": "Code-only per-satellite selection baseline; no carrier switching or truth weights.",
+  "metric": "phase_lock_metric",
+  "inputs": {
+    "docs\\reports\\data\\2026-09-12-sdcp-fresh-rf\\los_6400_0.json": "690fc8c71d2e0bc080f9396052f69ea322ed443c236879757d2c2cba9af0235b",
+    "docs\\reports\\data\\2026-09-12-sdcp-fresh-rf\\los_6400_1.json": "8c8e8cca3e00cac4c7f9977457a0cfa1a3017c43ac599f9a7f2b43e9fa88b235"
+  },
+  "modes": {
+    "fixed_A": {
+      "epochs": 280,
+      "solved": 280,
+      "switches": 0,
+      "B_fraction": 0.0,
+      "rms_m": 6.133048104557954,
+      "p95_m": 9.984868659385299
+    },
+    "fixed_B": {
+      "epochs": 280,
+      "solved": 280,
+      "switches": 0,
+      "B_fraction": 1.0,
+      "rms_m": 5.668298969214939,
+      "p95_m": 9.125667806487991
+    },
+    "quality_selection": {
+      "epochs": 280,
+      "solved": 280,
+      "switches": 981,
+      "B_fraction": 0.5330357142857143,
+      "rms_m": 5.911641891825942,
+      "p95_m": 9.952232614192564
+    }
+  }
+}

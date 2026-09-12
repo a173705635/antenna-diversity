@@ -1,0 +1,5 @@
+{
+  "scope": "All TR GNSS source amplitudes reduced by6dB before RF; same seed6401 and clean TL seed6400 as control; no external interference or multipath. One paired stress record, not independent repetitions.",
+  "duration_ms": 3000,
+  "amplitude_scale": 0.5011872336272722
+}

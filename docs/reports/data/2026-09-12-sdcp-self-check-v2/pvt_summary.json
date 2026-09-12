@@ -1,0 +1,702 @@
+[
+  {
+    "seed": 6300,
+    "case": "los",
+    "modes": {
+      "plain": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 3.931757908991473,
+          "demeaned_rms_m": 3.6369870590997957,
+          "max_m": 8.75571895115036
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 0.6792364918632183,
+          "demeaned_rms_m": 0.0014508085780825656,
+          "max_m": 0.6812730621232818
+        }
+      },
+      "fixed": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 3.931757908991473,
+          "demeaned_rms_m": 3.6369870590997957,
+          "max_m": 8.75571895115036
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 0.6792364918632183,
+          "demeaned_rms_m": 0.0014508085780825656,
+          "max_m": 0.6812730621232818
+        }
+      },
+      "fixed_confirmed": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 3.931757908991473,
+          "demeaned_rms_m": 3.6369870590997957,
+          "max_m": 8.75571895115036
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 0.6792364918632183,
+          "demeaned_rms_m": 0.0014508085780825656,
+          "max_m": 0.6812730621232818
+        }
+      },
+      "self_check": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 3.931757908991473,
+          "demeaned_rms_m": 3.6369870590997957,
+          "max_m": 8.75571895115036
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 0.6792364918632183,
+          "demeaned_rms_m": 0.0014508085780825656,
+          "max_m": 0.6812730621232818
+        }
+      }
+    }
+  },
+  {
+    "seed": 6300,
+    "case": "strong",
+    "modes": {
+      "plain": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 8.494266383738175,
+          "demeaned_rms_m": 3.813047545416261,
+          "max_m": 16.05315334030163
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 5.094079634842031,
+          "demeaned_rms_m": 0.0014855674311709732,
+          "max_m": 5.096306199046617
+        }
+      },
+      "fixed": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 5.131646686574954,
+          "demeaned_rms_m": 4.965507253457574,
+          "max_m": 13.513060519929393
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 0.46910610505718986,
+          "demeaned_rms_m": 0.00219420359570534,
+          "max_m": 0.4731292219719482
+        }
+      },
+      "fixed_confirmed": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 5.131646686574954,
+          "demeaned_rms_m": 4.965507253457574,
+          "max_m": 13.513060519929393
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 0.6339627611012633,
+          "demeaned_rms_m": 0.0021942031061661974,
+          "max_m": 0.6386763987146281
+        }
+      },
+      "self_check": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 5.131646686574954,
+          "demeaned_rms_m": 4.965507253457574,
+          "max_m": 13.513060519929393
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 0.9812695756476494,
+          "demeaned_rms_m": 0.0021942017887974664,
+          "max_m": 0.9864215325435555
+        }
+      }
+    }
+  },
+  {
+    "seed": 6300,
+    "case": "weak",
+    "modes": {
+      "plain": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 4.153991161223435,
+          "demeaned_rms_m": 3.71116465792107,
+          "max_m": 9.217953309948582
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 0.42428388594384003,
+          "demeaned_rms_m": 0.0014790595364646793,
+          "max_m": 0.4254260157954986
+        }
+      },
+      "fixed": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 4.153991161223435,
+          "demeaned_rms_m": 3.71116465792107,
+          "max_m": 9.217953309948582
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 0.42428388594384003,
+          "demeaned_rms_m": 0.0014790595364646793,
+          "max_m": 0.4254260157954986
+        }
+      },
+      "fixed_confirmed": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 4.153991161223435,
+          "demeaned_rms_m": 3.71116465792107,
+          "max_m": 9.217953309948582
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 0.42428388594384003,
+          "demeaned_rms_m": 0.0014790595364646793,
+          "max_m": 0.4254260157954986
+        }
+      },
+      "self_check": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 4.153991161223435,
+          "demeaned_rms_m": 3.71116465792107,
+          "max_m": 9.217953309948582
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 0.42428388594384003,
+          "demeaned_rms_m": 0.0014790595364646793,
+          "max_m": 0.4254260157954986
+        }
+      }
+    }
+  },
+  {
+    "seed": 6300,
+    "case": "static",
+    "modes": {
+      "plain": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 8.485392828013499,
+          "demeaned_rms_m": 3.8157683578179427,
+          "max_m": 16.05429508066264
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 5.807873514107269,
+          "demeaned_rms_m": 0.001487306780246411,
+          "max_m": 5.810107664270119
+        }
+      },
+      "fixed": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 5.128966886087887,
+          "demeaned_rms_m": 4.966730994279954,
+          "max_m": 13.496279236482387
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 2.1309185256527576,
+          "demeaned_rms_m": 0.002194689709351338,
+          "max_m": 2.1362757100189946
+        }
+      },
+      "fixed_confirmed": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 5.128966886087887,
+          "demeaned_rms_m": 4.966730994279954,
+          "max_m": 13.496279236482387
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 2.220313316842354,
+          "demeaned_rms_m": 0.0021946897804435155,
+          "max_m": 2.2256765787842805
+        }
+      },
+      "self_check": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 5.128966886087887,
+          "demeaned_rms_m": 4.966730994279954,
+          "max_m": 13.496279236482387
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 2.220313316842354,
+          "demeaned_rms_m": 0.0021946897804435155,
+          "max_m": 2.2256765787842805
+        }
+      }
+    }
+  },
+  {
+    "seed": 6300,
+    "case": "common",
+    "modes": {
+      "plain": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 15.102367770436052,
+          "demeaned_rms_m": 3.999854416752926,
+          "max_m": 23.00886325519525
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 11.343515259354515,
+          "demeaned_rms_m": 0.0015351946906939215,
+          "max_m": 11.345841115434917
+        }
+      },
+      "fixed": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 15.102367770436052,
+          "demeaned_rms_m": 3.999854416752926,
+          "max_m": 23.00886325519525
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 11.343515259354515,
+          "demeaned_rms_m": 0.0015351946906939215,
+          "max_m": 11.345841115434917
+        }
+      },
+      "fixed_confirmed": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 15.102367770436052,
+          "demeaned_rms_m": 3.999854416752926,
+          "max_m": 23.00886325519525
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 11.343515259354515,
+          "demeaned_rms_m": 0.0015351946906939215,
+          "max_m": 11.345841115434917
+        }
+      },
+      "self_check": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 15.102367770436052,
+          "demeaned_rms_m": 3.999854416752926,
+          "max_m": 23.00886325519525
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 11.343515259354515,
+          "demeaned_rms_m": 0.0015351946906939215,
+          "max_m": 11.345841115434917
+        }
+      }
+    }
+  },
+  {
+    "seed": 6302,
+    "case": "los",
+    "modes": {
+      "plain": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 3.8536314337100523,
+          "demeaned_rms_m": 3.0648946244072515,
+          "max_m": 6.320662924556848
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 0.6200719566536378,
+          "demeaned_rms_m": 0.001201801006090744,
+          "max_m": 0.6216427413179783
+        }
+      },
+      "fixed": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 3.8920791158385764,
+          "demeaned_rms_m": 2.9903694118398523,
+          "max_m": 7.0168391170372475
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 0.7157009040541775,
+          "demeaned_rms_m": 0.0013325491315377745,
+          "max_m": 0.718674754384709
+        }
+      },
+      "fixed_confirmed": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 3.8951331509611435,
+          "demeaned_rms_m": 3.028960518054026,
+          "max_m": 7.0168391170372475
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 0.6917817076475943,
+          "demeaned_rms_m": 0.001327518613592979,
+          "max_m": 0.6947245979889948
+        }
+      },
+      "self_check": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 3.8536314337100523,
+          "demeaned_rms_m": 3.0648946244072515,
+          "max_m": 6.320662924556848
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 0.6200719566536378,
+          "demeaned_rms_m": 0.001201801006090744,
+          "max_m": 0.6216427413179783
+        }
+      }
+    }
+  },
+  {
+    "seed": 6302,
+    "case": "strong",
+    "modes": {
+      "plain": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 9.234334391739006,
+          "demeaned_rms_m": 3.145597560707826,
+          "max_m": 12.554438712870953
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 5.880820243453206,
+          "demeaned_rms_m": 0.0012133668635102006,
+          "max_m": 5.882371783101417
+        }
+      },
+      "fixed": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 5.261152541243602,
+          "demeaned_rms_m": 4.496560658684977,
+          "max_m": 10.871095852225448
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 1.6080336208149928,
+          "demeaned_rms_m": 0.0018473315887825956,
+          "max_m": 1.6104200176016799
+        }
+      },
+      "fixed_confirmed": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 5.251718994066059,
+          "demeaned_rms_m": 4.5852997571069904,
+          "max_m": 10.871095852225448
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 1.640914424892272,
+          "demeaned_rms_m": 0.001838500065612362,
+          "max_m": 1.6432795977192693
+        }
+      },
+      "self_check": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 5.251718994066059,
+          "demeaned_rms_m": 4.5852997571069904,
+          "max_m": 10.871095852225448
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 1.8567879514424912,
+          "demeaned_rms_m": 0.0018385001428924052,
+          "max_m": 1.8591721604226867
+        }
+      }
+    }
+  },
+  {
+    "seed": 6302,
+    "case": "weak",
+    "modes": {
+      "plain": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 4.255846368640423,
+          "demeaned_rms_m": 3.103386659594381,
+          "max_m": 6.874456616949862
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 0.8375672383877709,
+          "demeaned_rms_m": 0.0012350735832695578,
+          "max_m": 0.8391119441688206
+        }
+      },
+      "fixed": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 4.304159590209534,
+          "demeaned_rms_m": 3.0153122433532054,
+          "max_m": 7.892013938640139
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 0.9332744334070433,
+          "demeaned_rms_m": 0.0013575243912852428,
+          "max_m": 0.9361495725859366
+        }
+      },
+      "fixed_confirmed": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 4.303810481706227,
+          "demeaned_rms_m": 3.062101897869233,
+          "max_m": 7.892013938640139
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 0.9081535125111465,
+          "demeaned_rms_m": 0.0013534918558290808,
+          "max_m": 0.9109895783722549
+        }
+      },
+      "self_check": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 4.255846368640423,
+          "demeaned_rms_m": 3.103386659594381,
+          "max_m": 6.874456616949862
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 0.8375672383877709,
+          "demeaned_rms_m": 0.0012350735832695578,
+          "max_m": 0.8391119441688206
+        }
+      }
+    }
+  },
+  {
+    "seed": 6302,
+    "case": "static",
+    "modes": {
+      "plain": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 9.239625566257256,
+          "demeaned_rms_m": 3.15431132316892,
+          "max_m": 12.61188457211383
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 6.51399460536556,
+          "demeaned_rms_m": 0.001212990062152372,
+          "max_m": 6.515552409495342
+        }
+      },
+      "fixed": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 5.280531548327843,
+          "demeaned_rms_m": 4.512549184456621,
+          "max_m": 10.87113430535022
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 3.142278522074608,
+          "demeaned_rms_m": 0.0018492656408767712,
+          "max_m": 3.144681111584945
+        }
+      },
+      "fixed_confirmed": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 5.271134856053935,
+          "demeaned_rms_m": 4.602028744682995,
+          "max_m": 10.87113430535022
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 3.074366896745374,
+          "demeaned_rms_m": 0.0018360249669146854,
+          "max_m": 3.0768159485365905
+        }
+      },
+      "self_check": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 5.271134856053935,
+          "demeaned_rms_m": 4.602028744682995,
+          "max_m": 10.87113430535022
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 3.074366896745374,
+          "demeaned_rms_m": 0.0018360249669146854,
+          "max_m": 3.0768159485365905
+        }
+      }
+    }
+  },
+  {
+    "seed": 6302,
+    "case": "common",
+    "modes": {
+      "plain": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 16.195750885769442,
+          "demeaned_rms_m": 3.2528564484578038,
+          "max_m": 19.14814917726253
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 12.171699957552313,
+          "demeaned_rms_m": 0.0012794892290016978,
+          "max_m": 12.173307271438265
+        }
+      },
+      "fixed": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 16.48871851625631,
+          "demeaned_rms_m": 3.2469654321687593,
+          "max_m": 20.61959927701936
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 12.258898224605188,
+          "demeaned_rms_m": 0.0013951771549912135,
+          "max_m": 12.260505163723435
+        }
+      },
+      "fixed_confirmed": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 16.428454428255833,
+          "demeaned_rms_m": 3.261540802068877,
+          "max_m": 20.61959927701936
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 12.245506732500878,
+          "demeaned_rms_m": 0.0013857528925073598,
+          "max_m": 12.247103587128253
+        }
+      },
+      "self_check": {
+        "code": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 16.195750885769442,
+          "demeaned_rms_m": 3.2528564484578038,
+          "max_m": 19.14814917726253
+        },
+        "float": {
+          "evaluation_epochs": 30,
+          "solved_epochs": 30,
+          "rms_m": 12.171699957552313,
+          "demeaned_rms_m": 0.0012794892290016978,
+          "max_m": 12.173307271438265
+        }
+      }
+    }
+  }
+]

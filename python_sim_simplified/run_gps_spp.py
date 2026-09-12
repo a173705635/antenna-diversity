@@ -147,7 +147,7 @@ def run_record(seed, satellites, scene, cfg):
                 ranges[~quality, column] = np.nan
                 for key in ('epoch_start_samples', 'code_nco_phase_chips', 'code_nco_rate_hz',
                             'carrier_nco_phase_rad', 'carrier_nco_frequency_hz',
-                            'pll_error_rad', 'phase_lock_metric'):
+                            'pll_error_rad', 'phase_lock_metric', 'cn0_db_hz'):
                     entry[key] = history[key].tolist()
         records.append(entry)
         print(f"seed={seed} PRN={prn} acquired={entry['acquired']} usable={np.isfinite(ranges[:, column]).sum()}/{times.size}", flush=True)

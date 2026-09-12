@@ -1,0 +1,196 @@
+{
+  "scope": "Conditional RF replay with illustrative bounds/threshold; not detection-rate validation.",
+  "threshold_m": 0.01,
+  "warning": "10 mm threshold and 3/8 mm bounds are illustrative, not independently calibrated. True branch flags are conditional experiments, not receiver certification. No detector probabilities.",
+  "rows": [
+    {
+      "scene": "los",
+      "external_branch_assumed_verified": false,
+      "illustrative_nuisance_bound_m": null,
+      "prn1": {
+        "unknown": 20,
+        "no_exceedance_evidence": 0,
+        "suspected_anomaly": 0
+      },
+      "other_prns": {
+        "unknown": 140,
+        "no_exceedance_evidence": 0,
+        "suspected_anomaly": 0
+      }
+    },
+    {
+      "scene": "los",
+      "external_branch_assumed_verified": false,
+      "illustrative_nuisance_bound_m": 0.003,
+      "prn1": {
+        "unknown": 20,
+        "no_exceedance_evidence": 0,
+        "suspected_anomaly": 0
+      },
+      "other_prns": {
+        "unknown": 140,
+        "no_exceedance_evidence": 0,
+        "suspected_anomaly": 0
+      }
+    },
+    {
+      "scene": "los",
+      "external_branch_assumed_verified": false,
+      "illustrative_nuisance_bound_m": 0.008,
+      "prn1": {
+        "unknown": 20,
+        "no_exceedance_evidence": 0,
+        "suspected_anomaly": 0
+      },
+      "other_prns": {
+        "unknown": 140,
+        "no_exceedance_evidence": 0,
+        "suspected_anomaly": 0
+      }
+    },
+    {
+      "scene": "los",
+      "external_branch_assumed_verified": true,
+      "illustrative_nuisance_bound_m": null,
+      "prn1": {
+        "unknown": 20,
+        "no_exceedance_evidence": 0,
+        "suspected_anomaly": 0
+      },
+      "other_prns": {
+        "unknown": 140,
+        "no_exceedance_evidence": 0,
+        "suspected_anomaly": 0
+      }
+    },
+    {
+      "scene": "los",
+      "external_branch_assumed_verified": true,
+      "illustrative_nuisance_bound_m": 0.003,
+      "prn1": {
+        "unknown": 1,
+        "no_exceedance_evidence": 19,
+        "suspected_anomaly": 0
+      },
+      "other_prns": {
+        "unknown": 4,
+        "no_exceedance_evidence": 136,
+        "suspected_anomaly": 0
+      }
+    },
+    {
+      "scene": "los",
+      "external_branch_assumed_verified": true,
+      "illustrative_nuisance_bound_m": 0.008,
+      "prn1": {
+        "unknown": 12,
+        "no_exceedance_evidence": 8,
+        "suspected_anomaly": 0
+      },
+      "other_prns": {
+        "unknown": 88,
+        "no_exceedance_evidence": 52,
+        "suspected_anomaly": 0
+      }
+    },
+    {
+      "scene": "startup",
+      "external_branch_assumed_verified": false,
+      "illustrative_nuisance_bound_m": null,
+      "prn1": {
+        "unknown": 20,
+        "no_exceedance_evidence": 0,
+        "suspected_anomaly": 0
+      },
+      "other_prns": {
+        "unknown": 140,
+        "no_exceedance_evidence": 0,
+        "suspected_anomaly": 0
+      }
+    },
+    {
+      "scene": "startup",
+      "external_branch_assumed_verified": false,
+      "illustrative_nuisance_bound_m": 0.003,
+      "prn1": {
+        "unknown": 20,
+        "no_exceedance_evidence": 0,
+        "suspected_anomaly": 0
+      },
+      "other_prns": {
+        "unknown": 140,
+        "no_exceedance_evidence": 0,
+        "suspected_anomaly": 0
+      }
+    },
+    {
+      "scene": "startup",
+      "external_branch_assumed_verified": false,
+      "illustrative_nuisance_bound_m": 0.008,
+      "prn1": {
+        "unknown": 20,
+        "no_exceedance_evidence": 0,
+        "suspected_anomaly": 0
+      },
+      "other_prns": {
+        "unknown": 140,
+        "no_exceedance_evidence": 0,
+        "suspected_anomaly": 0
+      }
+    },
+    {
+      "scene": "startup",
+      "external_branch_assumed_verified": true,
+      "illustrative_nuisance_bound_m": null,
+      "prn1": {
+        "unknown": 20,
+        "no_exceedance_evidence": 0,
+        "suspected_anomaly": 0
+      },
+      "other_prns": {
+        "unknown": 140,
+        "no_exceedance_evidence": 0,
+        "suspected_anomaly": 0
+      }
+    },
+    {
+      "scene": "startup",
+      "external_branch_assumed_verified": true,
+      "illustrative_nuisance_bound_m": 0.003,
+      "prn1": {
+        "unknown": 10,
+        "no_exceedance_evidence": 3,
+        "suspected_anomaly": 7
+      },
+      "other_prns": {
+        "unknown": 5,
+        "no_exceedance_evidence": 135,
+        "suspected_anomaly": 0
+      }
+    },
+    {
+      "scene": "startup",
+      "external_branch_assumed_verified": true,
+      "illustrative_nuisance_bound_m": 0.008,
+      "prn1": {
+        "unknown": 17,
+        "no_exceedance_evidence": 0,
+        "suspected_anomaly": 3
+      },
+      "other_prns": {
+        "unknown": 86,
+        "no_exceedance_evidence": 54,
+        "suspected_anomaly": 0
+      }
+    }
+  ],
+  "inputs": {
+    "L1CA_1_static.json": "2ae48040cc50e345c286f551b7bd63409014662916745134e5db80ac53d89136",
+    "manifest.json": "85de49c115e96a9f19ec572053cfa54a993e030868ebcbeb3aaf6f1d807fecad",
+    "summary.json": "08c2fc96256118ebe7db67a3d3db47d54ed6936dfaf07cde7a369a85d6c06cfe"
+  },
+  "source_sha256": {
+    "audit_gf_gate.py": "f00596b922c375f46bc039bc3f63facfffd530838da1ef48bdbb1f8567ef83b0",
+    "gf_quality_gate.py": "5877be8612967a2a7d29b1cf0581d6a3c4c88ea9cc33cf9f7b02c7901e7553bf"
+  }
+}

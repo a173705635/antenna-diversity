@@ -1,0 +1,78 @@
+{
+  "scope": "Frozen self-check replay and observation-domain stress; no new RF generation.",
+  "source_hashes": {
+    "common_6400_0.json": "6a95e3c9e25fe6951e0eb70e170eacf1977c6e20ac86af893d15e9330156ecbf",
+    "common_6400_1.json": "94db8c6630c9c52f0ae6d9e2442b0a4ddfd5443937a8e7d18640eff698aacdf1",
+    "common_6402_0.json": "2bc86af7b6e7ded03f3ab0a9e889e6d880967a5ebb14a042ae0a66995acd7c93",
+    "common_6402_1.json": "73ea1958cbb72d7c6f2cd9344e35dd4f13d81263a682f682956599907d954b6a",
+    "execution_provenance.json": "e41758937b7a7c6aa70bcc545add82ab226480032b2ad1844be12d59b8ec2434",
+    "los_6400_0.json": "690fc8c71d2e0bc080f9396052f69ea322ed443c236879757d2c2cba9af0235b",
+    "los_6400_1.json": "8c8e8cca3e00cac4c7f9977457a0cfa1a3017c43ac599f9a7f2b43e9fa88b235",
+    "los_6402_0.json": "cfe849e8974a1ca8e8fa8509fbf96d39480fc98e815ba8478af09886bbc08696",
+    "los_6402_1.json": "ce05e3816294c947fab6057d1ddfef45c1ef44368b2cf7bc547d3be82a57843d",
+    "manifest.json": "ad7679ea774ecb165c694a86889c06bc98a8a591ef5664d42d58a417dbb28447",
+    "residual_common_6400.json": "5a296fec7b851b8e61eb15a5f68594f01ac4a377ede5bcf4f7b4eb73c7dd6fcf",
+    "residual_common_6402.json": "ea44847e49492afc3c80eae62c966310352a537dbff94db3c2fff940d897789c",
+    "residual_los_6200.json": "cfef8f1e061308c200d764418480b05575415c83add7ed6255615056adc340e7",
+    "residual_los_6202.json": "06cca2f855bae5586751249e2aae07e0d80d9728bbefa711d8c137b9f5d00274",
+    "residual_los_6204.json": "12daca40cc648670361cbc5cba53128531fd85a1297091ba23569b07c387c9a8",
+    "residual_los_6400.json": "996511666c0370cdbc18374c78437c9a267fa4e09809e50c4d349975432e24d4",
+    "residual_los_6402.json": "70dc54bdb3c98c6ae93632efa6d8f49ea0e79d61242e2d1ba53c60b2189d2ab2",
+    "residual_static_6400.json": "44733c460d180b900549a5136a3b458f0657792101ddc3051300192c17bc417d",
+    "residual_static_6402.json": "f337d9c2ee15ed3601f2f12f952c22d9ef9bdc0d1aa5b0b7a431e868567dfeae",
+    "residual_strong_6400.json": "48fae2f33b50e5600f46125137f996c3a08f1caa73e0d58ef03a66894b9b5bf6",
+    "residual_strong_6402.json": "b771b7e03b3dfa2ebdd6e95bd9dcbd4dcab9d2fe6fe06e823ba95638b407aa0f",
+    "residual_weak_6400.json": "0d67cd560676ef618dfa53a3e7aad4a8cc299b7767ecee9280b9d0782e6830a2",
+    "residual_weak_6402.json": "53683abdefc090becb411abaef9084f16d9e7fccd564bab28c26ef883ebeefa9",
+    "static_6400_1.json": "fc92d0c69c77de782a22f9c160db631d629d284cffa6390ae96b751d7c4d24dd",
+    "static_6402_1.json": "2baabbd9574beb3c7b8be9ff7a2d5c232dec676631007e6e0aada56f40a917b9",
+    "strong_6400_1.json": "94db8c6630c9c52f0ae6d9e2442b0a4ddfd5443937a8e7d18640eff698aacdf1",
+    "strong_6402_1.json": "73ea1958cbb72d7c6f2cd9344e35dd4f13d81263a682f682956599907d954b6a",
+    "weak_6400_1.json": "1960b7b4e20c5773cae834a560a323ecea68c140ef7d4e95776446272dbc9777",
+    "weak_6402_1.json": "7624fe5992acd84a4abe334c20e5037cbac51ac59023d461b64fba96aae9e9fe"
+  },
+  "calibration_seeds": [
+    6200,
+    6202,
+    6204
+  ],
+  "evaluation_seeds": [
+    6400,
+    6402
+  ],
+  "configs": {
+    "50": {
+      "window": 50,
+      "block": 10,
+      "confirmation": 10,
+      "minimum_satellites": 6,
+      "noise_k": 3.0,
+      "threshold_cap": 2.0,
+      "geometry_limit_m": 0.005,
+      "jump_m": 0.04,
+      "epoch_s": 0.01
+    },
+    "100": {
+      "window": 100,
+      "block": 10,
+      "confirmation": 10,
+      "minimum_satellites": 6,
+      "noise_k": 3.0,
+      "threshold_cap": 2.0,
+      "geometry_limit_m": 0.005,
+      "jump_m": 0.04,
+      "epoch_s": 0.01
+    }
+  },
+  "floors_m": {
+    "50": 0.0040818353220011564,
+    "100": 0.003700138890912512
+  },
+  "code_hashes": {
+    "sdcp_self_check.py": "29017bc8f937d7d3a52ff373779807917bd858d8597afa67a023dfc19091f2a9",
+    "audit_sdcp_self_check.py": "66bf53f400b68466fb658bc0bf9f26e714fdca016a9d0504302b6d40d5cd72a8"
+  },
+  "metadata": "RF replay assumes aligned locked integer-coherent arcs and zero geometry uncertainty; stresses override these explicitly",
+  "pvt": "exploratory offline float, 50ms subset, pair code+phase weight .1 for alarms; unknown falls back to 1",
+  "limitations": "two RF seed pairs; injected observation-domain stresses share base records, not independent RF trials; no physical CN0, attitude or reacquisition simulation"
+}
