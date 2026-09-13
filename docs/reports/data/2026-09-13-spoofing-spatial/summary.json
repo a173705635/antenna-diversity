@@ -1,0 +1,107 @@
+{
+  "scope": "Known-direction dual-antenna LCMV capability, no RF/PVT claim.",
+  "baseline_m": 0.0759,
+  "correlation_rejection_threshold": 0.99,
+  "columns": [
+    "prn",
+    "source_az_deg",
+    "source_el_deg",
+    "mode",
+    "accepted",
+    "suppression_db",
+    "target_gain_db",
+    "target_phase_mm",
+    "noise_gain_db_vs_single"
+  ],
+  "modes": [
+    "ideal",
+    "target_az_error_3deg",
+    "source_az_error_3deg",
+    "B_gain_1dB_phase_5deg"
+  ],
+  "rows": [
+    {
+      "mode": 0,
+      "grid_points": 12096,
+      "accepted_points": 10690,
+      "accepted_fraction": 0.8837632275132276,
+      "suppression_db_p05_median": [
+        240.0,
+        240.0
+      ],
+      "target_abs_gain_error_db_p95": 2.3143859197278918e-14,
+      "target_phase_abs_mm_p95": 3.362441288176252e-14,
+      "noise_gain_db_p95_max": [
+        11.147805924181737,
+        13.998259506073339
+      ],
+      "usable_illustrative_fraction_all_grid": 0.5668816137566137
+    },
+    {
+      "mode": 1,
+      "grid_points": 12096,
+      "accepted_points": 10690,
+      "accepted_fraction": 0.8837632275132276,
+      "suppression_db_p05_median": [
+        240.0,
+        240.0
+      ],
+      "target_abs_gain_error_db_p95": 1.7330797908731799,
+      "target_phase_abs_mm_p95": 1.8295290695274635,
+      "noise_gain_db_p95_max": [
+        11.147805924181737,
+        13.998259506073339
+      ],
+      "usable_illustrative_fraction_all_grid": 0.5668816137566137
+    },
+    {
+      "mode": 2,
+      "grid_points": 12096,
+      "accepted_points": 10690,
+      "accepted_fraction": 0.8837632275132276,
+      "suppression_db_p05_median": [
+        14.518822143255134,
+        28.369127437782932
+      ],
+      "target_abs_gain_error_db_p95": 2.3143859197278918e-14,
+      "target_phase_abs_mm_p95": 3.362441288176252e-14,
+      "noise_gain_db_p95_max": [
+        11.147805924181737,
+        13.998259506073339
+      ],
+      "usable_illustrative_fraction_all_grid": 0.5533234126984127
+    },
+    {
+      "mode": 3,
+      "grid_points": 12096,
+      "accepted_points": 10690,
+      "accepted_fraction": 0.8837632275132276,
+      "suppression_db_p05_median": [
+        8.165189868677501,
+        18.666131283724866
+      ],
+      "target_abs_gain_error_db_p95": 2.220913025777568,
+      "target_phase_abs_mm_p95": 10.155954752301287,
+      "noise_gain_db_p95_max": [
+        11.147805924181737,
+        13.998259506073339
+      ],
+      "usable_illustrative_fraction_all_grid": 0.35119047619047616
+    }
+  ],
+  "same_projection_counterexample": {
+    "target": [
+      10,
+      25
+    ],
+    "other": [
+      170,
+      25
+    ]
+  },
+  "interpretation": "Grid fractions are not sky-area probabilities. 240dB is numerical display floor, not hardware rejection.",
+  "source_sha256": {
+    "audit_spoofing_spatial.py": "12d277c125f1a854398b1bd0c469e35fd6daf6e68f1877d3d3a60dd427ae1e22",
+    "diversity.py": "9dbc90ef1754c6937171f8bdb72bd48fb3c8cf57d3ac04fa66bca65e33771952"
+  }
+}

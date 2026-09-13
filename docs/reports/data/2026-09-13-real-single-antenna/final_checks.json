@@ -1,0 +1,8 @@
+{
+  "report_links_checked": 14,
+  "numeric_table_rows_checked": 10,
+  "whole_recording_sha256": "220b37c6e57255483fb7858e7fab10255d7db0459d5134531ea660e9da87ca78",
+  "main_input_window_sha256": "2cdf40052fcbd301a89f1f6f603be77ed4acc59b09391e34bc9d89a0814dc570",
+  "same_input_verified_for_three_main_runs": true,
+  "large_iq_not_in_evidence_directory": true
+}

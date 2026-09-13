@@ -1,0 +1,20 @@
+doppler_hz = 1500.0
+amplitude = 1.0
+dtype = "little-endian complex128"
+prn = 1
+generator = "GNSSSimulator.jl 0.6.3 + PhasedArray; native noiseless primitives"
+sample_rate_hz = 3.3e7
+source_noise = false
+duration_ms = 1000
+carrier_hz = 1.57542e9
+native_doa = [-0.4330127018922193, -0.25, -0.8660254037844386]
+geometry_range_m = 0.03286566407361944
+code_phase_chips = 885.75
+initial_phase_rad = 0.35
+if_hz = 4.092e6
+samples_per_channel = 33000000
+look_vector = [0.4330127018922193, 0.25, 0.8660254037844386]
+
+[files_sha256]
+"TR.c128" = "86db3a5c6e7edcbb7d5f3852525c65ded142269f565afb72c5c0214018376246"
+"TL.c128" = "9e3a702e92b41cb82ddfc9c133b8bb7cb6eef033a4b152e457526a4f284bede6"

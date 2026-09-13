@@ -1,0 +1,10 @@
+{
+  "new_tests_passed": 7,
+  "full_tests_passed": 156,
+  "warnings": 1,
+  "warning": "existing noise-free C/N0 divide by zero at tracking.py:82",
+  "duration_s": 89.54,
+  "command": "python -m pytest -q python_sim_simplified/tests",
+  "output_hashes_checked": 2,
+  "replay_rows_checked": 5
+}

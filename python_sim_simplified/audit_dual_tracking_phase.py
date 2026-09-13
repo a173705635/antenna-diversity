@@ -1,5 +1,7 @@
 """Two independent receiver chains; compare tracked NCOs at common times."""
 import json
+from copy import deepcopy
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -39,8 +41,9 @@ def compare_phases(first, second, fs_hz, samples_per_epoch):
     )
     difference = second_phase - np.asarray(first['carrier_nco_phase_rad'])[valid]
     # Branch chosen from observations; no truth-assisted integer-cycle fixing.
-    difference = np.unwrap(np.angle(np.exp(1j*difference)))
-    return {'time_s': times/fs_hz, 'phase_difference_rad': difference}
+    legacy_difference = np.unwrap(np.angle(np.exp(1j*difference)))
+    return {'time_s': times/fs_hz, 'phase_difference_rad': legacy_difference,
+            'raw_phase_difference_rad': difference}
 
 
 def statistics(phase, wavelength, expected):
@@ -63,14 +66,14 @@ def statistics(phase, wavelength, expected):
 
 
 def run_case(thermal_noise=True, *, duration_ms=100, seed_base=42,
-             multipath_paths=(), multipath_start_ms=None):
+             multipath_paths=(), multipath_start_ms=None, receiver_config=None):
     if not isinstance(duration_ms, int) or duration_ms < 10:
         raise ValueError('duration_ms must be an integer >= 10')
     if not isinstance(seed_base, int) or seed_base < 0:
         raise ValueError('seed_base must be a nonnegative integer')
     if multipath_start_ms is not None and not 0 <= multipath_start_ms < duration_ms-10:
         raise ValueError('echo onset must leave a full 10 ms ramp within the record')
-    cfg = default_config()
+    cfg = default_config() if receiver_config is None else deepcopy(receiver_config)
     cfg.signal.duration_ms = duration_ms
     cfg.random_seed = seed_base
     cfg.tracking.max_epochs = max(cfg.tracking.max_epochs,
@@ -92,14 +95,22 @@ def run_case(thermal_noise=True, *, duration_ms=100, seed_base=42,
             for channel in range(antenna.shape[0]):
                 antenna[channel] -= off*path['component'][channel]
         del progress, off
-    steering = truth['desired_steering_true'].copy()
+    # Geometry alone: do not let antenna/RF errors enter the compensation truth.
+    from antenna import direction_vector
+    positions = cfg.phone.phase_centers_m
+    baseline = np.array(positions['TR']) - np.array(positions['TL'])
+    expected = -2*np.pi/cfg.signal.wavelength_m * np.dot(
+        baseline, direction_vector(cfg.signal.true_direction))
     # Long records need only the array samples and this small post-hoc reference.
     del truth
     histories, diagnostics = [], []
     fs = None
     for index, name in enumerate(cfg.phone.active_antennas):
         seed = cfg.random_seed + index
-        adc, rf_info = process_rf(antenna[index:index+1], cfg.rf,
+        channel_rf = replace(cfg.rf,
+            amplitude_error_db=float(np.broadcast_to(cfg.rf.amplitude_error_db, (2,))[index]),
+            phase_error_deg=float(np.broadcast_to(cfg.rf.phase_error_deg, (2,))[index]))
+        adc, rf_info = process_rf(antenna[index:index+1], channel_rf,
                                   cfg.reference_impedance_ohm, seed)
         baseband, dfe_info = process_dfe(adc, cfg.dfe, cfg.signal.fs_rf_hz,
                                         cfg.signal.if_hz)
@@ -133,11 +144,12 @@ def run_case(thermal_noise=True, *, duration_ms=100, seed_base=42,
             'carrier_nco_phase_rad': history['carrier_nco_phase_rad'].tolist(),
             'carrier_nco_frequency_hz': history['carrier_nco_frequency_hz'].tolist(),
             'pll_error_rad': history['pll_error_rad'].tolist(),
+            'phase_lock_metric': history['phase_lock_metric'].tolist(),
         })
         del adc, baseband
     aligned = compare_phases(*histories, fs, round(fs*cfg.tracking.coherent_ms*.001))
     phase = aligned['phase_difference_rad']
-    expected = float(np.angle(steering[1]*steering[0].conj()))
+    expected = float(expected)
     return {'thermal_noise': thermal_noise, 'status': 'evaluated_not_lock_certified',
             'pair': 'TR - TL', 'duration_ms': cfg.signal.duration_ms,
             'seed_base': seed_base, 'tracking_max_epochs': cfg.tracking.max_epochs,
@@ -147,6 +159,7 @@ def run_case(thermal_noise=True, *, duration_ms=100, seed_base=42,
             'ideal_geometry_phase_deg': float(np.degrees(expected)),
             'ideal_geometry_path_m': expected*cfg.signal.wavelength_m/(2*np.pi),
             'time_s': aligned['time_s'].tolist(), 'phase_difference_rad': phase.tolist(),
+            'raw_phase_difference_rad': aligned['raw_phase_difference_rad'].tolist(),
             'all_epochs': statistics(phase, cfg.signal.wavelength_m, expected),
             'last_30_epochs': statistics(phase[-30:], cfg.signal.wavelength_m, expected),
             'channels': diagnostics}

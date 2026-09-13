@@ -1,6 +1,8 @@
 # GNSS 天线分集与空域抗干扰仿真
 
-当前阶段已收口，后续不推进极化分集。完整范围、结论及未完成项见[阶段总结与交接](docs/reports/2026-09-12-multipath-stage-closeout.md)。
+**当前新阶段：天线分集抗欺骗。** 已完成[双天线空间一致性首轮实现与验证](docs/reports/2026-09-12-antenna-spoofing-validation.md)：同源全星替代可见，部分欺骗漏检、真假混合有未知区间；不等于认证或导航恢复。多径阶段仍收口，极化分集暂停。
+
+此前多径阶段已收口，后续不推进极化分集。完整范围、结论及未完成项见[阶段总结与交接](docs/reports/2026-09-12-multipath-stage-closeout.md)。
 
 本仓库研究 GNSS 多通道接收链路、GPS L1/L5 定位、多径检测与空域抗干扰。当前只维护 `python_sim_simplified/`。多径检测与外部干扰研究分别组织，具体已验证范围以 [项目状态](PROJECT_STATUS.md) 为准。
 
@@ -10,6 +12,7 @@
 
 | 研究任务 | 入口 | 验证记录 |
 |---|---|---|
+| 真实单天线 GPS 接收与码定位 | `recorded_receiver.py` | [40 秒实测定位与模块说明](docs/reports/2026-09-13-recorded-receiver.md) |
 | 双 RF / DFE / 独立环路相位差 | `audit_dual_tracking_phase.py` | [双通道相位](docs/reports/2026-09-10-dual-tracking-phase.md) |
 | GPS 码/载波浮点定位 | `run_gps_spp.py` | [定位验证](docs/reports/2026-09-11-code-carrier-float.md) |
 | GPS L1/L5 定位 | `run_gps_l1_l5.py` | [双频权重](docs/reports/2026-09-11-dual-frequency-optimization.md) |

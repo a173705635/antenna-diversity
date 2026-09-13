@@ -1,0 +1,7 @@
+{
+  "coherent_equal.npz": "1cefb0f3799213d0d6825e0d112710a280390ceea552ade9713c626dea9e992f",
+  "coherent_stronger.npz": "4280021e88a2e79bbc46b51d978166ce71ed1b32f52afa2590011e2a4558c0b1",
+  "independent_equal.npz": "a0bc1358fe33fe88600d6dbc85d23ea6c87ff9d3a8f529b2961ceb76de0a78cb",
+  "independent_stronger.npz": "12164fe905739cbb93b88eee6230e871e5c1c830017441464484d7143d5aff80",
+  "summary.json": "12cf52a6fc7a8dfbb152ace5b03cf30c280835e31d9c621965e4ab7ec06f8ee6"
+}

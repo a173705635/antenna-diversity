@@ -1,0 +1,139 @@
+{
+  "kind": "Analytical calculations with stated hypothetical inputs; not measurements or current-loop predictions",
+  "gps_l1_wavelength_mm": 190.29367279836487,
+  "phase_to_distance": [
+    {
+      "phase_deg": 1,
+      "distance_mm": 0.5285935355510135
+    },
+    {
+      "phase_deg": 2,
+      "distance_mm": 1.057187071102027
+    },
+    {
+      "phase_deg": 3,
+      "distance_mm": 1.5857806066530407
+    },
+    {
+      "phase_deg": 5,
+      "distance_mm": 2.6429676777550677
+    },
+    {
+      "phase_deg": 10,
+      "distance_mm": 5.285935355510135
+    },
+    {
+      "phase_deg": 180,
+      "distance_mm": 95.14683639918243
+    },
+    {
+      "phase_deg": 360,
+      "distance_mm": 190.29367279836487
+    }
+  ],
+  "rf_pure_delay": [
+    {
+      "delay_ps": 1,
+      "phase_deg": 0.5671512,
+      "distance_mm": 0.29979245800000004
+    },
+    {
+      "delay_ps": 10,
+      "phase_deg": 5.671512,
+      "distance_mm": 2.99792458
+    },
+    {
+      "delay_ps": 100,
+      "phase_deg": 56.71512,
+      "distance_mm": 29.979245799999998
+    }
+  ],
+  "if_aperture_example": {
+    "if_hz": 4092000.0,
+    "delay_ps": 10.0,
+    "phase_deg": 0.0147312,
+    "l1_equivalent_distance_mm": 0.007786817090909092
+  },
+  "phase_frequency_slope": {
+    "differential_group_delay_ns": 1.0,
+    "frequency_change_hz": 5000.0,
+    "phase_change_deg": 0.0018000000000000002,
+    "distance_change_mm": 0.0009514683639918244
+  },
+  "same_epoch_mapping": [
+    {
+      "nco_hz": 2000.0,
+      "time_error_us": 1,
+      "distance_error_mm": 0.38058734559672974
+    },
+    {
+      "nco_hz": 2000.0,
+      "time_error_us": 10,
+      "distance_error_mm": 3.8058734559672973
+    },
+    {
+      "nco_hz": 2000.0,
+      "time_error_us": 100,
+      "distance_error_mm": 38.05873455967297
+    }
+  ],
+  "baseline_projection_bound": [
+    {
+      "baseline_mm": 75.9,
+      "single_rotation_error_deg": 1,
+      "bound_mm": 1.3246880886531633
+    },
+    {
+      "baseline_mm": 75.9,
+      "single_rotation_error_deg": 3,
+      "bound_mm": 3.9736607531351447
+    },
+    {
+      "baseline_mm": 75.9,
+      "single_rotation_error_deg": 5,
+      "bound_mm": 6.621423002058005
+    }
+  ],
+  "pll_thermal_example": [
+    {
+      "cn0_db_hz": 35.0,
+      "bandwidth_hz": 15.0,
+      "integration_s": 0.001,
+      "one_channel_sigma_mm": 2.2447384386925515,
+      "independent_equal_two_channel_sdcp_sigma_mm": 3.174539543979213
+    },
+    {
+      "cn0_db_hz": 40.0,
+      "bandwidth_hz": 15.0,
+      "integration_s": 0.001,
+      "one_channel_sigma_mm": 1.201945453649772,
+      "independent_equal_two_channel_sdcp_sigma_mm": 1.6998075617841901
+    },
+    {
+      "cn0_db_hz": 45.0,
+      "bandwidth_hz": 15.0,
+      "integration_s": 0.001,
+      "one_channel_sigma_mm": 0.6648086296753701,
+      "independent_equal_two_channel_sdcp_sigma_mm": 0.940181380469581
+    }
+  ],
+  "phase_rounding_example": {
+    "phase_bits": 16,
+    "max_instantaneous_error_mm": 0.0014518255065793218
+  },
+  "dfe_nominal_delay": {
+    "taps": 129,
+    "input_fs_hz": 33000000.0,
+    "input_samples": 64,
+    "microseconds": 1.9393939393939394
+  },
+  "carrier_multipath_single_echo_bound_mm": 47.57341819959122,
+  "gore_published_example_arithmetic": {
+    "coefficient_deg_per_ghz_ft": 0.24,
+    "frequency_ghz": 4.2,
+    "length_ft": 10.0,
+    "temperature_from_c": 25.0,
+    "temperature_to_c": -55.0,
+    "phase_change_deg": 10.08
+  }
+}

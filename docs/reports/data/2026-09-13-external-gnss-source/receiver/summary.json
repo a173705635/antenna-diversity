@@ -1,0 +1,365 @@
+{
+  "rows": [
+    {
+      "seed": 9900,
+      "case": "zero",
+      "status": "evaluated_not_lock_certified",
+      "raw_sdcp": {
+        "epochs": 799,
+        "mean_mm": 32.86012941107256,
+        "std_mm": 1.614867670448789,
+        "rms_mm": 32.89978575166556,
+        "max_abs_mm": 37.31667238534442
+      },
+      "geometry_residual": {
+        "epochs": 799,
+        "mean_mm": -0.005534662546880049,
+        "std_mm": 1.614867670448789,
+        "rms_mm": 1.6148771549409588,
+        "max_abs_mm": 4.451008311724978
+      },
+      "paired_change": {
+        "epochs": 799,
+        "mean_mm": 0.0,
+        "std_mm": 0.0,
+        "rms_mm": 0.0,
+        "max_abs_mm": 0.0
+      },
+      "quality_pass": 799,
+      "finite_epochs": 799,
+      "expected_injected_range_mm": -0.0,
+      "max_adjacent_step_mm": 3.970590586078515
+    },
+    {
+      "seed": 9900,
+      "case": "antenna_amplitude",
+      "status": "evaluated_not_lock_certified",
+      "raw_sdcp": {
+        "epochs": 799,
+        "mean_mm": 32.84925108650785,
+        "std_mm": 1.7116973862551184,
+        "rms_mm": 32.89381712247074,
+        "max_abs_mm": 37.45974443609157
+      },
+      "geometry_residual": {
+        "epochs": 799,
+        "mean_mm": -0.016412987111596014,
+        "std_mm": 1.7116973862551181,
+        "rms_mm": 1.7117760742160548,
+        "max_abs_mm": 4.727786799144964
+      },
+      "paired_change": {
+        "epochs": 799,
+        "mean_mm": -0.010878324564715956,
+        "std_mm": 0.1895273097039468,
+        "rms_mm": 0.18983924533391683,
+        "max_abs_mm": 0.6591647177174309
+      },
+      "quality_pass": 799,
+      "finite_epochs": 799,
+      "expected_injected_range_mm": -0.0,
+      "max_adjacent_step_mm": 4.316268570789816
+    },
+    {
+      "seed": 9900,
+      "case": "antenna_phase",
+      "status": "evaluated_not_lock_certified",
+      "raw_sdcp": {
+        "epochs": 799,
+        "mean_mm": 30.213127156627216,
+        "std_mm": 1.6316332518915209,
+        "rms_mm": 30.257152537064737,
+        "max_abs_mm": 34.51072851277104
+      },
+      "geometry_residual": {
+        "epochs": 799,
+        "mean_mm": -2.652536916992221,
+        "std_mm": 1.631633251891521,
+        "rms_mm": 3.1141899692672403,
+        "max_abs_mm": 7.109707179005921
+      },
+      "paired_change": {
+        "epochs": 799,
+        "mean_mm": -2.647002254445341,
+        "std_mm": 0.1572892131530352,
+        "rms_mm": 2.6516713279765685,
+        "max_abs_mm": 3.213901605789715
+      },
+      "quality_pass": 799,
+      "finite_epochs": 799,
+      "expected_injected_range_mm": -2.6429676777550672,
+      "max_adjacent_step_mm": 4.1018958874303735
+    },
+    {
+      "seed": 9900,
+      "case": "rf_amplitude",
+      "status": "evaluated_not_lock_certified",
+      "raw_sdcp": {
+        "epochs": 799,
+        "mean_mm": 32.88151855404114,
+        "std_mm": 1.6122459943353937,
+        "rms_mm": 32.921020633722804,
+        "max_abs_mm": 37.32638126945176
+      },
+      "geometry_residual": {
+        "epochs": 799,
+        "mean_mm": 0.015854480421706108,
+        "std_mm": 1.6122459943353937,
+        "rms_mm": 1.6123239472264763,
+        "max_abs_mm": 4.460717195832318
+      },
+      "paired_change": {
+        "epochs": 799,
+        "mean_mm": 0.021389142968586156,
+        "std_mm": 0.24814545273180236,
+        "rms_mm": 0.24906557600038148,
+        "max_abs_mm": 0.8094954202988447
+      },
+      "quality_pass": 799,
+      "finite_epochs": 799,
+      "expected_injected_range_mm": -0.0,
+      "max_adjacent_step_mm": 4.03094410819449
+    },
+    {
+      "seed": 9900,
+      "case": "rf_phase",
+      "status": "evaluated_not_lock_certified",
+      "raw_sdcp": {
+        "epochs": 799,
+        "mean_mm": 31.2703107711984,
+        "std_mm": 1.624868520141408,
+        "rms_mm": 31.31249803888334,
+        "max_abs_mm": 35.71970898821064
+      },
+      "geometry_residual": {
+        "epochs": 799,
+        "mean_mm": -1.5953533024210398,
+        "std_mm": 1.624868520141408,
+        "rms_mm": 2.2771363304141996,
+        "max_abs_mm": 5.956859128411464
+      },
+      "paired_change": {
+        "epochs": 799,
+        "mean_mm": -1.5898186398741598,
+        "std_mm": 0.20060643361403055,
+        "rms_mm": 1.6024251149113535,
+        "max_abs_mm": 2.19302646277697
+      },
+      "quality_pass": 799,
+      "finite_epochs": 799,
+      "expected_injected_range_mm": -1.5857806066530404,
+      "max_adjacent_step_mm": 3.9386578637277125
+    },
+    {
+      "seed": 9900,
+      "case": "combined",
+      "status": "evaluated_not_lock_certified",
+      "raw_sdcp": {
+        "epochs": 799,
+        "mean_mm": 28.624088824840726,
+        "std_mm": 1.7086577805160847,
+        "rms_mm": 28.675040932199032,
+        "max_abs_mm": 33.1882064456579
+      },
+      "geometry_residual": {
+        "epochs": 799,
+        "mean_mm": -4.241575248778713,
+        "std_mm": 1.7086577805160847,
+        "rms_mm": 4.572796956127656,
+        "max_abs_mm": 8.55100593010958
+      },
+      "paired_change": {
+        "epochs": 799,
+        "mean_mm": -4.236040586231833,
+        "std_mm": 0.31861461023592463,
+        "rms_mm": 4.248006016716445,
+        "max_abs_mm": 5.047938765983417
+      },
+      "quality_pass": 799,
+      "finite_epochs": 799,
+      "expected_injected_range_mm": -4.228748284408108,
+      "max_adjacent_step_mm": 4.352058958431826
+    },
+    {
+      "seed": 9902,
+      "case": "zero",
+      "status": "evaluated_not_lock_certified",
+      "raw_sdcp": {
+        "epochs": 799,
+        "mean_mm": 32.787180024956676,
+        "std_mm": 1.5806607524038256,
+        "rms_mm": 32.82525951768101,
+        "max_abs_mm": 37.49983554284597
+      },
+      "geometry_residual": {
+        "epochs": 799,
+        "mean_mm": -0.0784840486627638,
+        "std_mm": 1.5806607524038256,
+        "rms_mm": 1.5826080247756635,
+        "max_abs_mm": 6.1387478481488085
+      },
+      "paired_change": {
+        "epochs": 799,
+        "mean_mm": 0.0,
+        "std_mm": 0.0,
+        "rms_mm": 0.0,
+        "max_abs_mm": 0.0
+      },
+      "quality_pass": 799,
+      "finite_epochs": 799,
+      "expected_injected_range_mm": -0.0,
+      "max_adjacent_step_mm": 4.477994796687312
+    },
+    {
+      "seed": 9902,
+      "case": "antenna_amplitude",
+      "status": "evaluated_not_lock_certified",
+      "raw_sdcp": {
+        "epochs": 799,
+        "mean_mm": 32.78073503824698,
+        "std_mm": 1.668773256318927,
+        "rms_mm": 32.82318378568353,
+        "max_abs_mm": 37.81019290906329
+      },
+      "geometry_residual": {
+        "epochs": 799,
+        "mean_mm": -0.08492903537246103,
+        "std_mm": 1.668773256318927,
+        "rms_mm": 1.6709330094454928,
+        "max_abs_mm": 6.331626620999044
+      },
+      "paired_change": {
+        "epochs": 799,
+        "mean_mm": -0.006444986709697231,
+        "std_mm": 0.18669395745515796,
+        "rms_mm": 0.18680517017458728,
+        "max_abs_mm": 0.5786228964268503
+      },
+      "quality_pass": 799,
+      "finite_epochs": 799,
+      "expected_injected_range_mm": -0.0,
+      "max_adjacent_step_mm": 5.079020382140698
+    },
+    {
+      "seed": 9902,
+      "case": "antenna_phase",
+      "status": "evaluated_not_lock_certified",
+      "raw_sdcp": {
+        "epochs": 799,
+        "mean_mm": 30.135817407439763,
+        "std_mm": 1.5742019179630964,
+        "rms_mm": 30.176905117872312,
+        "max_abs_mm": 34.92476219236096
+      },
+      "geometry_residual": {
+        "epochs": 799,
+        "mean_mm": -2.7298466661796743,
+        "std_mm": 1.5742019179630964,
+        "rms_mm": 3.151217939046897,
+        "max_abs_mm": 8.540508494399559
+      },
+      "paired_change": {
+        "epochs": 799,
+        "mean_mm": -2.6513626175169103,
+        "std_mm": 0.16631946721520122,
+        "rms_mm": 2.6565740898271355,
+        "max_abs_mm": 3.0976676135878733
+      },
+      "quality_pass": 799,
+      "finite_epochs": 799,
+      "expected_injected_range_mm": -2.6429676777550672,
+      "max_adjacent_step_mm": 4.41844239541922
+    },
+    {
+      "seed": 9902,
+      "case": "rf_amplitude",
+      "status": "evaluated_not_lock_certified",
+      "raw_sdcp": {
+        "epochs": 799,
+        "mean_mm": 32.75235827882962,
+        "std_mm": 1.566073036531872,
+        "rms_mm": 32.789778248420205,
+        "max_abs_mm": 37.26682095529554
+      },
+      "geometry_residual": {
+        "epochs": 799,
+        "mean_mm": -0.11330579478982054,
+        "std_mm": 1.566073036531872,
+        "rms_mm": 1.570166538582806,
+        "max_abs_mm": 5.995320611583123
+      },
+      "paired_change": {
+        "epochs": 799,
+        "mean_mm": -0.03482174612705674,
+        "std_mm": 0.24622967833868278,
+        "rms_mm": 0.24867973077456149,
+        "max_abs_mm": 0.8317159457646994
+      },
+      "quality_pass": 799,
+      "finite_epochs": 799,
+      "expected_injected_range_mm": -0.0,
+      "max_adjacent_step_mm": 4.25779882412769
+    },
+    {
+      "seed": 9902,
+      "case": "rf_phase",
+      "status": "evaluated_not_lock_certified",
+      "raw_sdcp": {
+        "epochs": 799,
+        "mean_mm": 31.18567973744898,
+        "std_mm": 1.556721847963691,
+        "rms_mm": 31.224509661460875,
+        "max_abs_mm": 36.07326704734248
+      },
+      "geometry_residual": {
+        "epochs": 799,
+        "mean_mm": -1.6799843361704607,
+        "std_mm": 1.556721847963691,
+        "rms_mm": 2.2903559290436917,
+        "max_abs_mm": 7.3970602444940265
+      },
+      "paired_change": {
+        "epochs": 799,
+        "mean_mm": -1.6015002875076971,
+        "std_mm": 0.18316429270798568,
+        "rms_mm": 1.6119405476041764,
+        "max_abs_mm": 2.281310189260921
+      },
+      "quality_pass": 799,
+      "finite_epochs": 799,
+      "expected_injected_range_mm": -1.5857806066530404,
+      "max_adjacent_step_mm": 4.668937492894543
+    },
+    {
+      "seed": 9902,
+      "case": "combined",
+      "status": "evaluated_not_lock_certified",
+      "raw_sdcp": {
+        "epochs": 799,
+        "mean_mm": 28.538441552051303,
+        "std_mm": 1.630961681256237,
+        "rms_mm": 28.585007997647548,
+        "max_abs_mm": 33.224825984234485
+      },
+      "geometry_residual": {
+        "epochs": 799,
+        "mean_mm": -4.327222521568138,
+        "std_mm": 1.630961681256237,
+        "rms_mm": 4.624380040274879,
+        "max_abs_mm": 10.12155740422669
+      },
+      "paired_change": {
+        "epochs": 799,
+        "mean_mm": -4.248738472905375,
+        "std_mm": 0.29387419102744766,
+        "rms_mm": 4.2588896030888534,
+        "max_abs_mm": 5.371015815512692
+      },
+      "quality_pass": 799,
+      "finite_epochs": 799,
+      "expected_injected_range_mm": -4.228748284408108,
+      "max_adjacent_step_mm": 4.394930046728973
+    }
+  ],
+  "statistics": "All finite points, 200..998 ms, 1 ms; ddof=0; no modulo or mean subtraction."
+}

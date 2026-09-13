@@ -290,8 +290,17 @@ def antenna_response(
         pattern_voltage.append(voltage)
     pattern_voltage = np.asarray(pattern_voltage)
 
+    if (set(state.amplitude_error_db) | set(state.phase_error_deg)) - set(position_map):
+        raise ValueError('antenna error maps contain unknown element names')
+    amplitude_db = np.array([state.amplitude_error_db.get(name, 0.) for name in names])
+    phase_deg = np.array([state.phase_error_deg.get(name, 0.) for name in names])
+    if not np.all(np.isfinite(amplitude_db)) or not np.all(np.isfinite(phase_deg)):
+        raise ValueError('antenna amplitude/phase errors must be finite')
+    with np.errstate(over='raise', invalid='raise'):
+        element_error = 10.**(amplitude_db/20.) * np.exp(1j*np.deg2rad(phase_deg))
+
     blockage = attenuation_voltage(state, names, direction)
-    open_circuit = spatial * pattern_voltage * blockage
+    open_circuit = spatial * pattern_voltage * element_error * blockage
     coupling = coupling_matrix(state, names)
     coupled = coupling @ open_circuit
     channel = (
@@ -304,6 +313,7 @@ def antenna_response(
         "positions_m": positions,
         "spatial_phase": spatial,
         "pattern_polarization_voltage": pattern_voltage,
+        "element_error_response": element_error,
         "blockage_voltage": blockage,
         "open_circuit_response": open_circuit,
         "coupling_matrix": coupling,

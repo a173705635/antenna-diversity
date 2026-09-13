@@ -1,0 +1,98 @@
+[
+  {
+    "id": "S1",
+    "title": "NGS GNSS Antenna Calibration",
+    "url": "https://www.ngs.noaa.gov/research/gnss-satellite/gnss-antenna-calibration.shtml",
+    "access_date": "2026-09-13"
+  },
+  {
+    "id": "S2",
+    "title": "NGS Antenna Calibration FAQ",
+    "url": "https://nweb.ngs.noaa.gov/ANTCAL/FAQ.xhtml",
+    "access_date": "2026-09-13"
+  },
+  {
+    "id": "S3",
+    "title": "ESA/UPC Carrier Phase Wind-up Effect",
+    "url": "https://gssc.esa.int/navipedia/index.php/Carrier_Phase_Wind-up_Effect",
+    "access_date": "2026-09-13"
+  },
+  {
+    "id": "S4",
+    "title": "Gore Changes in Insertion Loss and Phase",
+    "url": "https://www.gore.com/resources/cables-microwave-rf-changes-insertion-loss-and-phase",
+    "access_date": "2026-09-13"
+  },
+  {
+    "id": "S5",
+    "title": "ADRV9002 shared-LO dual-RX measurement and ADI reply",
+    "url": "https://ez.analog.com/rf/wide-band-rf-transceivers/design-support-adrv9001-adrv9007/f/q-a/605735/adrv9002-rx1-rx2-phase-difference-varies-with-rf-frequency-using-shared-lo2-and-mcs",
+    "access_date": "2026-09-13"
+  },
+  {
+    "id": "S6",
+    "title": "ADI SDR RF PLL Phase Synchronization article",
+    "url": "https://www.analog.com/en/resources/technical-articles/simplify-antenna-calibrations-using-sdr.html",
+    "access_date": "2026-09-13"
+  },
+  {
+    "id": "S7",
+    "title": "ADI Image Rejection and Receiver IQ Calibration",
+    "url": "https://www.analog.com/en/resources/analog-dialogue/articles/mirror-mirror-on-the-wall-understanding-image-rejection-and-its-impact-on-desired-signals.html",
+    "access_date": "2026-09-13"
+  },
+  {
+    "id": "S8",
+    "title": "ADI FMComms5 Phase Synchronization",
+    "url": "https://developer.analog.com/docs/system-level/solutions/reference-designs/fmcomms5/phase-sync.html",
+    "access_date": "2026-09-13"
+  },
+  {
+    "id": "S9",
+    "title": "ADI AN-835 ADC Testing",
+    "url": "https://www.analog.com/en/resources/app-notes/an-835.html",
+    "access_date": "2026-09-13"
+  },
+  {
+    "id": "S10",
+    "title": "ESA/GMV PLL",
+    "url": "https://gssc.esa.int/navipedia/index.php/Phase_Lock_Loop_(PLL)",
+    "access_date": "2026-09-13"
+  },
+  {
+    "id": "S11",
+    "title": "ESA/UPC Single Frequency Cycle-Slip Detectors",
+    "url": "https://gssc.esa.int/navipedia/index.php/Examples_of_single_frequency_Cycle-Slip_Detectors",
+    "access_date": "2026-09-13"
+  },
+  {
+    "id": "S12",
+    "title": "ESA/UPC Multipath",
+    "url": "https://gssc.esa.int/navipedia/index.php/Multipath",
+    "access_date": "2026-09-13"
+  },
+  {
+    "id": "S13",
+    "title": "ESA/UPC Receiver Noise",
+    "url": "https://gssc.esa.int/navipedia/index.php/Receiver_noise",
+    "access_date": "2026-09-13"
+  },
+  {
+    "id": "S14",
+    "title": "ADI MT-007 Aperture Jitter",
+    "url": "https://www.analog.com/media/en/training-seminars/tutorials/MT-007.pdf",
+    "access_date": "2026-09-13"
+  },
+  {
+    "id": "S15",
+    "title": "Precise Calibration of a GNSS Antenna Array for Adaptive Beamforming Applications",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4118364/",
+    "access_date": "2026-09-13"
+  },
+  {
+    "id": "S16",
+    "title": "DLR Self-contained Antenna Crosstalk and Phase Offset Calibration (2017)",
+    "url": "https://elib.dlr.de/112950/",
+    "access_date": "2026-09-13"
+  }
+]

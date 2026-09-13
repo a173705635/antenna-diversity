@@ -1,0 +1,27 @@
+{
+  "prn": 7,
+  "file_interval_s": [
+    1,
+    2
+  ],
+  "arrays_compared": [
+    "epoch_start_samples",
+    "early",
+    "prompt",
+    "late",
+    "dll_error",
+    "pll_error_rad",
+    "fll_error_hz",
+    "carrier_frequency_hz",
+    "carrier_nco_phase_rad",
+    "carrier_nco_frequency_hz",
+    "code_nco_phase_chips",
+    "code_nco_rate_hz",
+    "code_rate_hz",
+    "code_phase_chips",
+    "prompt_magnitude",
+    "phase_lock_metric",
+    "cn0_db_hz"
+  ],
+  "all_arrays_bitwise_equal": true
+}

@@ -1,0 +1,18 @@
+{
+  "evidence_hash_entries": 23,
+  "hash_failures": 0,
+  "model_event_rows_recounted": 11,
+  "rf_summary_rows_recounted": 6,
+  "threshold_recomputed": 0.19328163509973767,
+  "rf_regeneration": "8 new digital RF streams; 3 archived control streams reused",
+  "rf_scores_independently_rebuilt_from_nco": 10,
+  "tests": {
+    "passed": 149,
+    "warnings": 1,
+    "duration_s": 89.42,
+    "command": "python -m pytest -q python_sim_simplified/tests",
+    "warning": "existing noise-free C/N0 divide by zero at tracking.py:82"
+  },
+  "local_links_checked": 9,
+  "missing_links": []
+}

@@ -1,0 +1,108 @@
+{
+  "scope": "Known-target projection identifiability audit; complex snapshots, not RF.",
+  "seed": 9720,
+  "snapshots_per_trial": 4000,
+  "target": [
+    10,
+    25
+  ],
+  "source": [
+    100,
+    10
+  ],
+  "source_to_target_power_db": 0,
+  "known_white_noise_power": 0.0025,
+  "rows": [
+    {
+      "rho": 0.0,
+      "trials": 300,
+      "accepted": 300,
+      "response_similarity_median": 0.9999439153671994,
+      "source_suppression_db_p05_median": [
+        30.852343447330373,
+        38.13644698788806
+      ],
+      "noise_gain_db_median": -1.6079078836144212,
+      "reconstruction_mse_median": 0.001876813594532051
+    },
+    {
+      "rho": 0.25,
+      "trials": 300,
+      "accepted": 300,
+      "response_similarity_median": 0.9777272953394334,
+      "source_suppression_db_p05_median": [
+        11.455771559543198,
+        12.051973123469072
+      ],
+      "noise_gain_db_median": -1.5065287911545653,
+      "reconstruction_mse_median": 0.06416095556572554
+    },
+    {
+      "rho": 0.5,
+      "trials": 300,
+      "accepted": 300,
+      "response_similarity_median": 0.9195235345483,
+      "source_suppression_db_p05_median": [
+        5.767843951782441,
+        6.033367641703466
+      ],
+      "noise_gain_db_median": -0.9199691110357211,
+      "reconstruction_mse_median": 0.2504665757826058
+    },
+    {
+      "rho": 0.9,
+      "trials": 300,
+      "accepted": 300,
+      "response_similarity_median": 0.8056607114467269,
+      "source_suppression_db_p05_median": [
+        0.8515203726996846,
+        0.9190839133615141
+      ],
+      "noise_gain_db_median": 0.6192226580909532,
+      "reconstruction_mse_median": 0.8118218420290999
+    },
+    {
+      "rho": 1.0,
+      "trials": 300,
+      "accepted": 300,
+      "response_similarity_median": 0.7794500620507201,
+      "source_suppression_db_p05_median": [
+        -0.009409937212404218,
+        -0.0009680591665128561
+      ],
+      "noise_gain_db_median": 1.0524743259045606,
+      "reconstruction_mse_median": 1.0011087209818432
+    }
+  ],
+  "columns": [
+    "accepted",
+    "response_similarity",
+    "suppression_db",
+    "noise_gain_db",
+    "reconstruction_mse"
+  ],
+  "coherent_ambiguity": {
+    "alternative_source": [
+      250,
+      20
+    ],
+    "alternative_target_coefficient": [
+      0.8887870958935339,
+      0.749728843640101
+    ],
+    "alternative_source_coefficient": [
+      0.8760550913909548,
+      -0.10551115640240993
+    ],
+    "identical_observation_residual": 1.1102230246251565e-16,
+    "projected_singular_values": [
+      1.8191653368215708,
+      7.345630683013489e-17
+    ]
+  },
+  "source_sha256": {
+    "audit_spoofing_projection.py": "be6b7ee784bdcdd8af33e78f7f1b6b9ec27fec0072cb143806ebde3b345775bd",
+    "audit_spoofing_spatial.py": "12d277c125f1a854398b1bd0c469e35fd6daf6e68f1877d3d3a60dd427ae1e22",
+    "diversity.py": "9dbc90ef1754c6937171f8bdb72bd48fb3c8cf57d3ac04fa66bca65e33771952"
+  }
+}

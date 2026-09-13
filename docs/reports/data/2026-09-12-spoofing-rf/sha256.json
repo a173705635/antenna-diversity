@@ -1,0 +1,12 @@
+{
+  "all_spoof_9300_0.json": "5d9a60e632b812c7be39927b9f7ce3d1f1bd644404e433a07ec7bb958f5bc168",
+  "all_spoof_9300_1.json": "153d6e566fe85b4bc8310e45a3e3e502df8732e7aaf1f3c39db3a285ba108daf",
+  "all_spoof_9400_0.json": "6d6185d0e35149aa162edff04c3d2461c0003c83f81d0482ec1b38897cf77b49",
+  "all_spoof_9400_1.json": "168070c8eb3a9532f3bc270a5d1febe43ddde72e6063724eace0982b1278e1af",
+  "manifest.json": "89d504de1b6d51c428c9d3d822f2e7f50d001d7dafc27a74bf592d86baabf4aa",
+  "mixture_equal_9600_0.json": "a04ae75b2fea58e8cb7c0e1720f4df69535e5585700165e12664dfe91ea3db73",
+  "mixture_equal_9600_1.json": "5dcc30b78631ba579995de89d3bc9da9c200562253aa35e4edf006259d67a125",
+  "partial_2_9500_0.json": "99374c950d9d2177d5367f345cf9c9d654da7b1f55b73c2cd624aeb940bd45ff",
+  "partial_2_9500_1.json": "1dc5de6c52a74bb01dd23f321245cc85a51c96135fd096a4c3fd4bbbcb8f9525",
+  "summary.json": "c5f2d4f6b49cf4b9bc9d831532e1eea141fddf681dbb7b4db3f9c655cbe53474"
+}

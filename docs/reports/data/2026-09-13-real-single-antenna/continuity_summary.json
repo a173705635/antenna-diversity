@@ -1,0 +1,46 @@
+{
+  "columns": [
+    "time_s",
+    "prn7_metric",
+    "prn7_lag_samples",
+    "prn30_metric",
+    "prn30_lag_samples"
+  ],
+  "fs_after_dfe": 5000000.0,
+  "lag_step_flag_samples": 10,
+  "jumps": [
+    {
+      "previous_s": 0.0,
+      "current_s": 0.01,
+      "lag_step_samples": [
+        -606.0,
+        -2313.0
+      ],
+      "metrics_before": [
+        13.657459620455159,
+        14.032861937940027
+      ],
+      "metrics_after": [
+        11.887181699472018,
+        19.666878426286093
+      ]
+    },
+    {
+      "previous_s": 0.47000000000000003,
+      "current_s": 0.48,
+      "lag_step_samples": [
+        1111.0,
+        1111.0
+      ],
+      "metrics_before": [
+        12.286493089895918,
+        18.7207140488893
+      ],
+      "metrics_after": [
+        7.533649245888118,
+        13.62445011888785
+      ]
+    }
+  ],
+  "interpretation": "Flagged lag discontinuities, not proof of hardware cause; no data repair."
+}

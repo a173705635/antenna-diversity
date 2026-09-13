@@ -1,0 +1,192 @@
+{
+  "epochs_attempted": 380,
+  "positions": 380,
+  "status_counts": {
+    "position": 380
+  },
+  "satellite_count_distribution": {
+    "10": 365,
+    "9": 14,
+    "8": 1
+  },
+  "navigation": [
+    {
+      "prn": 2,
+      "status": "ephemeris_decoded",
+      "tracking_epochs": 38995,
+      "valid_words": 63,
+      "tested_words": 63,
+      "complete_subframes": 5,
+      "time_anchors": 6,
+      "iode": 86,
+      "used_position_epochs": 380,
+      "first_tlm_segment_time_s": 4.1031808,
+      "first_tlm_tow_s": 590466
+    },
+    {
+      "prn": 5,
+      "status": "ephemeris_decoded",
+      "tracking_epochs": 38995,
+      "valid_words": 63,
+      "tested_words": 63,
+      "complete_subframes": 5,
+      "time_anchors": 6,
+      "iode": 97,
+      "used_position_epochs": 380,
+      "first_tlm_segment_time_s": 4.1048156,
+      "first_tlm_tow_s": 590466
+    },
+    {
+      "prn": 6,
+      "status": "ephemeris_decoded",
+      "tracking_epochs": 38995,
+      "valid_words": 63,
+      "tested_words": 63,
+      "complete_subframes": 5,
+      "time_anchors": 6,
+      "iode": 59,
+      "used_position_epochs": 380,
+      "first_tlm_segment_time_s": 4.1065288,
+      "first_tlm_tow_s": 590466
+    },
+    {
+      "prn": 7,
+      "status": "ephemeris_decoded",
+      "tracking_epochs": 38995,
+      "valid_words": 63,
+      "tested_words": 63,
+      "complete_subframes": 5,
+      "time_anchors": 6,
+      "iode": 70,
+      "used_position_epochs": 380,
+      "first_tlm_segment_time_s": 4.099257,
+      "first_tlm_tow_s": 590466
+    },
+    {
+      "prn": 9,
+      "status": "ephemeris_decoded",
+      "tracking_epochs": 38995,
+      "valid_words": 63,
+      "tested_words": 63,
+      "complete_subframes": 5,
+      "time_anchors": 6,
+      "iode": 72,
+      "used_position_epochs": 380,
+      "first_tlm_segment_time_s": 4.1005884,
+      "first_tlm_tow_s": 590466
+    },
+    {
+      "prn": 13,
+      "status": "ephemeris_decoded",
+      "tracking_epochs": 38995,
+      "valid_words": 63,
+      "tested_words": 63,
+      "complete_subframes": 5,
+      "time_anchors": 6,
+      "iode": 64,
+      "used_position_epochs": 375,
+      "first_tlm_segment_time_s": 4.1148324,
+      "first_tlm_tow_s": 590466
+    },
+    {
+      "prn": 23,
+      "status": "ephemeris_decoded",
+      "tracking_epochs": 38995,
+      "valid_words": 63,
+      "tested_words": 63,
+      "complete_subframes": 5,
+      "time_anchors": 6,
+      "iode": 33,
+      "used_position_epochs": 378,
+      "first_tlm_segment_time_s": 4.1084344,
+      "first_tlm_tow_s": 590466
+    },
+    {
+      "prn": 26,
+      "status": "ephemeris_decoded",
+      "tracking_epochs": 38995,
+      "valid_words": 63,
+      "tested_words": 63,
+      "complete_subframes": 5,
+      "time_anchors": 6,
+      "iode": 29,
+      "used_position_epochs": 371,
+      "first_tlm_segment_time_s": 4.1149314,
+      "first_tlm_tow_s": 590466
+    },
+    {
+      "prn": 29,
+      "status": "ephemeris_decoded",
+      "tracking_epochs": 38995,
+      "valid_words": 63,
+      "tested_words": 63,
+      "complete_subframes": 5,
+      "time_anchors": 6,
+      "iode": 47,
+      "used_position_epochs": 380,
+      "first_tlm_segment_time_s": 4.1122786,
+      "first_tlm_tow_s": 590466
+    },
+    {
+      "prn": 30,
+      "status": "ephemeris_decoded",
+      "tracking_epochs": 38995,
+      "valid_words": 63,
+      "tested_words": 63,
+      "complete_subframes": 5,
+      "time_anchors": 6,
+      "iode": 10,
+      "used_position_epochs": 380,
+      "first_tlm_segment_time_s": 4.1028596,
+      "first_tlm_tow_s": 590466
+    }
+  ],
+  "metadata_llh": {
+    "lat": "52.1771936",
+    "lon": "4.4900595",
+    "height": "53.9"
+  },
+  "reference_assumption": "WGS84 ellipsoidal height; metadata has no survey uncertainty or explicit height-datum statement",
+  "reference_ecef_m": [
+    3907409.200723421,
+    306837.6698687576,
+    5014960.358763846
+  ],
+  "mean_enu_m": [
+    0.43412579421251474,
+    0.7659815611968955,
+    39.26763025376842
+  ],
+  "std_enu_m": [
+    3.151642798517818,
+    2.9181561853331948,
+    6.228234753133675
+  ],
+  "rms_enu_m": [
+    3.1814018191121134,
+    3.0170123092377374,
+    39.75849209774951
+  ],
+  "horizontal_rms_m": 4.384481817585961,
+  "three_d_rms_m": 39.9995171807805,
+  "three_d_median_m": 39.689088307920024,
+  "three_d_p95_m": 49.688990571918126,
+  "three_d_max_m": 55.17597876659873,
+  "three_d_demeaned_rms_m": 7.56567221016016,
+  "residual_rms_m": 6.351378097463655,
+  "clock_bias_first_last_m": [
+    1658316.0074954545,
+    1658256.157763332
+  ],
+  "geometry_condition_min_max": [
+    5.6420805513676076,
+    6.97588434134665
+  ],
+  "numeric_array_or_scalar_checks": 3420,
+  "clock_origin_shift_s": 0.02,
+  "clock_origin_position_change_m": 1.0936226595691368e-09,
+  "evaluation_time_from_file_s": [
+    2.0,
+    39.900000000000034
+  ]
+}

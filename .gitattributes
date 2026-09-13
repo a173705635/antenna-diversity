@@ -1,0 +1,3 @@
+# Frozen research evidence must retain its exact bytes and SHA-256 hashes.
+docs/reports/data/** -text
+docs/reports/2026-09-13-sdcp-error-inventory.md -text

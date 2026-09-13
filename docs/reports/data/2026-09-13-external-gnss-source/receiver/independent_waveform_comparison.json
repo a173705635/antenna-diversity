@@ -1,0 +1,18 @@
+{
+  "prn_chips_equal_after_fixed_negation": true,
+  "channels": {
+    "TL": {
+      "samples": 200000,
+      "max_complex_error": 4.0407411433427055e-09,
+      "rms_complex_error": 1.3072275018843216e-09,
+      "sample_count_error_gt_1e_5": 0
+    },
+    "TR": {
+      "samples": 200000,
+      "max_complex_error": 4.040740972349201e-09,
+      "rms_complex_error": 1.3072273995596459e-09,
+      "sample_count_error_gt_1e_5": 0
+    }
+  },
+  "note": "Native bipolar convention negated for both channels; no fitted phase/scale/code shift."
+}

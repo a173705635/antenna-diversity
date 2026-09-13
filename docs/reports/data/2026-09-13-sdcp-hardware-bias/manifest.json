@@ -1,0 +1,134 @@
+{
+  "scope": "Fixed antenna/RF errors through dual RF/DFE/loops; no modulo in evaluated SDCP.",
+  "duration_ms": 1000,
+  "seed_pairs": [
+    [
+      9900,
+      9901
+    ],
+    [
+      9902,
+      9903
+    ]
+  ],
+  "cases_TR": {
+    "zero": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "antenna_amplitude": [
+      -1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "antenna_phase": [
+      0.0,
+      5.0,
+      0.0,
+      0.0
+    ],
+    "rf_amplitude": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "rf_phase": [
+      0.0,
+      0.0,
+      0.0,
+      3.0
+    ],
+    "combined": [
+      -1.0,
+      5.0,
+      1.0,
+      3.0
+    ]
+  },
+  "parameter_order": [
+    "antenna_db",
+    "antenna_deg",
+    "rf_db",
+    "rf_deg"
+  ],
+  "parameters_are": "Synthetic sensitivity settings, NOT measured hardware specifications.",
+  "reference": "No reference centering, branch rounding, phase unwrap or modulo in evaluated ranges.",
+  "source_sha256": {
+    "acquisition.py": "e6e805fc21a0270f80a06a59cdc1e531ac9c4108f70a03b636ee7dc04ce413de",
+    "antenna.py": "6e5058a244d594e8174e7dc4ed420e1364a302fa75449f60ae1e756e34c5ebf8",
+    "audit_antenna_selection.py": "1d96c142f05b3cb64bdee24b01fb1c2c6a5f17cfba2c46555095eb68062e70f7",
+    "audit_calibrated_sdcp.py": "feb37133d385c7516b817bfd2a52772781cbe705930a28cd96b717349fc54dc3",
+    "audit_code_carrier_float.py": "c84a89492e6c6632b8508afaa6d13f08d07a27637102793d05fc49569367c211",
+    "audit_code_discriminator.py": "92e82a40619d651515c2e922bda034d281275d9dea00a79dc2df92086fff2c84",
+    "audit_detection_boundaries.py": "fa29b360b0a68c31a09efd4229328a68aaa73ba6542bfa10c3fcbf95b0605a2d",
+    "audit_detection_calibration.py": "288f71b3d262967fb6861830e4f84f45473addec123b7927decd84f9bdada8a2",
+    "audit_detection_only.py": "a178bc388b96f252037438edec79f15df6356ca84fbf958fa059e9d9ea507da8",
+    "audit_diversity_observability.py": "06cc225ebaf8436ded663fbfaf2016b7df5cc8d178f163de4d8820c7a103f1f9",
+    "audit_dual_frequency_weights.py": "9f16490d81e0a724c9b11ee59d3a120029e807a392788fc193ed9895724874ef",
+    "audit_dual_polarization.py": "45ed5fd3ca8b51585d8a4d81a65e6c6c8d827a69c4de3f84d788c3b7a87ab518",
+    "audit_dual_tracking_phase.py": "7abb9602d189efd8a02f2502660373f15c3ce3ae0ea3a4285586ca4f5589738a",
+    "audit_dual_tracking_stability.py": "024a4f25788578ca2bc64a99c1fe78e03b15311f68f99f67024aba6fd2b86aa4",
+    "audit_geometry_free_sdcp.py": "d724b250a3998ed24ea99330847cdbab826bf2337172c4094c27f9a20869c099",
+    "audit_gf_branches.py": "b09c117dc216d75e6296b4f02be8bc4a8720e4099610ba2f89301105b9eeec24",
+    "audit_gf_gate.py": "f00596b922c375f46bc039bc3f63facfffd530838da1ef48bdbb1f8567ef83b0",
+    "audit_gf_pvt_lifecycle.py": "bb2835bf30b6a0fab4703ca922670ebbee548703a600634a57cfff105be02106",
+    "audit_gf_runtime.py": "48ba02a05d21485de485863a3ca508298f0843fbfd9901f5a4171af0b8d2b712",
+    "audit_gf_startup_rf.py": "4d60da2347ede2ff88e09a8e83ec6c9e8fa16ea509fa6ae08dec9103afa7bb3d",
+    "audit_gf_weight_ablation.py": "8b7e09d8c80ca9e253820967a5ee32b88a15a739861e40c4f5b9eb5fb3f625f8",
+    "audit_multipath_baseline.py": "e8358d1583c7fec37fed6846ea91ad059d82035c61bb2a11cec6399ab7277c8f",
+    "audit_multipath_oracle.py": "a80b8b76f35e9c4a98f8521d1ea11ff47a529b743134709ba4e9661a8c17e157",
+    "audit_phase_origin.py": "fb1438e070adecb17f2de2b19fc3e6d2c257cc9c47528f21c83e045569dc70b3",
+    "audit_pseudorange_bias.py": "22908c4c1bf823ad30f93caeda49364022e97837787087089893fb8c55822761",
+    "audit_sdcp_arc.py": "757240551a7a3b859a52569bce30ccf6bbb4fe59905ff9788ac8e867b7083d8d",
+    "audit_sdcp_contract.py": "ee9271ad491bf7639530356ff31c76598b1c16daf4b5a0851d3922e8782e990a",
+    "audit_sdcp_geometry_stress.py": "2a02e92b2a5d1ffda2dfeaeb685ce0c4f71d2f4af4f6a6c2fa628dae01ddd01a",
+    "audit_sdcp_hardware_bias.py": "4185528a6e994baf367ce56e157634b49d69199dc8f7d09d183c40fa2b920eb5",
+    "audit_sdcp_long.py": "1bb2ccec7b03d3466b8bcf145a94d6026bce6c0f3a0c2d0b9d0404e5070d7770",
+    "audit_sdcp_low_signal.py": "d261deb6962e803acd291e861aae42110daca474a3c33a8a252b6098bf94ed29",
+    "audit_sdcp_positioning.py": "db56dc24388f4e9e75e2040e28bc996ddefa79b42570588a299ea0a9e99c4538",
+    "audit_sdcp_self_check.py": "66bf53f400b68466fb658bc0bf9f26e714fdca016a9d0504302b6d40d5cd72a8",
+    "audit_sdcp_tracking_gap.py": "1d43d5fa8b2e4235e8e8f4212c57468d24039d0ef946382d5b838f9afeb06879",
+    "audit_sdcp_windows.py": "0fd24d34bebb3137af901ea02e0168fba5b525261d0e574a9e43e3ca6542a935",
+    "audit_spoofing_code_doppler.py": "0ef1e2dcccddcf4ed74b88980a4246e51f180ee8c83e6395742befb3dd569bb7",
+    "audit_spoofing_model.py": "012cea2b3b0f174e4ee49db587eb15ab55503778d9f47fab29dff22cbb30e51c",
+    "audit_spoofing_projection.py": "be6b7ee784bdcdd8af33e78f7f1b6b9ec27fec0072cb143806ebde3b345775bd",
+    "audit_spoofing_rf.py": "4cf2151e8b6d5785f5b1c2c6bc3ef98e20fe41760a90b8dff68e22139a87fb3d",
+    "audit_spoofing_spatial.py": "12d277c125f1a854398b1bd0c469e35fd6daf6e68f1877d3d3a60dd427ae1e22",
+    "audit_trimble_sdcp.py": "de1be7b0f90fadc396968dce09cb8664029105597b019e7870eeb17c3d21b9bf",
+    "channel_delay.py": "f357070e87dd1783e9845b97e46027ad1e7abfa5d9776a7af108413558a8c501",
+    "code_replica.py": "970336ae05dead945533f1ed58d4314fda83ac488ec4910c390e6f81595516cf",
+    "config.py": "91312b12f27ac9c09b04565f3d9345bf4d60460b1fcb4619b2934e3995d25116",
+    "detection_calibration.py": "be5b7e5e8659a86f6d14bb7bee14f991c68e960501065c849e67fc199a0fa3d2",
+    "dfe.py": "4bd74b6a6fb32768f3a7331340a3782e9329b20e0431c16eb8e3c41301a8a33f",
+    "diversity.py": "9dbc90ef1754c6937171f8bdb72bd48fb3c8cf57d3ac04fa66bca65e33771952",
+    "generate_sdcp_self_check_rf.py": "a414dcffc8a820de9dfecbdeff131405b2bb7352d3dd3d84341735ab6ae259eb",
+    "gf_quality_gate.py": "5877be8612967a2a7d29b1cf0581d6a3c4c88ea9cc33cf9f7b02c7901e7553bf",
+    "gf_runtime.py": "d23bc2781f9d4f929da2ce71af7a8b95adb2ac9e46201fa88b52210098740eff",
+    "gnss.py": "bc1ce321f38ea27f9ec81c3f12fba6fc37acb89b80aaf2b597fcba12525d539c",
+    "interference.py": "585bae54cdb7581ee902c87c64c57e2403dd2cc95df64891115c17c3e263cc21",
+    "l5.py": "353a78496a675fa09175144c91337ddb797343537476fe8d87da3a35f5318287",
+    "measured_pattern.py": "c3b9ccec23d9431168cb8887d8f5a1c9d937f9720f8f9f730f938bf5dfed4edc",
+    "metrics.py": "668dfe8b7eb75627a3df22a44b5a18f2bda9b603c6822f9bba82f9c18d255ba9",
+    "models.py": "8bb8c8017beacc2628d68e1e76808205f19d462bdabf238c83a31e24a5de7d13",
+    "multipath.py": "38d14bcc96468915694e59b52046c41c577cf66095dbf4a130bc91e1c4a0dc97",
+    "pipeline.py": "a5e307d2a90fd8bfd59d84fb6e397cda2f8bed80184a5176504a9a97576d3584",
+    "plotting.py": "99bb0c195f3f0862a3be4e1e66d9de9d9b8b7183f0025c10a288ff970ea19e3f",
+    "positioning.py": "3b154153668bbcf985e07a57d7e5a809ec3f426bd921428411e30fff4375a1f3",
+    "presets.py": "c8f59f7fb2a4986dac888aa409c07cf914d8500bb49e12a1b7e456c6de02aecc",
+    "report_sdcp_self_check.py": "b79dc8233582d180f9c5093939ccfcb4ce01b9d1523809bb9bfb6ed06eed40e8",
+    "rf.py": "94786715d3019e43b66bd5868f433669fa7926b4ef0ff3e699ed079e4a574841",
+    "run_end_to_end.py": "09276035277e9bcc3a62ad13cb258f6450d0c15d29cfa41cc8f48afc56687dc0",
+    "run_geometry_free_rf.py": "7a1f10de90e44e9f1ab76f5a42b3eaadfbe3d2cd4e8939ca717174c6f5299028",
+    "run_gps_l1_l5.py": "5b715d7692fe5a19add492d1e5ca4f9629483d319ee1963c71e9f028204653fa",
+    "run_gps_spp.py": "da9edb721ac0d9e7c2a87067ec02a7664eaeadb5c6e6fea11644ae20ec99a099",
+    "sdcp.py": "c638b9d9f8e885f6bb65313dff58409795f38bd5e1d47d3f41a23d4e84b25899",
+    "sdcp_arc.py": "bb9be851fc57db09dd78cf899c29ce9643901e12727430d9e85f56e849b875f8",
+    "sdcp_self_check.py": "29017bc8f937d7d3a52ff373779807917bd858d8597afa67a023dfc19091f2a9",
+    "spoofing.py": "d7c0fdeeb5c87078b9f7c5564e47d7448a46bb61b91d5e08c83451169e27dabd",
+    "tracking.py": "4a303109bc634ef7dcceecf43d529f385189205906e193fda4fcdc0cf45ff3ae"
+  }
+}

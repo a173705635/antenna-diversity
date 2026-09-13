@@ -1,0 +1,32 @@
+all_pass = true
+
+[[checks]]
+name = "zero_baseline"
+max_complex_error = 0.0
+pass = true
+tolerance = 1.0e-12
+[[checks]]
+name = "geometry_30_60"
+max_complex_error = 4.965068306494546e-16
+pass = true
+tolerance = 1.0e-12
+[[checks]]
+name = "geometry_110_25"
+max_complex_error = 4.002966042486721e-16
+pass = true
+tolerance = 1.0e-12
+[[checks]]
+name = "66_chunks_vs_one"
+max_complex_error = 1.0222336911155626e-11
+pass = true
+tolerance = 1.0e-8
+[[checks]]
+name = "native_measurement_noise_separation"
+max_complex_error = 1.6961374948868776e-12
+pass = true
+tolerance = 1.0e-10
+[[checks]]
+name = "two_prn_native_array_sum"
+max_complex_error = 2.9879551913779913e-12
+pass = true
+tolerance = 1.0e-10

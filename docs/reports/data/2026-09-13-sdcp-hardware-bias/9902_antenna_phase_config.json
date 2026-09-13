@@ -1,0 +1,334 @@
+{
+  "random_seed": 9902,
+  "reference_impedance_ohm": 50.0,
+  "signal": {
+    "signal_kind": "L1CA",
+    "prn": 1,
+    "carrier_hz": 1575420000.0,
+    "code_rate_hz": 1023000.0,
+    "fs_rf_hz": 33000000.0,
+    "if_hz": 4092000.0,
+    "doppler_hz": 1500.0,
+    "code_delay_chips": 137.25,
+    "initial_phase_rad": 0.35,
+    "duration_ms": 1000,
+    "power_dbm": -128.5,
+    "true_direction": {
+      "azimuth_deg": 30.0,
+      "elevation_deg": 60.0
+    },
+    "assumed_direction": {
+      "azimuth_deg": 30.0,
+      "elevation_deg": 60.0
+    },
+    "true_polarization": {
+      "kind": "rhcp",
+      "tilt_deg": 0.0,
+      "az_real": 1.0,
+      "az_imag": 0.0,
+      "el_real": 0.0,
+      "el_imag": 0.0
+    },
+    "assumed_polarization": {
+      "kind": "rhcp",
+      "tilt_deg": 0.0,
+      "az_real": 1.0,
+      "az_imag": 0.0,
+      "el_real": 0.0,
+      "el_imag": 0.0
+    },
+    "multipath_paths": [],
+    "code_bandwidth_hz": null
+  },
+  "phone": {
+    "active_antennas": [
+      "TL",
+      "TR"
+    ],
+    "phase_centers_m": {
+      "TL": [
+        -0.03795,
+        0.08045,
+        0.0
+      ],
+      "TR": [
+        0.03795,
+        0.08045,
+        0.0
+      ],
+      "BL": [
+        -0.03795,
+        -0.08045,
+        0.0
+      ],
+      "BR": [
+        0.03795,
+        -0.08045,
+        0.0
+      ]
+    },
+    "assumed_phase_centers_m": {
+      "TL": [
+        -0.03795,
+        0.08045,
+        0.0
+      ],
+      "TR": [
+        0.03795,
+        0.08045,
+        0.0
+      ],
+      "BL": [
+        -0.03795,
+        -0.08045,
+        0.0
+      ],
+      "BR": [
+        0.03795,
+        -0.08045,
+        0.0
+      ]
+    },
+    "channel_amplitude_error_db": {
+      "TL": 0.0,
+      "TR": 0.0,
+      "BL": 0.0,
+      "BR": 0.0
+    },
+    "channel_phase_error_deg": {
+      "TL": 0.0,
+      "TR": 0.0,
+      "BL": 0.0,
+      "BR": 0.0
+    },
+    "channel_delay_ns": {
+      "TL": 0.0,
+      "TR": 0.0,
+      "BL": 0.0,
+      "BR": 0.0
+    },
+    "estimated_channel_amplitude_error_db": {
+      "TL": 0.0,
+      "TR": 0.0,
+      "BL": 0.0,
+      "BR": 0.0
+    },
+    "estimated_channel_phase_error_deg": {
+      "TL": 0.0,
+      "TR": 0.0,
+      "BL": 0.0,
+      "BR": 0.0
+    },
+    "estimated_channel_delay_ns": {
+      "TL": 0.0,
+      "TR": 0.0,
+      "BL": 0.0,
+      "BR": 0.0
+    },
+    "antenna_model": {
+      "model_label": "ideal_isotropic",
+      "true_state": {
+        "pattern_kind": "ideal",
+        "parametric_patterns": {},
+        "measured_pattern_csv": null,
+        "orientations": {
+          "TL": {
+            "yaw_deg": 0.0,
+            "pitch_deg": 0.0,
+            "roll_deg": 0.0
+          },
+          "TR": {
+            "yaw_deg": 0.0,
+            "pitch_deg": 0.0,
+            "roll_deg": 0.0
+          },
+          "BL": {
+            "yaw_deg": 0.0,
+            "pitch_deg": 0.0,
+            "roll_deg": 0.0
+          },
+          "BR": {
+            "yaw_deg": 0.0,
+            "pitch_deg": 0.0,
+            "roll_deg": 0.0
+          }
+        },
+        "attenuation_regions": [],
+        "coupling_paths": [],
+        "amplitude_error_db": {
+          "TR": 0.0
+        },
+        "phase_error_deg": {
+          "TR": 5.0
+        }
+      },
+      "assumed_state": {
+        "pattern_kind": "ideal",
+        "parametric_patterns": {},
+        "measured_pattern_csv": null,
+        "orientations": {
+          "TL": {
+            "yaw_deg": 0.0,
+            "pitch_deg": 0.0,
+            "roll_deg": 0.0
+          },
+          "TR": {
+            "yaw_deg": 0.0,
+            "pitch_deg": 0.0,
+            "roll_deg": 0.0
+          },
+          "BL": {
+            "yaw_deg": 0.0,
+            "pitch_deg": 0.0,
+            "roll_deg": 0.0
+          },
+          "BR": {
+            "yaw_deg": 0.0,
+            "pitch_deg": 0.0,
+            "roll_deg": 0.0
+          }
+        },
+        "attenuation_regions": [],
+        "coupling_paths": [],
+        "amplitude_error_db": {},
+        "phase_error_deg": {}
+      }
+    }
+  },
+  "interferers": [],
+  "rf": {
+    "temperature_k": 290.0,
+    "noise_bandwidth_hz": 8184000.0,
+    "stages": [
+      {
+        "name": "LNA",
+        "gain_db": 28.0,
+        "noise_figure_db": 1.2
+      },
+      {
+        "name": "Mixer",
+        "gain_db": 8.0,
+        "noise_figure_db": 8.0
+      },
+      {
+        "name": "VGA",
+        "gain_db": 44.0,
+        "noise_figure_db": 10.0
+      }
+    ],
+    "adc_bits": 10,
+    "adc_vpp": 1.0,
+    "enable_soft_limiting": true,
+    "amplitude_error_db": [
+      0.0,
+      0.0
+    ],
+    "phase_error_deg": [
+      0.0,
+      0.0
+    ]
+  },
+  "dfe": {
+    "decimation": 5,
+    "cutoff_hz": 1800000.0,
+    "num_taps": 129,
+    "output_bits": 8,
+    "output_binary_shift": 2,
+    "nco_frequency_hz": null
+  },
+  "diversity": {
+    "modes": [
+      "single",
+      "egc",
+      "mvdr",
+      "blind_null"
+    ],
+    "diagonal_loading_factor": 0.01,
+    "blind_null": {
+      "detection_threshold_db": 6.0,
+      "reference_channel": 0
+    }
+  },
+  "multipath_detection": {
+    "enable": true,
+    "max_excess_delay_chips": 3.0,
+    "delay_step_chips": 0.25,
+    "detection_threshold_db": 6.0,
+    "azimuth_step_deg": 5.0,
+    "elevation_step_deg": 5.0
+  },
+  "multipath_suppression": {
+    "enable": true,
+    "diagonal_loading_factor": 0.01,
+    "max_steering_correlation": 0.95
+  },
+  "acquisition": {
+    "doppler_bins_hz": [
+      -5000.0,
+      -4750.0,
+      -4500.0,
+      -4250.0,
+      -4000.0,
+      -3750.0,
+      -3500.0,
+      -3250.0,
+      -3000.0,
+      -2750.0,
+      -2500.0,
+      -2250.0,
+      -2000.0,
+      -1750.0,
+      -1500.0,
+      -1250.0,
+      -1000.0,
+      -750.0,
+      -500.0,
+      -250.0,
+      0.0,
+      250.0,
+      500.0,
+      750.0,
+      1000.0,
+      1250.0,
+      1500.0,
+      1750.0,
+      2000.0,
+      2250.0,
+      2500.0,
+      2750.0,
+      3000.0,
+      3250.0,
+      3500.0,
+      3750.0,
+      4000.0,
+      4250.0,
+      4500.0,
+      4750.0,
+      5000.0
+    ],
+    "coherent_ms": 1,
+    "noncoherent_ms": 4,
+    "exclusion_chips": 1.0,
+    "threshold": 2.5
+  },
+  "tracking": {
+    "signal_kind": "L1CA",
+    "coherent_ms": 1,
+    "acquisition_ms": 4,
+    "early_late_spacing_chips": 0.5,
+    "fll_assist_epochs": 5,
+    "fll_gain": 0.5,
+    "pll_kp": 0.3,
+    "pll_ki_hz": 4.0,
+    "dll_kp_chips": 0.08,
+    "dll_ki_hz": 0.5,
+    "cn0_window_epochs": 10,
+    "max_epochs": 1000,
+    "code_replica_bandwidth_hz": null,
+    "refine_initial_phase": false
+  },
+  "plot": {
+    "show": true,
+    "output_dir": "F:\\antenna_diversity\\python_sim_simplified\\results"
+  }
+}

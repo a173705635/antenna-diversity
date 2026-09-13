@@ -1,0 +1,162 @@
+{
+  "upstream_files_verified": 34,
+  "upstream_test_passes": 137,
+  "rows": [
+    {
+      "seed": 9900,
+      "case": "zero",
+      "max_tracking_array_difference": {
+        "epoch_start_samples": 0.0,
+        "carrier_nco_phase_rad": 0.0,
+        "carrier_nco_frequency_hz": 0.0,
+        "pll_error_rad": 0.0,
+        "phase_lock_metric": 0.0
+      },
+      "residual_mean_difference_mm": 1.3877787807814457e-14,
+      "residual_std_difference_mm": 0.0
+    },
+    {
+      "seed": 9900,
+      "case": "antenna_amplitude",
+      "max_tracking_array_difference": {
+        "epoch_start_samples": 0.0,
+        "carrier_nco_phase_rad": 0.0,
+        "carrier_nco_frequency_hz": 0.0,
+        "pll_error_rad": 0.0,
+        "phase_lock_metric": 0.0
+      },
+      "residual_mean_difference_mm": 1.3860440573054689e-14,
+      "residual_std_difference_mm": 0.0
+    },
+    {
+      "seed": 9900,
+      "case": "antenna_phase",
+      "max_tracking_array_difference": {
+        "epoch_start_samples": 0.0,
+        "carrier_nco_phase_rad": 0.0,
+        "carrier_nco_frequency_hz": 0.0,
+        "pll_error_rad": 0.0,
+        "phase_lock_metric": 0.0
+      },
+      "residual_mean_difference_mm": 1.4654943925052066e-14,
+      "residual_std_difference_mm": 0.0
+    },
+    {
+      "seed": 9900,
+      "case": "rf_amplitude",
+      "max_tracking_array_difference": {
+        "epoch_start_samples": 0.0,
+        "carrier_nco_phase_rad": 0.0,
+        "carrier_nco_frequency_hz": 0.0,
+        "pll_error_rad": 0.0,
+        "phase_lock_metric": 0.0
+      },
+      "residual_mean_difference_mm": 1.3877787807814457e-14,
+      "residual_std_difference_mm": 0.0
+    },
+    {
+      "seed": 9900,
+      "case": "rf_phase",
+      "max_tracking_array_difference": {
+        "epoch_start_samples": 0.0,
+        "carrier_nco_phase_rad": 0.0,
+        "carrier_nco_frequency_hz": 0.0,
+        "pll_error_rad": 0.0,
+        "phase_lock_metric": 0.0
+      },
+      "residual_mean_difference_mm": 1.3988810110276972e-14,
+      "residual_std_difference_mm": 0.0
+    },
+    {
+      "seed": 9900,
+      "case": "combined",
+      "max_tracking_array_difference": {
+        "epoch_start_samples": 0.0,
+        "carrier_nco_phase_rad": 0.0,
+        "carrier_nco_frequency_hz": 0.0,
+        "pll_error_rad": 0.0,
+        "phase_lock_metric": 0.0
+      },
+      "residual_mean_difference_mm": 1.3322676295501878e-14,
+      "residual_std_difference_mm": 0.0
+    },
+    {
+      "seed": 9902,
+      "case": "zero",
+      "max_tracking_array_difference": {
+        "epoch_start_samples": 0.0,
+        "carrier_nco_phase_rad": 0.0,
+        "carrier_nco_frequency_hz": 0.0,
+        "pll_error_rad": 0.0,
+        "phase_lock_metric": 0.0
+      },
+      "residual_mean_difference_mm": 1.3863910020006642e-14,
+      "residual_std_difference_mm": 0.0
+    },
+    {
+      "seed": 9902,
+      "case": "antenna_amplitude",
+      "max_tracking_array_difference": {
+        "epoch_start_samples": 0.0,
+        "carrier_nco_phase_rad": 0.0,
+        "carrier_nco_frequency_hz": 0.0,
+        "pll_error_rad": 0.0,
+        "phase_lock_metric": 0.0
+      },
+      "residual_mean_difference_mm": 1.3863910020006642e-14,
+      "residual_std_difference_mm": 0.0
+    },
+    {
+      "seed": 9902,
+      "case": "antenna_phase",
+      "max_tracking_array_difference": {
+        "epoch_start_samples": 0.0,
+        "carrier_nco_phase_rad": 0.0,
+        "carrier_nco_frequency_hz": 0.0,
+        "pll_error_rad": 0.0,
+        "phase_lock_metric": 0.0
+      },
+      "residual_mean_difference_mm": 1.4654943925052066e-14,
+      "residual_std_difference_mm": 0.0
+    },
+    {
+      "seed": 9902,
+      "case": "rf_amplitude",
+      "max_tracking_array_difference": {
+        "epoch_start_samples": 0.0,
+        "carrier_nco_phase_rad": 0.0,
+        "carrier_nco_frequency_hz": 0.0,
+        "pll_error_rad": 0.0,
+        "phase_lock_metric": 0.0
+      },
+      "residual_mean_difference_mm": 1.3863910020006642e-14,
+      "residual_std_difference_mm": 0.0
+    },
+    {
+      "seed": 9902,
+      "case": "rf_phase",
+      "max_tracking_array_difference": {
+        "epoch_start_samples": 0.0,
+        "carrier_nco_phase_rad": 0.0,
+        "carrier_nco_frequency_hz": 0.0,
+        "pll_error_rad": 0.0,
+        "phase_lock_metric": 0.0
+      },
+      "residual_mean_difference_mm": 1.4210854715202004e-14,
+      "residual_std_difference_mm": -2.220446049250313e-16
+    },
+    {
+      "seed": 9902,
+      "case": "combined",
+      "max_tracking_array_difference": {
+        "epoch_start_samples": 0.0,
+        "carrier_nco_phase_rad": 0.0,
+        "carrier_nco_frequency_hz": 0.0,
+        "pll_error_rad": 0.0,
+        "phase_lock_metric": 0.0
+      },
+      "residual_mean_difference_mm": 1.509903313490213e-14,
+      "residual_std_difference_mm": 0.0
+    }
+  ]
+}

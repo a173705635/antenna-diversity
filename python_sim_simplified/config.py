@@ -77,6 +77,9 @@ class AntennaState:
     )
     attenuation_regions: tuple[AttenuationRegion, ...] = ()
     coupling_paths: tuple[CouplingPath, ...] = ()
+    # Residual element response, before coupling; absent names mean zero error.
+    amplitude_error_db: dict[str, float] = field(default_factory=dict)
+    phase_error_deg: dict[str, float] = field(default_factory=dict)
 
 
 @dataclass
@@ -195,6 +198,10 @@ class RFConfig:
     adc_bits: int = 10
     adc_vpp: float = 1.0
     enable_soft_limiting: bool = True
+    # Equivalent output error at fixed noise figure, before limiter/ADC.
+    # A scalar applies to every row; a tuple follows input channel row order.
+    amplitude_error_db: float | tuple[float, ...] = 0.0
+    phase_error_deg: float | tuple[float, ...] = 0.0
 
 
 @dataclass
@@ -251,6 +258,9 @@ class AcquisitionConfig:
 @dataclass
 class TrackingConfig:
     signal_kind: str = "L1CA"
+    # Legacy atan2 assumes a data-free carrier. Costas removes unknown BPSK
+    # sign transitions from PLL/FLL errors, retaining a half-cycle ambiguity.
+    carrier_discriminator: str = "atan2"
     coherent_ms: int = 1
     acquisition_ms: int = 4
     early_late_spacing_chips: float = 0.5

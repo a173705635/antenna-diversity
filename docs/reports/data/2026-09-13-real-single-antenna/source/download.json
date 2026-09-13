@@ -1,0 +1,25 @@
+{
+  "url": "https://sdr.ion.org/HackRF/HackRF_Bands-L1.int8",
+  "range": [
+    0,
+    199999999
+  ],
+  "bytes": 200000000,
+  "sha256": "220b37c6e57255483fb7858e7fab10255d7db0459d5134531ea660e9da87ca78",
+  "http_status": 206,
+  "headers": {
+    "Content-Type": "application/octet-stream",
+    "Content-Length": "200000000",
+    "Connection": "close",
+    "Date": "Sun, 13 Sep 2026 13:03:56 GMT",
+    "Last-Modified": "Tue, 21 Nov 2017 19:27:20 GMT",
+    "ETag": "\"388a166b15b040f4e4bce00f360b8f07-72\"",
+    "Accept-Ranges": "bytes",
+    "Server": "AmazonS3",
+    "Content-Range": "bytes 0-199999999/1200000000",
+    "X-Cache": "Miss from cloudfront",
+    "Via": "1.1 49d69e784c9245d879465654f12ff8ea.cloudfront.net (CloudFront)",
+    "X-Amz-Cf-Pop": "LAX54-P13",
+    "X-Amz-Cf-Id": "9QBT-vrkF3IbzAnjwahr3Q61WX6X9GQ-oBY59T5iuHogBkgW__1KoQ=="
+  }
+}

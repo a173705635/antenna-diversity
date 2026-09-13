@@ -1,0 +1,323 @@
+{
+  "threshold": 0.19328163509973767,
+  "rows": [
+    {
+      "case": "all_spoof",
+      "seed": 9300,
+      "windows": [
+        {
+          "start_s": 0.2,
+          "decision_s": 0.29,
+          "score": 0.005250358267740052,
+          "state": 1,
+          "start_index": 0,
+          "end_index": 10
+        },
+        {
+          "start_s": 0.3,
+          "decision_s": 0.39,
+          "score": 0.004886109646674075,
+          "state": 1,
+          "start_index": 10,
+          "end_index": 20
+        }
+      ],
+      "window_count": 2,
+      "valid_windows": 2,
+      "alerts": 2,
+      "unknown": 0,
+      "alert_fraction_valid": 1.0,
+      "coverage": 1.0,
+      "unprotected_A_pvt": {
+        "seed": 9300,
+        "epochs": 20,
+        "solved_epochs": 20,
+        "availability": 1.0,
+        "acquired_satellites": 8,
+        "enu_mean_m": [
+          102.17667252178362,
+          2.164036730849609,
+          -1.4337935291376058
+        ],
+        "enu_std_m": [
+          2.120040910655499,
+          1.9264945335151094,
+          4.3977716946002
+        ],
+        "horizontal_rms_m": 102.23972524046998,
+        "position_rms_m": 102.34430896248612,
+        "position_p95_m": 104.98854288375861,
+        "position_max_m": 107.2440725021355,
+        "clock_error_mean_m": -0.9568352227019205,
+        "used_satellites_min": 8
+      },
+      "policy": "alert or unknown => do not certify this GPS solution; no recovered position claim"
+    },
+    {
+      "case": "all_spoof",
+      "seed": 9400,
+      "windows": [
+        {
+          "start_s": 0.2,
+          "decision_s": 0.29,
+          "score": 0.004588602821892352,
+          "state": 1,
+          "start_index": 0,
+          "end_index": 10
+        },
+        {
+          "start_s": 0.3,
+          "decision_s": 0.39,
+          "score": 0.004497473170793675,
+          "state": 1,
+          "start_index": 10,
+          "end_index": 20
+        }
+      ],
+      "window_count": 2,
+      "valid_windows": 2,
+      "alerts": 2,
+      "unknown": 0,
+      "alert_fraction_valid": 1.0,
+      "coverage": 1.0,
+      "unprotected_A_pvt": {
+        "seed": 9400,
+        "epochs": 20,
+        "solved_epochs": 20,
+        "availability": 1.0,
+        "acquired_satellites": 8,
+        "enu_mean_m": [
+          101.62065920179124,
+          1.863755049104649,
+          -0.5557782979362668
+        ],
+        "enu_std_m": [
+          1.56921647798713,
+          1.3932588586793968,
+          3.991345742177684
+        ],
+        "horizontal_rms_m": 101.65940964855017,
+        "position_rms_m": 101.73925152290927,
+        "position_p95_m": 104.23862679259956,
+        "position_max_m": 105.67562040178893,
+        "clock_error_mean_m": -0.3287883386670728,
+        "used_satellites_min": 8
+      },
+      "policy": "alert or unknown => do not certify this GPS solution; no recovered position claim"
+    },
+    {
+      "case": "partial_2",
+      "seed": 9500,
+      "windows": [
+        {
+          "start_s": 0.2,
+          "decision_s": 0.29,
+          "score": 0.735379682263863,
+          "state": 0,
+          "start_index": 0,
+          "end_index": 10
+        },
+        {
+          "start_s": 0.3,
+          "decision_s": 0.39,
+          "score": 0.756663802042268,
+          "state": 0,
+          "start_index": 10,
+          "end_index": 20
+        }
+      ],
+      "window_count": 2,
+      "valid_windows": 2,
+      "alerts": 0,
+      "unknown": 0,
+      "alert_fraction_valid": 0.0,
+      "coverage": 1.0,
+      "unprotected_A_pvt": {
+        "seed": 9500,
+        "epochs": 20,
+        "solved_epochs": 20,
+        "availability": 1.0,
+        "acquired_satellites": 8,
+        "enu_mean_m": [
+          8.858549717555695,
+          8.565915818786769,
+          5.20796502038826
+        ],
+        "enu_std_m": [
+          1.9343656234619817,
+          1.5300334110635714,
+          3.4842946517611715
+        ],
+        "horizontal_rms_m": 12.567083572458241,
+        "position_rms_m": 14.042606538354232,
+        "position_p95_m": 16.693715024868467,
+        "position_max_m": 17.643282341753093,
+        "clock_error_mean_m": -3.246457907918375,
+        "used_satellites_min": 8
+      },
+      "policy": "alert or unknown => do not certify this GPS solution; no recovered position claim"
+    },
+    {
+      "case": "mixture_equal",
+      "seed": 9600,
+      "windows": [
+        {
+          "start_s": 0.2,
+          "decision_s": 0.29,
+          "score": null,
+          "state": -1,
+          "start_index": 0,
+          "end_index": 10
+        },
+        {
+          "start_s": 0.3,
+          "decision_s": 0.39,
+          "score": null,
+          "state": -1,
+          "start_index": 10,
+          "end_index": 20
+        }
+      ],
+      "window_count": 2,
+      "valid_windows": 0,
+      "alerts": 0,
+      "unknown": 2,
+      "alert_fraction_valid": null,
+      "coverage": 0.0,
+      "unprotected_A_pvt": {
+        "seed": 9600,
+        "epochs": 20,
+        "solved_epochs": 20,
+        "availability": 1.0,
+        "acquired_satellites": 7,
+        "enu_mean_m": [
+          48.74454958130698,
+          -0.45484838217782386,
+          -6.753213675644766
+        ],
+        "enu_std_m": [
+          2.2966293418486523,
+          1.4662397140110344,
+          3.0710732130840954
+        ],
+        "horizontal_rms_m": 48.82276483535164,
+        "position_rms_m": 49.38319300933351,
+        "position_p95_m": 52.03137323616517,
+        "position_max_m": 52.498481439611396,
+        "clock_error_mean_m": -4.9268324075441345,
+        "used_satellites_min": 7
+      },
+      "policy": "alert or unknown => do not certify this GPS solution; no recovered position claim"
+    },
+    {
+      "case": "archived_los",
+      "reused_sha256": {
+        "F:\\antenna_diversity\\docs\\reports\\data\\2026-09-12-geometry-free-rf\\L1CA_0.json": "f7bd50d9ef935ce990b73fe767780d0b5eda947b2c25922a1d78bba92cf9eeac",
+        "F:\\antenna_diversity\\docs\\reports\\data\\2026-09-12-geometry-free-rf\\L1CA_1.json": "7bd7c3bf0dd88e23b4bad5ccb30a0040104368e95209ae5ad26ffb88a650361c"
+      },
+      "windows": [
+        {
+          "start_s": 0.2,
+          "decision_s": 0.29,
+          "score": 0.938941288830961,
+          "state": 0,
+          "start_index": 0,
+          "end_index": 10
+        },
+        {
+          "start_s": 0.3,
+          "decision_s": 0.39,
+          "score": 0.9341322919215681,
+          "state": 0,
+          "start_index": 10,
+          "end_index": 20
+        }
+      ],
+      "window_count": 2,
+      "valid_windows": 2,
+      "alerts": 0,
+      "unknown": 0,
+      "alert_fraction_valid": 0.0,
+      "coverage": 1.0,
+      "unprotected_A_pvt": {
+        "seed": 7100,
+        "epochs": 20,
+        "solved_epochs": 20,
+        "availability": 1.0,
+        "acquired_satellites": 8,
+        "enu_mean_m": [
+          0.4914494350947002,
+          0.150593429948022,
+          -3.5377178044350677
+        ],
+        "enu_std_m": [
+          1.675937323627166,
+          1.4029440443772754,
+          2.7159306359583013
+        ],
+        "horizontal_rms_m": 2.245265871289782,
+        "position_rms_m": 4.9932900292224565,
+        "position_p95_m": 7.814885837076711,
+        "position_max_m": 8.638165497019951,
+        "clock_error_mean_m": -2.358478037270834,
+        "used_satellites_min": 8
+      },
+      "policy": "alert or unknown => do not certify this GPS solution; no recovered position claim"
+    },
+    {
+      "case": "archived_single_mp",
+      "reused_sha256": {
+        "F:\\antenna_diversity\\docs\\reports\\data\\2026-09-12-geometry-free-rf\\L1CA_0.json": "f7bd50d9ef935ce990b73fe767780d0b5eda947b2c25922a1d78bba92cf9eeac",
+        "F:\\antenna_diversity\\docs\\reports\\data\\2026-09-12-gf-startup-rf\\L1CA_1_static.json": "2ae48040cc50e345c286f551b7bd63409014662916745134e5db80ac53d89136"
+      },
+      "windows": [
+        {
+          "start_s": 0.2,
+          "decision_s": 0.29,
+          "score": 0.8544717756084168,
+          "state": 0,
+          "start_index": 0,
+          "end_index": 10
+        },
+        {
+          "start_s": 0.3,
+          "decision_s": 0.39,
+          "score": 0.8496153474634702,
+          "state": 0,
+          "start_index": 10,
+          "end_index": 20
+        }
+      ],
+      "window_count": 2,
+      "valid_windows": 2,
+      "alerts": 0,
+      "unknown": 0,
+      "alert_fraction_valid": 0.0,
+      "coverage": 1.0,
+      "unprotected_A_pvt": {
+        "seed": 7100,
+        "epochs": 20,
+        "solved_epochs": 20,
+        "availability": 1.0,
+        "acquired_satellites": 8,
+        "enu_mean_m": [
+          0.4914494350947002,
+          0.150593429948022,
+          -3.5377178044350677
+        ],
+        "enu_std_m": [
+          1.675937323627166,
+          1.4029440443772754,
+          2.7159306359583013
+        ],
+        "horizontal_rms_m": 2.245265871289782,
+        "position_rms_m": 4.9932900292224565,
+        "position_p95_m": 7.814885837076711,
+        "position_max_m": 8.638165497019951,
+        "clock_error_mean_m": -2.358478037270834,
+        "used_satellites_min": 8
+      },
+      "policy": "alert or unknown => do not certify this GPS solution; no recovered position claim"
+    }
+  ]
+}

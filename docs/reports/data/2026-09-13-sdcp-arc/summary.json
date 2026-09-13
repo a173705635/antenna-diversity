@@ -1,0 +1,67 @@
+{
+  "scope": "Replay saved RF quality through SDCP arc lifecycle, with explicit test approvals.",
+  "rows": [
+    {
+      "record": "B_clean",
+      "tail_epochs": 140,
+      "quality_pass_tail": 140,
+      "reference_usable_tail": 140,
+      "await_reference_tail": 0,
+      "arcs_opened": 2,
+      "initial_reference_assumption_applied": true
+    },
+    {
+      "record": "B_gap",
+      "tail_epochs": 140,
+      "quality_pass_tail": 140,
+      "reference_usable_tail": 0,
+      "await_reference_tail": 140,
+      "arcs_opened": 4,
+      "initial_reference_assumption_applied": true
+    },
+    {
+      "record": "B_gap_phase",
+      "tail_epochs": 140,
+      "quality_pass_tail": 140,
+      "reference_usable_tail": 0,
+      "await_reference_tail": 140,
+      "arcs_opened": 4,
+      "initial_reference_assumption_applied": true
+    },
+    {
+      "record": "B_gap_reacquired",
+      "tail_epochs": 140,
+      "quality_pass_tail": 140,
+      "reference_usable_tail": 0,
+      "await_reference_tail": 140,
+      "arcs_opened": 1,
+      "initial_reference_assumption_applied": false
+    },
+    {
+      "record": "B_gap_phase_reacquired",
+      "tail_epochs": 140,
+      "quality_pass_tail": 140,
+      "reference_usable_tail": 0,
+      "await_reference_tail": 140,
+      "arcs_opened": 1,
+      "initial_reference_assumption_applied": false
+    }
+  ],
+  "limitations": [
+    "phase_state_valid=True is a simulation interface assumption, not receiver-proven half-cycle validity",
+    "Only initial continuous record has explicit trusted-start test approval; no approval after gap/reacquisition",
+    "No source truth is used to restore any post-outage reference; no new RF generated"
+  ],
+  "input_sha256": {
+    "A.npz": "ce9a5b851df99d26d8021b22ab5f92172be863504f6aef125187701648854798",
+    "B_clean.npz": "9bf74dad24e3bbd22c6a35e2ec0a8431e6aaca26eec9113ac31a8f60e4674dc3",
+    "B_gap.npz": "5fa143355e55191d66656f114b232f6ba25885b9cf85914731f9573fbbc9149e",
+    "B_gap_phase.npz": "6591b9b841ab683ec5399cc96d1a9289f26e3c1e21783e131024f09d4e75e177",
+    "B_gap_reacquired.npz": "f1064138949738cae0183ec2339709131bbebb015dbc25a0a4cf1fd6f2590485",
+    "B_gap_phase_reacquired.npz": "f81033ffad0ffeaf8517b19f5e8d2c56186b089ed7a7279b1a1604484cde18ac"
+  },
+  "source_sha256": {
+    "audit_sdcp_arc.py": "757240551a7a3b859a52569bce30ccf6bbb4fe59905ff9788ac8e867b7083d8d",
+    "sdcp_arc.py": "bb9be851fc57db09dd78cf899c29ce9643901e12727430d9e85f56e849b875f8"
+  }
+}

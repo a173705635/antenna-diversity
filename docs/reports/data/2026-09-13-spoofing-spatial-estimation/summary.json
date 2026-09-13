@@ -1,0 +1,59 @@
+{
+  "scope": "Complex snapshot covariance model; NOT RF/tracking. Leading eigenvector is naive candidate, not adopted estimator.",
+  "seed": 9710,
+  "target_az_el": [
+    10,
+    25
+  ],
+  "source_az_el": [
+    100,
+    10
+  ],
+  "snapshots": 2000,
+  "rows": [
+    {
+      "case": "independent_equal",
+      "trials": 300,
+      "accepted": 300,
+      "suppression_db_p05_median": [
+        -0.037406845358939615,
+        0.0013666904366836693
+      ],
+      "noise_gain_db_median": 3.2299079366004912,
+      "target_constraint_max_error": 9.036560719766055e-16
+    },
+    {
+      "case": "independent_stronger",
+      "trials": 300,
+      "accepted": 300,
+      "suppression_db_p05_median": [
+        23.66153410820297,
+        24.843170368731897
+      ],
+      "noise_gain_db_median": -1.3446301686273898,
+      "target_constraint_max_error": 5.558049685633556e-16
+    },
+    {
+      "case": "coherent_equal",
+      "trials": 300,
+      "accepted": 300,
+      "suppression_db_p05_median": [
+        -0.012292117336867572,
+        0.0005771306571221816
+      ],
+      "noise_gain_db_median": 1.0522829534804634,
+      "target_constraint_max_error": 4.577566798522237e-16
+    },
+    {
+      "case": "coherent_stronger",
+      "trials": 300,
+      "accepted": 300,
+      "suppression_db_p05_median": [
+        9.98902219187175,
+        9.999468838592204
+      ],
+      "noise_gain_db_median": -1.3925947246634856,
+      "target_constraint_max_error": 4.577566798522237e-16
+    }
+  ]
+}

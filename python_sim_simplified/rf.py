@@ -19,6 +19,16 @@ def process_rf(
     reference_impedance_ohm: float,
     seed: int,
 ) -> tuple[np.ndarray, RFInfo]:
+    if x_antenna_v.ndim != 2 or x_antenna_v.shape[0] == 0:
+        raise ValueError('RF input must have shape (channels, samples)')
+    amplitude_db = np.broadcast_to(np.asarray(cfg.amplitude_error_db, dtype=float),
+                                   (x_antenna_v.shape[0],))
+    phase_deg = np.broadcast_to(np.asarray(cfg.phase_error_deg, dtype=float),
+                               (x_antenna_v.shape[0],))
+    if not np.all(np.isfinite(amplitude_db)) or not np.all(np.isfinite(phase_deg)):
+        raise ValueError('RF amplitude/phase errors must be finite')
+    with np.errstate(over='raise', invalid='raise'):
+        error_response = 10.**(amplitude_db/20.) * np.exp(1j*np.deg2rad(phase_deg))
     gain_linear = 10.0 ** (
         np.array([stage.gain_db for stage in cfg.stages]) / 10.0
     )
@@ -47,6 +57,8 @@ def process_rf(
         + 1j * rng.standard_normal(x_antenna_v.shape)
     )
     before_limit = (x_antenna_v + noise) * np.sqrt(total_gain_linear)
+    if np.any(amplitude_db != 0.) or np.any(phase_deg != 0.):
+        before_limit *= error_response[:, None]
     limit_v = cfg.adc_vpp / 2.0
     saturated = (np.abs(before_limit.real) > limit_v) | (
         np.abs(before_limit.imag) > limit_v
@@ -72,6 +84,9 @@ def process_rf(
     adc_codes = (i_code + 1j * q_code).astype(complex)
     info: RFInfo = {
         "total_gain_db": 10.0 * np.log10(total_gain_linear),
+        "channel_total_gain_db": 10.0 * np.log10(total_gain_linear) + amplitude_db,
+        "amplitude_error_db": amplitude_db.copy(),
+        "phase_error_deg": phase_deg.copy(),
         "noise_figure_db": 10.0 * np.log10(cascade_noise_factor),
         "input_noise_power_w": input_noise_power_w,
         "input_noise_rms_v": noise_rms_v,

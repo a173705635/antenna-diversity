@@ -1,5 +1,11 @@
 # 文档导航
 
+SDCP 全链路误差入口：[天线、RF、DFE、跟踪与后级偏差清单](reports/2026-09-13-sdcp-error-inventory.md)，包含影响因素、处理办法和参考数值；定位优化暂不推进。
+
+真实接收与定位最新结果：[通用接收模块及 40 秒 HackRF 码定位](reports/2026-09-13-recorded-receiver.md)。已从录波解星历并定位，保留垂向偏移和当前适用限制。
+
+抗欺骗应用讨论入口：[完整场景范围与应用边界](validation/2026-09-13-anti-spoofing-scenario-scope.md)。场景定义与已完成实验分别记录，不能将纳入范围视为已验证。
+
 先看 [项目状态](../PROJECT_STATUS.md) 了解当前结论，或阅读 [全量整合报告](reports/GNSS天线分集全量整合报告.docx)。运行代码见 [项目入口](../README.md)。
 
 | 想解决的问题 | 入口 | 收录内容 |

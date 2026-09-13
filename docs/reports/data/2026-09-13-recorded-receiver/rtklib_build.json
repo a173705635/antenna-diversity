@@ -1,0 +1,23 @@
+{
+  "command": [
+    "gcc",
+    "-O2",
+    "-flto",
+    "-ffunction-sections",
+    "-fdata-sections",
+    "-I",
+    "F:\\antenna_diversity\\docs\\reports\\data\\2026-09-13-recorded-receiver\\source\\rtklib",
+    "F:\\antenna_diversity\\docs\\reports\\data\\2026-09-13-recorded-receiver\\rtklib_compare.c",
+    "F:\\antenna_diversity\\docs\\reports\\data\\2026-09-13-recorded-receiver\\source\\rtklib\\rtkcmn.c",
+    "F:\\antenna_diversity\\docs\\reports\\data\\2026-09-13-recorded-receiver\\source\\rtklib\\rcvraw.c",
+    "F:\\antenna_diversity\\docs\\reports\\data\\2026-09-13-recorded-receiver\\source\\rtklib\\ephemeris.c",
+    "-Wl,--gc-sections",
+    "-lwinmm",
+    "-lws2_32",
+    "-o",
+    "F:\\antenna_diversity\\python_sim_simplified\\results\\rtklib_rebuild\\compare.exe"
+  ],
+  "compiler": "gcc (Rev10, Built by MSYS2 project) 11.2.0",
+  "source_commit": "71db0ffa0d9735697c6adfd06fdf766d0e5ce807",
+  "binary_sha256": "3e63e8a87d9368c25e939b6b0918e45a2cbc43ec26ff50334d62a87dcc6da8e9"
+}

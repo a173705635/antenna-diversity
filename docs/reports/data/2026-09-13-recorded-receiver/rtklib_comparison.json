@@ -1,0 +1,9 @@
+{
+  "source_commit": "71db0ffa0d9735697c6adfd06fdf766d0e5ce807",
+  "vectors": 30,
+  "satellites": 10,
+  "ephemeris_field_checks": 780,
+  "max_orbit_difference_m": 3.0969521511202215e-07,
+  "max_clock_difference_s": 3.3068166260807885e-18,
+  "scope": "Same parity-validated subframe payloads; independent C field decoding and orbit/clock propagation. Not an independent ephemeris truth source or full-receiver comparison."
+}

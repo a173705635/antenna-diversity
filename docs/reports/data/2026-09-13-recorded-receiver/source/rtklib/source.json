@@ -1,0 +1,36 @@
+{
+  "repository": "https://github.com/tomojitakasu/RTKLIB",
+  "commit": "71db0ffa0d9735697c6adfd06fdf766d0e5ce807",
+  "files": [
+    {
+      "path": "src/rtklib.h",
+      "url": "https://raw.githubusercontent.com/tomojitakasu/RTKLIB/71db0ffa0d9735697c6adfd06fdf766d0e5ce807/src/rtklib.h",
+      "sha256": "5b61545cb703c781b206497040194efdc8b8a23cdac4c627283efd1260693653",
+      "bytes": 90134
+    },
+    {
+      "path": "src/rtkcmn.c",
+      "url": "https://raw.githubusercontent.com/tomojitakasu/RTKLIB/71db0ffa0d9735697c6adfd06fdf766d0e5ce807/src/rtkcmn.c",
+      "sha256": "c1d7e9af54518733dc874fc64523114b4a77a45e80895d0bb8ff4fcecfea65c7",
+      "bytes": 152543
+    },
+    {
+      "path": "src/rcvraw.c",
+      "url": "https://raw.githubusercontent.com/tomojitakasu/RTKLIB/71db0ffa0d9735697c6adfd06fdf766d0e5ce807/src/rcvraw.c",
+      "sha256": "44e6bbdb250543c74d466bad870ecd8f472e65b5ad1b88177ca5aadb1ef08a17",
+      "bytes": 41847
+    },
+    {
+      "path": "src/ephemeris.c",
+      "url": "https://raw.githubusercontent.com/tomojitakasu/RTKLIB/71db0ffa0d9735697c6adfd06fdf766d0e5ce807/src/ephemeris.c",
+      "sha256": "c0e5aa04b1dc2f098f2ac3399c43410323ad44f8122f52f806f122a3ac52c626",
+      "bytes": 29819
+    },
+    {
+      "path": "readme.txt",
+      "url": "https://raw.githubusercontent.com/tomojitakasu/RTKLIB/71db0ffa0d9735697c6adfd06fdf766d0e5ce807/readme.txt",
+      "sha256": "e74c5106fa3d8b7e3855807bf10dca8325f4f141586f6b99058c868873def09a",
+      "bytes": 9441
+    }
+  ]
+}

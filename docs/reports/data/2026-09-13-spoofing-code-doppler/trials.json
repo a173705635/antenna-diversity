@@ -1,0 +1,2610 @@
+[
+  {
+    "delay_chips": 0,
+    "doppler_hz": 0,
+    "trials": [
+      {
+        "trial": 0,
+        "fake_grid": [
+          0,
+          0.0
+        ],
+        "true_grid": [
+          0.25,
+          50.0
+        ],
+        "search_suppression_db": 0.9446933045848409,
+        "oracle_suppression_db": null,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": 0.5247231891128039
+      },
+      {
+        "trial": 1,
+        "fake_grid": [
+          0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          250.0
+        ],
+        "search_suppression_db": 0.011621430784956633,
+        "oracle_suppression_db": null,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": 1.0110644840331058
+      },
+      {
+        "trial": 2,
+        "fake_grid": [
+          0,
+          0.0
+        ],
+        "true_grid": [
+          2.0,
+          0.0
+        ],
+        "search_suppression_db": -0.4032074720822435,
+        "oracle_suppression_db": null,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": 1.2075959023809688
+      },
+      {
+        "trial": 3,
+        "fake_grid": [
+          0,
+          0.0
+        ],
+        "true_grid": [
+          0.5,
+          0.0
+        ],
+        "search_suppression_db": -0.35791181953538276,
+        "oracle_suppression_db": null,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": 1.0191460067924025
+      },
+      {
+        "trial": 4,
+        "fake_grid": [
+          0,
+          0.0
+        ],
+        "true_grid": [
+          0.25,
+          500.0
+        ],
+        "search_suppression_db": -0.7603922831531142,
+        "oracle_suppression_db": null,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0,
+        "noise_gain_db": 1.3181100745954826
+      },
+      {
+        "trial": 5,
+        "fake_grid": [
+          0,
+          0.0
+        ],
+        "true_grid": [
+          0.25,
+          250.0
+        ],
+        "search_suppression_db": 0.29349407613589146,
+        "oracle_suppression_db": null,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.211167935941185,
+        "noise_gain_db": 0.7758978491051088
+      },
+      {
+        "trial": 6,
+        "fake_grid": [
+          0,
+          0.0
+        ],
+        "true_grid": [
+          2.0,
+          250.0
+        ],
+        "search_suppression_db": -0.42378648626561627,
+        "oracle_suppression_db": null,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.004642397246509,
+        "noise_gain_db": 1.1593275641718144
+      },
+      {
+        "trial": 7,
+        "fake_grid": [
+          0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          250.0
+        ],
+        "search_suppression_db": 0.36764298475166723,
+        "oracle_suppression_db": null,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": 0.7525582196618794
+      },
+      {
+        "trial": 8,
+        "fake_grid": [
+          0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          50.0
+        ],
+        "search_suppression_db": -0.13924983638747415,
+        "oracle_suppression_db": null,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": 1.146428555040329
+      },
+      {
+        "trial": 9,
+        "fake_grid": [
+          0,
+          0.0
+        ],
+        "true_grid": [
+          0.25,
+          0.0
+        ],
+        "search_suppression_db": 0.1702843372710519,
+        "oracle_suppression_db": null,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": 0.6636616194837843
+      },
+      {
+        "trial": 10,
+        "fake_grid": [
+          0,
+          0.0
+        ],
+        "true_grid": [
+          0.5,
+          500.0
+        ],
+        "search_suppression_db": 0.7206141585785375,
+        "oracle_suppression_db": null,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0000000000000004,
+        "noise_gain_db": 0.7392848876534983
+      },
+      {
+        "trial": 11,
+        "fake_grid": [
+          0,
+          0.0
+        ],
+        "true_grid": [
+          0.25,
+          250.0
+        ],
+        "search_suppression_db": 0.11872404217222732,
+        "oracle_suppression_db": null,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.211167935941185,
+        "noise_gain_db": 1.0468582750165625
+      },
+      {
+        "trial": 12,
+        "fake_grid": [
+          0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          500.0
+        ],
+        "search_suppression_db": 0.2974842634786963,
+        "oracle_suppression_db": null,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0000000000000004,
+        "noise_gain_db": 0.9416630679094508
+      },
+      {
+        "trial": 13,
+        "fake_grid": [
+          0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          250.0
+        ],
+        "search_suppression_db": 0.049699828257858736,
+        "oracle_suppression_db": null,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": 0.9313861588588668
+      },
+      {
+        "trial": 14,
+        "fake_grid": [
+          0,
+          0.0
+        ],
+        "true_grid": [
+          1.0,
+          50.0
+        ],
+        "search_suppression_db": 0.08425367365985653,
+        "oracle_suppression_db": null,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0011943013458622,
+        "noise_gain_db": 1.053573978038775
+      },
+      {
+        "trial": 15,
+        "fake_grid": [
+          0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          250.0
+        ],
+        "search_suppression_db": 0.30152098945781536,
+        "oracle_suppression_db": null,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": 0.9099930646538825
+      },
+      {
+        "trial": 16,
+        "fake_grid": [
+          0,
+          0.0
+        ],
+        "true_grid": [
+          2.0,
+          0.0
+        ],
+        "search_suppression_db": 0.40389787296036805,
+        "oracle_suppression_db": null,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": 0.9786905161405131
+      },
+      {
+        "trial": 17,
+        "fake_grid": [
+          0,
+          0.0
+        ],
+        "true_grid": [
+          2.0,
+          250.0
+        ],
+        "search_suppression_db": -0.4347788187764501,
+        "oracle_suppression_db": null,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.004642397246509,
+        "noise_gain_db": 1.1478455833956012
+      },
+      {
+        "trial": 18,
+        "fake_grid": [
+          0,
+          0.0
+        ],
+        "true_grid": [
+          0.25,
+          50.0
+        ],
+        "search_suppression_db": -0.19596843275464113,
+        "oracle_suppression_db": null,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": 1.0867025653066111
+      },
+      {
+        "trial": 19,
+        "fake_grid": [
+          0,
+          0.0
+        ],
+        "true_grid": [
+          0.25,
+          0.0
+        ],
+        "search_suppression_db": 0.3574155287947345,
+        "oracle_suppression_db": null,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": 0.6613154996001015
+      }
+    ]
+  },
+  {
+    "delay_chips": 0.25,
+    "doppler_hz": 0,
+    "trials": [
+      {
+        "trial": 0,
+        "fake_grid": [
+          0.25,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 23.01037283953207,
+        "oracle_suppression_db": 23.010372839532323,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": -1.8239465997962954
+      },
+      {
+        "trial": 1,
+        "fake_grid": [
+          0.25,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 24.821340569944685,
+        "oracle_suppression_db": 24.821340569944525,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": -1.4599393936985723
+      },
+      {
+        "trial": 2,
+        "fake_grid": [
+          0.25,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 35.15409229559221,
+        "oracle_suppression_db": 35.15409229559215,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": -1.6875312242917986
+      },
+      {
+        "trial": 3,
+        "fake_grid": [
+          0.25,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 23.899845105529423,
+        "oracle_suppression_db": 23.899845105529334,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": -1.3733314090631827
+      },
+      {
+        "trial": 4,
+        "fake_grid": [
+          0.25,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 29.39952266710293,
+        "oracle_suppression_db": 29.399522667103103,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": -1.5822404173586626
+      },
+      {
+        "trial": 5,
+        "fake_grid": [
+          0.25,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 24.59064137322871,
+        "oracle_suppression_db": 24.590641373228763,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": -1.820023269890285
+      },
+      {
+        "trial": 6,
+        "fake_grid": [
+          0.25,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 25.737202307754636,
+        "oracle_suppression_db": 25.73720230775473,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": -1.3764117372515083
+      },
+      {
+        "trial": 7,
+        "fake_grid": [
+          0.25,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 20.909143081929116,
+        "oracle_suppression_db": 20.90914308192894,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": -1.9547266431581183
+      },
+      {
+        "trial": 8,
+        "fake_grid": [
+          0.25,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 32.13517011703977,
+        "oracle_suppression_db": 32.13517011703888,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": -1.5804163138986607
+      },
+      {
+        "trial": 9,
+        "fake_grid": [
+          0.25,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 26.509169462891524,
+        "oracle_suppression_db": 26.509169462891116,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": -1.6954283750747074
+      },
+      {
+        "trial": 10,
+        "fake_grid": [
+          0.25,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 22.510834812002784,
+        "oracle_suppression_db": 22.510834812003083,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": -1.3635765621747589
+      },
+      {
+        "trial": 11,
+        "fake_grid": [
+          0.25,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 22.642139295043663,
+        "oracle_suppression_db": 22.642139295044,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": -1.7244517912819721
+      },
+      {
+        "trial": 12,
+        "fake_grid": [
+          0.25,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 20.59467875606101,
+        "oracle_suppression_db": 20.5946787560608,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": -1.8637474816104498
+      },
+      {
+        "trial": 13,
+        "fake_grid": [
+          0.25,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 21.46404098079048,
+        "oracle_suppression_db": 21.464040980790713,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": -1.6411804648996744
+      },
+      {
+        "trial": 14,
+        "fake_grid": [
+          0.25,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 23.22845422662494,
+        "oracle_suppression_db": 23.22845422662454,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": -1.672972030958907
+      },
+      {
+        "trial": 15,
+        "fake_grid": [
+          0.25,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 25.536612571096533,
+        "oracle_suppression_db": 25.536612571096704,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": -1.4833868322546786
+      },
+      {
+        "trial": 16,
+        "fake_grid": [
+          0.25,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 23.227150069909115,
+        "oracle_suppression_db": 23.227150069908898,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": -1.7402056395673688
+      },
+      {
+        "trial": 17,
+        "fake_grid": [
+          0.25,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 19.711747806580085,
+        "oracle_suppression_db": 19.71174780657997,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": -1.45435858093877
+      },
+      {
+        "trial": 18,
+        "fake_grid": [
+          0.25,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 24.181908756798343,
+        "oracle_suppression_db": 24.181908756798375,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": -1.8790824128302313
+      },
+      {
+        "trial": 19,
+        "fake_grid": [
+          0.25,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 23.86656102587615,
+        "oracle_suppression_db": 23.866561025876262,
+        "null_accepted": true,
+        "fitted_gram_condition": 6.992187500000003,
+        "noise_gain_db": -1.8804229080551307
+      }
+    ]
+  },
+  {
+    "delay_chips": 0.5,
+    "doppler_hz": 0,
+    "trials": [
+      {
+        "trial": 0,
+        "fake_grid": [
+          0.5,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 30.00794935788045,
+        "oracle_suppression_db": 30.00794935788062,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": -1.7501843660319114
+      },
+      {
+        "trial": 1,
+        "fake_grid": [
+          0.5,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 31.525362411327237,
+        "oracle_suppression_db": 31.525362411326952,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": -1.5207671171277661
+      },
+      {
+        "trial": 2,
+        "fake_grid": [
+          0.5,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 25.50892994213354,
+        "oracle_suppression_db": 25.508929942133456,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": -1.3745515951768283
+      },
+      {
+        "trial": 3,
+        "fake_grid": [
+          0.5,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 31.881650946010588,
+        "oracle_suppression_db": 31.881650946010996,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": -1.6331312503526974
+      },
+      {
+        "trial": 4,
+        "fake_grid": [
+          0.5,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 33.25200770965301,
+        "oracle_suppression_db": 33.252007709653164,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": -1.5715327867625837
+      },
+      {
+        "trial": 5,
+        "fake_grid": [
+          0.5,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 23.489562750298166,
+        "oracle_suppression_db": 23.489562750298006,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": -1.4807380012132816
+      },
+      {
+        "trial": 6,
+        "fake_grid": [
+          0.5,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 32.79731676848889,
+        "oracle_suppression_db": 32.797316768488805,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": -1.5935076901033907
+      },
+      {
+        "trial": 7,
+        "fake_grid": [
+          0.5,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 24.02025795832742,
+        "oracle_suppression_db": 24.020257958327335,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": -1.4208092786211803
+      },
+      {
+        "trial": 8,
+        "fake_grid": [
+          0.5,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 21.509028535667873,
+        "oracle_suppression_db": 21.50902853566786,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": -1.4412008554365674
+      },
+      {
+        "trial": 9,
+        "fake_grid": [
+          0.5,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 43.67456578391133,
+        "oracle_suppression_db": 43.67456578391064,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": -1.628112489888239
+      },
+      {
+        "trial": 10,
+        "fake_grid": [
+          0.5,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 27.217262620643993,
+        "oracle_suppression_db": 27.21726262064403,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": -1.5597954660849267
+      },
+      {
+        "trial": 11,
+        "fake_grid": [
+          0.5,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 27.59942580339589,
+        "oracle_suppression_db": 27.599425803396002,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": -1.5755346228918778
+      },
+      {
+        "trial": 12,
+        "fake_grid": [
+          0.5,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 31.956998614691393,
+        "oracle_suppression_db": 31.95699861469157,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": -1.7219937217045116
+      },
+      {
+        "trial": 13,
+        "fake_grid": [
+          0.5,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 23.10382794299062,
+        "oracle_suppression_db": 23.103827942990623,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": -1.916118658558448
+      },
+      {
+        "trial": 14,
+        "fake_grid": [
+          0.5,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 20.68556467360487,
+        "oracle_suppression_db": 20.685564673604844,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": -1.1981411641455395
+      },
+      {
+        "trial": 15,
+        "fake_grid": [
+          0.5,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 29.993020545263548,
+        "oracle_suppression_db": 29.993020545263334,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": -1.4641751664251887
+      },
+      {
+        "trial": 16,
+        "fake_grid": [
+          0.5,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 29.014324429162013,
+        "oracle_suppression_db": 29.014324429162034,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": -1.5467293081305222
+      },
+      {
+        "trial": 17,
+        "fake_grid": [
+          0.5,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 23.24685508956709,
+        "oracle_suppression_db": 23.24685508956714,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": -1.5925248089268098
+      },
+      {
+        "trial": 18,
+        "fake_grid": [
+          0.5,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 33.24049920724535,
+        "oracle_suppression_db": 33.24049920724529,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": -1.5103770913305057
+      },
+      {
+        "trial": 19,
+        "fake_grid": [
+          0.5,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 23.982613340830483,
+        "oracle_suppression_db": 23.98261334083058,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.996093749999999,
+        "noise_gain_db": -1.7743404863588665
+      }
+    ]
+  },
+  {
+    "delay_chips": 1,
+    "doppler_hz": 0,
+    "trials": [
+      {
+        "trial": 0,
+        "fake_grid": [
+          1.0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 45.556562727142875,
+        "oracle_suppression_db": 45.55656272714397,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": -1.6207515771339576
+      },
+      {
+        "trial": 1,
+        "fake_grid": [
+          1.0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 28.771148877088546,
+        "oracle_suppression_db": 28.77114887708853,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": -1.7044849163508105
+      },
+      {
+        "trial": 2,
+        "fake_grid": [
+          1.0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 32.031600400895364,
+        "oracle_suppression_db": 32.03160040089523,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": -1.7033648817411817
+      },
+      {
+        "trial": 3,
+        "fake_grid": [
+          1.0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 35.33023483266378,
+        "oracle_suppression_db": 35.33023483266346,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": -1.6343620614311196
+      },
+      {
+        "trial": 4,
+        "fake_grid": [
+          1.0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 32.36505189873928,
+        "oracle_suppression_db": 32.36505189873963,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": -1.6556986598496761
+      },
+      {
+        "trial": 5,
+        "fake_grid": [
+          1.0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 23.35653089828655,
+        "oracle_suppression_db": 23.35653089828658,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": -1.699725839350572
+      },
+      {
+        "trial": 6,
+        "fake_grid": [
+          1.0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 27.390757206910216,
+        "oracle_suppression_db": 27.390757206910173,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": -1.4230938697205877
+      },
+      {
+        "trial": 7,
+        "fake_grid": [
+          1.0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 23.89419390563733,
+        "oracle_suppression_db": 23.894193905637348,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": -1.3260319958705291
+      },
+      {
+        "trial": 8,
+        "fake_grid": [
+          1.0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 33.20047459818197,
+        "oracle_suppression_db": 33.20047459818184,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": -1.6373288845577083
+      },
+      {
+        "trial": 9,
+        "fake_grid": [
+          1.0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 20.659007583904568,
+        "oracle_suppression_db": 20.659007583904582,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": -1.6206828181964354
+      },
+      {
+        "trial": 10,
+        "fake_grid": [
+          1.0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 27.717248325152077,
+        "oracle_suppression_db": 27.717248325152074,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": -1.4629862420845567
+      },
+      {
+        "trial": 11,
+        "fake_grid": [
+          1.0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 28.246892551349923,
+        "oracle_suppression_db": 28.246892551349973,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": -1.7525566392970358
+      },
+      {
+        "trial": 12,
+        "fake_grid": [
+          1.0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 26.4165935246579,
+        "oracle_suppression_db": 26.416593524657856,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": -1.3916479490112983
+      },
+      {
+        "trial": 13,
+        "fake_grid": [
+          1.0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 30.810332675441657,
+        "oracle_suppression_db": 30.81033267544173,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": -1.607776311813851
+      },
+      {
+        "trial": 14,
+        "fake_grid": [
+          1.0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 26.394934169917935,
+        "oracle_suppression_db": 26.394934169918002,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": -1.3931265727156548
+      },
+      {
+        "trial": 15,
+        "fake_grid": [
+          1.0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 25.01681334283244,
+        "oracle_suppression_db": 25.016813342832496,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": -1.3557073447839696
+      },
+      {
+        "trial": 16,
+        "fake_grid": [
+          1.0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 35.40331614097654,
+        "oracle_suppression_db": 35.40331614097674,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": -1.6825486907485911
+      },
+      {
+        "trial": 17,
+        "fake_grid": [
+          1.0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 26.11978376752853,
+        "oracle_suppression_db": 26.119783767528567,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": -1.8212863884995114
+      },
+      {
+        "trial": 18,
+        "fake_grid": [
+          1.0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 28.353680064775535,
+        "oracle_suppression_db": 28.353680064775606,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": -1.7457814058901566
+      },
+      {
+        "trial": 19,
+        "fake_grid": [
+          1.0,
+          0.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 21.919359023544086,
+        "oracle_suppression_db": 21.919359023544015,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.0019569471624263,
+        "noise_gain_db": -1.8101876538260457
+      }
+    ]
+  },
+  {
+    "delay_chips": 0,
+    "doppler_hz": 50,
+    "trials": [
+      {
+        "trial": 0,
+        "fake_grid": [
+          0,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 26.673044927156468,
+        "oracle_suppression_db": 26.673044927156532,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": -1.414829526050262
+      },
+      {
+        "trial": 1,
+        "fake_grid": [
+          0,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 29.943203975363165,
+        "oracle_suppression_db": 29.943203975363385,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": -1.5004785017852176
+      },
+      {
+        "trial": 2,
+        "fake_grid": [
+          0,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 24.05173164664133,
+        "oracle_suppression_db": 24.051731646641503,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": -1.5757248122441683
+      },
+      {
+        "trial": 3,
+        "fake_grid": [
+          0,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 26.43389183265082,
+        "oracle_suppression_db": 26.43389183265095,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": -1.7632728319708675
+      },
+      {
+        "trial": 4,
+        "fake_grid": [
+          0,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 23.559199967781996,
+        "oracle_suppression_db": 23.559199967781836,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": -1.300606605700786
+      },
+      {
+        "trial": 5,
+        "fake_grid": [
+          0,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 25.195312996365868,
+        "oracle_suppression_db": 25.195312996365878,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": -1.8301946238581972
+      },
+      {
+        "trial": 6,
+        "fake_grid": [
+          0,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 23.296675652775775,
+        "oracle_suppression_db": 23.296675652775622,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": -1.2901247422208297
+      },
+      {
+        "trial": 7,
+        "fake_grid": [
+          0,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 25.253227119021957,
+        "oracle_suppression_db": 25.25322711902184,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": -1.5338942298759446
+      },
+      {
+        "trial": 8,
+        "fake_grid": [
+          0,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 31.741600363695635,
+        "oracle_suppression_db": 31.741600363695703,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": -1.7262825653660685
+      },
+      {
+        "trial": 9,
+        "fake_grid": [
+          0,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 33.07059721626771,
+        "oracle_suppression_db": 33.07059721626807,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": -1.5833307602807942
+      },
+      {
+        "trial": 10,
+        "fake_grid": [
+          0,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 38.821890465327634,
+        "oracle_suppression_db": 38.82189046532786,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": -1.6005753104432872
+      },
+      {
+        "trial": 11,
+        "fake_grid": [
+          0,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 25.02438963896365,
+        "oracle_suppression_db": 25.024389638963424,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": -1.3484768324670702
+      },
+      {
+        "trial": 12,
+        "fake_grid": [
+          0,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 26.457756460306463,
+        "oracle_suppression_db": 26.457756460306605,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": -1.676603159390936
+      },
+      {
+        "trial": 13,
+        "fake_grid": [
+          0,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 26.495218786252217,
+        "oracle_suppression_db": 26.49521878625197,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": -1.4121095856398178
+      },
+      {
+        "trial": 14,
+        "fake_grid": [
+          0,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 28.95899088207997,
+        "oracle_suppression_db": 28.95899088207986,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": -1.6090814862464304
+      },
+      {
+        "trial": 15,
+        "fake_grid": [
+          0,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 32.94028119073124,
+        "oracle_suppression_db": 32.94028119073132,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": -1.709590254229027
+      },
+      {
+        "trial": 16,
+        "fake_grid": [
+          0,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 30.882674585662237,
+        "oracle_suppression_db": 30.882674585662507,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": -1.5012908460412746
+      },
+      {
+        "trial": 17,
+        "fake_grid": [
+          0,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 25.78036831588601,
+        "oracle_suppression_db": 25.780368315886065,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": -1.3787336664383179
+      },
+      {
+        "trial": 18,
+        "fake_grid": [
+          0,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 17.942443475317454,
+        "oracle_suppression_db": 17.942443475317475,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": -2.062980477800199
+      },
+      {
+        "trial": 19,
+        "fake_grid": [
+          0,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 29.32003614538289,
+        "oracle_suppression_db": 29.320036145383057,
+        "null_accepted": true,
+        "fitted_gram_condition": 4.503876790136341,
+        "noise_gain_db": -1.493056524667273
+      }
+    ]
+  },
+  {
+    "delay_chips": 0,
+    "doppler_hz": 250,
+    "trials": [
+      {
+        "trial": 0,
+        "fake_grid": [
+          0,
+          250.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 31.936274268649107,
+        "oracle_suppression_db": 31.93627426864928,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": -1.5374868348454152
+      },
+      {
+        "trial": 1,
+        "fake_grid": [
+          0,
+          250.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 29.847719225519292,
+        "oracle_suppression_db": 29.847719225519434,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": -1.5416795009725761
+      },
+      {
+        "trial": 2,
+        "fake_grid": [
+          0,
+          250.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 24.887922273938592,
+        "oracle_suppression_db": 24.887922273938564,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": -1.8604725888739777
+      },
+      {
+        "trial": 3,
+        "fake_grid": [
+          0,
+          250.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 37.429641221345406,
+        "oracle_suppression_db": 37.429641221345605,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": -1.5488066774178026
+      },
+      {
+        "trial": 4,
+        "fake_grid": [
+          0,
+          250.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 25.654130815462757,
+        "oracle_suppression_db": 25.654130815462718,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": -1.841335740642975
+      },
+      {
+        "trial": 5,
+        "fake_grid": [
+          0,
+          250.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 24.73889837627287,
+        "oracle_suppression_db": 24.738898376272918,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": -1.4539255496334471
+      },
+      {
+        "trial": 6,
+        "fake_grid": [
+          0,
+          250.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 24.78191684608882,
+        "oracle_suppression_db": 24.7819168460888,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": -1.8113967993593523
+      },
+      {
+        "trial": 7,
+        "fake_grid": [
+          0,
+          250.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 27.20655251189794,
+        "oracle_suppression_db": 27.206552511897925,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": -1.7803421485550917
+      },
+      {
+        "trial": 8,
+        "fake_grid": [
+          0,
+          250.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 24.127096235920924,
+        "oracle_suppression_db": 24.127096235920924,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": -1.6527809283746822
+      },
+      {
+        "trial": 9,
+        "fake_grid": [
+          0,
+          250.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 32.472409255872556,
+        "oracle_suppression_db": 32.47240925587268,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": -1.5598902751962007
+      },
+      {
+        "trial": 10,
+        "fake_grid": [
+          0,
+          250.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 23.289688805818834,
+        "oracle_suppression_db": 23.289688805818827,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": -1.3971164471544473
+      },
+      {
+        "trial": 11,
+        "fake_grid": [
+          0,
+          250.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 25.470042121712105,
+        "oracle_suppression_db": 25.47004212171204,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": -1.8465636892578965
+      },
+      {
+        "trial": 12,
+        "fake_grid": [
+          0,
+          250.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 52.65462440234253,
+        "oracle_suppression_db": 52.654624402345014,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": -1.6153565462656159
+      },
+      {
+        "trial": 13,
+        "fake_grid": [
+          0,
+          250.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 21.67909957394969,
+        "oracle_suppression_db": 21.679099573949642,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": -1.8217472691705483
+      },
+      {
+        "trial": 14,
+        "fake_grid": [
+          0,
+          250.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 26.65616488000044,
+        "oracle_suppression_db": 26.656164880000404,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": -1.7781574080993772
+      },
+      {
+        "trial": 15,
+        "fake_grid": [
+          0,
+          250.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 39.27728357917464,
+        "oracle_suppression_db": 39.27728357917451,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": -1.6503999713574535
+      },
+      {
+        "trial": 16,
+        "fake_grid": [
+          0,
+          250.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 28.931764350741624,
+        "oracle_suppression_db": 28.931764350741524,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": -1.5071726299732038
+      },
+      {
+        "trial": 17,
+        "fake_grid": [
+          0,
+          250.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 27.182890146514328,
+        "oracle_suppression_db": 27.182890146514268,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": -1.7913726879822731
+      },
+      {
+        "trial": 18,
+        "fake_grid": [
+          0,
+          250.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 41.60530819247067,
+        "oracle_suppression_db": 41.605308192470964,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": -1.6211833274100562
+      },
+      {
+        "trial": 19,
+        "fake_grid": [
+          0,
+          250.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 26.132212722794982,
+        "oracle_suppression_db": 26.13221272279499,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.2918011924860588,
+        "noise_gain_db": -1.6836852210378472
+      }
+    ]
+  },
+  {
+    "delay_chips": 0.25,
+    "doppler_hz": 50,
+    "trials": [
+      {
+        "trial": 0,
+        "fake_grid": [
+          0.25,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 26.419378007140363,
+        "oracle_suppression_db": 26.419378007140498,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": -1.3880325738207278
+      },
+      {
+        "trial": 1,
+        "fake_grid": [
+          0.25,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 21.633571435875925,
+        "oracle_suppression_db": 21.633571435875982,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": -1.899379944911166
+      },
+      {
+        "trial": 2,
+        "fake_grid": [
+          0.25,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 35.62363238044688,
+        "oracle_suppression_db": 35.623632380447184,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": -1.6441223255706883
+      },
+      {
+        "trial": 3,
+        "fake_grid": [
+          0.25,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 23.798139514023884,
+        "oracle_suppression_db": 23.798139514023905,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": -1.5569312727961977
+      },
+      {
+        "trial": 4,
+        "fake_grid": [
+          0.25,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 23.373580688664507,
+        "oracle_suppression_db": 23.37358068866451,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": -1.423310068014558
+      },
+      {
+        "trial": 5,
+        "fake_grid": [
+          0.25,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 26.075522771353853,
+        "oracle_suppression_db": 26.075522771353846,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": -1.3797123940982567
+      },
+      {
+        "trial": 6,
+        "fake_grid": [
+          0.25,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 23.602760661432924,
+        "oracle_suppression_db": 23.602760661432846,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": -1.891095185583316
+      },
+      {
+        "trial": 7,
+        "fake_grid": [
+          0.25,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 25.43063334405999,
+        "oracle_suppression_db": 25.43063334405994,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": -1.4023396229729896
+      },
+      {
+        "trial": 8,
+        "fake_grid": [
+          0.25,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 35.51949362493998,
+        "oracle_suppression_db": 35.51949362493958,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": -1.6612405015365626
+      },
+      {
+        "trial": 9,
+        "fake_grid": [
+          0.25,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 30.48461943116992,
+        "oracle_suppression_db": 30.484619431170085,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": -1.7377439438301185
+      },
+      {
+        "trial": 10,
+        "fake_grid": [
+          0.25,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 32.891119946780016,
+        "oracle_suppression_db": 32.89111994677979,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": -1.5319316075160083
+      },
+      {
+        "trial": 11,
+        "fake_grid": [
+          0.25,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 33.7043089334034,
+        "oracle_suppression_db": 33.704308933403055,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": -1.6358904293696852
+      },
+      {
+        "trial": 12,
+        "fake_grid": [
+          0.25,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 25.27591480478606,
+        "oracle_suppression_db": 25.275914804786062,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": -1.8504744923124044
+      },
+      {
+        "trial": 13,
+        "fake_grid": [
+          0.25,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 28.53997035238088,
+        "oracle_suppression_db": 28.53997035238087,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": -1.4368909001266126
+      },
+      {
+        "trial": 14,
+        "fake_grid": [
+          0.25,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 19.880410559757728,
+        "oracle_suppression_db": 19.880410559757745,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": -1.4234320981121669
+      },
+      {
+        "trial": 15,
+        "fake_grid": [
+          0.25,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 42.95790903091445,
+        "oracle_suppression_db": 42.95790903091448,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": -1.6395716121363044
+      },
+      {
+        "trial": 16,
+        "fake_grid": [
+          0.25,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 29.078401145815445,
+        "oracle_suppression_db": 29.078401145815445,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": -1.6583773515967628
+      },
+      {
+        "trial": 17,
+        "fake_grid": [
+          0.25,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 23.268237300457105,
+        "oracle_suppression_db": 23.26823730045711,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": -1.8418563954579936
+      },
+      {
+        "trial": 18,
+        "fake_grid": [
+          0.25,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 21.82409454217784,
+        "oracle_suppression_db": 21.824094542177797,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": -1.5675966916746247
+      },
+      {
+        "trial": 19,
+        "fake_grid": [
+          0.25,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 26.45940405891784,
+        "oracle_suppression_db": 26.459404058917908,
+        "null_accepted": true,
+        "fitted_gram_condition": 2.826410217400361,
+        "noise_gain_db": -1.5241532516006795
+      }
+    ]
+  },
+  {
+    "delay_chips": 0.37,
+    "doppler_hz": 80,
+    "trials": [
+      {
+        "trial": 0,
+        "fake_grid": [
+          0.5,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 28.816039436788564,
+        "oracle_suppression_db": 29.777546651070654,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.9326115390315108,
+        "noise_gain_db": -1.4774465136809858
+      },
+      {
+        "trial": 1,
+        "fake_grid": [
+          0.5,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 22.883357999756665,
+        "oracle_suppression_db": 21.181014824342537,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.9326115390315108,
+        "noise_gain_db": -1.7805809410127091
+      },
+      {
+        "trial": 2,
+        "fake_grid": [
+          0.5,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 27.056838080227923,
+        "oracle_suppression_db": 26.060783976909075,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.9326115390315108,
+        "noise_gain_db": -1.772915253870646
+      },
+      {
+        "trial": 3,
+        "fake_grid": [
+          0.5,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 26.82876833937756,
+        "oracle_suppression_db": 29.195347779717654,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.9326115390315108,
+        "noise_gain_db": -1.8087367001526444
+      },
+      {
+        "trial": 4,
+        "fake_grid": [
+          0.5,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 31.902468302629238,
+        "oracle_suppression_db": 39.57355666613604,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.9326115390315108,
+        "noise_gain_db": -1.6779431276326258
+      },
+      {
+        "trial": 5,
+        "fake_grid": [
+          0.5,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 25.28646059654931,
+        "oracle_suppression_db": 30.36730010393503,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.9326115390315108,
+        "noise_gain_db": -1.4856540820887991
+      },
+      {
+        "trial": 6,
+        "fake_grid": [
+          0.5,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 22.624526798755614,
+        "oracle_suppression_db": 22.335544706019817,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.9326115390315108,
+        "noise_gain_db": -1.3665875882979093
+      },
+      {
+        "trial": 7,
+        "fake_grid": [
+          0.5,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 31.498919412215688,
+        "oracle_suppression_db": 26.57577153936942,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.9326115390315108,
+        "noise_gain_db": -1.5933791210346842
+      },
+      {
+        "trial": 8,
+        "fake_grid": [
+          0.5,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 21.23067163201766,
+        "oracle_suppression_db": 24.630680700454057,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.9326115390315108,
+        "noise_gain_db": -1.8604084464073938
+      },
+      {
+        "trial": 9,
+        "fake_grid": [
+          0.5,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 33.61239966601864,
+        "oracle_suppression_db": 37.75415756458428,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.9326115390315108,
+        "noise_gain_db": -1.534299354014346
+      },
+      {
+        "trial": 10,
+        "fake_grid": [
+          0.5,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 20.109064353420514,
+        "oracle_suppression_db": 20.485161283608914,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.9326115390315108,
+        "noise_gain_db": -1.1717737766279133
+      },
+      {
+        "trial": 11,
+        "fake_grid": [
+          0.5,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 24.52994968092186,
+        "oracle_suppression_db": 26.526746047707967,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.9326115390315108,
+        "noise_gain_db": -1.6675628261493864
+      },
+      {
+        "trial": 12,
+        "fake_grid": [
+          0.5,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 31.904375458973004,
+        "oracle_suppression_db": 31.35433859068755,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.9326115390315108,
+        "noise_gain_db": -1.654989978667754
+      },
+      {
+        "trial": 13,
+        "fake_grid": [
+          0.5,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 28.019470144441904,
+        "oracle_suppression_db": 29.74778359859656,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.9326115390315108,
+        "noise_gain_db": -1.7668741738052578
+      },
+      {
+        "trial": 14,
+        "fake_grid": [
+          0.5,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 36.876780839249946,
+        "oracle_suppression_db": 29.833076045111664,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.9326115390315108,
+        "noise_gain_db": -1.5458764152152569
+      },
+      {
+        "trial": 15,
+        "fake_grid": [
+          0.5,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 21.92532003786478,
+        "oracle_suppression_db": 29.509137631529004,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.9326115390315108,
+        "noise_gain_db": -1.8876893686303686
+      },
+      {
+        "trial": 16,
+        "fake_grid": [
+          0.5,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 21.684202712897303,
+        "oracle_suppression_db": 30.596615638159182,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.9326115390315108,
+        "noise_gain_db": -1.3305547746301396
+      },
+      {
+        "trial": 17,
+        "fake_grid": [
+          0.5,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 25.202930885372695,
+        "oracle_suppression_db": 27.355512018313696,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.9326115390315108,
+        "noise_gain_db": -1.8170034527223011
+      },
+      {
+        "trial": 18,
+        "fake_grid": [
+          0.5,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 28.78743429553466,
+        "oracle_suppression_db": 26.002851973097897,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.9326115390315108,
+        "noise_gain_db": -1.5226668876228464
+      },
+      {
+        "trial": 19,
+        "fake_grid": [
+          0.5,
+          50.0
+        ],
+        "true_grid": [
+          0,
+          0.0
+        ],
+        "search_suppression_db": 24.82753049368069,
+        "oracle_suppression_db": 27.979352485635353,
+        "null_accepted": true,
+        "fitted_gram_condition": 1.9326115390315108,
+        "noise_gain_db": -1.8548203178039533
+      }
+    ]
+  }
+]

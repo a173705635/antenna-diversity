@@ -1,9 +1,14 @@
 # GNSS 接收链路与定位研究代码
 
+真实录波完整入口现为 `recorded_receiver.py`，复用 `gps_lnav.py`、`gps_broadcast.py`、`gps_observables.py` 和既有 DFE/捕获/跟踪/求解器。已从 40 秒公开 HackRF IQ 解出 10 星星历并输出 380 个离线 GPS L1 码位置；见[方法、结果与复现](../docs/reports/2026-09-13-recorded-receiver.md)。`audit_real_gnss.py` 保留为配置与比较实验入口，内部调用通用通道处理。参考位置只用于报告评估。
+
+新增真实录波入口 `audit_real_gnss.py`：读取已采集的 signed int8 IQ，按其采样率/中频经过现有 DFE、捕获和跟踪，默认使用 Costas 处理未知 GPS L1 导航比特。已完成 ION/HackRF 10 秒片段验证，见[报告及复现命令](../docs/reports/2026-09-13-real-single-antenna.md)。该入口不叠加仿真 RF，不输出实测定位或 SDCP。历史 `TrackingConfig` 默认仍为 atan2；真实 L1 电文请显式选择 `carrier_discriminator='costas'`。
+
 当前唯一开发版本。代码和输出路径保持原位；下表用于选择实验入口。
 
 | 任务 | 脚本 | 输入与输出 |
 |---|---|---|
+| 真实 IQ 接收与 GPS 码定位 | `recorded_receiver.py` | `--iq` 指定已采集文件，`--output` 指定新输出目录；输入格式/参数见报告 |
 | 双通道相位基准 | `audit_dual_tracking_phase.py` | 仿真双通道信号，默认输出 `results/dual_tracking_phase/` |
 | GPS 定位 | `run_gps_spp.py` | 仿真 GPS 观测，默认输出 `results/gps_spp/` |
 | L1/L5 定位 | `run_gps_l1_l5.py` | 双频仿真与权重对照，参数见下文 |
@@ -40,6 +45,30 @@ python python_sim_simplified/audit_dual_tracking_phase.py
 ```
 
 固定 TL/TR、无人为通道延迟、无干扰与多径，保留热噪声；比较同一物理时刻的载波 NCO 相位。输出在本目录 `results/dual_tracking_phase/`。时钟假设、启动段与后段统计以及无噪声量化失效见[报告](../docs/reports/2026-09-10-dual-tracking-phase.md)。
+
+## 天线与 RF 幅相偏差
+
+外部源交叉验证入口：`external_gnss_generate.jl` 使用 GNSSSimulator.jl 原生函数生成两路无噪声 IQ；`audit_external_gnss.py --iq <IQ目录> --output <新目录>` 接入当前独立接收链。需先准备归档版本的 Julia 环境，详见[实际结果与复现步骤](../docs/reports/2026-09-13-external-gnss-source.md)。
+
+`AntennaState.amplitude_error_db` / `phase_error_deg` 按天线名字设置，在方向图之后、单元耦合之前生效；true_state 和 assumed_state 分别表示实际响应和估计响应。`RFConfig.amplitude_error_db` / `phase_error_deg` 支持统一标量或按输入行排序的元组，在等效信号与噪声增益之后、限幅和 ADC 之前生效。新增字段默认零。
+
+以下为人为敏感性参数，不是硬件实测值；两个通道使用独立 RF/DFE/环路：
+
+```python
+from presets import default_config
+from audit_dual_tracking_phase import run_case
+
+cfg = default_config()
+cfg.phone.active_antennas = ('TL', 'TR')
+cfg.phone.antenna_model.true_state.amplitude_error_db = {'TR': -1.0}
+cfg.phone.antenna_model.true_state.phase_error_deg = {'TR': 5.0}
+cfg.rf.amplitude_error_db = (0.0, 1.0)
+cfg.rf.phase_error_deg = (0.0, 3.0)
+case = run_case(duration_ms=1000, seed_base=9900, receiver_config=cfg)
+# raw_phase_difference_rad 保留整周；phase_difference_rad 是历史展示兼容字段。
+```
+
+完整六场景×两噪声对验证：`python python_sim_simplified/audit_sdcp_hardware_bias.py --output <新目录>`。该审计直接从累计 NCO 重建距离，未取余、未减参考均值；历史检测入口未整体替换。参见[幅相偏差验证](../docs/reports/2026-09-13-sdcp-hardware-bias.md)。
 
 # GNSS 天线分集精简研究仿真版
 
@@ -314,3 +343,8 @@ element_name,frequency_hz,azimuth_deg,elevation_deg,h_az_real,h_az_imag,h_el_rea
 本目录假定研究配置有效，没有包含完整版的配置全量校验、异常包装、文件哈希和 schema 审计、退化矩阵保护、Blind Null 安全旁路、断点恢复、Monte Carlo、批处理、报告系统和定点载波 NCO 对比。
 
 保留下来的内容包括 2～4 天线组合、手机四角几何、参数化/实测方向图、极化、遮挡、互耦、通道幅相误差、真实/估计通道延迟、CW与带限噪声干扰、静态镜面多径、RF/ADC、定点化 DFE 输出、五种合并方式、捕获、跟踪、码偏差和 C/N₀。尚未包含连续延迟估计、弥散多径、动态路径、NLOS 判决、路径跟踪或多星联合处理。旧版批量研究框架已[归档](../docs/archive/python_sim_2026-09-12/README.md)，需要追溯时先恢复环境。
+
+
+## 天线分集抗欺骗首轮
+
+`spoofing.py` 提供同频双天线固定8PRN圆统计空间一致性检测。`audit_spoofing_model.py --output <新目录>` 冻结模型门限；`audit_spoofing_rf.py --output <新目录> --model <模型summary.json>` 复用双RF/DFE/独立跟踪验证。检测共同来源，不认证单星，不恢复定位；默认定位入口未变。见[完整报告](../docs/reports/2026-09-12-antenna-spoofing-validation.md)。

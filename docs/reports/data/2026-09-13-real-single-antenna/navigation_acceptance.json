@@ -1,0 +1,327 @@
+{
+  "postprocessor_sha256": "d5eea76f6e1f3f01eafaff168fdb64d3537810283325fc46e74f40c6d39a0fdb",
+  "rule": ">=4 consecutive parity-valid words, both bit signs, valid TLM preamble with plausible HOW; parity alone is insufficient",
+  "rows": [
+    {
+      "run": "costas_start1s_9s",
+      "prn": 2,
+      "demodulation_evidence": true,
+      "valid_words": 13,
+      "tested_words": 13,
+      "longest_chain": 13,
+      "preambles": [
+        {
+          "bit_index": 179,
+          "next_subframe_tow_s": 590472,
+          "subframe_id": 2,
+          "ten_words_parity_ok": false
+        }
+      ],
+      "unique_payload_count": 13
+    },
+    {
+      "run": "costas_start1s_9s",
+      "prn": 5,
+      "demodulation_evidence": true,
+      "valid_words": 13,
+      "tested_words": 13,
+      "longest_chain": 13,
+      "preambles": [
+        {
+          "bit_index": 180,
+          "next_subframe_tow_s": 590472,
+          "subframe_id": 2,
+          "ten_words_parity_ok": false
+        }
+      ],
+      "unique_payload_count": 13
+    },
+    {
+      "run": "costas_start1s_9s",
+      "prn": 6,
+      "demodulation_evidence": true,
+      "valid_words": 13,
+      "tested_words": 13,
+      "longest_chain": 13,
+      "preambles": [
+        {
+          "bit_index": 180,
+          "next_subframe_tow_s": 590472,
+          "subframe_id": 2,
+          "ten_words_parity_ok": false
+        }
+      ],
+      "unique_payload_count": 13
+    },
+    {
+      "run": "costas_start1s_9s",
+      "prn": 7,
+      "demodulation_evidence": true,
+      "valid_words": 13,
+      "tested_words": 13,
+      "longest_chain": 13,
+      "preambles": [
+        {
+          "bit_index": 179,
+          "next_subframe_tow_s": 590472,
+          "subframe_id": 2,
+          "ten_words_parity_ok": false
+        }
+      ],
+      "unique_payload_count": 13
+    },
+    {
+      "run": "costas_start1s_9s",
+      "prn": 9,
+      "demodulation_evidence": true,
+      "valid_words": 13,
+      "tested_words": 13,
+      "longest_chain": 13,
+      "preambles": [
+        {
+          "bit_index": 179,
+          "next_subframe_tow_s": 590472,
+          "subframe_id": 2,
+          "ten_words_parity_ok": false
+        }
+      ],
+      "unique_payload_count": 13
+    },
+    {
+      "run": "costas_start1s_9s",
+      "prn": 13,
+      "demodulation_evidence": true,
+      "valid_words": 13,
+      "tested_words": 13,
+      "longest_chain": 13,
+      "preambles": [
+        {
+          "bit_index": 180,
+          "next_subframe_tow_s": 590472,
+          "subframe_id": 2,
+          "ten_words_parity_ok": false
+        }
+      ],
+      "unique_payload_count": 13
+    },
+    {
+      "run": "costas_start1s_9s",
+      "prn": 23,
+      "demodulation_evidence": true,
+      "valid_words": 13,
+      "tested_words": 13,
+      "longest_chain": 13,
+      "preambles": [
+        {
+          "bit_index": 180,
+          "next_subframe_tow_s": 590472,
+          "subframe_id": 2,
+          "ten_words_parity_ok": false
+        }
+      ],
+      "unique_payload_count": 13
+    },
+    {
+      "run": "costas_start1s_9s",
+      "prn": 26,
+      "demodulation_evidence": true,
+      "valid_words": 13,
+      "tested_words": 13,
+      "longest_chain": 13,
+      "preambles": [
+        {
+          "bit_index": 180,
+          "next_subframe_tow_s": 590472,
+          "subframe_id": 2,
+          "ten_words_parity_ok": false
+        }
+      ],
+      "unique_payload_count": 13
+    },
+    {
+      "run": "costas_start1s_9s",
+      "prn": 29,
+      "demodulation_evidence": true,
+      "valid_words": 13,
+      "tested_words": 13,
+      "longest_chain": 13,
+      "preambles": [
+        {
+          "bit_index": 180,
+          "next_subframe_tow_s": 590472,
+          "subframe_id": 2,
+          "ten_words_parity_ok": false
+        }
+      ],
+      "unique_payload_count": 13
+    },
+    {
+      "run": "costas_start1s_9s",
+      "prn": 30,
+      "demodulation_evidence": true,
+      "valid_words": 13,
+      "tested_words": 13,
+      "longest_chain": 13,
+      "preambles": [
+        {
+          "bit_index": 179,
+          "next_subframe_tow_s": 590472,
+          "subframe_id": 2,
+          "ten_words_parity_ok": false
+        }
+      ],
+      "unique_payload_count": 13
+    },
+    {
+      "run": "legacy_start1s_9s",
+      "prn": 2,
+      "demodulation_evidence": false,
+      "valid_words": 14,
+      "tested_words": 14,
+      "longest_chain": 14,
+      "preambles": [],
+      "unique_payload_count": 1
+    },
+    {
+      "run": "legacy_start1s_9s",
+      "prn": 5,
+      "demodulation_evidence": false,
+      "valid_words": 14,
+      "tested_words": 14,
+      "longest_chain": 14,
+      "preambles": [],
+      "unique_payload_count": 1
+    },
+    {
+      "run": "legacy_start1s_9s",
+      "prn": 6,
+      "demodulation_evidence": false,
+      "valid_words": 14,
+      "tested_words": 14,
+      "longest_chain": 14,
+      "preambles": [],
+      "unique_payload_count": 1
+    },
+    {
+      "run": "legacy_start1s_9s",
+      "prn": 7,
+      "demodulation_evidence": false,
+      "valid_words": 14,
+      "tested_words": 14,
+      "longest_chain": 14,
+      "preambles": [],
+      "unique_payload_count": 1
+    },
+    {
+      "run": "legacy_start1s_9s",
+      "prn": 9,
+      "demodulation_evidence": false,
+      "valid_words": 14,
+      "tested_words": 14,
+      "longest_chain": 14,
+      "preambles": [],
+      "unique_payload_count": 1
+    },
+    {
+      "run": "legacy_start1s_9s",
+      "prn": 13,
+      "demodulation_evidence": false,
+      "valid_words": 14,
+      "tested_words": 14,
+      "longest_chain": 14,
+      "preambles": [],
+      "unique_payload_count": 1
+    },
+    {
+      "run": "legacy_start1s_9s",
+      "prn": 23,
+      "demodulation_evidence": false,
+      "valid_words": 14,
+      "tested_words": 14,
+      "longest_chain": 14,
+      "preambles": [],
+      "unique_payload_count": 1
+    },
+    {
+      "run": "legacy_start1s_9s",
+      "prn": 26,
+      "demodulation_evidence": false,
+      "valid_words": 14,
+      "tested_words": 14,
+      "longest_chain": 14,
+      "preambles": [],
+      "unique_payload_count": 1
+    },
+    {
+      "run": "legacy_start1s_9s",
+      "prn": 29,
+      "demodulation_evidence": false,
+      "valid_words": 14,
+      "tested_words": 14,
+      "longest_chain": 14,
+      "preambles": [],
+      "unique_payload_count": 1
+    },
+    {
+      "run": "legacy_start1s_9s",
+      "prn": 30,
+      "demodulation_evidence": false,
+      "valid_words": 14,
+      "tested_words": 14,
+      "longest_chain": 14,
+      "preambles": [],
+      "unique_payload_count": 1
+    },
+    {
+      "run": "costas_quant8_start1s_9s",
+      "prn": 7,
+      "demodulation_evidence": true,
+      "valid_words": 13,
+      "tested_words": 13,
+      "longest_chain": 13,
+      "preambles": [
+        {
+          "bit_index": 179,
+          "next_subframe_tow_s": 590472,
+          "subframe_id": 2,
+          "ten_words_parity_ok": false
+        }
+      ],
+      "unique_payload_count": 13
+    },
+    {
+      "run": "costas_quant8_start1s_9s",
+      "prn": 13,
+      "demodulation_evidence": true,
+      "valid_words": 13,
+      "tested_words": 13,
+      "longest_chain": 13,
+      "preambles": [
+        {
+          "bit_index": 180,
+          "next_subframe_tow_s": 590472,
+          "subframe_id": 2,
+          "ten_words_parity_ok": false
+        }
+      ],
+      "unique_payload_count": 13
+    },
+    {
+      "run": "costas_quant8_start1s_9s",
+      "prn": 29,
+      "demodulation_evidence": true,
+      "valid_words": 13,
+      "tested_words": 13,
+      "longest_chain": 13,
+      "preambles": [
+        {
+          "bit_index": 180,
+          "next_subframe_tow_s": 590472,
+          "subframe_id": 2,
+          "ten_words_parity_ok": false
+        }
+      ],
+      "unique_payload_count": 13
+    }
+  ]
+}

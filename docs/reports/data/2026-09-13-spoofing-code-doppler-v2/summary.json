@@ -1,0 +1,208 @@
+{
+  "scope": "C/A waveform joint temporal/spatial separation; not RF/DFE/PLL validation.",
+  "seed": 9730,
+  "sample_rate_hz": 4092000.0,
+  "duration_s": 0.01,
+  "prn": 1,
+  "cn0_db_hz_per_component": 45,
+  "noise_power": 129.4004018540901,
+  "power_ratio_db": 0,
+  "grid": [
+    [
+      0,
+      0.0
+    ],
+    [
+      0,
+      50.0
+    ],
+    [
+      0,
+      250.0
+    ],
+    [
+      0,
+      500.0
+    ],
+    [
+      0.25,
+      0.0
+    ],
+    [
+      0.25,
+      50.0
+    ],
+    [
+      0.25,
+      250.0
+    ],
+    [
+      0.25,
+      500.0
+    ],
+    [
+      0.5,
+      0.0
+    ],
+    [
+      0.5,
+      50.0
+    ],
+    [
+      0.5,
+      250.0
+    ],
+    [
+      0.5,
+      500.0
+    ],
+    [
+      1.0,
+      0.0
+    ],
+    [
+      1.0,
+      50.0
+    ],
+    [
+      1.0,
+      250.0
+    ],
+    [
+      1.0,
+      500.0
+    ],
+    [
+      2.0,
+      0.0
+    ],
+    [
+      2.0,
+      50.0
+    ],
+    [
+      2.0,
+      250.0
+    ],
+    [
+      2.0,
+      500.0
+    ]
+  ],
+  "rows": [
+    {
+      "delay_chips": 0,
+      "doppler_hz": 0,
+      "waveform_correlation": 1.0000000000000002,
+      "oracle_gram_condition": 1.2738103345051546e+16,
+      "trials": 20,
+      "both_grid_correct": 0,
+      "accepted": 20,
+      "search_suppression_db_p05_median": [
+        -0.45105949199528694,
+        0.10148885791604681
+      ],
+      "oracle_suppression_db_median": null
+    },
+    {
+      "delay_chips": 0.25,
+      "doppler_hz": 0,
+      "waveform_correlation": 0.7497556207233625,
+      "oracle_gram_condition": 6.992187500000001,
+      "trials": 20,
+      "both_grid_correct": 20,
+      "accepted": 20,
+      "search_suppression_db_p05_median": [
+        20.550532208587004,
+        23.8832030657028
+      ],
+      "oracle_suppression_db_median": 23.883203065702816
+    },
+    {
+      "delay_chips": 0.5,
+      "doppler_hz": 0,
+      "waveform_correlation": 0.4995112414467252,
+      "oracle_gram_condition": 2.996093749999999,
+      "trials": 20,
+      "both_grid_correct": 20,
+      "accepted": 20,
+      "search_suppression_db_p05_median": [
+        21.467855342564697,
+        28.306875116278952
+      ],
+      "oracle_suppression_db_median": 28.306875116279024
+    },
+    {
+      "delay_chips": 1,
+      "doppler_hz": 0,
+      "waveform_correlation": 0.0009775171065493494,
+      "oracle_gram_condition": 1.0019569471624261,
+      "trials": 20,
+      "both_grid_correct": 20,
+      "accepted": 20,
+      "search_suppression_db_p05_median": [
+        21.8563414515621,
+        27.982070438251007
+      ],
+      "oracle_suppression_db_median": 27.98207043825101
+    },
+    {
+      "delay_chips": 0,
+      "doppler_hz": 50,
+      "waveform_correlation": 0.6366197725239309,
+      "oracle_gram_condition": 4.503876790136341,
+      "trials": 20,
+      "both_grid_correct": 20,
+      "accepted": 20,
+      "search_suppression_db_p05_median": [
+        23.028964043902928,
+        26.47648762327932
+      ],
+      "oracle_suppression_db_median": 26.476487623279276
+    },
+    {
+      "delay_chips": 0,
+      "doppler_hz": 250,
+      "waveform_correlation": 0.12732395525526533,
+      "oracle_gram_condition": 1.2918011924860588,
+      "trials": 20,
+      "both_grid_correct": 20,
+      "accepted": 20,
+      "search_suppression_db_p05_median": [
+        23.20915934422537,
+        26.91952751325738
+      ],
+      "oracle_suppression_db_median": 26.919527513257343
+    },
+    {
+      "delay_chips": 0.25,
+      "doppler_hz": 50,
+      "waveform_correlation": 0.477316888057343,
+      "oracle_gram_condition": 2.8264102174003622,
+      "trials": 20,
+      "both_grid_correct": 20,
+      "accepted": 20,
+      "search_suppression_db_p05_median": [
+        21.54591339207005,
+        26.247450389247128
+      ],
+      "oracle_suppression_db_median": 26.247450389247206
+    },
+    {
+      "delay_chips": 0.37,
+      "doppler_hz": 80,
+      "waveform_correlation": 0.14096850888998508,
+      "oracle_gram_condition": 1.3282033554039554,
+      "trials": 20,
+      "both_grid_correct": 0,
+      "accepted": 20,
+      "search_suppression_db_p05_median": [
+        20.736480984409425,
+        26.601213190542722
+      ],
+      "oracle_suppression_db_median": 28.33274329536334
+    }
+  ],
+  "assumptions": "Periodic bandlimited interpolation of 4-sample/chip C/A; constant nav bit; exact known target response; calibrated equal channel gains; no RF/PLL. No reliability classifier.",
+  "source_sha256": "0ef1e2dcccddcf4ed74b88980a4246e51f180ee8c83e6395742befb3dd569bb7"
+}

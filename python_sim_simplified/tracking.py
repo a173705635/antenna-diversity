@@ -83,6 +83,19 @@ def estimate_cn0_db_hz(
     )
 
 
+def estimate_cn0_m2m4_db_hz(prompt_window, coherent_interval_s):
+    """Bit-insensitive moment estimate; short/noise-only windows may be invalid."""
+    if len(prompt_window) < 2:
+        return np.nan
+    power = np.abs(prompt_window)**2
+    m2 = np.mean(power)
+    signal_power = np.sqrt(max(0.0, 2*m2*m2-np.mean(power*power)))
+    noise_power = m2-signal_power
+    if signal_power <= 0 or noise_power <= 0:
+        return np.nan
+    return 10*np.log10(signal_power/(noise_power*coherent_interval_s))
+
+
 def _correlate_epoch(
     block: np.ndarray,
     sample_index: np.ndarray,
@@ -187,6 +200,9 @@ def track(
     from l5 import l5q_code, NH20, synchronize_nh
     if cfg.signal_kind not in ('L1CA', 'L5Q'):
         raise ValueError('unsupported signal kind')
+    if cfg.carrier_discriminator not in ('atan2', 'costas'):
+        raise ValueError('unsupported carrier discriminator')
+    costas = cfg.carrier_discriminator == 'costas'
     is_l5 = cfg.signal_kind == 'L5Q'
     code = l5q_code(prn) if is_l5 else ca_code(prn)
     code_length = code.size
@@ -281,11 +297,12 @@ def track(
             return {"success": False, "status": "invalid_correlation",
                     "prompt": prompt[:epoch]}
         dll_error[epoch] = (abs(early[epoch]) - abs(late[epoch])) / denominator
-        pll_error_rad[epoch] = np.angle(prompt[epoch])
+        pll_error_rad[epoch] = (.5*np.angle(prompt[epoch]**2) if costas
+                                else np.angle(prompt[epoch]))
         if state.previous_prompt is not None:
-            fll_error_hz[epoch] = np.angle(
-                prompt[epoch] * np.conj(state.previous_prompt)
-            ) / (2.0 * np.pi * epoch_duration_s)
+            product = prompt[epoch] * np.conj(state.previous_prompt)
+            delta = .5*np.angle(product**2) if costas else np.angle(product)
+            fll_error_hz[epoch] = delta / (2.0 * np.pi * epoch_duration_s)
 
         _update_tracking_loops(
             state,
@@ -311,13 +328,12 @@ def track(
         code_phase_history[epoch] = state.code_phase_chips
         window_first = max(0, epoch - cfg.cn0_window_epochs + 1)
         prompt_window = prompt[window_first : epoch + 1]
-        phase_lock_metric[epoch] = abs(np.sum(prompt_window)) / np.sum(
-            np.abs(prompt_window)
-        )
-        cn0_db_hz[epoch] = estimate_cn0_db_hz(
-            prompt_window,
-            epoch_duration_s,
-        )
+        if costas:
+            phase_lock_metric[epoch] = abs(np.sum(prompt_window**2))/np.sum(abs(prompt_window)**2)
+            cn0_db_hz[epoch] = estimate_cn0_m2m4_db_hz(prompt_window, epoch_duration_s)
+        else:
+            phase_lock_metric[epoch] = abs(np.sum(prompt_window)) / np.sum(np.abs(prompt_window))
+            cn0_db_hz[epoch] = estimate_cn0_db_hz(prompt_window, epoch_duration_s)
 
     result: TrackingResult = {
         "success": True,

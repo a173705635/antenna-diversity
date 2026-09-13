@@ -1,0 +1,7 @@
+{
+  "files_hashed": 22,
+  "records_reconstructed": 12,
+  "reported_rows": 12,
+  "metrics_per_record": 15,
+  "method": "Raw accumulated NCO, no wrap, no branch rounding, no mean subtraction."
+}

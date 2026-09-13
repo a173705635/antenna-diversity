@@ -1,0 +1,11 @@
+{
+  "archive_files_hashed": 73,
+  "report_local_links_checked": 13,
+  "report_table_rows_checked": 6,
+  "receiver_rows": 12,
+  "all_receiver_finite_epochs": 9588,
+  "all_receiver_quality_pass": 9588,
+  "python_targeted_tests": 18,
+  "upstream_tests": 137,
+  "source_acceptance_checks": 6
+}

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://www.ion.org/standards/sdrwg/schema/metadata.xsd">
+   
+   <session id="0">
+      <toa>2017-09-09T19:55:00Z</toa>
+      <position lat="52.1771936" lon="4.4900595" height="53.9"/>
+      <contact>James T. Curran</contact>
+      <campaign>HackRF Demo</campaign>
+      <scenario>Static Test</scenario>
+   </session>
+   
+   <system id="hackrf">
+      <freqbase format="MHz">10.0</freqbase>
+      <equipment>hackrf</equipment>
+      <source id="RoofAntenna">
+         <type>Patch</type>
+         <polarization>RHCP</polarization>
+         <idcluster>Antenna</idcluster>
+      </source>
+      <cluster id="Antenna"/>
+   </system>
+   
+   <band id="L1">
+      <centerfreq format="GHz">1.575420</centerfreq>
+      <translatedfreq format="kHz">420.0</translatedfreq>
+      <delaybias format="sec">0.0</delaybias>
+      <bandwidth format="MHz">10.0</bandwidth>
+   </band>
+   
+   <file>
+      <url>HackRF_Bands-L1.int8</url>
+      <timestamp>2017-09-09T19:55:00Z</timestamp>
+      <owner>GPL</owner>
+      <lane id="L1"/>
+   </file>
+   
+   <lane id="L1">
+      
+      <bandsrc idband="L1" idsrc="RoofAntenn"/>
+      <system id="hackrf"/>
+      
+      <block>
+         <cycles>0</cycles>
+         <sizeheader>0</sizeheader>
+         <sizefooter>0</sizefooter>
+         <chunk>
+            <sizeword>2</sizeword>
+            <countwords>1</countwords>
+            <endian>Big</endian>
+            <padding>Tail</padding>
+            <wordshift>Undefined</wordshift>
+            <lump>
+               
+               <stream id="L1">
+                  <ratefactor>1</ratefactor>
+                  <quantization>8</quantization>
+                  <packedbits>16</packedbits>
+                  <alignment>Right</alignment>
+                  <shift>Left</shift>
+                  <format>IQ</format>
+                  <encoding>TC</encoding>
+                  <band id="L1"/>
+               </stream>
+               
+            </lump>
+         </chunk>
+      </block>
+   </lane>
+   
+   
+</metadata>

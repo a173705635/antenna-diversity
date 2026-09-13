@@ -1,0 +1,84 @@
+{
+  "scope": "Deterministic SDCP semantics/state audit; no new RF or detector-rate claim.",
+  "wavelength_m": 0.19029367279836487,
+  "residual_cases": [
+    {
+      "case": "clean",
+      "reference_late_mean_mm": -5.551115123125783e-15,
+      "calibrated_late_abs_mean_mm": 1.5959455978986625e-14
+    },
+    {
+      "case": "startup_bias_8mm",
+      "reference_late_mean_mm": 0.0,
+      "calibrated_late_abs_mean_mm": 8.000000000000018
+    },
+    {
+      "case": "late_bias_8mm",
+      "reference_late_mean_mm": 8.000000000000007,
+      "calibrated_late_abs_mean_mm": 8.000000000000018
+    },
+    {
+      "case": "integer_jump",
+      "reference_late_mean_mm": 190.29367279836484,
+      "calibrated_late_abs_mean_mm": 1.6653345369377348e-14
+    },
+    {
+      "case": "half_jump",
+      "reference_late_mean_mm": 95.14683639918242,
+      "calibrated_late_abs_mean_mm": 95.14683639918243
+    }
+  ],
+  "state_cases": [
+    {
+      "case": "integer_jump",
+      "late_states": [
+        0
+      ],
+      "first_clear_at_or_after_650ms_s": 0.65
+    },
+    {
+      "case": "half_jump",
+      "late_states": [
+        -1
+      ],
+      "first_clear_at_or_after_650ms_s": null
+    },
+    {
+      "case": "validity_gap",
+      "late_states": [
+        0
+      ],
+      "first_clear_at_or_after_650ms_s": 0.84
+    },
+    {
+      "case": "untrusted_after_gap",
+      "late_states": [
+        -1
+      ],
+      "first_clear_at_or_after_650ms_s": null
+    }
+  ],
+  "sensitivity_not_measurements": {
+    "geometry_vector_error_bound_mm": {
+      "1": 1.3246880886531633,
+      "3": 3.973660753135144,
+      "5": 6.6214230020580045
+    },
+    "time_skew_2000hz_mm": {
+      "1": 0.38058734559672974,
+      "10": 3.8058734559672973,
+      "100": 38.05873455967297
+    },
+    "hardware_phase_5deg_mm": 2.6429676777550677
+  },
+  "notes": [
+    "valid must include caller phase-arc validation; gap recovery is not authentication",
+    "geometry bound assumes baseline or LOS angular perturbation of given size, not false alarm rate",
+    "time-skew scale uses accumulated carrier at 2000Hz; not a complete oscillator error budget"
+  ],
+  "source_sha256": {
+    "audit_sdcp_contract.py": "ee9271ad491bf7639530356ff31c76598b1c16daf4b5a0851d3922e8782e990a",
+    "sdcp.py": "c638b9d9f8e885f6bb65313dff58409795f38bd5e1d47d3f41a23d4e84b25899",
+    "sdcp_self_check.py": "29017bc8f937d7d3a52ff373779807917bd858d8597afa67a023dfc19091f2a9"
+  }
+}

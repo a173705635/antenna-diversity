@@ -1,0 +1,90 @@
+{
+  "source_url": "https://sdr.ion.org/HackRF/HackRF_Bands-L1.int8",
+  "range": [
+    0,
+    799999999
+  ],
+  "bytes": 800000000,
+  "sha256": "42276d2a31d99e3ab10dc8968d8d2643785f595b4f59501df723b99e15932aa8",
+  "prefix": {
+    "url": "https://sdr.ion.org/HackRF/HackRF_Bands-L1.int8",
+    "range": [
+      0,
+      199999999
+    ],
+    "bytes": 200000000,
+    "sha256": "220b37c6e57255483fb7858e7fab10255d7db0459d5134531ea660e9da87ca78",
+    "http_status": 206,
+    "headers": {
+      "Content-Type": "application/octet-stream",
+      "Content-Length": "200000000",
+      "Connection": "close",
+      "Date": "Sun, 13 Sep 2026 13:03:56 GMT",
+      "Last-Modified": "Tue, 21 Nov 2017 19:27:20 GMT",
+      "ETag": "\"388a166b15b040f4e4bce00f360b8f07-72\"",
+      "Accept-Ranges": "bytes",
+      "Server": "AmazonS3",
+      "Content-Range": "bytes 0-199999999/1200000000",
+      "X-Cache": "Miss from cloudfront",
+      "Via": "1.1 49d69e784c9245d879465654f12ff8ea.cloudfront.net (CloudFront)",
+      "X-Amz-Cf-Pop": "LAX54-P13",
+      "X-Amz-Cf-Id": "9QBT-vrkF3IbzAnjwahr3Q61WX6X9GQ-oBY59T5iuHogBkgW__1KoQ=="
+    }
+  },
+  "parts": [
+    {
+      "url": "https://sdr.ion.org/HackRF/HackRF_Bands-L1.int8",
+      "range": [
+        200000000,
+        299999999
+      ],
+      "bytes": 100000000,
+      "sha256": "46d992da6a2065d00dc68a5361190975b905fa922cf4b674339bedd6c39b3ec8"
+    },
+    {
+      "url": "https://sdr.ion.org/HackRF/HackRF_Bands-L1.int8",
+      "range": [
+        300000000,
+        399999999
+      ],
+      "bytes": 100000000,
+      "sha256": "267966fce8272811cf613ab6b279f829c3c14b248cea0732130f5e5887502a6c"
+    },
+    {
+      "url": "https://sdr.ion.org/HackRF/HackRF_Bands-L1.int8",
+      "range": [
+        400000000,
+        499999999
+      ],
+      "bytes": 100000000,
+      "sha256": "7dcf91c12625dca4dcf154c30867cee17677c1fabbc87231d03d535d32adf9f9"
+    },
+    {
+      "url": "https://sdr.ion.org/HackRF/HackRF_Bands-L1.int8",
+      "range": [
+        500000000,
+        599999999
+      ],
+      "bytes": 100000000,
+      "sha256": "d3220029f1be7a66424175c728a78b256261f026db1dff78d8ee26feeecf9163"
+    },
+    {
+      "url": "https://sdr.ion.org/HackRF/HackRF_Bands-L1.int8",
+      "range": [
+        600000000,
+        699999999
+      ],
+      "bytes": 100000000,
+      "sha256": "e5a202d6e568f97289f8113c53d190950ef1a36d0c7eec3c3c35917f4acafc56"
+    },
+    {
+      "url": "https://sdr.ion.org/HackRF/HackRF_Bands-L1.int8",
+      "range": [
+        700000000,
+        799999999
+      ],
+      "bytes": 100000000,
+      "sha256": "24e6b13a20b2b0da483b7ae8cc1769dee2fd47e6ac5edea1e758896d81a69718"
+    }
+  ]
+}

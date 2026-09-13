@@ -1,0 +1,167 @@
+{
+  "scope": "Independent-event spatial spoofing evidence; model only, not receiver data.",
+  "threshold": 0.19328163509973767,
+  "calibration_seed": 9100,
+  "calibration_events": 5000,
+  "rows": [
+    {
+      "case": "los",
+      "baseline_m": 0.0759,
+      "noise_m": 0.003,
+      "seed": 9200,
+      "events": 5000,
+      "alerts": 42,
+      "fraction": 0.0084,
+      "wilson95": [
+        0.006220654387306615,
+        0.011334150165073551
+      ],
+      "median_score": 0.6366249474645778
+    },
+    {
+      "case": "all_spoof",
+      "baseline_m": 0.0759,
+      "noise_m": 0.003,
+      "seed": 9201,
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0000000000000002
+      ],
+      "median_score": 0.01692870694901972
+    },
+    {
+      "case": "partial_2",
+      "baseline_m": 0.0759,
+      "noise_m": 0.003,
+      "seed": 9202,
+      "events": 5000,
+      "alerts": 69,
+      "fraction": 0.0138,
+      "wilson95": [
+        0.010919427213083529,
+        0.01742708615829002
+      ],
+      "median_score": 0.6093897412468854
+    },
+    {
+      "case": "partial_4",
+      "baseline_m": 0.0759,
+      "noise_m": 0.003,
+      "seed": 9203,
+      "events": 5000,
+      "alerts": 375,
+      "fraction": 0.075,
+      "wilson95": [
+        0.06802108498396975,
+        0.0826314616693288
+      ],
+      "median_score": 0.44758889347328124
+    },
+    {
+      "case": "partial_6",
+      "baseline_m": 0.0759,
+      "noise_m": 0.003,
+      "seed": 9204,
+      "events": 5000,
+      "alerts": 1779,
+      "fraction": 0.3558,
+      "wilson95": [
+        0.3426451674461376,
+        0.369176237794817
+      ],
+      "median_score": 0.24683636919014684
+    },
+    {
+      "case": "two_sources",
+      "baseline_m": 0.0759,
+      "noise_m": 0.003,
+      "seed": 9205,
+      "events": 5000,
+      "alerts": 2053,
+      "fraction": 0.4106,
+      "wilson95": [
+        0.397037988901656,
+        0.4242992762061204
+      ],
+      "median_score": 0.2834490029176572
+    },
+    {
+      "case": "bias_spoof",
+      "baseline_m": 0.0759,
+      "noise_m": 0.003,
+      "seed": 9206,
+      "events": 5000,
+      "alerts": 141,
+      "fraction": 0.0282,
+      "wilson95": [
+        0.023961128241689122,
+        0.03316327531366678
+      ],
+      "median_score": 0.5122335878498443
+    },
+    {
+      "case": "concentrated_los",
+      "baseline_m": 0.0759,
+      "noise_m": 0.003,
+      "seed": 9207,
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0000000000000002
+      ],
+      "median_score": 0.017483086513663267
+    },
+    {
+      "case": "los",
+      "baseline_m": 0.01,
+      "noise_m": 0.003,
+      "seed": 9208,
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0000000000000002
+      ],
+      "median_score": 0.05246639759027533
+    },
+    {
+      "case": "single_mp_los",
+      "baseline_m": 0.0759,
+      "noise_m": 0.003,
+      "seed": 9209,
+      "events": 5000,
+      "alerts": 35,
+      "fraction": 0.007,
+      "wilson95": [
+        0.005037635094103144,
+        0.009719319023723182
+      ],
+      "median_score": 0.6470578126097655
+    },
+    {
+      "case": "all_spoof",
+      "baseline_m": 0.0759,
+      "noise_m": 0.02,
+      "seed": 9210,
+      "events": 5000,
+      "alerts": 0,
+      "fraction": 0.0,
+      "wilson95": [
+        0.0,
+        0.0007677019450571244
+      ],
+      "median_score": 0.5033851255864232
+    }
+  ],
+  "decision": "100ms block mean circular dispersion below frozen threshold; suspected common source only",
+  "source_sha256": {
+    "audit_spoofing_model.py": "012cea2b3b0f174e4ee49db587eb15ab55503778d9f47fab29dff22cbb30e51c",
+    "spoofing.py": "d7c0fdeeb5c87078b9f7c5564e47d7448a46bb61b91d5e08c83451169e27dabd"
+  }
+}

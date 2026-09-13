@@ -1,0 +1,13 @@
+{
+  "arch": "x86_64",
+  "etag": "\"94655fb8cd988d78f9b9c52afb7dadd7\"",
+  "extension": "zip",
+  "kind": "archive",
+  "last-modified": "Sun, 16 Aug 2026 13:33:04 GMT",
+  "os": "winnt",
+  "sha256": "88177b1089a01f5254454ecbda888542d6038aba4d017a4bf8bc860322d7f9de",
+  "size": 183434216,
+  "triplet": "x86_64-w64-mingw32",
+  "url": "https://julialang-s3.julialang.org/bin/winnt/x64/1.10/julia-1.10.12-win64.zip",
+  "version": "1.10.12"
+}

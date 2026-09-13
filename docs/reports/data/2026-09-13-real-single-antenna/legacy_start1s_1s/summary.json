@@ -1,0 +1,268 @@
+{
+  "rows": [
+    {
+      "prn": 2,
+      "acquisition": {
+        "success": true,
+        "prn": 2,
+        "doppler_hz": -1000.0,
+        "code_phase_samples": 904,
+        "peak": 177796241.10850695,
+        "second_peak": 28705362.611348223,
+        "second_peak_code_phase_samples": 3807,
+        "exclusion_samples": 5,
+        "metric": 6.193833658043321,
+        "samples_per_ms": 5000,
+        "coherent_samples": 5000
+      },
+      "tracking": {
+        "status": "tracking",
+        "epochs": 995,
+        "start_s": 0.0041808,
+        "end_s": 0.9981808,
+        "evaluated_epochs": 499,
+        "evaluation_start_s": 0.5,
+        "finite_nco": true,
+        "pll_rms_rad": 0.6591214779202536,
+        "bit_insensitive_phase_rms_rad": 0.39614831482565677,
+        "bit_insensitive_lock": 0.7614950241765812,
+        "legacy_lock_median": 0.9888384287430162,
+        "m2m4_cn0_db_hz": 46.17165167346876,
+        "dll_rms_chips_normalized": 0.06725886405911244,
+        "doppler_median_hz": -892.1778217563098,
+        "doppler_std_hz": 16.58154251948605
+      }
+    },
+    {
+      "prn": 5,
+      "acquisition": {
+        "success": true,
+        "prn": 5,
+        "doppler_hz": 3000.0,
+        "code_phase_samples": 4078,
+        "peak": 289800436.11614454,
+        "second_peak": 20513966.08310103,
+        "second_peak_code_phase_samples": 2038,
+        "exclusion_samples": 5,
+        "metric": 14.126982317421104,
+        "samples_per_ms": 5000,
+        "coherent_samples": 5000
+      },
+      "tracking": {
+        "status": "tracking",
+        "epochs": 995,
+        "start_s": 0.0048156,
+        "end_s": 0.9988156,
+        "evaluated_epochs": 499,
+        "evaluation_start_s": 0.5,
+        "finite_nco": true,
+        "pll_rms_rad": 0.6414333464773553,
+        "bit_insensitive_phase_rms_rad": 0.3842384266110713,
+        "bit_insensitive_lock": 0.7669418850849062,
+        "legacy_lock_median": 0.9937511021659399,
+        "m2m4_cn0_db_hz": 47.69633840751757,
+        "dll_rms_chips_normalized": 0.05594248628054878,
+        "doppler_median_hz": 2921.30175340486,
+        "doppler_std_hz": 16.670682805787756
+      }
+    },
+    {
+      "prn": 6,
+      "acquisition": {
+        "success": true,
+        "prn": 6,
+        "doppler_hz": -3500.0,
+        "code_phase_samples": 2644,
+        "peak": 149476448.36404985,
+        "second_peak": 16660677.801606476,
+        "second_peak_code_phase_samples": 4618,
+        "exclusion_samples": 5,
+        "metric": 8.971810759682109,
+        "samples_per_ms": 5000,
+        "coherent_samples": 5000
+      },
+      "tracking": {
+        "status": "tracking",
+        "epochs": 995,
+        "start_s": 0.0045288,
+        "end_s": 0.9985288,
+        "evaluated_epochs": 499,
+        "evaluation_start_s": 0.5,
+        "finite_nco": true,
+        "pll_rms_rad": 0.6600090503651597,
+        "bit_insensitive_phase_rms_rad": 0.4020286753489607,
+        "bit_insensitive_lock": 0.7619226408884909,
+        "legacy_lock_median": 0.9864345967904148,
+        "m2m4_cn0_db_hz": 45.67507547416681,
+        "dll_rms_chips_normalized": 0.07597073011807193,
+        "doppler_median_hz": -3397.2336530117,
+        "doppler_std_hz": 15.63230613029328
+      }
+    },
+    {
+      "prn": 7,
+      "acquisition": {
+        "success": true,
+        "prn": 7,
+        "doppler_hz": 750.0,
+        "code_phase_samples": 1285,
+        "peak": 406358156.6464029,
+        "second_peak": 24790756.263261624,
+        "second_peak_code_phase_samples": 2093,
+        "exclusion_samples": 5,
+        "metric": 16.391519174774054,
+        "samples_per_ms": 5000,
+        "coherent_samples": 5000
+      },
+      "tracking": {
+        "status": "tracking",
+        "epochs": 995,
+        "start_s": 0.004257,
+        "end_s": 0.998257,
+        "evaluated_epochs": 499,
+        "evaluation_start_s": 0.5,
+        "finite_nco": true,
+        "pll_rms_rad": 0.6409251014944135,
+        "bit_insensitive_phase_rms_rad": 0.3873038948880292,
+        "bit_insensitive_lock": 0.7785551863041923,
+        "legacy_lock_median": 0.9959928481212942,
+        "m2m4_cn0_db_hz": 50.96410120784964,
+        "dll_rms_chips_normalized": 0.03340559570929824,
+        "doppler_median_hz": 830.4453878339615,
+        "doppler_std_hz": 16.25415624040729
+      }
+    },
+    {
+      "prn": 9,
+      "acquisition": {
+        "success": true,
+        "prn": 9,
+        "doppler_hz": -2250.0,
+        "code_phase_samples": 2942,
+        "peak": 589927503.1847386,
+        "second_peak": 16389501.941917945,
+        "second_peak_code_phase_samples": 4055,
+        "exclusion_samples": 5,
+        "metric": 35.99423004282604,
+        "samples_per_ms": 5000,
+        "coherent_samples": 5000
+      },
+      "tracking": {
+        "status": "tracking",
+        "epochs": 995,
+        "start_s": 0.0045884,
+        "end_s": 0.9985884,
+        "evaluated_epochs": 499,
+        "evaluation_start_s": 0.5,
+        "finite_nco": true,
+        "pll_rms_rad": 0.6527822462001923,
+        "bit_insensitive_phase_rms_rad": 0.3834721374145147,
+        "bit_insensitive_lock": 0.7851752961076859,
+        "legacy_lock_median": 0.9966530841764122,
+        "m2m4_cn0_db_hz": 52.871955461538356,
+        "dll_rms_chips_normalized": 0.02937505257554252,
+        "doppler_median_hz": -2214.45033686276,
+        "doppler_std_hz": 15.649697250444254
+      }
+    },
+    {
+      "prn": 13,
+      "acquisition": {
+        "success": true,
+        "prn": 13,
+        "doppler_hz": 3500.0,
+        "code_phase_samples": 4162,
+        "peak": 76624449.73736918,
+        "second_peak": 19664077.88313542,
+        "second_peak_code_phase_samples": 4944,
+        "exclusion_samples": 5,
+        "metric": 3.8966713920048552,
+        "samples_per_ms": 5000,
+        "coherent_samples": 5000
+      },
+      "tracking": {
+        "status": "tracking",
+        "epochs": 995,
+        "start_s": 0.0048324,
+        "end_s": 0.9988324,
+        "evaluated_epochs": 499,
+        "evaluation_start_s": 0.5,
+        "finite_nco": true,
+        "pll_rms_rad": 0.6893887514597347,
+        "bit_insensitive_phase_rms_rad": 0.42510327024900774,
+        "bit_insensitive_lock": 0.7124395935525011,
+        "legacy_lock_median": 0.9765850891230717,
+        "m2m4_cn0_db_hz": 43.33879251702909,
+        "dll_rms_chips_normalized": 0.09472004167671312,
+        "doppler_median_hz": 3485.2303983071024,
+        "doppler_std_hz": 17.435006872923623
+      }
+    },
+    {
+      "prn": 29,
+      "acquisition": {
+        "success": true,
+        "prn": 29,
+        "doppler_hz": -1000.0,
+        "code_phase_samples": 1393,
+        "peak": 129082793.17715073,
+        "second_peak": 19884846.333863094,
+        "second_peak_code_phase_samples": 508,
+        "exclusion_samples": 5,
+        "metric": 6.491515750731647,
+        "samples_per_ms": 5000,
+        "coherent_samples": 5000
+      },
+      "tracking": {
+        "status": "tracking",
+        "epochs": 995,
+        "start_s": 0.0042786,
+        "end_s": 0.9982786,
+        "evaluated_epochs": 499,
+        "evaluation_start_s": 0.5,
+        "finite_nco": true,
+        "pll_rms_rad": 0.6605839481570296,
+        "bit_insensitive_phase_rms_rad": 0.40162154770376285,
+        "bit_insensitive_lock": 0.7760204800587561,
+        "legacy_lock_median": 0.9901357584467918,
+        "m2m4_cn0_db_hz": 45.22757704812616,
+        "dll_rms_chips_normalized": 0.06588484560444145,
+        "doppler_median_hz": -1127.1651849904374,
+        "doppler_std_hz": 14.566815954942971
+      }
+    },
+    {
+      "prn": 30,
+      "acquisition": {
+        "success": true,
+        "prn": 30,
+        "doppler_hz": 3000.0,
+        "code_phase_samples": 4298,
+        "peak": 574925825.2027788,
+        "second_peak": 18002831.719349,
+        "second_peak_code_phase_samples": 456,
+        "exclusion_samples": 5,
+        "metric": 31.935299633160636,
+        "samples_per_ms": 5000,
+        "coherent_samples": 5000
+      },
+      "tracking": {
+        "status": "tracking",
+        "epochs": 995,
+        "start_s": 0.0048596,
+        "end_s": 0.9988596,
+        "evaluated_epochs": 499,
+        "evaluation_start_s": 0.5,
+        "finite_nco": true,
+        "pll_rms_rad": 0.6480263660317521,
+        "bit_insensitive_phase_rms_rad": 0.38219140074532787,
+        "bit_insensitive_lock": 0.7853573802566446,
+        "legacy_lock_median": 0.9969608233375472,
+        "m2m4_cn0_db_hz": 51.99772252716934,
+        "dll_rms_chips_normalized": 0.02915546101777754,
+        "doppler_median_hz": 2892.695046940652,
+        "doppler_std_hz": 15.5914570560091
+      }
+    }
+  ]
+}
