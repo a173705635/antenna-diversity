@@ -27,7 +27,7 @@ def test_sdcp_pvt_geometry_and_unknown_phase_constants_cancel():
         ranges=np.linalg.norm(states-receiver_reference()[0]-channel*BASELINE,axis=2)+75000
         histories=[]
         for k in range(8):
-            histories.append({'tracking_status':'tracking', 'epoch_start_samples':starts,
+            histories.append({'acquired':True, 'tracking_status':'tracking', 'epoch_start_samples':starts,
                 'carrier_nco_phase_rad':-2*np.pi*(ranges[:,k]+channel*(k+1)*17.13)/WAVELENGTH,
                 'carrier_nco_frequency_hz':np.zeros(len(times))})
         pair.append({'time_s':times,'pseudoranges_m':ranges,'fs_dfe_hz':6.6e6,'satellite_tracking':histories})

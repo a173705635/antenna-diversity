@@ -34,7 +34,7 @@ def main():
             del scene
             save(key+'.json',r)
             records[key] = r
-            phases[key] = np.column_stack([carrier_range(dict(h,success=h.get('tracking_status')=='tracking'),
+            phases[key] = np.column_stack([carrier_range(dict(h,success=(h['acquired'] and h['tracking_status'] == 'tracking')),
                 r['time_s'],r['fs_dfe_hz'],.001,299792458/freq) for h in r['satellite_tracking']])
     t = np.asarray(records['L1CA_0']['time_s'])
     if not all(np.array_equal(t,r['time_s']) for r in records.values()):

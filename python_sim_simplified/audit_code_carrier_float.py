@@ -7,6 +7,7 @@ from pathlib import Path
 
 import numpy as np
 
+from positioning import PositioningFailure
 from positioning import carrier_range, solve_code_carrier_float
 from run_gps_spp import serializable
 
@@ -42,7 +43,7 @@ def analyze(data, manifest, code_sigma_m, phase_sigma_m, controls=False):
     code = np.array(data['pseudoranges_m'], dtype=float)
     histories = data['satellite_tracking']
     phase = np.column_stack([carrier_range(
-        {**h, 'success': h.get('tracking_status') == 'tracking'}, times,
+        {**h, 'success': (h['acquired'] and h['tracking_status'] == 'tracking')}, times,
         data['fs_dfe_hz'], manifest['tracking_config']['coherent_ms']*.001,
         299792458./manifest['signal_config_last_prn']['carrier_hz']) for h in histories])
     states = np.array([[np.array(s['position_m'])+t*np.array(s['velocity_mps'])
@@ -57,7 +58,7 @@ def analyze(data, manifest, code_sigma_m, phase_sigma_m, controls=False):
         try:
             solution = solve_code_carrier_float(states[indices], code[indices], phase[indices],
                                                code_sigma_m, phase_sigma_m)
-        except ValueError as exc:
+        except PositioningFailure as exc:
             arcs.append({'indices': indices, 'status': 'solver_failed', 'reason': str(exc)})
             continue
         peak = float(np.max(np.abs(solution['carrier_residual_m'])))

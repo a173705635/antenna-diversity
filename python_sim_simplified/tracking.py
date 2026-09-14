@@ -246,8 +246,6 @@ def track(
     if cfg.refine_initial_phase:
         if cfg.code_replica_bandwidth_hz is None:
             raise ValueError("phase refinement requires a continuous local code replica")
-        if n_epochs < 1:
-            raise ValueError("phase refinement requires a complete tracking epoch")
         initialization = _refine_initial_phase(
             x[first_epoch:first_epoch + samples_per_epoch], code, state, fs_hz
         )

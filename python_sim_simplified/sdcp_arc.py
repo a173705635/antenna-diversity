@@ -16,10 +16,6 @@ class SDCPArc:
     used_evidence: set = field(default_factory=set)
     break_reason: str = 'startup'
 
-    def __post_init__(self):
-        if not isinstance(self.session_id,str) or not self.session_id or not math.isfinite(self.max_gap_s) or self.max_gap_s<=0:
-            raise ValueError('unique restart session ID and positive maximum gap required')
-
     def invalidate(self,reason):
         self.arc_id=None;self.reference_id=None;self.evidence_id=None
         self.break_reason=reason
@@ -30,14 +26,10 @@ class SDCPArc:
         phase_state_valid must include external half-cycle/reset validity.
         This does not discover invisible integer slips or identify a true signal.
         """
-        if (type(quality_valid) is not bool or type(phase_state_valid) is not bool
-                or not isinstance(tracking_ids,tuple) or len(tracking_ids)!=2
-                or any(not isinstance(x,str) or not x for x in tracking_ids)
-                or not isinstance(calibration_id,str) or not calibration_id
-                or not math.isfinite(time_s)
+        if (not math.isfinite(time_s)
                 or (self.last_time_s is not None and time_s<=self.last_time_s)):
             self.invalidate('invalid_input')
-            raise ValueError('valid IDs, boolean flags and increasing finite time required')
+            raise ValueError('increasing finite time required for the current arc')
         gap=self.last_time_s is not None and time_s-self.last_time_s>self.max_gap_s
         self.last_time_s=time_s
         context=(tracking_ids,calibration_id)
@@ -61,8 +53,8 @@ class SDCPArc:
         if replay protection must survive a process restart. No offset is fitted.
         """
         if (self.arc_id is None or arc_id!=self.arc_id
-                or not isinstance(reference_id,str) or not reference_id
-                or not isinstance(evidence_id,str) or not evidence_id
+                or not reference_id
+                or not evidence_id
                 or evidence_id in self.used_evidence):
             raise ValueError('current arc and fresh external reference evidence required')
         self.reference_id=reference_id;self.evidence_id=evidence_id

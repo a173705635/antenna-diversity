@@ -10,6 +10,7 @@ import numpy as np
 
 from acquisition import acquire
 from dfe import process_dfe
+from positioning import PositioningFailure
 from positioning import code_pseudorange, carrier_range, solve_position, solve_code_carrier_float
 from rf import process_rf
 from tracking import track
@@ -69,7 +70,7 @@ def summarize(name, observations, times, satellites, reference, clock_bias, posi
             valid = np.isfinite(p)
             try:
                 positions[k] = solve_position(s[valid], p[valid])['position_m']
-            except ValueError as exc:
+            except PositioningFailure as exc:
                 failures.append({'index': k, 'reason': str(exc)})
         result['spp'] = error_summary(positions, reference)
         result['spp_positions_m'] = positions
@@ -81,7 +82,7 @@ def summarize(name, observations, times, satellites, reference, clock_bias, posi
                 result['joint_float'] = error_summary(joint['position_m'], reference)
                 result['joint_positions_m'] = joint['position_m']
                 result['joint_max_carrier_residual_m'] = float(np.max(np.abs(joint['carrier_residual_m'])))
-            except ValueError as exc:
+            except PositioningFailure as exc:
                 result['joint_failure'] = str(exc)
     return result
 

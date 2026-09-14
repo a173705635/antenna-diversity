@@ -11,6 +11,7 @@ from pathlib import Path
 import numpy as np
 
 from config import SPEED_OF_LIGHT_MPS
+from positioning import PositioningFailure
 from positioning import carrier_range, solve_position, solve_code_carrier_float
 from run_gps_spp import build_scene, satellite_setup, run_record, receiver_reference, serializable
 
@@ -38,7 +39,7 @@ def compare(records, satellites, weights=None):
         codes[kind] = np.asarray(record['pseudoranges_m'], dtype=float)
         phases[kind] = np.full_like(codes[kind], np.nan)
         for column, history in enumerate(record['satellite_tracking']):
-            if history.get('tracking_status') == 'tracking':
+            if (history['acquired'] and history['tracking_status'] == 'tracking'):
                 phases[kind][:, column] = carrier_range(dict(history, success=True), times,
                     record['fs_dfe_hz'], .001, SPEED_OF_LIGHT_MPS/frequency)
         phases[kind][~np.isfinite(codes[kind])] = np.nan
@@ -58,13 +59,14 @@ def compare(records, satellites, weights=None):
         if name == 'L5_code_dual_phase':
             cs[:len(satellites)] = np.inf
         positions = np.full((len(times), 3), np.nan)
+        code_failures = []
         for i in range(len(times)):
             valid = np.isfinite(p[i])
             try:
                 positions[i] = solve_position(geometry[i, valid], p[i, valid], sigma_m=cs[valid])['position_m']
-            except ValueError:
-                pass
-        result = {'code': position_stats(positions), 'code_position_ecef_m': positions,
+            except PositioningFailure as exc:
+                code_failures.append({'index': i, 'reason': str(exc)})
+        result = {'code_failures': code_failures, 'code': position_stats(positions), 'code_position_ecef_m': positions,
                   'observation_labels': [f'{k}:PRN{s["prn"]}' for k in kinds for s in satellites]}
         # Offline float ambiguities are independent per satellite AND frequency.
         # Do not bridge missing epochs or silently supply truth for rejected data.
@@ -75,7 +77,7 @@ def compare(records, satellites, weights=None):
                 result['float_solution'] = solution
                 result['carrier_postfit_max_m'] = float(abs(solution['carrier_residual_m']).max())
                 result['phase_residual_screen_passed'] = result['carrier_postfit_max_m'] <= .05
-            except ValueError as exc:
+            except PositioningFailure as exc:
                 result['float_failure'] = str(exc)
         else:
             result['float_failure'] = 'incomplete continuous common arc'

@@ -33,7 +33,7 @@ def main():
     for record in [pair[0],low]:
         columns=[]
         for h in record['satellite_tracking']:
-            if h.get('tracking_status')!='tracking':columns.append(np.full(len(t),np.nan))
+            if (not h['acquired'] or h['tracking_status'] != 'tracking'):columns.append(np.full(len(t),np.nan))
             else:columns.append(carrier_range(dict(h,success=True),t,record['fs_dfe_hz'],.001,WAVELENGTH))
         phases.append(np.column_stack(columns))
     r=(-(phases[1]-phases[0])-g+WAVELENGTH/2)%WAVELENGTH-WAVELENGTH/2

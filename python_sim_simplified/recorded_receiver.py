@@ -1,4 +1,7 @@
-"""Reusable offline recorded GPS L1 receiver, independent of audit scripts."""
+"""Reusable offline recorded GPS L1 receiver, independent of audit scripts.
+
+Experiments supply complete interleaved IQ byte pairs and an in-range sample window.
+"""
 from pathlib import Path
 from dataclasses import asdict
 import json
@@ -10,16 +13,12 @@ from acquisition import acquire
 from tracking import track
 from gps_lnav import decode_lnav
 from gps_observables import transmit_time, solve_gps_epoch
+from positioning import PositioningFailure
 from positioning import carrier_range
 from config import SPEED_OF_LIGHT_MPS as C
 
 
 def read_iq8(path, start_sample, count):
-    size = Path(path).stat().st_size
-    if size % 2:
-        raise ValueError('IQ file must contain complete byte pairs')
-    if start_sample < 0 or count < 1 or (start_sample+count)*2 > size:
-        raise ValueError('requested sample window is outside the recording')
     raw = np.fromfile(path, dtype=np.int8, offset=start_sample*2, count=count*2)
     return raw[::2].astype(np.float32) + 1j*raw[1::2].astype(np.float32)
 
@@ -29,12 +28,9 @@ def prepare_recording(path, cache_path, *, start_sample, sample_count,
     """Read once into a disk-backed DFE output; input sample units stay explicit."""
     path=Path(path);cache_path=Path(cache_path)
     if cache_path.exists():raise ValueError('refusing to overwrite an existing DFE cache')
-    if path.stat().st_size%2 or start_sample<0 or sample_count<1 or (start_sample+sample_count)*2>path.stat().st_size:
-        raise ValueError('invalid IQ file window')
     h,info=design_decimator(fs_hz,dfe_config.decimation,dfe_config.cutoff_hz,dfe_config.num_taps)
     delay=info['group_delay_input_samples']
     count=len(range(delay,sample_count,dfe_config.decimation))
-    if count<1:raise ValueError('recording shorter than DFE group delay')
     cache_path.parent.mkdir(parents=True,exist_ok=True)
     out=np.memmap(cache_path,dtype='<c16',mode='w+',shape=(1,count))
     digest=hashlib.sha256();sum_i=sum_q=sum_power=0.;rails=0
@@ -44,7 +40,6 @@ def prepare_recording(path, cache_path, *, start_sample, sample_count,
             f.seek(start_sample*2);remaining=sample_count
             while remaining:
                 n=min(block_samples,remaining);data=f.read(n*2)
-                if len(data)!=n*2:raise ValueError('truncated IQ while reading')
                 digest.update(data);raw=np.frombuffer(data,dtype='i1')
                 i=raw[::2].astype(float);q=raw[1::2].astype(float)
                 sum_i+=i.sum();sum_q+=q.sum();sum_power+=np.sum(i*i+q*q)
@@ -65,7 +60,6 @@ def prepare_recording(path, cache_path, *, start_sample, sample_count,
 
 def receive_channels(baseband, fs_hz, prns, acquisition_config, tracking_config, *, acquisition_only=False):
     """Yield independent GPS L1 channels from one common baseband stream."""
-    if np.asarray(baseband).ndim!=1:raise ValueError('one antenna stream required')
     for prn in prns:
         a=acquire(baseband,fs_hz,prn,1.023e6,acquisition_config)
         row={'prn':prn,'acquisition':{k:v for k,v in a.items() if k not in ('search_power','doppler_bins_hz')}}
@@ -81,7 +75,6 @@ def position_channels(channels, fs_hz, times_s, *, common_travel_s=.075):
     near its end can be used earlier. No receiver reference position is input.
     """
     times=np.asarray(times_s,float)
-    if len(times)==0:return {'status':'no_query_times','epochs':[]}
     usable={};navigation={};carriers={}
     for prn,h in channels.items():
         nav=decode_lnav(h,fs_hz);navigation[prn]=nav
@@ -104,7 +97,7 @@ def position_channels(channels, fs_hz, times_s, *, common_travel_s=.075):
             prns.append(prn);ephemerides.append(eph);txs.append(tx[k])
         if len(prns)<4:epochs.append({'sample_time_s':float(t),'status':'insufficient_tracking_quality'});continue
         try:solution=solve_gps_epoch(ephemerides,txs,origin+t-times[0])
-        except ValueError as e:epochs.append({'sample_time_s':float(t),'status':str(e)});continue
+        except PositioningFailure as e:epochs.append({'sample_time_s':float(t),'status':str(e)});continue
         epochs.append({'sample_time_s':float(t),'status':'position','prns':prns,
                        'transmit_tow_s':txs,
                        'carrier_range_m':[float(carriers[prn][k]) for prn in prns],

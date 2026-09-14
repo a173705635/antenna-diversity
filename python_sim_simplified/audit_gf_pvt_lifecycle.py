@@ -10,6 +10,7 @@ from pathlib import Path
 import numpy as np
 from audit_sdcp_positioning import BASELINE
 from gf_runtime import GFRuntime
+from positioning import PositioningFailure
 from positioning import solve_position
 from run_gps_spp import receiver_reference, serializable
 
@@ -40,7 +41,7 @@ def main():
         for mode in ['base','conditional_confirmed','calibration_outage','unconfirmed']:
             runtimes=[GFRuntime(.025,.25) for _ in sats]
             weights=np.ones(residual.shape); labels=np.full(residual.shape,-1)
-            errors=[]
+            errors=[]; failures=[]
             for k,time in enumerate(t):
                 for j,runtime in enumerate(runtimes):
                     if mode=='base': continue
@@ -58,10 +59,12 @@ def main():
                 try:
                     solution=solve_position(geometry[valid],codes[k,valid],sigma_m=sigma[valid])
                     errors.append(float(np.linalg.norm(solution['position_m']-reference)))
-                except ValueError: errors.append(float('nan'))
+                except PositioningFailure as exc:
+                    errors.append(float('nan'))
+                    failures.append({'index': k, 'reason': str(exc)})
             e=np.asarray(errors); good=np.isfinite(e)
             item={'solved':int(good.sum()),'epochs':len(t),'error_m':e,
-                  'multipliers':weights,'state':labels}
+                  'multipliers':weights,'state':labels,'failures':failures}
             if good.any(): item.update(rms_m=float(np.sqrt(np.mean(e[good]**2))),
                 p95_m=float(np.quantile(e[good],.95)),max_m=float(e[good].max()))
             results[mode]=item

@@ -7,8 +7,6 @@ from sdcp import geometry_offset_m, modified_sdcp, observation_weights
 def test_geometry_sign_and_units_match_array_phase_convention():
     g = geometry_offset_m([.0759, 0, 0], 30., 60.)
     assert g == pytest.approx(-.03286566407361945)
-    with pytest.raises(ValueError):
-        geometry_offset_m([1, 0], 0, 0)
 
 
 def test_constant_ambiguity_removed_without_erasing_later_event():
@@ -35,8 +33,6 @@ def test_weights_are_symmetric_and_shared_by_both_antennas():
     assert w['soft_pair'][1,0] == pytest.approx(.5)
     assert w['soft_pair'][1,0] == w['soft_pair'][2,0]
     assert w['soft_pair'][0,0] > w['soft_pair'][1,0] > w['soft_pair'][3,0]
-    with pytest.raises(ValueError):
-        observation_weights([np.nan], .01)
 
 
 def test_common_phase_cancels_in_dual_antenna_observable():

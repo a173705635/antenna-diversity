@@ -23,7 +23,7 @@ def evaluate(pair, threshold):
     for r in pair:
         if not np.array_equal(t, r['time_s']): raise ValueError('time mismatch')
         if [h['prn'] for h in r['satellite_tracking']] != list(range(1, 9)): raise ValueError('PRN mismatch')
-        phase.append(np.column_stack([carrier_range(dict(h, success=h.get('tracking_status') == 'tracking'),
+        phase.append(np.column_stack([carrier_range(dict(h, success=(h['acquired'] and h['tracking_status'] == 'tracking')),
             t, r['fs_dfe_hz'], .001, W) for h in r['satellite_tracking']]))
         valid &= np.isfinite(np.asarray(r['pseudoranges_m'], float))
     windows = window_evidence(t, *phase, valid, threshold, W)

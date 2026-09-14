@@ -17,12 +17,6 @@ class GFRuntime:
     context: tuple | None = None
     approved: bool = False
 
-    def __post_init__(self):
-        if not math.isfinite(self.max_gap_s) or self.max_gap_s <= 0:
-            raise ValueError('positive maximum gap required')
-        if not math.isfinite(self.anomaly_multiplier) or not 0 < self.anomaly_multiplier <= 1:
-            raise ValueError('anomaly multiplier must be in (0, 1]')
-
     def step(self, time_s, residual_m, threshold_m, *, valid, arc_id,
              calibration_id, calibration_valid, nuisance_bound_m,
              branch_confirmation=None):
@@ -32,21 +26,16 @@ class GFRuntime:
         change, including receiver restart. Valid calibration includes its
         temperature/gain/frequency/age envelope. No automatic reapproval occurs.
         """
-        if type(valid) is not bool or type(calibration_valid) is not bool:
-            raise ValueError('boolean validity flags required')
         if not math.isfinite(time_s) or (self.last_time_s is not None and time_s <= self.last_time_s):
             self.approved = False
             raise ValueError('strictly increasing finite time required')
-        if not math.isfinite(threshold_m) or threshold_m <= 0:
-            self.approved = False
-            raise ValueError('positive threshold required')
         gap = self.last_time_s is not None and time_s-self.last_time_s > self.max_gap_s
         self.last_time_s = time_s
         context = (arc_id, calibration_id)
         changed = context != self.context
         self.context = context
-        ready = (valid and calibration_valid and isinstance(arc_id,str) and bool(arc_id)
-                 and isinstance(calibration_id,str) and bool(calibration_id)
+        ready = (valid and calibration_valid and bool(arc_id)
+                 and bool(calibration_id)
                  and math.isfinite(residual_m) and math.isfinite(nuisance_bound_m)
                  and nuisance_bound_m >= 0)
         if changed or gap or not ready:

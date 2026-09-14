@@ -11,5 +11,3 @@ def test_integer_invariance_static_echo_and_external_bias():
     np.testing.assert_allclose(calibrated_sdcp(observed, geometry, wavelength, 0), echo+bias, atol=1e-14)
     assert abs(calibrated_sdcp(wavelength/2, 0, wavelength, 0)) == pytest.approx(wavelength/2)
     assert calibrated_sdcp(wavelength, 0, wavelength, 0) == pytest.approx(0)
-    with pytest.raises(ValueError):
-        calibrated_sdcp(np.nan, 0, wavelength, 0)

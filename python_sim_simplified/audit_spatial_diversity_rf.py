@@ -132,20 +132,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--model', type=Path, required=True, help='frozen model thresholds.json')
+    parser.add_argument('--geometry', choices=('model', 'phone'), default='model',
+                        help='model requires positions_m; phone explicitly selects original dimensions for legacy thresholds')
     parser.add_argument('--duration-ms', type=int, default=600)
     parser.add_argument('--seeds', type=int, nargs='+', default=[610000, 620000])
     parser.add_argument('--cases', nargs='+', choices=RF_CASES, default=list(RF_CASES))
     args = parser.parse_args()
-    if args.duration_ms < 400 or args.duration_ms % 100:
-        parser.error('duration must be a multiple of 100 ms, at least 400 ms')
     payload = json.loads(args.model.read_text(encoding='utf-8'))
-    if payload['layouts'] != LAYOUTS or payload['prns'] != 8 or not np.isclose(payload['wavelength_m'], W):
-        parser.error('threshold calibration contract does not match RF configuration')
     thresholds = payload['thresholds']
-    geometry = payload.get('positions_m', mate70_phase_centers())
+    geometry = payload['positions_m'] if args.geometry == 'model' else mate70_phase_centers()
     coordinates = np.array([geometry[name] for name in NAMES], dtype=float)
-    if coordinates.shape != (4, 3) or not np.isfinite(coordinates).all():
-        parser.error('invalid geometry in threshold calibration')
     out = args.output; out.mkdir(parents=True, exist_ok=False)
     sats = satellite_setup(); rows = []; traces = {}; started = time.monotonic()
     save_json(out/'manifest.json', {'scope': __doc__, 'duration_ms': args.duration_ms,

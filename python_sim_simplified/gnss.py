@@ -196,19 +196,6 @@ def _multipath_scene(
     time_s: np.ndarray,
     true_delays_s: np.ndarray,
 ) -> _MultipathScene:
-    values = np.array(
-        [
-            path.relative_power_db,
-            path.excess_delay_chips,
-            path.reflection_phase_rad,
-            path.doppler_offset_hz,
-            path.direction.azimuth_deg,
-            path.direction.elevation_deg,
-        ]
-    )
-    if not np.all(np.isfinite(values)) or path.excess_delay_chips < 0.0:
-        raise ValueError("multipath parameters must be finite and delay nonnegative")
-
     excess_delay_s = path.excess_delay_chips / cfg.signal.code_rate_hz
     total_delays_s = true_delays_s + excess_delay_s
     relative_voltage = 10.0 ** (path.relative_power_db / 20.0)

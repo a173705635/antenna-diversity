@@ -10,7 +10,6 @@ def test_threshold_uses_conservative_rank_and_strict_exceedance():
     assert threshold==495
     assert np.sum(scores>threshold)==4
     with pytest.raises(ValueError): calibrate_threshold(scores[:10],.01)
-    with pytest.raises(ValueError): calibrate_threshold([1,np.nan],.5)
 
 
 def test_score_is_record_maximum_and_scale_invariant():

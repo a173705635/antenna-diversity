@@ -40,7 +40,7 @@ def main():
     w=np.array([299792458/1575.42e6,299792458/1176.45e6])
     def extract(r,wave):
         if not np.array_equal(t,r['time_s']): raise ValueError('time mismatch')
-        return np.column_stack([carrier_range(dict(h,success=h.get('tracking_status')=='tracking'),t,
+        return np.column_stack([carrier_range(dict(h,success=(h['acquired'] and h['tracking_status'] == 'tracking')),t,
             r['fs_dfe_hz'],.001,wave) for h in r['satellite_tracking']])
     a1,b1,a5,b5=[extract(records[k],wave) for k,wave in zip(records,[w[0],w[0],w[1],w[1]])]
     bd=extract(dirty,w[0]); valid=np.isfinite(a1+b1+a5+b5+bd)

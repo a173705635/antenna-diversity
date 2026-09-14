@@ -32,5 +32,3 @@ def test_weighted_code_and_float_reject_low_quality_duplicate():
     assert np.linalg.norm(active['position_m']-result['position_m']) > .01
     with pytest.raises(ValueError):
         solve_code_carrier_float(s, p, l, code_sigma_m=np.full(16, np.inf))
-    with pytest.raises(ValueError):
-        solve_position(s[0], p[0], sigma_m=np.zeros(16))

@@ -88,7 +88,7 @@ def test_receiver_clock_origin_does_not_set_position():
     for omega,m in [(0.,0.),(1.,1.),(2.,2.),(3.,3.),(4.,4.),(5.,5.)]:
         eph=dict(sqrt_a=5153.795,e=.01,m0=m,omega=.3,omega0=omega,i0=.95,
             omega_dot=-8e-9,idot=0.,delta_n=1e-9,cuc=1e-6,cus=2e-6,crc=200.,crs=20.,cic=0.,cis=0.,
-            toe=tr,toc=tr,af0=1e-4,af1=2e-12,af2=0.,tgd=0.)
+            toe=tr,toc=tr,af0=1e-4,af1=2e-12,af2=0.,tgd=0.,health=0)
         tau=.075
         for _ in range(10):
             p,clock=satellite_state(eph,tr-tau)

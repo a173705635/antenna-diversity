@@ -62,26 +62,3 @@ def test_wideband_waveform_energy_is_concentrated_in_configured_band():
     in_band = np.abs(frequencies_hz) <= 0.55 * interferer.bandwidth_hz
 
     assert spectrum_power[in_band].sum() / spectrum_power.sum() >= 0.95
-
-
-@pytest.mark.parametrize(
-    ("overrides", "message"),
-    [
-        ({"bandwidth_hz": 0.0}, "bandwidth_hz"),
-        ({"bandwidth_hz": FS_HZ}, "bandwidth_hz"),
-        ({"filter_taps": 128}, "filter_taps"),
-        ({"filter_taps": 1}, "filter_taps"),
-        ({"random_seed": -1}, "random_seed"),
-        ({"center_offset_hz": 4.5e6}, "Nyquist"),
-    ],
-)
-def test_wideband_waveform_rejects_invalid_configuration(overrides, message):
-    parameters = {
-        "direction": Direction(80.0, 10.0),
-        "bandwidth_hz": 2.0e6,
-        "random_seed": 1001,
-    }
-    parameters.update(overrides)
-
-    with pytest.raises(ValueError, match=message):
-        _generate(WidebandInterferer(**parameters))

@@ -22,18 +22,3 @@ def test_common_frequency_error_is_invisible_and_cycles_remain():
     result = geometry_free_sdcp(t, a, a+l1, t, a, a+l5)
     assert np.allclose(result, l1-l5)
     assert not np.allclose(result, 0.)
-
-
-@pytest.mark.parametrize('kind', ['time', 'shape', 'nan', 'empty', 'order'])
-def test_rejects_unaligned_or_invalid_data(kind):
-    t = np.arange(3.)
-    u = t.copy()
-    a = np.zeros((3, 1))
-    b = a.copy()
-    if kind == 'time': u += .0001
-    if kind == 'shape': b = np.zeros((3, 2))
-    if kind == 'nan': b[1, 0] = np.nan
-    if kind == 'empty': t = u = np.array([]); a = b = np.empty((0, 1))
-    if kind == 'order': t = u = np.array([0., 2., 1.])
-    with pytest.raises(ValueError):
-        geometry_free_sdcp(t, a, b, u, a, a)

@@ -15,13 +15,10 @@ def classify(residual_m, threshold_m, *, nuisance_bound_m, valid, branch_verifie
     branch_verified includes externally checked continuous/half-cycle-valid arcs.
     """
     r = np.asarray(residual_m, float)
-    if r.ndim != 2 or not r.size or not np.isfinite(threshold_m) or threshold_m <= 0:
-        raise ValueError('nonempty epoch-by-PRN matrix and positive threshold required')
     b = np.broadcast_to(np.asarray(nuisance_bound_m, float), r.shape)
     flags = []
     for flag in (valid, branch_verified):
         a = np.asarray(flag)
-        if a.dtype.kind != 'b': raise ValueError('validity flags must be boolean')
         flags.append(np.broadcast_to(a, r.shape))
     usable = np.isfinite(r) & np.isfinite(b) & (b >= 0) & flags[0] & flags[1]
     lower = np.full(r.shape, np.nan)

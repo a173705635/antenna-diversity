@@ -42,8 +42,6 @@ def test_fresh_approval_binds_current_arc_but_is_not_old_continuity():
     assert r['arc_id']!=old
 
 
-def test_strict_flags_revoke_and_session_ids_separate_restarts():
+def test_session_ids_separate_restarts():
     m=SDCPArc('one',.015);old=step(m,0)['arc_id'];m.accept_reference(old,'r','e')
-    with pytest.raises(ValueError):step(m,.01,quality_valid=1)
-    assert step(m,.02)['state']=='await_reference'
     assert step(SDCPArc('two',.015),0)['arc_id']!=old

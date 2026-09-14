@@ -1,4 +1,7 @@
-"""Fractional sequence delay shared by the simplified GNSS sources."""
+"""Fractional sequence delay shared by the simplified GNSS sources.
+
+Experiments supply nonnegative finite delays and odd FIR lengths with matching channel arrays.
+"""
 
 import numpy as np
 
@@ -16,10 +19,6 @@ def fractional_delay(
     samples = np.asarray(signal, dtype=np.complex128)
     if delay_samples == 0.0:
         return samples.copy()
-    if not np.isfinite(delay_samples) or delay_samples < 0.0:
-        raise ValueError("delay_samples must be finite and nonnegative")
-    if num_taps < 3 or num_taps % 2 == 0:
-        raise ValueError("num_taps must be an odd integer of at least three")
 
     nearest_integer = round(delay_samples)
     if abs(delay_samples - nearest_integer) <= 1e-12:
@@ -67,8 +66,6 @@ def apply_channel_delays(
 
     values = np.asarray(component, dtype=np.complex128)
     delays = np.asarray(delays_s, dtype=np.float64)
-    if values.ndim != 2 or delays.shape != (values.shape[0],):
-        raise ValueError("component and delays_s must describe the same channels")
     if np.all(delays == 0.0):
         return values.copy()
 

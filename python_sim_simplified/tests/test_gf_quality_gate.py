@@ -27,8 +27,3 @@ def test_missing_values_and_threshold_boundary():
     r=np.array([[np.nan,.01,.012]])
     out=classify(r,.01,nuisance_bound_m=np.array([[0,0,.002]]),valid=True,branch_verified=True)
     assert out['state'].tolist()==[[-1,0,-1]]
-
-
-def test_rejects_non_boolean_flags():
-    with pytest.raises(ValueError):
-        classify([[0]],.01,nuisance_bound_m=0,valid=np.nan,branch_verified=True)

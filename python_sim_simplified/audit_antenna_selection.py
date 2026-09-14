@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import numpy as np
 from audit_sdcp_positioning import BASELINE
+from positioning import PositioningFailure
 from positioning import solve_position
 from run_gps_spp import satellite_setup, receiver_reference, serializable
 
@@ -31,20 +32,22 @@ def evaluate(pair, metric):
     out = {}
     for mode in ['fixed_A','fixed_B','quality_selection']:
         pick = chosen if mode=='quality_selection' else np.full(chosen.shape,int(mode=='fixed_B'))
-        positions = []
+        positions = []; failures = []
         for k,time in enumerate(t):
             values = p[pick[k],k,np.arange(len(sats))]
             valid = np.isfinite(values)
             if mode=='quality_selection': valid &= np.isfinite(q[pick[k],k,np.arange(len(sats))])
             states = np.array([s['position_m']+s['velocity_mps']*time for s in sats])-pick[k,:,None]*BASELINE
             try: positions.append(solve_position(states[valid],values[valid])['position_m'])
-            except ValueError: positions.append([np.nan]*3)
+            except PositioningFailure as exc:
+                positions.append([np.nan]*3)
+                failures.append({"index": k, "reason": str(exc)})
         # Truth enters after selection and solution, only for evaluation.
         error = np.linalg.norm(np.asarray(positions)-receiver_reference()[0],axis=1)
         valid = np.isfinite(error)
         out[mode] = {'epochs':len(t),'solved':int(valid.sum()),
                      'switches':int(np.count_nonzero(np.diff(pick,axis=0))),
-                     'B_fraction':float(pick.mean())}
+                     'B_fraction':float(pick.mean()), 'failures': failures}
         if valid.any(): out[mode].update(rms_m=float(np.sqrt(np.mean(error[valid]**2))),
                                          p95_m=float(np.quantile(error[valid],.95)))
     return out

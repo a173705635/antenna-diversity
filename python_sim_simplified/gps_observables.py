@@ -13,10 +13,8 @@ def transmit_time(history, anchor, times_s, fs_hz):
     Only the inherently periodic code phase is unwrapped; carrier is untouched.
     """
     t=np.asarray(times_s,dtype=float)
-    if fs_hz<=0 or t.ndim!=1 or not np.isfinite(t).all():
-        raise ValueError('invalid sample timing')
     result=np.full(t.shape,np.nan)
-    if not history.get('success',False):return result
+    if not history['success']:return result
     starts=np.asarray(history['epoch_start_samples'],dtype=float)/fs_hz
     phase=np.asarray(history['code_nco_phase_chips'],dtype=float)
     rate=np.asarray(history['code_nco_rate_hz'],dtype=float)
@@ -25,8 +23,6 @@ def transmit_time(history, anchor, times_s, fs_hz):
             or not np.allclose(np.diff(starts),.001,atol=1e-10,rtol=0)):
         raise ValueError('transmit time requires continuous 1-ms tracking')
     a=anchor['epoch_index']
-    if not 0<=a<len(starts) or not 0<=anchor['tow_s']<604800:
-        raise ValueError('invalid navigation time anchor')
     residual=np.unwrap(phase*2*np.pi/1023)*1023/(2*np.pi)
     residual-=round(residual[a]/1023)*1023
     i=np.searchsorted(starts,t,side='right')-1;j=np.clip(i,0,len(starts)-1)
@@ -43,13 +39,10 @@ def solve_gps_epoch(ephemerides, transmit_tow_s, receiver_tow_s, *, atmosphere=N
     is solved, not supplied from truth. Atmosphere=None means uncorrected.
     """
     tx=np.asarray(transmit_tow_s,float)
-    if len(tx)!=len(ephemerides) or len(tx)<4 or not np.isfinite(tx).all():
-        raise ValueError('at least four valid timed satellites required')
     raw=C*np.array([week_difference(receiver_tow_s-v) for v in tx])
-    if np.any(raw<=0):raise ValueError('invalid common receiver clock origin')
     positions=[];clocks=[]
     for eph,t in zip(ephemerides,tx):
-        if eph.get('health',0)!=0 or abs(week_difference(t-eph['toe']))>7200:
+        if eph['health']!=0 or abs(week_difference(t-eph['toe']))>7200:
             raise ValueError('unhealthy or stale ephemeris')
         gps_t=t
         for _ in range(3):

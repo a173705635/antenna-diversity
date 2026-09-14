@@ -1,8 +1,14 @@
 # GNSS 接收链路与定位研究代码
 
+2026-09-14 精简清理：删除通用字段/类型/形状验证包装和仅为其存在的测试；`sensor_contract.py` 只保留直接的旧 RF 记录适配。定位秩亏/不收敛使用 `PositioningFailure` 表示既有数学失败，实验输出保留具体原因；其他异常直接暴露，不再统一吞成 NaN。捕获失败、相位弧状态、检测窗口、量化/饱和及归档不可覆盖语义保留。输入单位、同步和数组顺序由实验配置明确提供，不再依赖通用拒收层。
+
+RF 几何现在必须显式选择：新阈值文件默认读取 `positions_m`；复现不带坐标的旧手机阈值时，使用 `audit_spatial_diversity_rf.py --geometry phone --model <旧阈值文件> --output <新目录>`。不再因字段缺失自动回退到手机阵列；当前工作尺寸仍为 0.0759 × 0.1609 m。
+
+本次清理验证：`python -m pytest -q` 为 191 passed（96.05 s），保留已有零噪声 C/N0 除零警告，未添加兜底。与提交 `68e3815806db49c58173ddc0cf70156cd851e7d8` 的独立进程对照中，48 份原尺寸 RF 记录重建的 36 个 2/3/4 天线布局批次，以及检测窗口、SD/DD 分数、固定种子宽带波形、时延、SDCP/权重和正常 SPP 数值完全一致；这属于既有数据回放与确定性计算对照，不是新增攻击性能实测。原尺寸、1 米及测向双差三个冻结归档共 605 个文件 SHA-256 均未变化。仅验证防御性拒收的测试已删除，保留模型失败测试并增加异常原因记录与未捕获卫星适配测试。
+
 新增研究入口：`audit_spatial_direction.py --output <新目录> --archive <原手机尺寸归档>`，验证星间双差统计与方向候选；`audit_reference_direction.py` 对照可信/被污染 PRN 8 参考。`spatial_direction.py` 输出校准后的方向候选和拒绝状态，`spatial_reference_direction.py` 使用显式参考方向。无 IMU；多解、镜像及混合信号测向失败均保留。详见[方法与结果](../docs/reports/2026-09-14-doa-double-difference.md)。尚非唯一测向，未自动接入原检测器。
 
-当前工作基线已回到 **0.0759 × 0.1609 m** 的手机尺寸，保持 2–4 天线配置。运行 `audit_spatial_diversity.py --output <新目录>` 即使用该默认尺寸；RF 可使用新生成的原尺寸阈值，或 `../docs/reports/data/2026-09-13-gpspatron-spatial/model/thresholds.json`（相对本代码目录）。RF 会读取阈值文件中的坐标，勿将历史 1 米实验阈值作为当前基线。尺寸参数仍可用于复现实验：[1 米历史对照](../docs/reports/2026-09-14-spacing-1m.md)。
+当前工作基线已回到 **0.0759 × 0.1609 m** 的手机尺寸，保持 2–4 天线配置。运行 `audit_spatial_diversity.py --output <新目录>` 即使用该默认尺寸；RF 可使用新生成的原尺寸阈值，或通过 `--geometry phone` 使用 `../docs/reports/data/2026-09-13-gpspatron-spatial/model/thresholds.json`（相对本代码目录）。默认读取阈值文件中的坐标，勿将历史 1 米实验阈值作为当前基线。尺寸参数仍可用于复现实验：[1 米历史对照](../docs/reports/2026-09-14-spacing-1m.md)。
 
 新增2–4天线空间抗欺骗入口：`audit_spatial_diversity.py --output <新目录>`生成5000条H0标定与22场景各5000条留出事件；`audit_spatial_diversity_rf.py --output <新目录> --model <模型目录>/thresholds.json`运行四RF链并取2/3/4天线子集比较。检测模块`spatial_spoofing.py`接受同步载波距离和有效性，提供全星/三星簇判据及三态输出。不是GPSPATRON专有算法复刻。[完整方法、收益、失效与复现](../docs/reports/2026-09-14-gpspatron-spatial-diversity.md)，[配置调用示例与归档](../docs/reports/data/2026-09-13-gpspatron-spatial/README.md)。默认旧仿真入口保留。
 

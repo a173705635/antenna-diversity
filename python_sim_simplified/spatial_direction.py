@@ -17,10 +17,6 @@ def double_difference_scores(carrier_m, wavelength_m):
     Shared baselines and PRN references are correlated. Calibrate separately.
     """
     x = np.asarray(carrier_m, float)
-    if x.ndim < 3 or x.shape[-3] < 1 or not 2 <= x.shape[-2] <= 4 or x.shape[-1] < 3:
-        raise ValueError('epochs x 2-4 antennas x >=3 PRNs required')
-    if not np.isfinite(x).all() or not np.isfinite(wavelength_m) or wavelength_m <= 0:
-        raise ValueError('finite phase and positive wavelength required')
     pairs = np.array(list(combinations(range(x.shape[-2]), 2)))
     triples = np.array(list(combinations(range(x.shape[-1]), 3)))
     z = np.exp(4j*np.pi*(x[..., pairs[:, 1], :]-x[..., pairs[:, 0], :])/wavelength_m)
@@ -34,8 +30,6 @@ def double_difference_scores(carrier_m, wavelength_m):
 def select_common_prns(carrier_m, wavelength_m):
     """Data-only best triple under the original circular-dispersion score."""
     x = np.asarray(carrier_m, float)
-    if x.ndim != 3 or x.shape[2] < 3 or not np.isfinite(x).all():
-        raise ValueError('finite epoch x antenna x PRN block required')
     triples = np.array(list(combinations(range(x.shape[2]), 3)))
     pairs = np.array(list(combinations(range(x.shape[1]), 2)))
     z = np.exp(4j*np.pi*(x[:, pairs[:, 1]]-x[:, pairs[:, 0]])/wavelength_m)
@@ -51,10 +45,6 @@ def calibrate_channel_bias(carrier_m, positions_m, known_directions, wavelength_
     Returns bias modulo wavelength/harmonic, adequate for that harmonic only.
     """
     x, p, u = map(lambda v: np.asarray(v, float), (carrier_m, positions_m, known_directions))
-    if x.ndim != 3 or p.shape != (x.shape[1], 3) or u.shape != (x.shape[2], 3):
-        raise ValueError('calibration dimensions do not match')
-    if not all(np.isfinite(v).all() for v in (x, p, u)) or harmonic not in (1, 2) or wavelength_m <= 0:
-        raise ValueError('invalid calibration values')
     predicted = -(p-p[0]) @ u.T
     observed = x-x[:, :1]
     z = np.exp(2j*np.pi*harmonic*(observed-predicted[None])/wavelength_m)
@@ -74,10 +64,6 @@ def estimate_direction(carrier_m, positions_m, wavelength_m, *, channel_bias_m=N
     Candidate search is numerical; not a proof of exhaustive identifiability.
     """
     x, p = np.asarray(carrier_m, float), np.asarray(positions_m, float)
-    if x.ndim != 3 or x.shape[0] < 1 or x.shape[2] < 1 or not 2 <= x.shape[1] <= 4 or p.shape != (x.shape[1], 3):
-        raise ValueError('epoch x 2-4 antennas x PRNs and antenna x xyz required')
-    if harmonic not in (1, 2) or not np.isfinite([wavelength_m, fit_limit_m, ambiguity_slack_m]).all() or wavelength_m <= 0 or fit_limit_m <= 0 or ambiguity_slack_m < 0:
-        raise ValueError('invalid fit settings')
     def empty(status):
         return {'status': status, 'candidates': [], 'harmonic': harmonic}
     if not np.isfinite(x).all():
@@ -87,8 +73,6 @@ def estimate_direction(carrier_m, positions_m, wavelength_m, *, channel_bias_m=N
     if channel_bias_m is None:
         return empty('uncalibrated')
     bias = np.asarray(channel_bias_m, float)
-    if bias.shape != (len(p),) or not np.isfinite(bias).all():
-        raise ValueError('finite per-channel calibrated biases required')
     if np.linalg.matrix_rank((p-p[0])[:, :2]) < 2:
         return empty('rank_deficient')
     pairs = np.array(list(combinations(range(len(p)), 2)))

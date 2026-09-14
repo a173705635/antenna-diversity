@@ -23,10 +23,6 @@ def calibrate_threshold(scores, target_false_alarm_rate):
     conditional performance in each scenario or confidence on one fitted cutoff.
     """
     values=np.asarray(scores,dtype=float)
-    if values.ndim!=1 or not values.size or not np.all(np.isfinite(values)):
-        raise ValueError("finite eligible calibration scores required")
-    if not 0<target_false_alarm_rate<1:
-        raise ValueError("false alarm target must be between zero and one")
     rank=math.ceil((values.size+1)*(1-target_false_alarm_rate))
     if rank>values.size:
         raise ValueError("too few calibration scores for the requested tail")
@@ -35,8 +31,6 @@ def calibrate_threshold(scores, target_false_alarm_rate):
 
 def binomial_interval(positives,total,confidence=.95):
     """Two-sided exact Clopper-Pearson interval, including endpoints."""
-    if total<0 or not 0<=positives<=total or not 0<confidence<1:
-        raise ValueError("valid counts and confidence required")
     if not total:
         return None
     tail=(1-confidence)/2

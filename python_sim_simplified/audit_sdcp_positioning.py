@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 import numpy as np
 from config import MultipathPath, Direction, SPEED_OF_LIGHT_MPS
+from positioning import PositioningFailure
 from positioning import carrier_range, solve_position, solve_code_carrier_float
 from run_gps_spp import build_scene, satellite_setup, run_record, receiver_reference, serializable
 from sdcp import modified_sdcp, observation_weights
@@ -49,7 +50,7 @@ def observables(pair, satellites):
     p = [np.asarray(r['pseudoranges_m'], dtype=float) for r in pair]
     phases = []
     for record in pair:
-        if any(h.get('tracking_status') != 'tracking' for h in record['satellite_tracking']):
+        if any((not h['acquired'] or h['tracking_status'] != 'tracking') for h in record['satellite_tracking']):
             raise ValueError('incomplete tracked pair')
         phases.append(np.column_stack([carrier_range(dict(h, success=True), times,
             record['fs_dfe_hz'], .001, WAVELENGTH) for h in record['satellite_tracking']]))
@@ -95,12 +96,13 @@ def evaluate(pair, satellites, threshold):
         scale = np.full_like(weight, np.inf)
         np.divide(1., np.sqrt(weight), out=scale, where=weight>0)
         code_positions = np.full((len(times),3),np.nan)
+        code_failures = []
         for k in range(len(times)):
             try:
                 code_positions[k] = solve_position(geometry[k],p[k],sigma_m=30.*scale[k])['position_m']
-            except ValueError:
-                pass
-        mode = {'pair_weights': pair_weight, 'code_positions_m': code_positions,
+            except PositioningFailure as exc:
+                code_failures.append({'index': k, 'reason': str(exc)})
+        mode = {'code_failures': code_failures, 'pair_weights': pair_weight, 'code_positions_m': code_positions,
                 'code': statistics(code_positions,times),
                 'min_retained_prns': int(np.min(np.sum(pair_weight[times>=.6]>1e-3,axis=1))),
                 'prn1_mean_weight': float(pair_weight[times>=.6,0].mean()),
@@ -113,7 +115,7 @@ def evaluate(pair, satellites, threshold):
             used = weight > 1e-3
             mode['used_phase_residual_max_m'] = float(abs(solved['carrier_residual_m'][used]).max())
             mode['phase_screen_passed'] = mode['used_phase_residual_max_m'] <= .05
-        except ValueError as exc:
+        except PositioningFailure as exc:
             mode['float_failure'] = str(exc)
         result['modes'][name] = mode
     return result

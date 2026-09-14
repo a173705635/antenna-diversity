@@ -15,6 +15,7 @@ from acquisition import acquire
 from config import SPEED_OF_LIGHT_MPS
 from dfe import process_dfe
 from gnss import generate_scenario
+from positioning import PositioningFailure
 from positioning import code_pseudorange, solve_position
 from presets import default_config
 from rf import process_rf
@@ -165,7 +166,7 @@ def run_record(seed, satellites, scene, cfg):
             clocks[epoch] = solution['clock_bias_m']
             conditions[epoch] = solution['geometry_condition']
             residuals[epoch, valid] = solution['residual_m']
-        except ValueError as exc:
+        except PositioningFailure as exc:
             failures.append({'time_s': float(time), 'reason': str(exc)})
     # Truth is introduced only here, after every receiver/position solution.
     reference, rotation = receiver_reference()

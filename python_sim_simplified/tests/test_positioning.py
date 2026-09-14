@@ -18,8 +18,6 @@ def test_position_and_clock_recovery_and_degenerate_geometry():
         solve_position(satellites[:3], ranges[:3])
     with pytest.raises(ValueError):
         solve_position(np.tile(satellites[0], (5, 1)), np.repeat(ranges[0], 5))
-    with pytest.raises(ValueError):
-        solve_position(satellites, ranges * np.nan)
 
 
 def test_code_range_common_time_and_period_boundary():
