@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "checks": 8172,
+  "original_archive_unchanged": true,
+  "model_detection_events": 110000,
+  "direction_model_trials": 100
+}

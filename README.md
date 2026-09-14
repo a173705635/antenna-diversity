@@ -1,6 +1,6 @@
 # GNSS 天线分集与空域抗干扰仿真
 
-**当前新阶段：天线分集抗欺骗。** 已完成[双天线空间一致性首轮实现与验证](docs/reports/2026-09-12-antenna-spoofing-validation.md)：同源全星替代可见，部分欺骗漏检、真假混合有未知区间；不等于认证或导航恢复。多径阶段仍收口，极化分集暂停。
+**当前阶段：天线分集抗欺骗。** 新增[GPSPATRON公开原理启发的2–4天线实现与验证](docs/reports/2026-09-14-gpspatron-spatial-diversity.md)：全星/三星簇判据、独立门限标定、RF接收链和因果输出门控。部分同源欺骗可见收益，真假混合及坏通道仍有失效边界；不是专有算法复刻或导航恢复。此前[双天线首轮验证](docs/reports/2026-09-12-antenna-spoofing-validation.md)保留追溯。多径阶段仍收口，极化分集暂停。
 
 此前多径阶段已收口，后续不推进极化分集。完整范围、结论及未完成项见[阶段总结与交接](docs/reports/2026-09-12-multipath-stage-closeout.md)。
 
@@ -12,6 +12,7 @@
 
 | 研究任务 | 入口 | 验证记录 |
 |---|---|---|
+| 2–4天线抗欺骗及输出保护 | `audit_spatial_diversity.py` / `audit_spatial_diversity_rf.py` | [方法、配对收益与RF验证](docs/reports/2026-09-14-gpspatron-spatial-diversity.md) |
 | 真实单天线 GPS 接收与码定位 | `recorded_receiver.py` | [40 秒实测定位与模块说明](docs/reports/2026-09-13-recorded-receiver.md) |
 | 双 RF / DFE / 独立环路相位差 | `audit_dual_tracking_phase.py` | [双通道相位](docs/reports/2026-09-10-dual-tracking-phase.md) |
 | GPS 码/载波浮点定位 | `run_gps_spp.py` | [定位验证](docs/reports/2026-09-11-code-carrier-float.md) |

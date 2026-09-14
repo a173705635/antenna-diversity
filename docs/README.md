@@ -1,5 +1,7 @@
 # 文档导航
 
+最新抗欺骗：[GPSPATRON公开原理启发的2–4天线本地实现](reports/2026-09-14-gpspatron-spatial-diversity.md)，包含公式、独立标定、配对统计、RF链路、输出保护和负面边界；区分本地模型与商业产品能力。
+
 SDCP 全链路误差入口：[天线、RF、DFE、跟踪与后级偏差清单](reports/2026-09-13-sdcp-error-inventory.md)，包含影响因素、处理办法和参考数值；定位优化暂不推进。
 
 真实接收与定位最新结果：[通用接收模块及 40 秒 HackRF 码定位](reports/2026-09-13-recorded-receiver.md)。已从录波解星历并定位，保留垂向偏移和当前适用限制。

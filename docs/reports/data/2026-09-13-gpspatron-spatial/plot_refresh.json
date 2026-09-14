@@ -1,0 +1,12 @@
+{
+  "change": "empty/unknown panel uses receiver time range and explicit unknown annotation",
+  "numeric_results_changed": false,
+  "source_sha256": "fc5beff9a112e2bfc923de88db7497b0dfcc8eb93108c58f48d4785d14564b3a",
+  "source_snapshot": "plot_code/audit_spatial_diversity_rf.py",
+  "figures_visually_checked": [
+    "model/detection_comparison.png",
+    "model/boundaries.png",
+    "rf_a/rf_results.png",
+    "rf_b/rf_results.png"
+  ]
+}

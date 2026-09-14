@@ -1,0 +1,27 @@
+{
+  "python": "3.11.0rc2",
+  "numpy": "2.0.1",
+  "scipy": "1.17.1",
+  "matplotlib": "3.11.0",
+  "pytest": "9.1.1",
+  "platform": "Windows-10-10.0.26220-SP0",
+  "base_commit": "4922a6e",
+  "formal_model_command": "python python_sim_simplified/audit_spatial_diversity.py --output docs/reports/data/2026-09-13-gpspatron-spatial/model",
+  "rf_batch_cases": {
+    "rf_a": [
+      "los",
+      "all_spoof",
+      "partial_3"
+    ],
+    "rf_b": [
+      "partial_4",
+      "mixture_0",
+      "mixture_6"
+    ]
+  },
+  "rf_duration_ms": 600,
+  "rf_seeds": [
+    610000,
+    620000
+  ]
+}

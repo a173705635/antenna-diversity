@@ -1,0 +1,28 @@
+DD done los
+DD done all_spoof
+DD done partial_2
+DD done partial_3
+DD done partial_4
+DD done partial_6
+DD done two_sources
+DD done mixture_-6
+DD done mixture_0
+DD done mixture_3
+DD done mixture_6
+DD done mixture_12
+DD done single_mp
+DD done clustered_los
+DD done short_aperture_los
+DD done short_aperture_spoof
+DD done low_signal_los
+DD done low_signal_spoof
+DD done prn_bias_spoof
+DD done bad_fourth_spoof
+DD done common_reflection
+DD done spatial_matched
+DOA model 0 / 100
+DOA model 20 / 100
+DOA model 40 / 100
+DOA model 60 / 100
+DOA model 80 / 100
+DONE 181.76499999995576

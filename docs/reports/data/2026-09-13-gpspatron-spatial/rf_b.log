@@ -1,0 +1,216 @@
+seed=610000 PRN=1 acquired=True usable=40/40
+seed=610000 PRN=2 acquired=True usable=40/40
+seed=610000 PRN=3 acquired=True usable=40/40
+seed=610000 PRN=4 acquired=True usable=40/40
+seed=610000 PRN=5 acquired=True usable=40/40
+seed=610000 PRN=6 acquired=True usable=40/40
+seed=610000 PRN=7 acquired=True usable=40/40
+seed=610000 PRN=8 acquired=True usable=40/40
+DONE partial_4/610000/TL, elapsed=25.5s
+seed=610001 PRN=1 acquired=True usable=40/40
+seed=610001 PRN=2 acquired=True usable=40/40
+seed=610001 PRN=3 acquired=True usable=40/40
+seed=610001 PRN=4 acquired=True usable=40/40
+seed=610001 PRN=5 acquired=True usable=40/40
+seed=610001 PRN=6 acquired=True usable=40/40
+seed=610001 PRN=7 acquired=True usable=40/40
+seed=610001 PRN=8 acquired=True usable=40/40
+DONE partial_4/610000/TR, elapsed=50.8s
+seed=610002 PRN=1 acquired=True usable=40/40
+seed=610002 PRN=2 acquired=True usable=40/40
+seed=610002 PRN=3 acquired=True usable=40/40
+seed=610002 PRN=4 acquired=True usable=40/40
+seed=610002 PRN=5 acquired=True usable=40/40
+seed=610002 PRN=6 acquired=True usable=40/40
+seed=610002 PRN=7 acquired=True usable=40/40
+seed=610002 PRN=8 acquired=True usable=40/40
+DONE partial_4/610000/BL, elapsed=75.7s
+seed=610003 PRN=1 acquired=True usable=40/40
+seed=610003 PRN=2 acquired=True usable=40/40
+seed=610003 PRN=3 acquired=True usable=40/40
+seed=610003 PRN=4 acquired=True usable=40/40
+seed=610003 PRN=5 acquired=True usable=40/40
+seed=610003 PRN=6 acquired=True usable=40/40
+seed=610003 PRN=7 acquired=True usable=40/40
+seed=610003 PRN=8 acquired=True usable=40/40
+DONE partial_4/610000/BR, elapsed=99.4s
+seed=620000 PRN=1 acquired=True usable=40/40
+seed=620000 PRN=2 acquired=True usable=40/40
+seed=620000 PRN=3 acquired=True usable=40/40
+seed=620000 PRN=4 acquired=True usable=40/40
+seed=620000 PRN=5 acquired=True usable=40/40
+seed=620000 PRN=6 acquired=True usable=40/40
+seed=620000 PRN=7 acquired=True usable=40/40
+seed=620000 PRN=8 acquired=True usable=40/40
+DONE partial_4/620000/TL, elapsed=123.9s
+seed=620001 PRN=1 acquired=True usable=40/40
+seed=620001 PRN=2 acquired=True usable=40/40
+seed=620001 PRN=3 acquired=True usable=40/40
+seed=620001 PRN=4 acquired=True usable=40/40
+seed=620001 PRN=5 acquired=True usable=40/40
+seed=620001 PRN=6 acquired=True usable=40/40
+seed=620001 PRN=7 acquired=True usable=40/40
+seed=620001 PRN=8 acquired=True usable=40/40
+DONE partial_4/620000/TR, elapsed=149.5s
+seed=620002 PRN=1 acquired=True usable=40/40
+seed=620002 PRN=2 acquired=True usable=40/40
+seed=620002 PRN=3 acquired=True usable=40/40
+seed=620002 PRN=4 acquired=True usable=40/40
+seed=620002 PRN=5 acquired=True usable=40/40
+seed=620002 PRN=6 acquired=True usable=40/40
+seed=620002 PRN=7 acquired=True usable=40/40
+seed=620002 PRN=8 acquired=True usable=40/40
+DONE partial_4/620000/BL, elapsed=174.8s
+seed=620003 PRN=1 acquired=True usable=40/40
+seed=620003 PRN=2 acquired=True usable=40/40
+seed=620003 PRN=3 acquired=True usable=40/40
+seed=620003 PRN=4 acquired=True usable=40/40
+seed=620003 PRN=5 acquired=True usable=40/40
+seed=620003 PRN=6 acquired=True usable=40/40
+seed=620003 PRN=7 acquired=True usable=40/40
+seed=620003 PRN=8 acquired=True usable=40/40
+DONE partial_4/620000/BR, elapsed=198.7s
+seed=610000 PRN=1 acquired=True usable=40/40
+seed=610000 PRN=2 acquired=True usable=40/40
+seed=610000 PRN=3 acquired=True usable=40/40
+seed=610000 PRN=4 acquired=True usable=40/40
+seed=610000 PRN=5 acquired=True usable=40/40
+seed=610000 PRN=6 acquired=True usable=40/40
+seed=610000 PRN=7 acquired=False usable=0/40
+seed=610000 PRN=8 acquired=True usable=40/40
+DONE mixture_0/610000/TL, elapsed=237.5s
+seed=610001 PRN=1 acquired=True usable=40/40
+seed=610001 PRN=2 acquired=False usable=0/40
+seed=610001 PRN=3 acquired=True usable=40/40
+seed=610001 PRN=4 acquired=True usable=40/40
+seed=610001 PRN=5 acquired=True usable=40/40
+seed=610001 PRN=6 acquired=True usable=40/40
+seed=610001 PRN=7 acquired=True usable=40/40
+seed=610001 PRN=8 acquired=True usable=40/40
+DONE mixture_0/610000/TR, elapsed=276.1s
+seed=610002 PRN=1 acquired=True usable=40/40
+seed=610002 PRN=2 acquired=True usable=40/40
+seed=610002 PRN=3 acquired=True usable=40/40
+seed=610002 PRN=4 acquired=True usable=40/40
+seed=610002 PRN=5 acquired=True usable=40/40
+seed=610002 PRN=6 acquired=True usable=40/40
+seed=610002 PRN=7 acquired=True usable=40/40
+seed=610002 PRN=8 acquired=True usable=40/40
+DONE mixture_0/610000/BL, elapsed=316.0s
+seed=610003 PRN=1 acquired=True usable=40/40
+seed=610003 PRN=2 acquired=True usable=40/40
+seed=610003 PRN=3 acquired=True usable=40/40
+seed=610003 PRN=4 acquired=True usable=40/40
+seed=610003 PRN=5 acquired=True usable=40/40
+seed=610003 PRN=6 acquired=True usable=40/40
+seed=610003 PRN=7 acquired=False usable=0/40
+seed=610003 PRN=8 acquired=False usable=0/40
+DONE mixture_0/610000/BR, elapsed=353.7s
+seed=620000 PRN=1 acquired=True usable=40/40
+seed=620000 PRN=2 acquired=True usable=40/40
+seed=620000 PRN=3 acquired=True usable=40/40
+seed=620000 PRN=4 acquired=True usable=40/40
+seed=620000 PRN=5 acquired=True usable=40/40
+seed=620000 PRN=6 acquired=True usable=40/40
+seed=620000 PRN=7 acquired=True usable=40/40
+seed=620000 PRN=8 acquired=True usable=40/40
+DONE mixture_0/620000/TL, elapsed=391.4s
+seed=620001 PRN=1 acquired=True usable=40/40
+seed=620001 PRN=2 acquired=False usable=0/40
+seed=620001 PRN=3 acquired=True usable=40/40
+seed=620001 PRN=4 acquired=True usable=40/40
+seed=620001 PRN=5 acquired=True usable=40/40
+seed=620001 PRN=6 acquired=True usable=40/40
+seed=620001 PRN=7 acquired=True usable=40/40
+seed=620001 PRN=8 acquired=True usable=40/40
+DONE mixture_0/620000/TR, elapsed=429.4s
+seed=620002 PRN=1 acquired=False usable=0/40
+seed=620002 PRN=2 acquired=True usable=40/40
+seed=620002 PRN=3 acquired=True usable=40/40
+seed=620002 PRN=4 acquired=True usable=40/40
+seed=620002 PRN=5 acquired=True usable=40/40
+seed=620002 PRN=6 acquired=True usable=40/40
+seed=620002 PRN=7 acquired=True usable=40/40
+seed=620002 PRN=8 acquired=True usable=40/40
+DONE mixture_0/620000/BL, elapsed=464.1s
+seed=620003 PRN=1 acquired=True usable=40/40
+seed=620003 PRN=2 acquired=True usable=40/40
+seed=620003 PRN=3 acquired=True usable=40/40
+seed=620003 PRN=4 acquired=True usable=40/40
+seed=620003 PRN=5 acquired=True usable=40/40
+seed=620003 PRN=6 acquired=True usable=40/40
+seed=620003 PRN=7 acquired=False usable=0/40
+seed=620003 PRN=8 acquired=False usable=0/40
+DONE mixture_0/620000/BR, elapsed=499.6s
+seed=610000 PRN=1 acquired=True usable=40/40
+seed=610000 PRN=2 acquired=True usable=40/40
+seed=610000 PRN=3 acquired=True usable=40/40
+seed=610000 PRN=4 acquired=True usable=40/40
+seed=610000 PRN=5 acquired=True usable=40/40
+seed=610000 PRN=6 acquired=True usable=40/40
+seed=610000 PRN=7 acquired=True usable=40/40
+seed=610000 PRN=8 acquired=True usable=40/40
+DONE mixture_6/610000/TL, elapsed=536.8s
+seed=610001 PRN=1 acquired=True usable=40/40
+seed=610001 PRN=2 acquired=True usable=40/40
+seed=610001 PRN=3 acquired=True usable=40/40
+seed=610001 PRN=4 acquired=True usable=40/40
+seed=610001 PRN=5 acquired=True usable=40/40
+seed=610001 PRN=6 acquired=True usable=40/40
+seed=610001 PRN=7 acquired=True usable=40/40
+seed=610001 PRN=8 acquired=True usable=40/40
+DONE mixture_6/610000/TR, elapsed=572.1s
+seed=610002 PRN=1 acquired=True usable=40/40
+seed=610002 PRN=2 acquired=True usable=40/40
+seed=610002 PRN=3 acquired=True usable=40/40
+seed=610002 PRN=4 acquired=True usable=40/40
+seed=610002 PRN=5 acquired=True usable=40/40
+seed=610002 PRN=6 acquired=True usable=40/40
+seed=610002 PRN=7 acquired=True usable=40/40
+seed=610002 PRN=8 acquired=True usable=40/40
+DONE mixture_6/610000/BL, elapsed=608.1s
+seed=610003 PRN=1 acquired=True usable=40/40
+seed=610003 PRN=2 acquired=True usable=40/40
+seed=610003 PRN=3 acquired=True usable=40/40
+seed=610003 PRN=4 acquired=True usable=40/40
+seed=610003 PRN=5 acquired=True usable=40/40
+seed=610003 PRN=6 acquired=True usable=40/40
+seed=610003 PRN=7 acquired=True usable=40/40
+seed=610003 PRN=8 acquired=True usable=40/40
+DONE mixture_6/610000/BR, elapsed=636.9s
+seed=620000 PRN=1 acquired=True usable=40/40
+seed=620000 PRN=2 acquired=True usable=40/40
+seed=620000 PRN=3 acquired=True usable=40/40
+seed=620000 PRN=4 acquired=True usable=40/40
+seed=620000 PRN=5 acquired=True usable=40/40
+seed=620000 PRN=6 acquired=True usable=40/40
+seed=620000 PRN=7 acquired=True usable=40/40
+seed=620000 PRN=8 acquired=True usable=40/40
+DONE mixture_6/620000/TL, elapsed=665.5s
+seed=620001 PRN=1 acquired=True usable=40/40
+seed=620001 PRN=2 acquired=True usable=40/40
+seed=620001 PRN=3 acquired=True usable=40/40
+seed=620001 PRN=4 acquired=True usable=40/40
+seed=620001 PRN=5 acquired=True usable=40/40
+seed=620001 PRN=6 acquired=True usable=40/40
+seed=620001 PRN=7 acquired=True usable=40/40
+seed=620001 PRN=8 acquired=True usable=40/40
+DONE mixture_6/620000/TR, elapsed=694.0s
+seed=620002 PRN=1 acquired=True usable=40/40
+seed=620002 PRN=2 acquired=True usable=40/40
+seed=620002 PRN=3 acquired=True usable=40/40
+seed=620002 PRN=4 acquired=True usable=40/40
+seed=620002 PRN=5 acquired=True usable=40/40
+seed=620002 PRN=6 acquired=True usable=40/40
+seed=620002 PRN=7 acquired=True usable=40/40
+seed=620002 PRN=8 acquired=True usable=40/40
+DONE mixture_6/620000/BL, elapsed=722.9s
+seed=620003 PRN=1 acquired=True usable=40/40
+seed=620003 PRN=2 acquired=True usable=40/40
+seed=620003 PRN=3 acquired=True usable=40/40
+seed=620003 PRN=4 acquired=True usable=40/40
+seed=620003 PRN=5 acquired=True usable=40/40
+seed=620003 PRN=6 acquired=True usable=40/40
+seed=620003 PRN=7 acquired=True usable=40/40
+seed=620003 PRN=8 acquired=True usable=40/40
+DONE mixture_6/620000/BR, elapsed=751.7s

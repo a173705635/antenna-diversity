@@ -1,0 +1,5638 @@
+{
+  "rows": [
+    {
+      "case": "los",
+      "is_attack": false,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 55,
+      "fraction": 0.011,
+      "wilson95": [
+        0.008461172335733187,
+        0.014289640166532683
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.19293160297696343,
+        0.6282231390998905,
+        0.9350882091464865
+      ],
+      "seed_base": 300000
+    },
+    {
+      "case": "los",
+      "is_attack": false,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 42,
+      "fraction": 0.0084,
+      "wilson95": [
+        0.006220654387306615,
+        0.011334150165073551
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.00448188950439781,
+        0.0219988179261214,
+        0.11097675685403677
+      ],
+      "seed_base": 300000
+    },
+    {
+      "case": "los",
+      "is_attack": false,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 42,
+      "fraction": 0.0084,
+      "wilson95": [
+        0.006220654387306615,
+        0.011334150165073551
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.25563554143183886,
+        0.6881853002380098,
+        0.9426006434778678
+      ],
+      "seed_base": 300000
+    },
+    {
+      "case": "los",
+      "is_attack": false,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 46,
+      "fraction": 0.0092,
+      "wilson95": [
+        0.0069047385482477065,
+        0.012248837681020369
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.0048405545529632416,
+        0.026313401455766983,
+        0.12036052107618969
+      ],
+      "seed_base": 300000
+    },
+    {
+      "case": "los",
+      "is_attack": false,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 44,
+      "fraction": 0.0088,
+      "wilson95": [
+        0.006562037439973316,
+        0.011792152950850806
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.39856321636670555,
+        0.6613797087438927,
+        0.854209782258774
+      ],
+      "seed_base": 300000
+    },
+    {
+      "case": "los",
+      "is_attack": false,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 46,
+      "fraction": 0.0092,
+      "wilson95": [
+        0.0069047385482477065,
+        0.012248837681020369
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.01657380646050802,
+        0.11005889095579535,
+        0.2938040865139617
+      ],
+      "seed_base": 300000
+    },
+    {
+      "case": "los",
+      "is_attack": false,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 46,
+      "fraction": 0.0092,
+      "wilson95": [
+        0.0069047385482477065,
+        0.012248837681020369
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.423523039272343,
+        0.6619294810180663,
+        0.8334522598524963
+      ],
+      "seed_base": 300000
+    },
+    {
+      "case": "los",
+      "is_attack": false,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 45,
+      "fraction": 0.009,
+      "wilson95": [
+        0.00673322861097761,
+        0.01202065469906849
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.02015496170699222,
+        0.12366798467152235,
+        0.31679823485033
+      ],
+      "seed_base": 300000
+    },
+    {
+      "case": "all_spoof",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.008766857725009961,
+        0.016572207138825523,
+        0.030003372470824477
+      ],
+      "seed_base": 310000
+    },
+    {
+      "case": "all_spoof",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 2452,
+      "fraction": 0.4904,
+      "wilson95": [
+        0.4765562043137506,
+        0.5042585355635946
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.0019210710132712937,
+        0.004311075932816705,
+        0.008192364450669221
+      ],
+      "seed_base": 310000
+    },
+    {
+      "case": "all_spoof",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.009027414689818339,
+        0.01657601328784214,
+        0.02999487108256952
+      ],
+      "seed_base": 310000
+    },
+    {
+      "case": "all_spoof",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 3062,
+      "fraction": 0.6124,
+      "wilson95": [
+        0.5988143040162465,
+        0.6258131165865047
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.001954129221055359,
+        0.004343071748455723,
+        0.008233825908066842
+      ],
+      "seed_base": 310000
+    },
+    {
+      "case": "all_spoof",
+      "is_attack": true,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.010926281776569229,
+        0.016806058517559126,
+        0.025982192950546046
+      ],
+      "seed_base": 310000
+    },
+    {
+      "case": "all_spoof",
+      "is_attack": true,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.0035115270040755467,
+        0.006164293147642021,
+        0.01001271853032077
+      ],
+      "seed_base": 310000
+    },
+    {
+      "case": "all_spoof",
+      "is_attack": true,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.011733452367484062,
+        0.016953134390905927,
+        0.024496519738161745
+      ],
+      "seed_base": 310000
+    },
+    {
+      "case": "all_spoof",
+      "is_attack": true,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.00445612043272509,
+        0.007115164710961068,
+        0.010802970663774657
+      ],
+      "seed_base": 310000
+    },
+    {
+      "case": "partial_2",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 96,
+      "fraction": 0.0192,
+      "wilson95": [
+        0.015749017549122262,
+        0.02338920464124467
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.15365739586791516,
+        0.6130557724799719,
+        0.9346391219226479
+      ],
+      "seed_base": 320000
+    },
+    {
+      "case": "partial_2",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 79,
+      "fraction": 0.0158,
+      "wilson95": [
+        0.01269663591166846,
+        0.019646806651924864
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.0038270365119061124,
+        0.01655131878059543,
+        0.1009457331413062
+      ],
+      "seed_base": 320000
+    },
+    {
+      "case": "partial_2",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 86,
+      "fraction": 0.0172,
+      "wilson95": [
+        0.013949219247445802,
+        0.021192073750701364
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.22078319209991748,
+        0.6543163921636578,
+        0.9406481331018411
+      ],
+      "seed_base": 320000
+    },
+    {
+      "case": "partial_2",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 90,
+      "fraction": 0.018,
+      "wilson95": [
+        0.014667759588024541,
+        0.02207230508701053
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.004224891924455592,
+        0.01783757036905314,
+        0.10330573238138847
+      ],
+      "seed_base": 320000
+    },
+    {
+      "case": "partial_2",
+      "is_attack": true,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 124,
+      "fraction": 0.0248,
+      "wilson95": [
+        0.020840470557508064,
+        0.029489153371074234
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.3560233760825451,
+        0.6329381730250689,
+        0.833479908942378
+      ],
+      "seed_base": 320000
+    },
+    {
+      "case": "partial_2",
+      "is_attack": true,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 305,
+      "fraction": 0.061,
+      "wilson95": [
+        0.054697233283090105,
+        0.06797680902467006
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.009744297632892758,
+        0.07369534490433205,
+        0.24502072055491098
+      ],
+      "seed_base": 320000
+    },
+    {
+      "case": "partial_2",
+      "is_attack": true,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 122,
+      "fraction": 0.0244,
+      "wilson95": [
+        0.02047464350657034,
+        0.029055594583568007
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.3778777210964351,
+        0.6340461155911128,
+        0.8041695523384341
+      ],
+      "seed_base": 320000
+    },
+    {
+      "case": "partial_2",
+      "is_attack": true,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 353,
+      "fraction": 0.0706,
+      "wilson95": [
+        0.06382458792359247,
+        0.07803471450682259
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.010922255586950522,
+        0.0846086089021438,
+        0.27662795453101385
+      ],
+      "seed_base": 320000
+    },
+    {
+      "case": "partial_3",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 184,
+      "fraction": 0.0368,
+      "wilson95": [
+        0.031927002221443804,
+        0.04238419686045712
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.11967085080142292,
+        0.5430851842401696,
+        0.9241621783216926
+      ],
+      "seed_base": 330000
+    },
+    {
+      "case": "partial_3",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 235,
+      "fraction": 0.047,
+      "wilson95": [
+        0.04147349616779377,
+        0.053222041794428
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.002991060606815485,
+        0.009608525091763104,
+        0.029178341165029046
+      ],
+      "seed_base": 330000
+    },
+    {
+      "case": "partial_3",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 226,
+      "fraction": 0.0452,
+      "wilson95": [
+        0.03978255839785057,
+        0.051315743291373395
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.14635568589068204,
+        0.5751519422148581,
+        0.9176229038357964
+      ],
+      "seed_base": 330000
+    },
+    {
+      "case": "partial_3",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 307,
+      "fraction": 0.0614,
+      "wilson95": [
+        0.055076678775241784,
+        0.06839674937096234
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.0033791322913233534,
+        0.009861847714583361,
+        0.0298166490171347
+      ],
+      "seed_base": 330000
+    },
+    {
+      "case": "partial_3",
+      "is_attack": true,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 392,
+      "fraction": 0.0784,
+      "wilson95": [
+        0.07126887513142803,
+        0.08617845114864413
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.28126310479549466,
+        0.5686696918121634,
+        0.7696839283087294
+      ],
+      "seed_base": 330000
+    },
+    {
+      "case": "partial_3",
+      "is_attack": true,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 3985,
+      "fraction": 0.797,
+      "wilson95": [
+        0.7856248290803202,
+        0.8079191559643161
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.005163410639857762,
+        0.012130071934070232,
+        0.027060861098428927
+      ],
+      "seed_base": 330000
+    },
+    {
+      "case": "partial_3",
+      "is_attack": true,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 419,
+      "fraction": 0.0838,
+      "wilson95": [
+        0.07643548386837289,
+        0.09180355123069266
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.3109958145955727,
+        0.5687528371786392,
+        0.744745613405732
+      ],
+      "seed_base": 330000
+    },
+    {
+      "case": "partial_3",
+      "is_attack": true,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 4730,
+      "fraction": 0.946,
+      "wilson95": [
+        0.9393858810432103,
+        0.9519293288217987
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.006320386588857996,
+        0.012507017056392275,
+        0.024267903250174794
+      ],
+      "seed_base": 330000
+    },
+    {
+      "case": "partial_4",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 401,
+      "fraction": 0.0802,
+      "wilson95": [
+        0.07298997275947985,
+        0.0880545897935901
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.07844917593813722,
+        0.44654167610242085,
+        0.8512030333363395
+      ],
+      "seed_base": 340000
+    },
+    {
+      "case": "partial_4",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 477,
+      "fraction": 0.0954,
+      "wilson95": [
+        0.08756516763547541,
+        0.10385605677846481
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.0025800703318875585,
+        0.007378031937441293,
+        0.01779226760518166
+      ],
+      "seed_base": 340000
+    },
+    {
+      "case": "partial_4",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 475,
+      "fraction": 0.095,
+      "wilson95": [
+        0.0871807381378733,
+        0.10344110043762297
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.09410430833319672,
+        0.4748210194107586,
+        0.8523667492697304
+      ],
+      "seed_base": 340000
+    },
+    {
+      "case": "partial_4",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 652,
+      "fraction": 0.1304,
+      "wilson95": [
+        0.12134914479996549,
+        0.14001834047782075
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.002731704416445529,
+        0.007419296425823491,
+        0.0185970172427589
+      ],
+      "seed_base": 340000
+    },
+    {
+      "case": "partial_4",
+      "is_attack": true,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 1209,
+      "fraction": 0.2418,
+      "wilson95": [
+        0.23013296852236015,
+        0.2538634727620674
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.211903905361166,
+        0.47038512515983055,
+        0.6612746374242184
+      ],
+      "seed_base": 340000
+    },
+    {
+      "case": "partial_4",
+      "is_attack": true,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 4853,
+      "fraction": 0.9706,
+      "wilson95": [
+        0.9655443196141249,
+        0.9749331193151876
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.004630680901173528,
+        0.009468866205999266,
+        0.018866692928708725
+      ],
+      "seed_base": 340000
+    },
+    {
+      "case": "partial_4",
+      "is_attack": true,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 1428,
+      "fraction": 0.2856,
+      "wilson95": [
+        0.273248072369508,
+        0.2982811182245326
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.22892134026384914,
+        0.4714130055663107,
+        0.6330532858465819
+      ],
+      "seed_base": 340000
+    },
+    {
+      "case": "partial_4",
+      "is_attack": true,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 4987,
+      "fraction": 0.9974,
+      "wilson95": [
+        0.9955564171048898,
+        0.9984798730001674
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.005502925613082997,
+        0.010225860992709706,
+        0.017780835525572396
+      ],
+      "seed_base": 340000
+    },
+    {
+      "case": "partial_6",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 1847,
+      "fraction": 0.3694,
+      "wilson95": [
+        0.3561271045071171,
+        0.38287341924093193
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.019946231336113073,
+        0.24486290055429172,
+        0.49869418773521096
+      ],
+      "seed_base": 350000
+    },
+    {
+      "case": "partial_6",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 1377,
+      "fraction": 0.2754,
+      "wilson95": [
+        0.26319388113263326,
+        0.2879509705810864
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.0022836850379744983,
+        0.005270249286973672,
+        0.011077850301882203
+      ],
+      "seed_base": 350000
+    },
+    {
+      "case": "partial_6",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 2426,
+      "fraction": 0.4852,
+      "wilson95": [
+        0.4713637102772141,
+        0.4990590137003597
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.019920587121188573,
+        0.25205174212319514,
+        0.4981757435239351
+      ],
+      "seed_base": 350000
+    },
+    {
+      "case": "partial_6",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 1830,
+      "fraction": 0.366,
+      "wilson95": [
+        0.3527555422602733,
+        0.3794502018610021
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.00226155391179527,
+        0.005320422029860272,
+        0.010869209055811216
+      ],
+      "seed_base": 350000
+    },
+    {
+      "case": "partial_6",
+      "is_attack": true,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.060985200427471964,
+        0.2541014923093873,
+        0.361363838695284
+      ],
+      "seed_base": 350000
+    },
+    {
+      "case": "partial_6",
+      "is_attack": true,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.0038211649906322535,
+        0.007130889746464963,
+        0.012602530663703745
+      ],
+      "seed_base": 350000
+    },
+    {
+      "case": "partial_6",
+      "is_attack": true,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.06517053905257957,
+        0.256683514820476,
+        0.34042392611185046
+      ],
+      "seed_base": 350000
+    },
+    {
+      "case": "partial_6",
+      "is_attack": true,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.00491738362822045,
+        0.008061983598517829,
+        0.013006395366018888
+      ],
+      "seed_base": 350000
+    },
+    {
+      "case": "two_sources",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 2068,
+      "fraction": 0.4136,
+      "wilson95": [
+        0.40002085321788106,
+        0.4273118056782249
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.01335860484523215,
+        0.2741191238221333,
+        0.9543443900875931
+      ],
+      "seed_base": 360000
+    },
+    {
+      "case": "two_sources",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 845,
+      "fraction": 0.169,
+      "wilson95": [
+        0.1588675861035525,
+        0.17964063258407537
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.0024498937832554604,
+        0.0061149169107727105,
+        0.013096525446904568
+      ],
+      "seed_base": 360000
+    },
+    {
+      "case": "two_sources",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 2263,
+      "fraction": 0.4526,
+      "wilson95": [
+        0.43884501610186466,
+        0.4664277620425269
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.013319205655006394,
+        0.3031222842054865,
+        0.9593797977229168
+      ],
+      "seed_base": 360000
+    },
+    {
+      "case": "two_sources",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 1167,
+      "fraction": 0.2334,
+      "wilson95": [
+        0.2218827868044027,
+        0.2453265518727018
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.002327446439618899,
+        0.006140136574329885,
+        0.013226947073129958
+      ],
+      "seed_base": 360000
+    },
+    {
+      "case": "two_sources",
+      "is_attack": true,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 2508,
+      "fraction": 0.5016,
+      "wilson95": [
+        0.48774512513685814,
+        0.5154524182169177
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.02390513346445828,
+        0.39560725254295437,
+        0.62350593349657
+      ],
+      "seed_base": 360000
+    },
+    {
+      "case": "two_sources",
+      "is_attack": true,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 4995,
+      "fraction": 0.999,
+      "wilson95": [
+        0.9976610469499418,
+        0.9995727865088913
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.004309864086622454,
+        0.008001449013204482,
+        0.013887169980211275
+      ],
+      "seed_base": 360000
+    },
+    {
+      "case": "two_sources",
+      "is_attack": true,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 2601,
+      "fraction": 0.5202,
+      "wilson95": [
+        0.5063420766760635,
+        0.5340269081653563
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.02453912895713538,
+        0.40640762305898015,
+        0.6165558680179077
+      ],
+      "seed_base": 360000
+    },
+    {
+      "case": "two_sources",
+      "is_attack": true,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.005358945608417365,
+        0.00887623463553128,
+        0.014055255330721373
+      ],
+      "seed_base": 360000
+    },
+    {
+      "case": "mixture_-6",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 133,
+      "fraction": 0.0266,
+      "wilson95": [
+        0.022490203302556452,
+        0.031436656899023634
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.13684706761095936,
+        0.6012411115808661,
+        0.9415904657478119
+      ],
+      "seed_base": 370000
+    },
+    {
+      "case": "mixture_-6",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 208,
+      "fraction": 0.0416,
+      "wilson95": [
+        0.03640829747606612,
+        0.04749553166716225
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.0028418858725036467,
+        0.01934080900697463,
+        0.10806358600668224
+      ],
+      "seed_base": 370000
+    },
+    {
+      "case": "mixture_-6",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 54,
+      "fraction": 0.0108,
+      "wilson95": [
+        0.008287189765234891,
+        0.014063929817809002
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.24165294391786982,
+        0.680047466248975,
+        0.9442896732965936
+      ],
+      "seed_base": 370000
+    },
+    {
+      "case": "mixture_-6",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 136,
+      "fraction": 0.0272,
+      "wilson95": [
+        0.02304132562570655,
+        0.03208461333353947
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.003563999678092401,
+        0.02469525959976948,
+        0.11659728044726027
+      ],
+      "seed_base": 370000
+    },
+    {
+      "case": "mixture_-6",
+      "is_attack": true,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 106,
+      "fraction": 0.0212,
+      "wilson95": [
+        0.01755941437195323,
+        0.025575737010633478
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.3544708958762666,
+        0.6451197696928961,
+        0.844312640103789
+      ],
+      "seed_base": 370000
+    },
+    {
+      "case": "mixture_-6",
+      "is_attack": true,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 81,
+      "fraction": 0.0162,
+      "wilson95": [
+        0.013053851931465627,
+        0.020088976470571653
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.013558287665197727,
+        0.10212186936078585,
+        0.28367868435543697
+      ],
+      "seed_base": 370000
+    },
+    {
+      "case": "mixture_-6",
+      "is_attack": true,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 58,
+      "fraction": 0.0116,
+      "wilson95": [
+        0.008984523450010988,
+        0.014965367809920811
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.4085778775824091,
+        0.6548624797467908,
+        0.805516170299046
+      ],
+      "seed_base": 370000
+    },
+    {
+      "case": "mixture_-6",
+      "is_attack": true,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 50,
+      "fraction": 0.01,
+      "wilson95": [
+        0.007593772813946567,
+        0.013158575092209418
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.01970158010559636,
+        0.15285893798444794,
+        0.34860999839807055
+      ],
+      "seed_base": 370000
+    },
+    {
+      "case": "mixture_0",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 467,
+      "fraction": 0.0934,
+      "wilson95": [
+        0.08564346098790364,
+        0.10178083423381683
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.0741959864952815,
+        0.44792176381705107,
+        0.8640405013680443
+      ],
+      "seed_base": 380000
+    },
+    {
+      "case": "mixture_0",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 719,
+      "fraction": 0.1438,
+      "wilson95": [
+        0.13434743677336694,
+        0.1537994740922918
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.0015922818113516687,
+        0.012733599191016765,
+        0.10366715264500587
+      ],
+      "seed_base": 380000
+    },
+    {
+      "case": "mixture_0",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 91,
+      "fraction": 0.0182,
+      "wilson95": [
+        0.014847689638538625,
+        0.022292067955718423
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.20837949263261282,
+        0.6494295523780165,
+        0.9243527386141946
+      ],
+      "seed_base": 380000
+    },
+    {
+      "case": "mixture_0",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 408,
+      "fraction": 0.0816,
+      "wilson95": [
+        0.0743293778033679,
+        0.0895130351842559
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.002155309020873063,
+        0.023622853649502444,
+        0.14526305622603936
+      ],
+      "seed_base": 380000
+    },
+    {
+      "case": "mixture_0",
+      "is_attack": true,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 345,
+      "fraction": 0.069,
+      "wilson95": [
+        0.06230052488742162,
+        0.07636123418921763
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.2884961245027827,
+        0.5816434871497599,
+        0.794806773584317
+      ],
+      "seed_base": 380000
+    },
+    {
+      "case": "mixture_0",
+      "is_attack": true,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 210,
+      "fraction": 0.042,
+      "wilson95": [
+        0.03678268629468601,
+        0.04792052868698633
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.008615212471996337,
+        0.08281209574477394,
+        0.26600443091713244
+      ],
+      "seed_base": 380000
+    },
+    {
+      "case": "mixture_0",
+      "is_attack": true,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 305,
+      "fraction": 0.061,
+      "wilson95": [
+        0.054697233283090105,
+        0.06797680902467006
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.3042108622504492,
+        0.5854890582757872,
+        0.7715585682668268
+      ],
+      "seed_base": 380000
+    },
+    {
+      "case": "mixture_0",
+      "is_attack": true,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 181,
+      "fraction": 0.0362,
+      "wilson95": [
+        0.03136842467827379,
+        0.04174369564596121
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.010329879741891358,
+        0.10128286422170237,
+        0.29321404752844665
+      ],
+      "seed_base": 380000
+    },
+    {
+      "case": "mixture_3",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 1579,
+      "fraction": 0.3158,
+      "wilson95": [
+        0.30306128520872083,
+        0.3288215361878383
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.030688832851257775,
+        0.27594231422653837,
+        0.7781877386083795
+      ],
+      "seed_base": 390000
+    },
+    {
+      "case": "mixture_3",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 1837,
+      "fraction": 0.3674,
+      "wilson95": [
+        0.3541437461513992,
+        0.38085984840443
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.0009919826297629243,
+        0.005571700770673893,
+        0.03283165120342329
+      ],
+      "seed_base": 390000
+    },
+    {
+      "case": "mixture_3",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 604,
+      "fraction": 0.1208,
+      "wilson95": [
+        0.11205671478998741,
+        0.13012551036514394
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.10355073634118071,
+        0.413151494005081,
+        0.7392306362207852
+      ],
+      "seed_base": 390000
+    },
+    {
+      "case": "mixture_3",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 1156,
+      "fraction": 0.2312,
+      "wilson95": [
+        0.21972308119204448,
+        0.24308963537361827
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.0013360394073720409,
+        0.00875555099286226,
+        0.04629413315934821
+      ],
+      "seed_base": 390000
+    },
+    {
+      "case": "mixture_3",
+      "is_attack": true,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 2234,
+      "fraction": 0.4468,
+      "wilson95": [
+        0.4330657056802901,
+        0.46061597780666397
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.14568007353456663,
+        0.4146683879670644,
+        0.6871663719928265
+      ],
+      "seed_base": 390000
+    },
+    {
+      "case": "mixture_3",
+      "is_attack": true,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 1018,
+      "fraction": 0.2036,
+      "wilson95": [
+        0.19266813936484387,
+        0.21498695434818607
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.004408690495018073,
+        0.03311028669795581,
+        0.13536451662696203
+      ],
+      "seed_base": 390000
+    },
+    {
+      "case": "mixture_3",
+      "is_attack": true,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 1719,
+      "fraction": 0.3438,
+      "wilson95": [
+        0.3307590208478427,
+        0.35708080923979324
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.2017723751102104,
+        0.45989070271855215,
+        0.6673641561395185
+      ],
+      "seed_base": 390000
+    },
+    {
+      "case": "mixture_3",
+      "is_attack": true,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 701,
+      "fraction": 0.1402,
+      "wilson95": [
+        0.13085238782396819,
+        0.15010005049569497
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.006089611388161464,
+        0.05271141028475759,
+        0.21751458949902297
+      ],
+      "seed_base": 390000
+    },
+    {
+      "case": "mixture_6",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 3465,
+      "fraction": 0.693,
+      "wilson95": [
+        0.6800709372408028,
+        0.705632729808405
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.013584010708546063,
+        0.14564669945356573,
+        0.3910904032517671
+      ],
+      "seed_base": 400000
+    },
+    {
+      "case": "mixture_6",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 3617,
+      "fraction": 0.7234,
+      "wilson95": [
+        0.7108333040109117,
+        0.7356236867600369
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.0006266894809518075,
+        0.002645615950336128,
+        0.016434655351671816
+      ],
+      "seed_base": 400000
+    },
+    {
+      "case": "mixture_6",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 3424,
+      "fraction": 0.6848,
+      "wilson95": [
+        0.6717845979332472,
+        0.6975316594278597
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.0459578193411701,
+        0.2111485895181357,
+        0.38315636013709736
+      ],
+      "seed_base": 400000
+    },
+    {
+      "case": "mixture_6",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 3119,
+      "fraction": 0.6238,
+      "wilson95": [
+        0.6102822768985547,
+        0.6371276400998491
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.000718822021181207,
+        0.003631470629428829,
+        0.019163491968537952
+      ],
+      "seed_base": 400000
+    },
+    {
+      "case": "mixture_6",
+      "is_attack": true,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 4832,
+      "fraction": 0.9664,
+      "wilson95": [
+        0.9610363184973227,
+        0.9710475691283282
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.07734352264019599,
+        0.22319993292000917,
+        0.4536110255664654
+      ],
+      "seed_base": 400000
+    },
+    {
+      "case": "mixture_6",
+      "is_attack": true,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 2767,
+      "fraction": 0.5534,
+      "wilson95": [
+        0.539584462301987,
+        0.567133547130281
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.0019646748408401814,
+        0.014718531057900365,
+        0.06488581129530227
+      ],
+      "seed_base": 400000
+    },
+    {
+      "case": "mixture_6",
+      "is_attack": true,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 4850,
+      "fraction": 0.97,
+      "wilson95": [
+        0.964898893426598,
+        0.9743794667450484
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.10682137508894528,
+        0.2617300067840246,
+        0.4484742783657006
+      ],
+      "seed_base": 400000
+    },
+    {
+      "case": "mixture_6",
+      "is_attack": true,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 1767,
+      "fraction": 0.3534,
+      "wilson95": [
+        0.3402672047829543,
+        0.3667578854273365
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.0031300543001323367,
+        0.027442597636757042,
+        0.10661554078993529
+      ],
+      "seed_base": 400000
+    },
+    {
+      "case": "mixture_12",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.003209972014170728,
+        0.03792863101183577,
+        0.09385575332927995
+      ],
+      "seed_base": 410000
+    },
+    {
+      "case": "mixture_12",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 4977,
+      "fraction": 0.9954,
+      "wilson95": [
+        0.9931066129381813,
+        0.9969327479746563
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.0001758222800176782,
+        0.0006807817304156027,
+        0.0037391003431432317
+      ],
+      "seed_base": 410000
+    },
+    {
+      "case": "mixture_12",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.010967596991044092,
+        0.05319013115775825,
+        0.09623716918254123
+      ],
+      "seed_base": 410000
+    },
+    {
+      "case": "mixture_12",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 4949,
+      "fraction": 0.9898,
+      "wilson95": [
+        0.9866146950734219,
+        0.9922332641012003
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.0002024812911683145,
+        0.0008793801773849751,
+        0.004728200010108592
+      ],
+      "seed_base": 410000
+    },
+    {
+      "case": "mixture_12",
+      "is_attack": true,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.019051851609848097,
+        0.05764522037074679,
+        0.12239176513149354
+      ],
+      "seed_base": 410000
+    },
+    {
+      "case": "mixture_12",
+      "is_attack": true,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 4964,
+      "fraction": 0.9928,
+      "wilson95": [
+        0.9900487489604066,
+        0.9947946040025453
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.0005268875291042358,
+        0.0034950967134816007,
+        0.015576558731367344
+      ],
+      "seed_base": 410000
+    },
+    {
+      "case": "mixture_12",
+      "is_attack": true,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.028811469895385366,
+        0.0685281262516782,
+        0.1240601412063459
+      ],
+      "seed_base": 410000
+    },
+    {
+      "case": "mixture_12",
+      "is_attack": true,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 4742,
+      "fraction": 0.9484,
+      "wilson95": [
+        0.9419167179483694,
+        0.9541948069473034
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.0009060036201780988,
+        0.007206689274476123,
+        0.026477024493462675
+      ],
+      "seed_base": 410000
+    },
+    {
+      "case": "single_mp",
+      "is_attack": false,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 43,
+      "fraction": 0.0086,
+      "wilson95": [
+        0.0063911756315949385,
+        0.011563321840007208
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.20176425022705474,
+        0.6475507383578143,
+        0.9401263881004664
+      ],
+      "seed_base": 420000
+    },
+    {
+      "case": "single_mp",
+      "is_attack": false,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 45,
+      "fraction": 0.009,
+      "wilson95": [
+        0.00673322861097761,
+        0.01202065469906849
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.004397734742053934,
+        0.023104722301897557,
+        0.11268406244182254
+      ],
+      "seed_base": 420000
+    },
+    {
+      "case": "single_mp",
+      "is_attack": false,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 37,
+      "fraction": 0.0074,
+      "wilson95": [
+        0.005373597756871216,
+        0.010182742199399067
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.2637585330431295,
+        0.6868737287784843,
+        0.9446366277849245
+      ],
+      "seed_base": 420000
+    },
+    {
+      "case": "single_mp",
+      "is_attack": false,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 59,
+      "fraction": 0.0118,
+      "wilson95": [
+        0.009159421922706208,
+        0.015190162256447572
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.004454305428002522,
+        0.026290435490130208,
+        0.11752801728639935
+      ],
+      "seed_base": 420000
+    },
+    {
+      "case": "single_mp",
+      "is_attack": false,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 45,
+      "fraction": 0.009,
+      "wilson95": [
+        0.00673322861097761,
+        0.01202065469906849
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.40422155875563687,
+        0.6655143462561063,
+        0.8538615159462832
+      ],
+      "seed_base": 420000
+    },
+    {
+      "case": "single_mp",
+      "is_attack": false,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 34,
+      "fraction": 0.0068,
+      "wilson95": [
+        0.0048703334305700095,
+        0.009486927768034338
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.017898235524609122,
+        0.11211924513214827,
+        0.28399439776908836
+      ],
+      "seed_base": 420000
+    },
+    {
+      "case": "single_mp",
+      "is_attack": false,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 36,
+      "fraction": 0.0072,
+      "wilson95": [
+        0.005205395997454866,
+        0.009951251039593437
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.42546569077849034,
+        0.6669433887602315,
+        0.8326318586334895
+      ],
+      "seed_base": 420000
+    },
+    {
+      "case": "single_mp",
+      "is_attack": false,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 30,
+      "fraction": 0.006,
+      "wilson95": [
+        0.004206136160498105,
+        0.008552353361218335
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.021802847328772343,
+        0.13302421274067766,
+        0.3299840763463011
+      ],
+      "seed_base": 420000
+    },
+    {
+      "case": "clustered_los",
+      "is_attack": false,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 223,
+      "fraction": 0.0446,
+      "wilson95": [
+        0.039219458507478336,
+        0.050679764424079704
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.10925859480175458,
+        0.5236919945218695,
+        0.9130425343953295
+      ],
+      "seed_base": 430000
+    },
+    {
+      "case": "clustered_los",
+      "is_attack": false,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 212,
+      "fraction": 0.0424,
+      "wilson95": [
+        0.03715721151196373,
+        0.04834538930815256
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.003159257789406642,
+        0.00959604361880106,
+        0.028454560332062097
+      ],
+      "seed_base": 430000
+    },
+    {
+      "case": "clustered_los",
+      "is_attack": false,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 221,
+      "fraction": 0.0442,
+      "wilson95": [
+        0.03884421475711896,
+        0.05025562233599513
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.15165001186077826,
+        0.5663899511104121,
+        0.9183183661409692
+      ],
+      "seed_base": 430000
+    },
+    {
+      "case": "clustered_los",
+      "is_attack": false,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 267,
+      "fraction": 0.0534,
+      "wilson95": [
+        0.047503970713696914,
+        0.05998174066362813
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.0033585293040294976,
+        0.010764623744152036,
+        0.03584712434006104
+      ],
+      "seed_base": 430000
+    },
+    {
+      "case": "clustered_los",
+      "is_attack": false,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 410,
+      "fraction": 0.082,
+      "wilson95": [
+        0.07471218677229068,
+        0.0899296120537771
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.2889591556297377,
+        0.5645678582490352,
+        0.7687804797368615
+      ],
+      "seed_base": 430000
+    },
+    {
+      "case": "clustered_los",
+      "is_attack": false,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 3443,
+      "fraction": 0.6886,
+      "wilson95": [
+        0.675624025866941,
+        0.7012863969593834
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.005598867683383143,
+        0.013602232572066948,
+        0.033216258381790584
+      ],
+      "seed_base": 430000
+    },
+    {
+      "case": "clustered_los",
+      "is_attack": false,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 469,
+      "fraction": 0.0938,
+      "wilson95": [
+        0.08602771364704209,
+        0.10219596741312231
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.2974558198984357,
+        0.5627167608176205,
+        0.7425731319556937
+      ],
+      "seed_base": 430000
+    },
+    {
+      "case": "clustered_los",
+      "is_attack": false,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 4229,
+      "fraction": 0.8458,
+      "wilson95": [
+        0.8355247347394819,
+        0.8555443225953168
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.006719757696182017,
+        0.013999694894365516,
+        0.029751163755366298
+      ],
+      "seed_base": 430000
+    },
+    {
+      "case": "short_aperture_los",
+      "is_attack": false,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.013661226953812637,
+        0.03687012661785221,
+        0.08292082218910317
+      ],
+      "seed_base": 440000
+    },
+    {
+      "case": "short_aperture_los",
+      "is_attack": false,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 1013,
+      "fraction": 0.2026,
+      "wilson95": [
+        0.1916893350667882,
+        0.21396729405013182
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.002415478751458166,
+        0.005825091976870439,
+        0.012644135868365524
+      ],
+      "seed_base": 440000
+    },
+    {
+      "case": "short_aperture_los",
+      "is_attack": false,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 4769,
+      "fraction": 0.9538,
+      "wilson95": [
+        0.9476249036383626,
+        0.9592783300763037
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.025699937708812855,
+        0.12442671626755737,
+        0.3013108759315739
+      ],
+      "seed_base": 440000
+    },
+    {
+      "case": "short_aperture_los",
+      "is_attack": false,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 539,
+      "fraction": 0.1078,
+      "wilson95": [
+        0.09950297750115339,
+        0.11669920790454943
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.0028647832630224225,
+        0.008424908363409526,
+        0.02340241963306528
+      ],
+      "seed_base": 440000
+    },
+    {
+      "case": "short_aperture_los",
+      "is_attack": false,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.031052026516488956,
+        0.09045677134977896,
+        0.1855158086974475
+      ],
+      "seed_base": 440000
+    },
+    {
+      "case": "short_aperture_los",
+      "is_attack": false,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 3881,
+      "fraction": 0.7762,
+      "wilson95": [
+        0.7644378439030247,
+        0.7875380775425257
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.005390773196928978,
+        0.012346057620471869,
+        0.028379268917710494
+      ],
+      "seed_base": 440000
+    },
+    {
+      "case": "short_aperture_los",
+      "is_attack": false,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.03329971015490701,
+        0.09023948171141162,
+        0.18050790661784244
+      ],
+      "seed_base": 440000
+    },
+    {
+      "case": "short_aperture_los",
+      "is_attack": false,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 4178,
+      "fraction": 0.8356,
+      "wilson95": [
+        0.8250696954201525,
+        0.8456150230343252
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.006681216028837397,
+        0.014088435401703268,
+        0.031329293070760995
+      ],
+      "seed_base": 440000
+    },
+    {
+      "case": "short_aperture_spoof",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.008974892104729276,
+        0.016576595787767795,
+        0.030700861969207367
+      ],
+      "seed_base": 450000
+    },
+    {
+      "case": "short_aperture_spoof",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 2387,
+      "fraction": 0.4774,
+      "wilson95": [
+        0.46357778085666207,
+        0.49125691927125464
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.001973470143522259,
+        0.004348530874495304,
+        0.008276156433448959
+      ],
+      "seed_base": 450000
+    },
+    {
+      "case": "short_aperture_spoof",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.00894002111512599,
+        0.016633653278059313,
+        0.030128812573083242
+      ],
+      "seed_base": 450000
+    },
+    {
+      "case": "short_aperture_spoof",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 2998,
+      "fraction": 0.5996,
+      "wilson95": [
+        0.5859472484853594,
+        0.6130998252871853
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.001958924401119608,
+        0.00435825738652561,
+        0.008321721572945574
+      ],
+      "seed_base": 450000
+    },
+    {
+      "case": "short_aperture_spoof",
+      "is_attack": true,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.010852162965693699,
+        0.016853722351909912,
+        0.025917643168306494
+      ],
+      "seed_base": 450000
+    },
+    {
+      "case": "short_aperture_spoof",
+      "is_attack": true,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.0034838065692328274,
+        0.006133455246834968,
+        0.010036845436490133
+      ],
+      "seed_base": 450000
+    },
+    {
+      "case": "short_aperture_spoof",
+      "is_attack": true,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.011947365410218685,
+        0.01690054664921113,
+        0.024050038131770375
+      ],
+      "seed_base": 450000
+    },
+    {
+      "case": "short_aperture_spoof",
+      "is_attack": true,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.004488442055227238,
+        0.007166575305383294,
+        0.010801678422725457
+      ],
+      "seed_base": 450000
+    },
+    {
+      "case": "low_signal_los",
+      "is_attack": false,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 0,
+      "fraction": 0.0,
+      "wilson95": [
+        0.0,
+        0.0007677019450571244
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.5331602410268744,
+        0.6867987732558256,
+        0.8025204877464405
+      ],
+      "seed_base": 460000
+    },
+    {
+      "case": "low_signal_los",
+      "is_attack": false,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 0,
+      "fraction": 0.0,
+      "wilson95": [
+        0.0,
+        0.0007677019450571244
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.16999815334486632,
+        0.2924641697849597,
+        0.38084113798246017
+      ],
+      "seed_base": 460000
+    },
+    {
+      "case": "low_signal_los",
+      "is_attack": false,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 0,
+      "fraction": 0.0,
+      "wilson95": [
+        0.0,
+        0.0007677019450571244
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.5415599247451457,
+        0.6854406212459385,
+        0.7999284544418785
+      ],
+      "seed_base": 460000
+    },
+    {
+      "case": "low_signal_los",
+      "is_attack": false,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 0,
+      "fraction": 0.0,
+      "wilson95": [
+        0.0,
+        0.0007677019450571244
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.16502594806763987,
+        0.29163605856949826,
+        0.38332258179064316
+      ],
+      "seed_base": 460000
+    },
+    {
+      "case": "low_signal_los",
+      "is_attack": false,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 0,
+      "fraction": 0.0,
+      "wilson95": [
+        0.0,
+        0.0007677019450571244
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.602848978247836,
+        0.6853415672310011,
+        0.7553233197462618
+      ],
+      "seed_base": 460000
+    },
+    {
+      "case": "low_signal_los",
+      "is_attack": false,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 0,
+      "fraction": 0.0,
+      "wilson95": [
+        0.0,
+        0.0007677019450571244
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.2684856418042427,
+        0.36427963819957776,
+        0.42480334237345274
+      ],
+      "seed_base": 460000
+    },
+    {
+      "case": "low_signal_los",
+      "is_attack": false,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 0,
+      "fraction": 0.0,
+      "wilson95": [
+        0.0,
+        0.0007677019450571244
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.6276759649421134,
+        0.6846035874222203,
+        0.7344893498924668
+      ],
+      "seed_base": 460000
+    },
+    {
+      "case": "low_signal_los",
+      "is_attack": false,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 0,
+      "fraction": 0.0,
+      "wilson95": [
+        0.0,
+        0.0007677019450571244
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.3225030008287434,
+        0.3954337576845411,
+        0.44141662388319935
+      ],
+      "seed_base": 460000
+    },
+    {
+      "case": "low_signal_spoof",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 0,
+      "fraction": 0.0,
+      "wilson95": [
+        0.0,
+        0.0007677019450571244
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.4952805120135777,
+        0.6566914392342162,
+        0.7922863492474345
+      ],
+      "seed_base": 470000
+    },
+    {
+      "case": "low_signal_spoof",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 0,
+      "fraction": 0.0,
+      "wilson95": [
+        0.0,
+        0.0007677019450571244
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.1468262004002037,
+        0.276862430771513,
+        0.3755713758288993
+      ],
+      "seed_base": 470000
+    },
+    {
+      "case": "low_signal_spoof",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 0,
+      "fraction": 0.0,
+      "wilson95": [
+        0.0,
+        0.0007677019450571244
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.49382755880755497,
+        0.6567892150658166,
+        0.7826544947579269
+      ],
+      "seed_base": 470000
+    },
+    {
+      "case": "low_signal_spoof",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 0,
+      "fraction": 0.0,
+      "wilson95": [
+        0.0,
+        0.0007677019450571244
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.14722951554721112,
+        0.27666418665034054,
+        0.37805696946169387
+      ],
+      "seed_base": 470000
+    },
+    {
+      "case": "low_signal_spoof",
+      "is_attack": true,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 0,
+      "fraction": 0.0,
+      "wilson95": [
+        0.0,
+        0.0007677019450571244
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.5531774258401566,
+        0.6569147457233745,
+        0.7355679937171601
+      ],
+      "seed_base": 470000
+    },
+    {
+      "case": "low_signal_spoof",
+      "is_attack": true,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 0,
+      "fraction": 0.0,
+      "wilson95": [
+        0.0,
+        0.0007677019450571244
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.24472915854001198,
+        0.34669292781511296,
+        0.41660158405642794
+      ],
+      "seed_base": 470000
+    },
+    {
+      "case": "low_signal_spoof",
+      "is_attack": true,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 0,
+      "fraction": 0.0,
+      "wilson95": [
+        0.0,
+        0.0007677019450571244
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.576977835206481,
+        0.6556133711934482,
+        0.7156667655426504
+      ],
+      "seed_base": 470000
+    },
+    {
+      "case": "low_signal_spoof",
+      "is_attack": true,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 0,
+      "fraction": 0.0,
+      "wilson95": [
+        0.0,
+        0.0007677019450571244
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.29115592758839165,
+        0.3751344069621978,
+        0.4315138521033128
+      ],
+      "seed_base": 470000
+    },
+    {
+      "case": "prn_bias_spoof",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 26,
+      "fraction": 0.0052,
+      "wilson95": [
+        0.003551168641804525,
+        0.0076085492030240065
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.23255656166243904,
+        0.6645630896148357,
+        0.94005744196428
+      ],
+      "seed_base": 480000
+    },
+    {
+      "case": "prn_bias_spoof",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 34,
+      "fraction": 0.0068,
+      "wilson95": [
+        0.0048703334305700095,
+        0.009486927768034338
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.004641188377791261,
+        0.02512398950677709,
+        0.11637613988485083
+      ],
+      "seed_base": 480000
+    },
+    {
+      "case": "prn_bias_spoof",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 55,
+      "fraction": 0.011,
+      "wilson95": [
+        0.008461172335733187,
+        0.014289640166532683
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.2405029843587079,
+        0.6654908290767507,
+        0.940391250049645
+      ],
+      "seed_base": 480000
+    },
+    {
+      "case": "prn_bias_spoof",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 40,
+      "fraction": 0.008,
+      "wilson95": [
+        0.005880681725099648,
+        0.010874736988836564
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.004902933332433147,
+        0.025455696598531967,
+        0.11286932104824927
+      ],
+      "seed_base": 480000
+    },
+    {
+      "case": "prn_bias_spoof",
+      "is_attack": true,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 64,
+      "fraction": 0.0128,
+      "wilson95": [
+        0.010037035568302636,
+        0.016311013206961034
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.3914932460612941,
+        0.6594827531091502,
+        0.8508375114416298
+      ],
+      "seed_base": 480000
+    },
+    {
+      "case": "prn_bias_spoof",
+      "is_attack": true,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 35,
+      "fraction": 0.007,
+      "wilson95": [
+        0.005037635094103144,
+        0.009719319023723182
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.017893029054033373,
+        0.11106344690974654,
+        0.2851008869130797
+      ],
+      "seed_base": 480000
+    },
+    {
+      "case": "prn_bias_spoof",
+      "is_attack": true,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 15,
+      "fraction": 0.003,
+      "wilson95": [
+        0.0018189297776376753,
+        0.004944165955749107
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.4462239203911475,
+        0.6576887267335358,
+        0.7948414954875334
+      ],
+      "seed_base": 480000
+    },
+    {
+      "case": "prn_bias_spoof",
+      "is_attack": true,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 6,
+      "fraction": 0.0012,
+      "wilson95": [
+        0.0005500831677591556,
+        0.002615776292629832
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.04521036332107832,
+        0.19284392331275707,
+        0.37319704957613753
+      ],
+      "seed_base": 480000
+    },
+    {
+      "case": "bad_fourth_spoof",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.008905186097728578,
+        0.016458885796737252,
+        0.030074503848472583
+      ],
+      "seed_base": 490000
+    },
+    {
+      "case": "bad_fourth_spoof",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 2452,
+      "fraction": 0.4904,
+      "wilson95": [
+        0.4765562043137506,
+        0.5042585355635946
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.0018944547793024067,
+        0.00431928653651627,
+        0.008302450572038862
+      ],
+      "seed_base": 490000
+    },
+    {
+      "case": "bad_fourth_spoof",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 0,
+      "fraction": 0.0,
+      "wilson95": [
+        0.0,
+        0.0007677019450571244
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.5061240590538251,
+        0.6683814976652729,
+        0.7929144068158765
+      ],
+      "seed_base": 490000
+    },
+    {
+      "case": "bad_fourth_spoof",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 0,
+      "fraction": 0.0,
+      "wilson95": [
+        0.0,
+        0.0007677019450571244
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.14156175577990374,
+        0.2738488881848005,
+        0.37516694477095
+      ],
+      "seed_base": 490000
+    },
+    {
+      "case": "bad_fourth_spoof",
+      "is_attack": true,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.010865028014663491,
+        0.016749166719766506,
+        0.026019505221385814
+      ],
+      "seed_base": 490000
+    },
+    {
+      "case": "bad_fourth_spoof",
+      "is_attack": true,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.0034181679180794347,
+        0.006114515298138673,
+        0.009885513464239645
+      ],
+      "seed_base": 490000
+    },
+    {
+      "case": "bad_fourth_spoof",
+      "is_attack": true,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 4986,
+      "fraction": 0.9972,
+      "wilson95": [
+        0.9953052742616263,
+        0.9983313229242089
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.26158769282196687,
+        0.34252792638998153,
+        0.40601633713185076
+      ],
+      "seed_base": 490000
+    },
+    {
+      "case": "bad_fourth_spoof",
+      "is_attack": true,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 0,
+      "fraction": 0.0,
+      "wilson95": [
+        0.0,
+        0.0007677019450571244
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.07843806980973954,
+        0.14443093358045495,
+        0.1950681896776481
+      ],
+      "seed_base": 490000
+    },
+    {
+      "case": "common_reflection",
+      "is_attack": false,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.006271599939180543,
+        0.06002171747471619,
+        0.1510817341889792
+      ],
+      "seed_base": 500000
+    },
+    {
+      "case": "common_reflection",
+      "is_attack": false,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 4808,
+      "fraction": 0.9616,
+      "wilson95": [
+        0.9559095898889262,
+        0.9665816676753972
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.0002817074599183377,
+        0.001084453874116803,
+        0.00623757500216609
+      ],
+      "seed_base": 500000
+    },
+    {
+      "case": "common_reflection",
+      "is_attack": false,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.017702766011267843,
+        0.084216618075348,
+        0.15309831042024166
+      ],
+      "seed_base": 500000
+    },
+    {
+      "case": "common_reflection",
+      "is_attack": false,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 4700,
+      "fraction": 0.94,
+      "wilson95": [
+        0.9330733955440581,
+        0.9462510267442915
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.00030986890981518986,
+        0.0013671067792239756,
+        0.007311693412958231
+      ],
+      "seed_base": 500000
+    },
+    {
+      "case": "common_reflection",
+      "is_attack": false,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.030893110663513194,
+        0.09038518822459127,
+        0.19224170842004365
+      ],
+      "seed_base": 500000
+    },
+    {
+      "case": "common_reflection",
+      "is_attack": false,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 4658,
+      "fraction": 0.9316,
+      "wilson95": [
+        0.9242665987345867,
+        0.9382707209464399
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.0008001241449443362,
+        0.005548323720526743,
+        0.025509140021279637
+      ],
+      "seed_base": 500000
+    },
+    {
+      "case": "common_reflection",
+      "is_attack": false,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 5000,
+      "fraction": 1.0,
+      "wilson95": [
+        0.9992322980549431,
+        1.0
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.04489513089640107,
+        0.10749617515047102,
+        0.1976241340828806
+      ],
+      "seed_base": 500000
+    },
+    {
+      "case": "common_reflection",
+      "is_attack": false,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 4003,
+      "fraction": 0.8006,
+      "wilson95": [
+        0.7892963376875187,
+        0.8114421199031129
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.0013414894601174742,
+        0.01104218279544629,
+        0.0423573098222406
+      ],
+      "seed_base": 500000
+    },
+    {
+      "case": "spatial_matched",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "global",
+      "events": 5000,
+      "alerts": 55,
+      "fraction": 0.011,
+      "wilson95": [
+        0.008461172335733187,
+        0.014289640166532683
+      ],
+      "threshold": 0.1974069493937969,
+      "score_quantiles_01_50_99": [
+        0.19293160297696343,
+        0.6282231390998905,
+        0.9350882091464865
+      ],
+      "seed_base": 300000
+    },
+    {
+      "case": "spatial_matched",
+      "is_attack": true,
+      "layout": "2_short",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 42,
+      "fraction": 0.0084,
+      "wilson95": [
+        0.006220654387306615,
+        0.011334150165073551
+      ],
+      "threshold": 0.004283684832809697,
+      "score_quantiles_01_50_99": [
+        0.00448188950439781,
+        0.0219988179261214,
+        0.11097675685403677
+      ],
+      "seed_base": 300000
+    },
+    {
+      "case": "spatial_matched",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "global",
+      "events": 5000,
+      "alerts": 42,
+      "fraction": 0.0084,
+      "wilson95": [
+        0.006220654387306615,
+        0.011334150165073551
+      ],
+      "threshold": 0.24884074326750075,
+      "score_quantiles_01_50_99": [
+        0.25563554143183886,
+        0.6881853002380098,
+        0.9426006434778678
+      ],
+      "seed_base": 300000
+    },
+    {
+      "case": "spatial_matched",
+      "is_attack": true,
+      "layout": "2_diagonal",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 46,
+      "fraction": 0.0092,
+      "wilson95": [
+        0.0069047385482477065,
+        0.012248837681020369
+      ],
+      "threshold": 0.0047098269219257305,
+      "score_quantiles_01_50_99": [
+        0.0048405545529632416,
+        0.026313401455766983,
+        0.12036052107618969
+      ],
+      "seed_base": 300000
+    },
+    {
+      "case": "spatial_matched",
+      "is_attack": true,
+      "layout": "3",
+      "method": "global",
+      "events": 5000,
+      "alerts": 44,
+      "fraction": 0.0088,
+      "wilson95": [
+        0.006562037439973316,
+        0.011792152950850806
+      ],
+      "threshold": 0.3962934804026627,
+      "score_quantiles_01_50_99": [
+        0.39856321636670555,
+        0.6613797087438927,
+        0.854209782258774
+      ],
+      "seed_base": 300000
+    },
+    {
+      "case": "spatial_matched",
+      "is_attack": true,
+      "layout": "3",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 46,
+      "fraction": 0.0092,
+      "wilson95": [
+        0.0069047385482477065,
+        0.012248837681020369
+      ],
+      "threshold": 0.016342094557729805,
+      "score_quantiles_01_50_99": [
+        0.01657380646050802,
+        0.11005889095579535,
+        0.2938040865139617
+      ],
+      "seed_base": 300000
+    },
+    {
+      "case": "spatial_matched",
+      "is_attack": true,
+      "layout": "4",
+      "method": "global",
+      "events": 5000,
+      "alerts": 46,
+      "fraction": 0.0092,
+      "wilson95": [
+        0.0069047385482477065,
+        0.012248837681020369
+      ],
+      "threshold": 0.41466989641459484,
+      "score_quantiles_01_50_99": [
+        0.423523039272343,
+        0.6619294810180663,
+        0.8334522598524963
+      ],
+      "seed_base": 300000
+    },
+    {
+      "case": "spatial_matched",
+      "is_attack": true,
+      "layout": "4",
+      "method": "cluster3",
+      "events": 5000,
+      "alerts": 45,
+      "fraction": 0.009,
+      "wilson95": [
+        0.00673322861097761,
+        0.01202065469906849
+      ],
+      "threshold": 0.01964729156201372,
+      "score_quantiles_01_50_99": [
+        0.02015496170699222,
+        0.12366798467152235,
+        0.31679823485033
+      ],
+      "seed_base": 300000
+    }
+  ],
+  "paired_gains": [
+    {
+      "case": "los",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": -0.0022,
+      "normal95": [
+        -0.005856122482931768,
+        0.0014561224829317682
+      ],
+      "gained": 38,
+      "lost": 49
+    },
+    {
+      "case": "los",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.0004,
+      "normal95": [
+        -0.0031499834480868787,
+        0.003949983448086879
+      ],
+      "gained": 42,
+      "lost": 40
+    },
+    {
+      "case": "los",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": 0.0004,
+      "normal95": [
+        -0.002016622124634189,
+        0.002816622124634189
+      ],
+      "gained": 20,
+      "lost": 18
+    },
+    {
+      "case": "los",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": -0.0018,
+      "normal95": [
+        -0.005498085897355024,
+        0.0018980858973550244
+      ],
+      "gained": 40,
+      "lost": 49
+    },
+    {
+      "case": "los",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": 0.0008,
+      "normal95": [
+        -0.002877519295904322,
+        0.004477519295904322
+      ],
+      "gained": 46,
+      "lost": 42
+    },
+    {
+      "case": "los",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": 0.0,
+      "normal95": [
+        -0.003719142126637603,
+        0.003719142126637603
+      ],
+      "gained": 45,
+      "lost": 45
+    },
+    {
+      "case": "los",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": -0.0002,
+      "normal95": [
+        -0.002648232790682239,
+        0.0022482327906822386
+      ],
+      "gained": 19,
+      "lost": 20
+    },
+    {
+      "case": "los",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": 0.0006,
+      "normal95": [
+        -0.0030143182018933863,
+        0.0042143182018933864
+      ],
+      "gained": 44,
+      "lost": 41
+    },
+    {
+      "case": "all_spoof",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "all_spoof",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "all_spoof",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "all_spoof",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "all_spoof",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": 0.5096,
+      "normal95": [
+        0.49574213063366535,
+        0.5234578693663348
+      ],
+      "gained": 2548,
+      "lost": 0
+    },
+    {
+      "case": "all_spoof",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": 0.3876,
+      "normal95": [
+        0.37409433423047295,
+        0.40110566576952705
+      ],
+      "gained": 1938,
+      "lost": 0
+    },
+    {
+      "case": "all_spoof",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "all_spoof",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": 0.5096,
+      "normal95": [
+        0.49574213063366535,
+        0.5234578693663348
+      ],
+      "gained": 2548,
+      "lost": 0
+    },
+    {
+      "case": "partial_2",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": 0.0056,
+      "normal95": [
+        0.00037194494237523506,
+        0.010828055057624766
+      ],
+      "gained": 103,
+      "lost": 75
+    },
+    {
+      "case": "partial_2",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.0076,
+      "normal95": [
+        0.001977227795501968,
+        0.013222772204498032
+      ],
+      "gained": 122,
+      "lost": 84
+    },
+    {
+      "case": "partial_2",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": -0.0004,
+      "normal95": [
+        -0.0038623151386185557,
+        0.0030623151386185554
+      ],
+      "gained": 38,
+      "lost": 40
+    },
+    {
+      "case": "partial_2",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": 0.0052,
+      "normal95": [
+        0.00024323939066170537,
+        0.010156760609338294
+      ],
+      "gained": 93,
+      "lost": 67
+    },
+    {
+      "case": "partial_2",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": 0.0452,
+      "normal95": [
+        0.03793116424109881,
+        0.05246883575890118
+      ],
+      "gained": 290,
+      "lost": 64
+    },
+    {
+      "case": "partial_2",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": 0.043,
+      "normal95": [
+        0.03552302366140582,
+        0.05047697633859417
+      ],
+      "gained": 294,
+      "lost": 79
+    },
+    {
+      "case": "partial_2",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": 0.0096,
+      "normal95": [
+        0.004347075444736398,
+        0.0148529245552636
+      ],
+      "gained": 114,
+      "lost": 66
+    },
+    {
+      "case": "partial_2",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": 0.0548,
+      "normal95": [
+        0.04704821966459531,
+        0.06255178033540469
+      ],
+      "gained": 340,
+      "lost": 66
+    },
+    {
+      "case": "partial_3",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": 0.0416,
+      "normal95": [
+        0.03345792662028567,
+        0.04974207337971433
+      ],
+      "gained": 324,
+      "lost": 116
+    },
+    {
+      "case": "partial_3",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.0332,
+      "normal95": [
+        0.02393535560272729,
+        0.04246464439727271
+      ],
+      "gained": 365,
+      "lost": 199
+    },
+    {
+      "case": "partial_3",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": 0.0054,
+      "normal95": [
+        -0.00034636812425475113,
+        0.011146368124254753
+      ],
+      "gained": 121,
+      "lost": 94
+    },
+    {
+      "case": "partial_3",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": 0.047,
+      "normal95": [
+        0.038777087871373406,
+        0.055222912128626594
+      ],
+      "gained": 343,
+      "lost": 108
+    },
+    {
+      "case": "partial_3",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": 0.75,
+      "normal95": [
+        0.7377933799362315,
+        0.7622066200637685
+      ],
+      "gained": 3766,
+      "lost": 16
+    },
+    {
+      "case": "partial_3",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": 0.7356,
+      "normal95": [
+        0.7229423848518053,
+        0.7482576151481948
+      ],
+      "gained": 3713,
+      "lost": 35
+    },
+    {
+      "case": "partial_3",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": 0.149,
+      "normal95": [
+        0.13852463641319715,
+        0.15947536358680284
+      ],
+      "gained": 785,
+      "lost": 40
+    },
+    {
+      "case": "partial_3",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": 0.899,
+      "normal95": [
+        0.8905554177359539,
+        0.9074445822640461
+      ],
+      "gained": 4500,
+      "lost": 5
+    },
+    {
+      "case": "partial_4",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": 0.1616,
+      "normal95": [
+        0.14919401613268565,
+        0.17400598386731433
+      ],
+      "gained": 970,
+      "lost": 162
+    },
+    {
+      "case": "partial_4",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.1468,
+      "normal95": [
+        0.13262031141348365,
+        0.16097968858651637
+      ],
+      "gained": 1075,
+      "lost": 341
+    },
+    {
+      "case": "partial_4",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": 0.0438,
+      "normal95": [
+        0.03471189150108723,
+        0.05288810849891277
+      ],
+      "gained": 383,
+      "lost": 164
+    },
+    {
+      "case": "partial_4",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": 0.2054,
+      "normal95": [
+        0.19242111047521349,
+        0.2183788895247865
+      ],
+      "gained": 1167,
+      "lost": 140
+    },
+    {
+      "case": "partial_4",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": 0.8752,
+      "normal95": [
+        0.8659882923171083,
+        0.8844117076828917
+      ],
+      "gained": 4379,
+      "lost": 3
+    },
+    {
+      "case": "partial_4",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": 0.8402,
+      "normal95": [
+        0.8297295906764963,
+        0.8506704093235036
+      ],
+      "gained": 4222,
+      "lost": 21
+    },
+    {
+      "case": "partial_4",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": 0.0268,
+      "normal95": [
+        0.022254984461324047,
+        0.031345015538675955
+      ],
+      "gained": 136,
+      "lost": 2
+    },
+    {
+      "case": "partial_4",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": 0.902,
+      "normal95": [
+        0.8937395591845856,
+        0.9102604408154145
+      ],
+      "gained": 4511,
+      "lost": 1
+    },
+    {
+      "case": "partial_6",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": 0.6306,
+      "normal95": [
+        0.617220744377331,
+        0.6439792556226691
+      ],
+      "gained": 3153,
+      "lost": 0
+    },
+    {
+      "case": "partial_6",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.5148,
+      "normal95": [
+        0.5009456489500486,
+        0.5286543510499515
+      ],
+      "gained": 2574,
+      "lost": 0
+    },
+    {
+      "case": "partial_6",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "partial_6",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": 0.6306,
+      "normal95": [
+        0.617220744377331,
+        0.6439792556226691
+      ],
+      "gained": 3153,
+      "lost": 0
+    },
+    {
+      "case": "partial_6",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": 0.7246,
+      "normal95": [
+        0.7122166640412232,
+        0.7369833359587769
+      ],
+      "gained": 3623,
+      "lost": 0
+    },
+    {
+      "case": "partial_6",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": 0.634,
+      "normal95": [
+        0.6206466050478098,
+        0.6473533949521902
+      ],
+      "gained": 3170,
+      "lost": 0
+    },
+    {
+      "case": "partial_6",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "partial_6",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": 0.7246,
+      "normal95": [
+        0.7122166640412232,
+        0.7369833359587769
+      ],
+      "gained": 3623,
+      "lost": 0
+    },
+    {
+      "case": "two_sources",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": 0.088,
+      "normal95": [
+        0.07246009670718377,
+        0.10353990329281622
+      ],
+      "gained": 1025,
+      "lost": 585
+    },
+    {
+      "case": "two_sources",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.049,
+      "normal95": [
+        0.028490337090718455,
+        0.06950966290928155
+      ],
+      "gained": 1497,
+      "lost": 1252
+    },
+    {
+      "case": "two_sources",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": 0.0186,
+      "normal95": [
+        0.007726709904587976,
+        0.02947329009541202
+      ],
+      "gained": 432,
+      "lost": 339
+    },
+    {
+      "case": "two_sources",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": 0.1066,
+      "normal95": [
+        0.09108532571712233,
+        0.12211467428287767
+      ],
+      "gained": 1078,
+      "lost": 545
+    },
+    {
+      "case": "two_sources",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": 0.83,
+      "normal95": [
+        0.8195871399965869,
+        0.840412860003413
+      ],
+      "gained": 4150,
+      "lost": 0
+    },
+    {
+      "case": "two_sources",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": 0.7656,
+      "normal95": [
+        0.7538568045634998,
+        0.7773431954365001
+      ],
+      "gained": 3828,
+      "lost": 0
+    },
+    {
+      "case": "two_sources",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": 0.001,
+      "normal95": [
+        0.0001238282087534196,
+        0.0018761717912465805
+      ],
+      "gained": 5,
+      "lost": 0
+    },
+    {
+      "case": "two_sources",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": 0.831,
+      "normal95": [
+        0.8206115587788112,
+        0.8413884412211887
+      ],
+      "gained": 4155,
+      "lost": 0
+    },
+    {
+      "case": "mixture_-6",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": -0.0054,
+      "normal95": [
+        -0.010642894177474774,
+        -0.00015710582252522615
+      ],
+      "gained": 76,
+      "lost": 103
+    },
+    {
+      "case": "mixture_-6",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.0104,
+      "normal95": [
+        0.0054806747147774434,
+        0.015319325285222556
+      ],
+      "gained": 105,
+      "lost": 53
+    },
+    {
+      "case": "mixture_-6",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": -0.0096,
+      "normal95": [
+        -0.01330960890460987,
+        -0.005890391095390128
+      ],
+      "gained": 21,
+      "lost": 69
+    },
+    {
+      "case": "mixture_-6",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": -0.015,
+      "normal95": [
+        -0.01979939084265424,
+        -0.010200609157345757
+      ],
+      "gained": 38,
+      "lost": 113
+    },
+    {
+      "case": "mixture_-6",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": -0.0254,
+      "normal95": [
+        -0.03162052633191899,
+        -0.019179473668081013
+      ],
+      "gained": 64,
+      "lost": 191
+    },
+    {
+      "case": "mixture_-6",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": -0.011,
+      "normal95": [
+        -0.016686423852162527,
+        -0.005313576147837473
+      ],
+      "gained": 78,
+      "lost": 133
+    },
+    {
+      "case": "mixture_-6",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": -0.0062,
+      "normal95": [
+        -0.00945192377083851,
+        -0.0029480762291614893
+      ],
+      "gained": 19,
+      "lost": 50
+    },
+    {
+      "case": "mixture_-6",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": -0.0316,
+      "normal95": [
+        -0.03742806962846149,
+        -0.025771930371538514
+      ],
+      "gained": 34,
+      "lost": 192
+    },
+    {
+      "case": "mixture_0",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": -0.0244,
+      "normal95": [
+        -0.03376803268278397,
+        -0.015031967317216035
+      ],
+      "gained": 226,
+      "lost": 348
+    },
+    {
+      "case": "mixture_0",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.0508,
+      "normal95": [
+        0.04306695833677153,
+        0.058533041663228466
+      ],
+      "gained": 328,
+      "lost": 74
+    },
+    {
+      "case": "mixture_0",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": -0.008,
+      "normal95": [
+        -0.013483965833007039,
+        -0.0025160341669929623
+      ],
+      "gained": 78,
+      "lost": 118
+    },
+    {
+      "case": "mixture_0",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": -0.0324,
+      "normal95": [
+        -0.04148255491759298,
+        -0.023317445082407018
+      ],
+      "gained": 190,
+      "lost": 352
+    },
+    {
+      "case": "mixture_0",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": -0.1018,
+      "normal95": [
+        -0.11229872973497113,
+        -0.09130127026502888
+      ],
+      "gained": 130,
+      "lost": 639
+    },
+    {
+      "case": "mixture_0",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": -0.0396,
+      "normal95": [
+        -0.04855824606830978,
+        -0.030641753931690226
+      ],
+      "gained": 166,
+      "lost": 364
+    },
+    {
+      "case": "mixture_0",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": -0.0058,
+      "normal95": [
+        -0.010073540836568052,
+        -0.0015264591634319476
+      ],
+      "gained": 45,
+      "lost": 74
+    },
+    {
+      "case": "mixture_0",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": -0.1076,
+      "normal95": [
+        -0.11786877823355647,
+        -0.09733122176644353
+      ],
+      "gained": 103,
+      "lost": 641
+    },
+    {
+      "case": "mixture_3",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": 0.131,
+      "normal95": [
+        0.11641980858370002,
+        0.1455801914163
+      ],
+      "gained": 1062,
+      "lost": 407
+    },
+    {
+      "case": "mixture_3",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.326,
+      "normal95": [
+        0.3095037889902125,
+        0.3424962110097875
+      ],
+      "gained": 1966,
+      "lost": 336
+    },
+    {
+      "case": "mixture_3",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": -0.103,
+      "normal95": [
+        -0.11530977365217462,
+        -0.09069022634782536
+      ],
+      "gained": 262,
+      "lost": 777
+    },
+    {
+      "case": "mixture_3",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": 0.028,
+      "normal95": [
+        0.013299688555157112,
+        0.04270031144484289
+      ],
+      "gained": 775,
+      "lost": 635
+    },
+    {
+      "case": "mixture_3",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": -0.1638,
+      "normal95": [
+        -0.17927830419772633,
+        -0.14832169580227367
+      ],
+      "gained": 437,
+      "lost": 1256
+    },
+    {
+      "case": "mixture_3",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": -0.0276,
+      "normal95": [
+        -0.043075044057463444,
+        -0.012124955942536557
+      ],
+      "gained": 712,
+      "lost": 850
+    },
+    {
+      "case": "mixture_3",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": -0.0634,
+      "normal95": [
+        -0.07326256374305311,
+        -0.05353743625694689
+      ],
+      "gained": 168,
+      "lost": 485
+    },
+    {
+      "case": "mixture_3",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": -0.2272,
+      "normal95": [
+        -0.24234228771638824,
+        -0.21205771228361178
+      ],
+      "gained": 307,
+      "lost": 1443
+    },
+    {
+      "case": "mixture_6",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": 0.2734,
+      "normal95": [
+        0.2609086139966315,
+        0.28589138600336844
+      ],
+      "gained": 1378,
+      "lost": 11
+    },
+    {
+      "case": "mixture_6",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.2816,
+      "normal95": [
+        0.26739184293707186,
+        0.2958081570629282
+      ],
+      "gained": 1559,
+      "lost": 151
+    },
+    {
+      "case": "mixture_6",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": 0.0036,
+      "normal95": [
+        -0.0021340654290954416,
+        0.009334065429095442
+      ],
+      "gained": 116,
+      "lost": 98
+    },
+    {
+      "case": "mixture_6",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": 0.277,
+      "normal95": [
+        0.2645450069414357,
+        0.28945499305856437
+      ],
+      "gained": 1389,
+      "lost": 4
+    },
+    {
+      "case": "mixture_6",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": -0.17,
+      "normal95": [
+        -0.1865931915523241,
+        -0.15340680844767593
+      ],
+      "gained": 543,
+      "lost": 1393
+    },
+    {
+      "case": "mixture_6",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": -0.0704,
+      "normal95": [
+        -0.08932836387393926,
+        -0.051471636126060746
+      ],
+      "gained": 1002,
+      "lost": 1354
+    },
+    {
+      "case": "mixture_6",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": -0.2,
+      "normal95": [
+        -0.21373791116993987,
+        -0.18626208883006015
+      ],
+      "gained": 214,
+      "lost": 1214
+    },
+    {
+      "case": "mixture_6",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": -0.37,
+      "normal95": [
+        -0.3866209548593333,
+        -0.3533790451406667
+      ],
+      "gained": 316,
+      "lost": 2166
+    },
+    {
+      "case": "mixture_12",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "mixture_12",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "mixture_12",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "mixture_12",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "mixture_12",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": -0.0026,
+      "normal95": [
+        -0.005558899030983,
+        0.0003588990309829998
+      ],
+      "gained": 22,
+      "lost": 35
+    },
+    {
+      "case": "mixture_12",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": 0.003,
+      "normal95": [
+        -0.0006556852814641641,
+        0.006655685281464164
+      ],
+      "gained": 51,
+      "lost": 36
+    },
+    {
+      "case": "mixture_12",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": -0.0444,
+      "normal95": [
+        -0.05062508306133708,
+        -0.03817491693866292
+      ],
+      "gained": 20,
+      "lost": 242
+    },
+    {
+      "case": "mixture_12",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": -0.047,
+      "normal95": [
+        -0.053393307602698996,
+        -0.040606692397301004
+      ],
+      "gained": 21,
+      "lost": 256
+    },
+    {
+      "case": "single_mp",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": 0.0004,
+      "normal95": [
+        -0.0028327596899009187,
+        0.003632759689900919
+      ],
+      "gained": 35,
+      "lost": 33
+    },
+    {
+      "case": "single_mp",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.0016,
+      "normal95": [
+        -0.0019061602974352534,
+        0.005106160297435254
+      ],
+      "gained": 44,
+      "lost": 36
+    },
+    {
+      "case": "single_mp",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": -0.0018,
+      "normal95": [
+        -0.00391056719046385,
+        0.00031056719046384943
+      ],
+      "gained": 10,
+      "lost": 19
+    },
+    {
+      "case": "single_mp",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": -0.0014,
+      "normal95": [
+        -0.004608685543986289,
+        0.0018086855439862885
+      ],
+      "gained": 30,
+      "lost": 37
+    },
+    {
+      "case": "single_mp",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": -0.0022,
+      "normal95": [
+        -0.005639526232454147,
+        0.001239526232454147
+      ],
+      "gained": 33,
+      "lost": 44
+    },
+    {
+      "case": "single_mp",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": -0.005,
+      "normal95": [
+        -0.00873717755966259,
+        -0.00126282244033741
+      ],
+      "gained": 33,
+      "lost": 58
+    },
+    {
+      "case": "single_mp",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": -0.0008,
+      "normal95": [
+        -0.0029471331850369127,
+        0.0013471331850369128
+      ],
+      "gained": 13,
+      "lost": 17
+    },
+    {
+      "case": "single_mp",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": -0.003,
+      "normal95": [
+        -0.0063484903476150574,
+        0.0003484903476150573
+      ],
+      "gained": 29,
+      "lost": 44
+    },
+    {
+      "case": "clustered_los",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": 0.0374,
+      "normal95": [
+        0.02917660941238011,
+        0.0456233905876199
+      ],
+      "gained": 317,
+      "lost": 130
+    },
+    {
+      "case": "clustered_los",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.0378,
+      "normal95": [
+        0.028507470367218547,
+        0.04709252963278145
+      ],
+      "gained": 379,
+      "lost": 190
+    },
+    {
+      "case": "clustered_los",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": 0.0118,
+      "normal95": [
+        0.005981212266473803,
+        0.017618787733526195
+      ],
+      "gained": 140,
+      "lost": 81
+    },
+    {
+      "case": "clustered_los",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": 0.0492,
+      "normal95": [
+        0.04064779873755938,
+        0.05775220126244062
+      ],
+      "gained": 367,
+      "lost": 121
+    },
+    {
+      "case": "clustered_los",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": 0.6462,
+      "normal95": [
+        0.6327154223017598,
+        0.6596845776982402
+      ],
+      "gained": 3251,
+      "lost": 20
+    },
+    {
+      "case": "clustered_los",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": 0.6352,
+      "normal95": [
+        0.6211928507244985,
+        0.6492071492755015
+      ],
+      "gained": 3235,
+      "lost": 59
+    },
+    {
+      "case": "clustered_los",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": 0.1572,
+      "normal95": [
+        0.14546231831365844,
+        0.16893768168634157
+      ],
+      "gained": 903,
+      "lost": 117
+    },
+    {
+      "case": "clustered_los",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": 0.8034,
+      "normal95": [
+        0.7922443493073866,
+        0.8145556506926134
+      ],
+      "gained": 4027,
+      "lost": 10
+    },
+    {
+      "case": "short_aperture_los",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "short_aperture_los",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.0462,
+      "normal95": [
+        0.040380895324363855,
+        0.05201910467563614
+      ],
+      "gained": 231,
+      "lost": 0
+    },
+    {
+      "case": "short_aperture_los",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "short_aperture_los",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "short_aperture_los",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": 0.5736,
+      "normal95": [
+        0.5583111781344173,
+        0.5888888218655827
+      ],
+      "gained": 3017,
+      "lost": 149
+    },
+    {
+      "case": "short_aperture_los",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": 0.6684,
+      "normal95": [
+        0.654705748104859,
+        0.682094251895141
+      ],
+      "gained": 3398,
+      "lost": 56
+    },
+    {
+      "case": "short_aperture_los",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": 0.0594,
+      "normal95": [
+        0.04866835612191478,
+        0.07013164387808522
+      ],
+      "gained": 532,
+      "lost": 235
+    },
+    {
+      "case": "short_aperture_los",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": 0.633,
+      "normal95": [
+        0.618417911335869,
+        0.647582088664131
+      ],
+      "gained": 3276,
+      "lost": 111
+    },
+    {
+      "case": "short_aperture_spoof",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "short_aperture_spoof",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "short_aperture_spoof",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "short_aperture_spoof",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "short_aperture_spoof",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": 0.5226,
+      "normal95": [
+        0.5087537415845407,
+        0.5364462584154592
+      ],
+      "gained": 2613,
+      "lost": 0
+    },
+    {
+      "case": "short_aperture_spoof",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": 0.4004,
+      "normal95": [
+        0.38681735440129356,
+        0.4139826455987064
+      ],
+      "gained": 2002,
+      "lost": 0
+    },
+    {
+      "case": "short_aperture_spoof",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "short_aperture_spoof",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": 0.5226,
+      "normal95": [
+        0.5087537415845407,
+        0.5364462584154592
+      ],
+      "gained": 2613,
+      "lost": 0
+    },
+    {
+      "case": "low_signal_los",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "low_signal_los",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "low_signal_los",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "low_signal_los",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "low_signal_los",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "low_signal_los",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "low_signal_los",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "low_signal_los",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "low_signal_spoof",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "low_signal_spoof",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "low_signal_spoof",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "low_signal_spoof",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "low_signal_spoof",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "low_signal_spoof",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "low_signal_spoof",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "low_signal_spoof",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "prn_bias_spoof",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": 0.0076,
+      "normal95": [
+        0.004188843967258398,
+        0.011011156032741602
+      ],
+      "gained": 57,
+      "lost": 19
+    },
+    {
+      "case": "prn_bias_spoof",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.0018,
+      "normal95": [
+        -0.0024762731465135554,
+        0.006076273146513555
+      ],
+      "gained": 64,
+      "lost": 55
+    },
+    {
+      "case": "prn_bias_spoof",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": -0.0098,
+      "normal95": [
+        -0.013184210439247817,
+        -0.006415789560752182
+      ],
+      "gained": 13,
+      "lost": 62
+    },
+    {
+      "case": "prn_bias_spoof",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": -0.0022,
+      "normal95": [
+        -0.004647479368492458,
+        0.000247479368492458
+      ],
+      "gained": 14,
+      "lost": 25
+    },
+    {
+      "case": "prn_bias_spoof",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": 0.0002,
+      "normal95": [
+        -0.0029116526112137266,
+        0.0033116526112137268
+      ],
+      "gained": 32,
+      "lost": 31
+    },
+    {
+      "case": "prn_bias_spoof",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": -0.001,
+      "normal95": [
+        -0.0043949835571013935,
+        0.0023949835571013935
+      ],
+      "gained": 35,
+      "lost": 40
+    },
+    {
+      "case": "prn_bias_spoof",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": -0.0058,
+      "normal95": [
+        -0.0082429539557968,
+        -0.0033570460442032
+      ],
+      "gained": 5,
+      "lost": 34
+    },
+    {
+      "case": "prn_bias_spoof",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": -0.0056,
+      "normal95": [
+        -0.008074563633536726,
+        -0.0031254363664632726
+      ],
+      "gained": 6,
+      "lost": 34
+    },
+    {
+      "case": "bad_fourth_spoof",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "bad_fourth_spoof",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 1.0,
+      "normal95": [
+        1.0,
+        1.0
+      ],
+      "gained": 5000,
+      "lost": 0
+    },
+    {
+      "case": "bad_fourth_spoof",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": -0.0028,
+      "normal95": [
+        -0.004264794407652214,
+        -0.0013352055923477864
+      ],
+      "gained": 0,
+      "lost": 14
+    },
+    {
+      "case": "bad_fourth_spoof",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": -0.0028,
+      "normal95": [
+        -0.004264794407652214,
+        -0.0013352055923477864
+      ],
+      "gained": 0,
+      "lost": 14
+    },
+    {
+      "case": "bad_fourth_spoof",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": 0.5096,
+      "normal95": [
+        0.49574213063366535,
+        0.5234578693663348
+      ],
+      "gained": 2548,
+      "lost": 0
+    },
+    {
+      "case": "bad_fourth_spoof",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": 1.0,
+      "normal95": [
+        1.0,
+        1.0
+      ],
+      "gained": 5000,
+      "lost": 0
+    },
+    {
+      "case": "bad_fourth_spoof",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": -1.0,
+      "normal95": [
+        -1.0,
+        -1.0
+      ],
+      "gained": 0,
+      "lost": 5000
+    },
+    {
+      "case": "bad_fourth_spoof",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": -0.4904,
+      "normal95": [
+        -0.5042578693663348,
+        -0.4765421306336653
+      ],
+      "gained": 0,
+      "lost": 2452
+    },
+    {
+      "case": "common_reflection",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "common_reflection",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "common_reflection",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "common_reflection",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": 0.0,
+      "normal95": [
+        0.0,
+        0.0
+      ],
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "common_reflection",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": -0.03,
+      "normal95": [
+        -0.03842184750117693,
+        -0.021578152498823066
+      ],
+      "gained": 158,
+      "lost": 308
+    },
+    {
+      "case": "common_reflection",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": -0.0084,
+      "normal95": [
+        -0.01795181125925765,
+        0.0011518112592576527
+      ],
+      "gained": 276,
+      "lost": 318
+    },
+    {
+      "case": "common_reflection",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": -0.131,
+      "normal95": [
+        -0.14211045944870548,
+        -0.11988954055129453
+      ],
+      "gained": 117,
+      "lost": 772
+    },
+    {
+      "case": "common_reflection",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": -0.161,
+      "normal95": [
+        -0.1728481579560076,
+        -0.1491518420439924
+      ],
+      "gained": 119,
+      "lost": 924
+    },
+    {
+      "case": "spatial_matched",
+      "comparison": "2_short->3",
+      "method": "global",
+      "delta": -0.0022,
+      "normal95": [
+        -0.005856122482931768,
+        0.0014561224829317682
+      ],
+      "gained": 38,
+      "lost": 49
+    },
+    {
+      "case": "spatial_matched",
+      "comparison": "2_diagonal->3",
+      "method": "global",
+      "delta": 0.0004,
+      "normal95": [
+        -0.0031499834480868787,
+        0.003949983448086879
+      ],
+      "gained": 42,
+      "lost": 40
+    },
+    {
+      "case": "spatial_matched",
+      "comparison": "3->4",
+      "method": "global",
+      "delta": 0.0004,
+      "normal95": [
+        -0.002016622124634189,
+        0.002816622124634189
+      ],
+      "gained": 20,
+      "lost": 18
+    },
+    {
+      "case": "spatial_matched",
+      "comparison": "2_short->4",
+      "method": "global",
+      "delta": -0.0018,
+      "normal95": [
+        -0.005498085897355024,
+        0.0018980858973550244
+      ],
+      "gained": 40,
+      "lost": 49
+    },
+    {
+      "case": "spatial_matched",
+      "comparison": "2_short->3",
+      "method": "cluster3",
+      "delta": 0.0008,
+      "normal95": [
+        -0.002877519295904322,
+        0.004477519295904322
+      ],
+      "gained": 46,
+      "lost": 42
+    },
+    {
+      "case": "spatial_matched",
+      "comparison": "2_diagonal->3",
+      "method": "cluster3",
+      "delta": 0.0,
+      "normal95": [
+        -0.003719142126637603,
+        0.003719142126637603
+      ],
+      "gained": 45,
+      "lost": 45
+    },
+    {
+      "case": "spatial_matched",
+      "comparison": "3->4",
+      "method": "cluster3",
+      "delta": -0.0002,
+      "normal95": [
+        -0.002648232790682239,
+        0.0022482327906822386
+      ],
+      "gained": 19,
+      "lost": 20
+    },
+    {
+      "case": "spatial_matched",
+      "comparison": "2_short->4",
+      "method": "cluster3",
+      "delta": 0.0006,
+      "normal95": [
+        -0.0030143182018933863,
+        0.0042143182018933864
+      ],
+      "gained": 44,
+      "lost": 41
+    }
+  ]
+}

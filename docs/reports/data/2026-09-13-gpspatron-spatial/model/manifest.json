@@ -1,0 +1,161 @@
+{
+  "scope": "Paired 2–4 antenna spatial-detection experiment; observation model, not RF.",
+  "python": "3.11.0rc2",
+  "numpy": "2.0.1",
+  "calibration_events": 5000,
+  "evaluation_events_per_case": 5000,
+  "positions_m": {
+    "TL": [
+      -0.03795,
+      0.08045,
+      0.0
+    ],
+    "TR": [
+      0.03795,
+      0.08045,
+      0.0
+    ],
+    "BL": [
+      -0.03795,
+      -0.08045,
+      0.0
+    ],
+    "BR": [
+      0.03795,
+      -0.08045,
+      0.0
+    ]
+  },
+  "layouts": {
+    "2_short": [
+      0,
+      1
+    ],
+    "2_diagonal": [
+      0,
+      3
+    ],
+    "3": [
+      0,
+      1,
+      2
+    ],
+    "4": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "cases": [
+    [
+      "los",
+      false
+    ],
+    [
+      "all_spoof",
+      true
+    ],
+    [
+      "partial_2",
+      true
+    ],
+    [
+      "partial_3",
+      true
+    ],
+    [
+      "partial_4",
+      true
+    ],
+    [
+      "partial_6",
+      true
+    ],
+    [
+      "two_sources",
+      true
+    ],
+    [
+      "mixture_-6",
+      true
+    ],
+    [
+      "mixture_0",
+      true
+    ],
+    [
+      "mixture_3",
+      true
+    ],
+    [
+      "mixture_6",
+      true
+    ],
+    [
+      "mixture_12",
+      true
+    ],
+    [
+      "single_mp",
+      false
+    ],
+    [
+      "clustered_los",
+      false
+    ],
+    [
+      "short_aperture_los",
+      false
+    ],
+    [
+      "short_aperture_spoof",
+      true
+    ],
+    [
+      "low_signal_los",
+      false
+    ],
+    [
+      "low_signal_spoof",
+      true
+    ],
+    [
+      "prn_bias_spoof",
+      true
+    ],
+    [
+      "bad_fourth_spoof",
+      true
+    ],
+    [
+      "common_reflection",
+      false
+    ],
+    [
+      "spatial_matched",
+      true
+    ]
+  ],
+  "chunk_events": 250,
+  "calibration_seed_base": 200000,
+  "evaluation_seed_base": 300000,
+  "seed_stride_per_case": 10000,
+  "step_s": 0.01,
+  "epochs_per_event": 10,
+  "noise_m_per_antenna_small_angle": 0.0021213203435596424,
+  "temporal_ar1": 0.7,
+  "known_limitations": [
+    "synthetic correlator phasors, not tracking loops",
+    "fixed 8 PRNs",
+    "uniform random sky and orientation is a chosen population",
+    "no missing data in nominal model",
+    "independent antenna noises and common oscillator reference",
+    "no certified output authenticity"
+  ],
+  "source_sha256": {
+    "audit_spatial_diversity.py": "dbb2de5c227e52e1b5b94668d972e2a740faf4ef9d1041dfb9249fb022206780",
+    "spatial_spoofing.py": "d467a7c3a283d78ac44b2e2ccb3bfe3f16265327cf14ebf15c6d94d7e13aca3c",
+    "presets.py": "c8f59f7fb2a4986dac888aa409c07cf914d8500bb49e12a1b7e456c6de02aecc"
+  }
+}

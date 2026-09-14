@@ -1,0 +1,46 @@
+{
+  "target_alpha": 0.01,
+  "thresholds": {
+    "2_short_global": 0.1974069493937969,
+    "2_short_cluster3": 0.004283684832809697,
+    "2_diagonal_global": 0.24884074326750075,
+    "2_diagonal_cluster3": 0.0047098269219257305,
+    "3_global": 0.3962934804026627,
+    "3_cluster3": 0.016342094557729805,
+    "4_global": 0.41466989641459484,
+    "4_cluster3": 0.01964729156201372
+  },
+  "calibration_seed_base": 200000,
+  "events": 5000,
+  "layouts": {
+    "2_short": [
+      0,
+      1
+    ],
+    "2_diagonal": [
+      0,
+      3
+    ],
+    "3": [
+      0,
+      1,
+      2
+    ],
+    "4": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "antenna_names": [
+    "TL",
+    "TR",
+    "BL",
+    "BR"
+  ],
+  "prns": 8,
+  "epochs": 10,
+  "wavelength_m": 0.19029367279836487,
+  "scope": "local research; observation-model H0; not GPSPATRON thresholds"
+}

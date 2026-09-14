@@ -1,0 +1,16 @@
+{
+  "bias_m": [
+    0.0,
+    -0.00015458368868283214,
+    -6.823605354239464e-05,
+    -3.587028071945548e-05
+  ],
+  "concentration": [
+    1.0,
+    0.9932884333528796,
+    0.9900281494148372,
+    0.9923561840420022
+  ],
+  "assumption": "trusted LOS, known orientation and synthetic satellite geometry; transfer assumes stable PRN-common biases",
+  "input": "docs\\reports\\data\\2026-09-13-gpspatron-spatial\\rf_a\\los_610000_observations.npz"
+}

@@ -1,0 +1,18 @@
+{
+  "2_short_original_global": 0.1974069493937969,
+  "2_short_original_cluster3": 0.004283684832809697,
+  "2_short_dd_global": 0.4051071261364035,
+  "2_short_dd_cluster3": 0.012796857494117709,
+  "2_diagonal_original_global": 0.24884074326750075,
+  "2_diagonal_original_cluster3": 0.0047098269219257305,
+  "2_diagonal_dd_global": 0.49652640687341465,
+  "2_diagonal_dd_cluster3": 0.014082928231509768,
+  "3_original_global": 0.3962934804026627,
+  "3_original_cluster3": 0.016342094557729805,
+  "3_dd_global": 0.7060354276185641,
+  "3_dd_cluster3": 0.04832146043445025,
+  "4_original_global": 0.41466989641459484,
+  "4_original_cluster3": 0.01964729156201372,
+  "4_dd_global": 0.7252908535894094,
+  "4_dd_cluster3": 0.0580282438081166
+}

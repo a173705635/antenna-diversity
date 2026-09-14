@@ -1,0 +1,6461 @@
+[
+  {
+    "case": "all_spoof",
+    "seed": 610000,
+    "layout": "3",
+    "window": 0,
+    "status": "reference_in_target",
+    "selected_prns": [
+      2,
+      6,
+      8
+    ],
+    "result": {
+      "status": "reference_in_target",
+      "candidates": []
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": null,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "all_spoof",
+    "seed": 610000,
+    "layout": "3",
+    "window": 1,
+    "status": "reference_in_target",
+    "selected_prns": [
+      4,
+      7,
+      8
+    ],
+    "result": {
+      "status": "reference_in_target",
+      "candidates": []
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": null,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "all_spoof",
+    "seed": 610000,
+    "layout": "3",
+    "window": 2,
+    "status": "reference_in_target",
+    "selected_prns": [
+      4,
+      6,
+      8
+    ],
+    "result": {
+      "status": "reference_in_target",
+      "candidates": []
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": null,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "all_spoof",
+    "seed": 610000,
+    "layout": "3",
+    "window": 3,
+    "status": "ambiguous",
+    "selected_prns": [
+      3,
+      6,
+      7
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 324.46786810690537,
+          "elevation_deg": 64.72302377076534,
+          "unit_vector": [
+            -0.24815189714974897,
+            0.34748376385008206,
+            0.9042542064052347
+          ],
+          "rms_m": 0.0024168474791236576
+        },
+        {
+          "azimuth_deg": 324.46786810690537,
+          "elevation_deg": -64.72302377076534,
+          "unit_vector": [
+            -0.24815189714974897,
+            0.34748376385008206,
+            -0.9042542064052347
+          ],
+          "rms_m": 0.0024168474791236576
+        },
+        {
+          "azimuth_deg": 196.54747538988863,
+          "elevation_deg": 29.391772162409907,
+          "unit_vector": [
+            -0.24815024280269776,
+            -0.8351992479343517,
+            0.4907786397622205
+          ],
+          "rms_m": 0.0024168474969437446
+        },
+        {
+          "azimuth_deg": 196.54747538988863,
+          "elevation_deg": -29.391772162409907,
+          "unit_vector": [
+            -0.24815024280269776,
+            -0.8351992479343517,
+            -0.4907786397622205
+          ],
+          "rms_m": 0.0024168474969437446
+        },
+        {
+          "azimuth_deg": 345.1941834086234,
+          "elevation_deg": 13.816164505914514,
+          "unit_vector": [
+            -0.2481502413941662,
+            0.9388250475573164,
+            0.23880742822412296
+          ],
+          "rms_m": 0.002416847496983217
+        },
+        {
+          "azimuth_deg": 345.1941834086234,
+          "elevation_deg": -13.816164505914514,
+          "unit_vector": [
+            -0.2481502413941662,
+            0.9388250475573164,
+            -0.23880742822412296
+          ],
+          "rms_m": 0.002416847496983217
+        },
+        {
+          "azimuth_deg": 225.49967714294326,
+          "elevation_deg": 69.64016140113728,
+          "unit_vector": [
+            -0.248149138189323,
+            -0.24385822758818035,
+            0.9375260903321291
+          ],
+          "rms_m": 0.002416847545896466
+        },
+        {
+          "azimuth_deg": 225.49967714294326,
+          "elevation_deg": -69.64016140113728,
+          "unit_vector": [
+            -0.248149138189323,
+            -0.24385822758818035,
+            -0.9375260903321291
+          ],
+          "rms_m": 0.002416847545896466
+        },
+        {
+          "azimuth_deg": 103.57462903484702,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9720650278296908,
+            -0.23471169904898703,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0030117748278466975
+        }
+      ],
+      "best_rms_m": 0.0024168474791236576,
+      "upper_candidate_count": 5,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 10.613572846191559,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "all_spoof",
+    "seed": 610000,
+    "layout": "4",
+    "window": 0,
+    "status": "ambiguous",
+    "selected_prns": [
+      2,
+      4,
+      7
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 224.16949517210014,
+          "elevation_deg": 69.87948374524741,
+          "unit_vector": [
+            -0.23969063093654627,
+            -0.2467419868409814,
+            0.9389711355366603
+          ],
+          "rms_m": 0.0019957249285990366
+        },
+        {
+          "azimuth_deg": 224.16949517210014,
+          "elevation_deg": -69.87948374524741,
+          "unit_vector": [
+            -0.23969063093654627,
+            -0.2467419868409814,
+            -0.9389711355366603
+          ],
+          "rms_m": 0.0019957249285990366
+        },
+        {
+          "azimuth_deg": 195.9604093610867,
+          "elevation_deg": 29.344917801326012,
+          "unit_vector": [
+            -0.23968999643466507,
+            -0.8380835572299549,
+            0.49006597179352823
+          ],
+          "rms_m": 0.0019957249503424444
+        },
+        {
+          "azimuth_deg": 195.9604093610867,
+          "elevation_deg": -29.344917801326012,
+          "unit_vector": [
+            -0.23968999643466507,
+            -0.8380835572299549,
+            -0.49006597179352823
+          ],
+          "rms_m": 0.0019957249503424444
+        },
+        {
+          "azimuth_deg": 345.635540750482,
+          "elevation_deg": 14.95138086206982,
+          "unit_vector": [
+            -0.2396899958538855,
+            0.9359407385103984,
+            0.2579993021001693
+          ],
+          "rms_m": 0.001995724950369255
+        },
+        {
+          "azimuth_deg": 345.635540750482,
+          "elevation_deg": -14.95138086206982,
+          "unit_vector": [
+            -0.2396899958538855,
+            0.9359407385103984,
+            -0.2579993021001693
+          ],
+          "rms_m": 0.001995724950369255
+        },
+        {
+          "azimuth_deg": 325.17901363625174,
+          "elevation_deg": 65.18044959146165,
+          "unit_vector": [
+            -0.23968999586483353,
+            0.34459930663093025,
+            0.9076343006694922
+          ],
+          "rms_m": 0.0019957249503770196
+        },
+        {
+          "azimuth_deg": 325.17901363625174,
+          "elevation_deg": -65.18044959146165,
+          "unit_vector": [
+            -0.23968999586483353,
+            0.34459930663093025,
+            -0.9076343006694922
+          ],
+          "rms_m": 0.0019957249503770196
+        },
+        {
+          "azimuth_deg": 104.13927175104618,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9697048085413136,
+            -0.24427972550306815,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.003402339143632869
+        }
+      ],
+      "best_rms_m": 0.0019957249285990366,
+      "upper_candidate_count": 5,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 10.814766908573922,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "all_spoof",
+    "seed": 610000,
+    "layout": "4",
+    "window": 1,
+    "status": "reference_in_target",
+    "selected_prns": [
+      4,
+      7,
+      8
+    ],
+    "result": {
+      "status": "reference_in_target",
+      "candidates": []
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": null,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "all_spoof",
+    "seed": 610000,
+    "layout": "4",
+    "window": 2,
+    "status": "reference_in_target",
+    "selected_prns": [
+      4,
+      6,
+      8
+    ],
+    "result": {
+      "status": "reference_in_target",
+      "candidates": []
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": null,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "all_spoof",
+    "seed": 610000,
+    "layout": "4",
+    "window": 3,
+    "status": "ambiguous",
+    "selected_prns": [
+      3,
+      5,
+      6
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 224.27982451987918,
+          "elevation_deg": 69.82186119663339,
+          "unit_vector": [
+            -0.24082448750052382,
+            -0.24695593388983986,
+            0.9386247029226895
+          ],
+          "rms_m": 0.002692184223322099
+        },
+        {
+          "azimuth_deg": 224.27982451987918,
+          "elevation_deg": -69.82186119663339,
+          "unit_vector": [
+            -0.24082448750052382,
+            -0.24695593388983986,
+            -0.9386247029226895
+          ],
+          "rms_m": 0.002692184223322099
+        },
+        {
+          "azimuth_deg": 196.02809837245132,
+          "elevation_deg": 29.28429546843677,
+          "unit_vector": [
+            -0.24082297043727927,
+            -0.8382976967342797,
+            0.48914340285826924
+          ],
+          "rms_m": 0.0026921843447379476
+        },
+        {
+          "azimuth_deg": 196.02809837245132,
+          "elevation_deg": -29.28429546843677,
+          "unit_vector": [
+            -0.24082297043727927,
+            -0.8382976967342797,
+            -0.48914340285826924
+          ],
+          "rms_m": 0.0026921843447379476
+        },
+        {
+          "azimuth_deg": 325.03552935354156,
+          "elevation_deg": 65.15062085707828,
+          "unit_vector": [
+            -0.24082296962418007,
+            0.34438516714274164,
+            0.9074156456406607
+          ],
+          "rms_m": 0.0026921843447951553
+        },
+        {
+          "azimuth_deg": 325.03552935354156,
+          "elevation_deg": -65.15062085707828,
+          "unit_vector": [
+            -0.24082296962418007,
+            0.34438516714274164,
+            -0.9074156456406607
+          ],
+          "rms_m": 0.0026921843447951553
+        },
+        {
+          "azimuth_deg": 345.5673066886276,
+          "elevation_deg": 14.934867485445919,
+          "unit_vector": [
+            -0.24082296925462093,
+            0.9357265990478285,
+            0.25772083601015283
+          ],
+          "rms_m": 0.002692184344822882
+        },
+        {
+          "azimuth_deg": 345.5673066886276,
+          "elevation_deg": -14.934867485445919,
+          "unit_vector": [
+            -0.24082296925462093,
+            0.9357265990478285,
+            -0.25772083601015283
+          ],
+          "rms_m": 0.002692184344822882
+        },
+        {
+          "azimuth_deg": 104.1507052257657,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9696560427806233,
+            -0.24447322695751764,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.003804254731508253
+        }
+      ],
+      "best_rms_m": 0.002692184223322099,
+      "upper_candidate_count": 5,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 10.819103543259585,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "all_spoof",
+    "seed": 620000,
+    "layout": "3",
+    "window": 0,
+    "status": "reference_in_target",
+    "selected_prns": [
+      3,
+      5,
+      8
+    ],
+    "result": {
+      "status": "reference_in_target",
+      "candidates": []
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": null,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "all_spoof",
+    "seed": 620000,
+    "layout": "3",
+    "window": 1,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      3,
+      7
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 226.2368876839755,
+          "elevation_deg": 69.92185816835338,
+          "unit_vector": [
+            -0.24793422959777947,
+            -0.2374541523908549,
+            0.9392252888983006
+          ],
+          "rms_m": 0.0019840605094960523
+        },
+        {
+          "azimuth_deg": 226.2368876839755,
+          "elevation_deg": -69.92185816835338,
+          "unit_vector": [
+            -0.24793422959777947,
+            -0.2374541523908549,
+            -0.9392252888983006
+          ],
+          "rms_m": 0.0019840605094960523
+        },
+        {
+          "azimuth_deg": 345.3023338705148,
+          "elevation_deg": 12.257039600958016,
+          "unit_vector": [
+            -0.24793503736902098,
+            0.9452290135134251,
+            0.21229773728718682
+          ],
+          "rms_m": 0.001984060538797743
+        },
+        {
+          "azimuth_deg": 345.3023338705148,
+          "elevation_deg": -12.257039600958016,
+          "unit_vector": [
+            -0.24793503736902098,
+            0.9452290135134251,
+            -0.21229773728718682
+          ],
+          "rms_m": 0.001984060538797743
+        },
+        {
+          "azimuth_deg": 324.98476237271046,
+          "elevation_deg": 64.39925681179237,
+          "unit_vector": [
+            -0.24793503754958837,
+            0.35388758163362,
+            0.9018269217099211
+          ],
+          "rms_m": 0.0019840605388026537
+        },
+        {
+          "azimuth_deg": 324.98476237271046,
+          "elevation_deg": -64.39925681179237,
+          "unit_vector": [
+            -0.24793503754958837,
+            0.35388758163362,
+            -0.9018269217099211
+          ],
+          "rms_m": 0.0019840605388026537
+        },
+        {
+          "azimuth_deg": 196.6546125872912,
+          "elevation_deg": 30.10749861037584,
+          "unit_vector": [
+            -0.24793503836398995,
+            -0.8287952820620444,
+            0.5016239599372653
+          ],
+          "rms_m": 0.0019840605388030622
+        },
+        {
+          "azimuth_deg": 196.6546125872912,
+          "elevation_deg": -30.10749861037584,
+          "unit_vector": [
+            -0.24793503836398995,
+            -0.8287952820620444,
+            -0.5016239599372653
+          ],
+          "rms_m": 0.0019840605388030622
+        },
+        {
+          "azimuth_deg": 103.21912835352123,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9735026130523432,
+            -0.22867588937240338,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0026341680922254453
+        }
+      ],
+      "best_rms_m": 0.0019840605094960523,
+      "upper_candidate_count": 5,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 10.50034895494471,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "all_spoof",
+    "seed": 620000,
+    "layout": "3",
+    "window": 2,
+    "status": "reference_in_target",
+    "selected_prns": [
+      6,
+      7,
+      8
+    ],
+    "result": {
+      "status": "reference_in_target",
+      "candidates": []
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": null,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "all_spoof",
+    "seed": 620000,
+    "layout": "3",
+    "window": 3,
+    "status": "ambiguous",
+    "selected_prns": [
+      2,
+      4,
+      7
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 224.49286965862848,
+          "elevation_deg": 69.35564059423277,
+          "unit_vector": [
+            -0.247085659030296,
+            -0.25149879221574484,
+            0.9357868531965952
+          ],
+          "rms_m": 0.0019431438125824946
+        },
+        {
+          "azimuth_deg": 224.49286965862848,
+          "elevation_deg": -69.35564059423277,
+          "unit_vector": [
+            -0.247085659030296,
+            -0.25149879221574484,
+            -0.9357868531965952
+          ],
+          "rms_m": 0.0019431438125824946
+        },
+        {
+          "azimuth_deg": 345.139226482217,
+          "elevation_deg": 15.547501790290465,
+          "unit_vector": [
+            -0.2470864752106574,
+            0.9311843728921808,
+            0.2680371941529183
+          ],
+          "rms_m": 0.0019431438411214382
+        },
+        {
+          "azimuth_deg": 345.139226482217,
+          "elevation_deg": -15.547501790290465,
+          "unit_vector": [
+            -0.2470864752106574,
+            0.9311843728921808,
+            -0.2680371941529183
+          ],
+          "rms_m": 0.0019431438411214382
+        },
+        {
+          "azimuth_deg": 196.33899689575722,
+          "elevation_deg": 28.560668950711047,
+          "unit_vector": [
+            -0.2470864759688264,
+            -0.8428399227231964,
+            0.4780890482507028
+          ],
+          "rms_m": 0.0019431438411448804
+        },
+        {
+          "azimuth_deg": 196.33899689575722,
+          "elevation_deg": -28.560668950711047,
+          "unit_vector": [
+            -0.2470864759688264,
+            -0.8428399227231964,
+            -0.4780890482507028
+          ],
+          "rms_m": 0.0019431438411448804
+        },
+        {
+          "azimuth_deg": 323.9804708813317,
+          "elevation_deg": 65.15448006115643,
+          "unit_vector": [
+            -0.24708743260278182,
+            0.339843023212328,
+            0.9074439488054735
+          ],
+          "rms_m": 0.0019431438629989035
+        },
+        {
+          "azimuth_deg": 323.9804708813317,
+          "elevation_deg": -65.15448006115643,
+          "unit_vector": [
+            -0.24708743260278182,
+            0.339843023212328,
+            -0.9074439488054735
+          ],
+          "rms_m": 0.0019431438629989035
+        },
+        {
+          "azimuth_deg": 103.97681079804897,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9703935593506349,
+            -0.2415291700205294,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0027515030195411324
+        }
+      ],
+      "best_rms_m": 0.0019431438125824946,
+      "upper_candidate_count": 5,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 10.754257825132967,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "all_spoof",
+    "seed": 620000,
+    "layout": "4",
+    "window": 0,
+    "status": "reference_in_target",
+    "selected_prns": [
+      3,
+      5,
+      8
+    ],
+    "result": {
+      "status": "reference_in_target",
+      "candidates": []
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": null,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "all_spoof",
+    "seed": 620000,
+    "layout": "4",
+    "window": 1,
+    "status": "reference_in_target",
+    "selected_prns": [
+      3,
+      7,
+      8
+    ],
+    "result": {
+      "status": "reference_in_target",
+      "candidates": []
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": null,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "all_spoof",
+    "seed": 620000,
+    "layout": "4",
+    "window": 2,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 224.3416614976013,
+          "elevation_deg": 69.97591218883782,
+          "unit_vector": [
+            -0.23932611949675,
+            -0.24489009311773574,
+            0.9395487485061188
+          ],
+          "rms_m": 0.0021880281040767544
+        },
+        {
+          "azimuth_deg": 224.3416614976013,
+          "elevation_deg": -69.97591218883782,
+          "unit_vector": [
+            -0.23932611949675,
+            -0.24489009311773574,
+            -0.9395487485061188
+          ],
+          "rms_m": 0.0021880281040767544
+        },
+        {
+          "azimuth_deg": 195.97087058013258,
+          "elevation_deg": 29.564056088158516,
+          "unit_vector": [
+            -0.23932553484377875,
+            -0.8362316537380078,
+            0.49339630081541525
+          ],
+          "rms_m": 0.002188028120815082
+        },
+        {
+          "azimuth_deg": 195.97087058013258,
+          "elevation_deg": -29.564056088158516,
+          "unit_vector": [
+            -0.23932553484377875,
+            -0.8362316537380078,
+            -0.49339630081541525
+          ],
+          "rms_m": 0.002188028120815082
+        },
+        {
+          "azimuth_deg": 345.68364028914897,
+          "elevation_deg": 14.568175073579994,
+          "unit_vector": [
+            -0.23932553408284316,
+            0.9377926420713665,
+            0.2515318055689337
+          ],
+          "rms_m": 0.002188028120825504
+        },
+        {
+          "azimuth_deg": 345.68364028914897,
+          "elevation_deg": -14.568175073579994,
+          "unit_vector": [
+            -0.23932553408284316,
+            0.9377926420713665,
+            -0.2515318055689337
+          ],
+          "rms_m": 0.002188028120825504
+        },
+        {
+          "azimuth_deg": 325.363615122199,
+          "elevation_deg": 65.09744989244292,
+          "unit_vector": [
+            -0.23932553417149535,
+            0.3464512100866418,
+            0.9070252740266006
+          ],
+          "rms_m": 0.002188028120827763
+        },
+        {
+          "azimuth_deg": 325.363615122199,
+          "elevation_deg": -65.09744989244292,
+          "unit_vector": [
+            -0.23932553417149535,
+            0.3464512100866418,
+            -0.9070252740266006
+          ],
+          "rms_m": 0.002188028120827763
+        },
+        {
+          "azimuth_deg": 104.03126433491707,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9701635733771823,
+            -0.24245131654007698,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0035147462284482807
+        }
+      ],
+      "best_rms_m": 0.0021880281040767544,
+      "upper_candidate_count": 5,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 10.774306924358994,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "all_spoof",
+    "seed": 620000,
+    "layout": "4",
+    "window": 3,
+    "status": "ambiguous",
+    "selected_prns": [
+      2,
+      4,
+      6
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 224.49502834363375,
+          "elevation_deg": 69.40492459173551,
+          "unit_vector": [
+            -0.24653090719275603,
+            -0.25091522139250716,
+            0.9360897731907265
+          ],
+          "rms_m": 0.0016696964056223422
+        },
+        {
+          "azimuth_deg": 224.49502834363375,
+          "elevation_deg": -69.40492459173551,
+          "unit_vector": [
+            -0.24653090719275603,
+            -0.25091522139250716,
+            -0.9360897731907265
+          ],
+          "rms_m": 0.0016696964056223422
+        },
+        {
+          "azimuth_deg": 196.3148761541442,
+          "elevation_deg": 28.64635378348067,
+          "unit_vector": [
+            -0.24653050664038162,
+            -0.8422567422208256,
+            0.4794020123854285
+          ],
+          "rms_m": 0.0016696964064679344
+        },
+        {
+          "azimuth_deg": 196.3148761541442,
+          "elevation_deg": -28.64635378348067,
+          "unit_vector": [
+            -0.24653050664038162,
+            -0.8422567422208256,
+            -0.4794020123854285
+          ],
+          "rms_m": 0.0016696964064679344
+        },
+        {
+          "azimuth_deg": 324.0886165201386,
+          "elevation_deg": 65.14533318829457,
+          "unit_vector": [
+            -0.24653050624025824,
+            0.3404261216502386,
+            0.9073768595192953
+          ],
+          "rms_m": 0.0016696964064709333
+        },
+        {
+          "azimuth_deg": 324.0886165201386,
+          "elevation_deg": -65.14533318829457,
+          "unit_vector": [
+            -0.24653050624025824,
+            0.3404261216502386,
+            -0.9073768595192953
+          ],
+          "rms_m": 0.0016696964064709333
+        },
+        {
+          "azimuth_deg": 345.18006239602875,
+          "elevation_deg": 15.457182311923198,
+          "unit_vector": [
+            -0.2465305062173243,
+            0.931767553590589,
+            0.26651817120046206
+          ],
+          "rms_m": 0.0016696964064711213
+        },
+        {
+          "azimuth_deg": 345.18006239602875,
+          "elevation_deg": -15.457182311923198,
+          "unit_vector": [
+            -0.2465305062173243,
+            0.931767553590589,
+            -0.26651817120046206
+          ],
+          "rms_m": 0.0016696964064711213
+        },
+        {
+          "azimuth_deg": 104.40148849971592,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9685767000322452,
+            -0.24871505011688813,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0029250001506714828
+        }
+      ],
+      "best_rms_m": 0.0016696964056223422,
+      "upper_candidate_count": 5,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 10.91677198553942,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_3",
+    "seed": 610000,
+    "layout": "3",
+    "window": 0,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 99.97151932255554,
+          "elevation_deg": 13.24738960447148,
+          "unit_vector": [
+            0.958685625033738,
+            -0.16855082339740807,
+            0.2291560435286984
+          ],
+          "rms_m": 0.0020558415064255205
+        },
+        {
+          "azimuth_deg": 99.97151932255554,
+          "elevation_deg": -13.24738960447148,
+          "unit_vector": [
+            0.958685625033738,
+            -0.16855082339740807,
+            -0.2291560435286984
+          ],
+          "rms_m": 0.0020558415064255205
+        },
+        {
+          "azimuth_deg": 201.21003352053884,
+          "elevation_deg": 35.40203258883971,
+          "unit_vector": [
+            -0.2948958823544078,
+            -0.7598922551434355,
+            0.5793100889363477
+          ],
+          "rms_m": 0.0020558415064330787
+        },
+        {
+          "azimuth_deg": 201.21003352053884,
+          "elevation_deg": -35.40203258883971,
+          "unit_vector": [
+            -0.2948958823544078,
+            -0.7598922551434355,
+            -0.5793100889363477
+          ],
+          "rms_m": 0.0020558415064330787
+        },
+        {
+          "azimuth_deg": 325.1042783932194,
+          "elevation_deg": 58.97072495504177,
+          "unit_vector": [
+            -0.29489588145104334,
+            0.422790608537654,
+            0.8569040322203954
+          ],
+          "rms_m": 0.002055841506440528
+        },
+        {
+          "azimuth_deg": 325.1042783932194,
+          "elevation_deg": -58.97072495504177,
+          "unit_vector": [
+            -0.29489588145104334,
+            0.422790608537654,
+            -0.8569040322203954
+          ],
+          "rms_m": 0.002055841506440528
+        },
+        {
+          "azimuth_deg": 240.24957140744664,
+          "elevation_deg": 70.14343769924118,
+          "unit_vector": [
+            -0.2948968708247706,
+            -0.16855037414135862,
+            0.9405459090095318
+          ],
+          "rms_m": 0.0020558415118439245
+        },
+        {
+          "azimuth_deg": 240.24957140744664,
+          "elevation_deg": -70.14343769924118,
+          "unit_vector": [
+            -0.2948968708247706,
+            -0.16855037414135862,
+            -0.9405459090095318
+          ],
+          "rms_m": 0.0020558415118439245
+        },
+        {
+          "azimuth_deg": 100.10062381625175,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9845012705849843,
+            -0.17537744500519922,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.002481156285176683
+        },
+        {
+          "azimuth_deg": 64.4676848645322,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9023423301738892,
+            0.4310200913836337,
+            0.0
+          ],
+          "rms_m": 0.0037161144549651896
+        }
+      ],
+      "best_rms_m": 0.0020558415064255205,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 3.2475093885171953,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_3",
+    "seed": 610000,
+    "layout": "3",
+    "window": 1,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 325.26274998558665,
+          "elevation_deg": 59.08837523012382,
+          "unit_vector": [
+            -0.29272214248556505,
+            0.4221577814249714,
+            0.8579606954173405
+          ],
+          "rms_m": 0.002055322132724462
+        },
+        {
+          "azimuth_deg": 325.26274998558665,
+          "elevation_deg": -59.08837523012382,
+          "unit_vector": [
+            -0.29272214248556505,
+            0.4221577814249714,
+            -0.8579606954173405
+          ],
+          "rms_m": 0.002055322132724462
+        },
+        {
+          "azimuth_deg": 201.05145559261987,
+          "elevation_deg": 35.42115122469884,
+          "unit_vector": [
+            -0.29272214345151576,
+            -0.7605250822565863,
+            0.5795820442282203
+          ],
+          "rms_m": 0.0020553221327510797
+        },
+        {
+          "azimuth_deg": 201.05145559261987,
+          "elevation_deg": -35.42115122469884,
+          "unit_vector": [
+            -0.29272214345151576,
+            -0.7605250822565863,
+            -0.5795820442282203
+          ],
+          "rms_m": 0.0020553221327510797
+        },
+        {
+          "azimuth_deg": 99.98601685804954,
+          "elevation_deg": 12.672431400024408,
+          "unit_vector": [
+            0.9608593639547108,
+            -0.16918365053728618,
+            0.21937678795037988
+          ],
+          "rms_m": 0.0020553221327642857
+        },
+        {
+          "azimuth_deg": 99.98601685804954,
+          "elevation_deg": -12.672431400024408,
+          "unit_vector": [
+            0.9608593639547108,
+            -0.16918365053728618,
+            -0.21937678795037988
+          ],
+          "rms_m": 0.0020553221327642857
+        },
+        {
+          "azimuth_deg": 239.9736675756285,
+          "elevation_deg": 70.239006393879,
+          "unit_vector": [
+            -0.2927231268160624,
+            -0.16918319954186287,
+            0.941111160288627
+          ],
+          "rms_m": 0.0020553221367963738
+        },
+        {
+          "azimuth_deg": 239.9736675756285,
+          "elevation_deg": -70.239006393879,
+          "unit_vector": [
+            -0.2927231268160624,
+            -0.16918319954186287,
+            -0.941111160288627
+          ],
+          "rms_m": 0.0020553221367963738
+        },
+        {
+          "azimuth_deg": 100.10312832891941,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.984493603546915,
+            -0.17542047934950442,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0024163438156133994
+        },
+        {
+          "azimuth_deg": 64.4917800380208,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9025235116142065,
+            0.43064058213731005,
+            0.0
+          ],
+          "rms_m": 0.003809865079423302
+        }
+      ],
+      "best_rms_m": 0.002055322132724462,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 2.6724665616342294,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_3",
+    "seed": 610000,
+    "layout": "3",
+    "window": 2,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 325.0830333919328,
+          "elevation_deg": 58.81378458566183,
+          "unit_vector": [
+            -0.29639501399600726,
+            0.4246042821369867,
+            0.8554888656605887
+          ],
+          "rms_m": 0.0022008929603281706
+        },
+        {
+          "azimuth_deg": 325.0830333919328,
+          "elevation_deg": -58.81378458566183,
+          "unit_vector": [
+            -0.29639501399600726,
+            0.4246042821369867,
+            -0.8554888656605887
+          ],
+          "rms_m": 0.0022008929603281706
+        },
+        {
+          "azimuth_deg": 99.88148967503676,
+          "elevation_deg": 13.68759868135224,
+          "unit_vector": [
+            0.957186492412354,
+            -0.16673714980654059,
+            0.23662785469535477
+          ],
+          "rms_m": 0.002200892960334083
+        },
+        {
+          "azimuth_deg": 99.88148967503676,
+          "elevation_deg": -13.68759868135224,
+          "unit_vector": [
+            0.957186492412354,
+            -0.16673714980654059,
+            -0.23662785469535477
+          ],
+          "rms_m": 0.002200892960334083
+        },
+        {
+          "azimuth_deg": 201.35459955744275,
+          "elevation_deg": 35.51520466435667,
+          "unit_vector": [
+            -0.2963950150652603,
+            -0.7580785814925926,
+            0.5809189782806573
+          ],
+          "rms_m": 0.002200892960401976
+        },
+        {
+          "azimuth_deg": 201.35459955744275,
+          "elevation_deg": -35.51520466435667,
+          "unit_vector": [
+            -0.2963950150652603,
+            -0.7580785814925926,
+            -0.5809189782806573
+          ],
+          "rms_m": 0.002200892960401976
+        },
+        {
+          "azimuth_deg": 240.6402478190139,
+          "elevation_deg": 70.11847968790373,
+          "unit_vector": [
+            -0.29639633297298434,
+            -0.1667365480717956,
+            0.9403978611934789
+          ],
+          "rms_m": 0.002200893128630648
+        },
+        {
+          "azimuth_deg": 240.6402478190139,
+          "elevation_deg": -70.11847968790373,
+          "unit_vector": [
+            -0.29639633297298434,
+            -0.1667365480717956,
+            -0.9403978611934789
+          ],
+          "rms_m": 0.002200893128630648
+        },
+        {
+          "azimuth_deg": 100.0222285464406,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9847403101234277,
+            -0.17403023190818165,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0026518559307082638
+        },
+        {
+          "azimuth_deg": 64.36008748150198,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9015313145858909,
+            0.4327138648356849,
+            0.0
+          ],
+          "rms_m": 0.0037698424295041044
+        }
+      ],
+      "best_rms_m": 0.0022008929603281706,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 3.68942161302369,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_3",
+    "seed": 610000,
+    "layout": "3",
+    "window": 3,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 325.1858720655324,
+          "elevation_deg": 58.523051316615536,
+          "unit_vector": [
+            -0.29810693692175216,
+            0.42869407138998056,
+            0.8528503076825457
+          ],
+          "rms_m": 0.002264020958751894
+        },
+        {
+          "azimuth_deg": 325.1858720655324,
+          "elevation_deg": -58.523051316615536,
+          "unit_vector": [
+            -0.29810693692175216,
+            0.42869407138998056,
+            -0.8528503076825457
+          ],
+          "rms_m": 0.002264020958751894
+        },
+        {
+          "azimuth_deg": 99.6606734854706,
+          "elevation_deg": 14.252730273627225,
+          "unit_vector": [
+            0.9554745693880048,
+            -0.16264736054702797,
+            0.246199478796954
+          ],
+          "rms_m": 0.002264020958766621
+        },
+        {
+          "azimuth_deg": 99.6606734854706,
+          "elevation_deg": -14.252730273627225,
+          "unit_vector": [
+            0.9554745693880048,
+            -0.16264736054702797,
+            -0.246199478796954
+          ],
+          "rms_m": 0.002264020958766621
+        },
+        {
+          "azimuth_deg": 201.57251283688225,
+          "elevation_deg": 35.82763115195258,
+          "unit_vector": [
+            -0.29810693806439026,
+            -0.7539887922321997,
+            0.5853487461899125
+          ],
+          "rms_m": 0.002264020958812256
+        },
+        {
+          "azimuth_deg": 201.57251283688225,
+          "elevation_deg": -35.82763115195258,
+          "unit_vector": [
+            -0.29810693806439026,
+            -0.7539887922321997,
+            -0.5853487461899125
+          ],
+          "rms_m": 0.002264020958812256
+        },
+        {
+          "azimuth_deg": 241.38326934922952,
+          "elevation_deg": 70.14800571075698,
+          "unit_vector": [
+            -0.29810816522633243,
+            -0.16264679145392555,
+            0.9405729865646434
+          ],
+          "rms_m": 0.0022640210732464464
+        },
+        {
+          "azimuth_deg": 241.38326934922952,
+          "elevation_deg": -70.14800571075698,
+          "unit_vector": [
+            -0.29810816522633243,
+            -0.16264679145392555,
+            -0.9405729865646434
+          ],
+          "rms_m": 0.0022640210732464464
+        },
+        {
+          "azimuth_deg": 64.10349105374189,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.8995843917852525,
+            0.43674697715766436,
+            0.0
+          ],
+          "rms_m": 0.00381934247571531
+        }
+      ],
+      "best_rms_m": 0.002264020958751894,
+      "upper_candidate_count": 5,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 4.265643986366967,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_3",
+    "seed": 610000,
+    "layout": "4",
+    "window": 0,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 241.67795577389188,
+          "elevation_deg": 69.76870827835927,
+          "unit_vector": [
+            -0.3044153900730908,
+            -0.16406190938605633,
+            0.9383043004139165
+          ],
+          "rms_m": 0.002088381290387929
+        },
+        {
+          "azimuth_deg": 241.67795577389188,
+          "elevation_deg": -69.76870827835927,
+          "unit_vector": [
+            -0.3044153900730908,
+            -0.16406190938605633,
+            -0.9383043004139165
+          ],
+          "rms_m": 0.002088381290387929
+        },
+        {
+          "azimuth_deg": 201.9485842959968,
+          "elevation_deg": 35.46855162216132,
+          "unit_vector": [
+            -0.30441463881128683,
+            -0.7554036542244199,
+            0.5802560183761878
+          ],
+          "rms_m": 0.002088381305082479
+        },
+        {
+          "azimuth_deg": 201.9485842959968,
+          "elevation_deg": -35.46855162216132,
+          "unit_vector": [
+            -0.30441463881128683,
+            -0.7554036542244199,
+            -0.5802560183761878
+          ],
+          "rms_m": 0.002088381305082479
+        },
+        {
+          "azimuth_deg": 99.8066020878208,
+          "elevation_deg": 15.58317705209494,
+          "unit_vector": [
+            0.9491668685822968,
+            -0.164062222485161,
+            0.2686370092502266
+          ],
+          "rms_m": 0.0020883813050852564
+        },
+        {
+          "azimuth_deg": 99.8066020878208,
+          "elevation_deg": -15.58317705209494,
+          "unit_vector": [
+            0.9491668685822968,
+            -0.164062222485161,
+            -0.2686370092502266
+          ],
+          "rms_m": 0.0020883813050852564
+        },
+        {
+          "azimuth_deg": 324.5320667148671,
+          "elevation_deg": 58.35671563638621,
+          "unit_vector": [
+            -0.30441463805967006,
+            0.4272792096165101,
+            0.8513308435411526
+          ],
+          "rms_m": 0.002088381305099132
+        },
+        {
+          "azimuth_deg": 324.5320667148671,
+          "elevation_deg": -58.35671563638621,
+          "unit_vector": [
+            -0.30441463805967006,
+            0.4272792096165101,
+            -0.8513308435411526
+          ],
+          "rms_m": 0.002088381305099132
+        },
+        {
+          "azimuth_deg": 99.52359214425087,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9862175578280187,
+            -0.16545370540347132,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0031097116378689007
+        },
+        {
+          "azimuth_deg": 64.98815303709125,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9062203835155516,
+            0.4228056486152078,
+            0.0
+          ],
+          "rms_m": 0.0034330970267803162
+        }
+      ],
+      "best_rms_m": 0.002088381290387929,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 5.586358630162984,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_3",
+    "seed": 610000,
+    "layout": "4",
+    "window": 1,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 240.95043063594494,
+          "elevation_deg": 69.99039220478804,
+          "unit_vector": [
+            -0.2991317390677376,
+            -0.16614990283374512,
+            0.9396352550168858
+          ],
+          "rms_m": 0.0021491253802326544
+        },
+        {
+          "azimuth_deg": 240.95043063594494,
+          "elevation_deg": -69.99039220478804,
+          "unit_vector": [
+            -0.2991317390677376,
+            -0.16614990283374512,
+            -0.9396352550168858
+          ],
+          "rms_m": 0.0021491253802326544
+        },
+        {
+          "azimuth_deg": 201.54890435685058,
+          "elevation_deg": 35.470371572522154,
+          "unit_vector": [
+            -0.2991310125483957,
+            -0.7574916289568437,
+            0.5802818878718159
+          ],
+          "rms_m": 0.002149125424027267
+        },
+        {
+          "azimuth_deg": 201.54890435685058,
+          "elevation_deg": -35.470371572522154,
+          "unit_vector": [
+            -0.2991310125483957,
+            -0.7574916289568437,
+            -0.5802818878718159
+          ],
+          "rms_m": 0.002149125424027267
+        },
+        {
+          "azimuth_deg": 99.87506000003984,
+          "elevation_deg": 14.348979472308072,
+          "unit_vector": [
+            0.9544504948309914,
+            -0.16615019718625432,
+            0.24782728843257854
+          ],
+          "rms_m": 0.00214912542404649
+        },
+        {
+          "azimuth_deg": 99.87506000003984,
+          "elevation_deg": -14.348979472308072,
+          "unit_vector": [
+            0.9544504948309914,
+            -0.16615019718625432,
+            -0.24782728843257854
+          ],
+          "rms_m": 0.00214912542404649
+        },
+        {
+          "azimuth_deg": 324.8728043057244,
+          "elevation_deg": 58.67633073990192,
+          "unit_vector": [
+            -0.29913101175408463,
+            0.42519123489788363,
+            0.8542441404967261
+          ],
+          "rms_m": 0.0021491254240484387
+        },
+        {
+          "azimuth_deg": 324.8728043057244,
+          "elevation_deg": -58.67633073990192,
+          "unit_vector": [
+            -0.29913101175408463,
+            0.42519123489788363,
+            -0.8542441404967261
+          ],
+          "rms_m": 0.0021491254240484387
+        },
+        {
+          "azimuth_deg": 99.6325075160712,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9859012599313938,
+            -0.16732813769862603,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.002906067381671108
+        },
+        {
+          "azimuth_deg": 65.145973576291,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9073815573064072,
+            0.42030787461121777,
+            0.0
+          ],
+          "rms_m": 0.003679151966720073
+        }
+      ],
+      "best_rms_m": 0.0021491253802326544,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 4.350693053476383,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_3",
+    "seed": 610000,
+    "layout": "4",
+    "window": 2,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 325.100825865465,
+          "elevation_deg": 58.83394126981901,
+          "unit_vector": [
+            -0.29609093565946637,
+            0.42444944052684236,
+            0.8556709824791023
+          ],
+          "rms_m": 0.002303110759479348
+        },
+        {
+          "azimuth_deg": 325.100825865465,
+          "elevation_deg": -58.83394126981901,
+          "unit_vector": [
+            -0.29609093565946637,
+            0.42444944052684236,
+            -0.8556709824791023
+          ],
+          "rms_m": 0.002303110759479348
+        },
+        {
+          "azimuth_deg": 99.88740605825473,
+          "elevation_deg": 13.608402927184866,
+          "unit_vector": [
+            0.9574905708479435,
+            -0.16689199155368972,
+            0.23528465715495003
+          ],
+          "rms_m": 0.0023031107594808893
+        },
+        {
+          "azimuth_deg": 99.88740605825473,
+          "elevation_deg": -13.608402927184866,
+          "unit_vector": [
+            0.9574905708479435,
+            -0.16689199155368972,
+            -0.23528465715495003
+          ],
+          "rms_m": 0.0023031107594808893
+        },
+        {
+          "azimuth_deg": 201.33069663696457,
+          "elevation_deg": 35.51189501572029,
+          "unit_vector": [
+            -0.2960909361667152,
+            -0.7582334233389996,
+            0.5808719594295629
+          ],
+          "rms_m": 0.0023031107594943243
+        },
+        {
+          "azimuth_deg": 201.33069663696457,
+          "elevation_deg": -35.51189501572029,
+          "unit_vector": [
+            -0.2960909361667152,
+            -0.7582334233389996,
+            -0.5808719594295629
+          ],
+          "rms_m": 0.0023031107594943243
+        },
+        {
+          "azimuth_deg": 240.59229306760244,
+          "elevation_deg": 70.13000940350615,
+          "unit_vector": [
+            -0.2960918159951846,
+            -0.16689164093952502,
+            0.9404662762083426
+          ],
+          "rms_m": 0.002303110826811321
+        },
+        {
+          "azimuth_deg": 240.59229306760244,
+          "elevation_deg": -70.13000940350615,
+          "unit_vector": [
+            -0.2960918159951846,
+            -0.16689164093952502,
+            -0.9404662762083426
+          ],
+          "rms_m": 0.002303110826811321
+        },
+        {
+          "azimuth_deg": 99.66994922608137,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9857917036523729,
+            -0.16797236978191454,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0028976819301219023
+        },
+        {
+          "azimuth_deg": 65.20757218071958,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9078329051765268,
+            0.4193321073788021,
+            0.0
+          ],
+          "rms_m": 0.0039025163782089685
+        }
+      ],
+      "best_rms_m": 0.002303110759479348,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 3.6100850426985938,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_3",
+    "seed": 610000,
+    "layout": "4",
+    "window": 3,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 325.0021833279344,
+          "elevation_deg": 58.327446794895984,
+          "unit_vector": [
+            -0.3011479599344269,
+            0.4301187419934815,
+            0.8510627321257098
+          ],
+          "rms_m": 0.002441793685070721
+        },
+        {
+          "azimuth_deg": 325.0021833279344,
+          "elevation_deg": -58.327446794895984,
+          "unit_vector": [
+            -0.3011479599344269,
+            0.4301187419934815,
+            -0.8510627321257098
+          ],
+          "rms_m": 0.002441793685070721
+        },
+        {
+          "azimuth_deg": 99.60763866312257,
+          "elevation_deg": 14.987422888094011,
+          "unit_vector": [
+            0.9524335464328197,
+            -0.16122269007426857,
+            0.25860700654587443
+          ],
+          "rms_m": 0.002441793685097482
+        },
+        {
+          "azimuth_deg": 99.60763866312257,
+          "elevation_deg": -14.987422888094011,
+          "unit_vector": [
+            0.9524335464328197,
+            -0.16122269007426857,
+            -0.25860700654587443
+          ],
+          "rms_m": 0.002441793685097482
+        },
+        {
+          "azimuth_deg": 201.80943674121207,
+          "elevation_deg": 35.8471863043644,
+          "unit_vector": [
+            -0.30114796105219843,
+            -0.7525641217909952,
+            0.5856254333164259
+          ],
+          "rms_m": 0.0024417936851347053
+        },
+        {
+          "azimuth_deg": 201.80943674121207,
+          "elevation_deg": -35.8471863043644,
+          "unit_vector": [
+            -0.30114796105219843,
+            -0.7525641217909952,
+            -0.5856254333164259
+          ],
+          "rms_m": 0.0024417936851347053
+        },
+        {
+          "azimuth_deg": 241.83730257034767,
+          "elevation_deg": 70.02626370508972,
+          "unit_vector": [
+            -0.30114891322852433,
+            -0.16122228535540953,
+            0.939849300029562
+          ],
+          "rms_m": 0.0024417937775777663
+        },
+        {
+          "azimuth_deg": 241.83730257034767,
+          "elevation_deg": -70.02626370508972,
+          "unit_vector": [
+            -0.30114891322852433,
+            -0.16122228535540953,
+            -0.939849300029562
+          ],
+          "rms_m": 0.0024417937775777663
+        },
+        {
+          "azimuth_deg": 99.35211097821593,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9867083282693069,
+            -0.16250130745317018,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.003239387199800007
+        },
+        {
+          "azimuth_deg": 64.83825665723998,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9051111455499619,
+            0.4251750394851933,
+            0.0
+          ],
+          "rms_m": 0.0038720733106256547
+        }
+      ],
+      "best_rms_m": 0.002441793685070721,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 5.002101901438522,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_3",
+    "seed": 620000,
+    "layout": "3",
+    "window": 0,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 240.96429801022168,
+          "elevation_deg": 70.14010148601133,
+          "unit_vector": [
+            -0.2970243080810101,
+            -0.16488529478372702,
+            0.940526129340956
+          ],
+          "rms_m": 0.001988699858637372
+        },
+        {
+          "azimuth_deg": 240.96429801022168,
+          "elevation_deg": -70.14010148601133,
+          "unit_vector": [
+            -0.2970243080810101,
+            -0.16488529478372702,
+            -0.940526129340956
+          ],
+          "rms_m": 0.001988699858637372
+        },
+        {
+          "azimuth_deg": 201.44342981834328,
+          "elevation_deg": 35.662346607272355,
+          "unit_vector": [
+            -0.29702358850694577,
+            -0.7562270525015437,
+            0.5830074038425962
+          ],
+          "rms_m": 0.0019886998856819857
+        },
+        {
+          "azimuth_deg": 201.44342981834328,
+          "elevation_deg": -35.662346607272355,
+          "unit_vector": [
+            -0.29702358850694577,
+            -0.7562270525015437,
+            -0.5830074038425962
+          ],
+          "rms_m": 0.0019886998856819857
+        },
+        {
+          "azimuth_deg": 99.7801873933196,
+          "elevation_deg": 13.91230064614915,
+          "unit_vector": [
+            0.9565579187260324,
+            -0.16488562071485552,
+            0.24043643693084055
+          ],
+          "rms_m": 0.0019886998856903297
+        },
+        {
+          "azimuth_deg": 99.7801873933196,
+          "elevation_deg": -13.91230064614915,
+          "unit_vector": [
+            0.9565579187260324,
+            -0.16488562071485552,
+            -0.24043643693084055
+          ],
+          "rms_m": 0.0019886998856903297
+        },
+        {
+          "azimuth_deg": 325.1430495838437,
+          "elevation_deg": 58.68790326360798,
+          "unit_vector": [
+            -0.29702358789424643,
+            0.42645581122708054,
+            0.8543491261217989
+          ],
+          "rms_m": 0.00198869988569857
+        },
+        {
+          "azimuth_deg": 325.1430495838437,
+          "elevation_deg": -58.68790326360798,
+          "unit_vector": [
+            -0.29702358789424643,
+            0.42645581122708054,
+            -0.8543491261217989
+          ],
+          "rms_m": 0.00198869988569857
+        },
+        {
+          "azimuth_deg": 99.92796834558249,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.985025283369684,
+            -0.17240995076408402,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.002510711360817947
+        },
+        {
+          "azimuth_deg": 64.24094208580209,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9006295464316736,
+            0.4345876437432132,
+            0.0
+          ],
+          "rms_m": 0.0036608486937108877
+        }
+      ],
+      "best_rms_m": 0.001988699858637372,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 3.91820365930237,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_3",
+    "seed": 620000,
+    "layout": "3",
+    "window": 1,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 325.7416772379581,
+          "elevation_deg": 59.173581861468996,
+          "unit_vector": [
+            -0.2884646425896308,
+            0.4235348131407464,
+            0.8587237111163692
+          ],
+          "rms_m": 0.0021616603301948647
+        },
+        {
+          "azimuth_deg": 325.7416772379581,
+          "elevation_deg": -59.173581861468996,
+          "unit_vector": [
+            -0.2884646425896308,
+            0.4235348131407464,
+            -0.8587237111163692
+          ],
+          "rms_m": 0.0021616603301948647
+        },
+        {
+          "azimuth_deg": 99.8635139427889,
+          "elevation_deg": 11.593896800149253,
+          "unit_vector": [
+            0.9651168638801575,
+            -0.16780661879601472,
+            0.20097357473652763
+          ],
+          "rms_m": 0.0021616603302427573
+        },
+        {
+          "azimuth_deg": 99.8635139427889,
+          "elevation_deg": -11.593896800149253,
+          "unit_vector": [
+            0.9651168638801575,
+            -0.16780661879601472,
+            -0.20097357473652763
+          ],
+          "rms_m": 0.0021616603302427573
+        },
+        {
+          "azimuth_deg": 200.80602493641646,
+          "elevation_deg": 35.69770524747229,
+          "unit_vector": [
+            -0.2884646433633899,
+            -0.7591480505981547,
+            0.5835086861412209
+          ],
+          "rms_m": 0.0021616603302442106
+        },
+        {
+          "azimuth_deg": 200.80602493641646,
+          "elevation_deg": -35.69770524747229,
+          "unit_vector": [
+            -0.2884646433633899,
+            -0.7591480505981547,
+            -0.5835086861412209
+          ],
+          "rms_m": 0.0021616603302442106
+        },
+        {
+          "azimuth_deg": 239.8125719204545,
+          "elevation_deg": 70.50507466566484,
+          "unit_vector": [
+            -0.2884655254566737,
+            -0.16780621955279468,
+            0.9426710525429347
+          ],
+          "rms_m": 0.0021616603888108305
+        },
+        {
+          "azimuth_deg": 239.8125719204545,
+          "elevation_deg": -70.50507466566484,
+          "unit_vector": [
+            -0.2884655254566737,
+            -0.16780621955279468,
+            -0.9426710525429347
+          ],
+          "rms_m": 0.0021616603888108305
+        },
+        {
+          "azimuth_deg": 99.96377684175968,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9849173388949194,
+            -0.17302553437036527,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0024086829907886396
+        },
+        {
+          "azimuth_deg": 64.35550600290298,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9014967110868849,
+            0.43278595159677896,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0041134233216514726
+        }
+      ],
+      "best_rms_m": 0.0021616603301948647,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 1.5995250717464085,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_3",
+    "seed": 620000,
+    "layout": "3",
+    "window": 2,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 240.04050618736073,
+          "elevation_deg": 70.50029805115221,
+          "unit_vector": [
+            -0.28919889453228464,
+            -0.16669656560820784,
+            0.9426432275340088
+          ],
+          "rms_m": 0.0027133488788395536
+        },
+        {
+          "azimuth_deg": 240.04050618736073,
+          "elevation_deg": -70.50029805115221,
+          "unit_vector": [
+            -0.28919889453228464,
+            -0.16669656560820784,
+            -0.9426432275340088
+          ],
+          "rms_m": 0.0027133488788395536
+        },
+        {
+          "azimuth_deg": 200.88223813197678,
+          "elevation_deg": 35.77383453045431,
+          "unit_vector": [
+            -0.2891975706349478,
+            -0.7580386166559778,
+            0.5845872225743014
+          ],
+          "rms_m": 0.002713349055552694
+        },
+        {
+          "azimuth_deg": 200.88223813197678,
+          "elevation_deg": -35.77383453045431,
+          "unit_vector": [
+            -0.2891975706349478,
+            -0.7580386166559778,
+            -0.5845872225743014
+          ],
+          "rms_m": 0.002713349055552694
+        },
+        {
+          "azimuth_deg": 99.8068739524261,
+          "elevation_deg": 11.850993145364425,
+          "unit_vector": [
+            0.9643839368616423,
+            -0.16669718501879455,
+            0.20536716103128497
+          ],
+          "rms_m": 0.002713349055596895
+        },
+        {
+          "azimuth_deg": 99.8068739524261,
+          "elevation_deg": -11.850993145364425,
+          "unit_vector": [
+            0.9643839368616423,
+            -0.16669718501879455,
+            -0.20536716103128497
+          ],
+          "rms_m": 0.002713349055596895
+        },
+        {
+          "azimuth_deg": 325.7437691855667,
+          "elevation_deg": 59.0848312936798,
+          "unit_vector": [
+            -0.28919756906655597,
+            0.424644246878014,
+            0.8579289187569089
+          ],
+          "rms_m": 0.0027133490557439965
+        },
+        {
+          "azimuth_deg": 325.7437691855667,
+          "elevation_deg": -59.0848312936798,
+          "unit_vector": [
+            -0.28919756906655597,
+            0.424644246878014,
+            -0.8579289187569089
+          ],
+          "rms_m": 0.0027133490557439965
+        },
+        {
+          "azimuth_deg": 99.91256659850478,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9850715935056795,
+            -0.17214515871258565,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.002935051828472261
+        },
+        {
+          "azimuth_deg": 64.28728599325405,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9009807696329345,
+            0.43385902405233545,
+            0.0
+          ],
+          "rms_m": 0.004412401026681877
+        }
+      ],
+      "best_rms_m": 0.0027133488788395536,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 1.8606799804263692,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_3",
+    "seed": 620000,
+    "layout": "3",
+    "window": 3,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 240.7169571745908,
+          "elevation_deg": 69.84540611338612,
+          "unit_vector": [
+            -0.3005251505107351,
+            -0.16852991593567782,
+            0.9387663720783853
+          ],
+          "rms_m": 0.002209074588633121
+        },
+        {
+          "azimuth_deg": 240.7169571745908,
+          "elevation_deg": -69.84540611338612,
+          "unit_vector": [
+            -0.3005251505107351,
+            -0.16852991593567782,
+            -0.9387663720783853
+          ],
+          "rms_m": 0.002209074588633121
+        },
+        {
+          "azimuth_deg": 324.59568485756114,
+          "elevation_deg": 58.752700898525525,
+          "unit_vector": [
+            -0.3005240799040471,
+            0.4228110198367307,
+            0.8549363244724426
+          ],
+          "rms_m": 0.0022090745986518452
+        },
+        {
+          "azimuth_deg": 324.59568485756114,
+          "elevation_deg": -58.752700898525525,
+          "unit_vector": [
+            -0.3005240799040471,
+            0.4228110198367307,
+            -0.8549363244724426
+          ],
+          "rms_m": 0.0022090745986518452
+        },
+        {
+          "azimuth_deg": 201.57845583391787,
+          "elevation_deg": 35.200355347941205,
+          "unit_vector": [
+            -0.30052408091672594,
+            -0.7598718438124988,
+            0.5764373840844732
+          ],
+          "rms_m": 0.0022090745986875528
+        },
+        {
+          "azimuth_deg": 201.57845583391787,
+          "elevation_deg": -35.200355347941205,
+          "unit_vector": [
+            -0.30052408091672594,
+            -0.7598718438124988,
+            -0.5764373840844732
+          ],
+          "rms_m": 0.0022090745986875528
+        },
+        {
+          "azimuth_deg": 100.02802329994155,
+          "elevation_deg": 14.569445097581408,
+          "unit_vector": [
+            0.9530574264558966,
+            -0.1685304120653572,
+            0.2515532589459813
+          ],
+          "rms_m": 0.002209074598714055
+        },
+        {
+          "azimuth_deg": 100.02802329994155,
+          "elevation_deg": -14.569445097581408,
+          "unit_vector": [
+            0.9530574264558966,
+            -0.1685304120653572,
+            -0.2515532589459813
+          ],
+          "rms_m": 0.002209074598714055
+        },
+        {
+          "azimuth_deg": 100.18290661275387,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9842483949028497,
+            -0.17679111157285082,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.002773537081314315
+        },
+        {
+          "azimuth_deg": 64.52015480984119,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9027366684413393,
+            0.43019356974672646,
+            0.0
+          ],
+          "rms_m": 0.0035401149744691183
+        }
+      ],
+      "best_rms_m": 0.002209074588633121,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 4.5695270870834275,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_3",
+    "seed": 620000,
+    "layout": "4",
+    "window": 0,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 242.0085680327611,
+          "elevation_deg": 69.86127931579429,
+          "unit_vector": [
+            -0.3040179551388815,
+            -0.1615909027590412,
+            0.9388617912657279
+          ],
+          "rms_m": 0.0022166202589342407
+        },
+        {
+          "azimuth_deg": 242.0085680327611,
+          "elevation_deg": -69.86127931579429,
+          "unit_vector": [
+            -0.3040179551388815,
+            -0.1615909027590412,
+            -0.9388617912657279
+          ],
+          "rms_m": 0.0022166202589342407
+        },
+        {
+          "azimuth_deg": 201.98774125011207,
+          "elevation_deg": 35.708802071564506,
+          "unit_vector": [
+            -0.3040171706209761,
+            -0.7529326703273544,
+            0.5836659609068665
+          ],
+          "rms_m": 0.002216620325080422
+        },
+        {
+          "azimuth_deg": 201.98774125011207,
+          "elevation_deg": -35.708802071564506,
+          "unit_vector": [
+            -0.3040171706209761,
+            -0.7529326703273544,
+            -0.5836659609068665
+          ],
+          "rms_m": 0.002216620325080422
+        },
+        {
+          "azimuth_deg": 324.7233558576224,
+          "elevation_deg": 58.23652008730825,
+          "unit_vector": [
+            -0.30401716977610294,
+            0.4297501934877902,
+            0.8502283997130037
+          ],
+          "rms_m": 0.002216620325116524
+        },
+        {
+          "azimuth_deg": 324.7233558576224,
+          "elevation_deg": -58.23652008730825,
+          "unit_vector": [
+            -0.30401716977610294,
+            0.4297501934877902,
+            -0.8502283997130037
+          ],
+          "rms_m": 0.002216620325116524
+        },
+        {
+          "azimuth_deg": 99.65773900525973,
+          "elevation_deg": 15.588711616663806,
+          "unit_vector": [
+            0.9495643368738429,
+            -0.16159123866216427,
+            0.2687300536318304
+          ],
+          "rms_m": 0.002216620325122652
+        },
+        {
+          "azimuth_deg": 99.65773900525973,
+          "elevation_deg": -15.588711616663806,
+          "unit_vector": [
+            0.9495643368738429,
+            -0.16159123866216427,
+            -0.2687300536318304
+          ],
+          "rms_m": 0.002216620325122652
+        },
+        {
+          "azimuth_deg": 99.37997292727232,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9866291900263268,
+            -0.16298110745725866,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0031982987563597283
+        },
+        {
+          "azimuth_deg": 64.84217732140678,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9051402375205059,
+            0.4251131030929559,
+            0.0
+          ],
+          "rms_m": 0.0035860545975687154
+        }
+      ],
+      "best_rms_m": 0.0022166202589342407,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 5.598659954246509,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_3",
+    "seed": 620000,
+    "layout": "4",
+    "window": 1,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 325.3724191232829,
+          "elevation_deg": 58.79350393950125,
+          "unit_vector": [
+            -0.2944187310103984,
+            0.42634501861624446,
+            0.8553055219810877
+          ],
+          "rms_m": 0.0022718689969973235
+        },
+        {
+          "azimuth_deg": 325.3724191232829,
+          "elevation_deg": -58.79350393950125,
+          "unit_vector": [
+            -0.2944187310103984,
+            0.42634501861624446,
+            -0.8553055219810877
+          ],
+          "rms_m": 0.0022718689969973235
+        },
+        {
+          "azimuth_deg": 99.76056577769562,
+          "elevation_deg": 13.282083479239876,
+          "unit_vector": [
+            0.9591627754555827,
+            -0.16499641342990476,
+            0.22974541069542886
+          ],
+          "rms_m": 0.002271868997049628
+        },
+        {
+          "azimuth_deg": 99.76056577769562,
+          "elevation_deg": -13.282083479239876,
+          "unit_vector": [
+            0.9591627754555827,
+            -0.16499641342990476,
+            -0.22974541069542886
+          ],
+          "rms_m": 0.002271868997049628
+        },
+        {
+          "azimuth_deg": 201.26941130067024,
+          "elevation_deg": 35.74534783569747,
+          "unit_vector": [
+            -0.2944187319191255,
+            -0.7563378452112829,
+            0.5841837674878407
+          ],
+          "rms_m": 0.002271868997078198
+        },
+        {
+          "azimuth_deg": 201.26941130067024,
+          "elevation_deg": -35.74534783569747,
+          "unit_vector": [
+            -0.2944187319191255,
+            -0.7563378452112829,
+            -0.5841837674878407
+          ],
+          "rms_m": 0.002271868997078198
+        },
+        {
+          "azimuth_deg": 240.73319290869404,
+          "elevation_deg": 70.27534767784032,
+          "unit_vector": [
+            -0.2944192841871609,
+            -0.16499619141206834,
+            0.9413254176522761
+          ],
+          "rms_m": 0.0022718690670469853
+        },
+        {
+          "azimuth_deg": 240.73319290869404,
+          "elevation_deg": -70.27534767784032,
+          "unit_vector": [
+            -0.2944192841871609,
+            -0.16499619141206834,
+            -0.9413254176522761
+          ],
+          "rms_m": 0.0022718690670469853
+        },
+        {
+          "azimuth_deg": 99.55661348998547,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9861220379097877,
+            -0.1660220658486311,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.002821386193826001
+        },
+        {
+          "azimuth_deg": 65.10320520412643,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.90706756619058,
+            0.42098507142783315,
+            0.0
+          ],
+          "rms_m": 0.004012116965169535
+        }
+      ],
+      "best_rms_m": 0.0022718689969973235,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 3.290448239190101,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_3",
+    "seed": 620000,
+    "layout": "4",
+    "window": 2,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 240.49384148500394,
+          "elevation_deg": 70.38774688683243,
+          "unit_vector": [
+            -0.2921197572146818,
+            -0.16531485876240296,
+            0.9419856925225575
+          ],
+          "rms_m": 0.002615337213402387
+        },
+        {
+          "azimuth_deg": 240.49384148500394,
+          "elevation_deg": -70.38774688683243,
+          "unit_vector": [
+            -0.2921197572146818,
+            -0.16531485876240296,
+            -0.9419856925225575
+          ],
+          "rms_m": 0.002615337213402387
+        },
+        {
+          "azimuth_deg": 201.10986419860023,
+          "elevation_deg": 35.797693808637575,
+          "unit_vector": [
+            -0.2921191342708296,
+            -0.7566565417774264,
+            0.5849250286816994
+          ],
+          "rms_m": 0.002615337318677537
+        },
+        {
+          "azimuth_deg": 201.10986419860023,
+          "elevation_deg": -35.797693808637575,
+          "unit_vector": [
+            -0.2921191342708296,
+            -0.7566565417774264,
+            -0.5849250286816994
+          ],
+          "rms_m": 0.002615337318677537
+        },
+        {
+          "azimuth_deg": 99.7561157530873,
+          "elevation_deg": 12.690468046005913,
+          "unit_vector": [
+            0.9614623732490704,
+            -0.16531511005211694,
+            0.21968390750057645
+          ],
+          "rms_m": 0.002615337318736978
+        },
+        {
+          "azimuth_deg": 99.7561157530873,
+          "elevation_deg": -12.690468046005913,
+          "unit_vector": [
+            0.9614623732490704,
+            -0.16531511005211694,
+            -0.21968390750057645
+          ],
+          "rms_m": 0.002615337318736978
+        },
+        {
+          "azimuth_deg": 325.5622183846756,
+          "elevation_deg": 58.898359025797234,
+          "unit_vector": [
+            -0.2921191330504488,
+            0.4260263220434617,
+            0.8562522905265567
+          ],
+          "rms_m": 0.0026153373188366113
+        },
+        {
+          "azimuth_deg": 325.5622183846756,
+          "elevation_deg": -58.898359025797234,
+          "unit_vector": [
+            -0.2921191330504488,
+            0.4260263220434617,
+            -0.8562522905265567
+          ],
+          "rms_m": 0.0026153373188366113
+        },
+        {
+          "azimuth_deg": 99.56953637301922,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9860845670721325,
+            -0.16624447835090614,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0030331274416601777
+        },
+        {
+          "azimuth_deg": 65.13636173668783,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9073110344256746,
+            0.4204600894370503,
+            0.0
+          ],
+          "rms_m": 0.0043132893918998915
+        }
+      ],
+      "best_rms_m": 0.002615337213402387,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 2.70107094747043,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_3",
+    "seed": 620000,
+    "layout": "4",
+    "window": 3,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 324.51755869756784,
+          "elevation_deg": 58.6680093117939,
+          "unit_vector": [
+            -0.301833530335284,
+            0.4234294230435012,
+            0.8541686271845782
+          ],
+          "rms_m": 0.0020892410412703473
+        },
+        {
+          "azimuth_deg": 324.51755869756784,
+          "elevation_deg": -58.6680093117939,
+          "unit_vector": [
+            -0.301833530335284,
+            0.4234294230435012,
+            -0.8541686271845782
+          ],
+          "rms_m": 0.0020892410412703473
+        },
+        {
+          "azimuth_deg": 201.67979461396607,
+          "elevation_deg": 35.20951877688794,
+          "unit_vector": [
+            -0.3018335310714037,
+            -0.759253440802132,
+            0.5765680637627195
+          ],
+          "rms_m": 0.0020892410413132947
+        },
+        {
+          "azimuth_deg": 201.67979461396607,
+          "elevation_deg": -35.20951877688794,
+          "unit_vector": [
+            -0.3018335310714037,
+            -0.759253440802132,
+            -0.5765680637627195
+          ],
+          "rms_m": 0.0020892410413132947
+        },
+        {
+          "azimuth_deg": 100.00543919873186,
+          "elevation_deg": 14.88432163597664,
+          "unit_vector": [
+            0.9517479763165934,
+            -0.16791200901774017,
+            0.2568683452761269
+          ],
+          "rms_m": 0.0020892410413213902
+        },
+        {
+          "azimuth_deg": 100.00543919873186,
+          "elevation_deg": -14.88432163597664,
+          "unit_vector": [
+            0.9517479763165934,
+            -0.16791200901774017,
+            -0.2568683452761269
+          ],
+          "rms_m": 0.0020892410413213902
+        },
+        {
+          "azimuth_deg": 240.91259525169153,
+          "elevation_deg": 69.79404861090886,
+          "unit_vector": [
+            -0.30183406995075795,
+            -0.1679117915564979,
+            0.9384571511119983
+          ],
+          "rms_m": 0.0020892410512932014
+        },
+        {
+          "azimuth_deg": 240.91259525169153,
+          "elevation_deg": -69.79404861090886,
+          "unit_vector": [
+            -0.30183406995075795,
+            -0.1679117915564979,
+            -0.9384571511119983
+          ],
+          "rms_m": 0.0020892410512932014
+        },
+        {
+          "azimuth_deg": 99.74208019673824,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9855794582561036,
+            -0.16921327212605203,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.002963363967587004
+        },
+        {
+          "azimuth_deg": 65.23280800526845,
+          "elevation_deg": 1.4210854715202004e-14,
+          "unit_vector": [
+            0.9080175111964092,
+            0.41893221332415936,
+            2.4802620430283604e-16
+          ],
+          "rms_m": 0.0034745159063248646
+        }
+      ],
+      "best_rms_m": 0.0020892410412703473,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 4.884324521940283,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_4",
+    "seed": 610000,
+    "layout": "3",
+    "window": 0,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 241.86637522035744,
+          "elevation_deg": 69.26463410620752,
+          "unit_vector": [
+            -0.312221019634636,
+            -0.16694604329763515,
+            0.935225669838875
+          ],
+          "rms_m": 0.0021075449884271086
+        },
+        {
+          "azimuth_deg": 241.86637522035744,
+          "elevation_deg": -69.26463410620752,
+          "unit_vector": [
+            -0.312221019634636,
+            -0.16694604329763515,
+            -0.935225669838875
+          ],
+          "rms_m": 0.0021075449884271086
+        },
+        {
+          "azimuth_deg": 202.37908243422027,
+          "elevation_deg": 34.91020195658119,
+          "unit_vector": [
+            -0.31221994223714916,
+            -0.7582879995655456,
+            0.5722918987582424
+          ],
+          "rms_m": 0.0021075450117699424
+        },
+        {
+          "azimuth_deg": 202.37908243422027,
+          "elevation_deg": -34.91020195658119,
+          "unit_vector": [
+            -0.31221994223714916,
+            -0.7582879995655456,
+            -0.5722918987582424
+          ],
+          "rms_m": 0.0021075450117699424
+        },
+        {
+          "azimuth_deg": 100.05660680336129,
+          "elevation_deg": 17.049735751649987,
+          "unit_vector": [
+            0.9413615652055242,
+            -0.16694656784907344,
+            0.29320171731628797
+          ],
+          "rms_m": 0.002107545011770849
+        },
+        {
+          "azimuth_deg": 100.05660680336129,
+          "elevation_deg": -17.049735751649987,
+          "unit_vector": [
+            0.9413615652055242,
+            -0.16694656784907344,
+            -0.29320171731628797
+          ],
+          "rms_m": 0.002107545011770849
+        },
+        {
+          "azimuth_deg": 323.6587272663806,
+          "elevation_deg": 58.20576484547816,
+          "unit_vector": [
+            -0.31221994126383207,
+            0.42439486409372434,
+            0.8499457086238382
+          ],
+          "rms_m": 0.0021075450117997987
+        },
+        {
+          "azimuth_deg": 323.6587272663806,
+          "elevation_deg": -58.20576484547816,
+          "unit_vector": [
+            -0.31221994126383207,
+            0.42439486409372434,
+            -0.8499457086238382
+          ],
+          "rms_m": 0.0021075450117997987
+        },
+        {
+          "azimuth_deg": 64.5302002131939,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9028120784102831,
+            0.4300352905012621,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.002987050700544423
+        },
+        {
+          "azimuth_deg": 100.26719905436039,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9839872381960235,
+            -0.17823892691374127,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0031156177794269464
+        }
+      ],
+      "best_rms_m": 0.0021075449884271086,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 7.049950266081496,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_4",
+    "seed": 610000,
+    "layout": "3",
+    "window": 1,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 241.37003391247708,
+          "elevation_deg": 69.49163077991896,
+          "unit_vector": [
+            -0.3075084871370964,
+            -0.1678677668998606,
+            0.9366210243074348
+          ],
+          "rms_m": 0.002001205335333956
+        },
+        {
+          "azimuth_deg": 241.37003391247708,
+          "elevation_deg": -69.49163077991896,
+          "unit_vector": [
+            -0.3075084871370964,
+            -0.1678677668998606,
+            -0.9366210243074348
+          ],
+          "rms_m": 0.002001205335333956
+        },
+        {
+          "azimuth_deg": 324.01450872467325,
+          "elevation_deg": 58.443079560162616,
+          "unit_vector": [
+            -0.3075074611056835,
+            0.42347317340265533,
+            0.8521206679647086
+          ],
+          "rms_m": 0.002001205343321922
+        },
+        {
+          "azimuth_deg": 324.01450872467325,
+          "elevation_deg": -58.443079560162616,
+          "unit_vector": [
+            -0.3075074611056835,
+            0.42347317340265533,
+            -0.8521206679647086
+          ],
+          "rms_m": 0.002001205343321922
+        },
+        {
+          "azimuth_deg": 202.04973278726231,
+          "elevation_deg": 35.003041186561205,
+          "unit_vector": [
+            -0.30750746202378076,
+            -0.7592096902824572,
+            0.5736199150839417
+          ],
+          "rms_m": 0.002001205343352171
+        },
+        {
+          "azimuth_deg": 202.04973278726231,
+          "elevation_deg": -35.003041186561205,
+          "unit_vector": [
+            -0.30750746202378076,
+            -0.7592096902824572,
+            -0.5736199150839417
+          ],
+          "rms_m": 0.002001205343352171
+        },
+        {
+          "azimuth_deg": 100.06165338540698,
+          "elevation_deg": 16.0850193908267,
+          "unit_vector": [
+            0.9460740453694152,
+            -0.16786825854815524,
+            0.2770634375921146
+          ],
+          "rms_m": 0.002001205343373985
+        },
+        {
+          "azimuth_deg": 100.06165338540698,
+          "elevation_deg": -16.0850193908267,
+          "unit_vector": [
+            0.9460740453694152,
+            -0.16786825854815524,
+            -0.2770634375921146
+          ],
+          "rms_m": 0.002001205343373985
+        },
+        {
+          "azimuth_deg": 100.24827338755131,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9840460595410542,
+            -0.17791389125564108,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0028591461714578244
+        },
+        {
+          "azimuth_deg": 64.54738202798762,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9029409964706063,
+            0.42976453656935043,
+            0.0
+          ],
+          "rms_m": 0.00310343317005003
+        }
+      ],
+      "best_rms_m": 0.002001205335333956,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 6.085315489076307,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_4",
+    "seed": 610000,
+    "layout": "3",
+    "window": 2,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      4
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 99.50800094014537,
+          "elevation_deg": 18.24906004919582,
+          "unit_vector": [
+            0.9366577432746805,
+            -0.15687721397399698,
+            0.3131482264029921
+          ],
+          "rms_m": 0.0018544484045573005
+        },
+        {
+          "azimuth_deg": 99.50800094014537,
+          "elevation_deg": -18.24906004919582,
+          "unit_vector": [
+            0.9366577432746805,
+            -0.15687721397399698,
+            -0.3131482264029921
+          ],
+          "rms_m": 0.0018544484045573005
+        },
+        {
+          "azimuth_deg": 323.89078830502496,
+          "elevation_deg": 57.46783256548846,
+          "unit_vector": [
+            -0.3169237633643531,
+            0.4344642179663775,
+            0.8430896580565079
+          ],
+          "rms_m": 0.0018544484045611436
+        },
+        {
+          "azimuth_deg": 323.89078830502496,
+          "elevation_deg": -57.46783256548846,
+          "unit_vector": [
+            -0.3169237633643531,
+            0.4344642179663775,
+            -0.8430896580565079
+          ],
+          "rms_m": 0.0018544484045611436
+        },
+        {
+          "azimuth_deg": 202.95610978811342,
+          "elevation_deg": 35.652097803530324,
+          "unit_vector": [
+            -0.3169237641418438,
+            -0.7482186457361373,
+            0.5828620642098314
+          ],
+          "rms_m": 0.0018544484045832268
+        },
+        {
+          "azimuth_deg": 202.95610978811342,
+          "elevation_deg": -35.652097803530324,
+          "unit_vector": [
+            -0.3169237641418438,
+            -0.7482186457361373,
+            -0.5828620642098314
+          ],
+          "rms_m": 0.0018544484045832268
+        },
+        {
+          "azimuth_deg": 243.66469092923217,
+          "elevation_deg": 69.29073206969841,
+          "unit_vector": [
+            -0.3169244306646982,
+            -0.15687689808391453,
+            0.9353868419511929
+          ],
+          "rms_m": 0.0018544484487932815
+        },
+        {
+          "azimuth_deg": 243.66469092923217,
+          "elevation_deg": -69.29073206969841,
+          "unit_vector": [
+            -0.3169244306646982,
+            -0.15687689808391453,
+            -0.9353868419511929
+          ],
+          "rms_m": 0.0018544484487932815
+        },
+        {
+          "azimuth_deg": 63.89550171614974,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.8979930334285368,
+            0.4400096725230196,
+            0.0
+          ],
+          "rms_m": 0.0028227190143392767
+        },
+        {
+          "azimuth_deg": 99.77324478328228,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9854872731978164,
+            -0.1697493280255699,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0032144033002447993
+        }
+      ],
+      "best_rms_m": 0.0018544484045573005,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 8.262818614376748,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_4",
+    "seed": 610000,
+    "layout": "3",
+    "window": 3,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 324.1080294971053,
+          "elevation_deg": 57.97930422502323,
+          "unit_vector": [
+            -0.31084941253601855,
+            0.42954834346066895,
+            0.8478566290100039
+          ],
+          "rms_m": 0.002151055866740606
+        },
+        {
+          "azimuth_deg": 324.1080294971053,
+          "elevation_deg": -57.97930422502323,
+          "unit_vector": [
+            -0.31084941253601855,
+            0.42954834346066895,
+            -0.8478566290100039
+          ],
+          "rms_m": 0.002151055866740606
+        },
+        {
+          "azimuth_deg": 99.73831617445906,
+          "elevation_deg": 16.95876459993016,
+          "unit_vector": [
+            0.9427320938373135,
+            -0.16179308847456794,
+            0.2916833827474158
+          ],
+          "rms_m": 0.0021510558667625487
+        },
+        {
+          "azimuth_deg": 99.73831617445906,
+          "elevation_deg": -16.95876459993016,
+          "unit_vector": [
+            0.9427320938373135,
+            -0.16179308847456794,
+            -0.2916833827474158
+          ],
+          "rms_m": 0.0021510558667625487
+        },
+        {
+          "azimuth_deg": 202.4279415606049,
+          "elevation_deg": 35.43605222185523,
+          "unit_vector": [
+            -0.31084941358692736,
+            -0.7531345201699423,
+            0.5797939604730754
+          ],
+          "rms_m": 0.0021510558668022197
+        },
+        {
+          "azimuth_deg": 202.4279415606049,
+          "elevation_deg": -35.43605222185523,
+          "unit_vector": [
+            -0.31084941358692736,
+            -0.7531345201699423,
+            -0.5797939604730754
+          ],
+          "rms_m": 0.0021510558668022197
+        },
+        {
+          "azimuth_deg": 242.50377516495064,
+          "elevation_deg": 69.48605752781712,
+          "unit_vector": [
+            -0.3108505707800913,
+            -0.1617925337104629,
+            0.9365869413360621
+          ],
+          "rms_m": 0.0021510559758331754
+        },
+        {
+          "azimuth_deg": 242.50377516495064,
+          "elevation_deg": -69.48605752781712,
+          "unit_vector": [
+            -0.3108505707800913,
+            -0.1617925337104629,
+            -0.9365869413360621
+          ],
+          "rms_m": 0.0021510559758331754
+        },
+        {
+          "azimuth_deg": 99.95811603963375,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9849344289475322,
+            -0.17292822405205732,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0031256854648749424
+        },
+        {
+          "azimuth_deg": 64.16992146265693,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9000901642946654,
+            0.43570367928214954,
+            0.0
+          ],
+          "rms_m": 0.0031836609138771936
+        }
+      ],
+      "best_rms_m": 0.002151055866740606,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 6.96340930462761,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_4",
+    "seed": 610000,
+    "layout": "4",
+    "window": 0,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 240.08233455661684,
+          "elevation_deg": 69.74413812633885,
+          "unit_vector": [
+            -0.30007773433613644,
+            -0.17267548434007474,
+            0.9381559201239481
+          ],
+          "rms_m": 0.0021286770577127073
+        },
+        {
+          "azimuth_deg": 240.08233455661684,
+          "elevation_deg": -69.74413812633885,
+          "unit_vector": [
+            -0.30007773433613644,
+            -0.17267548434007474,
+            -0.9381559201239481
+          ],
+          "rms_m": 0.0021286770577127073
+        },
+        {
+          "azimuth_deg": 201.4430149978876,
+          "elevation_deg": 34.8316299554378,
+          "unit_vector": [
+            -0.3000769519240827,
+            -0.7640172228929608,
+            0.5711667935436019
+          ],
+          "rms_m": 0.002128677114452831
+        },
+        {
+          "azimuth_deg": 201.4430149978876,
+          "elevation_deg": -34.8316299554378,
+          "unit_vector": [
+            -0.3000769519240827,
+            -0.7640172228929608,
+            -0.5711667935436019
+          ],
+          "rms_m": 0.002128677114452831
+        },
+        {
+          "azimuth_deg": 100.2647834445837,
+          "elevation_deg": 14.300433475872719,
+          "unit_vector": [
+            0.9535045554382583,
+            -0.17267579112342699,
+            0.24700634388288067
+          ],
+          "rms_m": 0.00212867711446827
+        },
+        {
+          "azimuth_deg": 100.2647834445837,
+          "elevation_deg": -14.300433475872719,
+          "unit_vector": [
+            0.9535045554382583,
+            -0.17267579112342699,
+            -0.24700634388288067
+          ],
+          "rms_m": 0.00212867711446827
+        },
+        {
+          "azimuth_deg": 324.3690872597856,
+          "elevation_deg": 58.995919977185835,
+          "unit_vector": [
+            -0.30007695116212735,
+            0.41866564095726183,
+            0.8571306227542493
+          ],
+          "rms_m": 0.0021286771144954785
+        },
+        {
+          "azimuth_deg": 324.3690872597856,
+          "elevation_deg": -58.995919977185835,
+          "unit_vector": [
+            -0.30007695116212735,
+            0.41866564095726183,
+            -0.8571306227542493
+          ],
+          "rms_m": 0.0021286771144954785
+        },
+        {
+          "azimuth_deg": 100.01497250050306,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9847623417445369,
+            -0.17390552113666746,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0028839571429236754
+        },
+        {
+          "azimuth_deg": 65.52765851927688,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9101613506373294,
+            0.41425392672373346,
+            0.0
+          ],
+          "rms_m": 0.0034746423928511787
+        }
+      ],
+      "best_rms_m": 0.0021286770577127073,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 4.308212695908771,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_4",
+    "seed": 610000,
+    "layout": "4",
+    "window": 1,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 324.76585423193865,
+          "elevation_deg": 59.25891035535249,
+          "unit_vector": [
+            -0.2948976870901815,
+            0.41751564795138824,
+            0.8594859148727184
+          ],
+          "rms_m": 0.0021609557022202134
+        },
+        {
+          "azimuth_deg": 324.76585423193865,
+          "elevation_deg": -59.25891035535249,
+          "unit_vector": [
+            -0.2948976870901815,
+            0.41751564795138824,
+            -0.8594859148727184
+          ],
+          "rms_m": 0.0021609557022202134
+        },
+        {
+          "azimuth_deg": 201.07680889643248,
+          "elevation_deg": 34.912428057478905,
+          "unit_vector": [
+            -0.2948976875633683,
+            -0.7651672157881799,
+            0.5723237595563746
+          ],
+          "rms_m": 0.0021609557022316205
+        },
+        {
+          "azimuth_deg": 201.07680889643248,
+          "elevation_deg": -34.912428057478905,
+          "unit_vector": [
+            -0.2948976875633683,
+            -0.7651672157881799,
+            -0.5723237595563746
+          ],
+          "rms_m": 0.0021609557022316205
+        },
+        {
+          "azimuth_deg": 100.27705368251856,
+          "elevation_deg": 13.01397209718057,
+          "unit_vector": [
+            0.9586838194536599,
+            -0.17382578413391378,
+            0.22518865665919388
+          ],
+          "rms_m": 0.0021609557022812267
+        },
+        {
+          "azimuth_deg": 100.27705368251856,
+          "elevation_deg": -13.01397209718057,
+          "unit_vector": [
+            0.9586838194536599,
+            -0.17382578413391378,
+            -0.22518865665919388
+          ],
+          "rms_m": 0.0021609557022812267
+        },
+        {
+          "azimuth_deg": 239.48309187206905,
+          "elevation_deg": 69.9819548859926,
+          "unit_vector": [
+            -0.2948982325816757,
+            -0.17382557533002058,
+            0.939584856083468
+          ],
+          "rms_m": 0.0021609557099671276
+        },
+        {
+          "azimuth_deg": 239.48309187206905,
+          "elevation_deg": -69.9819548859926,
+          "unit_vector": [
+            -0.2948982325816757,
+            -0.17382557533002058,
+            -0.939584856083468
+          ],
+          "rms_m": 0.0021609557099671276
+        },
+        {
+          "azimuth_deg": 100.06945420056581,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9845965324072693,
+            -0.17484183816118234,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.002694437438300616
+        },
+        {
+          "azimuth_deg": 65.62775883995346,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9108836960556008,
+            0.41266317046725637,
+            0.0
+          ],
+          "rms_m": 0.0037237865867405886
+        }
+      ],
+      "best_rms_m": 0.0021609557022202134,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 3.026171310058418,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_4",
+    "seed": 610000,
+    "layout": "4",
+    "window": 2,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      4
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 325.9004454887402,
+          "elevation_deg": 59.63106787928668,
+          "unit_vector": [
+            -0.2834367606397956,
+            0.4186413575142735,
+            0.8627879325168065
+          ],
+          "rms_m": 0.0029488177631583927
+        },
+        {
+          "azimuth_deg": 325.9004454887402,
+          "elevation_deg": -59.63106787928668,
+          "unit_vector": [
+            -0.2834367606397956,
+            0.4186413575142735,
+            -0.8627879325168065
+          ],
+          "rms_m": 0.0029488177631583927
+        },
+        {
+          "azimuth_deg": 200.35336158268436,
+          "elevation_deg": 35.42047384027276,
+          "unit_vector": [
+            -0.28343676155315245,
+            -0.7640415067281693,
+            0.5795724097960583
+          ],
+          "rms_m": 0.0029488177631962127
+        },
+        {
+          "azimuth_deg": 200.35336158268436,
+          "elevation_deg": -35.42047384027276,
+          "unit_vector": [
+            -0.28343676155315245,
+            -0.7640415067281693,
+            -0.5795724097960583
+          ],
+          "rms_m": 0.0029488177631962127
+        },
+        {
+          "azimuth_deg": 100.09375899984565,
+          "elevation_deg": 9.803856636077043,
+          "unit_vector": [
+            0.9701447452904546,
+            -0.1727000744961759,
+            0.1702758275690779
+          ],
+          "rms_m": 0.002948817763221371
+        },
+        {
+          "azimuth_deg": 100.09375899984565,
+          "elevation_deg": -9.803856636077043,
+          "unit_vector": [
+            0.9701447452904546,
+            -0.1727000744961759,
+            -0.1702758275690779
+          ],
+          "rms_m": 0.002948817763221371
+        },
+        {
+          "azimuth_deg": 238.6459283870645,
+          "elevation_deg": 70.61543477116845,
+          "unit_vector": [
+            -0.2834380351592555,
+            -0.17269960926943403,
+            0.943312103804062
+          ],
+          "rms_m": 0.002948817836994791
+        },
+        {
+          "azimuth_deg": 238.6459283870645,
+          "elevation_deg": -70.61543477116845,
+          "unit_vector": [
+            -0.2834380351592555,
+            -0.17269960926943403,
+            -0.943312103804062
+          ],
+          "rms_m": 0.002948817836994791
+        },
+        {
+          "azimuth_deg": 65.62854659670847,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9108893696546563,
+            0.4126506467341873,
+            0.0
+          ],
+          "rms_m": 0.004776648234948871
+        }
+      ],
+      "best_rms_m": 0.0029488177631583927,
+      "upper_candidate_count": 5,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 0.21680177281527999,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_4",
+    "seed": 610000,
+    "layout": "4",
+    "window": 3,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 324.9221539906081,
+          "elevation_deg": 58.87347441635148,
+          "unit_vector": [
+            -0.2970737358344611,
+            0.42304077785808464,
+            0.8560278592117102
+          ],
+          "rms_m": 0.0024233811739837957
+        },
+        {
+          "azimuth_deg": 324.9221539906081,
+          "elevation_deg": -58.87347441635148,
+          "unit_vector": [
+            -0.2970737358344611,
+            0.42304077785808464,
+            -0.8560278592117102
+          ],
+          "rms_m": 0.0024233811739837957
+        },
+        {
+          "azimuth_deg": 99.97923136276066,
+          "elevation_deg": 13.783860314722451,
+          "unit_vector": [
+            0.9565077706070145,
+            -0.16830065424022297,
+            0.23825988867350684
+          ],
+          "rms_m": 0.00242338117402083
+        },
+        {
+          "azimuth_deg": 99.97923136276066,
+          "elevation_deg": -13.783860314722451,
+          "unit_vector": [
+            0.9565077706070145,
+            -0.16830065424022297,
+            -0.23825988867350684
+          ],
+          "rms_m": 0.00242338117402083
+        },
+        {
+          "azimuth_deg": 201.35901027048675,
+          "elevation_deg": 35.34686090571389,
+          "unit_vector": [
+            -0.2970737368313035,
+            -0.7596420859676107,
+            0.5785249312794242
+          ],
+          "rms_m": 0.0024233811740681835
+        },
+        {
+          "azimuth_deg": 201.35901027048675,
+          "elevation_deg": -35.34686090571389,
+          "unit_vector": [
+            -0.2970737368313035,
+            -0.7596420859676107,
+            -0.5785249312794242
+          ],
+          "rms_m": 0.0024233811740681835
+        },
+        {
+          "azimuth_deg": 240.46736381261144,
+          "elevation_deg": 70.0356273031316,
+          "unit_vector": [
+            -0.29707474439128306,
+            -0.16830025790690076,
+            0.9399051119306271
+          ],
+          "rms_m": 0.002423381311737703
+        },
+        {
+          "azimuth_deg": 240.46736381261144,
+          "elevation_deg": -70.0356273031316,
+          "unit_vector": [
+            -0.29707474439128306,
+            -0.16830025790690076,
+            -0.9399051119306271
+          ],
+          "rms_m": 0.002423381311737703
+        },
+        {
+          "azimuth_deg": 99.75405257195234,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9855440783798277,
+            -0.16941921251869857,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.003020064456398155
+        },
+        {
+          "azimuth_deg": 65.28537803792278,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9084015076890763,
+            0.41809891273263666,
+            0.0
+          ],
+          "rms_m": 0.0038982486590633174
+        }
+      ],
+      "best_rms_m": 0.0024233811739837957,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 3.783914868431978,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_4",
+    "seed": 620000,
+    "layout": "3",
+    "window": 0,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 242.37308305012994,
+          "elevation_deg": 69.21417297934961,
+          "unit_vector": [
+            -0.31441484887662513,
+            -0.16456023550839835,
+            0.9349134888829604
+          ],
+          "rms_m": 0.0020671017649253227
+        },
+        {
+          "azimuth_deg": 242.37308305012994,
+          "elevation_deg": -69.21417297934961,
+          "unit_vector": [
+            -0.31441484887662513,
+            -0.16456023550839835,
+            -0.9349134888829604
+          ],
+          "rms_m": 0.0020671017649253227
+        },
+        {
+          "azimuth_deg": 202.58463060608156,
+          "elevation_deg": 35.04668800881396,
+          "unit_vector": [
+            -0.31441382430080883,
+            -0.7559021593796033,
+            0.5742437396557258
+          ],
+          "rms_m": 0.0020671018144358443
+        },
+        {
+          "azimuth_deg": 202.58463060608156,
+          "elevation_deg": -35.04668800881396,
+          "unit_vector": [
+            -0.31441382430080883,
+            -0.7559021593796033,
+            -0.5742437396557258
+          ],
+          "rms_m": 0.0020671018144358443
+        },
+        {
+          "azimuth_deg": 99.9384617235633,
+          "elevation_deg": 17.545883142405174,
+          "unit_vector": [
+            0.9391676831613088,
+            -0.16456072765131663,
+            0.30146945089061433
+          ],
+          "rms_m": 0.0020671018144501666
+        },
+        {
+          "azimuth_deg": 99.9384617235633,
+          "elevation_deg": -17.545883142405174,
+          "unit_vector": [
+            0.9391676831613088,
+            -0.16456072765131663,
+            -0.30146945089061433
+          ],
+          "rms_m": 0.0020671018144501666
+        },
+        {
+          "azimuth_deg": 323.62053578667195,
+          "elevation_deg": 57.98831019246615,
+          "unit_vector": [
+            -0.3144138233658653,
+            0.42678070428096404,
+            0.8479399613946159
+          ],
+          "rms_m": 0.0020671018144749246
+        },
+        {
+          "azimuth_deg": 323.62053578667195,
+          "elevation_deg": -57.98831019246615,
+          "unit_vector": [
+            -0.3144138233658653,
+            0.42678070428096404,
+            -0.8479399613946159
+          ],
+          "rms_m": 0.0020671018144749246
+        },
+        {
+          "azimuth_deg": 64.39001705890405,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9017572281734781,
+            0.4322428732054303,
+            0.0
+          ],
+          "rms_m": 0.002914298836779812
+        },
+        {
+          "azimuth_deg": 100.16673993319273,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9842982394176328,
+            -0.1765133872524922,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.003190160857829133
+        }
+      ],
+      "best_rms_m": 0.0020671017649253227,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 7.546119440997882,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_4",
+    "seed": 620000,
+    "layout": "3",
+    "window": 1,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 324.4050648474617,
+          "elevation_deg": 58.521755254263,
+          "unit_vector": [
+            -0.3039323998444739,
+            0.424607578872329,
+            0.8528384960172458
+          ],
+          "rms_m": 0.002395273037773255
+        },
+        {
+          "azimuth_deg": 324.4050648474617,
+          "elevation_deg": -58.521755254263,
+          "unit_vector": [
+            -0.3039323998444739,
+            0.424607578872329,
+            -0.8528384960172458
+          ],
+          "rms_m": 0.002395273037773255
+        },
+        {
+          "azimuth_deg": 99.95816232620409,
+          "elevation_deg": 15.382797908652044,
+          "unit_vector": [
+            0.9496491065116889,
+            -0.16673385308396615,
+            0.26526665213955036
+          ],
+          "rms_m": 0.0023952730378815463
+        },
+        {
+          "azimuth_deg": 99.95816232620409,
+          "elevation_deg": -15.382797908652044,
+          "unit_vector": [
+            0.9496491065116889,
+            -0.16673385308396615,
+            -0.26526665213955036
+          ],
+          "rms_m": 0.0023952730378815463
+        },
+        {
+          "azimuth_deg": 201.847152862156,
+          "elevation_deg": 35.24090574122311,
+          "unit_vector": [
+            -0.3039324010344427,
+            -0.7580752847502893,
+            0.5770155615338348
+          ],
+          "rms_m": 0.0023952730379094246
+        },
+        {
+          "azimuth_deg": 201.847152862156,
+          "elevation_deg": -35.24090574122311,
+          "unit_vector": [
+            -0.3039324010344427,
+            -0.7580752847502893,
+            -0.5770155615338348
+          ],
+          "rms_m": 0.0023952730379094246
+        },
+        {
+          "azimuth_deg": 241.2514824058162,
+          "elevation_deg": 69.71662931988557,
+          "unit_vector": [
+            -0.3039334160601408,
+            -0.16673335163720285,
+            0.9379895884570565
+          ],
+          "rms_m": 0.002395273144506487
+        },
+        {
+          "azimuth_deg": 241.2514824058162,
+          "elevation_deg": -69.71662931988557,
+          "unit_vector": [
+            -0.3039334160601408,
+            -0.16673335163720285,
+            -0.9379895884570565
+          ],
+          "rms_m": 0.002395273144506487
+        },
+        {
+          "azimuth_deg": 100.13138707727194,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9844069649901779,
+            -0.17590601831326522,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0030355874516863153
+        },
+        {
+          "azimuth_deg": 64.43458010131144,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9020931417139265,
+            0.4315413811822659,
+            0.0
+          ],
+          "rms_m": 0.003548916787037225
+        }
+      ],
+      "best_rms_m": 0.002395273037773255,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 5.382952518503168,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_4",
+    "seed": 620000,
+    "layout": "3",
+    "window": 2,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      4
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 324.050233879367,
+          "elevation_deg": 57.77475380626946,
+          "unit_vector": [
+            -0.31305759051714654,
+            0.43168220742441027,
+            0.8459582831397698
+          ],
+          "rms_m": 0.0029871416212385
+        },
+        {
+          "azimuth_deg": 324.050233879367,
+          "elevation_deg": -57.77475380626946,
+          "unit_vector": [
+            -0.31305759051714654,
+            0.43168220742441027,
+            -0.8459582831397698
+          ],
+          "rms_m": 0.0029871416212385
+        },
+        {
+          "azimuth_deg": 99.63443636338972,
+          "elevation_deg": 17.449963449469188,
+          "unit_vector": [
+            0.940523915135355,
+            -0.15965922454520767,
+            0.2998728014943776
+          ],
+          "rms_m": 0.002987141621334445
+        },
+        {
+          "azimuth_deg": 99.63443636338972,
+          "elevation_deg": -17.449963449469188,
+          "unit_vector": [
+            0.940523915135355,
+            -0.15965922454520767,
+            -0.2998728014943776
+          ],
+          "rms_m": 0.002987141621334445
+        },
+        {
+          "azimuth_deg": 202.62900769834027,
+          "elevation_deg": 35.547072897803396,
+          "unit_vector": [
+            -0.31305759253107956,
+            -0.7510006559351671,
+            0.5813716182817951
+          ],
+          "rms_m": 0.0029871416213351825
+        },
+        {
+          "azimuth_deg": 202.62900769834027,
+          "elevation_deg": -35.547072897803396,
+          "unit_vector": [
+            -0.31305759253107956,
+            -0.7510006559351671,
+            -0.5813716182817951
+          ],
+          "rms_m": 0.0029871416213351825
+        },
+        {
+          "azimuth_deg": 242.97872678842396,
+          "elevation_deg": 69.42571397629945,
+          "unit_vector": [
+            -0.31305960549802214,
+            -0.1596582755891277,
+            0.9362173457276515
+          ],
+          "rms_m": 0.0029871417011328055
+        },
+        {
+          "azimuth_deg": 242.97872678842396,
+          "elevation_deg": -69.42571397629945,
+          "unit_vector": [
+            -0.31305960549802214,
+            -0.1596582755891277,
+            -0.9362173457276515
+          ],
+          "rms_m": 0.0029871417011328055
+        },
+        {
+          "azimuth_deg": 64.04627386052744,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.8991477953590792,
+            0.4376451097646443,
+            0.0
+          ],
+          "rms_m": 0.0037571379942287694
+        },
+        {
+          "azimuth_deg": 99.87120844423771,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9851955974271965,
+            -0.17143405382265606,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0038320694751387578
+        }
+      ],
+      "best_rms_m": 0.0029871416212385,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 7.458408660031456,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_4",
+    "seed": 620000,
+    "layout": "3",
+    "window": 3,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      4
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 242.9170720835682,
+          "elevation_deg": 69.05411716742805,
+          "unit_vector": [
+            -0.31828712592827346,
+            -0.16275609665792679,
+            0.9339184966949713
+          ],
+          "rms_m": 0.002080798698838636
+        },
+        {
+          "azimuth_deg": 242.9170720835682,
+          "elevation_deg": -69.05411716742805,
+          "unit_vector": [
+            -0.31828712592827346,
+            -0.16275609665792679,
+            -0.9339184966949713
+          ],
+          "rms_m": 0.002080798698838636
+        },
+        {
+          "azimuth_deg": 202.88340376187548,
+          "elevation_deg": 35.063398349233296,
+          "unit_vector": [
+            -0.3182861017031232,
+            -0.7540980254561646,
+            0.5744824849077149
+          ],
+          "rms_m": 0.0020807987384077993
+        },
+        {
+          "azimuth_deg": 202.88340376187548,
+          "elevation_deg": -35.063398349233296,
+          "unit_vector": [
+            -0.3182861017031232,
+            -0.7540980254561646,
+            -0.5744824849077149
+          ],
+          "rms_m": 0.0020807987384077993
+        },
+        {
+          "azimuth_deg": 323.40078324503975,
+          "elevation_deg": 57.73435088994419,
+          "unit_vector": [
+            -0.31828610074556657,
+            0.42858483819694865,
+            0.8455820448305879
+          ],
+          "rms_m": 0.0020807987384163272
+        },
+        {
+          "azimuth_deg": 323.40078324503975,
+          "elevation_deg": -57.73435088994419,
+          "unit_vector": [
+            -0.31828610074556657,
+            0.42858483819694865,
+            -0.8455820448305879
+          ],
+          "rms_m": 0.0020807987384163272
+        },
+        {
+          "azimuth_deg": 99.8715462166859,
+          "elevation_deg": 18.313596615630434,
+          "unit_vector": [
+            0.9352954057543357,
+            -0.16275659371785237,
+            0.314217751211154
+          ],
+          "rms_m": 0.0020807987384282734
+        },
+        {
+          "azimuth_deg": 99.8715462166859,
+          "elevation_deg": -18.313596615630434,
+          "unit_vector": [
+            0.9352954057543357,
+            -0.16275659371785237,
+            -0.314217751211154
+          ],
+          "rms_m": 0.0020807987384282734
+        },
+        {
+          "azimuth_deg": 64.30595949292183,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9011221225318152,
+            0.43356535872202273,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.002803129514567809
+        },
+        {
+          "azimuth_deg": 100.12331731617451,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9844317305160818,
+            -0.17576736885187902,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.003364743398996888
+        }
+      ],
+      "best_rms_m": 0.002080798698838636,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 8.314527624405935,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_4",
+    "seed": 620000,
+    "layout": "4",
+    "window": 0,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 240.27430036186706,
+          "elevation_deg": 69.78582117665879,
+          "unit_vector": [
+            -0.3000618056753288,
+            -0.17133065698292457,
+            0.9384075440620991
+          ],
+          "rms_m": 0.0023524999357025724
+        },
+        {
+          "azimuth_deg": 240.27430036186706,
+          "elevation_deg": -69.78582117665879,
+          "unit_vector": [
+            -0.3000618056753288,
+            -0.17133065698292457,
+            -0.9384075440620991
+          ],
+          "rms_m": 0.0023524999357025724
+        },
+        {
+          "azimuth_deg": 201.47633514509198,
+          "elevation_deg": 34.95756810897278,
+          "unit_vector": [
+            -0.3000608473511375,
+            -0.7626724629285402,
+            0.5729696346032938
+          ],
+          "rms_m": 0.0023524999860830426
+        },
+        {
+          "azimuth_deg": 201.47633514509198,
+          "elevation_deg": -34.95756810897278,
+          "unit_vector": [
+            -0.3000608473511375,
+            -0.7626724629285402,
+            -0.5729696346032938
+          ],
+          "rms_m": 0.0023524999860830426
+        },
+        {
+          "azimuth_deg": 100.18635545309613,
+          "elevation_deg": 14.352041315975898,
+          "unit_vector": [
+            0.9535206601015179,
+            -0.17133103118687748,
+            0.24787906025319414
+          ],
+          "rms_m": 0.002352499986100157
+        },
+        {
+          "azimuth_deg": 100.18635545309613,
+          "elevation_deg": -14.352041315975898,
+          "unit_vector": [
+            0.9535206601015179,
+            -0.17133103118687748,
+            -0.24787906025319414
+          ],
+          "rms_m": 0.002352499986100157
+        },
+        {
+          "azimuth_deg": 324.4574973758494,
+          "elevation_deg": 58.923415560108864,
+          "unit_vector": [
+            -0.3000608464463298,
+            0.42001040089855207,
+            0.8564781092164292
+          ],
+          "rms_m": 0.0023524999861175397
+        },
+        {
+          "azimuth_deg": 324.4574973758494,
+          "elevation_deg": -58.923415560108864,
+          "unit_vector": [
+            -0.3000608464463298,
+            0.42001040089855207,
+            -0.8564781092164292
+          ],
+          "rms_m": 0.0023524999861175397
+        },
+        {
+          "azimuth_deg": 99.9376192688942,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9849962285972309,
+            -0.17257586635805036,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.003061270550100606
+        },
+        {
+          "azimuth_deg": 65.44652298092842,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9095738206182278,
+            0.41554237430851737,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0036455223557485187
+        }
+      ],
+      "best_rms_m": 0.0023524999357025724,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 4.355849960470087,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_4",
+    "seed": 620000,
+    "layout": "4",
+    "window": 1,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 325.3044138840573,
+          "elevation_deg": 59.471236693639995,
+          "unit_vector": [
+            -0.28914522959698935,
+            0.41764748278016806,
+            0.8613742603123764
+          ],
+          "rms_m": 0.00254287544483246
+        },
+        {
+          "azimuth_deg": 325.3044138840573,
+          "elevation_deg": -59.471236693639995,
+          "unit_vector": [
+            -0.28914522959698935,
+            0.41764748278016806,
+            -0.8613742603123764
+          ],
+          "rms_m": 0.00254287544483246
+        },
+        {
+          "azimuth_deg": 100.20946445893829,
+          "elevation_deg": 11.492006594314711,
+          "unit_vector": [
+            0.9644362768820551,
+            -0.17369394932030036,
+            0.19923122195930237
+          ],
+          "rms_m": 0.002542875444870593
+        },
+        {
+          "azimuth_deg": 100.20946445893829,
+          "elevation_deg": -11.492006594314711,
+          "unit_vector": [
+            0.9644362768820551,
+            -0.17369394932030036,
+            -0.19923122195930237
+          ],
+          "rms_m": 0.002542875444870593
+        },
+        {
+          "azimuth_deg": 200.7040925669424,
+          "elevation_deg": 35.12952060285145,
+          "unit_vector": [
+            -0.28914523065573683,
+            -0.7650353810516491,
+            0.5754267123867284
+          ],
+          "rms_m": 0.002542875444898015
+        },
+        {
+          "azimuth_deg": 200.7040925669424,
+          "elevation_deg": -35.12952060285145,
+          "unit_vector": [
+            -0.28914523065573683,
+            -0.7650353810516491,
+            -0.5754267123867284
+          ],
+          "rms_m": 0.002542875444898015
+        },
+        {
+          "azimuth_deg": 239.00626356259454,
+          "elevation_deg": 70.28720431175195,
+          "unit_vector": [
+            -0.289146239708289,
+            -0.1736935699462424,
+            0.9413952388990963
+          ],
+          "rms_m": 0.002542875523503466
+        },
+        {
+          "azimuth_deg": 239.00626356259454,
+          "elevation_deg": -70.28720431175195,
+          "unit_vector": [
+            -0.289146239708289,
+            -0.1736935699462424,
+            -0.9413952388990963
+          ],
+          "rms_m": 0.002542875523503466
+        },
+        {
+          "azimuth_deg": 100.0494477711618,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9846575233170773,
+            -0.17449802799768033,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.002835741032206756
+        },
+        {
+          "azimuth_deg": 65.651518375671,
+          "elevation_deg": 5e-324,
+          "unit_vector": [
+            0.9110547417738041,
+            0.4122854078080706,
+            0.0
+          ],
+          "rms_m": 0.004233372405312685
+        }
+      ],
+      "best_rms_m": 0.00254287544483246,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 1.5061311456881061,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_4",
+    "seed": 620000,
+    "layout": "4",
+    "window": 2,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      3
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 239.10789626010228,
+          "elevation_deg": 70.34106985079707,
+          "unit_vector": [
+            -0.2886942788997113,
+            -0.17272592835968284,
+            0.9417119341937116
+          ],
+          "rms_m": 0.002707679747441598
+        },
+        {
+          "azimuth_deg": 239.10789626010228,
+          "elevation_deg": -70.34106985079707,
+          "unit_vector": [
+            -0.2886942788997113,
+            -0.17272592835968284,
+            -0.9417119341937116
+          ],
+          "rms_m": 0.002707679747441598
+        },
+        {
+          "azimuth_deg": 200.69842767230162,
+          "elevation_deg": 35.23541748607045,
+          "unit_vector": [
+            -0.2886931913525161,
+            -0.7640677742531761,
+            0.5769373255514824
+          ],
+          "rms_m": 0.002707679921876102
+        },
+        {
+          "azimuth_deg": 200.69842767230162,
+          "elevation_deg": -35.23541748607045,
+          "unit_vector": [
+            -0.2886931913525161,
+            -0.7640677742531761,
+            -0.5769373255514824
+          ],
+          "rms_m": 0.002707679921876102
+        },
+        {
+          "azimuth_deg": 100.14911852860094,
+          "elevation_deg": 11.41296334260771,
+          "unit_vector": [
+            0.9648883161427424,
+            -0.17272634254746208,
+            0.1978791246225841
+          ],
+          "rms_m": 0.0027076799219424167
+        },
+        {
+          "azimuth_deg": 100.14911852860094,
+          "elevation_deg": -11.41296334260771,
+          "unit_vector": [
+            0.9648883161427424,
+            -0.17272634254746208,
+            -0.1978791246225841
+          ],
+          "rms_m": 0.0027076799219424167
+        },
+        {
+          "azimuth_deg": 325.40834868724556,
+          "elevation_deg": 59.435372040056095,
+          "unit_vector": [
+            -0.2886931901534933,
+            0.418615089581289,
+            0.8610561240324862
+          ],
+          "rms_m": 0.00270767992199633
+        },
+        {
+          "azimuth_deg": 325.40834868724556,
+          "elevation_deg": -59.435372040056095,
+          "unit_vector": [
+            -0.2886931901534933,
+            0.418615089581289,
+            -0.8610561240324862
+          ],
+          "rms_m": 0.00270767992199633
+        },
+        {
+          "azimuth_deg": 99.99174188822508,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9848327709102671,
+            -0.17350623430068815,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.002980028106616376
+        },
+        {
+          "azimuth_deg": 65.59795781970024,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9106689360414705,
+            0.4131368888505312,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0043723660256440935
+        }
+      ],
+      "best_rms_m": 0.002707679747441598,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 1.4205397167418508,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "partial_4",
+    "seed": 620000,
+    "layout": "4",
+    "window": 3,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      2,
+      4
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 239.18088482215535,
+          "elevation_deg": 70.05798513150368,
+          "unit_vector": [
+            -0.29290628634948096,
+            -0.17473966237128663,
+            0.9400382746523275
+          ],
+          "rms_m": 0.0025176863706791995
+        },
+        {
+          "azimuth_deg": 239.18088482215535,
+          "elevation_deg": -70.05798513150368,
+          "unit_vector": [
+            -0.29290628634948096,
+            -0.17473966237128663,
+            -0.9400382746523275
+          ],
+          "rms_m": 0.0025176863706791995
+        },
+        {
+          "azimuth_deg": 200.923988440128,
+          "elevation_deg": 34.898459515609325,
+          "unit_vector": [
+            -0.29290559344529976,
+            -0.7660813569027323,
+            0.5721238222050584
+          ],
+          "rms_m": 0.0025176864063500325
+        },
+        {
+          "azimuth_deg": 200.923988440128,
+          "elevation_deg": -34.898459515609325,
+          "unit_vector": [
+            -0.29290559344529976,
+            -0.7660813569027323,
+            -0.5721238222050584
+          ],
+          "rms_m": 0.0025176864063500325
+        },
+        {
+          "azimuth_deg": 100.30897876014242,
+          "elevation_deg": 12.462208499276215,
+          "unit_vector": [
+            0.9606759135143531,
+            -0.17473992525007317,
+            0.21579561561107255
+          ],
+          "rms_m": 0.0025176864063958778
+        },
+        {
+          "azimuth_deg": 100.30897876014242,
+          "elevation_deg": -12.462208499276215,
+          "unit_vector": [
+            0.9606759135143531,
+            -0.17473992525007317,
+            -0.21579561561107255
+          ],
+          "rms_m": 0.0025176864063958778
+        },
+        {
+          "azimuth_deg": 324.88958486175164,
+          "elevation_deg": 59.38513799972826,
+          "unit_vector": [
+            -0.2929055923476628,
+            0.41660150653684574,
+            0.8606099573690136
+          ],
+          "rms_m": 0.0025176864064113237
+        },
+        {
+          "azimuth_deg": 324.88958486175164,
+          "elevation_deg": -59.38513799972826,
+          "unit_vector": [
+            -0.2929055923476628,
+            0.41660150653684574,
+            -0.8606099573690136
+          ],
+          "rms_m": 0.0025176864064113237
+        },
+        {
+          "azimuth_deg": 100.11859646067023,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9844462094340483,
+            -0.17568625652262626,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.0029196291478897638
+        },
+        {
+          "azimuth_deg": 65.6928651407361,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9113520250086522,
+            0.4116278495347819,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.004014281086478917
+        }
+      ],
+      "best_rms_m": 0.0025176863706791995,
+      "upper_candidate_count": 6,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": true,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 2.480786420027957,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "mixture_0",
+    "seed": 610000,
+    "layout": "3",
+    "window": 0,
+    "status": "invalid_observation"
+  },
+  {
+    "case": "mixture_0",
+    "seed": 610000,
+    "layout": "3",
+    "window": 1,
+    "status": "invalid_observation"
+  },
+  {
+    "case": "mixture_0",
+    "seed": 610000,
+    "layout": "3",
+    "window": 2,
+    "status": "invalid_observation"
+  },
+  {
+    "case": "mixture_0",
+    "seed": 610000,
+    "layout": "3",
+    "window": 3,
+    "status": "invalid_observation"
+  },
+  {
+    "case": "mixture_0",
+    "seed": 610000,
+    "layout": "4",
+    "window": 0,
+    "status": "invalid_observation"
+  },
+  {
+    "case": "mixture_0",
+    "seed": 610000,
+    "layout": "4",
+    "window": 1,
+    "status": "invalid_observation"
+  },
+  {
+    "case": "mixture_0",
+    "seed": 610000,
+    "layout": "4",
+    "window": 2,
+    "status": "invalid_observation"
+  },
+  {
+    "case": "mixture_0",
+    "seed": 610000,
+    "layout": "4",
+    "window": 3,
+    "status": "invalid_observation"
+  },
+  {
+    "case": "mixture_0",
+    "seed": 620000,
+    "layout": "3",
+    "window": 0,
+    "status": "invalid_observation"
+  },
+  {
+    "case": "mixture_0",
+    "seed": 620000,
+    "layout": "3",
+    "window": 1,
+    "status": "invalid_observation"
+  },
+  {
+    "case": "mixture_0",
+    "seed": 620000,
+    "layout": "3",
+    "window": 2,
+    "status": "invalid_observation"
+  },
+  {
+    "case": "mixture_0",
+    "seed": 620000,
+    "layout": "3",
+    "window": 3,
+    "status": "invalid_observation"
+  },
+  {
+    "case": "mixture_0",
+    "seed": 620000,
+    "layout": "4",
+    "window": 0,
+    "status": "invalid_observation"
+  },
+  {
+    "case": "mixture_0",
+    "seed": 620000,
+    "layout": "4",
+    "window": 1,
+    "status": "invalid_observation"
+  },
+  {
+    "case": "mixture_0",
+    "seed": 620000,
+    "layout": "4",
+    "window": 2,
+    "status": "invalid_observation"
+  },
+  {
+    "case": "mixture_0",
+    "seed": 620000,
+    "layout": "4",
+    "window": 3,
+    "status": "invalid_observation"
+  },
+  {
+    "case": "mixture_6",
+    "seed": 610000,
+    "layout": "3",
+    "window": 0,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      4,
+      7
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 319.26439157221466,
+          "elevation_deg": 71.79180241442886,
+          "unit_vector": [
+            -0.20390891815418283,
+            0.2367681866680418,
+            0.9499273545272386
+          ],
+          "rms_m": 0.0026093303682120654
+        },
+        {
+          "azimuth_deg": 319.26439157221466,
+          "elevation_deg": -71.79180241442886,
+          "unit_vector": [
+            -0.20390891815418283,
+            0.2367681866680418,
+            -0.9499273545272386
+          ],
+          "rms_m": 0.0026093303682120654
+        },
+        {
+          "azimuth_deg": 192.16485523443373,
+          "elevation_deg": 14.615058432159632,
+          "unit_vector": [
+            -0.20390675837975208,
+            -0.9459147917946666,
+            0.2523236821051758
+          ],
+          "rms_m": 0.002609330483681028
+        },
+        {
+          "azimuth_deg": 192.16485523443373,
+          "elevation_deg": -14.615058432159632,
+          "unit_vector": [
+            -0.20390675837975208,
+            -0.9459147917946666,
+            -0.2523236821051758
+          ],
+          "rms_m": 0.002609330483681028
+        },
+        {
+          "azimuth_deg": 209.90218984952594,
+          "elevation_deg": 65.85649188520703,
+          "unit_vector": [
+            -0.20390675808312553,
+            -0.35457335990331584,
+            0.9125238443212886
+          ],
+          "rms_m": 0.002609330483696087
+        },
+        {
+          "azimuth_deg": 209.90218984952594,
+          "elevation_deg": -65.85649188520703,
+          "unit_vector": [
+            -0.20390675808312553,
+            -0.35457335990331584,
+            -0.9125238443212886
+          ],
+          "rms_m": 0.002609330483696087
+        },
+        {
+          "azimuth_deg": 346.16714677938637,
+          "elevation_deg": 31.477613345806354,
+          "unit_vector": [
+            -0.20390675670019076,
+            0.8281095035696641,
+            0.5221653805736395
+          ],
+          "rms_m": 0.0026093304837596625
+        },
+        {
+          "azimuth_deg": 346.16714677938637,
+          "elevation_deg": -31.477613345806354,
+          "unit_vector": [
+            -0.20390675670019076,
+            0.8281095035696641,
+            -0.5221653805736395
+          ],
+          "rms_m": 0.0026093304837596625
+        }
+      ],
+      "best_rms_m": 0.0026093303682120654,
+      "upper_candidate_count": 4,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 88.77747305769306,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "mixture_6",
+    "seed": 610000,
+    "layout": "3",
+    "window": 1,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      4,
+      7
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 318.576885611983,
+          "elevation_deg": 71.44445346025576,
+          "unit_vector": [
+            -0.21054150773247268,
+            0.23861833618143077,
+            0.9480155922556036
+          ],
+          "rms_m": 0.002455892197613397
+        },
+        {
+          "azimuth_deg": 318.576885611983,
+          "elevation_deg": -71.44445346025576,
+          "unit_vector": [
+            -0.21054150773247268,
+            0.23861833618143077,
+            -0.9480155922556036
+          ],
+          "rms_m": 0.002455892197613397
+        },
+        {
+          "azimuth_deg": 192.57199780816902,
+          "elevation_deg": 14.70258604059817,
+          "unit_vector": [
+            -0.2105390562329193,
+            -0.9440646443346662,
+            0.25380160188188716
+          ],
+          "rms_m": 0.002455892255474565
+        },
+        {
+          "azimuth_deg": 192.57199780816902,
+          "elevation_deg": -14.70258604059817,
+          "unit_vector": [
+            -0.2105390562329193,
+            -0.9440646443346662,
+            -0.25380160188188716
+          ],
+          "rms_m": 0.002455892255474565
+        },
+        {
+          "azimuth_deg": 210.83280601074134,
+          "elevation_deg": 65.7461459076797,
+          "unit_vector": [
+            -0.21053905589569372,
+            -0.3527232123608193,
+            0.9117344138532966
+          ],
+          "rms_m": 0.0024558922554818036
+        },
+        {
+          "azimuth_deg": 210.83280601074134,
+          "elevation_deg": -65.7461459076797,
+          "unit_vector": [
+            -0.21053905589569372,
+            -0.3527232123608193,
+            -0.9117344138532966
+          ],
+          "rms_m": 0.0024558922554818036
+        },
+        {
+          "azimuth_deg": 345.76581480324575,
+          "elevation_deg": 31.102176555484686,
+          "unit_vector": [
+            -0.21053905462922723,
+            0.8299596511023881,
+            0.5165658564189405
+          ],
+          "rms_m": 0.002455892255523311
+        },
+        {
+          "azimuth_deg": 345.76581480324575,
+          "elevation_deg": -31.102176555484686,
+          "unit_vector": [
+            -0.21053905462922723,
+            0.8299596511023881,
+            -0.5165658564189405
+          ],
+          "rms_m": 0.002455892255523311
+        }
+      ],
+      "best_rms_m": 0.002455892197613397,
+      "upper_candidate_count": 4,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 89.17206351651149,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "mixture_6",
+    "seed": 610000,
+    "layout": "3",
+    "window": 2,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      4,
+      7
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 319.23037464602385,
+          "elevation_deg": 71.59768954425829,
+          "unit_vector": [
+            -0.20614986841708385,
+            0.23908304674694952,
+            0.9488632823066846
+          ],
+          "rms_m": 0.0026905893294962907
+        },
+        {
+          "azimuth_deg": 319.23037464602385,
+          "elevation_deg": -71.59768954425829,
+          "unit_vector": [
+            -0.20614986841708385,
+            0.23908304674694952,
+            -0.9488632823066846
+          ],
+          "rms_m": 0.0026905893294962907
+        },
+        {
+          "azimuth_deg": 192.32376869841363,
+          "elevation_deg": 15.015446468636455,
+          "unit_vector": [
+            -0.2061481427571397,
+            -0.9435999079728167,
+            0.259079441313806
+          ],
+          "rms_m": 0.002690589409201921
+        },
+        {
+          "azimuth_deg": 192.32376869841363,
+          "elevation_deg": -15.015446468636455,
+          "unit_vector": [
+            -0.2061481427571397,
+            -0.9435999079728167,
+            -0.259079441313806
+          ],
+          "rms_m": 0.002690589409201921
+        },
+        {
+          "azimuth_deg": 210.33695619223158,
+          "elevation_deg": 65.91158262147673,
+          "unit_vector": [
+            -0.20614814238809814,
+            -0.35225847597522425,
+            0.9129167045758056
+          ],
+          "rms_m": 0.0026905894092137564
+        },
+        {
+          "azimuth_deg": 210.33695619223158,
+          "elevation_deg": -65.91158262147673,
+          "unit_vector": [
+            -0.20614814238809814,
+            -0.35225847597522425,
+            -0.9129167045758056
+          ],
+          "rms_m": 0.0026905894092137564
+        },
+        {
+          "azimuth_deg": 346.0584711533276,
+          "elevation_deg": 31.170658939851272,
+          "unit_vector": [
+            -0.20614814096936965,
+            0.8304243873663445,
+            0.5175889110501735
+          ],
+          "rms_m": 0.0026905894093148287
+        },
+        {
+          "azimuth_deg": 346.0584711533276,
+          "elevation_deg": -31.170658939851272,
+          "unit_vector": [
+            -0.20614814096936965,
+            0.8304243873663445,
+            -0.5175889110501735
+          ],
+          "rms_m": 0.0026905894093148287
+        }
+      ],
+      "best_rms_m": 0.0026905893294962907,
+      "upper_candidate_count": 4,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 88.92082438469888,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "mixture_6",
+    "seed": 610000,
+    "layout": "3",
+    "window": 3,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      4,
+      7
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 317.7814653314417,
+          "elevation_deg": 71.21253764594722,
+          "unit_vector": [
+            -0.21641051935968983,
+            0.23851245136516852,
+            0.946719756662048
+          ],
+          "rms_m": 0.002702362620232066
+        },
+        {
+          "azimuth_deg": 317.7814653314417,
+          "elevation_deg": -71.21253764594722,
+          "unit_vector": [
+            -0.21641051935968983,
+            0.23851245136516852,
+            -0.946719756662048
+          ],
+          "rms_m": 0.002702362620232066
+        },
+        {
+          "azimuth_deg": 192.9095060453263,
+          "elevation_deg": 14.383659619116804,
+          "unit_vector": [
+            -0.21640878024009558,
+            -0.9441704833164103,
+            0.2484136434841096
+          ],
+          "rms_m": 0.002702362850606028
+        },
+        {
+          "azimuth_deg": 192.9095060453263,
+          "elevation_deg": -14.383659619116804,
+          "unit_vector": [
+            -0.21640878024009558,
+            -0.9441704833164103,
+            -0.2484136434841096
+          ],
+          "rms_m": 0.002702362850606028
+        },
+        {
+          "azimuth_deg": 211.5229987194831,
+          "elevation_deg": 65.54933681865401,
+          "unit_vector": [
+            -0.21640877982567264,
+            -0.3528290513465333,
+            0.9103180216497249
+          ],
+          "rms_m": 0.0027023628506657005
+        },
+        {
+          "azimuth_deg": 211.5229987194831,
+          "elevation_deg": -65.54933681865401,
+          "unit_vector": [
+            -0.21640877982567264,
+            -0.3528290513465333,
+            -0.9103180216497249
+          ],
+          "rms_m": 0.0027023628506657005
+        },
+        {
+          "azimuth_deg": 345.38396305812137,
+          "elevation_deg": 30.95102828156012,
+          "unit_vector": [
+            -0.2164087788884697,
+            0.8298538120876191,
+            0.5143052507836644
+          ],
+          "rms_m": 0.0027023628507531574
+        },
+        {
+          "azimuth_deg": 345.38396305812137,
+          "elevation_deg": -30.95102828156012,
+          "unit_vector": [
+            -0.2164087788884697,
+            0.8298538120876191,
+            -0.5143052507836644
+          ],
+          "rms_m": 0.0027023628507531574
+        },
+        {
+          "azimuth_deg": 75.43066918849945,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            0.9678439591022807,
+            0.25155132841872013,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.004614309265507528
+        }
+      ],
+      "best_rms_m": 0.002702362620232066,
+      "upper_candidate_count": 5,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 26.408977326053826,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "mixture_6",
+    "seed": 610000,
+    "layout": "4",
+    "window": 0,
+    "status": "rejected_fit",
+    "selected_prns": [
+      1,
+      4,
+      7
+    ],
+    "result": {
+      "status": "rejected_fit",
+      "candidates": [],
+      "best_rms_m": 0.009193888209661062,
+      "upper_candidate_count": 0,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": false,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": null,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "mixture_6",
+    "seed": 610000,
+    "layout": "4",
+    "window": 1,
+    "status": "rejected_fit",
+    "selected_prns": [
+      1,
+      4,
+      7
+    ],
+    "result": {
+      "status": "rejected_fit",
+      "candidates": [],
+      "best_rms_m": 0.00902724568388649,
+      "upper_candidate_count": 0,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": false,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": null,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "mixture_6",
+    "seed": 610000,
+    "layout": "4",
+    "window": 2,
+    "status": "rejected_fit",
+    "selected_prns": [
+      1,
+      4,
+      7
+    ],
+    "result": {
+      "status": "rejected_fit",
+      "candidates": [],
+      "best_rms_m": 0.009224947406515548,
+      "upper_candidate_count": 0,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": false,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": null,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "mixture_6",
+    "seed": 610000,
+    "layout": "4",
+    "window": 3,
+    "status": "rejected_fit",
+    "selected_prns": [
+      1,
+      4,
+      7
+    ],
+    "result": {
+      "status": "rejected_fit",
+      "candidates": [],
+      "best_rms_m": 0.009108766687844792,
+      "upper_candidate_count": 0,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": false,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": null,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "mixture_6",
+    "seed": 620000,
+    "layout": "3",
+    "window": 0,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      4,
+      7
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 318.90011968137696,
+          "elevation_deg": 71.3850550072799,
+          "unit_vector": [
+            -0.2098379579629664,
+            0.24054278164214177,
+            0.9476851806363721
+          ],
+          "rms_m": 0.0025833058527112186
+        },
+        {
+          "azimuth_deg": 318.90011968137696,
+          "elevation_deg": -71.3850550072799,
+          "unit_vector": [
+            -0.2098379579629664,
+            0.24054278164214177,
+            -0.9476851806363721
+          ],
+          "rms_m": 0.0025833058527112186
+        },
+        {
+          "azimuth_deg": 192.55614937052314,
+          "elevation_deg": 15.154360690437343,
+          "unit_vector": [
+            -0.20983632417219006,
+            -0.9421401639708933,
+            0.2614204056511312
+          ],
+          "rms_m": 0.0025833059497886064
+        },
+        {
+          "azimuth_deg": 192.55614937052314,
+          "elevation_deg": -15.154360690437343,
+          "unit_vector": [
+            -0.20983632417219006,
+            -0.9421401639708933,
+            -0.2614204056511312
+          ],
+          "rms_m": 0.0025833059497886064
+        },
+        {
+          "azimuth_deg": 210.88648303547114,
+          "elevation_deg": 65.87255283376848,
+          "unit_vector": [
+            -0.20983632379765385,
+            -0.3507987319910668,
+            0.9126384644800732
+          ],
+          "rms_m": 0.0025833059498091286
+        },
+        {
+          "azimuth_deg": 210.88648303547114,
+          "elevation_deg": -65.87255283376848,
+          "unit_vector": [
+            -0.20983632379765385,
+            -0.3507987319910668,
+            -0.9126384644800732
+          ],
+          "rms_m": 0.0025833059498091286
+        },
+        {
+          "azimuth_deg": 345.84290632499653,
+          "elevation_deg": 30.913838867148414,
+          "unit_vector": [
+            -0.20983632240468053,
+            0.8318841314185009,
+            0.5137484887508335
+          ],
+          "rms_m": 0.0025833059499081787
+        },
+        {
+          "azimuth_deg": 345.84290632499653,
+          "elevation_deg": -30.913838867148414,
+          "unit_vector": [
+            -0.20983632240468053,
+            0.8318841314185009,
+            -0.5137484887508335
+          ],
+          "rms_m": 0.0025833059499081787
+        }
+      ],
+      "best_rms_m": 0.0025833058527112186,
+      "upper_candidate_count": 4,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 89.14287255222469,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "mixture_6",
+    "seed": 620000,
+    "layout": "3",
+    "window": 1,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      4,
+      7
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 318.8014306402765,
+          "elevation_deg": 71.28655573129043,
+          "unit_vector": [
+            -0.21132476435463027,
+            0.24140649578424378,
+            0.9471350208727538
+          ],
+          "rms_m": 0.0025101595755657505
+        },
+        {
+          "azimuth_deg": 318.8014306402765,
+          "elevation_deg": -71.28655573129043,
+          "unit_vector": [
+            -0.21132476435463027,
+            0.24140649578424378,
+            -0.9471350208727538
+          ],
+          "rms_m": 0.0025101595755657505
+        },
+        {
+          "azimuth_deg": 192.65346740376378,
+          "elevation_deg": 15.267591436215097,
+          "unit_vector": [
+            -0.2113226816999263,
+            -0.9412764707957821,
+            0.2633274192433987
+          ],
+          "rms_m": 0.002510159694151765
+        },
+        {
+          "azimuth_deg": 192.65346740376378,
+          "elevation_deg": -15.267591436215097,
+          "unit_vector": [
+            -0.2113226816999263,
+            -0.9412764707957821,
+            -0.2633274192433987
+          ],
+          "rms_m": 0.002510159694151765
+        },
+        {
+          "azimuth_deg": 211.12740738418148,
+          "elevation_deg": 65.87095759951794,
+          "unit_vector": [
+            -0.21132268137238333,
+            -0.3499350388077239,
+            0.9126270831792266
+          ],
+          "rms_m": 0.0025101596941719353
+        },
+        {
+          "azimuth_deg": 211.12740738418148,
+          "elevation_deg": -65.87095759951794,
+          "unit_vector": [
+            -0.21132268137238333,
+            -0.3499350388077239,
+            -0.9126270831792266
+          ],
+          "rms_m": 0.0025101596941719353
+        },
+        {
+          "azimuth_deg": 345.7608801107793,
+          "elevation_deg": 30.77953653711182,
+          "unit_vector": [
+            -0.2113226800837788,
+            0.8327478246345882,
+            0.5117360505656897
+          ],
+          "rms_m": 0.002510159694241041
+        },
+        {
+          "azimuth_deg": 345.7608801107793,
+          "elevation_deg": -30.77953653711182,
+          "unit_vector": [
+            -0.2113226800837788,
+            0.8327478246345882,
+            -0.5117360505656897
+          ],
+          "rms_m": 0.002510159694241041
+        }
+      ],
+      "best_rms_m": 0.0025101595755657505,
+      "upper_candidate_count": 4,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 89.23405161076879,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "mixture_6",
+    "seed": 620000,
+    "layout": "3",
+    "window": 2,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      4,
+      7
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 319.17502796882764,
+          "elevation_deg": 71.77632597371954,
+          "unit_vector": [
+            -0.20444569279124764,
+            0.2366440195409314,
+            0.9498429168628979
+          ],
+          "rms_m": 0.0025795773816259726
+        },
+        {
+          "azimuth_deg": 319.17502796882764,
+          "elevation_deg": -71.77632597371954,
+          "unit_vector": [
+            -0.20444569279124764,
+            0.2366440195409314,
+            -0.9498429168628979
+          ],
+          "rms_m": 0.0025795773816259726
+        },
+        {
+          "azimuth_deg": 192.19437268906037,
+          "elevation_deg": 14.561685120791612,
+          "unit_vector": [
+            -0.20444360518189403,
+            -0.9460389539427254,
+            0.2514221746846999
+          ],
+          "rms_m": 0.0025795774899812886
+        },
+        {
+          "azimuth_deg": 192.19437268906037,
+          "elevation_deg": -14.561685120791612,
+          "unit_vector": [
+            -0.20444360518189403,
+            -0.9460389539427254,
+            -0.2514221746846999
+          ],
+          "rms_m": 0.0025795774899812886
+        },
+        {
+          "azimuth_deg": 209.9586577065549,
+          "elevation_deg": 65.8329151351098,
+          "unit_vector": [
+            -0.20444360488495844,
+            -0.354697522035637,
+            0.9123554572004389
+          ],
+          "rms_m": 0.0025795774899974016
+        },
+        {
+          "azimuth_deg": 209.9586577065549,
+          "elevation_deg": -65.8329151351098,
+          "unit_vector": [
+            -0.20444360488495844,
+            -0.354697522035637,
+            -0.9123554572004389
+          ],
+          "rms_m": 0.0025795774899974016
+        },
+        {
+          "azimuth_deg": 346.1301323428268,
+          "elevation_deg": 31.476738620855265,
+          "unit_vector": [
+            -0.20444360351068086,
+            0.827985341436178,
+            0.5221523602842212
+          ],
+          "rms_m": 0.00257957749007612
+        },
+        {
+          "azimuth_deg": 346.1301323428268,
+          "elevation_deg": -31.476738620855265,
+          "unit_vector": [
+            -0.20444360351068086,
+            0.827985341436178,
+            -0.5221523602842212
+          ],
+          "rms_m": 0.00257957749007612
+        }
+      ],
+      "best_rms_m": 0.0025795773816259726,
+      "upper_candidate_count": 4,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 88.80777011703042,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "mixture_6",
+    "seed": 620000,
+    "layout": "3",
+    "window": 3,
+    "status": "ambiguous",
+    "selected_prns": [
+      1,
+      4,
+      7
+    ],
+    "result": {
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "azimuth_deg": 318.1452326524304,
+          "elevation_deg": 71.67710765351146,
+          "unit_vector": [
+            -0.20976291180306642,
+            0.23415621094372932,
+            0.9492999471760096
+          ],
+          "rms_m": 0.0027926693735892435
+        },
+        {
+          "azimuth_deg": 318.1452326524304,
+          "elevation_deg": -71.67710765351146,
+          "unit_vector": [
+            -0.20976291180306642,
+            0.23415621094372932,
+            -0.9492999471760096
+          ],
+          "rms_m": 0.0027926693735892435
+        },
+        {
+          "azimuth_deg": 192.46990106696956,
+          "elevation_deg": 13.72552296556718,
+          "unit_vector": [
+            -0.20976060449852918,
+            -0.9485267548814198,
+            0.23727090861404523
+          ],
+          "rms_m": 0.002792669593915061
+        },
+        {
+          "azimuth_deg": 192.46990106696956,
+          "elevation_deg": -13.72552296556718,
+          "unit_vector": [
+            -0.20976060449852918,
+            -0.9485267548814198,
+            -0.23727090861404523
+          ],
+          "rms_m": 0.002792669593915061
+        },
+        {
+          "azimuth_deg": 210.42400628668372,
+          "elevation_deg": 65.52959228925465,
+          "unit_vector": [
+            -0.20976060414156128,
+            -0.3571853229807697,
+            0.910175331459434
+          ],
+          "rms_m": 0.0027926695939441896
+        },
+        {
+          "azimuth_deg": 210.42400628668372,
+          "elevation_deg": -65.52959228925465,
+          "unit_vector": [
+            -0.20976060414156128,
+            -0.3571853229807697,
+            -0.910175331459434
+          ],
+          "rms_m": 0.0027926695939441896
+        },
+        {
+          "azimuth_deg": 345.7427670323065,
+          "elevation_deg": 31.599555194344816,
+          "unit_vector": [
+            -0.20976060265302388,
+            0.8254975404714339,
+            0.5239792937228089
+          ],
+          "rms_m": 0.0027926695940050992
+        },
+        {
+          "azimuth_deg": 345.7427670323065,
+          "elevation_deg": -31.599555194344816,
+          "unit_vector": [
+            -0.20976060265302388,
+            0.8254975404714339,
+            -0.5239792937228089
+          ],
+          "rms_m": 0.0027926695940050992
+        },
+        {
+          "azimuth_deg": 191.8455332517624,
+          "elevation_deg": 1e-10,
+          "unit_vector": [
+            -0.2052738981516742,
+            -0.978704565605789,
+            1.7453292519943296e-12
+          ],
+          "rms_m": 0.004738758159999576
+        }
+      ],
+      "best_rms_m": 0.0027926693735892435,
+      "upper_candidate_count": 5,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": true,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": 89.10058964392488,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "mixture_6",
+    "seed": 620000,
+    "layout": "4",
+    "window": 0,
+    "status": "rejected_fit",
+    "selected_prns": [
+      1,
+      4,
+      7
+    ],
+    "result": {
+      "status": "rejected_fit",
+      "candidates": [],
+      "best_rms_m": 0.008978558017220096,
+      "upper_candidate_count": 0,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": false,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": null,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "mixture_6",
+    "seed": 620000,
+    "layout": "4",
+    "window": 1,
+    "status": "rejected_fit",
+    "selected_prns": [
+      1,
+      4,
+      7
+    ],
+    "result": {
+      "status": "rejected_fit",
+      "candidates": [],
+      "best_rms_m": 0.008887162033694591,
+      "upper_candidate_count": 0,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": false,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": null,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "mixture_6",
+    "seed": 620000,
+    "layout": "4",
+    "window": 2,
+    "status": "rejected_fit",
+    "selected_prns": [
+      1,
+      4,
+      7
+    ],
+    "result": {
+      "status": "rejected_fit",
+      "candidates": [],
+      "best_rms_m": 0.009273451836643787,
+      "upper_candidate_count": 0,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": false,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": null,
+    "added_common_bias_did_not_change_candidates": true
+  },
+  {
+    "case": "mixture_6",
+    "seed": 620000,
+    "layout": "4",
+    "window": 3,
+    "status": "rejected_fit",
+    "selected_prns": [
+      1,
+      4,
+      7
+    ],
+    "result": {
+      "status": "rejected_fit",
+      "candidates": [],
+      "best_rms_m": 0.009534907056360157,
+      "upper_candidate_count": 0,
+      "harmonic": 2,
+      "fit_limit_m": 0.008,
+      "ambiguity_slack_m": 0.002,
+      "calibration_assumed_valid": true,
+      "planar_mirror_unresolved": false,
+      "reference_index": 7,
+      "reference_assumed_trusted": true,
+      "reference_authentication_performed": false
+    },
+    "reference_actually_genuine": false,
+    "reference_policy": "fixed PRN 8; assumed, not independently authenticated",
+    "candidate_set_min_error_deg": null,
+    "added_common_bias_did_not_change_candidates": true
+  }
+]

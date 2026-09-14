@@ -1,5 +1,11 @@
 # GNSS 接收链路与定位研究代码
 
+新增研究入口：`audit_spatial_direction.py --output <新目录> --archive <原手机尺寸归档>`，验证星间双差统计与方向候选；`audit_reference_direction.py` 对照可信/被污染 PRN 8 参考。`spatial_direction.py` 输出校准后的方向候选和拒绝状态，`spatial_reference_direction.py` 使用显式参考方向。无 IMU；多解、镜像及混合信号测向失败均保留。详见[方法与结果](../docs/reports/2026-09-14-doa-double-difference.md)。尚非唯一测向，未自动接入原检测器。
+
+当前工作基线已回到 **0.0759 × 0.1609 m** 的手机尺寸，保持 2–4 天线配置。运行 `audit_spatial_diversity.py --output <新目录>` 即使用该默认尺寸；RF 可使用新生成的原尺寸阈值，或 `../docs/reports/data/2026-09-13-gpspatron-spatial/model/thresholds.json`（相对本代码目录）。RF 会读取阈值文件中的坐标，勿将历史 1 米实验阈值作为当前基线。尺寸参数仍可用于复现实验：[1 米历史对照](../docs/reports/2026-09-14-spacing-1m.md)。
+
+新增2–4天线空间抗欺骗入口：`audit_spatial_diversity.py --output <新目录>`生成5000条H0标定与22场景各5000条留出事件；`audit_spatial_diversity_rf.py --output <新目录> --model <模型目录>/thresholds.json`运行四RF链并取2/3/4天线子集比较。检测模块`spatial_spoofing.py`接受同步载波距离和有效性，提供全星/三星簇判据及三态输出。不是GPSPATRON专有算法复刻。[完整方法、收益、失效与复现](../docs/reports/2026-09-14-gpspatron-spatial-diversity.md)，[配置调用示例与归档](../docs/reports/data/2026-09-13-gpspatron-spatial/README.md)。默认旧仿真入口保留。
+
 真实录波完整入口现为 `recorded_receiver.py`，复用 `gps_lnav.py`、`gps_broadcast.py`、`gps_observables.py` 和既有 DFE/捕获/跟踪/求解器。已从 40 秒公开 HackRF IQ 解出 10 星星历并输出 380 个离线 GPS L1 码位置；见[方法、结果与复现](../docs/reports/2026-09-13-recorded-receiver.md)。`audit_real_gnss.py` 保留为配置与比较实验入口，内部调用通用通道处理。参考位置只用于报告评估。
 
 新增真实录波入口 `audit_real_gnss.py`：读取已采集的 signed int8 IQ，按其采样率/中频经过现有 DFE、捕获和跟踪，默认使用 Costas 处理未知 GPS L1 导航比特。已完成 ION/HackRF 10 秒片段验证，见[报告及复现命令](../docs/reports/2026-09-13-real-single-antenna.md)。该入口不叠加仿真 RF，不输出实测定位或 SDCP。历史 `TrackingConfig` 默认仍为 atan2；真实 L1 电文请显式选择 `carrier_discriminator='costas'`。

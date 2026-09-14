@@ -1,0 +1,1 @@
+PASS: all 5000 LOS event scores, all four layouts and both methods are exactly identical to the previous archived default-geometry run.
