@@ -13,6 +13,7 @@ node_modules/
 **/.idea/
 .codex_docx_review/
 .superpowers/
+.chart-data-*/
 
 # Local git worktrees used for isolated feature execution
 .worktrees/
