@@ -1,0 +1,4580 @@
+{
+  "branches": [
+    {
+      "ref": "codex/multipath-detection-suppression",
+      "sha": "4f465158a3521268bb7ea5e05a89a6579a929146",
+      "files": [
+        {
+          "path": "python_sim_simplified/acquisition.py",
+          "blob": "d777e2f7bc2ae76406e09f1eb67b6c419646da0e",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/antenna.py",
+          "blob": "3d56035a6bd7542e36687b2227682bff93546795",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/channel_delay.py",
+          "blob": "78ba6e1d9369ecfa48a27373670b74bed57707d5",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/config.py",
+          "blob": "77e743cac1f9da25e1ad2f74bca51562315baba2",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/dfe.py",
+          "blob": "46bcdb37b9bfd6bcfd8d5e75f6d0fc44bd5d7e22",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/diversity.py",
+          "blob": "1cb0ff5801ac7a6d7df8d5364806270a3281fc4c",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/gnss.py",
+          "blob": "46517de63edf3f89205892070a9c983057195d5c",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/interference.py",
+          "blob": "423d573c77c6c393080e5a9f19e88982638c1dd4",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/measured_pattern.py",
+          "blob": "8cdad4628497e8c6e632391768a458c69ed05c83",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/metrics.py",
+          "blob": "64be2fa8297b31afe5e9ed5afd947cbe73906867",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/models.py",
+          "blob": "683e30f2f7d4840ee903c4f1c0d144fa984ee5f7",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/multipath.py",
+          "blob": "ef9c1d86ea8d0a919994960b6238f27b2fb00ba1",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/pipeline.py",
+          "blob": "92fe6d3cd1c4f53832c27b6720934b743dfee284",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/plotting.py",
+          "blob": "3a79acd0252dfd3eb88bb734b67bc5e0ec2bcf2c",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/presets.py",
+          "blob": "462e085c84d1e38f2f44810abdc4e69a3a562099",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/rf.py",
+          "blob": "abe7584c18cd3f6e0e6b1756bb322c0c46eb71b0",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/run_end_to_end.py",
+          "blob": "685809ab0d6cc26f397a01909f16d577b4168dc5",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/tests/conftest.py",
+          "blob": "63eee33accbdf5e48bd5771d90b2da2f4fe4b3bd",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_antenna.py",
+          "blob": "fd35c17236be6d383ed6f46fd448e8cef74dc36f",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_channel_delay.py",
+          "blob": "c8454bec27fa32d1c1737997e0ce4173df6ba052",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_config_gnss.py",
+          "blob": "c31288e062de8d24ae0aafb65cf2efc18d9dd234",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_default_regression.py",
+          "blob": "44931a6d768d16cf2843d0caf87a240f923a5a84",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_diversity.py",
+          "blob": "e9f8c72b190e6c3f2185cb43fca68f734afc1f62",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_multipath.py",
+          "blob": "22566dcf4c03761273dd5359afa658e9ea232a5a",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_pipeline.py",
+          "blob": "73321524e01b2b200c1a1e6d38ae477789a364d3",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_plotting_runner.py",
+          "blob": "093ca73c581a09aa1458bc6dc44d1e74e1fe00b2",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_receiver.py",
+          "blob": "539ccd1307058fc4d191d7dea7c250fbc9ff5f48",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_research_contract.py",
+          "blob": "a77e967a1a683bf51431c4b5bdd13aee07de9f68",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_rf_dfe.py",
+          "blob": "dbfcb6c86743cb7c4c79dd21738cf149a88c883d",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_scenario.py",
+          "blob": "28362bc0a7fa1d39700a1f710dd92945d3031cf2",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_wideband_interference.py",
+          "blob": "bfc3c50577682abce891cd5c262c16b2766b6e8e",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tracking.py",
+          "blob": "64cf29a4dc1ffebec630af4f8f4cc19a0a624c54",
+          "test": false
+        }
+      ]
+    },
+    {
+      "ref": "codex/tracking-fixed-nco",
+      "sha": "014f5b6870ed4c120db7a5022a0504af251c43b3",
+      "files": []
+    },
+    {
+      "ref": "feature/antenna-diversity",
+      "sha": "f04d59244508f3f8c23c45acd997d1a861606704",
+      "files": []
+    },
+    {
+      "ref": "main",
+      "sha": "68e3815806db49c58173ddc0cf70156cd851e7d8",
+      "files": [
+        {
+          "path": "python_sim_simplified/acquisition.py",
+          "blob": "f59bb48704c467eee1d9a7aa8800e39e1cc7682e",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/antenna.py",
+          "blob": "cac47a5c3cf035e7e642662f7197154cf0b05df8",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_antenna_selection.py",
+          "blob": "f519aaf955f8d763952f6484e0e42858b0773c90",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_calibrated_sdcp.py",
+          "blob": "1372fb0754c11058976e5e9c0ed7bbbb62447b99",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_code_carrier_float.py",
+          "blob": "df2c415c81e39e4e12d1f2b7aa3256b4e5f03739",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_code_discriminator.py",
+          "blob": "65cf5cb6116d3ec13b4986b5b36ec78d99a15e9b",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_detection_boundaries.py",
+          "blob": "c78e34e24b416084915495e3fe6bfe22e4c49d67",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_detection_calibration.py",
+          "blob": "a786f9bb342707b4ec7e13725e9a58208c9bbee3",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_detection_only.py",
+          "blob": "2d111eeacafbb8a3497a9ba36b4269056a72c38d",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_diversity_observability.py",
+          "blob": "a6474bc03fe12eb23553db2996337fa47a63e1d4",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_dual_frequency_weights.py",
+          "blob": "44fc9edda00698921c454849ec70a1ff8c0ae69b",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_dual_polarization.py",
+          "blob": "619fa8f427225a7fba57427d096923ebc172fb23",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_dual_tracking_phase.py",
+          "blob": "43f27ab5ef633ef713f598fbbb2aced101829045",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_dual_tracking_stability.py",
+          "blob": "df4c2132b7cf5346d3d8bc598a4f1d63b1180817",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_external_gnss.py",
+          "blob": "065beb4306a85c48555473954f75fbb050a4eef1",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_geometry_free_sdcp.py",
+          "blob": "e1c3c085a47c9bff60f0b337f76d5bf2a4bd30cb",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_gf_branches.py",
+          "blob": "3ef77a3581a0d3ecadf7d5621bb3882c2a8f6293",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_gf_gate.py",
+          "blob": "096e849a7f697e49883eb174e33cdff24b565329",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_gf_pvt_lifecycle.py",
+          "blob": "3ffa71b9de16925a6a69be6cbf281831bbbdf145",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_gf_runtime.py",
+          "blob": "54ffcb67cf4c0a4c55b5069d8b2772955c43c557",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_gf_startup_rf.py",
+          "blob": "c81cf0bc91c626d3a241ac8f88904dca19f47ee1",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_gf_weight_ablation.py",
+          "blob": "dc02076bd0eb2af77cd9ca107d393a38b8f3e4fc",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_multipath_baseline.py",
+          "blob": "92514ffcfd4b08fd1482a64f548a0a9d138deda4",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_multipath_oracle.py",
+          "blob": "7d6bd8a7ad178bfe04e860ed8a179f5d6e287c2c",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_phase_origin.py",
+          "blob": "eafe650dd07a7f75a0b193e932f4fb121be882f2",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_pseudorange_bias.py",
+          "blob": "c6eab3db6c29b66e92c40b9782d90adf5d3bbc61",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_real_gnss.py",
+          "blob": "b651dabe91127adcbaa606ba9f05e448d238e2b3",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_reference_direction.py",
+          "blob": "2c1e580c8680fd2c84d1ae9449b80605c7382139",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_sdcp_arc.py",
+          "blob": "5281d113f4162726f46ecd2af2e47e905ec93c54",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_sdcp_contract.py",
+          "blob": "76ec2e33c4a42d5fdc40bb55184765d4e26143d9",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_sdcp_geometry_stress.py",
+          "blob": "0835f5c3fdc8fea88341970db089e4ae706104ad",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_sdcp_hardware_bias.py",
+          "blob": "76c6b00571d72cba54065d6940fc81adb0c9124a",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_sdcp_long.py",
+          "blob": "86562082a7402c66382594838890a72a0e5cdb56",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_sdcp_low_signal.py",
+          "blob": "39797027642970d5d16ef40e6b038b964d1cb18c",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_sdcp_positioning.py",
+          "blob": "e8689a5aa761d5c21138d1d94686188bc8bb1e10",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_sdcp_self_check.py",
+          "blob": "ab08f920740816942277fb2ad22b9240d3b9e9a4",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_sdcp_tracking_gap.py",
+          "blob": "c2994aff4e18faae6532d91ef1823579e6cdb7c1",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_sdcp_windows.py",
+          "blob": "10b707d01284ab0b8cd754238f89621bb41dbf3b",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_spatial_direction.py",
+          "blob": "85d50807ad90082c2ebb7c89a6aaaf38bde4ef55",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_spatial_diversity.py",
+          "blob": "d9baa21741c900f83743c9a11fff575700dde6a0",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_spatial_diversity_rf.py",
+          "blob": "eac38ca5e7f928e1fbefdb43e7dfca1d628fcfb1",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_spoofing_code_doppler.py",
+          "blob": "68ed066316a88855f2bf64f440399ecfdb1c2608",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_spoofing_model.py",
+          "blob": "f7a7953db7595e059d71ed0dd8faabe94bf1e443",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_spoofing_projection.py",
+          "blob": "f4e1d3e3d299c34a54ea8e4076e6b97fabccbd6b",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_spoofing_rf.py",
+          "blob": "1b2f1c01655772dd943eba231a300035f5da79f5",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_spoofing_spatial.py",
+          "blob": "5e252824c236a11999ec92f594cae7af35d44c29",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_trimble_sdcp.py",
+          "blob": "2c59802554adedbe77a067e878358250ba7c3beb",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/channel_delay.py",
+          "blob": "78ba6e1d9369ecfa48a27373670b74bed57707d5",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/code_replica.py",
+          "blob": "93d02ccb72fae727aa1d1f3f42fb5c4da004f210",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/config.py",
+          "blob": "38a7cde832b9c1511a92e35884b961dfc30b45a4",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/detection_calibration.py",
+          "blob": "36b2778be48dd28c9544dc0136fef3e8257e8d99",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/dfe.py",
+          "blob": "0696f31d36ea30733712f66cf8523671b450401c",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/diversity.py",
+          "blob": "1cb0ff5801ac7a6d7df8d5364806270a3281fc4c",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/generate_sdcp_self_check_rf.py",
+          "blob": "4baca67a5dd0778893edcd58f38e734494936cd5",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/gf_quality_gate.py",
+          "blob": "621e4a864759383d017c394c661a2a2eb980e406",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/gf_runtime.py",
+          "blob": "9c2e097d6504d0cc1460ca37b0423fa8d7ee0e43",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/gnss.py",
+          "blob": "30178d2c2f78df2c5abc774868609ba2557fec17",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/gps_broadcast.py",
+          "blob": "887b098c479415cce2bce77ce2ff1e5bf3456c6e",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/gps_lnav.py",
+          "blob": "2e2d3b0b735cc0da4a0b3bf29d5d7df25daabe08",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/gps_observables.py",
+          "blob": "08768a008f9f7e0e1c01023432d50ca2dfa412d3",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/interference.py",
+          "blob": "423d573c77c6c393080e5a9f19e88982638c1dd4",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/l5.py",
+          "blob": "d5c0587ee4f83c79117ab827cd5f1f7377cb9ee2",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/measured_pattern.py",
+          "blob": "8cdad4628497e8c6e632391768a458c69ed05c83",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/metrics.py",
+          "blob": "64be2fa8297b31afe5e9ed5afd947cbe73906867",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/models.py",
+          "blob": "3539a1c899ba449d49c8d43e1868b27238f4237b",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/multipath.py",
+          "blob": "3abb8250286d871bd775334bb4e9cf5b9a2c111c",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/pipeline.py",
+          "blob": "92fe6d3cd1c4f53832c27b6720934b743dfee284",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/plotting.py",
+          "blob": "3a79acd0252dfd3eb88bb734b67bc5e0ec2bcf2c",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/positioning.py",
+          "blob": "e44e4bb66b79bf3a21be32b91706cd02a2725d86",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/presets.py",
+          "blob": "462e085c84d1e38f2f44810abdc4e69a3a562099",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/recorded_receiver.py",
+          "blob": "a631fe2f2fa9e9cb834ae85ac88e720af73d9360",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/report_sdcp_self_check.py",
+          "blob": "755b72d95122afbd29a9ff419501ebca03852acc",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/rf.py",
+          "blob": "e7871458aa3d53304d83a2901d1e6496581e7c00",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/run_end_to_end.py",
+          "blob": "4c70bbbdf33eaaadd0e671dc85006eac1a1d2c28",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/run_geometry_free_rf.py",
+          "blob": "ebd339a0c81b5c050fc26dbfe3440c12d0b907f9",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/run_gps_l1_l5.py",
+          "blob": "4fbe9cade027bd4434fd0798dc5524b4a5de2df5",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/run_gps_spp.py",
+          "blob": "038364f728de92c82303b581110c99460839a1fe",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/sdcp.py",
+          "blob": "99d64ddf8ab6156b161ff8e6af139f1d89e34673",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/sdcp_arc.py",
+          "blob": "66290329a05ed7cb1dec20cf4729b2f4c042baaa",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/sdcp_self_check.py",
+          "blob": "7f75b572f15f958ee43712774c8412999a2ac6cf",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/spatial_direction.py",
+          "blob": "a3bc803eb06c9bbf1689bd9cda46479bc77c9bc5",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/spatial_reference_direction.py",
+          "blob": "e62337243577ddf383817a19bdf62f94778880df",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/spatial_spoofing.py",
+          "blob": "893d7d5e08179a59f4ef6c34caac19f8980d1b43",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/spoofing.py",
+          "blob": "408830633d4ad7df97891bac9079afaaccb6bc81",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/tests/conftest.py",
+          "blob": "63eee33accbdf5e48bd5771d90b2da2f4fe4b3bd",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_antenna.py",
+          "blob": "fd35c17236be6d383ed6f46fd448e8cef74dc36f",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_antenna_selection.py",
+          "blob": "92efde738268fc9a4890ef83f99216f3340fe48c",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_calibrated_sdcp.py",
+          "blob": "a38ab714324668b6fa22b4ffdb5964b49c7eda3d",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_carrier_positioning.py",
+          "blob": "daade8fd0202af49acd0d75094b9130db54c3f32",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_channel_delay.py",
+          "blob": "c8454bec27fa32d1c1737997e0ce4173df6ba052",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_config_gnss.py",
+          "blob": "579e987b0e255567dd2ba8e6cdaa7c3c973784fe",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_continuous_source.py",
+          "blob": "aacf26f6bc550bd0309af335ec211e65b340ca9b",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_default_regression.py",
+          "blob": "db3ae0c4f5541c009d17e12d31c47ce6b4bc7438",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_detection_calibration.py",
+          "blob": "3c238ae2b2f83a0c0acc4bcfbcf7b98606e358ec",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_diversity.py",
+          "blob": "e9f8c72b190e6c3f2185cb43fca68f734afc1f62",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_dual_tracking_phase.py",
+          "blob": "f08d81b8b6a08afccf94629cbc9ab02f1ee5c5e2",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_geometry_free_sdcp.py",
+          "blob": "e01085ce9aaaf3551c52789cfadedbf449c97f0e",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_gf_quality_gate.py",
+          "blob": "3d81d7463b06eb29e1d6702e9c6094b8e18d8260",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_gf_runtime.py",
+          "blob": "15c0b7f7d25e513442bbabac6327bfcedaf010ad",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_gps_navigation.py",
+          "blob": "2b2980c77033d51d87559deab90e3665473f4edb",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_hardware_bias.py",
+          "blob": "96e21835d14bb9bf36e4ae28f60f1d4485a09828",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_l5.py",
+          "blob": "a61f3b354ba31a44db71b92020c122edcbae9a37",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_multipath.py",
+          "blob": "22566dcf4c03761273dd5359afa658e9ea232a5a",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_path_delay_refinement.py",
+          "blob": "333dd6c2880ba66a1911bc0712d7bd6fa60ab931",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_phase_origin.py",
+          "blob": "ddd3884189cbdcaca7cd0d04a07798562c266bb0",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_pipeline.py",
+          "blob": "73321524e01b2b200c1a1e6d38ae477789a364d3",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_plotting_runner.py",
+          "blob": "093ca73c581a09aa1458bc6dc44d1e74e1fe00b2",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_positioning.py",
+          "blob": "5580881a0f6bbb83b2f40360fded78c77d61b251",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_positioning_weights.py",
+          "blob": "d3d0bb4f6b695a130f380d405a49957fdc6ff792",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_pseudorange_diagnosis.py",
+          "blob": "24e926adaf1f5aee4e237919d06457f7755c148f",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_real_gnss.py",
+          "blob": "b3369073716d2d48e859885feda26cbf41c6cee9",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_receiver.py",
+          "blob": "5b612bb790710d013022cca5e4e3b79abeddb5f5",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_reference_direction.py",
+          "blob": "52ca4152d850a67d2c7ad9c9922ea93e314c5191",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_research_contract.py",
+          "blob": "a77e967a1a683bf51431c4b5bdd13aee07de9f68",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_rf_dfe.py",
+          "blob": "dbfcb6c86743cb7c4c79dd21738cf149a88c883d",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_scenario.py",
+          "blob": "28362bc0a7fa1d39700a1f710dd92945d3031cf2",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_sdcp.py",
+          "blob": "94decb17bd2172a76346397be1841771fcba5b59",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_sdcp_arc.py",
+          "blob": "abdca1871689b2b07be44220726f8b0fe8673f61",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_sdcp_positioning.py",
+          "blob": "7002d642b356c9145e5301e6cfc829f1b87b91c5",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_sdcp_self_check.py",
+          "blob": "3424e3f377b0142454afe50e1f015cd03ebaf082",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_sdcp_windows.py",
+          "blob": "e981ecc1463a06c57b3989409b6aafb3f38e0106",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_spatial_direction.py",
+          "blob": "69311cbf30977daec93264d0f6821b7b7df5ae70",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_spatial_diversity_audit.py",
+          "blob": "0686a129f39fc4b59f446ad90bb0ce4136d85f8b",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_spatial_spoofing.py",
+          "blob": "da82ab03bc369a1978ac9b3d71679f1e7d0dd2d5",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_spoofing.py",
+          "blob": "96ae1c008d59215e9d722cad573d962c304b8ef4",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_tracking_initialization.py",
+          "blob": "919d483224fddebcb417ee5b8c6ddb96455830a2",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_tracking_replica.py",
+          "blob": "3cf2e44002c504ee12dca18091bc08f88ef2b841",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_wideband_interference.py",
+          "blob": "bfc3c50577682abce891cd5c262c16b2766b6e8e",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tracking.py",
+          "blob": "14141851acf0d48f76854eb3fd4e59a78fd1e527",
+          "test": false
+        }
+      ]
+    },
+    {
+      "ref": "origin/codex/antenna-realism",
+      "sha": "1b40abb925359a12f3233493a62204bd051229ca",
+      "files": []
+    },
+    {
+      "ref": "origin/codex/multipath-detection-suppression",
+      "sha": "4f465158a3521268bb7ea5e05a89a6579a929146",
+      "files": [
+        {
+          "path": "python_sim_simplified/acquisition.py",
+          "blob": "d777e2f7bc2ae76406e09f1eb67b6c419646da0e",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/antenna.py",
+          "blob": "3d56035a6bd7542e36687b2227682bff93546795",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/channel_delay.py",
+          "blob": "78ba6e1d9369ecfa48a27373670b74bed57707d5",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/config.py",
+          "blob": "77e743cac1f9da25e1ad2f74bca51562315baba2",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/dfe.py",
+          "blob": "46bcdb37b9bfd6bcfd8d5e75f6d0fc44bd5d7e22",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/diversity.py",
+          "blob": "1cb0ff5801ac7a6d7df8d5364806270a3281fc4c",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/gnss.py",
+          "blob": "46517de63edf3f89205892070a9c983057195d5c",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/interference.py",
+          "blob": "423d573c77c6c393080e5a9f19e88982638c1dd4",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/measured_pattern.py",
+          "blob": "8cdad4628497e8c6e632391768a458c69ed05c83",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/metrics.py",
+          "blob": "64be2fa8297b31afe5e9ed5afd947cbe73906867",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/models.py",
+          "blob": "683e30f2f7d4840ee903c4f1c0d144fa984ee5f7",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/multipath.py",
+          "blob": "ef9c1d86ea8d0a919994960b6238f27b2fb00ba1",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/pipeline.py",
+          "blob": "92fe6d3cd1c4f53832c27b6720934b743dfee284",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/plotting.py",
+          "blob": "3a79acd0252dfd3eb88bb734b67bc5e0ec2bcf2c",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/presets.py",
+          "blob": "462e085c84d1e38f2f44810abdc4e69a3a562099",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/rf.py",
+          "blob": "abe7584c18cd3f6e0e6b1756bb322c0c46eb71b0",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/run_end_to_end.py",
+          "blob": "685809ab0d6cc26f397a01909f16d577b4168dc5",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/tests/conftest.py",
+          "blob": "63eee33accbdf5e48bd5771d90b2da2f4fe4b3bd",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_antenna.py",
+          "blob": "fd35c17236be6d383ed6f46fd448e8cef74dc36f",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_channel_delay.py",
+          "blob": "c8454bec27fa32d1c1737997e0ce4173df6ba052",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_config_gnss.py",
+          "blob": "c31288e062de8d24ae0aafb65cf2efc18d9dd234",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_default_regression.py",
+          "blob": "44931a6d768d16cf2843d0caf87a240f923a5a84",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_diversity.py",
+          "blob": "e9f8c72b190e6c3f2185cb43fca68f734afc1f62",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_multipath.py",
+          "blob": "22566dcf4c03761273dd5359afa658e9ea232a5a",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_pipeline.py",
+          "blob": "73321524e01b2b200c1a1e6d38ae477789a364d3",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_plotting_runner.py",
+          "blob": "093ca73c581a09aa1458bc6dc44d1e74e1fe00b2",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_receiver.py",
+          "blob": "539ccd1307058fc4d191d7dea7c250fbc9ff5f48",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_research_contract.py",
+          "blob": "a77e967a1a683bf51431c4b5bdd13aee07de9f68",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_rf_dfe.py",
+          "blob": "dbfcb6c86743cb7c4c79dd21738cf149a88c883d",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_scenario.py",
+          "blob": "28362bc0a7fa1d39700a1f710dd92945d3031cf2",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_wideband_interference.py",
+          "blob": "bfc3c50577682abce891cd5c262c16b2766b6e8e",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tracking.py",
+          "blob": "64cf29a4dc1ffebec630af4f8f4cc19a0a624c54",
+          "test": false
+        }
+      ]
+    },
+    {
+      "ref": "origin/codex/pre-acquisition-blind-nulling",
+      "sha": "6fe6f93d59045ae6bd44f792f74935f8d7e2a840",
+      "files": []
+    },
+    {
+      "ref": "origin/codex/simplified-python-copy",
+      "sha": "0505387c32ea59f5ece9858feac991e96051fd3c",
+      "files": [
+        {
+          "path": "python_sim_simplified/acquisition.py",
+          "blob": "d0c6a55adf41f1d3b2dea0a5f73fdf53655cfb92",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/antenna.py",
+          "blob": "f9178d44f93ba4c63dc4e9a49c18ffd00bd4f9e7",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/config.py",
+          "blob": "7671a0d0752ed2fb9a555ba53f5de0db9b38de32",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/dfe.py",
+          "blob": "1072d38d94f950c3f648c15bf178d73343ac8d32",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/diversity.py",
+          "blob": "1b9ceecaf9697ca09fac9df4ad5ee7ff700d3d53",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/gnss.py",
+          "blob": "040a5fef3242be5602fa1cc6ed822623d67d3807",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/metrics.py",
+          "blob": "fce0c07e0c553fc4f12c4c4525bd76422ddc8508",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/pipeline.py",
+          "blob": "ee793ed7e860529eae8b9a49458246cabda88590",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/plotting.py",
+          "blob": "e7ae58bd657ea07168320725d4ddd7ea633b7f02",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/rf.py",
+          "blob": "6d42d93a198d9ebaac7360783be87e1996698063",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/run_end_to_end.py",
+          "blob": "0db2e774a8baab961626d7bc39ebbb9cbb2ee907",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/tests/conftest.py",
+          "blob": "63eee33accbdf5e48bd5771d90b2da2f4fe4b3bd",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_antenna.py",
+          "blob": "f8bb6e0fe2d63bdbdd80edf3f9f48c1b15341aae",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_config_gnss.py",
+          "blob": "a85bd24771a91622e0be09d3473bd8a96ebbb9c7",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_diversity.py",
+          "blob": "29a021430870aa517432e6f8013588a3cfddeb01",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_pipeline.py",
+          "blob": "c234a685766f893a72b0e37ff172f05c8dd0052f",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_plotting_runner.py",
+          "blob": "f67bd07721d6a54b07fd153be4d4ee2808ef93a2",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_receiver.py",
+          "blob": "67acb24823b247cc2203e630098bcdc5d6f9a01d",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_rf_dfe.py",
+          "blob": "7a3282c274bdec7200ccdec474ec309aa401c8f7",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_scenario.py",
+          "blob": "461cf3a165517c7a77b4eaa7d9acfdb3fe0dd457",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_teaching_contract.py",
+          "blob": "f71d9f2fd1e486f233ad67e1fd605bd99224aabb",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tracking.py",
+          "blob": "18d63cfe226185dcecd314cad138450ddcae7c41",
+          "test": false
+        }
+      ]
+    },
+    {
+      "ref": "origin/codex/simplified-research-refactor",
+      "sha": "4799c9e717ccec69de2390b385c07963aee54541",
+      "files": [
+        {
+          "path": "python_sim_simplified/acquisition.py",
+          "blob": "d777e2f7bc2ae76406e09f1eb67b6c419646da0e",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/antenna.py",
+          "blob": "3d56035a6bd7542e36687b2227682bff93546795",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/channel_delay.py",
+          "blob": "78ba6e1d9369ecfa48a27373670b74bed57707d5",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/config.py",
+          "blob": "61c91b2ee4d66939b0dc87be6b44d935a0003916",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/dfe.py",
+          "blob": "46bcdb37b9bfd6bcfd8d5e75f6d0fc44bd5d7e22",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/diversity.py",
+          "blob": "c5d0abcc3f4531d70c7c78d70dc4be92a8f35879",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/gnss.py",
+          "blob": "e8fae348a18629bd4587cd3e58ee504a07bde56c",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/measured_pattern.py",
+          "blob": "8cdad4628497e8c6e632391768a458c69ed05c83",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/metrics.py",
+          "blob": "42865261466be45ba99f374b3b9db84dbdc60604",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/models.py",
+          "blob": "839eda1caeba3129aea6c836e409a20bf3bb5a38",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/pipeline.py",
+          "blob": "78902b698b19408f6a2188939cebcfa26351f6e6",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/plotting.py",
+          "blob": "099e6c0d2826df7c34177a62ab499b26ecb06453",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/presets.py",
+          "blob": "15e311268c536671b4607eb2c810385140093408",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/rf.py",
+          "blob": "abe7584c18cd3f6e0e6b1756bb322c0c46eb71b0",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/run_end_to_end.py",
+          "blob": "3b9ada0db4ce3f7b7dd1cf4a50ed276b0e10d8e5",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/tests/conftest.py",
+          "blob": "63eee33accbdf5e48bd5771d90b2da2f4fe4b3bd",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_antenna.py",
+          "blob": "fd35c17236be6d383ed6f46fd448e8cef74dc36f",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_channel_delay.py",
+          "blob": "c8454bec27fa32d1c1737997e0ce4173df6ba052",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_config_gnss.py",
+          "blob": "d4d4cea4a37d23d31925c0d72b18e51d1aa33902",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_default_regression.py",
+          "blob": "87b550b5b03b822627d7480b1fe9e0015199ce3e",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_diversity.py",
+          "blob": "29a021430870aa517432e6f8013588a3cfddeb01",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_pipeline.py",
+          "blob": "18a5f41a5434356ce1afcecb6e8b37d989b3049c",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_plotting_runner.py",
+          "blob": "e119c6419be67091dfb8f4f0e547fdea6aaf852e",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_receiver.py",
+          "blob": "539ccd1307058fc4d191d7dea7c250fbc9ff5f48",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_research_contract.py",
+          "blob": "1d840646c2f5ba8c75573e1e568d4ec5b9e4a7ec",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_rf_dfe.py",
+          "blob": "dbfcb6c86743cb7c4c79dd21738cf149a88c883d",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_scenario.py",
+          "blob": "cc1e4997c7e0e0a55de53231d3e7f5551d5b635d",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tracking.py",
+          "blob": "64cf29a4dc1ffebec630af4f8f4cc19a0a624c54",
+          "test": false
+        }
+      ]
+    },
+    {
+      "ref": "origin/codex/spatial-research",
+      "sha": "f640b9ee71fb906230d8bd86fcfdd4e59ef5a8f2",
+      "files": []
+    },
+    {
+      "ref": "origin/codex/tracking-fixed-nco",
+      "sha": "faa24ba0a290502b44fed8b6d37e58c8dcda535f",
+      "files": []
+    },
+    {
+      "ref": "origin/feature/antenna-diversity",
+      "sha": "f04d59244508f3f8c23c45acd997d1a861606704",
+      "files": []
+    },
+    {
+      "ref": "origin/main",
+      "sha": "04ce4557c407a52818199c96ad785bdd5c45b1bf",
+      "files": [
+        {
+          "path": "python_sim_simplified/acquisition.py",
+          "blob": "f59bb48704c467eee1d9a7aa8800e39e1cc7682e",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/antenna.py",
+          "blob": "cac47a5c3cf035e7e642662f7197154cf0b05df8",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_antenna_selection.py",
+          "blob": "f519aaf955f8d763952f6484e0e42858b0773c90",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_calibrated_sdcp.py",
+          "blob": "1372fb0754c11058976e5e9c0ed7bbbb62447b99",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_code_carrier_float.py",
+          "blob": "df2c415c81e39e4e12d1f2b7aa3256b4e5f03739",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_code_discriminator.py",
+          "blob": "65cf5cb6116d3ec13b4986b5b36ec78d99a15e9b",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_detection_boundaries.py",
+          "blob": "c78e34e24b416084915495e3fe6bfe22e4c49d67",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_detection_calibration.py",
+          "blob": "a786f9bb342707b4ec7e13725e9a58208c9bbee3",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_detection_only.py",
+          "blob": "2d111eeacafbb8a3497a9ba36b4269056a72c38d",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_diversity_observability.py",
+          "blob": "a6474bc03fe12eb23553db2996337fa47a63e1d4",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_dual_frequency_weights.py",
+          "blob": "44fc9edda00698921c454849ec70a1ff8c0ae69b",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_dual_polarization.py",
+          "blob": "619fa8f427225a7fba57427d096923ebc172fb23",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_dual_tracking_phase.py",
+          "blob": "43f27ab5ef633ef713f598fbbb2aced101829045",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_dual_tracking_stability.py",
+          "blob": "df4c2132b7cf5346d3d8bc598a4f1d63b1180817",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_external_gnss.py",
+          "blob": "065beb4306a85c48555473954f75fbb050a4eef1",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_geometry_free_sdcp.py",
+          "blob": "e1c3c085a47c9bff60f0b337f76d5bf2a4bd30cb",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_gf_branches.py",
+          "blob": "3ef77a3581a0d3ecadf7d5621bb3882c2a8f6293",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_gf_gate.py",
+          "blob": "096e849a7f697e49883eb174e33cdff24b565329",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_gf_pvt_lifecycle.py",
+          "blob": "3ffa71b9de16925a6a69be6cbf281831bbbdf145",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_gf_runtime.py",
+          "blob": "54ffcb67cf4c0a4c55b5069d8b2772955c43c557",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_gf_startup_rf.py",
+          "blob": "c81cf0bc91c626d3a241ac8f88904dca19f47ee1",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_gf_weight_ablation.py",
+          "blob": "dc02076bd0eb2af77cd9ca107d393a38b8f3e4fc",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_multipath_baseline.py",
+          "blob": "92514ffcfd4b08fd1482a64f548a0a9d138deda4",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_multipath_oracle.py",
+          "blob": "7d6bd8a7ad178bfe04e860ed8a179f5d6e287c2c",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_phase_origin.py",
+          "blob": "eafe650dd07a7f75a0b193e932f4fb121be882f2",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_pseudorange_bias.py",
+          "blob": "c6eab3db6c29b66e92c40b9782d90adf5d3bbc61",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_real_gnss.py",
+          "blob": "b651dabe91127adcbaa606ba9f05e448d238e2b3",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_reference_direction.py",
+          "blob": "2c1e580c8680fd2c84d1ae9449b80605c7382139",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_sdcp_arc.py",
+          "blob": "5281d113f4162726f46ecd2af2e47e905ec93c54",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_sdcp_contract.py",
+          "blob": "76ec2e33c4a42d5fdc40bb55184765d4e26143d9",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_sdcp_geometry_stress.py",
+          "blob": "0835f5c3fdc8fea88341970db089e4ae706104ad",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_sdcp_hardware_bias.py",
+          "blob": "76c6b00571d72cba54065d6940fc81adb0c9124a",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_sdcp_long.py",
+          "blob": "86562082a7402c66382594838890a72a0e5cdb56",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_sdcp_low_signal.py",
+          "blob": "39797027642970d5d16ef40e6b038b964d1cb18c",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_sdcp_positioning.py",
+          "blob": "e8689a5aa761d5c21138d1d94686188bc8bb1e10",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_sdcp_self_check.py",
+          "blob": "ab08f920740816942277fb2ad22b9240d3b9e9a4",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_sdcp_tracking_gap.py",
+          "blob": "c2994aff4e18faae6532d91ef1823579e6cdb7c1",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_sdcp_windows.py",
+          "blob": "10b707d01284ab0b8cd754238f89621bb41dbf3b",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_spatial_direction.py",
+          "blob": "85d50807ad90082c2ebb7c89a6aaaf38bde4ef55",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_spatial_diversity.py",
+          "blob": "d9baa21741c900f83743c9a11fff575700dde6a0",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_spatial_diversity_rf.py",
+          "blob": "eac38ca5e7f928e1fbefdb43e7dfca1d628fcfb1",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_spoofing_code_doppler.py",
+          "blob": "68ed066316a88855f2bf64f440399ecfdb1c2608",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_spoofing_model.py",
+          "blob": "f7a7953db7595e059d71ed0dd8faabe94bf1e443",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_spoofing_projection.py",
+          "blob": "f4e1d3e3d299c34a54ea8e4076e6b97fabccbd6b",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_spoofing_rf.py",
+          "blob": "1b2f1c01655772dd943eba231a300035f5da79f5",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_spoofing_spatial.py",
+          "blob": "5e252824c236a11999ec92f594cae7af35d44c29",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/audit_trimble_sdcp.py",
+          "blob": "2c59802554adedbe77a067e878358250ba7c3beb",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/channel_delay.py",
+          "blob": "78ba6e1d9369ecfa48a27373670b74bed57707d5",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/code_replica.py",
+          "blob": "93d02ccb72fae727aa1d1f3f42fb5c4da004f210",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/config.py",
+          "blob": "38a7cde832b9c1511a92e35884b961dfc30b45a4",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/detection_calibration.py",
+          "blob": "36b2778be48dd28c9544dc0136fef3e8257e8d99",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/dfe.py",
+          "blob": "0696f31d36ea30733712f66cf8523671b450401c",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/diversity.py",
+          "blob": "1cb0ff5801ac7a6d7df8d5364806270a3281fc4c",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/generate_sdcp_self_check_rf.py",
+          "blob": "4baca67a5dd0778893edcd58f38e734494936cd5",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/gf_quality_gate.py",
+          "blob": "621e4a864759383d017c394c661a2a2eb980e406",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/gf_runtime.py",
+          "blob": "9c2e097d6504d0cc1460ca37b0423fa8d7ee0e43",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/gnss.py",
+          "blob": "30178d2c2f78df2c5abc774868609ba2557fec17",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/gps_broadcast.py",
+          "blob": "887b098c479415cce2bce77ce2ff1e5bf3456c6e",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/gps_lnav.py",
+          "blob": "2e2d3b0b735cc0da4a0b3bf29d5d7df25daabe08",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/gps_observables.py",
+          "blob": "08768a008f9f7e0e1c01023432d50ca2dfa412d3",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/interference.py",
+          "blob": "423d573c77c6c393080e5a9f19e88982638c1dd4",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/l5.py",
+          "blob": "d5c0587ee4f83c79117ab827cd5f1f7377cb9ee2",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/measured_pattern.py",
+          "blob": "8cdad4628497e8c6e632391768a458c69ed05c83",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/metrics.py",
+          "blob": "64be2fa8297b31afe5e9ed5afd947cbe73906867",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/models.py",
+          "blob": "3539a1c899ba449d49c8d43e1868b27238f4237b",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/multipath.py",
+          "blob": "3abb8250286d871bd775334bb4e9cf5b9a2c111c",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/pipeline.py",
+          "blob": "92fe6d3cd1c4f53832c27b6720934b743dfee284",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/plotting.py",
+          "blob": "3a79acd0252dfd3eb88bb734b67bc5e0ec2bcf2c",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/positioning.py",
+          "blob": "e44e4bb66b79bf3a21be32b91706cd02a2725d86",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/presets.py",
+          "blob": "462e085c84d1e38f2f44810abdc4e69a3a562099",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/recorded_receiver.py",
+          "blob": "a631fe2f2fa9e9cb834ae85ac88e720af73d9360",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/report_sdcp_self_check.py",
+          "blob": "755b72d95122afbd29a9ff419501ebca03852acc",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/rf.py",
+          "blob": "e7871458aa3d53304d83a2901d1e6496581e7c00",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/run_end_to_end.py",
+          "blob": "4c70bbbdf33eaaadd0e671dc85006eac1a1d2c28",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/run_geometry_free_rf.py",
+          "blob": "ebd339a0c81b5c050fc26dbfe3440c12d0b907f9",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/run_gps_l1_l5.py",
+          "blob": "4fbe9cade027bd4434fd0798dc5524b4a5de2df5",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/run_gps_spp.py",
+          "blob": "038364f728de92c82303b581110c99460839a1fe",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/sdcp.py",
+          "blob": "99d64ddf8ab6156b161ff8e6af139f1d89e34673",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/sdcp_arc.py",
+          "blob": "66290329a05ed7cb1dec20cf4729b2f4c042baaa",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/sdcp_self_check.py",
+          "blob": "7f75b572f15f958ee43712774c8412999a2ac6cf",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/spatial_direction.py",
+          "blob": "a3bc803eb06c9bbf1689bd9cda46479bc77c9bc5",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/spatial_reference_direction.py",
+          "blob": "e62337243577ddf383817a19bdf62f94778880df",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/spatial_spoofing.py",
+          "blob": "893d7d5e08179a59f4ef6c34caac19f8980d1b43",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/spoofing.py",
+          "blob": "408830633d4ad7df97891bac9079afaaccb6bc81",
+          "test": false
+        },
+        {
+          "path": "python_sim_simplified/tests/conftest.py",
+          "blob": "63eee33accbdf5e48bd5771d90b2da2f4fe4b3bd",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_antenna.py",
+          "blob": "fd35c17236be6d383ed6f46fd448e8cef74dc36f",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_antenna_selection.py",
+          "blob": "92efde738268fc9a4890ef83f99216f3340fe48c",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_calibrated_sdcp.py",
+          "blob": "a38ab714324668b6fa22b4ffdb5964b49c7eda3d",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_carrier_positioning.py",
+          "blob": "daade8fd0202af49acd0d75094b9130db54c3f32",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_channel_delay.py",
+          "blob": "c8454bec27fa32d1c1737997e0ce4173df6ba052",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_config_gnss.py",
+          "blob": "579e987b0e255567dd2ba8e6cdaa7c3c973784fe",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_continuous_source.py",
+          "blob": "aacf26f6bc550bd0309af335ec211e65b340ca9b",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_default_regression.py",
+          "blob": "db3ae0c4f5541c009d17e12d31c47ce6b4bc7438",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_detection_calibration.py",
+          "blob": "3c238ae2b2f83a0c0acc4bcfbcf7b98606e358ec",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_diversity.py",
+          "blob": "e9f8c72b190e6c3f2185cb43fca68f734afc1f62",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_dual_tracking_phase.py",
+          "blob": "f08d81b8b6a08afccf94629cbc9ab02f1ee5c5e2",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_geometry_free_sdcp.py",
+          "blob": "e01085ce9aaaf3551c52789cfadedbf449c97f0e",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_gf_quality_gate.py",
+          "blob": "3d81d7463b06eb29e1d6702e9c6094b8e18d8260",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_gf_runtime.py",
+          "blob": "15c0b7f7d25e513442bbabac6327bfcedaf010ad",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_gps_navigation.py",
+          "blob": "2b2980c77033d51d87559deab90e3665473f4edb",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_hardware_bias.py",
+          "blob": "96e21835d14bb9bf36e4ae28f60f1d4485a09828",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_l5.py",
+          "blob": "a61f3b354ba31a44db71b92020c122edcbae9a37",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_multipath.py",
+          "blob": "22566dcf4c03761273dd5359afa658e9ea232a5a",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_path_delay_refinement.py",
+          "blob": "333dd6c2880ba66a1911bc0712d7bd6fa60ab931",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_phase_origin.py",
+          "blob": "ddd3884189cbdcaca7cd0d04a07798562c266bb0",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_pipeline.py",
+          "blob": "73321524e01b2b200c1a1e6d38ae477789a364d3",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_plotting_runner.py",
+          "blob": "093ca73c581a09aa1458bc6dc44d1e74e1fe00b2",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_positioning.py",
+          "blob": "5580881a0f6bbb83b2f40360fded78c77d61b251",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_positioning_weights.py",
+          "blob": "d3d0bb4f6b695a130f380d405a49957fdc6ff792",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_pseudorange_diagnosis.py",
+          "blob": "24e926adaf1f5aee4e237919d06457f7755c148f",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_real_gnss.py",
+          "blob": "b3369073716d2d48e859885feda26cbf41c6cee9",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_receiver.py",
+          "blob": "5b612bb790710d013022cca5e4e3b79abeddb5f5",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_reference_direction.py",
+          "blob": "52ca4152d850a67d2c7ad9c9922ea93e314c5191",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_research_contract.py",
+          "blob": "a77e967a1a683bf51431c4b5bdd13aee07de9f68",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_rf_dfe.py",
+          "blob": "dbfcb6c86743cb7c4c79dd21738cf149a88c883d",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_scenario.py",
+          "blob": "28362bc0a7fa1d39700a1f710dd92945d3031cf2",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_sdcp.py",
+          "blob": "94decb17bd2172a76346397be1841771fcba5b59",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_sdcp_arc.py",
+          "blob": "abdca1871689b2b07be44220726f8b0fe8673f61",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_sdcp_positioning.py",
+          "blob": "7002d642b356c9145e5301e6cfc829f1b87b91c5",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_sdcp_self_check.py",
+          "blob": "3424e3f377b0142454afe50e1f015cd03ebaf082",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_sdcp_windows.py",
+          "blob": "e981ecc1463a06c57b3989409b6aafb3f38e0106",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_spatial_direction.py",
+          "blob": "69311cbf30977daec93264d0f6821b7b7df5ae70",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_spatial_diversity_audit.py",
+          "blob": "0686a129f39fc4b59f446ad90bb0ce4136d85f8b",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_spatial_spoofing.py",
+          "blob": "da82ab03bc369a1978ac9b3d71679f1e7d0dd2d5",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_spoofing.py",
+          "blob": "96ae1c008d59215e9d722cad573d962c304b8ef4",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_tracking_initialization.py",
+          "blob": "919d483224fddebcb417ee5b8c6ddb96455830a2",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_tracking_replica.py",
+          "blob": "3cf2e44002c504ee12dca18091bc08f88ef2b841",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tests/test_wideband_interference.py",
+          "blob": "bfc3c50577682abce891cd5c262c16b2766b6e8e",
+          "test": true
+        },
+        {
+          "path": "python_sim_simplified/tracking.py",
+          "blob": "14141851acf0d48f76854eb3fd4e59a78fd1e527",
+          "test": false
+        }
+      ]
+    }
+  ],
+  "blobs": {
+    "d777e2f7bc2ae76406e09f1eb67b6c419646da0e": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 64
+    },
+    "3d56035a6bd7542e36687b2227682bff93546795": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 314
+    },
+    "78ba6e1d9369ecfa48a27373670b74bed57707d5": {
+      "hits": [
+        [
+          19,
+          "if not np.isfinite(delay_samples) or delay_samples < 0.0:"
+        ],
+        [
+          20,
+          "raise ValueError(\"delay_samples must be finite and nonnegative\")"
+        ],
+        [
+          22,
+          "raise ValueError(\"num_taps must be an odd integer of at least three\")"
+        ],
+        [
+          71,
+          "raise ValueError(\"component and delays_s must describe the same channels\")"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 81
+    },
+    "77e743cac1f9da25e1ad2f74bca51562315baba2": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 288
+    },
+    "46bcdb37b9bfd6bcfd8d5e75f6d0fc44bd5d7e22": {
+      "hits": [
+        [
+          40,
+          "if cfg.nco_frequency_hz is None"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 84
+    },
+    "1cb0ff5801ac7a6d7df8d5364806270a3281fc4c": {
+      "hits": [
+        [
+          76,
+          "if not accepted:"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 198
+    },
+    "46517de63edf3f89205892070a9c983057195d5c": {
+      "hits": [
+        [
+          118,
+          "if isinstance(interferer, CWInterferer):"
+        ],
+        [
+          134,
+          "elif isinstance(interferer, WidebandInterferer):"
+        ],
+        [
+          146,
+          "if interferer.stop_ms is None"
+        ],
+        [
+          193,
+          "if not np.all(np.isfinite(values)) or path.excess_delay_chips < 0.0:"
+        ],
+        [
+          194,
+          "raise ValueError(\"multipath parameters must be finite and delay nonnegative\")"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 370
+    },
+    "423d573c77c6c393080e5a9f19e88982638c1dd4": {
+      "hits": [
+        [
+          16,
+          "if not isinstance(num_samples, (int, np.integer)) or num_samples <= 0:"
+        ],
+        [
+          17,
+          "raise ValueError(\"num_samples must be a positive integer\")"
+        ],
+        [
+          18,
+          "if not np.isfinite(fs_hz) or fs_hz <= 0.0:"
+        ],
+        [
+          19,
+          "raise ValueError(\"fs_hz must be finite and positive\")"
+        ],
+        [
+          20,
+          "if not np.isfinite(if_hz):"
+        ],
+        [
+          21,
+          "raise ValueError(\"if_hz must be finite\")"
+        ],
+        [
+          22,
+          "if not np.isfinite(impedance_ohm) or impedance_ohm <= 0.0:"
+        ],
+        [
+          23,
+          "raise ValueError(\"impedance_ohm must be finite and positive\")"
+        ],
+        [
+          24,
+          "if not np.isfinite(interferer.power_dbm):"
+        ],
+        [
+          25,
+          "raise ValueError(\"power_dbm must be finite\")"
+        ],
+        [
+          31,
+          "raise ValueError(\"bandwidth_hz must be between zero and fs_hz\")"
+        ],
+        [
+          33,
+          "isinstance(interferer.filter_taps, (bool, np.bool_))"
+        ],
+        [
+          34,
+          "or not isinstance(interferer.filter_taps, (int, np.integer))"
+        ],
+        [
+          38,
+          "raise ValueError(\"filter_taps must be an odd integer of at least three\")"
+        ],
+        [
+          40,
+          "isinstance(interferer.random_seed, (bool, np.bool_))"
+        ],
+        [
+          41,
+          "or not isinstance(interferer.random_seed, (int, np.integer))"
+        ],
+        [
+          44,
+          "raise ValueError(\"random_seed must be a nonnegative integer\")"
+        ],
+        [
+          48,
+          "if not -fs_hz / 2.0 < lower_hz < upper_hz < fs_hz / 2.0:"
+        ],
+        [
+          49,
+          "raise ValueError(\"wideband occupied band must remain inside Nyquist\")"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 93
+    },
+    "8cdad4628497e8c6e632391768a458c69ed05c83": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 92
+    },
+    "64be2fa8297b31afe5e9ed5afd947cbe73906867": {
+      "hits": [
+        [
+          40,
+          "if not tracking[\"success\"]:"
+        ],
+        [
+          53,
+          "if not tracking[\"success\"]:"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 135
+    },
+    "683e30f2f7d4840ee903c4f1c0d144fa984ee5f7": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 245
+    },
+    "ef9c1d86ea8d0a919994960b6238f27b2fb00ba1": {
+      "hits": [
+        [
+          154,
+          "if not np.all(np.isfinite(config_values)) or cfg.delay_step_chips <= 0.0:"
+        ],
+        [
+          155,
+          "raise ValueError(\"multipath detection values must be finite and delay step positive\")"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 299
+    },
+    "92fe6d3cd1c4f53832c27b6720934b743dfee284": {
+      "hits": [
+        [
+          120,
+          "cfg = default_config() if cfg is None else cfg"
+        ],
+        [
+          154,
+          "if not cfg.multipath_detection.enable:"
+        ],
+        [
+          156,
+          "elif pilot is None:"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 224
+    },
+    "3a79acd0252dfd3eb88bb734b67bc5e0ec2bcf2c": {
+      "hits": [
+        [
+          31,
+          "size = min(samples.size, 65_536) if n_fft is None else n_fft"
+        ],
+        [
+          53,
+          "if not interferer.enable:"
+        ],
+        [
+          55,
+          "if isinstance(interferer, CWInterferer):"
+        ],
+        [
+          62,
+          "elif isinstance(interferer, WidebandInterferer):"
+        ],
+        [
+          176,
+          "kind = \"CW\" if isinstance(interferer, CWInterferer) else \"Wideband\""
+        ],
+        [
+          262,
+          "branch = results[\"branches\"].get(mode)"
+        ],
+        [
+          278,
+          "branch = results[\"branches\"].get(mode)"
+        ],
+        [
+          430,
+          "if isinstance(interferer, CWInterferer)"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 759
+    },
+    "462e085c84d1e38f2f44810abdc4e69a3a562099": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 173
+    },
+    "abe7584c18cd3f6e0e6b1756bb322c0c46eb71b0": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 86
+    },
+    "685809ab0d6cc26f397a01909f16d577b4168dc5": {
+      "hits": [
+        [
+          37,
+          "if not results[\"config\"].plot.show:"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 71
+    },
+    "63eee33accbdf5e48bd5771d90b2da2f4fe4b3bd": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 6
+    },
+    "fd35c17236be6d383ed6f46fd448e8cef74dc36f": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 96
+    },
+    "c8454bec27fa32d1c1737997e0ce4173df6ba052": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 50
+    },
+    "c31288e062de8d24ae0aafb65cf2efc18d9dd234": {
+      "hits": [
+        [
+          22,
+          "assert isinstance(cfg.interferers[0], CWInterferer)"
+        ],
+        [
+          23,
+          "assert isinstance(cfg.interferers[1], WidebandInterferer)"
+        ],
+        [
+          32,
+          "assert isinstance(path, MultipathPath)"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 63
+    },
+    "44931a6d768d16cf2843d0caf87a240f923a5a84": {
+      "hits": [
+        [
+          37,
+          "if cn0_db_hz is None:"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 75
+    },
+    "e9f8c72b190e6c3f2185cb43fca68f734afc1f62": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 91
+    },
+    "22566dcf4c03761273dd5359afa658e9ea232a5a": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 177
+    },
+    "73321524e01b2b200c1a1e6d38ae477789a364d3": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 152
+    },
+    "093ca73c581a09aa1458bc6dc44d1e74e1fe00b2": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 181
+    },
+    "539ccd1307058fc4d191d7dea7c250fbc9ff5f48": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 70
+    },
+    "a77e967a1a683bf51431c4b5bdd13aee07de9f68": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 84
+    },
+    "dbfcb6c86743cb7c4c79dd21738cf149a88c883d": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 86
+    },
+    "28362bc0a7fa1d39700a1f710dd92945d3031cf2": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 235
+    },
+    "bfc3c50577682abce891cd5c262c16b2766b6e8e": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 87
+    },
+    "64cf29a4dc1ffebec630af4f8f4cc19a0a624c54": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 224
+    },
+    "f59bb48704c467eee1d9a7aa8800e39e1cc7682e": {
+      "hits": [
+        [
+          22,
+          "raise ValueError('unsupported signal kind')"
+        ],
+        [
+          26,
+          "raise ValueError('L5 acquisition requires 1 ms before NH synchronization')"
+        ],
+        [
+          34,
+          "raise ValueError('L5 acquisition needs one extra millisecond')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 78
+    },
+    "cac47a5c3cf035e7e642662f7197154cf0b05df8": {
+      "hits": [
+        [
+          294,
+          "raise ValueError('antenna error maps contain unknown element names')"
+        ],
+        [
+          295,
+          "amplitude_db = np.array([state.amplitude_error_db.get(name, 0.) for name in names])"
+        ],
+        [
+          296,
+          "phase_deg = np.array([state.phase_error_deg.get(name, 0.) for name in names])"
+        ],
+        [
+          297,
+          "if not np.all(np.isfinite(amplitude_db)) or not np.all(np.isfinite(phase_deg)):"
+        ],
+        [
+          298,
+          "raise ValueError('antenna amplitude/phase errors must be finite')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 324
+    },
+    "f519aaf955f8d763952f6484e0e42858b0773c90": {
+      "hits": [
+        [
+          14,
+          "if not np.array_equal(t, pair[1]['time_s']): raise ValueError('unaligned times')"
+        ],
+        [
+          18,
+          "raise ValueError('unexpected PRN order')"
+        ],
+        [
+          23,
+          "if metric not in h: raise ValueError('requested quality history missing')"
+        ],
+        [
+          41,
+          "except ValueError: positions.append([np.nan]*3)"
+        ],
+        [
+          60,
+          "if args.output.exists(): raise FileExistsError(args.output)"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 69
+    },
+    "1372fb0754c11058976e5e9c0ed7bbbb62447b99": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 87
+    },
+    "df2c415c81e39e4e12d1f2b7aa3256b4e5f03739": {
+      "hits": [
+        [
+          18,
+          "if not indices.size:"
+        ],
+        [
+          27,
+          "if not valid.any():"
+        ],
+        [
+          45,
+          "{**h, 'success': h.get('tracking_status') == 'tracking'}, times,"
+        ],
+        [
+          60,
+          "except ValueError as exc:"
+        ],
+        [
+          72,
+          "if not accepted:"
+        ],
+        [
+          133,
+          "if not np.isfinite([args.code_sigma_m, args.phase_sigma_m]).all() or min(args.code_sigma_m, args.phase_sigma_m) <= 0:"
+        ],
+        [
+          141,
+          "if any(expected.get(name) != digest for name, digest in input_hashes.items()):"
+        ],
+        [
+          142,
+          "raise ValueError('input archive hash mismatch')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 186
+    },
+    "65cf5cb6116d3ec13b4986b5b36ec78d99a15e9b": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 70
+    },
+    "c78e34e24b416084915495e3fe6bfe22e4c49d67": {
+      "hits": [
+        [
+          48,
+          "if not 1<=args.trials<=9000: parser.error('trials must be in 1..9000')"
+        ],
+        [
+          62,
+          "raise ValueError('checkpoint belongs to a different frozen threshold')"
+        ],
+        [
+          71,
+          "if threshold_path.read_bytes()!=frozen_bytes: raise ValueError('threshold changed during study')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 81
+    },
+    "a786f9bb342707b4ec7e13725e9a58208c9bbee3": {
+      "hits": [
+        [
+          46,
+          "if not acq['success']: return row"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 102
+    },
+    "2d111eeacafbb8a3497a9ba36b4269056a72c38d": {
+      "hits": [
+        [
+          26,
+          "\"echo_same_direction\": cfg.signal.true_direction}.get(kind)"
+        ],
+        [
+          38,
+          "if not acq[\"success\"]:"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 92
+    },
+    "a6474bc03fe12eb23553db2996337fa47a63e1d4": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 48
+    },
+    "44fc9edda00698921c454849ec70a1ff8c0ae69b": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 71
+    },
+    "619fa8f427225a7fba57427d096923ebc172fb23": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 67
+    },
+    "43f27ab5ef633ef713f598fbbb2aced101829045": {
+      "hits": [
+        [
+          29,
+          "if not len(t1) or not len(t2):"
+        ],
+        [
+          30,
+          "raise ValueError('both channels require tracking epochs')"
+        ],
+        [
+          35,
+          "if not len(times):"
+        ],
+        [
+          36,
+          "raise ValueError('no overlapping tracking time')"
+        ],
+        [
+          70,
+          "if not isinstance(duration_ms, int) or duration_ms < 10:"
+        ],
+        [
+          71,
+          "raise ValueError('duration_ms must be an integer >= 10')"
+        ],
+        [
+          72,
+          "if not isinstance(seed_base, int) or seed_base < 0:"
+        ],
+        [
+          73,
+          "raise ValueError('seed_base must be a nonnegative integer')"
+        ],
+        [
+          75,
+          "raise ValueError('echo onset must leave a full 10 ms ramp within the record')"
+        ],
+        [
+          76,
+          "cfg = default_config() if receiver_config is None else deepcopy(receiver_config)"
+        ],
+        [
+          86,
+          "if not thermal_noise:"
+        ],
+        [
+          118,
+          "if not np.any(baseband):"
+        ],
+        [
+          125,
+          "if not acq['success']:"
+        ],
+        [
+          130,
+          "if not history['success']:"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 200
+    },
+    "df4c2132b7cf5346d3d8bc598a4f1d63b1180817": {
+      "hits": [
+        [
+          25,
+          "if not np.all(np.isfinite(channel[key])):"
+        ],
+        [
+          30,
+          "if not np.any(selected):"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 132
+    },
+    "065beb4306a85c48555473954f75fbb050a4eef1": {
+      "hits": [
+        [
+          28,
+          "if not acq['success']:"
+        ],
+        [
+          101,
+          "case = {'status': 'evaluated_not_lock_certified' if first.get('success') and second.get('success') else 'receiver_failed',"
+        ],
+        [
+          102,
+          "'fs_hz': first.get('fs_hz'), 'wavelength_m': cfg.signal.wavelength_m,"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 126
+    },
+    "e1c3c085a47c9bff60f0b337f76d5bf2a4bd30cb": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 41
+    },
+    "3ef77a3581a0d3ecadf7d5621bb3882c2a8f6293": {
+      "hits": [
+        [
+          25,
+          "raise ValueError('input hash mismatch')"
+        ],
+        [
+          37,
+          "if not np.array_equal(t,r['time_s']): raise ValueError('unaligned records')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 81
+    },
+    "096e849a7f697e49883eb174e33cdff24b565329": {
+      "hits": [
+        [
+          22,
+          "if hashlib.sha256((SOURCE/name).read_bytes()).hexdigest()!=digest: raise ValueError('hash mismatch')"
+        ],
+        [
+          29,
+          "out=classify(r,.010,nuisance_bound_m=np.nan if bound is None else bound,"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 44
+    },
+    "3ffa71b9de16925a6a69be6cbf281831bbbdf145": {
+      "hits": [
+        [
+          30,
+          "if hashlib.sha256((directory/name).read_bytes()).hexdigest()!=digest: raise ValueError('hash mismatch')"
+        ],
+        [
+          36,
+          "if not np.array_equal(t,b['time_s']) or not np.array_equal(t,gf['time_s']): raise ValueError('unaligned times')"
+        ],
+        [
+          61,
+          "except ValueError: errors.append(float('nan'))"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 84
+    },
+    "54ffcb67cf4c0a4c55b5069d8b2772955c43c557": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 35
+    },
+    "c81cf0bc91c626d3a241ac8f88904dca19f47ee1": {
+      "hits": [
+        [
+          22,
+          "if hashlib.sha256((SOURCE/name).read_bytes()).hexdigest()!=digest: raise ValueError('hash mismatch')"
+        ],
+        [
+          42,
+          "if not np.array_equal(t,r['time_s']): raise ValueError('time mismatch')"
+        ],
+        [
+          43,
+          "return np.column_stack([carrier_range(dict(h,success=h.get('tracking_status')=='tracking'),t,"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 76
+    },
+    "dc02076bd0eb2af77cd9ca107d393a38b8f3e4fc": {
+      "hits": [
+        [
+          29,
+          "if not np.array_equal(t,r['time_s']): raise ValueError('unaligned times')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 74
+    },
+    "92514ffcfd4b08fd1482a64f548a0a9d138deda4": {
+      "hits": [
+        [
+          35,
+          "if not tracking[\"success\"]:"
+        ],
+        [
+          62,
+          "if not noise:"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 127
+    },
+    "7d6bd8a7ad178bfe04e860ed8a179f5d6e287c2c": {
+      "hits": [
+        [
+          49,
+          "if not pilot_acq[\"success\"]:"
+        ],
+        [
+          50,
+          "raise ValueError(\"EGC pilot acquisition failed in detector audit\")"
+        ],
+        [
+          89,
+          "\"initialization\": tr.get(\"initialization\"),"
+        ],
+        [
+          90,
+          "\"suppression_status\": combining.get(\"suppression_status\"),"
+        ],
+        [
+          93,
+          "detected = None if detection is None else {"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 140
+    },
+    "eafe650dd07a7f75a0b193e932f4fb121be882f2": {
+      "hits": [
+        [
+          78,
+          "if not h['success']:"
+        ],
+        [
+          86,
+          "if not np.isfinite(cycles).all():"
+        ],
+        [
+          87,
+          "raise ValueError('missing common-time observations')"
+        ],
+        [
+          121,
+          "if not all(np.any(v) for v in x):"
+        ],
+        [
+          127,
+          "if not all(a['success'] for a in acquisitions):"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 145
+    },
+    "c6eab3db6c29b66e92c40b9782d90adf5d3bbc61": {
+      "hits": [
+        [
+          72,
+          "except ValueError as exc:"
+        ],
+        [
+          84,
+          "except ValueError as exc:"
+        ],
+        [
+          100,
+          "raise ValueError('archive checksum mismatch')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 202
+    },
+    "b651dabe91127adcbaa606ba9f05e448d238e2b3": {
+      "hits": [
+        [
+          22,
+          "if isinstance(x, np.ndarray): return x.tolist()"
+        ],
+        [
+          23,
+          "if isinstance(x, np.generic): return x.item()"
+        ],
+        [
+          24,
+          "if isinstance(x, Path): return str(x)"
+        ],
+        [
+          25,
+          "raise TypeError(type(x).__name__)"
+        ],
+        [
+          30,
+          "if not h.get('success'): return {'status':h['status']}"
+        ],
+        [
+          47,
+          "'m2m4_cn0_db_hz':None if cn0 is None else float(cn0),"
+        ],
+        [
+          91,
+          "if not block: raise ValueError('input truncated during hashing')"
+        ],
+        [
+          103,
+          "if h.get('success'):"
+        ],
+        [
+          107,
+          "**{k:v for k,v in h.items() if isinstance(v,np.ndarray)})"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 114
+    },
+    "2c1e580c8680fd2c84d1ae9449b80605c7382139": {
+      "hits": [
+        [
+          35,
+          "if not valid[k*10:(k+1)*10,indices].all():"
+        ],
+        [
+          49,
+          "assert np.max(np.min(np.linalg.norm(a[:,None]-b[None],axis=-1),axis=1))<1e-4"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 61
+    },
+    "5281d113f4162726f46ecd2af2e47e905ec93c54": {
+      "hits": [
+        [
+          28,
+          "if not issued and .2<=t<.29 and quality[i]:"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 51
+    },
+    "76ec2e33c4a42d5fdc40bb55184765d4e26143d9": {
+      "hits": [
+        [
+          28,
+          "assert max(abs(np.array(raw['startup_bias_8mm']['reference_m'])))<1e-12"
+        ],
+        [
+          29,
+          "assert max(abs(np.array(raw['integer_jump']['calibrated_m'])))<1e-12"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 65
+    },
+    "0835f5c3fdc8fea88341970db089e4ae706104ad": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 51
+    },
+    "76c6b00571d72cba54065d6940fc81adb0c9124a": {
+      "hits": [
+        [
+          32,
+          "if not x.size:"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 129
+    },
+    "86562082a7402c66382594838890a72a0e5cdb56": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 69
+    },
+    "39797027642970d5d16ef40e6b038b964d1cb18c": {
+      "hits": [
+        [
+          36,
+          "if h.get('tracking_status')!='tracking':columns.append(np.full(len(t),np.nan))"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 59
+    },
+    "e8689a5aa761d5c21138d1d94686188bc8bb1e10": {
+      "hits": [
+        [
+          47,
+          "if not np.array_equal(times, pair[1]['time_s']):"
+        ],
+        [
+          48,
+          "raise ValueError('channel time axes differ')"
+        ],
+        [
+          52,
+          "if any(h.get('tracking_status') != 'tracking' for h in record['satellite_tracking']):"
+        ],
+        [
+          53,
+          "raise ValueError('incomplete tracked pair')"
+        ],
+        [
+          56,
+          "if not all(np.isfinite(x).all() for x in p+phases):"
+        ],
+        [
+          57,
+          "raise ValueError('incomplete continuous observation arc')"
+        ],
+        [
+          101,
+          "except ValueError:"
+        ],
+        [
+          116,
+          "except ValueError as exc:"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 190
+    },
+    "ab08f920740816942277fb2ad22b9240d3b9e9a4": {
+      "hits": [
+        [
+          25,
+          "if isinstance(x, np.ndarray): return convert(x.tolist())"
+        ],
+        [
+          26,
+          "if isinstance(x, np.generic): return convert(x.item())"
+        ],
+        [
+          27,
+          "if isinstance(x, float) and not np.isfinite(x): return None"
+        ],
+        [
+          28,
+          "if isinstance(x, dict): return {k: convert(v) for k, v in x.items()}"
+        ],
+        [
+          29,
+          "if isinstance(x, (list, tuple)): return [convert(v) for v in x]"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 189
+    },
+    "c2994aff4e18faae6532d91ef1823579e6cdb7c1": {
+      "hits": [
+        [
+          40,
+          "if not acq['success']:raise RuntimeError(f'initial acquisition failed: {label}')"
+        ],
+        [
+          42,
+          "if not h['success']:raise RuntimeError(f'tracking processing failed: {label}')"
+        ],
+        [
+          44,
+          "np.savez_compressed(out/(name+'.npz'),**{k:v for k,v in history.items() if isinstance(v,np.ndarray)})"
+        ],
+        [
+          59,
+          "if not qa['success']:raise RuntimeError(f'reacquisition failed: {label}')"
+        ],
+        [
+          62,
+          "if not nh['success']:raise RuntimeError('new tracking failed')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 85
+    },
+    "10b707d01284ab0b8cd754238f89621bb41dbf3b": {
+      "hits": [
+        [
+          16,
+          "raise ValueError('finite data and valid window required')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 76
+    },
+    "85d50807ad90082c2ebb7c89a6aaaf38bde4ef55": {
+      "hits": [
+        [
+          56,
+          "assert max(invariant[label].values()) < 1e-10"
+        ],
+        [
+          63,
+          "if not candidates:"
+        ],
+        [
+          133,
+          "if not valid[k*10:(k+1)*10, indices].all():"
+        ],
+        [
+          141,
+          "if not alarm:"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 182
+    },
+    "d9baa21741c900f83743c9a11fff575700dde6a0": {
+      "hits": [
+        [
+          39,
+          "raise ValueError('unknown model case')"
+        ],
+        [
+          49,
+          "geometry = mate70_phase_centers() if positions_m is None else positions_m"
+        ],
+        [
+          101,
+          "raise ValueError('aligned independent-event decisions required')"
+        ],
+        [
+          162,
+          "if not all(np.isfinite(v) and v > 0 for v in (args.width_m, args.height_m)):"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 214
+    },
+    "eac38ca5e7f928e1fbefdb43e7dfca1d628fcfb1": {
+      "hits": [
+        [
+          27,
+          "geometry = mate70_phase_centers() if positions_m is None else positions_m"
+        ],
+        [
+          44,
+          "raise ValueError('unknown RF case')"
+        ],
+        [
+          145,
+          "geometry = payload.get('positions_m', mate70_phase_centers())"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 188
+    },
+    "68ed066316a88855f2bf64f440399ecfdb1c2608": {
+      "hits": [
+        [
+          50,
+          "suppression=-20*np.log10(max(abs(np.vdot(w,b)),1e-12))"
+        ],
+        [
+          57,
+          "oracle=-20*np.log10(max(abs(np.vdot(oi['weights'],b)),1e-12))"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 81
+    },
+    "f7a7953db7595e059d71ed0dd8faabe94bf1e443": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 66
+    },
+    "f4e1d3e3d299c34a54ea8e4076e6b97fabccbd6b": {
+      "hits": [
+        [
+          39,
+          "-20*np.log10(max(abs(np.vdot(w,b)),1e-12)),"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 75
+    },
+    "1b2f1c01655772dd943eba231a300035f5da79f5": {
+      "hits": [
+        [
+          24,
+          "if not np.array_equal(t, r['time_s']): raise ValueError('time mismatch')"
+        ],
+        [
+          25,
+          "if [h['prn'] for h in r['satellite_tracking']] != list(range(1, 9)): raise ValueError('PRN mismatch')"
+        ],
+        [
+          26,
+          "phase.append(np.column_stack([carrier_range(dict(h, success=h.get('tracking_status') == 'tracking'),"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 88
+    },
+    "5e252824c236a11999ec92f594cae7af35d44c29": {
+      "hits": [
+        [
+          41,
+          "-20*np.log10(max(leak,1e-12)),20*np.log10(max(abs(gain),1e-12)),"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 78
+    },
+    "2c59802554adedbe77a067e878358250ba7c3beb": {
+      "hits": [
+        [
+          97,
+          "raise ValueError('all ten archived H0 records required')"
+        ],
+        [
+          132,
+          "print(json.dumps(result.get('evaluation',result)), flush=True)"
+        ],
+        [
+          140,
+          "'evaluation': r['sdcp'].get('evaluation'),"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 164
+    },
+    "93d02ccb72fae727aa1d1f3f42fb5c4da004f210": {
+      "hits": [
+        [
+          20,
+          "raise ValueError(\"positive finite rates and sufficient replica sampling required\")"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 44
+    },
+    "38a7cde832b9c1511a92e35884b961dfc30b45a4": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 306
+    },
+    "36b2778be48dd28c9544dc0136fef3e8257e8d99": {
+      "hits": [
+        [
+          27,
+          "raise ValueError(\"finite eligible calibration scores required\")"
+        ],
+        [
+          28,
+          "if not 0<target_false_alarm_rate<1:"
+        ],
+        [
+          29,
+          "raise ValueError(\"false alarm target must be between zero and one\")"
+        ],
+        [
+          32,
+          "raise ValueError(\"too few calibration scores for the requested tail\")"
+        ],
+        [
+          39,
+          "raise ValueError(\"valid counts and confidence required\")"
+        ],
+        [
+          40,
+          "if not total:"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 45
+    },
+    "0696f31d36ea30733712f66cf8523671b450401c": {
+      "hits": [
+        [
+          40,
+          "if cfg.nco_frequency_hz is None"
+        ],
+        [
+          94,
+          "frequency=signal_if_hz if cfg.nco_frequency_hz is None else cfg.nco_frequency_hz"
+        ],
+        [
+          99,
+          "raise ValueError('DFE blocks must be nonempty channel-by-sample arrays')"
+        ],
+        [
+          100,
+          "if state is None:"
+        ],
+        [
+          102,
+          "if block.shape[0]!=channels:raise ValueError('DFE channel count changed')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 114
+    },
+    "4baca67a5dd0778893edcd58f38e734494936cd5": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 45
+    },
+    "621e4a864759383d017c394c661a2a2eb980e406": {
+      "hits": [
+        [
+          19,
+          "raise ValueError('nonempty epoch-by-PRN matrix and positive threshold required')"
+        ],
+        [
+          24,
+          "if a.dtype.kind != 'b': raise ValueError('validity flags must be boolean')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 38
+    },
+    "9c2e097d6504d0cc1460ca37b0423fa8d7ee0e43": {
+      "hits": [
+        [
+          21,
+          "if not math.isfinite(self.max_gap_s) or self.max_gap_s <= 0:"
+        ],
+        [
+          22,
+          "raise ValueError('positive maximum gap required')"
+        ],
+        [
+          23,
+          "if not math.isfinite(self.anomaly_multiplier) or not 0 < self.anomaly_multiplier <= 1:"
+        ],
+        [
+          24,
+          "raise ValueError('anomaly multiplier must be in (0, 1]')"
+        ],
+        [
+          36,
+          "raise ValueError('boolean validity flags required')"
+        ],
+        [
+          37,
+          "if not math.isfinite(time_s) or (self.last_time_s is not None and time_s <= self.last_time_s):"
+        ],
+        [
+          39,
+          "raise ValueError('strictly increasing finite time required')"
+        ],
+        [
+          40,
+          "if not math.isfinite(threshold_m) or threshold_m <= 0:"
+        ],
+        [
+          42,
+          "raise ValueError('positive threshold required')"
+        ],
+        [
+          48,
+          "ready = (valid and calibration_valid and isinstance(arc_id,str) and bool(arc_id)"
+        ],
+        [
+          49,
+          "and isinstance(calibration_id,str) and bool(calibration_id)"
+        ],
+        [
+          61,
+          "if not ready: reason = 'invalid_observation_or_calibration'"
+        ],
+        [
+          63,
+          "elif not self.approved: reason = 'await_current_branch_confirmation'"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 66
+    },
+    "30178d2c2f78df2c5abc774868609ba2557fec17": {
+      "hits": [
+        [
+          85,
+          "raise ValueError('unsupported signal kind')"
+        ],
+        [
+          95,
+          "raise ValueError(\"bandlimited source must fit inside RF sampling Nyquist\")"
+        ],
+        [
+          134,
+          "if isinstance(interferer, CWInterferer):"
+        ],
+        [
+          150,
+          "elif isinstance(interferer, WidebandInterferer):"
+        ],
+        [
+          162,
+          "if interferer.stop_ms is None"
+        ],
+        [
+          209,
+          "if not np.all(np.isfinite(values)) or path.excess_delay_chips < 0.0:"
+        ],
+        [
+          210,
+          "raise ValueError(\"multipath parameters must be finite and delay nonnegative\")"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 386
+    },
+    "887b098c479415cce2bce77ce2ff1e5bf3456c6e": {
+      "hits": [
+        [
+          19,
+          "if not (2e7<a<3e7 and 0<=e<1):"
+        ],
+        [
+          20,
+          "raise ValueError('invalid GPS broadcast orbit')"
+        ],
+        [
+          28,
+          "else: raise ValueError('Kepler equation did not converge')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 46
+    },
+    "2e2d3b0b735cc0da4a0b3bf29d5d7df25daabe08": {
+      "hits": [
+        [
+          71,
+          "if not {1,2,3}.issubset(subframes):"
+        ],
+        [
+          72,
+          "raise ValueError('subframes 1, 2 and 3 required')"
+        ],
+        [
+          77,
+          "raise ValueError('ten validated payload words required')"
+        ],
+        [
+          79,
+          "raise ValueError('subframe header mismatch')"
+        ],
+        [
+          91,
+          "raise ValueError('ephemeris issue identifiers are inconsistent')"
+        ],
+        [
+          104,
+          "if not (0<=eph['e']<1 and 2e7<eph['sqrt_a']**2<3e7):"
+        ],
+        [
+          105,
+          "raise ValueError('invalid decoded orbit')"
+        ],
+        [
+          119,
+          "if diagnostics.get('status')!='evaluated' or not diagnostics['demodulation_evidence']:"
+        ],
+        [
+          127,
+          "if d is None or d>>16!=0x8b or how is None:continue"
+        ],
+        [
+          129,
+          "if not 1<=sf<=5 or not 0<=tow_next<604800:continue"
+        ],
+        [
+          146,
+          "if not out['time_anchors']:return out"
+        ],
+        [
+          150,
+          "except ValueError as e:out['ephemeris_error']=str(e)"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 152
+    },
+    "08768a008f9f7e0e1c01023432d50ca2dfa412d3": {
+      "hits": [
+        [
+          17,
+          "raise ValueError('invalid sample timing')"
+        ],
+        [
+          19,
+          "if not history.get('success',False):return result"
+        ],
+        [
+          26,
+          "raise ValueError('transmit time requires continuous 1-ms tracking')"
+        ],
+        [
+          28,
+          "if not 0<=a<len(starts) or not 0<=anchor['tow_s']<604800:"
+        ],
+        [
+          29,
+          "raise ValueError('invalid navigation time anchor')"
+        ],
+        [
+          47,
+          "raise ValueError('at least four valid timed satellites required')"
+        ],
+        [
+          49,
+          "if np.any(raw<=0):raise ValueError('invalid common receiver clock origin')"
+        ],
+        [
+          52,
+          "if eph.get('health',0)!=0 or abs(week_difference(t-eph['toe']))>7200:"
+        ],
+        [
+          53,
+          "raise ValueError('unhealthy or stale ephemeris')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 71
+    },
+    "d5c0587ee4f83c79117ab827cd5f1f7377cb9ee2": {
+      "hits": [
+        [
+          18,
+          "if not isinstance(prn, (int, np.integer)) or not 1 <= prn <= 32:"
+        ],
+        [
+          19,
+          "raise ValueError('L5 Q5 supports integer PRNs 1..32')"
+        ],
+        [
+          45,
+          "raise ValueError('NH synchronization requires 40 finite nonzero prompts')"
+        ],
+        [
+          59,
+          "raise ValueError('ambiguous NH synchronization')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 62
+    },
+    "3539a1c899ba449d49c8d43e1868b27238f4237b": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 262
+    },
+    "3abb8250286d871bd775334bb4e9cf5b9a2c111c": {
+      "hits": [
+        [
+          38,
+          "if not 0 < bandwidth_hz < fs_hz/2 or max_excess_delay_chips <= 0:"
+        ],
+        [
+          39,
+          "raise ValueError(\"valid bandwidth and positive delay search range required\")"
+        ],
+        [
+          70,
+          "if direct is None or reflected is None:"
+        ],
+        [
+          214,
+          "if not np.all(np.isfinite(config_values)) or cfg.delay_step_chips <= 0.0:"
+        ],
+        [
+          215,
+          "raise ValueError(\"multipath detection values must be finite and delay step positive\")"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 359
+    },
+    "e44e4bb66b79bf3a21be32b91706cd02a2725d86": {
+      "hits": [
+        [
+          12,
+          "except ValueError as exc:"
+        ],
+        [
+          13,
+          "raise ValueError('sigmas must broadcast to observation shape') from exc"
+        ],
+        [
+          15,
+          "raise ValueError('sigmas must be positive, with +inf for excluded observations')"
+        ],
+        [
+          31,
+          "raise ValueError('require at least four finite satellite positions and positive ranges')"
+        ],
+        [
+          38,
+          "raise ValueError('receiver iterate coincides with a satellite')"
+        ],
+        [
+          43,
+          "raise ValueError('insufficient satellite geometry')"
+        ],
+        [
+          45,
+          "if not np.isfinite(state).all():"
+        ],
+        [
+          46,
+          "raise ValueError('nonfinite position iterate')"
+        ],
+        [
+          52,
+          "raise ValueError('position did not converge within 20 iterations')"
+        ],
+        [
+          67,
+          "raise ValueError('invalid observation time, sample rate or timing aid')"
+        ],
+        [
+          69,
+          "if not history['success']:"
+        ],
+        [
+          76,
+          "raise ValueError('invalid code NCO history')"
+        ],
+        [
+          83,
+          "if not np.isfinite([code_rate_hz, code_length]).all() or min(code_rate_hz, code_length) <= 0:"
+        ],
+        [
+          84,
+          "raise ValueError('positive finite code rate and length required')"
+        ],
+        [
+          102,
+          "raise ValueError('invalid carrier observation timing or wavelength')"
+        ],
+        [
+          104,
+          "if not history['success']:"
+        ],
+        [
+          111,
+          "raise ValueError('invalid carrier NCO history')"
+        ],
+        [
+          112,
+          "if not starts.size:"
+        ],
+        [
+          140,
+          "raise ValueError('require >=2 epochs, >=4 satellites, finite continuous observations and positive sigmas')"
+        ],
+        [
+          160,
+          "raise ValueError('receiver iterate coincides with satellite')"
+        ],
+        [
+          173,
+          "raise ValueError('rank deficient joint position/ambiguity system')"
+        ],
+        [
+          178,
+          "if np.max(np.abs(update)) < 1e-4:"
+        ],
+        [
+          187,
+          "raise ValueError('joint float solution did not converge')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 187
+    },
+    "a631fe2f2fa9e9cb834ae85ac88e720af73d9360": {
+      "hits": [
+        [
+          20,
+          "raise ValueError('IQ file must contain complete byte pairs')"
+        ],
+        [
+          22,
+          "raise ValueError('requested sample window is outside the recording')"
+        ],
+        [
+          31,
+          "if cache_path.exists():raise ValueError('refusing to overwrite an existing DFE cache')"
+        ],
+        [
+          33,
+          "raise ValueError('invalid IQ file window')"
+        ],
+        [
+          37,
+          "if count<1:raise ValueError('recording shorter than DFE group delay')"
+        ],
+        [
+          47,
+          "if len(data)!=n*2:raise ValueError('truncated IQ while reading')"
+        ],
+        [
+          58,
+          "info.update({'if_hz':if_hz if dfe_config.nco_frequency_hz is None else dfe_config.nco_frequency_hz,"
+        ],
+        [
+          68,
+          "if np.asarray(baseband).ndim!=1:raise ValueError('one antenna stream required')"
+        ],
+        [
+          107,
+          "except ValueError as e:epochs.append({'sample_time_s':float(t),'status':str(e)});continue"
+        ],
+        [
+          119,
+          "if isinstance(x,np.ndarray):return x.tolist()"
+        ],
+        [
+          120,
+          "if isinstance(x,np.generic):return x.item()"
+        ],
+        [
+          121,
+          "if isinstance(x,Path):return str(x)"
+        ],
+        [
+          122,
+          "raise TypeError(type(x).__name__)"
+        ],
+        [
+          146,
+          "h=row.get('history')"
+        ],
+        [
+          149,
+          "np.savez_compressed(args.output/f\"prn{row['prn']:02d}.npz\",**{k:v for k,v in h.items() if isinstance(v,np.ndarray)})"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 156
+    },
+    "755b72d95122afbd29a9ff419501ebca03852acc": {
+      "hits": [
+        [
+          18,
+          "def percent(v): return '—' if v is None else f'{100*v:.2f}%'"
+        ],
+        [
+          89,
+          "delay = '—' if e['delay_s'] is None else f\"{e['delay_s']:.3f}\""
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 221
+    },
+    "e7871458aa3d53304d83a2901d1e6496581e7c00": {
+      "hits": [
+        [
+          23,
+          "raise ValueError('RF input must have shape (channels, samples)')"
+        ],
+        [
+          28,
+          "if not np.all(np.isfinite(amplitude_db)) or not np.all(np.isfinite(phase_deg)):"
+        ],
+        [
+          29,
+          "raise ValueError('RF amplitude/phase errors must be finite')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 101
+    },
+    "4c70bbbdf33eaaadd0e671dc85006eac1a1d2c28": {
+      "hits": [
+        [
+          37,
+          "if not results[\"config\"].plot.show:"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 71
+    },
+    "ebd339a0c81b5c050fc26dbfe3440c12d0b907f9": {
+      "hits": [
+        [
+          37,
+          "phases[key] = np.column_stack([carrier_range(dict(h,success=h.get('tracking_status')=='tracking'),"
+        ],
+        [
+          40,
+          "if not all(np.array_equal(t,r['time_s']) for r in records.values()):"
+        ],
+        [
+          41,
+          "raise ValueError('time axes differ')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 60
+    },
+    "4fbe9cade027bd4434fd0798dc5524b4a5de2df5": {
+      "hits": [
+        [
+          31,
+          "if not np.array_equal(times, records['L5Q']['time_s']):"
+        ],
+        [
+          32,
+          "raise ValueError('frequency streams must share observation times')"
+        ],
+        [
+          41,
+          "if history.get('tracking_status') == 'tracking':"
+        ],
+        [
+          65,
+          "except ValueError:"
+        ],
+        [
+          78,
+          "except ValueError as exc:"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 142
+    },
+    "038364f728de92c82303b581110c99460839a1fe": {
+      "hits": [
+        [
+          70,
+          "raise ValueError('unsupported signal kind')"
+        ],
+        [
+          94,
+          "cfg.signal.multipath_paths = list((multipath_by_prn or {}).get(satellite['prn'], ()))"
+        ],
+        [
+          103,
+          "if not 0 <= multipath_start_ms < duration_ms-10:"
+        ],
+        [
+          104,
+          "raise ValueError('multipath onset must leave a full 10 ms ramp')"
+        ],
+        [
+          168,
+          "except ValueError as exc:"
+        ],
+        [
+          197,
+          "if isinstance(value, np.ndarray):"
+        ],
+        [
+          199,
+          "if isinstance(value, dict):"
+        ],
+        [
+          201,
+          "if isinstance(value, (list, tuple)):"
+        ],
+        [
+          203,
+          "if isinstance(value, float) and not np.isfinite(value):"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 260
+    },
+    "99d64ddf8ab6156b161ff8e6af139f1d89e34673": {
+      "hits": [
+        [
+          26,
+          "raise ValueError('finite same-PRN matrices and exactly aligned increasing times required')"
+        ],
+        [
+          34,
+          "raise ValueError('finite three-component baseline required')"
+        ],
+        [
+          35,
+          "if not np.all(np.isfinite([azimuth_deg, elevation_deg])):"
+        ],
+        [
+          36,
+          "raise ValueError('finite direction required')"
+        ],
+        [
+          52,
+          "raise ValueError('finite aligned observations, geometry and positive wavelength required')"
+        ],
+        [
+          55,
+          "raise ValueError('reference interval requires at least two observations')"
+        ],
+        [
+          69,
+          "raise ValueError('finite residual vector and positive threshold required')"
+        ],
+        [
+          86,
+          "raise ValueError('finite observations/calibration and positive wavelength required')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 88
+    },
+    "66290329a05ed7cb1dec20cf4729b2f4c042baaa": {
+      "hits": [
+        [
+          20,
+          "if not isinstance(self.session_id,str) or not self.session_id or not math.isfinite(self.max_gap_s) or self.max_gap_s<=0:"
+        ],
+        [
+          21,
+          "raise ValueError('unique restart session ID and positive maximum gap required')"
+        ],
+        [
+          34,
+          "or not isinstance(tracking_ids,tuple) or len(tracking_ids)!=2"
+        ],
+        [
+          35,
+          "or any(not isinstance(x,str) or not x for x in tracking_ids)"
+        ],
+        [
+          36,
+          "or not isinstance(calibration_id,str) or not calibration_id"
+        ],
+        [
+          40,
+          "raise ValueError('valid IDs, boolean flags and increasing finite time required')"
+        ],
+        [
+          47,
+          "if not quality_valid:self.invalidate('quality_invalid')"
+        ],
+        [
+          48,
+          "if not phase_state_valid:self.invalidate('phase_state_unverified')"
+        ],
+        [
+          50,
+          "if usable and self.arc_id is None:"
+        ],
+        [
+          52,
+          "state='unavailable' if not usable else ('reference_usable' if self.reference_id else 'await_reference')"
+        ],
+        [
+          63,
+          "if (self.arc_id is None or arc_id!=self.arc_id"
+        ],
+        [
+          64,
+          "or not isinstance(reference_id,str) or not reference_id"
+        ],
+        [
+          65,
+          "or not isinstance(evidence_id,str) or not evidence_id"
+        ],
+        [
+          67,
+          "raise ValueError('current arc and fresh external reference evidence required')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 69
+    },
+    "7f75b572f15f958ee43712774c8412999a2ac6cf": {
+      "hits": [
+        [
+          40,
+          "raise ValueError('invalid aligned observations or configuration')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 101
+    },
+    "a3bc803eb06c9bbf1689bd9cda46479bc77c9bc5": {
+      "hits": [
+        [
+          21,
+          "raise ValueError('epochs x 2-4 antennas x >=3 PRNs required')"
+        ],
+        [
+          22,
+          "if not np.isfinite(x).all() or not np.isfinite(wavelength_m) or wavelength_m <= 0:"
+        ],
+        [
+          23,
+          "raise ValueError('finite phase and positive wavelength required')"
+        ],
+        [
+          38,
+          "raise ValueError('finite epoch x antenna x PRN block required')"
+        ],
+        [
+          55,
+          "raise ValueError('calibration dimensions do not match')"
+        ],
+        [
+          56,
+          "if not all(np.isfinite(v).all() for v in (x, p, u)) or harmonic not in (1, 2) or wavelength_m <= 0:"
+        ],
+        [
+          57,
+          "raise ValueError('invalid calibration values')"
+        ],
+        [
+          78,
+          "raise ValueError('epoch x 2-4 antennas x PRNs and antenna x xyz required')"
+        ],
+        [
+          80,
+          "raise ValueError('invalid fit settings')"
+        ],
+        [
+          83,
+          "if not np.isfinite(x).all():"
+        ],
+        [
+          85,
+          "if not np.isfinite(p).all() or not np.allclose(p[:, 2], p[0, 2]):"
+        ],
+        [
+          86,
+          "raise ValueError('this estimator supports planar xy arrays only')"
+        ],
+        [
+          87,
+          "if channel_bias_m is None:"
+        ],
+        [
+          91,
+          "raise ValueError('finite per-channel calibrated biases required')"
+        ],
+        [
+          132,
+          "return {'status': 'rejected_fit' if not accepted else 'single_upper_candidate' if len(accepted)==1 else 'ambiguous',"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 135
+    },
+    "e62337243577ddf383817a19bdf62f94778880df": {
+      "hits": [
+        [
+          11,
+          "raise ValueError('invalid reference geometry')"
+        ],
+        [
+          12,
+          "if not np.isfinite(u).all() or not np.isclose(np.linalg.norm(u), 1.) or not targets:"
+        ],
+        [
+          13,
+          "raise ValueError('unit reference direction and nonempty targets required')"
+        ],
+        [
+          14,
+          "if not 0 <= reference_index < x.shape[2] or any(not 0 <= i < x.shape[2] for i in targets):"
+        ],
+        [
+          15,
+          "raise ValueError('PRN index outside observations')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 23
+    },
+    "893d7d5e08179a59f4ef6c34caac19f8980d1b43": {
+      "hits": [
+        [
+          24,
+          "raise ValueError('finite epochs x 2–4 antennas x >=3 PRNs and positive wavelength required')"
+        ],
+        [
+          45,
+          "raise ValueError('finite [0,1] H0 vector and alpha in (0,1) required')"
+        ],
+        [
+          64,
+          "or not isinstance(window_epochs, int) or window_epochs < 1"
+        ],
+        [
+          68,
+          "raise ValueError('aligned observations, boolean validity and valid detector parameters required')"
+        ],
+        [
+          79,
+          "'reason': 'evaluated' if good else ('incomplete' if not complete else"
+        ],
+        [
+          80,
+          "'time_gap' if not regular else 'invalid_observation')})"
+        ],
+        [
+          87,
+          "if not 2 <= len(records) <= 4:"
+        ],
+        [
+          88,
+          "raise ValueError('two to four synchronized receiver records required')"
+        ],
+        [
+          92,
+          "raise ValueError('at least three unique PRNs required')"
+        ],
+        [
+          97,
+          "raise ValueError('time and PRN order must match exactly')"
+        ],
+        [
+          99,
+          "dict(h, success=h.get('tracking_status') == 'tracking'),"
+        ],
+        [
+          116,
+          "raise ValueError('finite output times required')"
+        ],
+        [
+          117,
+          "if not windows:"
+        ],
+        [
+          121,
+          "if not np.isfinite(decisions).all() or np.any(np.diff(decisions) <= 0) or not np.isin(states, [-1, 0, 1]).all():"
+        ],
+        [
+          122,
+          "raise ValueError('ordered decisions and three-state policy required')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 124
+    },
+    "408830633d4ad7df97891bac9079afaaccb6bc81": {
+      "hits": [
+        [
+          13,
+          "raise ValueError('finite multi-PRN differences and positive wavelength required')"
+        ],
+        [
+          29,
+          "or not isinstance(window_epochs, int) or window_epochs < 1"
+        ],
+        [
+          32,
+          "raise ValueError('aligned eight-PRN matrices, boolean validity and valid parameters required')"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 43
+    },
+    "92efde738268fc9a4890ef83f99216f3340fe48c": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 20
+    },
+    "a38ab714324668b6fa22b4ffdb5964b49c7eda3d": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 15
+    },
+    "daade8fd0202af49acd0d75094b9130db54c3f32": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 70
+    },
+    "579e987b0e255567dd2ba8e6cdaa7c3c973784fe": {
+      "hits": [
+        [
+          24,
+          "assert isinstance(cfg.interferers[0], CWInterferer)"
+        ],
+        [
+          25,
+          "assert isinstance(cfg.interferers[1], WidebandInterferer)"
+        ],
+        [
+          34,
+          "assert isinstance(path, MultipathPath)"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 65
+    },
+    "aacf26f6bc550bd0309af335ec211e65b340ca9b": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 32
+    },
+    "db3ae0c4f5541c009d17e12d31c47ce6b4bc7438": {
+      "hits": [
+        [
+          40,
+          "if cn0_db_hz is None:"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 78
+    },
+    "3c238ae2b2f83a0c0acc4bcfbcf7b98606e358ec": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 26
+    },
+    "f08d81b8b6a08afccf94629cbc9ab02f1ee5c5e2": {
+      "hits": [
+        [
+          86,
+          "raise StopBeforeGenerating"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 110
+    },
+    "e01085ce9aaaf3551c52789cfadedbf449c97f0e": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 39
+    },
+    "3d81d7463b06eb29e1d6702e9c6094b8e18d8260": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 34
+    },
+    "15c0b7f7d25e513442bbabac6327bfcedaf010ad": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 45
+    },
+    "2b2980c77033d51d87559deab90e3665473f4edb": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 136
+    },
+    "96e21835d14bb9bf36e4ae28f60f1d4485a09828": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 53
+    },
+    "a61f3b354ba31a44db71b92020c122edcbae9a37": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 59
+    },
+    "333dd6c2880ba66a1911bc0712d7bd6fa60ab931": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 33
+    },
+    "ddd3884189cbdcaca7cd0d04a07798562c266bb0": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 13
+    },
+    "5580881a0f6bbb83b2f40360fded78c77d61b251": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 84
+    },
+    "d3d0bb4f6b695a130f380d405a49957fdc6ff792": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 36
+    },
+    "24e926adaf1f5aee4e237919d06457f7755c148f": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 10
+    },
+    "b3369073716d2d48e859885feda26cbf41c6cee9": {
+      "hits": [
+        [
+          52,
+          "assert result.get('demodulation_evidence') is False"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 52
+    },
+    "5b612bb790710d013022cca5e4e3b79abeddb5f5": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 74
+    },
+    "52ca4152d850a67d2c7ad9c9922ea93e314c5191": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 21
+    },
+    "94decb17bd2172a76346397be1841771fcba5b59": {
+      "hits": [
+        [
+          20,
+          "assert np.max(abs(r['residual_m'][time < .5])) < 1e-12"
+        ],
+        [
+          27,
+          "assert np.max(abs(r['residual_m'])) < 1e-12"
+        ],
+        [
+          47,
+          "assert np.max(abs(r['residual_m'])) < 1e-12"
+        ],
+        [
+          56,
+          "assert np.max(abs(corrected['residual_m'])) < 1e-12"
+        ],
+        [
+          77,
+          "raise Inspected"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 81
+    },
+    "abdca1871689b2b07be44220726f8b0fe8673f61": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 49
+    },
+    "7002d642b356c9145e5301e6cfc829f1b87b91c5": {
+      "hits": [
+        [
+          35,
+          "assert np.max(abs(residual)) < 1e-6"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 36
+    },
+    "3424e3f377b0142454afe50e1f015cd03ebaf082": {
+      "hits": [
+        [
+          6,
+          "return detect(np.arange(len(r))*.01, r, .19, .004, valid=kw.get('valid', True),"
+        ],
+        [
+          7,
+          "geometry_uncertainty_m=kw.get('uncertainty', 0.), channel_skew_s=0.,"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 48
+    },
+    "e981ecc1463a06c57b3989409b6aafb3f38e0106": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 9
+    },
+    "69311cbf30977daec93264d0f6821b7b7df5ae70": {
+      "hits": [
+        [
+          20,
+          "assert max(double_difference_scores(x, W).values()) < 1e-12"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 57
+    },
+    "0686a129f39fc4b59f446ad90bb0ce4136d85f8b": {
+      "hits": [
+        [
+          23,
+          "assert np.max(spatial_scores(x[:, :, :count], module.W)['global']) < 1e-10"
+        ],
+        [
+          62,
+          "assert np.max(spatial_scores(x, module.W)['global']) < 1e-10"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 98
+    },
+    "da82ab03bc369a1978ac9b3d71679f1e7d0dd2d5": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 106
+    },
+    "96ae1c008d59215e9d722cad573d962c304b8ef4": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 33
+    },
+    "919d483224fddebcb417ee5b8c6ddb96455830a2": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 18
+    },
+    "3cf2e44002c504ee12dca18091bc08f88ef2b841": {
+      "hits": [
+        [
+          78,
+          "assert np.max(np.abs(difference)) < 1e-4"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 78
+    },
+    "14141851acf0d48f76854eb3fd4e59a78fd1e527": {
+      "hits": [
+        [
+          53,
+          "if not np.isfinite(powers[best]) or powers[best] <= 0:"
+        ],
+        [
+          54,
+          "raise ValueError(\"initial phase refinement requires nonzero finite correlation\")"
+        ],
+        [
+          196,
+          "if not np.isfinite(x).all() or not np.any(x):"
+        ],
+        [
+          202,
+          "raise ValueError('unsupported signal kind')"
+        ],
+        [
+          204,
+          "raise ValueError('unsupported carrier discriminator')"
+        ],
+        [
+          210,
+          "raise ValueError('L5 uses 1 ms epochs without L1 initial refinement')"
+        ],
+        [
+          213,
+          "raise ValueError(\"local replica bandwidth must be below receiver Nyquist\")"
+        ],
+        [
+          240,
+          "except ValueError:"
+        ],
+        [
+          247,
+          "if cfg.code_replica_bandwidth_hz is None:"
+        ],
+        [
+          248,
+          "raise ValueError(\"phase refinement requires a continuous local code replica\")"
+        ],
+        [
+          250,
+          "raise ValueError(\"phase refinement requires a complete tracking epoch\")"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 364
+    },
+    "d0c6a55adf41f1d3b2dea0a5f73fdf53655cfb92": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 56
+    },
+    "f9178d44f93ba4c63dc4e9a49c18ffd00bd4f9e7": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 358
+    },
+    "7671a0d0752ed2fb9a555ba53f5de0db9b38de32": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 352
+    },
+    "1072d38d94f950c3f648c15bf178d73343ac8d32": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 65
+    },
+    "1b9ceecaf9697ca09fac9df4ad5ee7ff700d3d53": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 98
+    },
+    "040a5fef3242be5602fa1cc6ed822623d67d3807": {
+      "hits": [
+        [
+          87,
+          "if not interferer.enable:"
+        ],
+        [
+          111,
+          "if interferer.stop_ms is None"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 153
+    },
+    "fce0c07e0c553fc4f12c4c4525bd76422ddc8508": {
+      "hits": [
+        [
+          7,
+          "if not tracking[\"success\"]:"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 62
+    },
+    "ee793ed7e860529eae8b9a49458246cabda88590": {
+      "hits": [
+        [
+          16,
+          "cfg = default_config() if cfg is None else cfg"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 91
+    },
+    "e7ae58bd657ea07168320725d4ddd7ea633b7f02": {
+      "hits": [
+        [
+          172,
+          "branch = results[\"branches\"].get(mode)"
+        ],
+        [
+          188,
+          "branch = results[\"branches\"].get(mode)"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 213
+    },
+    "6d42d93a198d9ebaac7360783be87e1996698063": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 78
+    },
+    "0db2e774a8baab961626d7bc39ebbb9cbb2ee907": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 29
+    },
+    "f8bb6e0fe2d63bdbdd80edf3f9f48c1b15341aae": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 88
+    },
+    "a85bd24771a91622e0be09d3473bd8a96ebbb9c7": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 28
+    },
+    "29a021430870aa517432e6f8013588a3cfddeb01": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 49
+    },
+    "c234a685766f893a72b0e37ff172f05c8dd0052f": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 42
+    },
+    "f67bd07721d6a54b07fd153be4d4ee2808ef93a2": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 52
+    },
+    "67acb24823b247cc2203e630098bcdc5d6f9a01d": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 52
+    },
+    "7a3282c274bdec7200ccdec474ec309aa401c8f7": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 64
+    },
+    "461cf3a165517c7a77b4eaa7d9acfdb3fe0dd457": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 39
+    },
+    "f71d9f2fd1e486f233ad67e1fd605bd99224aabb": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 68
+    },
+    "18d63cfe226185dcecd314cad138450ddcae7c41": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 154
+    },
+    "61c91b2ee4d66939b0dc87be6b44d935a0003916": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 240
+    },
+    "c5d0abcc3f4531d70c7c78d70dc4be92a8f35879": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 110
+    },
+    "e8fae348a18629bd4587cd3e58ee504a07bde56c": {
+      "hits": [
+        [
+          121,
+          "if interferer.stop_ms is None"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 265
+    },
+    "42865261466be45ba99f374b3b9db84dbdc60604": {
+      "hits": [
+        [
+          9,
+          "if not tracking[\"success\"]:"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 64
+    },
+    "839eda1caeba3129aea6c836e409a20bf3bb5a38": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 178
+    },
+    "78902b698b19408f6a2188939cebcfa26351f6e6": {
+      "hits": [
+        [
+          87,
+          "cfg = default_config() if cfg is None else cfg"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 123
+    },
+    "099e6c0d2826df7c34177a62ab499b26ecb06453": {
+      "hits": [
+        [
+          29,
+          "size = min(samples.size, 65_536) if n_fft is None else n_fft"
+        ],
+        [
+          224,
+          "branch = results[\"branches\"].get(mode)"
+        ],
+        [
+          240,
+          "branch = results[\"branches\"].get(mode)"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 531
+    },
+    "15e311268c536671b4607eb2c810385140093408": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 154
+    },
+    "3b9ada0db4ce3f7b7dd1cf4a50ed276b0e10d8e5": {
+      "hits": [
+        [
+          27,
+          "if not results[\"config\"].plot.show:"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 49
+    },
+    "d4d4cea4a37d23d31925c0d72b18e51d1aa33902": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 45
+    },
+    "87b550b5b03b822627d7480b1fe9e0015199ce3e": {
+      "hits": [
+        [
+          32,
+          "if cn0_db_hz is None:"
+        ]
+      ],
+      "parse": "ok",
+      "line_count": 38
+    },
+    "18a5f41a5434356ce1afcecb6e8b37d989b3049c": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 53
+    },
+    "e119c6419be67091dfb8f4f0e547fdea6aaf852e": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 142
+    },
+    "1d840646c2f5ba8c75573e1e568d4ec5b9e4a7ec": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 78
+    },
+    "cc1e4997c7e0e0a55de53231d3e7f5551d5b635d": {
+      "hits": [],
+      "parse": "ok",
+      "line_count": 120
+    }
+  },
+  "working_tree_additions": [
+    {
+      "path": "python_sim_simplified\\sensor_contract.py",
+      "sha256": "fc7e2e8c2d9d913a8126135d0e44ac26affb1dd367bd88607426dbf90d20e653",
+      "syntax": "ok"
+    },
+    {
+      "path": "python_sim_simplified\\audit_sensor_contract.py",
+      "sha256": "481c9824ce565bb60db25752379d21ba7dcf4417b5b4347b56e0066e6c1a38fa",
+      "syntax": "ok"
+    },
+    {
+      "path": "python_sim_simplified\\tests\\test_sensor_contract.py",
+      "sha256": "911a0c547f3fee10afca694b3b43a51ea481a8bbaad55860671882702ba6307f",
+      "syntax": "ok"
+    }
+  ]
+}

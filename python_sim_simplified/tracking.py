@@ -178,6 +178,9 @@ def track(
     cfg: TrackingConfig,
     carrier_hz: float,
     nominal_code_rate_hz: float,
+    *,
+    loss_confirm_epochs: int | None = None,
+    loss_settle_epochs: int = 100,
 ) -> TrackingResult:
     """Track residual carrier and C/A-code phase after acquisition."""
 
@@ -269,6 +272,8 @@ def track(
     code_nco_phase = np.zeros(n_epochs)
     code_nco_rate = np.zeros(n_epochs)
     accumulated_phase = state.carrier_phase_rad
+    bad_epochs = 0
+    quality_lost = False
 
     for epoch in range(n_epochs):
         first = first_epoch + epoch * samples_per_epoch
@@ -333,6 +338,13 @@ def track(
             phase_lock_metric[epoch] = abs(np.sum(prompt_window)) / np.sum(np.abs(prompt_window))
             cn0_db_hz[epoch] = estimate_cn0_db_hz(prompt_window, epoch_duration_s)
 
+        if loss_confirm_epochs is not None and epoch >= loss_settle_epochs:
+            good = phase_lock_metric[epoch] >= .8 and abs(pll_error_rad[epoch]) < np.pi/2
+            bad_epochs = 0 if good else bad_epochs+1
+            if bad_epochs >= loss_confirm_epochs:
+                quality_lost = True
+                break
+
     result: TrackingResult = {
         "success": True,
         "status": "tracking",
@@ -359,4 +371,8 @@ def track(
         result["initialization"] = initialization
     if nh_sync is not None:
         result['nh_sync'] = nh_sync
+    if quality_lost:
+        result = {key: value[:epoch+1] if isinstance(value, np.ndarray) else value
+                  for key, value in result.items()}
+        result['status'] = 'tracking_quality_lost'
     return result

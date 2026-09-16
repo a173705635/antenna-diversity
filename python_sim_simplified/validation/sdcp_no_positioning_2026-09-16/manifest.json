@@ -1,0 +1,68 @@
+{
+  "scope": "Dual RF/DFE/tracking SDCP experiment, with no positioning dependency.",
+  "cases": [
+    "zero",
+    "fixed_plus10",
+    "fixed_minus10",
+    "ramp",
+    "sine",
+    "step",
+    "gap",
+    "hardware"
+  ],
+  "seeds": [
+    11600,
+    11602,
+    11604
+  ],
+  "duration_s": 1.5,
+  "data_symbols": [
+    1,
+    1,
+    -1,
+    1,
+    -1,
+    -1,
+    1,
+    -1
+  ],
+  "symbol_duration_s": 0.02,
+  "data_note": "Synthetic repeated 50 bps symbols, not valid LNAV.",
+  "gap_s": [
+    0.6,
+    0.75
+  ],
+  "step_deg": 30.0,
+  "step_start_s": 0.6,
+  "ramp_deg_per_s": 20.0,
+  "dynamic_start_s": 0.4,
+  "sine_amplitude_deg": 10.0,
+  "sine_hz": 2.0,
+  "hardware_B": {
+    "antenna_db": -1.0,
+    "antenna_deg": 5.0,
+    "rf_db": 1.0,
+    "rf_deg": 3.0
+  },
+  "phase_policy": "Raw accumulated NCO, no wrap, no centering, no integer correction.",
+  "quality_policy": "Report only, never used to select statistics.",
+  "source_sha256": {
+    "gnss.py": "f79ecaba6b8b5524e6652a40df4a512a29ef7e85b16500258801a3e6d466d585",
+    "channel_delay.py": "78cfb57df642482d33263288baf851ba0600fa952f59e2e28ebc710785ed1af8",
+    "tracking.py": "20e19f40ee8dc0ba0eb628c7fe6a625fa308c8c54688a87cae813aeead260a58",
+    "config.py": "fb8afc3b455bbc34b1ba49e2c39a6f16e2f9dbeb560e1968703d67d0e5eee0b6",
+    "l5.py": "353a78496a675fa09175144c91337ddb797343537476fe8d87da3a35f5318287",
+    "antenna.py": "6e5058a244d594e8174e7dc4ed420e1364a302fa75449f60ae1e756e34c5ebf8",
+    "models.py": "8bb8c8017beacc2628d68e1e76808205f19d462bdabf238c83a31e24a5de7d13",
+    "interference.py": "298fe23bf54d1b70d7b47d1278896c200b51658ec17e76ec1cf12ba83e974a5e",
+    "acquisition.py": "e6e805fc21a0270f80a06a59cdc1e531ac9c4108f70a03b636ee7dc04ce413de",
+    "dfe.py": "aec92bd014ca541b16976c146446cc8377021ff00e2f2e9b602bd0fb663d5ab7",
+    "measured_pattern.py": "c3b9ccec23d9431168cb8887d8f5a1c9d937f9720f8f9f730f938bf5dfed4edc",
+    "presets.py": "c8f59f7fb2a4986dac888aa409c07cf914d8500bb49e12a1b7e456c6de02aecc",
+    "rf.py": "94786715d3019e43b66bd5868f433669fa7926b4ef0ff3e699ed079e4a574841",
+    "code_replica.py": "970336ae05dead945533f1ed58d4314fda83ac488ec4910c390e6f81595516cf",
+    "audit_sdcp_no_positioning.py": "ce4ae095e1bd90848f7c02ea41bab9be2f36a75dfdfa1aaab3be152ead7c5474"
+  },
+  "python_version": "3.11.0rc2 (main, Sep 11 2022, 20:22:52) [MSC v.1933 64 bit (AMD64)]",
+  "numpy_version": "2.0.1"
+}

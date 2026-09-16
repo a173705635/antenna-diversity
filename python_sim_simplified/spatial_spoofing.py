@@ -68,6 +68,24 @@ def detect_windows(times_s, carrier_m, valid, threshold, wavelength_m, *,
     return rows
 
 
+def confirm_windows(windows, count, *, period_s=.1):
+    """Causal consecutive-window evidence. Pending evidence remains state 0.
+
+    Unknown or nonadjacent windows break the run. Confirmation does not latch;
+    navigation owns isolation/readmission. No independent-window assumption.
+    """
+    rows = []; run = 0; previous = None
+    for row in windows:
+        if previous is not None and not np.isclose(row['decision_s']-previous, period_s,
+                                                   rtol=0, atol=1e-9):
+            run = 0
+        run = run+1 if row['state'] == 1 else 0
+        state = -1 if row['state'] == -1 else int(run >= count)
+        rows.append(dict(row, raw_state=row['state'], state=state, evidence_run=run))
+        previous = row['decision_s']
+    return rows
+
+
 def observations_from_records(records, wavelength_m):
     """Adapt existing run_gps_spp records without consulting truth or PVT errors."""
     from positioning import carrier_range

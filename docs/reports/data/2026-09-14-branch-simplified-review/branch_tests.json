@@ -1,0 +1,23 @@
+[
+  {
+    "ref": "origin/codex/simplified-python-copy",
+    "sha": "0505387c32ea59f5ece9858feac991e96051fd3c",
+    "exit_code": 0,
+    "seconds": 24.71,
+    "tail": ".......................                                                  [100%]\n23 passed in 24.02s\n"
+  },
+  {
+    "ref": "origin/codex/simplified-research-refactor",
+    "sha": "4799c9e717ccec69de2390b385c07963aee54541",
+    "exit_code": 0,
+    "seconds": 60.33,
+    "tail": ".....................................                                    [100%]\n37 passed in 59.55s\n"
+  },
+  {
+    "ref": "codex/multipath-detection-suppression",
+    "sha": "4f465158a3521268bb7ea5e05a89a6579a929146",
+    "exit_code": 0,
+    "seconds": 64.34,
+    "tail": "...................................................................      [100%]\n67 passed in 63.62s (0:01:03)\n"
+  }
+]

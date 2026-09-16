@@ -1,0 +1,1109 @@
+
+=================================== ERRORS ====================================
+_ ERROR collecting results/recovery-two-hundred/final_source/test_continuous_improvement.py _
+import file mismatch:
+imported module 'test_continuous_improvement' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_continuous_improvement.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-two-hundred\final_source\test_continuous_improvement.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_antenna.py _
+import file mismatch:
+imported module 'test_antenna' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_antenna.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_antenna.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_antenna_selection.py _
+import file mismatch:
+imported module 'test_antenna_selection' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_antenna_selection.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_antenna_selection.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_array_reacquisition.py _
+import file mismatch:
+imported module 'test_array_reacquisition' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_array_reacquisition.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_array_reacquisition.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_autonomous_tracking.py _
+import file mismatch:
+imported module 'test_autonomous_tracking' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_autonomous_tracking.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_autonomous_tracking.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_bench_calibration.py _
+import file mismatch:
+imported module 'test_bench_calibration' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_bench_calibration.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_bench_calibration.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_calibrated_sdcp.py _
+import file mismatch:
+imported module 'test_calibrated_sdcp' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_calibrated_sdcp.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_calibrated_sdcp.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_carrier_admission.py _
+import file mismatch:
+imported module 'test_carrier_admission' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_carrier_admission.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_carrier_admission.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_carrier_positioning.py _
+import file mismatch:
+imported module 'test_carrier_positioning' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_carrier_positioning.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_carrier_positioning.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_channel_delay.py _
+import file mismatch:
+imported module 'test_channel_delay' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_channel_delay.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_channel_delay.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_config_gnss.py _
+import file mismatch:
+imported module 'test_config_gnss' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_config_gnss.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_config_gnss.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_continuous_improvement.py _
+import file mismatch:
+imported module 'test_continuous_improvement' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_continuous_improvement.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_continuous_improvement.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_continuous_source.py _
+import file mismatch:
+imported module 'test_continuous_source' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_continuous_source.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_continuous_source.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_default_regression.py _
+import file mismatch:
+imported module 'test_default_regression' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_default_regression.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_default_regression.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_detection_calibration.py _
+import file mismatch:
+imported module 'test_detection_calibration' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_detection_calibration.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_detection_calibration.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_diversity.py _
+import file mismatch:
+imported module 'test_diversity' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_diversity.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_diversity.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_doppler_recovery.py _
+import file mismatch:
+imported module 'test_doppler_recovery' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_doppler_recovery.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_doppler_recovery.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_dual_tracking_phase.py _
+import file mismatch:
+imported module 'test_dual_tracking_phase' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_dual_tracking_phase.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_dual_tracking_phase.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_geometry_free_sdcp.py _
+import file mismatch:
+imported module 'test_geometry_free_sdcp' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_geometry_free_sdcp.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_geometry_free_sdcp.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_gf_quality_gate.py _
+import file mismatch:
+imported module 'test_gf_quality_gate' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_gf_quality_gate.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_gf_quality_gate.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_gf_runtime.py _
+import file mismatch:
+imported module 'test_gf_runtime' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_gf_runtime.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_gf_runtime.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_gps_navigation.py _
+import file mismatch:
+imported module 'test_gps_navigation' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_gps_navigation.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_gps_navigation.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_hardware_bias.py _
+import file mismatch:
+imported module 'test_hardware_bias' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_hardware_bias.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_hardware_bias.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_inertial_budget.py _
+import file mismatch:
+imported module 'test_inertial_budget' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_inertial_budget.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_inertial_budget.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+___ ERROR collecting results/research-twenty/final_source/tests/test_l5.py ____
+import file mismatch:
+imported module 'test_l5' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_l5.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_l5.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_multipath.py _
+import file mismatch:
+imported module 'test_multipath' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_multipath.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_multipath.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_navigation_fusion.py _
+import file mismatch:
+imported module 'test_navigation_fusion' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_navigation_fusion.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_navigation_fusion.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_navigation_monitors.py _
+import file mismatch:
+imported module 'test_navigation_monitors' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_navigation_monitors.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_navigation_monitors.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_navigation_research.py _
+import file mismatch:
+imported module 'test_navigation_research' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_navigation_research.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_navigation_research.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_path_delay_refinement.py _
+import file mismatch:
+imported module 'test_path_delay_refinement' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_path_delay_refinement.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_path_delay_refinement.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_phase_origin.py _
+import file mismatch:
+imported module 'test_phase_origin' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_phase_origin.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_phase_origin.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_pipeline.py _
+import file mismatch:
+imported module 'test_pipeline' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_pipeline.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_pipeline.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_plotting_runner.py _
+import file mismatch:
+imported module 'test_plotting_runner' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_plotting_runner.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_plotting_runner.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_positioning.py _
+import file mismatch:
+imported module 'test_positioning' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_positioning.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_positioning.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_positioning_weights.py _
+import file mismatch:
+imported module 'test_positioning_weights' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_positioning_weights.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_positioning_weights.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_pseudorange_diagnosis.py _
+import file mismatch:
+imported module 'test_pseudorange_diagnosis' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_pseudorange_diagnosis.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_pseudorange_diagnosis.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_real_gnss.py _
+import file mismatch:
+imported module 'test_real_gnss' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_real_gnss.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_real_gnss.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_receiver.py _
+import file mismatch:
+imported module 'test_receiver' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_receiver.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_receiver.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_recovery_admission.py _
+import file mismatch:
+imported module 'test_recovery_admission' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_recovery_admission.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_recovery_admission.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_reference_direction.py _
+import file mismatch:
+imported module 'test_reference_direction' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_reference_direction.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_reference_direction.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_research_contract.py _
+import file mismatch:
+imported module 'test_research_contract' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_research_contract.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_research_contract.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_rf_arc_consumer.py _
+import file mismatch:
+imported module 'test_rf_arc_consumer' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_rf_arc_consumer.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_rf_arc_consumer.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_rf_dfe.py __
+import file mismatch:
+imported module 'test_rf_dfe' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_rf_dfe.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_rf_dfe.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_scenario.py _
+import file mismatch:
+imported module 'test_scenario' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_scenario.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_scenario.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__ ERROR collecting results/research-twenty/final_source/tests/test_sdcp.py ___
+import file mismatch:
+imported module 'test_sdcp' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_sdcp.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_sdcp.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_sdcp_arc.py _
+import file mismatch:
+imported module 'test_sdcp_arc' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_sdcp_arc.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_sdcp_arc.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_sdcp_positioning.py _
+import file mismatch:
+imported module 'test_sdcp_positioning' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_sdcp_positioning.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_sdcp_positioning.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_sdcp_self_check.py _
+import file mismatch:
+imported module 'test_sdcp_self_check' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_sdcp_self_check.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_sdcp_self_check.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_sdcp_windows.py _
+import file mismatch:
+imported module 'test_sdcp_windows' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_sdcp_windows.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_sdcp_windows.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_sensor_contract.py _
+import file mismatch:
+imported module 'test_sensor_contract' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_sensor_contract.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_sensor_contract.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_signal_recovery.py _
+import file mismatch:
+imported module 'test_signal_recovery' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_signal_recovery.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_signal_recovery.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_solver_failure_reporting.py _
+import file mismatch:
+imported module 'test_solver_failure_reporting' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_solver_failure_reporting.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_solver_failure_reporting.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_spatial_confirmation.py _
+import file mismatch:
+imported module 'test_spatial_confirmation' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_spatial_confirmation.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_spatial_confirmation.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_spatial_direction.py _
+import file mismatch:
+imported module 'test_spatial_direction' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_spatial_direction.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_spatial_direction.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_spatial_diversity_audit.py _
+import file mismatch:
+imported module 'test_spatial_diversity_audit' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_spatial_diversity_audit.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_spatial_diversity_audit.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_spatial_spoofing.py _
+import file mismatch:
+imported module 'test_spatial_spoofing' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_spatial_spoofing.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_spatial_spoofing.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_spoofing.py _
+import file mismatch:
+imported module 'test_spoofing' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_spoofing.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_spoofing.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_stream_replay.py _
+import file mismatch:
+imported module 'test_stream_replay' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_stream_replay.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_stream_replay.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_sync_replay.py _
+import file mismatch:
+imported module 'test_sync_replay' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_sync_replay.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_sync_replay.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_temporal_spatial_monitor.py _
+import file mismatch:
+imported module 'test_temporal_spatial_monitor' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_temporal_spatial_monitor.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_temporal_spatial_monitor.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_tracking_initialization.py _
+import file mismatch:
+imported module 'test_tracking_initialization' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_tracking_initialization.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_tracking_initialization.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_tracking_replica.py _
+import file mismatch:
+imported module 'test_tracking_replica' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_tracking_replica.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_tracking_replica.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting results/research-twenty/final_source/tests/test_wideband_interference.py _
+import file mismatch:
+imported module 'test_wideband_interference' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_wideband_interference.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_wideband_interference.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+___________________ ERROR collecting tests/test_antenna.py ____________________
+import file mismatch:
+imported module 'test_antenna' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_antenna.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_antenna.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+______________ ERROR collecting tests/test_antenna_selection.py _______________
+import file mismatch:
+imported module 'test_antenna_selection' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_antenna_selection.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_antenna_selection.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_____________ ERROR collecting tests/test_array_reacquisition.py ______________
+import file mismatch:
+imported module 'test_array_reacquisition' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_array_reacquisition.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_array_reacquisition.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_____________ ERROR collecting tests/test_autonomous_tracking.py ______________
+import file mismatch:
+imported module 'test_autonomous_tracking' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_autonomous_tracking.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_autonomous_tracking.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+______________ ERROR collecting tests/test_bench_calibration.py _______________
+import file mismatch:
+imported module 'test_bench_calibration' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_bench_calibration.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_bench_calibration.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________ ERROR collecting tests/test_calibrated_sdcp.py ________________
+import file mismatch:
+imported module 'test_calibrated_sdcp' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_calibrated_sdcp.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_calibrated_sdcp.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+______________ ERROR collecting tests/test_carrier_admission.py _______________
+import file mismatch:
+imported module 'test_carrier_admission' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_carrier_admission.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_carrier_admission.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_____________ ERROR collecting tests/test_carrier_positioning.py ______________
+import file mismatch:
+imported module 'test_carrier_positioning' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_carrier_positioning.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_carrier_positioning.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+________________ ERROR collecting tests/test_channel_delay.py _________________
+import file mismatch:
+imported module 'test_channel_delay' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_channel_delay.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_channel_delay.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting tests/test_cold_next.py ___________________
+import file mismatch:
+imported module 'test_cold_next' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\research-next-hundred\final_sources\tests\test_cold_next.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_cold_next.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting tests/test_config_gnss.py __________________
+import file mismatch:
+imported module 'test_config_gnss' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_config_gnss.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_config_gnss.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________ ERROR collecting tests/test_continuous_improvement.py ____________
+import file mismatch:
+imported module 'test_continuous_improvement' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_continuous_improvement.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_continuous_improvement.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+______________ ERROR collecting tests/test_continuous_source.py _______________
+import file mismatch:
+imported module 'test_continuous_source' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_continuous_source.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_continuous_source.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+______________ ERROR collecting tests/test_default_regression.py ______________
+import file mismatch:
+imported module 'test_default_regression' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_default_regression.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_default_regression.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting tests/test_delay_next.py __________________
+import file mismatch:
+imported module 'test_delay_next' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\research-next-hundred\final_sources\tests\test_delay_next.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_delay_next.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________ ERROR collecting tests/test_detection_calibration.py _____________
+import file mismatch:
+imported module 'test_detection_calibration' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_detection_calibration.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_detection_calibration.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting tests/test_diversity.py ___________________
+import file mismatch:
+imported module 'test_diversity' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_diversity.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_diversity.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________ ERROR collecting tests/test_doppler_recovery.py _______________
+import file mismatch:
+imported module 'test_doppler_recovery' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_doppler_recovery.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_doppler_recovery.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_____________ ERROR collecting tests/test_dual_tracking_phase.py ______________
+import file mismatch:
+imported module 'test_dual_tracking_phase' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_dual_tracking_phase.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_dual_tracking_phase.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+______________ ERROR collecting tests/test_geometry_free_sdcp.py ______________
+import file mismatch:
+imported module 'test_geometry_free_sdcp' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_geometry_free_sdcp.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_geometry_free_sdcp.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________ ERROR collecting tests/test_gf_quality_gate.py ________________
+import file mismatch:
+imported module 'test_gf_quality_gate' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_gf_quality_gate.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_gf_quality_gate.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting tests/test_gf_runtime.py __________________
+import file mismatch:
+imported module 'test_gf_runtime' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_gf_runtime.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_gf_runtime.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+________________ ERROR collecting tests/test_gps_navigation.py ________________
+import file mismatch:
+imported module 'test_gps_navigation' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_gps_navigation.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_gps_navigation.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+________________ ERROR collecting tests/test_hardware_bias.py _________________
+import file mismatch:
+imported module 'test_hardware_bias' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_hardware_bias.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_hardware_bias.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________ ERROR collecting tests/test_inertial_budget.py ________________
+import file mismatch:
+imported module 'test_inertial_budget' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_inertial_budget.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_inertial_budget.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+________________ ERROR collecting tests/test_integrity_next.py ________________
+import file mismatch:
+imported module 'test_integrity_next' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\research-next-hundred\final_sources\tests\test_integrity_next.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_integrity_next.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+______________________ ERROR collecting tests/test_l5.py ______________________
+import file mismatch:
+imported module 'test_l5' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_l5.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_l5.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting tests/test_motion_third.py _________________
+import file mismatch:
+imported module 'test_motion_third' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\research-third-hundred\final_sources\tests\test_motion_third.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_motion_third.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting tests/test_multipath.py ___________________
+import file mismatch:
+imported module 'test_multipath' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_multipath.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_multipath.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+______________ ERROR collecting tests/test_navigation_fusion.py _______________
+import file mismatch:
+imported module 'test_navigation_fusion' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_navigation_fusion.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_navigation_fusion.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_____________ ERROR collecting tests/test_navigation_monitors.py ______________
+import file mismatch:
+imported module 'test_navigation_monitors' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_navigation_monitors.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_navigation_monitors.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________ ERROR collecting tests/test_navigation_next.py ________________
+import file mismatch:
+imported module 'test_navigation_next' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\research-next-hundred\final_sources\tests\test_navigation_next.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_navigation_next.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_____________ ERROR collecting tests/test_navigation_research.py ______________
+import file mismatch:
+imported module 'test_navigation_research' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_navigation_research.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_navigation_research.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________ ERROR collecting tests/test_navigation_third.py _______________
+import file mismatch:
+imported module 'test_navigation_third' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\research-third-hundred\final_sources\tests\test_navigation_third.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_navigation_third.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________ ERROR collecting tests/test_path_delay_refinement.py _____________
+import file mismatch:
+imported module 'test_path_delay_refinement' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_path_delay_refinement.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_path_delay_refinement.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting tests/test_phase_origin.py _________________
+import file mismatch:
+imported module 'test_phase_origin' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_phase_origin.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_phase_origin.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+___________________ ERROR collecting tests/test_pipeline.py ___________________
+import file mismatch:
+imported module 'test_pipeline' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_pipeline.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_pipeline.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________ ERROR collecting tests/test_plotting_runner.py ________________
+import file mismatch:
+imported module 'test_plotting_runner' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_plotting_runner.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_plotting_runner.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting tests/test_positioning.py __________________
+import file mismatch:
+imported module 'test_positioning' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_positioning.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_positioning.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_____________ ERROR collecting tests/test_positioning_weights.py ______________
+import file mismatch:
+imported module 'test_positioning_weights' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_positioning_weights.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_positioning_weights.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________ ERROR collecting tests/test_pseudorange_diagnosis.py _____________
+import file mismatch:
+imported module 'test_pseudorange_diagnosis' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_pseudorange_diagnosis.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_pseudorange_diagnosis.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting tests/test_real_gnss.py ___________________
+import file mismatch:
+imported module 'test_real_gnss' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_real_gnss.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_real_gnss.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+___________________ ERROR collecting tests/test_receiver.py ___________________
+import file mismatch:
+imported module 'test_receiver' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_receiver.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_receiver.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+______________ ERROR collecting tests/test_recovery_admission.py ______________
+import file mismatch:
+imported module 'test_recovery_admission' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_recovery_admission.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_recovery_admission.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+________________ ERROR collecting tests/test_recovery_third.py ________________
+import file mismatch:
+imported module 'test_recovery_third' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\research-third-hundred\final_sources\tests\test_recovery_third.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_recovery_third.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_____________ ERROR collecting tests/test_reference_direction.py ______________
+import file mismatch:
+imported module 'test_reference_direction' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_reference_direction.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_reference_direction.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+______________ ERROR collecting tests/test_research_contract.py _______________
+import file mismatch:
+imported module 'test_research_contract' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_research_contract.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_research_contract.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________ ERROR collecting tests/test_research_twenty.py ________________
+import file mismatch:
+imported module 'test_research_twenty' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\research-twenty\final_source\tests\test_research_twenty.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_research_twenty.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________ ERROR collecting tests/test_rf_arc_consumer.py ________________
+import file mismatch:
+imported module 'test_rf_arc_consumer' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_rf_arc_consumer.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_rf_arc_consumer.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________________ ERROR collecting tests/test_rf_dfe.py ____________________
+import file mismatch:
+imported module 'test_rf_dfe' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_rf_dfe.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_rf_dfe.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+___________________ ERROR collecting tests/test_scenario.py ___________________
+import file mismatch:
+imported module 'test_scenario' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_scenario.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_scenario.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_____________________ ERROR collecting tests/test_sdcp.py _____________________
+import file mismatch:
+imported module 'test_sdcp' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_sdcp.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_sdcp.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+___________________ ERROR collecting tests/test_sdcp_arc.py ___________________
+import file mismatch:
+imported module 'test_sdcp_arc' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_sdcp_arc.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_sdcp_arc.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________ ERROR collecting tests/test_sdcp_positioning.py _______________
+import file mismatch:
+imported module 'test_sdcp_positioning' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_sdcp_positioning.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_sdcp_positioning.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________ ERROR collecting tests/test_sdcp_self_check.py ________________
+import file mismatch:
+imported module 'test_sdcp_self_check' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_sdcp_self_check.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_sdcp_self_check.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting tests/test_sdcp_windows.py _________________
+import file mismatch:
+imported module 'test_sdcp_windows' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_sdcp_windows.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_sdcp_windows.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________ ERROR collecting tests/test_sensor_contract.py ________________
+import file mismatch:
+imported module 'test_sensor_contract' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_sensor_contract.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_sensor_contract.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________ ERROR collecting tests/test_signal_recovery.py ________________
+import file mismatch:
+imported module 'test_signal_recovery' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_signal_recovery.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_signal_recovery.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+___________ ERROR collecting tests/test_solver_failure_reporting.py ___________
+import file mismatch:
+imported module 'test_solver_failure_reporting' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_solver_failure_reporting.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_solver_failure_reporting.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting tests/test_source_third.py _________________
+import file mismatch:
+imported module 'test_source_third' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\research-third-hundred\final_sources\tests\test_source_third.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_source_third.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_____________ ERROR collecting tests/test_spatial_confirmation.py _____________
+import file mismatch:
+imported module 'test_spatial_confirmation' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_spatial_confirmation.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_spatial_confirmation.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+______________ ERROR collecting tests/test_spatial_direction.py _______________
+import file mismatch:
+imported module 'test_spatial_direction' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_spatial_direction.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_spatial_direction.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+___________ ERROR collecting tests/test_spatial_diversity_audit.py ____________
+import file mismatch:
+imported module 'test_spatial_diversity_audit' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_spatial_diversity_audit.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_spatial_diversity_audit.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________ ERROR collecting tests/test_spatial_spoofing.py _______________
+import file mismatch:
+imported module 'test_spatial_spoofing' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_spatial_spoofing.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_spatial_spoofing.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+___________________ ERROR collecting tests/test_spoofing.py ___________________
+import file mismatch:
+imported module 'test_spoofing' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_spoofing.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_spoofing.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+________________ ERROR collecting tests/test_stream_replay.py _________________
+import file mismatch:
+imported module 'test_stream_replay' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_stream_replay.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_stream_replay.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting tests/test_sync_replay.py __________________
+import file mismatch:
+imported module 'test_sync_replay' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_sync_replay.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_sync_replay.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+___________ ERROR collecting tests/test_temporal_spatial_monitor.py ___________
+import file mismatch:
+imported module 'test_temporal_spatial_monitor' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_temporal_spatial_monitor.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_temporal_spatial_monitor.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+___________ ERROR collecting tests/test_tracking_initialization.py ____________
+import file mismatch:
+imported module 'test_tracking_initialization' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_tracking_initialization.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_tracking_initialization.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________ ERROR collecting tests/test_tracking_replica.py _______________
+import file mismatch:
+imported module 'test_tracking_replica' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_tracking_replica.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_tracking_replica.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting tests/test_warm_array.py __________________
+import file mismatch:
+imported module 'test_warm_array' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\research-warm-hundred\final_sources\tests\test_warm_array.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_warm_array.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________ ERROR collecting tests/test_warm_navigation.py ________________
+import file mismatch:
+imported module 'test_warm_navigation' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\research-warm-hundred\final_sources\tests\test_warm_navigation.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_warm_navigation.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+________________ ERROR collecting tests/test_warm_recovery.py _________________
+import file mismatch:
+imported module 'test_warm_recovery' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\research-warm-hundred\final_sources\tests\test_warm_recovery.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_warm_recovery.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting tests/test_warm_source.py __________________
+import file mismatch:
+imported module 'test_warm_source' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\research-warm-hundred\final_sources\tests\test_warm_source.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_warm_source.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________ ERROR collecting tests/test_wideband_interference.py _____________
+import file mismatch:
+imported module 'test_wideband_interference' has this __file__ attribute:
+  F:\antenna_diversity\python_sim_simplified\results\recovery-four-hundred\final_source\tests\test_wideband_interference.py
+which is not the same as the test file we want to collect:
+  F:\antenna_diversity\python_sim_simplified\tests\test_wideband_interference.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+=========================== short test summary info ===========================
+ERROR results/recovery-two-hundred/final_source/test_continuous_improvement.py
+ERROR results/research-twenty/final_source/tests/test_antenna.py
+ERROR results/research-twenty/final_source/tests/test_antenna_selection.py
+ERROR results/research-twenty/final_source/tests/test_array_reacquisition.py
+ERROR results/research-twenty/final_source/tests/test_autonomous_tracking.py
+ERROR results/research-twenty/final_source/tests/test_bench_calibration.py
+ERROR results/research-twenty/final_source/tests/test_calibrated_sdcp.py
+ERROR results/research-twenty/final_source/tests/test_carrier_admission.py
+ERROR results/research-twenty/final_source/tests/test_carrier_positioning.py
+ERROR results/research-twenty/final_source/tests/test_channel_delay.py
+ERROR results/research-twenty/final_source/tests/test_config_gnss.py
+ERROR results/research-twenty/final_source/tests/test_continuous_improvement.py
+ERROR results/research-twenty/final_source/tests/test_continuous_source.py
+ERROR results/research-twenty/final_source/tests/test_default_regression.py
+ERROR results/research-twenty/final_source/tests/test_detection_calibration.py
+ERROR results/research-twenty/final_source/tests/test_diversity.py
+ERROR results/research-twenty/final_source/tests/test_doppler_recovery.py
+ERROR results/research-twenty/final_source/tests/test_dual_tracking_phase.py
+ERROR results/research-twenty/final_source/tests/test_geometry_free_sdcp.py
+ERROR results/research-twenty/final_source/tests/test_gf_quality_gate.py
+ERROR results/research-twenty/final_source/tests/test_gf_runtime.py
+ERROR results/research-twenty/final_source/tests/test_gps_navigation.py
+ERROR results/research-twenty/final_source/tests/test_hardware_bias.py
+ERROR results/research-twenty/final_source/tests/test_inertial_budget.py
+ERROR results/research-twenty/final_source/tests/test_l5.py
+ERROR results/research-twenty/final_source/tests/test_multipath.py
+ERROR results/research-twenty/final_source/tests/test_navigation_fusion.py
+ERROR results/research-twenty/final_source/tests/test_navigation_monitors.py
+ERROR results/research-twenty/final_source/tests/test_navigation_research.py
+ERROR results/research-twenty/final_source/tests/test_path_delay_refinement.py
+ERROR results/research-twenty/final_source/tests/test_phase_origin.py
+ERROR results/research-twenty/final_source/tests/test_pipeline.py
+ERROR results/research-twenty/final_source/tests/test_plotting_runner.py
+ERROR results/research-twenty/final_source/tests/test_positioning.py
+ERROR results/research-twenty/final_source/tests/test_positioning_weights.py
+ERROR results/research-twenty/final_source/tests/test_pseudorange_diagnosis.py
+ERROR results/research-twenty/final_source/tests/test_real_gnss.py
+ERROR results/research-twenty/final_source/tests/test_receiver.py
+ERROR results/research-twenty/final_source/tests/test_recovery_admission.py
+ERROR results/research-twenty/final_source/tests/test_reference_direction.py
+ERROR results/research-twenty/final_source/tests/test_research_contract.py
+ERROR results/research-twenty/final_source/tests/test_rf_arc_consumer.py
+ERROR results/research-twenty/final_source/tests/test_rf_dfe.py
+ERROR results/research-twenty/final_source/tests/test_scenario.py
+ERROR results/research-twenty/final_source/tests/test_sdcp.py
+ERROR results/research-twenty/final_source/tests/test_sdcp_arc.py
+ERROR results/research-twenty/final_source/tests/test_sdcp_positioning.py
+ERROR results/research-twenty/final_source/tests/test_sdcp_self_check.py
+ERROR results/research-twenty/final_source/tests/test_sdcp_windows.py
+ERROR results/research-twenty/final_source/tests/test_sensor_contract.py
+ERROR results/research-twenty/final_source/tests/test_signal_recovery.py
+ERROR results/research-twenty/final_source/tests/test_solver_failure_reporting.py
+ERROR results/research-twenty/final_source/tests/test_spatial_confirmation.py
+ERROR results/research-twenty/final_source/tests/test_spatial_direction.py
+ERROR results/research-twenty/final_source/tests/test_spatial_diversity_audit.py
+ERROR results/research-twenty/final_source/tests/test_spatial_spoofing.py
+ERROR results/research-twenty/final_source/tests/test_spoofing.py
+ERROR results/research-twenty/final_source/tests/test_stream_replay.py
+ERROR results/research-twenty/final_source/tests/test_sync_replay.py
+ERROR results/research-twenty/final_source/tests/test_temporal_spatial_monitor.py
+ERROR results/research-twenty/final_source/tests/test_tracking_initialization.py
+ERROR results/research-twenty/final_source/tests/test_tracking_replica.py
+ERROR results/research-twenty/final_source/tests/test_wideband_interference.py
+ERROR tests/test_antenna.py
+ERROR tests/test_antenna_selection.py
+ERROR tests/test_array_reacquisition.py
+ERROR tests/test_autonomous_tracking.py
+ERROR tests/test_bench_calibration.py
+ERROR tests/test_calibrated_sdcp.py
+ERROR tests/test_carrier_admission.py
+ERROR tests/test_carrier_positioning.py
+ERROR tests/test_channel_delay.py
+ERROR tests/test_cold_next.py
+ERROR tests/test_config_gnss.py
+ERROR tests/test_continuous_improvement.py
+ERROR tests/test_continuous_source.py
+ERROR tests/test_default_regression.py
+ERROR tests/test_delay_next.py
+ERROR tests/test_detection_calibration.py
+ERROR tests/test_diversity.py
+ERROR tests/test_doppler_recovery.py
+ERROR tests/test_dual_tracking_phase.py
+ERROR tests/test_geometry_free_sdcp.py
+ERROR tests/test_gf_quality_gate.py
+ERROR tests/test_gf_runtime.py
+ERROR tests/test_gps_navigation.py
+ERROR tests/test_hardware_bias.py
+ERROR tests/test_inertial_budget.py
+ERROR tests/test_integrity_next.py
+ERROR tests/test_l5.py
+ERROR tests/test_motion_third.py
+ERROR tests/test_multipath.py
+ERROR tests/test_navigation_fusion.py
+ERROR tests/test_navigation_monitors.py
+ERROR tests/test_navigation_next.py
+ERROR tests/test_navigation_research.py
+ERROR tests/test_navigation_third.py
+ERROR tests/test_path_delay_refinement.py
+ERROR tests/test_phase_origin.py
+ERROR tests/test_pipeline.py
+ERROR tests/test_plotting_runner.py
+ERROR tests/test_positioning.py
+ERROR tests/test_positioning_weights.py
+ERROR tests/test_pseudorange_diagnosis.py
+ERROR tests/test_real_gnss.py
+ERROR tests/test_receiver.py
+ERROR tests/test_recovery_admission.py
+ERROR tests/test_recovery_third.py
+ERROR tests/test_reference_direction.py
+ERROR tests/test_research_contract.py
+ERROR tests/test_research_twenty.py
+ERROR tests/test_rf_arc_consumer.py
+ERROR tests/test_rf_dfe.py
+ERROR tests/test_scenario.py
+ERROR tests/test_sdcp.py
+ERROR tests/test_sdcp_arc.py
+ERROR tests/test_sdcp_positioning.py
+ERROR tests/test_sdcp_self_check.py
+ERROR tests/test_sdcp_windows.py
+ERROR tests/test_sensor_contract.py
+ERROR tests/test_signal_recovery.py
+ERROR tests/test_solver_failure_reporting.py
+ERROR tests/test_source_third.py
+ERROR tests/test_spatial_confirmation.py
+ERROR tests/test_spatial_direction.py
+ERROR tests/test_spatial_diversity_audit.py
+ERROR tests/test_spatial_spoofing.py
+ERROR tests/test_spoofing.py
+ERROR tests/test_stream_replay.py
+ERROR tests/test_sync_replay.py
+ERROR tests/test_temporal_spatial_monitor.py
+ERROR tests/test_tracking_initialization.py
+ERROR tests/test_tracking_replica.py
+ERROR tests/test_warm_array.py
+ERROR tests/test_warm_navigation.py
+ERROR tests/test_warm_recovery.py
+ERROR tests/test_warm_source.py
+ERROR tests/test_wideband_interference.py
+!!!!!!!!!!!!!!!!!! Interrupted: 138 errors during collection !!!!!!!!!!!!!!!!!!
+138 errors in 16.64s

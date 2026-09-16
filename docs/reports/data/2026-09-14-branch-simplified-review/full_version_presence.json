@@ -1,0 +1,59 @@
+{
+  "scope": "historical full-version syntax and presence only; not simplified-rule compliance or full functional audit",
+  "branches": [
+    {
+      "ref": "codex/multipath-detection-suppression",
+      "python_sim_files": 90
+    },
+    {
+      "ref": "codex/tracking-fixed-nco",
+      "python_sim_files": 86
+    },
+    {
+      "ref": "feature/antenna-diversity",
+      "python_sim_files": 49
+    },
+    {
+      "ref": "main",
+      "python_sim_files": 0
+    },
+    {
+      "ref": "origin/codex/antenna-realism",
+      "python_sim_files": 81
+    },
+    {
+      "ref": "origin/codex/multipath-detection-suppression",
+      "python_sim_files": 90
+    },
+    {
+      "ref": "origin/codex/pre-acquisition-blind-nulling",
+      "python_sim_files": 88
+    },
+    {
+      "ref": "origin/codex/simplified-python-copy",
+      "python_sim_files": 88
+    },
+    {
+      "ref": "origin/codex/simplified-research-refactor",
+      "python_sim_files": 90
+    },
+    {
+      "ref": "origin/codex/spatial-research",
+      "python_sim_files": 72
+    },
+    {
+      "ref": "origin/codex/tracking-fixed-nco",
+      "python_sim_files": 86
+    },
+    {
+      "ref": "origin/feature/antenna-diversity",
+      "python_sim_files": 49
+    },
+    {
+      "ref": "origin/main",
+      "python_sim_files": 0
+    }
+  ],
+  "unique_blobs": 151,
+  "syntax_errors": {}
+}

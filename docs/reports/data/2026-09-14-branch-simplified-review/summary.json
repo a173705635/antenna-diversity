@@ -1,0 +1,25 @@
+{
+  "scope": "13 refs, 11 commits; simplified compliance review, not full historical functional proof",
+  "local_branches": 4,
+  "remote_branches": 9,
+  "unique_commits": 11,
+  "simplified_unique_python_blobs": 178,
+  "main_and_origin_main_simplified_blobs_equal": true,
+  "main_working_tree_tests": {
+    "passed": 216,
+    "warnings": 1,
+    "seconds": 115.61,
+    "warning": "existing tracking.py C/N0 divide by zero"
+  },
+  "code_modified_by_review": false,
+  "findings": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ]
+}

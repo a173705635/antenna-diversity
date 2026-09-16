@@ -1,0 +1,21 @@
+{"kind":"deck","id":"pr/g26o6g","name":"Deck"}
+{"kind":"layout","layoutId":"e882beb0-1580-4c49-ab96-95a0661bf302","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"11b0bb72-4a4d-4581-98ed-3f938cf33d78","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/lv2f1v","slide":1,"title":"GNSS 天线分集近期仿真结论","textShapes":14}
+{"kind":"textbox","id":"sh/90ru5ozy","slide":1,"text":"GNSS 天线分集近期仿真结论","textPreview":"GNSS 天线分集近期仿真结论","textChars":15,"textLines":1,"bbox":[64,34,1152,58]}
+{"kind":"textbox","id":"sh/mx0ba907","slide":1,"text":"多基线提升部分同源欺骗的可见性，但天线数和孔径都不保证单调收益；可信导航尚未闭环","textPreview":"多基线提升部分同源欺骗的可见性，但天线数和孔径都不保证单调收益；可信导航尚未闭环","textChars":40,"textLines":1,"bbox":[66,98,1135,38]}
+{"kind":"textbox","id":"sh/ny9c3ehs","slide":1,"text":"3/8 部分同源欺骗检出率","textPreview":"3/8 部分同源欺骗检出率","textChars":13,"textLines":1,"bbox":[70,159,630,32]}
+{"kind":"textbox","id":"sh/0vit8zi1","slide":1,"text":"各布局独立标定，标称正常窗口虚警目标 1%","textPreview":"各布局独立标定，标称正常窗口虚警目标 1%","textChars":21,"textLines":1,"bbox":[70,193,630,26]}
+{"kind":"textbox","id":"sh/ytgb690b","slide":1,"text":"主要结论","textPreview":"主要结论","textChars":4,"textLines":1,"bbox":[775,159,430,32]}
+{"kind":"textbox","id":"sh/zu9szuhg","slide":1,"text":"空间检测","textPreview":"空间检测","textChars":4,"textLines":1,"bbox":[775,215,145,28]}
+{"kind":"textbox","id":"sh/kr2tk3yl","slide":1,"text":"同源簇判据与多基线共同产生增益。RF 三假星场景中，2/3/4 天线分别告警 6/8、8/8、8/8，原全星判据均为 0/8。","textPreview":"同源簇判据与多基线共同产生增益。RF 三假星场景中，2/3/4 天线分别告警 6/8、8/8、8/8，原全星判据均为 0/8。","textChars":63,"textLines":1,"bbox":[775,246,440,88]}
+{"kind":"textbox","id":"sh/5sbud8zq","slide":1,"text":"适用边界","textPreview":"适用边界","textChars":4,"textLines":1,"bbox":[775,344,145,28]}
+{"kind":"textbox","id":"sh/503qh0re","slide":1,"text":"1 m 孔径提高部分替代检出率，但 +6 dB 真假混合 RF 中，三天线 cluster3 从 8/8 降至 0/8。更多天线仍需匹配判据并重新标定。","textPreview":"1 m 孔径提高部分替代检出率，但 +6 dB 真假混合 RF 中，三天线 cluster3 从 8/8 降至 0/8。更多天线仍需匹配判据并重新标定。","textChars":76,"textLines":1,"bbox":[775,375,440,96]}
+{"kind":"textbox","id":"sh/4zu98vat","slide":1,"text":"多径与导航","textPreview":"多径与导航","textChars":5,"textLines":1,"bbox":[775,479,165,28]}
+{"kind":"textbox","id":"sh/jyl8fq98","slide":1,"text":"强非共同多径下，SDCP 软降权使浮点 RMS 下降 57%–65%；弱反射、共模和参考污染无稳定收益。\n第三批冻结验证中，导航新方案 20 m 内历元由 172/204 降至 154/204，未采用。","textPreview":"强非共同多径下，SDCP 软降权使浮点 RMS 下降 57%–65%；弱反射、共模和参考污染无稳定收益。 | 第三批冻结验证中，导航新方案 20 m 内历元由 172/204 降至 154/204，未采用。","textChars":101,"textLines":2,"bbox":[775,510,440,100]}
+{"kind":"shape","id":"sh/ixcr65sn","slide":1,"bbox":[0,620,1280,100]}
+{"kind":"textbox","id":"sh/hw3qd0r2","slide":1,"text":"综合判断","textPreview":"综合判断","textChars":4,"textLines":1,"bbox":[67,641,126,28]}
+{"kind":"textbox","id":"sh/wvu94vah","slide":1,"text":"天线分集已证明对空间同源检测有价值，但尚未证明攻击后可长期输出可信位置。下一步应把独立验证的源存在性检测接入同一 RF/PVT 链，并进入同步四通道 RF + IMU 台架标定。","textPreview":"天线分集已证明对空间同源检测有价值，但尚未证明攻击后可长期输出可信位置。下一步应把独立验证的源存在性检测接入同一 RF/PVT 链，并进入同步四通道 RF + IMU 台架标定。","textChars":89,"textLines":1,"bbox":[203,640,1005,52]}
+{"kind":"textbox","id":"sh/val8bq9c","slide":1,"text":"口径：模型检出率与 RF 窗口计数分开解释；仿真未包含真实多天线 IQ、实机同步误差、互耦与方向图标定。资料截至 2026-09-15。","textPreview":"口径：模型检出率与 RF 窗口计数分开解释；仿真未包含真实多天线 IQ、实机同步误差、互耦与方向图标定。资料截至 2026-09-15。","textChars":68,"textLines":1,"bbox":[203,693,1005,18]}
+{"kind":"chart","id":"ch/l4jy1wz2","slide":1,"name":"","chartType":"bar","bbox":[62,222,664,322]}
+{"kind":"notes","id":"nt/lv2f1v","slide":1,"text":"本页结论来源：\n1. docs/reports/2026-09-14-gpspatron-spatial-diversity.md\n2. docs/reports/2026-09-14-spacing-1m.md\n3. docs/reports/2026-09-11-sdcp-positioning.md\n4. python_sim_simplified/RESEARCH_THIRD_HUNDRED_REPORT.md\n说明：第三批100轮报告当前位于本地未提交工作区；引用前应与最终归档版本核对。"}

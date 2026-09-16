@@ -1,0 +1,25 @@
+{
+  "scope": "in-memory injected ValueError, no source edits; demonstrates exception classification loss, not an observed historical solver failure",
+  "injected_exception": "ValueError: injected unexpected solver regression",
+  "escaped_exception": false,
+  "returned": {
+    "fixed_A": {
+      "epochs": 40,
+      "solved": 0,
+      "switches": 0,
+      "B_fraction": 0.0
+    },
+    "fixed_B": {
+      "epochs": 40,
+      "solved": 0,
+      "switches": 0,
+      "B_fraction": 1.0
+    },
+    "quality_selection": {
+      "epochs": 40,
+      "solved": 0,
+      "switches": 133,
+      "B_fraction": 0.540625
+    }
+  }
+}

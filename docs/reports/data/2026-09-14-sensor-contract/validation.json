@@ -1,0 +1,15 @@
+{
+  "scope": "W1 initial batch contracts and legacy replay; not hardware or navigation admission",
+  "targeted_tests_passed": 19,
+  "full_regression_passed": 216,
+  "full_regression_seconds": 94.73,
+  "warnings": [
+    "Existing tracking.py C/N0 divide by zero in noise-free phase-origin test"
+  ],
+  "frozen_archive_hashes_verified": 605,
+  "source_sha256": {
+    "python_sim_simplified/sensor_contract.py": "fc7e2e8c2d9d913a8126135d0e44ac26affb1dd367bd88607426dbf90d20e653",
+    "python_sim_simplified/audit_sensor_contract.py": "481c9824ce565bb60db25752379d21ba7dcf4417b5b4347b56e0066e6c1a38fa",
+    "python_sim_simplified/tests/test_sensor_contract.py": "911a0c547f3fee10afca694b3b43a51ea481a8bbaad55860671882702ba6307f"
+  }
+}

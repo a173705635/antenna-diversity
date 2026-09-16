@@ -1,0 +1,17 @@
+[
+  {
+    "ref": "origin/codex/simplified-python-copy",
+    "sha": "0505387c32ea59f5ece9858feac991e96051fd3c",
+    "directory": "C:\\Users\\TBS\\AppData\\Local\\Temp\\antenna-branch-review-a3golvgb\\simplified-python-copy"
+  },
+  {
+    "ref": "origin/codex/simplified-research-refactor",
+    "sha": "4799c9e717ccec69de2390b385c07963aee54541",
+    "directory": "C:\\Users\\TBS\\AppData\\Local\\Temp\\antenna-branch-review-a3golvgb\\simplified-research-refactor"
+  },
+  {
+    "ref": "codex/multipath-detection-suppression",
+    "sha": "4f465158a3521268bb7ea5e05a89a6579a929146",
+    "directory": "C:\\Users\\TBS\\AppData\\Local\\Temp\\antenna-branch-review-a3golvgb\\multipath-detection-suppression"
+  }
+]

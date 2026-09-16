@@ -6,6 +6,9 @@ __pycache__/
 .venv/
 venv/
 
+# Installed JavaScript dependencies, including presentation runtime links
+node_modules/
+
 # Local IDE and Codex working files
 **/.idea/
 .codex_docx_review/

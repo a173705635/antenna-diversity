@@ -1,0 +1,887 @@
+{
+  "scope": "legacy replay only; not hardware synchronization or authenticity",
+  "source_record_count": 48,
+  "layout_batches": 36,
+  "observation_count": 34560,
+  "inputs_unchanged": true,
+  "source_sha256": {
+    "rf_a\\all_spoof_610000_TL.json": "dd28afb15359ee0e0995045f52a49498bc1deb046cb1b1fcb243682c98db3ec2",
+    "rf_a\\all_spoof_610000_TR.json": "1123d695abdb4f0e98af761216f22f0df70e2653d367d22f3155be438b578224",
+    "rf_a\\all_spoof_610000_BL.json": "3b0e2a18dded6b20b80e6137169ada86541918f1245c67ee4626547e24c338e2",
+    "rf_a\\all_spoof_610000_BR.json": "9f39fcb7e2ed4dcf8a3c976d4a8a1d6a0a28feb782d21f8b3dd3535c276982b1",
+    "rf_a\\all_spoof_620000_TL.json": "c02e73603938aeb75cfdecce165972e58be87efa5ab32c293fdf521c4a1d37a3",
+    "rf_a\\all_spoof_620000_TR.json": "a01e6f90d5bca8cdae101abe13a7e6cc119812b4022f961fb70b67d36905b099",
+    "rf_a\\all_spoof_620000_BL.json": "edbc6abec6beed168a173da51fb85338255bc02a4f0308a5cc4e5ffe49f9dbc2",
+    "rf_a\\all_spoof_620000_BR.json": "75054ffcce2a205875d80b4d765ca0ae0b6b4516e8bb8335dc16f2cdfa79f26b",
+    "rf_a\\los_610000_TL.json": "04919c71e77ca2c12fd2e019adccab0aecc02b025625ab6669ef23603fa3d972",
+    "rf_a\\los_610000_TR.json": "073aa2b41365e02d2c1fd8ff37cd6d363bffff9c48dedcb0e06a6fa25f4151a2",
+    "rf_a\\los_610000_BL.json": "2e40814363906975c8ccc99dd63b122118b7f452b63dc0efb73f3db77b370d6b",
+    "rf_a\\los_610000_BR.json": "488785b9b65aee2bb832a8c1aceb8bc7e34d13270d87ded3b53dcbe104a83432",
+    "rf_a\\los_620000_TL.json": "dbcfeb70d56e75d31b9994fcad12d263c8f45126ab56b91022367814f8ce0e2c",
+    "rf_a\\los_620000_TR.json": "bfe51c99c4ec6b39f88b16170f38d21a1c341464f788ae62b245b58620b02687",
+    "rf_a\\los_620000_BL.json": "16403e6a947d51443596dff207763555d18ed89de100b0f547fbfb16b917b9cd",
+    "rf_a\\los_620000_BR.json": "47f69dd054e89d20c71e76719ae07a8ec82527979d5231a240e956fab17189f1",
+    "rf_a\\partial_3_610000_TL.json": "340b43cc96c196a859de5f35cead673e3b8e96d3f9129f4c494901706eb6c9b6",
+    "rf_a\\partial_3_610000_TR.json": "398c59daef62041dec5b082761df375211a47eae0a0feccee1c69eb8ffd2a89b",
+    "rf_a\\partial_3_610000_BL.json": "1a8c5963d644af721a502f5af07d813a8cd046d6ed4bd00e5892707c8bb5db29",
+    "rf_a\\partial_3_610000_BR.json": "7e063a8f683c509fed0e838569efb5ddc0c391b276dd19eb349d73ff0d04c973",
+    "rf_a\\partial_3_620000_TL.json": "077747292f1bca66b493bdefd9d5c9e24a1f5903c60f1b65d2be1066a6878c41",
+    "rf_a\\partial_3_620000_TR.json": "3cb588f2fdbff9d74cb44612986223ed2d42ebec1b2bbe7392c7bd8e6d165ac3",
+    "rf_a\\partial_3_620000_BL.json": "9a46b66963b67d8b15a30d421e32135fddfb871a0234d450653e0ac1679b376c",
+    "rf_a\\partial_3_620000_BR.json": "05377fdb7d810e10ecce8477ef89a5b26eff3f048314ea02771c6c615bb408f3",
+    "rf_b\\mixture_0_610000_TL.json": "32df915e9a72f096a20755f72259fe71a9d5fd85d5c7bfa926f053e07bcd19b5",
+    "rf_b\\mixture_0_610000_TR.json": "173bbc8cc7fc7115241d2a6fd429675ad779d51e8d4627220d15c66b53988812",
+    "rf_b\\mixture_0_610000_BL.json": "9e4bea0bcb60ee5aa33eb9e39686dacc38d953f4c0742d7b3c880d5f1e05ee56",
+    "rf_b\\mixture_0_610000_BR.json": "5e0772acb60b3c136126c817d1f97b019ee3f88e3a7608d9fdadb202de25e783",
+    "rf_b\\mixture_0_620000_TL.json": "7da286fd7e749f1f26f5603930c2d1074feed2894db2114313d786ea7b2da7a0",
+    "rf_b\\mixture_0_620000_TR.json": "35112f3dcfc2a0dc096f725868ff7d92012b5b91336df4ebd670080e2432fd1a",
+    "rf_b\\mixture_0_620000_BL.json": "68ab6c609d5181b9237b75ba1d008faba8f5c668bafa033d678da7a52a7c25d7",
+    "rf_b\\mixture_0_620000_BR.json": "5b9fad940a15a2bab0f53ffac5c8644ca41a22dd13626ec115306ab3b4bf3e9a",
+    "rf_b\\mixture_6_610000_TL.json": "7040a6eef372b9c905f8c76c8f2379120bc6d0b3a60a5dd5e4d6220d9f9964b0",
+    "rf_b\\mixture_6_610000_TR.json": "b0b13e8e689f0abe25aaf48f5dcd049bf518ede02205359970cf674d4394ba22",
+    "rf_b\\mixture_6_610000_BL.json": "b760909e9773d78f302b9fde77400a37c2e06de9b9820a0015f471aea69ab611",
+    "rf_b\\mixture_6_610000_BR.json": "34fef08145d07deb8df21e8d91b90b6a2e704d6674edc085ffe2d05da0763ed0",
+    "rf_b\\mixture_6_620000_TL.json": "2e8680db6a364dd972b5b96db644ebb8591adce86f6ed71aeeb4b2b6486298f5",
+    "rf_b\\mixture_6_620000_TR.json": "dc2148ea747db4aa36e347375b5eb0b77825944c13bf83528eb33191b1c00fbc",
+    "rf_b\\mixture_6_620000_BL.json": "d3cfae2f8f73cc39a4781da5ecd5b8feb419cce17dbc3888a9f1dff56c39bd92",
+    "rf_b\\mixture_6_620000_BR.json": "24de34b49b185e59fc9831bd4278b9a8ec4f36155dc1c0eeb868c6b993e6a00d",
+    "rf_b\\partial_4_610000_TL.json": "b47799682ad42a81f0ff3d3412e877fbd8696db429b5d5f4ee559db8718faeea",
+    "rf_b\\partial_4_610000_TR.json": "1577ee177e2475d9c304b44d206caa937e22ec92673cc392d7584edd23240162",
+    "rf_b\\partial_4_610000_BL.json": "bdc1b5f8e2d17c19ff62d71cb1b8ff27f45af15bad0f0e7057c5e9156192ec86",
+    "rf_b\\partial_4_610000_BR.json": "e6e92852408df61c0886ce6ceb57a1deb5b3d479944d617d067c1249f901beca",
+    "rf_b\\partial_4_620000_TL.json": "96b6b5a85cfa85bb1914c8dca9f5375bac3de1d8e33786e9971d72d7ac4bdc0a",
+    "rf_b\\partial_4_620000_TR.json": "5ba2a9eb96cecc2032fd09f67301808387cc96618d23886e8cd857071c6db395",
+    "rf_b\\partial_4_620000_BL.json": "1dfd1d3c8bc8150786539c11b1c81a256f66548ad0e4a07f6e1b5b689c6d19bb",
+    "rf_b\\partial_4_620000_BR.json": "6e3fa55ba31061ab4a45dc26e5ab092609b11075c7fb08e1a1c4dfb91ff801a8"
+  },
+  "results": [
+    {
+      "record": "all_spoof_610000",
+      "channels": [
+        "TL",
+        "TR"
+      ],
+      "shape": [
+        40,
+        2,
+        8
+      ],
+      "valid_count": 640,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "all_spoof_610000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL"
+      ],
+      "shape": [
+        40,
+        3,
+        8
+      ],
+      "valid_count": 960,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "all_spoof_610000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL",
+        "BR"
+      ],
+      "shape": [
+        40,
+        4,
+        8
+      ],
+      "valid_count": 1280,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "all_spoof_620000",
+      "channels": [
+        "TL",
+        "TR"
+      ],
+      "shape": [
+        40,
+        2,
+        8
+      ],
+      "valid_count": 640,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "all_spoof_620000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL"
+      ],
+      "shape": [
+        40,
+        3,
+        8
+      ],
+      "valid_count": 960,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "all_spoof_620000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL",
+        "BR"
+      ],
+      "shape": [
+        40,
+        4,
+        8
+      ],
+      "valid_count": 1280,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "los_610000",
+      "channels": [
+        "TL",
+        "TR"
+      ],
+      "shape": [
+        40,
+        2,
+        8
+      ],
+      "valid_count": 640,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "los_610000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL"
+      ],
+      "shape": [
+        40,
+        3,
+        8
+      ],
+      "valid_count": 960,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "los_610000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL",
+        "BR"
+      ],
+      "shape": [
+        40,
+        4,
+        8
+      ],
+      "valid_count": 1280,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "los_620000",
+      "channels": [
+        "TL",
+        "TR"
+      ],
+      "shape": [
+        40,
+        2,
+        8
+      ],
+      "valid_count": 640,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "los_620000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL"
+      ],
+      "shape": [
+        40,
+        3,
+        8
+      ],
+      "valid_count": 960,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "los_620000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL",
+        "BR"
+      ],
+      "shape": [
+        40,
+        4,
+        8
+      ],
+      "valid_count": 1280,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "partial_3_610000",
+      "channels": [
+        "TL",
+        "TR"
+      ],
+      "shape": [
+        40,
+        2,
+        8
+      ],
+      "valid_count": 640,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "partial_3_610000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL"
+      ],
+      "shape": [
+        40,
+        3,
+        8
+      ],
+      "valid_count": 960,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "partial_3_610000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL",
+        "BR"
+      ],
+      "shape": [
+        40,
+        4,
+        8
+      ],
+      "valid_count": 1280,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "partial_3_620000",
+      "channels": [
+        "TL",
+        "TR"
+      ],
+      "shape": [
+        40,
+        2,
+        8
+      ],
+      "valid_count": 640,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "partial_3_620000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL"
+      ],
+      "shape": [
+        40,
+        3,
+        8
+      ],
+      "valid_count": 960,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "partial_3_620000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL",
+        "BR"
+      ],
+      "shape": [
+        40,
+        4,
+        8
+      ],
+      "valid_count": 1280,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "mixture_0_610000",
+      "channels": [
+        "TL",
+        "TR"
+      ],
+      "shape": [
+        40,
+        2,
+        8
+      ],
+      "valid_count": 560,
+      "invalid_count": 80,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "mixture_0_610000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL"
+      ],
+      "shape": [
+        40,
+        3,
+        8
+      ],
+      "valid_count": 880,
+      "invalid_count": 80,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "mixture_0_610000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL",
+        "BR"
+      ],
+      "shape": [
+        40,
+        4,
+        8
+      ],
+      "valid_count": 1120,
+      "invalid_count": 160,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "mixture_0_620000",
+      "channels": [
+        "TL",
+        "TR"
+      ],
+      "shape": [
+        40,
+        2,
+        8
+      ],
+      "valid_count": 600,
+      "invalid_count": 40,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "mixture_0_620000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL"
+      ],
+      "shape": [
+        40,
+        3,
+        8
+      ],
+      "valid_count": 880,
+      "invalid_count": 80,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "mixture_0_620000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL",
+        "BR"
+      ],
+      "shape": [
+        40,
+        4,
+        8
+      ],
+      "valid_count": 1120,
+      "invalid_count": 160,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "mixture_6_610000",
+      "channels": [
+        "TL",
+        "TR"
+      ],
+      "shape": [
+        40,
+        2,
+        8
+      ],
+      "valid_count": 640,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "mixture_6_610000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL"
+      ],
+      "shape": [
+        40,
+        3,
+        8
+      ],
+      "valid_count": 960,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "mixture_6_610000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL",
+        "BR"
+      ],
+      "shape": [
+        40,
+        4,
+        8
+      ],
+      "valid_count": 1280,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "mixture_6_620000",
+      "channels": [
+        "TL",
+        "TR"
+      ],
+      "shape": [
+        40,
+        2,
+        8
+      ],
+      "valid_count": 640,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "mixture_6_620000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL"
+      ],
+      "shape": [
+        40,
+        3,
+        8
+      ],
+      "valid_count": 960,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "mixture_6_620000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL",
+        "BR"
+      ],
+      "shape": [
+        40,
+        4,
+        8
+      ],
+      "valid_count": 1280,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "partial_4_610000",
+      "channels": [
+        "TL",
+        "TR"
+      ],
+      "shape": [
+        40,
+        2,
+        8
+      ],
+      "valid_count": 640,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "partial_4_610000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL"
+      ],
+      "shape": [
+        40,
+        3,
+        8
+      ],
+      "valid_count": 960,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "partial_4_610000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL",
+        "BR"
+      ],
+      "shape": [
+        40,
+        4,
+        8
+      ],
+      "valid_count": 1280,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "partial_4_620000",
+      "channels": [
+        "TL",
+        "TR"
+      ],
+      "shape": [
+        40,
+        2,
+        8
+      ],
+      "valid_count": 640,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "partial_4_620000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL"
+      ],
+      "shape": [
+        40,
+        3,
+        8
+      ],
+      "valid_count": 960,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    },
+    {
+      "record": "partial_4_620000",
+      "channels": [
+        "TL",
+        "TR",
+        "BL",
+        "BR"
+      ],
+      "shape": [
+        40,
+        4,
+        8
+      ],
+      "valid_count": 1280,
+      "invalid_count": 0,
+      "evidence_gaps": [
+        "clock_id",
+        "available_time_s",
+        "calibration_id",
+        "arc_ids",
+        "imu",
+        "hardware_channel_mapping"
+      ]
+    }
+  ]
+}

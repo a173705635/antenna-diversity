@@ -1,0 +1,1164 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/lv2f1v",
+    "id": "lv2f1v",
+    "slide": 1,
+    "layoutId": "11b0bb72-4a4d-4581-98ed-3f938cf33d78",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "e882beb0-1580-4c49-ab96-95a0661bf302",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#F5F7F6",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "+mn-lt",
+      "Microsoft YaHei"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "11b0bb72-4a4d-4581-98ed-3f938cf33d78",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "e882beb0-1580-4c49-ab96-95a0661bf302",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "e882beb0-1580-4c49-ab96-95a0661bf302",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/90ru5ozy",
+      "id": "1",
+      "bbox": [
+        64,
+        34,
+        1152,
+        58
+      ],
+      "geometry": "rect",
+      "text": "GNSS 天线分集近期仿真结论",
+      "textPreview": "GNSS 天线分集近期仿真结论",
+      "resolvedFontSize": 46,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 46,
+        "typeface": "Microsoft YaHei",
+        "color": "#17324D",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "GNSS 天线分集近期仿真结论"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "GNSS 天线分集近期仿真结论",
+          "lineSpacingPercent": 105000,
+          "resolvedTextStyle": {
+            "fontSize": 46,
+            "typeface": "Microsoft YaHei",
+            "color": "#17324D",
+            "bold": true,
+            "alignment": "left",
+            "lineSpacing": 1.05
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "GNSS 天线分集近期仿真结论",
+              "fontSize": 46,
+              "typeface": "Microsoft YaHei",
+              "color": "#17324D",
+              "bold": true,
+              "alignment": "left",
+              "lineSpacing": 1.05
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/mx0ba907",
+      "id": "2",
+      "bbox": [
+        66,
+        98,
+        1135,
+        38
+      ],
+      "geometry": "rect",
+      "text": "多基线提升部分同源欺骗的可见性，但天线数和孔径都不保证单调收益；可信导航尚未闭环",
+      "textPreview": "多基线提升部分同源欺骗的可见性，但天线数和孔径都不保证单调收益；可信导航尚未闭环",
+      "resolvedFontSize": 22,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 22,
+        "typeface": "Microsoft YaHei",
+        "color": "#00666B",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "多基线提升部分同源欺骗的可见性，但天线数和孔径都不保证单调收益；可信导航尚未闭环"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "多基线提升部分同源欺骗的可见性，但天线数和孔径都不保证单调收益；可信导航尚未闭环",
+          "lineSpacingPercent": 105000,
+          "resolvedTextStyle": {
+            "fontSize": 22,
+            "typeface": "Microsoft YaHei",
+            "color": "#00666B",
+            "alignment": "left",
+            "lineSpacing": 1.05
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "多基线提升部分同源欺骗的可见性，但天线数和孔径都不保证单调收益；可信导航尚未闭环",
+              "fontSize": 22,
+              "typeface": "Microsoft YaHei",
+              "color": "#00666B",
+              "alignment": "left",
+              "lineSpacing": 1.05
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ny9c3ehs",
+      "id": "3",
+      "bbox": [
+        70,
+        159,
+        630,
+        32
+      ],
+      "geometry": "rect",
+      "text": "3/8 部分同源欺骗检出率",
+      "textPreview": "3/8 部分同源欺骗检出率",
+      "resolvedFontSize": 25,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 25,
+        "typeface": "Microsoft YaHei",
+        "color": "#17324D",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "3/8 部分同源欺骗检出率"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "3/8 部分同源欺骗检出率",
+          "lineSpacingPercent": 105000,
+          "resolvedTextStyle": {
+            "fontSize": 25,
+            "typeface": "Microsoft YaHei",
+            "color": "#17324D",
+            "bold": true,
+            "alignment": "left",
+            "lineSpacing": 1.05
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "3/8 部分同源欺骗检出率",
+              "fontSize": 25,
+              "typeface": "Microsoft YaHei",
+              "color": "#17324D",
+              "bold": true,
+              "alignment": "left",
+              "lineSpacing": 1.05
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0vit8zi1",
+      "id": "4",
+      "bbox": [
+        70,
+        193,
+        630,
+        26
+      ],
+      "geometry": "rect",
+      "text": "各布局独立标定，标称正常窗口虚警目标 1%",
+      "textPreview": "各布局独立标定，标称正常窗口虚警目标 1%",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 17,
+        "typeface": "Microsoft YaHei",
+        "color": "#5B6B79",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "各布局独立标定，标称正常窗口虚警目标 1%"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "各布局独立标定，标称正常窗口虚警目标 1%",
+          "lineSpacingPercent": 105000,
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "typeface": "Microsoft YaHei",
+            "color": "#5B6B79",
+            "alignment": "left",
+            "lineSpacing": 1.05
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "各布局独立标定，标称正常窗口虚警目标 1%",
+              "fontSize": 17,
+              "typeface": "Microsoft YaHei",
+              "color": "#5B6B79",
+              "alignment": "left",
+              "lineSpacing": 1.05
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "chart",
+      "scope": "slide",
+      "aid": "ch/l4jy1wz2",
+      "id": "5",
+      "bbox": [
+        62,
+        222,
+        664,
+        322
+      ],
+      "chartType": "bar"
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ytgb690b",
+      "id": "6",
+      "bbox": [
+        775,
+        159,
+        430,
+        32
+      ],
+      "geometry": "rect",
+      "text": "主要结论",
+      "textPreview": "主要结论",
+      "resolvedFontSize": 25,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 25,
+        "typeface": "Microsoft YaHei",
+        "color": "#17324D",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "主要结论"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "主要结论",
+          "lineSpacingPercent": 105000,
+          "resolvedTextStyle": {
+            "fontSize": 25,
+            "typeface": "Microsoft YaHei",
+            "color": "#17324D",
+            "bold": true,
+            "alignment": "left",
+            "lineSpacing": 1.05
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "主要结论",
+              "fontSize": 25,
+              "typeface": "Microsoft YaHei",
+              "color": "#17324D",
+              "bold": true,
+              "alignment": "left",
+              "lineSpacing": 1.05
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zu9szuhg",
+      "id": "7",
+      "bbox": [
+        775,
+        215,
+        145,
+        28
+      ],
+      "geometry": "rect",
+      "text": "空间检测",
+      "textPreview": "空间检测",
+      "resolvedFontSize": 19,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 19,
+        "typeface": "Microsoft YaHei",
+        "color": "#00666B",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "空间检测"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "空间检测",
+          "lineSpacingPercent": 105000,
+          "resolvedTextStyle": {
+            "fontSize": 19,
+            "typeface": "Microsoft YaHei",
+            "color": "#00666B",
+            "bold": true,
+            "alignment": "left",
+            "lineSpacing": 1.05
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "空间检测",
+              "fontSize": 19,
+              "typeface": "Microsoft YaHei",
+              "color": "#00666B",
+              "bold": true,
+              "alignment": "left",
+              "lineSpacing": 1.05
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kr2tk3yl",
+      "id": "8",
+      "bbox": [
+        775,
+        246,
+        440,
+        88
+      ],
+      "geometry": "rect",
+      "text": "同源簇判据与多基线共同产生增益。RF 三假星场景中，2/3/4 天线分别告警 6/8、8/8、8/8，原全星判据均为 0/8。",
+      "textPreview": "同源簇判据与多基线共同产生增益。RF 三假星场景中，2/3/4 天线分别告警 6/8、8/8、8/8，原全星判据均为 0/8。",
+      "resolvedFontSize": 19,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 19,
+        "typeface": "Microsoft YaHei",
+        "color": "#17324D",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "同源簇判据与多基线共同产生增益。RF"
+          },
+          {
+            "index": 2,
+            "text": "三假星场景中，2/3/4 天线分别告警"
+          },
+          {
+            "index": 3,
+            "text": "6/8、8/8、8/8，原全星判据均为 0/8。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "同源簇判据与多基线共同产生增益。RF 三假星场景中，2/3/4 天线分别告警 6/8、8/8、8/8，原全星判据均为 0/8。",
+          "lineSpacingPercent": 105000,
+          "resolvedTextStyle": {
+            "fontSize": 19,
+            "typeface": "Microsoft YaHei",
+            "color": "#17324D",
+            "alignment": "left",
+            "lineSpacing": 1.05
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "同源簇判据与多基线共同产生增益。RF 三假星场景中，2/3/4 天线分别告警 6/8、8/8、8/8，原全星判据均为 0/8。",
+              "fontSize": 19,
+              "typeface": "Microsoft YaHei",
+              "color": "#17324D",
+              "alignment": "left",
+              "lineSpacing": 1.05
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5sbud8zq",
+      "id": "9",
+      "bbox": [
+        775,
+        344,
+        145,
+        28
+      ],
+      "geometry": "rect",
+      "text": "适用边界",
+      "textPreview": "适用边界",
+      "resolvedFontSize": 19,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 19,
+        "typeface": "Microsoft YaHei",
+        "color": "#E39B32",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "适用边界"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "适用边界",
+          "lineSpacingPercent": 105000,
+          "resolvedTextStyle": {
+            "fontSize": 19,
+            "typeface": "Microsoft YaHei",
+            "color": "#E39B32",
+            "bold": true,
+            "alignment": "left",
+            "lineSpacing": 1.05
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "适用边界",
+              "fontSize": 19,
+              "typeface": "Microsoft YaHei",
+              "color": "#E39B32",
+              "bold": true,
+              "alignment": "left",
+              "lineSpacing": 1.05
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/503qh0re",
+      "id": "10",
+      "bbox": [
+        775,
+        375,
+        440,
+        96
+      ],
+      "geometry": "rect",
+      "text": "1 m 孔径提高部分替代检出率，但 +6 dB 真假混合 RF 中，三天线 cluster3 从 8/8 降至 0/8。更多天线仍需匹配判据并重新标定。",
+      "textPreview": "1 m 孔径提高部分替代检出率，但 +6 dB 真假混合 RF 中，三天线 cluster3 从 8/8 降至 0/8。更多天线仍需匹配判据并重新标定。",
+      "resolvedFontSize": 19,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 19,
+        "typeface": "Microsoft YaHei",
+        "color": "#17324D",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "1 m 孔径提高部分替代检出率，但 +6 dB 真假混合"
+          },
+          {
+            "index": 2,
+            "text": "RF 中，三天线 cluster3 从 8/8 降至"
+          },
+          {
+            "index": 3,
+            "text": "0/8。更多天线仍需匹配判据并重新标定。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "1 m 孔径提高部分替代检出率，但 +6 dB 真假混合 RF 中，三天线 cluster3 从 8/8 降至 0/8。更多天线仍需匹配判据并重新标定。",
+          "lineSpacingPercent": 105000,
+          "resolvedTextStyle": {
+            "fontSize": 19,
+            "typeface": "Microsoft YaHei",
+            "color": "#17324D",
+            "alignment": "left",
+            "lineSpacing": 1.05
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "1 m 孔径提高部分替代检出率，但 +6 dB 真假混合 RF 中，三天线 cluster3 从 8/8 降至 0/8。更多天线仍需匹配判据并重新标定。",
+              "fontSize": 19,
+              "typeface": "Microsoft YaHei",
+              "color": "#17324D",
+              "alignment": "left",
+              "lineSpacing": 1.05
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4zu98vat",
+      "id": "11",
+      "bbox": [
+        775,
+        479,
+        165,
+        28
+      ],
+      "geometry": "rect",
+      "text": "多径与导航",
+      "textPreview": "多径与导航",
+      "resolvedFontSize": 19,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 19,
+        "typeface": "Microsoft YaHei",
+        "color": "#B44A4A",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "多径与导航"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "多径与导航",
+          "lineSpacingPercent": 105000,
+          "resolvedTextStyle": {
+            "fontSize": 19,
+            "typeface": "Microsoft YaHei",
+            "color": "#B44A4A",
+            "bold": true,
+            "alignment": "left",
+            "lineSpacing": 1.05
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "多径与导航",
+              "fontSize": 19,
+              "typeface": "Microsoft YaHei",
+              "color": "#B44A4A",
+              "bold": true,
+              "alignment": "left",
+              "lineSpacing": 1.05
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/jyl8fq98",
+      "id": "12",
+      "bbox": [
+        775,
+        510,
+        440,
+        100
+      ],
+      "geometry": "rect",
+      "text": "强非共同多径下，SDCP 软降权使浮点 RMS 下降 57%–65%；弱反射、共模和参考污染无稳定收益。\n第三批冻结验证中，导航新方案 20 m 内历元由 172/204 降至 154/204，未采用。",
+      "textPreview": "强非共同多径下，SDCP 软降权使浮点 RMS 下降 57%–65%；弱反射、共模和参考污染无稳定收益。 | 第三批冻结验证中，导航新方案 20 m 内历元由 172/204 降至 154/204，未采用。",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18,
+        "typeface": "Microsoft YaHei",
+        "color": "#17324D",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 4,
+        "lines": [
+          {
+            "index": 1,
+            "text": "强非共同多径下，SDCP 软降权使浮点 RMS 下降"
+          },
+          {
+            "index": 2,
+            "text": "57%–65%；弱反射、共模和参考污染无稳定收益。"
+          },
+          {
+            "index": 3,
+            "text": "第三批冻结验证中，导航新方案 20 m 内历元由"
+          },
+          {
+            "index": 4,
+            "text": "172/204 降至 154/204，未采用。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "强非共同多径下，SDCP 软降权使浮点 RMS 下降 57%–65%；弱反射、共模和参考污染无稳定收益。",
+          "lineSpacingPercent": 103000,
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "typeface": "Microsoft YaHei",
+            "color": "#17324D",
+            "alignment": "left",
+            "lineSpacing": 1.03
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "强非共同多径下，SDCP 软降权使浮点 RMS 下降 57%–65%；弱反射、共模和参考污染无稳定收益。",
+              "fontSize": 18,
+              "typeface": "Microsoft YaHei",
+              "color": "#17324D",
+              "alignment": "left",
+              "lineSpacing": 1.03
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "第三批冻结验证中，导航新方案 20 m 内历元由 172/204 降至 154/204，未采用。",
+          "lineSpacingPercent": 103000,
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "typeface": "Microsoft YaHei",
+            "color": "#17324D",
+            "alignment": "left",
+            "lineSpacing": 1.03
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "第三批冻结验证中，导航新方案 20 m 内历元由 172/204 降至 154/204，未采用。",
+              "fontSize": 18,
+              "typeface": "Microsoft YaHei",
+              "color": "#17324D",
+              "alignment": "left",
+              "lineSpacing": 1.03
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ixcr65sn",
+      "id": "13",
+      "bbox": [
+        0,
+        620,
+        1280,
+        100
+      ],
+      "geometry": "rect",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": ""
+          }
+        ]
+      },
+      "fillColor": "#E5F0EE",
+      "lineWidth": 0
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/hw3qd0r2",
+      "id": "14",
+      "bbox": [
+        67,
+        641,
+        126,
+        28
+      ],
+      "geometry": "rect",
+      "text": "综合判断",
+      "textPreview": "综合判断",
+      "resolvedFontSize": 20,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 20,
+        "typeface": "Microsoft YaHei",
+        "color": "#00666B",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "综合判断"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "综合判断",
+          "lineSpacingPercent": 105000,
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "typeface": "Microsoft YaHei",
+            "color": "#00666B",
+            "bold": true,
+            "alignment": "left",
+            "lineSpacing": 1.05
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "综合判断",
+              "fontSize": 20,
+              "typeface": "Microsoft YaHei",
+              "color": "#00666B",
+              "bold": true,
+              "alignment": "left",
+              "lineSpacing": 1.05
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wvu94vah",
+      "id": "15",
+      "bbox": [
+        203,
+        640,
+        1005,
+        52
+      ],
+      "geometry": "rect",
+      "text": "天线分集已证明对空间同源检测有价值，但尚未证明攻击后可长期输出可信位置。下一步应把独立验证的源存在性检测接入同一 RF/PVT 链，并进入同步四通道 RF + IMU 台架标定。",
+      "textPreview": "天线分集已证明对空间同源检测有价值，但尚未证明攻击后可长期输出可信位置。下一步应把独立验证的源存在性检测接入同一 RF/PVT 链，并进入同步四通道 RF + IMU 台架标定。",
+      "resolvedFontSize": 20,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 20,
+        "typeface": "Microsoft YaHei",
+        "color": "#17324D",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "天线分集已证明对空间同源检测有价值，但尚未证明攻击后可长期输出可信位置。下一步应把独立验证的源存在性"
+          },
+          {
+            "index": 2,
+            "text": "检测接入同一 RF/PVT 链，并进入同步四通道 RF + IMU 台架标定。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "天线分集已证明对空间同源检测有价值，但尚未证明攻击后可长期输出可信位置。下一步应把独立验证的源存在性检测接入同一 RF/PVT 链，并进入同步四通道 RF + IMU 台架标定。",
+          "lineSpacingPercent": 105000,
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "typeface": "Microsoft YaHei",
+            "color": "#17324D",
+            "bold": true,
+            "alignment": "left",
+            "lineSpacing": 1.05
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "天线分集已证明对空间同源检测有价值，但尚未证明攻击后可长期输出可信位置。下一步应把独立验证的源存在性检测接入同一 RF/PVT 链，并进入同步四通道 RF + IMU 台架标定。",
+              "fontSize": 20,
+              "typeface": "Microsoft YaHei",
+              "color": "#17324D",
+              "bold": true,
+              "alignment": "left",
+              "lineSpacing": 1.05
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/val8bq9c",
+      "id": "16",
+      "bbox": [
+        203,
+        693,
+        1005,
+        18
+      ],
+      "geometry": "rect",
+      "text": "口径：模型检出率与 RF 窗口计数分开解释；仿真未包含真实多天线 IQ、实机同步误差、互耦与方向图标定。资料截至 2026-09-15。",
+      "textPreview": "口径：模型检出率与 RF 窗口计数分开解释；仿真未包含真实多天线 IQ、实机同步误差、互耦与方向图标定。资料截至 2026-09-15。",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 13,
+        "typeface": "Microsoft YaHei",
+        "color": "#5B6B79",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "口径：模型检出率与 RF 窗口计数分开解释；仿真未包含真实多天线 IQ、实机同步误差、互耦与方向图标定。资料截至 2026-09-15。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "口径：模型检出率与 RF 窗口计数分开解释；仿真未包含真实多天线 IQ、实机同步误差、互耦与方向图标定。资料截至 2026-09-15。",
+          "lineSpacingPercent": 105000,
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "typeface": "Microsoft YaHei",
+            "color": "#5B6B79",
+            "alignment": "left",
+            "lineSpacing": 1.05
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "口径：模型检出率与 RF 窗口计数分开解释；仿真未包含真实多天线 IQ、实机同步误差、互耦与方向图标定。资料截至 2026-09-15。",
+              "fontSize": 13,
+              "typeface": "Microsoft YaHei",
+              "color": "#5B6B79",
+              "alignment": "left",
+              "lineSpacing": 1.05
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

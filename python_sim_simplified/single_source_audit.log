@@ -1,0 +1,21 @@
+replayed round 1
+replayed round 2
+replayed round 3
+replayed round 4
+replayed round 5
+replayed round 6
+replayed round 7
+replayed round 8
+replayed round 9
+replayed round 10
+replayed round 11
+replayed round 12
+replayed round 13
+replayed round 14
+replayed round 15
+replayed round 16
+replayed round 17
+replayed round 18
+replayed round 19
+replayed round 20
+{'completed_rounds': 20, 'paired_side_rows': 356, 'unique_navigation_replays': 196, 'round_source_changes': [{'round': 1, 'parent': 0, 'source_sha256': '806fac99418440570e256c3e03f53e50080cfd2cb5583438c8ee085db93dd1da'}, {'round': 2, 'parent': 1, 'source_sha256': '9022b336b6425d656cce445868df4135d29f2782f01db7c431664fb2a29351a2'}, {'round': 3, 'parent': 2, 'source_sha256': 'c4402a9e41aa68e506fc82201e44104990ae6383b8235019f6f3cf940cfbd3e2'}, {'round': 4, 'parent': 3, 'source_sha256': 'be77000fbc4b4f0da6965a9956e08df914d09e87875cd19da59579bc7b664953'}, {'round': 5, 'parent': 4, 'source_sha256': 'e3ded8dc18ac293abecadeb58fc278795dd5de5379656e6fc88712f3ddf468bb'}, {'round': 6, 'parent': 5, 'source_sha256': '784ecf9fe06becb511fa31f069e36d0992c5f3d167781aa8988326f139afcfb1'}, {'round': 7, 'parent': 6, 'source_sha256': 'fcb777ae68aa423f18bc4000abe5f25baeca72f4a0a71f84e73f8a645eab5da5'}, {'round': 8, 'parent': 6, 'source_sha256': 'd89e119b3089aa3d233fbe075b368c8a9e4a25aba57886a2bd5a05a44daa7464'}, {'round': 9, 'parent': 8, 'source_sha256': 'e64ccc95ccd1ef7b82f3674d4de8f7e25a990423c8906c299597ae2efdb83d35'}, {'round': 10, 'parent': 9, 'source_sha256': '4e9a614af2766c2b9ff77f0d1d7ab2db16168deee080663c8911fd1220ac7909'}, {'round': 11, 'parent': 10, 'source_sha256': '18997e2123fb68bff2993c911bdc5b4b516cca0f711c348224d537dbe9219390'}, {'round': 12, 'parent': 11, 'source_sha256': '1c0f43af5088501df726dc10b1225d88685645341f2d311e2d6735f4e24cad78'}, {'round': 13, 'parent': 12, 'source_sha256': '0e5738b1e98fe2e202ee2d58c8d28edd66ec2f3ac11117fd40a0e72b1e10272a'}, {'round': 14, 'parent': 13, 'source_sha256': 'da81a7838da2918efe5a45dff6c32891a0cbda2593d38a8af8412194a4a06a8a'}, {'round': 15, 'parent': 14, 'source_sha256': '7b0cc54fddfbaa682e6ef80187f89b92dcedc151a8b4cba252e87fc65bbe04fc'}, {'round': 16, 'parent': 15, 'source_sha256': 'df72b135908db9b6ed5e530dbdd8cc435be381bae34049ca45cfcfc8853221d3'}, {'round': 17, 'parent': 15, 'source_sha256': 'efc466874754657601a533ef559a5d7f233a9d76f37ed0054078f7afa94e4986'}, {'round': 18, 'parent': 17, 'source_sha256': 'fb670879631784ff8a0d77cb9f16c2c72b0c07ba27a51677a16ad958e7746cb2'}, {'round': 19, 'parent': 18, 'source_sha256': '1d74b1741f509d3751cadba051c25abd3b38d49f96a8767b37a15308d8515ced'}, {'round': 20, 'parent': 19, 'source_sha256': '7aa23b8443633babe3da947b619d798387ebee0eedf151c1029c3e5794a50742'}], 'previous_archive_verified_files': 1296, 'frozen_dependencies_verified': 250, 'input_records_verified': 46, 'scope': 'all counted PVT replays from immutable RF-derived tracking; not a rerun of every RF frontend', 'post_freeze_corrective_replays': 108, 'corrective_frontend_ast_unchanged': True}
