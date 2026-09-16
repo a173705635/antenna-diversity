@@ -13,7 +13,10 @@ node_modules/
 **/.idea/
 .codex_docx_review/
 .superpowers/
+
+# Local presentation build intermediates; final decks live under docs/presentations/
 .chart-data-*/
+.codex_ppt_build/
 
 # Local git worktrees used for isolated feature execution
 .worktrees/
@@ -21,6 +24,20 @@ node_modules/
 # Generated Python simulation figures
 python_sim/results/
 python_sim_simplified/results/
+
+# Transient simulation runs; referenced research logs remain tracked explicitly
+python_sim_simplified/*.log
+!python_sim_simplified/four_hundred_tests_final.log
+!python_sim_simplified/hundred_all_tests.log
+!python_sim_simplified/mechanism_four_tests.log
+!python_sim_simplified/next_all_tests_corrected.log
+!python_sim_simplified/satellite_count_tests.log
+!python_sim_simplified/single_source_all_tests.log
+!python_sim_simplified/single_source_corrected_tests.log
+!python_sim_simplified/spatial_ten_collection_error.log
+!python_sim_simplified/spatial_ten_tests.log
+!python_sim_simplified/third_all_tests.log
+!python_sim_simplified/weak_ten_tests.log
 
 # MATLAB generated and temporary files
 *.asv

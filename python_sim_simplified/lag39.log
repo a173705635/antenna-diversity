@@ -1,8 +1,0 @@
-normal [(True, 8), (True, 8), (True, 8), (True, 8)]
-attack [(True, 8), (True, 8), (True, 8), (True, 8)]
-overlap [(True, 8), (True, 8), (True, 8), (True, 8)]
-two [(True, 8), (True, 8), (True, 7), (True, 8)]
-absent [(False, 0), (False, 0), (False, 0), (False, 0)]
-bandwidth [(True, 8), (True, 8), (True, 8), (True, 8)]
-skew [(True, 8), (True, 8), (True, 8), (True, 8)]
-noise [(False, 3), (True, 4), (False, 5), (False, 3)]

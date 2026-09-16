@@ -1,8 +1,0 @@
-finished seed 41001
-finished seed 41002
-finished seed 41003
-finished seed 41004
-finished seed 41005
-finished seed 41006
-finished seed 41007
-{"summary": {"41001": {"old_success": 0, "new_success": 4}, "41002": {"old_success": 0, "new_success": 4}, "41003": {"old_success": 4, "new_success": 4}, "41004": {"old_success": 4, "new_success": 4}, "41005": {"old_success": 0, "new_success": 4}, "41006": {"old_success": 0, "new_success": 4}, "41007": {"old_success": 0, "new_success": 4}}, "false": {"old_success": 0, "new_success": 0}}
