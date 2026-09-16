@@ -1,0 +1,11 @@
+{
+  "threshold_m": 0.0009512686134661868,
+  "calibration_max_abs_change_m": [
+    0.0007610148907729495,
+    0.0005119937532092056,
+    0.0006018494533473612
+  ],
+  "margin": 1.25,
+  "design": "Exploratory amendment after primary calibration exposed half-cycle offsets.",
+  "code_sha256": "d6107b8e7325a05969cc08292597eb947f14b54d1e4ea6d9d17327c07a430f27"
+}

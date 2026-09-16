@@ -1,0 +1,1250 @@
+[
+  {
+    "case": "los",
+    "seed": 12000,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 110,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -0.20682506265136033,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -0.2556576205656929,
+      "std_mm": 1.6762666301684768,
+      "rms_mm": 1.6956505047826609,
+      "max_abs_mm": 4.617648563334055
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -0.047032617271307905,
+      "std_mm": 1.6017696905213752,
+      "rms_mm": 1.602460048974804,
+      "max_abs_mm": 5.098624142836253
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "los",
+    "seed": 12002,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 110,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": 0.11608394757506406,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": 0.028633870349651504,
+      "std_mm": 1.5597262612134541,
+      "rms_mm": 1.5599890731829185,
+      "max_abs_mm": 4.578760725817858
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": 0.05687359723340459,
+      "std_mm": 1.5317431512665176,
+      "rms_mm": 1.5327986454567832,
+      "max_abs_mm": 5.411588108008316
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "los",
+    "seed": 12004,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 110,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -95.15768973951634,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -95.1629381813758,
+      "std_mm": 1.6636544327376543,
+      "rms_mm": 95.17747921322521,
+      "max_abs_mm": 99.64290483002553
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -95.14214827184135,
+      "std_mm": 1.5524488290796448,
+      "rms_mm": 95.15481320011065,
+      "max_abs_mm": 99.64290483002553
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "hardware",
+    "seed": 12000,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 110,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -4.430045333532752,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -4.4721814131033355,
+      "std_mm": 1.8233976558876164,
+      "rms_mm": 4.829615471567421,
+      "max_abs_mm": 9.429108714038206
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -4.292852652366412,
+      "std_mm": 1.7098792745735152,
+      "rms_mm": 4.620851764398571,
+      "max_abs_mm": 9.743903211640411
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "hardware",
+    "seed": 12002,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 110,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -4.174304684937031,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -4.266166725311758,
+      "std_mm": 1.666150333654576,
+      "rms_mm": 4.5799820373550055,
+      "max_abs_mm": 8.827257758867036
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -4.2113044596343725,
+      "std_mm": 1.6388750726072931,
+      "rms_mm": 4.518959698354248,
+      "max_abs_mm": 10.56020861289148
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "hardware",
+    "seed": 12004,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 110,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -99.44131623112939,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -99.42511819891592,
+      "std_mm": 1.766503829161805,
+      "rms_mm": 99.44080985514371,
+      "max_abs_mm": 104.37150600915993
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -99.34605799150125,
+      "std_mm": 1.647038820460873,
+      "rms_mm": 99.35971002034395,
+      "max_abs_mm": 104.37150600915993
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "drift",
+    "seed": 12000,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 109,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -8.637013001698165,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -9.702255585557232,
+      "std_mm": 2.0064345141992863,
+      "rms_mm": 9.907549793326634,
+      "max_abs_mm": 16.459271877688717
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -4.911545887156254,
+      "std_mm": 4.206204792966349,
+      "rms_mm": 6.466486044368656,
+      "max_abs_mm": 16.459271877688717
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "drift",
+    "seed": 12002,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 109,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -8.340992503652908,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -9.445642802990736,
+      "std_mm": 2.006810882101895,
+      "rms_mm": 9.656472330940181,
+      "max_abs_mm": 14.463860570071398
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -4.82720576175521,
+      "std_mm": 4.004606830102554,
+      "rms_mm": 6.2720643595252366,
+      "max_abs_mm": 14.463860570071398
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "drift",
+    "seed": 12004,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 109,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -103.65490464398934,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -104.66703021855464,
+      "std_mm": 2.0020829961577173,
+      "rms_mm": 104.6861765043281,
+      "max_abs_mm": 111.24072950306491
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -100.01281535527202,
+      "std_mm": 3.9722472074853457,
+      "rms_mm": 100.09166790080536,
+      "max_abs_mm": 111.24072950306491
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_start_strong",
+    "seed": 12000,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 110,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -9.405855336136144,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -9.424739392860031,
+      "std_mm": 1.4199661501332574,
+      "rms_mm": 9.531107831246686,
+      "max_abs_mm": 12.84727521824179
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -9.281174969918514,
+      "std_mm": 1.3598099202231704,
+      "rms_mm": 9.380260755510971,
+      "max_abs_mm": 13.530702834852786
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_start_strong",
+    "seed": 12002,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 110,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -9.073649801186713,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -9.113596865866919,
+      "std_mm": 1.312789255793833,
+      "rms_mm": 9.207663300950307,
+      "max_abs_mm": 12.90081157565355
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -9.144271231365899,
+      "std_mm": 1.3044638750786048,
+      "rms_mm": 9.23684590940929,
+      "max_abs_mm": 13.278840795731977
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_start_strong",
+    "seed": 12004,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 110,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -104.3835964419413,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -104.39257848417027,
+      "std_mm": 1.4532305598701547,
+      "rms_mm": 104.40269307653796,
+      "max_abs_mm": 108.26828262697957
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -104.33659613180478,
+      "std_mm": 1.3706431473971266,
+      "rms_mm": 104.34559863745498,
+      "max_abs_mm": 108.26828262697957
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_late_strong",
+    "seed": 12000,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -9.410317651034468,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -9.42605165678581,
+      "std_mm": 1.4220564753598575,
+      "rms_mm": 9.532717055252789,
+      "max_abs_mm": 12.842969465939547
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -6.348980463075968,
+      "std_mm": 4.7454298188057935,
+      "rms_mm": 7.926452995238886,
+      "max_abs_mm": 13.51646147156867
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_late_strong",
+    "seed": 12002,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -9.077839631520389,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -9.11540735416816,
+      "std_mm": 1.3131135935917582,
+      "rms_mm": 9.209501536027803,
+      "max_abs_mm": 12.901920851808038
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -6.262545329249058,
+      "std_mm": 4.492243254619685,
+      "rms_mm": 7.707121606642473,
+      "max_abs_mm": 13.216690158930618
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_late_strong",
+    "seed": 12004,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -104.38703886970129,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -104.39312582067464,
+      "std_mm": 1.4516571661121607,
+      "rms_mm": 104.40321847117133,
+      "max_abs_mm": 108.274969893418
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -101.47062693514587,
+      "std_mm": 4.370053237028313,
+      "rms_mm": 101.56468626400621,
+      "max_abs_mm": 108.274969893418
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_start_weak",
+    "seed": 12000,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 110,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -1.7307640843889311,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -1.7870758457000873,
+      "std_mm": 1.6216630302199702,
+      "rms_mm": 2.4131786220391764,
+      "max_abs_mm": 5.902548972529155
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -1.5980852176386595,
+      "std_mm": 1.5438479504320484,
+      "rms_mm": 2.2220132440848404,
+      "max_abs_mm": 6.263743623152223
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_start_weak",
+    "seed": 12002,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 110,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -1.4506252757082496,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -1.5395154700820102,
+      "std_mm": 1.530214277812604,
+      "rms_mm": 2.170636685086517,
+      "max_abs_mm": 5.657604171704259
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -1.4988046753757909,
+      "std_mm": 1.4963496082134733,
+      "rms_mm": 2.1178946161055667,
+      "max_abs_mm": 6.586172573047694
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_start_weak",
+    "seed": 12004,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 110,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -96.70726443756554,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -96.70320436171465,
+      "std_mm": 1.6349433140389336,
+      "rms_mm": 96.71702421737173,
+      "max_abs_mm": 101.14478173857297
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -96.67259870312851,
+      "std_mm": 1.5202733555607344,
+      "rms_mm": 96.68455187408046,
+      "max_abs_mm": 101.14478173857297
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_late_weak",
+    "seed": 12000,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -1.7302056396006325,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -1.7865889150147651,
+      "std_mm": 1.6214822385023255,
+      "rms_mm": 2.4126965414308006,
+      "max_abs_mm": 5.889007660842799
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -1.0949195894152002,
+      "std_mm": 1.8200439209393857,
+      "rms_mm": 2.1240077168959544,
+      "max_abs_mm": 6.272119219512911
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_late_weak",
+    "seed": 12002,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -1.4509005827959973,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -1.5403171140579606,
+      "std_mm": 1.5293634525914657,
+      "rms_mm": 2.1706057638323757,
+      "max_abs_mm": 5.657537225165519
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -1.0185568766517903,
+      "std_mm": 1.6681759050986786,
+      "rms_mm": 1.9545508336511606,
+      "max_abs_mm": 6.099527542122305
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_late_weak",
+    "seed": 12004,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -96.70775528233807,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -96.70323494767266,
+      "std_mm": 1.6340189407681451,
+      "rms_mm": 96.71703917740436,
+      "max_abs_mm": 101.14498283353245
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -96.19542149604676,
+      "std_mm": 1.6210199753809567,
+      "rms_mm": 96.20907869095662,
+      "max_abs_mm": 101.14498283353245
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_short",
+    "seed": 12000,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -7.856468782024898,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -7.884940416700575,
+      "std_mm": 1.4522309606450923,
+      "rms_mm": 8.017559487647995,
+      "max_abs_mm": 11.464164821827096
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -5.279332285212401,
+      "std_mm": 4.058749074662328,
+      "rms_mm": 6.659188646431208,
+      "max_abs_mm": 11.857245865419753
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_short",
+    "seed": 12002,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -7.57436917725166,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -7.626440369845281,
+      "std_mm": 1.3309406472011283,
+      "rms_mm": 7.74170496216292,
+      "max_abs_mm": 11.210646433961864
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -5.229961910434474,
+      "std_mm": 3.8306138667736858,
+      "rms_mm": 6.482754366850117,
+      "max_abs_mm": 11.619084771232798
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_short",
+    "seed": 12004,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -102.85325432065025,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -102.85769704153728,
+      "std_mm": 1.464520571888295,
+      "rms_mm": 102.86812266778345,
+      "max_abs_mm": 106.74314830898757
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -100.4220063206446,
+      "std_mm": 3.697981179838085,
+      "rms_mm": 100.49007124223779,
+      "max_abs_mm": 106.74314830898757
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_medium",
+    "seed": 12000,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -7.141596684964431,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -7.171712822296325,
+      "std_mm": 1.4914019214940875,
+      "rms_mm": 7.325144674129363,
+      "max_abs_mm": 10.90667176571533
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -4.790821500450295,
+      "std_mm": 3.7691244854056,
+      "rms_mm": 6.095758364277643,
+      "max_abs_mm": 11.70908518148224
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_medium",
+    "seed": 12002,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -6.7976824586129165,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -6.850994595803774,
+      "std_mm": 1.364038522879486,
+      "rms_mm": 6.985465485107758,
+      "max_abs_mm": 10.444350814342567
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -4.699033028791832,
+      "std_mm": 3.5100516000771944,
+      "rms_mm": 5.865268420190249,
+      "max_abs_mm": 11.178137202219478
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_medium",
+    "seed": 12004,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -102.09679965873396,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -102.11477731990193,
+      "std_mm": 1.4918347313296354,
+      "rms_mm": 102.12567413710794,
+      "max_abs_mm": 106.24431403157239
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -99.8914370994447,
+      "std_mm": 3.3837851538266173,
+      "rms_mm": 99.94873289721873,
+      "max_abs_mm": 106.24431403157239
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_long",
+    "seed": 12000,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -0.08214494209660717,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -0.15221085384793198,
+      "std_mm": 1.6699621686914514,
+      "rms_mm": 1.676884548467715,
+      "max_abs_mm": 4.4283193396294775
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": 0.029723873795393208,
+      "std_mm": 1.5891644180187994,
+      "rms_mm": 1.5894423727113964,
+      "max_abs_mm": 5.098624142836253
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_long",
+    "seed": 12002,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": 0.17546117715982476,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": 0.11090580029693665,
+      "std_mm": 1.5966276699342055,
+      "rms_mm": 1.6004749335553603,
+      "max_abs_mm": 4.643141142704338
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": 0.09928561843975328,
+      "std_mm": 1.5352949749998777,
+      "rms_mm": 1.5385019643435103,
+      "max_abs_mm": 5.411588108008316
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_long",
+    "seed": 12004,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -95.03860442409736,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -95.01731870957968,
+      "std_mm": 1.6703917083744049,
+      "rms_mm": 95.03200020633706,
+      "max_abs_mm": 99.60664057851837
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -95.05925030269727,
+      "std_mm": 1.5682688881049187,
+      "rms_mm": 95.07218591899657,
+      "max_abs_mm": 99.60664057851837
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_phase0",
+    "seed": 12000,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": 6.863589753246944,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": 6.825761354217164,
+      "std_mm": 1.4465075752215792,
+      "rms_mm": 6.977349226597301,
+      "max_abs_mm": 10.543675676459454
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": 4.801359712939049,
+      "std_mm": 3.3570973161546243,
+      "rms_mm": 5.85859688689764,
+      "max_abs_mm": 11.183382252588345
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_phase0",
+    "seed": 12002,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": 7.208445508918101,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": 7.17928739746306,
+      "std_mm": 1.3391383161253931,
+      "rms_mm": 7.3031129640097365,
+      "max_abs_mm": 11.059982643997095
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": 4.91656582113655,
+      "std_mm": 3.5949141048106235,
+      "rms_mm": 6.090650777588096,
+      "max_abs_mm": 11.66307823622454
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_phase0",
+    "seed": 12004,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -88.117582672762,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -88.1109819724662,
+      "std_mm": 1.5137056739903982,
+      "rms_mm": 88.12398339282976,
+      "max_abs_mm": 91.83407548840378
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -90.3224388466777,
+      "std_mm": 3.7169062814324523,
+      "rms_mm": 90.39888468071267,
+      "max_abs_mm": 99.4758681065915
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_phase180",
+    "seed": 12000,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -9.907349534919001,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -10.008800027850663,
+      "std_mm": 1.9559035890242458,
+      "rms_mm": 10.19811927989967,
+      "max_abs_mm": 15.321865684779029
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -6.709510609724217,
+      "std_mm": 5.094338087713445,
+      "rms_mm": 8.424358324165096,
+      "max_abs_mm": 15.85586408528093
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_phase180",
+    "seed": 12002,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -9.561604711658557,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -9.705669116870016,
+      "std_mm": 1.9535989773054614,
+      "rms_mm": 9.900331407094074,
+      "max_abs_mm": 15.544105961127517
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -6.598473560241616,
+      "std_mm": 4.833546853566461,
+      "rms_mm": 8.179427150530158,
+      "max_abs_mm": 15.544105961127517
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_phase180",
+    "seed": 12004,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -104.87801525390014,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -104.89433110967566,
+      "std_mm": 1.8978475140085624,
+      "rms_mm": 104.91149853153705,
+      "max_abs_mm": 110.7539569046058
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -101.7643193745484,
+      "std_mm": 4.66348134144544,
+      "rms_mm": 101.87111836034342,
+      "max_abs_mm": 110.7539569046058
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_other_direction",
+    "seed": 12000,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": 11.355285543569014,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": 11.28627409222864,
+      "std_mm": 1.572553625841555,
+      "rms_mm": 11.395302005258959,
+      "max_abs_mm": 15.288595433159587
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": 7.855409763735548,
+      "std_mm": 5.323380501846726,
+      "rms_mm": 9.489248786054334,
+      "max_abs_mm": 15.845597964744899
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_other_direction",
+    "seed": 12002,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": 11.678547600839003,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": 11.670192334663392,
+      "std_mm": 1.482646727875167,
+      "rms_mm": 11.763997213860392,
+      "max_abs_mm": 16.366799814246914
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": 7.974722200076516,
+      "std_mm": 5.586462695054025,
+      "rms_mm": 9.736773572987282,
+      "max_abs_mm": 16.68252796583367
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_other_direction",
+    "seed": 12004,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -83.59612491931094,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -83.55899968828709,
+      "std_mm": 1.677887877654622,
+      "rms_mm": 83.57584421731644,
+      "max_abs_mm": 88.17234758475317
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -87.2529632166837,
+      "std_mm": 5.72053248868025,
+      "rms_mm": 87.44028866630077,
+      "max_abs_mm": 99.4758681065915
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_both_diff",
+    "seed": 12000,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -16.698384948947115,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -16.736376012392004,
+      "std_mm": 1.321758332510863,
+      "rms_mm": 16.788487934228392,
+      "max_abs_mm": 19.83577889502458
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -11.331062181327155,
+      "std_mm": 8.029741306214436,
+      "rms_mm": 13.887754159756314,
+      "max_abs_mm": 20.830992259246333
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_both_diff",
+    "seed": 12002,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -16.3955806951169,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -16.432566811698358,
+      "std_mm": 1.2718301068828926,
+      "rms_mm": 16.481711192764664,
+      "max_abs_mm": 19.62739377972415
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -11.266163923531296,
+      "std_mm": 7.780038574832367,
+      "rms_mm": 13.69143709687766,
+      "max_abs_mm": 19.83820275810104
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_both_diff",
+    "seed": 12004,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -111.62784464535744,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -111.63944254916026,
+      "std_mm": 1.3032729479725285,
+      "rms_mm": 111.64704945973347,
+      "max_abs_mm": 115.61937988223073
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -106.45550644608227,
+      "std_mm": 7.63322764275732,
+      "rms_mm": 106.7288199922496,
+      "max_abs_mm": 115.61937988223073
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_both_common_late",
+    "seed": 12000,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -0.27331893027068166,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -0.25667631785980854,
+      "std_mm": 1.6282701694674042,
+      "rms_mm": 1.6483769219834032,
+      "max_abs_mm": 4.247343911802239
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -0.08749293945988676,
+      "std_mm": 1.594305311933909,
+      "rms_mm": 1.5967042437834287,
+      "max_abs_mm": 5.973456228893972
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_both_common_late",
+    "seed": 12002,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": 0.036083443021002824,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -0.006378205496999546,
+      "std_mm": 1.4911425397301543,
+      "rms_mm": 1.4911561807195974,
+      "max_abs_mm": 5.097823557779213
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -0.011521523284413162,
+      "std_mm": 1.4784891815964207,
+      "rms_mm": 1.478534073194273,
+      "max_abs_mm": 5.411588108008316
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_both_common_late",
+    "seed": 12004,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 89,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -95.20676051755183,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -95.1915343804816,
+      "std_mm": 1.5915634029246264,
+      "rms_mm": 95.20483859434844,
+      "max_abs_mm": 100.08352923408314
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -95.10366077140858,
+      "std_mm": 1.5133520478422269,
+      "rms_mm": 95.11570073622897,
+      "max_abs_mm": 100.08352923408314
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_both_common_start",
+    "seed": 12000,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 110,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -95.41775100907567,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -95.40177466025841,
+      "std_mm": 1.6251699949285134,
+      "rms_mm": 95.4156160481037,
+      "max_abs_mm": 99.38431828795518
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -95.26343508431547,
+      "std_mm": 1.5697293523057911,
+      "rms_mm": 95.27636702930627,
+      "max_abs_mm": 101.14374723485608
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_both_common_start",
+    "seed": 12002,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 110,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -95.11178876071402,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -95.154050306744,
+      "std_mm": 1.490973118274199,
+      "rms_mm": 95.1657306524664,
+      "max_abs_mm": 99.27799400618851
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -95.1122590651507,
+      "std_mm": 1.4668633366242922,
+      "rms_mm": 95.12356970028338,
+      "max_abs_mm": 100.44255843175675
+    },
+    "quality_fraction": 1.0
+  },
+  {
+    "case": "mp_both_common_start",
+    "seed": 12004,
+    "detected": false,
+    "first_alarm_s": null,
+    "delay_s": null,
+    "event_alarm_count": 0,
+    "event_decisions": 110,
+    "pre_event_alarm_count": 0,
+    "tail_score_mean_mm": -95.2060749136615,
+    "tail_residual": {
+      "epochs": 391,
+      "mean_mm": -95.19118552651167,
+      "std_mm": 1.5912336393638222,
+      "rms_mm": 95.20448427693839,
+      "max_abs_mm": 100.09548187799933
+    },
+    "all_residual": {
+      "epochs": 1291,
+      "mean_mm": -95.08471158182316,
+      "std_mm": 1.5225512038563107,
+      "rms_mm": 95.09690078423617,
+      "max_abs_mm": 100.09548187799933
+    },
+    "quality_fraction": 1.0
+  }
+]

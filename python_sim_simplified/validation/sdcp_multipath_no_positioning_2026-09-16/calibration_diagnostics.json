@@ -1,0 +1,32 @@
+[
+  {
+    "seed": 11900,
+    "mean_mm": -0.02788305987937091,
+    "std_mm": 1.5043691389800555,
+    "max_abs_mean_mm": 0.607965065054967,
+    "prompt_cross_angle_deg": 0.06312905575716768,
+    "prompt_epoch_offset_samples": [
+      0
+    ]
+  },
+  {
+    "seed": 11902,
+    "mean_mm": -95.29292247196634,
+    "std_mm": 1.728916723406108,
+    "max_abs_mean_mm": 95.86776150507873,
+    "prompt_cross_angle_deg": -179.96422481470552,
+    "prompt_epoch_offset_samples": [
+      1
+    ]
+  },
+  {
+    "seed": 11904,
+    "mean_mm": -95.12007486850621,
+    "std_mm": 1.5517099078598864,
+    "max_abs_mean_mm": 95.45841399546234,
+    "prompt_cross_angle_deg": -179.98100399456467,
+    "prompt_epoch_offset_samples": [
+      -1
+    ]
+  }
+]

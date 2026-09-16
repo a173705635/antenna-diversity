@@ -1,5 +1,7 @@
 # GNSS 接收链路与定位研究代码
 
+独立专题：[不接定位的 SDCP 多径检测验证](SDCP_MULTIPATH_NO_POSITIONING_REPORT.md)（2026-09-16），在原双 RF/DFE/独立跟踪链加入具有传播时延的仿真回波，比较绝对几何残差和相邻窗口变化判据。16 类场景 × 3 组噪声，正常标定与测试种子分开；相位不取余。见[实验计划](SDCP_MULTIPATH_NO_POSITIONING_PLAN.md)、[运行入口](audit_sdcp_multipath_no_positioning.py)、[独立复算](summarize_sdcp_multipath_no_positioning.py)及[原始证据](validation/sdcp_multipath_no_positioning_2026-09-16/)。
+
 独立专题：[不接定位的双通道 SDCP 验证报告](SDCP_NO_POSITIONING_REPORT.md)（2026-09-16）。八场景 × 三组噪声，原始 NCO 不取余、不去均值；正常基线标准差 1.543～1.697 mm，单路中断后保留约 +3/−2/+3 周偏移。见[实验入口](audit_sdcp_no_positioning.py)、[原始证据](validation/sdcp_no_positioning_2026-09-16/)及[独立核验](verify_sdcp_no_positioning.py)。不涉及定位或检测率验证。
 
 四轮机制研究已完成，最新研究入口为 `single_source_receiver_history.py`：区分短暂观测筛选间隙与真实失锁，保留同跟踪弧平滑历史，并用最近已发布位置及实际载波位移接续。旧困难四天线样本165→171/171、354→371/371，最大误差25.76→12.59m、33.87→16.68m，输出未减少；冻结新种子4秒四天线保持371/371，最大误差7.91→5.30m。三天线新种子仅4→15/371，仍不能保底。真实消失负例停发且无错误恢复；当前统一版本强信号近源及撤除仍有约0.1秒中断，不能沿用更早版本的全部通过结论。44组配对、64份导航重演、397项测试通过，未证明商用或长期导航。见[四轮结果](MECHANISM_FOUR_REPORT.md)、[数学机制与边界](MECHANISM_FOUR_METHODS.md)、[研究计划](MECHANISM_FOUR_PLAN.md)。
