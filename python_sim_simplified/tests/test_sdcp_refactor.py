@@ -64,15 +64,3 @@ def test_verifier_requires_matching_current_source_for_runs_without_snapshot(tmp
     with pytest.raises(AssertionError, match='current_source source hashes differ'):
         sdcp_support.verify_sources(tmp_path, expected)
     assert not (tmp_path/'code').exists()
-
-
-@pytest.mark.parametrize('entry', ['sdcp_baseline', 'sdcp_multipath', 'sdcp_window_change',
-                                  'verify_sdcp_baseline', 'verify_sdcp_multipath'])
-def test_experiment_cli_help(entry):
-    root = Path(__file__).resolve().parents[1]
-    result = subprocess.run([sys.executable, '-m', f'experiments.{entry}', '--help'],
-                            cwd=root, capture_output=True, text=True)
-    assert result.returncode == 0, result.stderr
-    assert 'usage:' in result.stdout
-    if entry in ('sdcp_baseline', 'sdcp_multipath'):
-        assert '--freeze-source' in result.stdout

@@ -4,7 +4,6 @@ import sys
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import argparse
 import hashlib
 import json
 from dataclasses import asdict
@@ -12,26 +11,24 @@ import numpy as np
 from core.provenance import source_hashes, freeze_source
 from core.serialization import serializable
 from core.gps_simulation import receiver_reference, satellite_setup, build_scene, run_record
+from experiments.paths import RESULTS, reset_output
+
+OUTPUT = RESULTS/'gps_spp'
+DURATION_MS = 1000
+SEEDS = [3000, 3001, 3002]
+FREEZE_SOURCE = False
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--duration-ms', type=int, default=1000)
-    parser.add_argument('--seeds', type=int, nargs='+', default=[3000, 3001, 3002])
-    parser.add_argument('--output', type=Path, default=Path(__file__).resolve().parents[1]/'results/gps_spp')
-    parser.add_argument('--freeze-source', action='store_true')
-    args = parser.parse_args()
-    if args.duration_ms < 300 or any(s < 0 for s in args.seeds) or len(set(args.seeds)) != len(args.seeds):
-        parser.error('require duration >= 300 ms and distinct nonnegative RF seeds')
-    args.output.mkdir(parents=True, exist_ok=False)
-    if args.freeze_source:
-        freeze_source(args.output)
+    output = reset_output(OUTPUT.name)
+    if FREEZE_SOURCE:
+        freeze_source(output)
     hashes = source_hashes()
     satellites = satellite_setup()
     print('Generating eight GPS PRNs before shared RF/DFE...', flush=True)
-    scene, cfg = build_scene(satellites, args.duration_ms)
+    scene, cfg = build_scene(satellites, DURATION_MS)
     from dataclasses import asdict
     metadata = {'scope': 'single antenna assisted synthetic GPS L1 SPP; no multipath/interference',
-                'satellites': satellites, 'duration_ms': args.duration_ms, 'seeds': args.seeds,
+                'satellites': satellites, 'duration_ms': DURATION_MS, 'seeds': SEEDS,
                 'satellite_frame': 'synthetic reception ECEF, already rotation-corrected by definition',
                 'trajectory': 'linear radial motion, not broadcast ephemeris/orbital propagation',
                 'time_aid': 'per-PRN pseudorange rounded to 10 km at t=0; only selects 1 ms ambiguity',
@@ -41,14 +38,14 @@ def main():
                 'signal_config_last_prn': asdict(cfg.signal), 'rf_config': asdict(cfg.rf),
                 'dfe_config': asdict(cfg.dfe), 'tracking_config': asdict(cfg.tracking),
                 'source_sha256': hashes}
-    (args.output/'manifest.json').write_text(json.dumps(serializable(metadata), indent=2, allow_nan=False), encoding='utf-8')
+    (output/'manifest.json').write_text(json.dumps(serializable(metadata), indent=2, allow_nan=False), encoding='utf-8')
     all_records = []
-    for seed in args.seeds:
+    for seed in SEEDS:
         result = run_record(seed, satellites, scene, cfg)
-        (args.output/f'seed_{seed}.json').write_text(json.dumps(serializable(result), indent=2, allow_nan=False), encoding='utf-8')
+        (output/f'seed_{seed}.json').write_text(json.dumps(serializable(result), indent=2, allow_nan=False), encoding='utf-8')
         print(json.dumps(result['summary']), flush=True)
         all_records.append(result)
-    (args.output/'summary.json').write_text(json.dumps([r['summary'] for r in all_records], indent=2, allow_nan=False), encoding='utf-8')
+    (output/'summary.json').write_text(json.dumps([r['summary'] for r in all_records], indent=2, allow_nan=False), encoding='utf-8')
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
@@ -62,7 +59,7 @@ def main():
     for axis in axes:
         axis.grid(alpha=.3)
         axis.legend()
-    fig.savefig(args.output/'position_error.png', dpi=160)
+    fig.savefig(output/'position_error.png', dpi=160)
     plt.close(fig)
 
 

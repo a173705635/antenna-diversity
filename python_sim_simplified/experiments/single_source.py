@@ -8,7 +8,6 @@ import sys
 if __package__ in (None, ''):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import argparse
 from dataclasses import asdict
 import hashlib
 import json
@@ -18,6 +17,19 @@ from core.single_source import frontend, navigate
 from core.single_source_scene import Case, generate
 from core.provenance import source_hashes, freeze_source
 from core.serialization import serializable
+from experiments.paths import RESULTS, reset_output
+
+OUTPUT = RESULTS/'single_source'
+INPUT = None
+CASE = None
+SEED = 113001
+DURATION_S = 2.
+SATELLITES = 24
+CN0_DB_HZ = 45.
+ATTACKED = True
+ANTENNAS = [3, 4]
+SAVE_IQ = False
+FREEZE_SOURCE = False
 
 
 def save(path, value):
@@ -46,61 +58,47 @@ def evaluate(record, subset, case):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    source = parser.add_mutually_exclusive_group()
-    source.add_argument('--input', type=Path, help='Existing samples.npy, observations.npz and metadata.json folder')
-    source.add_argument('--case', type=Path, help='JSON fields for core.single_source_scene.Case')
-    parser.add_argument('--seed', type=int, default=113001)
-    parser.add_argument('--duration', type=float, default=2.)
-    parser.add_argument('--stars', type=int, default=24)
-    parser.add_argument('--cn0', type=float, default=45.)
-    parser.add_argument('--no-attack', action='store_true')
-    parser.add_argument('--antennas', nargs='+', type=int, choices=(2, 3, 4), default=[3, 4])
-    parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--save-iq', action='store_true', help='Also save the generated input for exact replay')
-    parser.add_argument('--freeze-source', action='store_true')
-    args = parser.parse_args()
-    args.output.mkdir(parents=True, exist_ok=False)
-    if args.freeze_source:
-        freeze_source(args.output)
+    output = reset_output(OUTPUT.name)
+    if FREEZE_SOURCE:
+        freeze_source(output)
 
-    if args.input is not None:
-        meta = json.loads((args.input/'metadata.json').read_text(encoding='utf-8'))
-        with np.load(args.input/'observations.npz') as data:
+    if INPUT is not None:
+        meta = json.loads((INPUT/'metadata.json').read_text(encoding='utf-8'))
+        with np.load(INPUT/'observations.npz') as data:
             record = dict(data)
-        record['samples'] = np.load(args.input/'samples.npy', mmap_mode='r')
+        record['samples'] = np.load(INPUT/'samples.npy', mmap_mode='r')
         # The manifest binds actual input bytes, not just the old metadata's claims.
         hashes = {}
         for name in ('samples.npy', 'observations.npz', 'metadata.json'):
-            with (args.input/name).open('rb') as stream:
+            with (INPUT/name).open('rb') as stream:
                 hashes[name] = hashlib.file_digest(stream, 'sha256').hexdigest()
-        identity = dict(input=str(args.input.resolve()), input_sha256=hashes)
+        identity = dict(input=str(INPUT.resolve()), input_sha256=hashes)
     else:
-        parameters = (json.loads(args.case.read_text(encoding='utf-8')) if args.case is not None else
-                      dict(duration=args.duration, stars=args.stars, cn0=args.cn0,
+        parameters = (json.loads(CASE.read_text(encoding='utf-8')) if CASE is not None else
+                      dict(duration=DURATION_S, stars=SATELLITES, cn0=CN0_DB_HZ,
                            attack_start=.3, phase_deg=10., amplitude_db=1., velocity_east=2.))
         case = Case(**parameters)
-        samples, nominal, codes, times, satellites, radii = generate(case, args.seed, not args.no_attack)
+        samples, nominal, codes, times, satellites, radii = generate(case, SEED, ATTACKED)
         record = dict(samples=samples, nominal=nominal, codes=np.array(codes), times=times,
                       satellites=satellites, coarse=np.round((radii + 75000) / 10000) * 10000)
-        meta = dict(case=asdict(case), seed=args.seed, attacked=not args.no_attack)
+        meta = dict(case=asdict(case), seed=SEED, attacked=ATTACKED)
         identity = dict(generated=True, **meta)
-        if args.save_iq:
-            inp = args.output/'input'
+        if SAVE_IQ:
+            inp = output/'input'
             inp.mkdir()
             np.save(inp/'samples.npy', samples)
             np.savez(inp/'observations.npz', **{k: v for k, v in record.items() if k != 'samples'})
             save(inp/'metadata.json', meta)
-    save(args.output/'manifest.json', identity | dict(scope=__doc__, source_sha256=source_hashes(),
-         case=meta['case'], antennas=args.antennas))
+    save(output/'manifest.json', identity | dict(scope=__doc__, source_sha256=source_hashes(),
+         case=meta['case'], antennas=ANTENNAS))
     summaries = []
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     figure, axes = plt.subplots(2, 1, figsize=(9, 6), constrained_layout=True)
-    for antennas in args.antennas:
+    for antennas in ANTENNAS:
         z, nav, score = evaluate(record, list(range(antennas)), meta['case'])
-        folder = args.output/f'{antennas}_antennas'
+        folder = output/f'{antennas}_antennas'
         folder.mkdir()
         np.savez_compressed(folder/'tracking.npz', **z)
         np.savez_compressed(folder/'navigation.npz', **{k: v for k, v in nav.items() if k != 'initialization_time'})
@@ -110,13 +108,13 @@ def main():
         axes[0].plot(times[times >= meta['case']['attack_start']], score['errors_m'], label=f'{antennas} antennas')
         axes[1].plot(times, nav['selected'].sum(axis=1), label=f'{antennas} antennas')
         print(antennas, {k: score[k] for k in ('opportunities', 'solved', 'good20', 'error30', 'error50')}, flush=True)
-    save(args.output/'summary.json', summaries)
+    save(output/'summary.json', summaries)
     axes[0].set(ylabel='Horizontal error (m)')
     axes[1].set(xlabel='Receiver time (s)', ylabel='Selected satellites')
     for axis in axes:
         axis.grid(alpha=.3)
         axis.legend()
-    figure.savefig(args.output/'navigation.png', dpi=160)
+    figure.savefig(output/'navigation.png', dpi=160)
     plt.close(figure)
 
 

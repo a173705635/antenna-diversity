@@ -1,13 +1,16 @@
 """Exploratory adjacent-window change test, without wrapping or position solution."""
-import argparse
 import hashlib
 import json
 from pathlib import Path
+import shutil
 
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
+from experiments.paths import RESULTS
+
+OUTPUT = RESULTS/'sdcp_multipath'
 
 
 def change_score(r):
@@ -21,10 +24,7 @@ def alarm(score,limit):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('directory',type=Path)
-    args=parser.parse_args()
-    out=args.directory
+    out=OUTPUT
     plan=json.loads((out/'plan.json').read_text(encoding='utf-8'))
     maxima=[]
     for seed in plan['calibration_seeds']:
@@ -33,7 +33,9 @@ def main():
             maxima.append(float(np.max(abs(s))))
     limit=1.25*max(maxima)
     supplement=out/'window_change'
-    supplement.mkdir(exist_ok=False)
+    if supplement.exists():
+        shutil.rmtree(supplement)
+    supplement.mkdir()
     (supplement/'threshold.json').write_text(json.dumps(dict(threshold_m=limit,
         calibration_max_abs_change_m=maxima,margin=1.25,
         design='Exploratory amendment after primary calibration exposed half-cycle offsets.',

@@ -1,5 +1,4 @@
 """Dual RF/DFE/tracking SDCP experiment, with no positioning dependency."""
-import argparse
 from dataclasses import asdict
 import hashlib
 from pathlib import Path
@@ -20,6 +19,10 @@ from core.presets import default_config
 from core.sdcp_observation import raw_sdcp, receive as receive_observation
 from core.provenance import source_hashes, freeze_source
 from experiments.sdcp_support import save_json, statistics
+from experiments.paths import RESULTS, reset_output
+
+OUTPUT = RESULTS/'sdcp_baseline'
+FREEZE_SOURCE = False
 
 
 CASES = ('zero', 'fixed_plus10', 'fixed_minus10', 'ramp', 'sine',
@@ -52,12 +55,7 @@ def receive(signal, cfg, seed, out, name, hardware=False):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--freeze-source', action='store_true')
-    args = parser.parse_args()
-    out = args.output
-    out.mkdir(parents=True, exist_ok=False)
+    out = reset_output(OUTPUT.name)
     (out/'.gitattributes').write_text('** -text\n', encoding='utf-8')
     started = time.perf_counter()
     cfg = default_config()
@@ -70,7 +68,7 @@ def main():
     cfg.phone.estimated_channel_delay_ns = dict(cfg.phone.channel_delay_ns)
     save_json(out/'config.json', asdict(cfg))
     hashes = source_hashes()
-    if args.freeze_source:
+    if FREEZE_SOURCE:
         freeze_source(out)
     bits = np.array([1, 1, -1, 1, -1, -1, 1, -1])
     save_json(out/'manifest.json', {'scope': __doc__, 'cases': CASES, 'seeds': SEEDS,

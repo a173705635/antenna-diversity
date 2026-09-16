@@ -1,5 +1,4 @@
 """Independently recompute saved NCO decisions, then render the experiment evidence."""
-import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -14,6 +13,9 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
+from experiments.paths import RESULTS
+
+OUTPUT = RESULTS/'sdcp_multipath'
 
 
 def read(path):
@@ -30,9 +32,7 @@ def phase_distance(path, times, fs, wavelength):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('directory',type=Path)
-    out = parser.parse_args().directory
+    out = OUTPUT
     plan, cfg, threshold, completion, rows = [read(out/name) for name in
         ('plan.json','config.json','threshold.json','completion.json','results.json')]
     assert completion['records'] == len(rows) == len(plan['cases'])*len(plan['test_seeds'])

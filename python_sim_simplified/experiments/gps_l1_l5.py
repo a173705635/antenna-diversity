@@ -11,7 +11,6 @@ if __package__ in (None, ""):
 
 from core.serialization import serializable
 from core.provenance import source_hashes, freeze_source
-import argparse
 from dataclasses import asdict
 import hashlib
 import json
@@ -22,6 +21,13 @@ from core.config import SPEED_OF_LIGHT_MPS
 from core.positioning import PositioningFailure
 from core.positioning import carrier_range, solve_position, solve_code_carrier_float
 from core.gps_simulation import build_scene, satellite_setup, run_record, receiver_reference
+from experiments.paths import ROOT, RESULTS, reset_output
+
+OUTPUT = RESULTS/'gps_l1_l5'
+WEIGHTS = ROOT/'configs/dual_frequency_weights.json'
+DURATION_MS = 1000
+SEEDS = [4000, 4001, 4002]
+FREEZE_SOURCE = False
 
 
 def position_stats(positions):
@@ -94,24 +100,15 @@ def compare(records, satellites, weights=None):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--duration-ms', type=int, default=1000)
-    parser.add_argument('--seeds', type=int, nargs='+', default=[4000, 4001, 4002])
-    parser.add_argument('--weights', type=Path, default=Path(__file__).resolve().parents[1]/'configs/dual_frequency_weights.json')
-    parser.add_argument('--output', type=Path, default=Path(__file__).resolve().parents[1]/'results/gps_l1_l5')
-    parser.add_argument('--freeze-source', action='store_true')
-    args = parser.parse_args()
-    if args.duration_ms < 300 or any(s < 0 for s in args.seeds) or len(set(args.seeds)) != len(args.seeds):
-        parser.error('duration >=300 ms and distinct nonnegative seeds required')
-    args.output.mkdir(parents=True, exist_ok=False)
-    if args.freeze_source:
-        freeze_source(args.output)
-    weights = json.loads(args.weights.read_text(encoding='utf-8'))
+    output = reset_output(OUTPUT.name)
+    if FREEZE_SOURCE:
+        freeze_source(output)
+    weights = json.loads(WEIGHTS.read_text(encoding='utf-8'))
     def save(name, data):
-        (args.output/name).write_text(json.dumps(serializable(data), indent=2, allow_nan=False), encoding='utf-8')
+        (output/name).write_text(json.dumps(serializable(data), indent=2, allow_nan=False), encoding='utf-8')
     satellites = satellite_setup()
-    manifest = {'scope': __doc__, 'satellites': satellites, 'duration_ms': args.duration_ms,
-                'seeds': args.seeds, 'frequency_noise_seeds': 'L1=seed; L5=seed+100000',
+    manifest = {'scope': __doc__, 'satellites': satellites, 'duration_ms': DURATION_MS,
+                'seeds': SEEDS, 'frequency_noise_seeds': 'L1=seed; L5=seed+100000',
                 'source_sha256': source_hashes(),
                 'time_aid': 'per-satellite range rounded to 10 km; selects primary 1 ms ambiguity',
                 'power': 'same configured power per tracked component; Q5 only, no I5 component',
@@ -120,24 +117,24 @@ def main():
                 'recommended_mode': 'L5_code_dual_phase',
                 'weight_calibration': 'seeds 4000..4002, observation scatter only; this receiver configuration',
                 'weights': weights,
-                'weights_sha256': hashlib.sha256(args.weights.read_bytes()).hexdigest(),
+                'weights_sha256': hashlib.sha256(WEIGHTS.read_bytes()).hexdigest(),
                 'phase_screen': '50 mm maximum postfit residual, not certified cycle-slip protection',
                 'noise_model': 'IID discrete RF samples; band-specific configured noise bandwidth',
                 'frequency_configs': {}}
-    records = {seed: {} for seed in args.seeds}
+    records = {seed: {} for seed in SEEDS}
     for kind in ['L1CA', 'L5Q']:
         print(f'Generating {kind} scene...', flush=True)
-        scene, cfg = build_scene(satellites, args.duration_ms, signal_kind=kind)
+        scene, cfg = build_scene(satellites, DURATION_MS, signal_kind=kind)
         manifest['frequency_configs'][kind] = {'signal': asdict(cfg.signal), 'rf': asdict(cfg.rf),
                                              'dfe': asdict(cfg.dfe), 'tracking': asdict(cfg.tracking)}
         save('manifest.json', manifest)
-        for seed in args.seeds:
+        for seed in SEEDS:
             record = run_record(seed+(100000 if kind == 'L5Q' else 0), satellites, scene, cfg)
             records[seed][kind] = record
             save(f'{kind}_{seed}.json', record)
         del scene
     summaries = []
-    for seed in args.seeds:
+    for seed in SEEDS:
         result = compare(records[seed], satellites, weights)
         save(f'comparison_{seed}.json', result)
         summary = {'seed': seed, 'modes': {name: {key: value for key, value in mode.items()
@@ -147,7 +144,7 @@ def main():
         print(json.dumps(summary), flush=True)
     save('summary.json', summaries)
     save('sha256.json', {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
-                        for p in args.output.glob('*.json') if p.name != 'sha256.json'})
+                        for p in output.glob('*.json') if p.name != 'sha256.json'})
 
 
 if __name__ == '__main__':

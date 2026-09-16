@@ -1,5 +1,4 @@
 """Independently reconstruct the no-positioning audit from saved raw NCOs."""
-import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -11,12 +10,13 @@ if __package__ in (None, ""):
 from experiments.sdcp_support import verify_sources
 
 import numpy as np
+from experiments.paths import RESULTS
+
+OUTPUT = RESULTS/'sdcp_baseline'
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('directory', type=Path)
-    root = parser.parse_args().directory
+    root = OUTPUT
     hashes = json.loads((root/'sha256.json').read_text())
     for name, digest in hashes.items():
         assert hashlib.sha256((root/name).read_bytes()).hexdigest() == digest, name

@@ -19,6 +19,12 @@ from core.plotting import (
 from core.presets import default_config
 from core.provenance import source_hashes, freeze_source
 from core.serialization import serializable
+from experiments.paths import RESULTS, reset_output
+
+OUTPUT = RESULTS/'full_chain'
+DURATION_MS = None
+SHOW_PLOTS = False
+FREEZE_SOURCE = False
 
 
 def save_results_figures(results, output_dir):
@@ -48,24 +54,14 @@ def save_results_figures(results, output_dir):
 
 
 def main():
-    import argparse
     import json
     from dataclasses import asdict
-
-    parser = argparse.ArgumentParser(description="RF/DFE, antenna combining, acquisition and tracking")
-    parser.add_argument('--output', type=Path,
-                        default=Path(__file__).resolve().parents[1]/'results/full_chain')
-    parser.add_argument('--duration-ms', type=int)
-    parser.add_argument('--freeze-source', action='store_true')
-    parser.add_argument('--no-show', action='store_true')
-    args = parser.parse_args()
     cfg = default_config()
-    cfg.plot.output_dir = args.output
-    args.output.mkdir(parents=True, exist_ok=False)
-    if args.duration_ms is not None:
-        cfg.signal.duration_ms = cfg.tracking.max_epochs = args.duration_ms
-    if args.no_show:
-        cfg.plot.show = False
+    output = reset_output(OUTPUT.name)
+    cfg.plot.output_dir = output
+    if DURATION_MS is not None:
+        cfg.signal.duration_ms = cfg.tracking.max_epochs = DURATION_MS
+    cfg.plot.show = SHOW_PLOTS
     cfg.phone.channel_delay_ns = {
         "BL": 0,
         "BR": 0,
@@ -84,13 +80,12 @@ def main():
     print(format_metrics(results["metrics"]))
 
     save_results_figures(results, cfg.plot.output_dir)
-    output = Path(cfg.plot.output_dir)
     (output/'manifest.json').write_text(json.dumps(serializable({
         'config': asdict(cfg), 'source_sha256': source_hashes()}),
         default=str, indent=2, allow_nan=False), encoding='utf-8')
     (output/'summary.json').write_text(json.dumps(serializable(results['metrics']),
         indent=2, allow_nan=False), encoding='utf-8')
-    if args.freeze_source:
+    if FREEZE_SOURCE:
         freeze_source(output)
 
     if cfg.plot.show:

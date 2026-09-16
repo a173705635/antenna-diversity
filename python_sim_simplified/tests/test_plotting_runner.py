@@ -165,14 +165,19 @@ def test_detected_path_gets_an_independent_angle_figure():
 
 
 def test_direct_runner_does_not_show_on_noninteractive_backend(tmp_path):
-    script = Path(__file__).resolve().parents[1] / "experiments" / "full_chain.py"
+    source = Path(__file__).resolve().parents[1]
+    standalone = tmp_path/'python_sim_simplified'
+    import shutil
+    shutil.copytree(source, standalone,
+                    ignore=shutil.ignore_patterns('tests', 'results', 'validation', 'archive', '__pycache__'))
+    script = standalone / "experiments" / "full_chain.py"
     environment = os.environ.copy()
     environment["MPLBACKEND"] = "Agg"
     environment["PYTHONWARNINGS"] = "error"
 
     completed = subprocess.run(
-        [sys.executable, str(script), "--output", str(tmp_path / "figures")],
-        cwd=script.parents[1],
+        [sys.executable, str(script)],
+        cwd=tmp_path,
         env=environment,
         text=True,
         capture_output=True,

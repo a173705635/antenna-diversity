@@ -1,5 +1,4 @@
 """Frozen single-PRN multipath experiment through two independent receiver chains."""
-import argparse
 from dataclasses import asdict
 import hashlib
 from pathlib import Path
@@ -18,6 +17,10 @@ from core.presets import default_config
 from core.sdcp_observation import raw_sdcp, receive as receive_observation
 from core.provenance import source_hashes, freeze_source
 from experiments.sdcp_support import save_json, statistics
+from experiments.paths import RESULTS, reset_output
+
+OUTPUT = RESULTS/'sdcp_multipath'
+FREEZE_SOURCE = False
 
 
 CALIBRATION_SEEDS = (11900, 11902, 11904)
@@ -84,12 +87,7 @@ def residual(first, second, cfg, geometry):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--freeze-source', action='store_true')
-    args = parser.parse_args()
-    out = args.output
-    out.mkdir(parents=True, exist_ok=False)
+    out = reset_output(OUTPUT.name)
     (out/'.gitattributes').write_text('** -text\n', encoding='utf-8')
     started = time.perf_counter()
     cfg = default_config()
@@ -102,7 +100,7 @@ def main():
     cfg.phone.estimated_channel_delay_ns = dict(cfg.phone.channel_delay_ns)
     save_json(out/'config.json', asdict(cfg))
     hashes = source_hashes()
-    if args.freeze_source:
+    if FREEZE_SOURCE:
         freeze_source(out)
     save_json(out/'plan.json', dict(cases=cases(), calibration_seeds=CALIBRATION_SEEDS,
         test_seeds=TEST_SEEDS, window_samples=WINDOW, stride_samples=STRIDE,

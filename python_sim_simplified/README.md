@@ -15,22 +15,22 @@ validation/    已归档的独立验证证据（未修改）
 
 ## 运行入口
 
-在 `python_sim_simplified` 目录执行下列命令。也可以从仓库根目录执行 `python python_sim_simplified/experiments/<名称>.py ...`。`--output` 相对当前工作目录；使用新的输出目录，避免覆盖实验。每个入口均支持 `--help`。
+在 `python_sim_simplified` 目录执行下列命令，不需要命令行参数。输入、输出和实验参数都固定在对应脚本顶部；要换条件时直接修改这些常量。生成型实验重复运行会先删除并重建自己的固定输出目录，不影响其他实验目录。
 
 | 实验 | 命令 |
 |---|---|
-| 完整 RF→DFE→合并→捕获→跟踪及绘图 | `python -m experiments.full_chain --output results/full_chain_run1 --no-show` |
-| 无定位的双通道 SDCP 基线 | `python -m experiments.sdcp_baseline --output results/sdcp_run1` |
-| SDCP 基线独立核验 | `python -m experiments.verify_sdcp_baseline results/sdcp_run1` |
-| SDCP 多径实验（含独立标定与留出） | `python -m experiments.sdcp_multipath --output results/multipath_run1` |
-| 相邻窗口变化判据 | `python -m experiments.sdcp_window_change results/multipath_run1` |
-| 多径及窗口变化独立复算、绘图 | `python -m experiments.verify_sdcp_multipath results/multipath_run1` |
-| 最新单源接收机，比较三/四天线 | `python -m experiments.single_source --output results/single_source_run1` |
-| GPS L1 仿真定位 | `python -m experiments.gps_spp --output results/gps_spp_run1` |
-| GPS L1/L5 仿真定位与冻结权重对照 | `python -m experiments.gps_l1_l5 --output results/gps_l1_l5_run1` |
-| 真实录波 GPS L1 码定位 | `python -m experiments.recorded_iq --iq <录波文件> --output results/recorded_run1` |
+| 完整 RF→DFE→合并→捕获→跟踪及绘图 | `python -m experiments.full_chain` |
+| 无定位的双通道 SDCP 基线 | `python -m experiments.sdcp_baseline` |
+| SDCP 基线独立核验 | `python -m experiments.verify_sdcp_baseline` |
+| SDCP 多径实验（含独立标定与留出） | `python -m experiments.sdcp_multipath` |
+| 相邻窗口变化判据 | `python -m experiments.sdcp_window_change` |
+| 多径及窗口变化独立复算、绘图 | `python -m experiments.verify_sdcp_multipath` |
+| 最新单源接收机，比较三/四天线 | `python -m experiments.single_source` |
+| GPS L1 仿真定位 | `python -m experiments.gps_spp` |
+| GPS L1/L5 仿真定位与冻结权重对照 | `python -m experiments.gps_l1_l5` |
+| 真实录波 GPS L1 码定位 | `python -m experiments.recorded_iq` |
 
-单源实验默认同一份四路录波分别选择三/四天线、24 星、45 dB-Hz、2 秒、0.3 秒引入攻击。`--no-attack` 为正常对照，`--antennas 2 3 4` 增加二天线，`--case <JSON>` 指定原 `Case` 字段。`--input <目录>` 可直接回放已有 `samples.npy`、`observations.npz`、`metadata.json`，不再通过历史轮次脚本启动。输出包括跟踪观测、导航、评分、汇总和图。`--save-iq` 才额外保存新生成的 RF；不保存时仍记录完整场景参数与种子。
+单源实验的顶部常量默认用同一份四路录波分别选择三/四天线、24 星、45 dB-Hz、2 秒、0.3 秒引入攻击。设置 `ATTACKED = False` 运行正常对照，修改 `ANTENNAS` 增减天线配置，设置 `CASE` 使用 JSON 配置，设置 `INPUT` 回放已有 `samples.npy`、`observations.npz`、`metadata.json`。`SAVE_IQ = True` 才额外保存新生成的 RF。
 
 SDCP 多径完整顺序为：生成 → window_change → verify。核验脚本保留独立 NCO 重建和原有判据，不通过删除失败场景提高结果。
 
@@ -51,7 +51,7 @@ SDCP 多径完整顺序为：生成 → window_change → verify。核验脚本�
 
 ## 版本与归档
 
-日常运行记录 `source_sha256`、实验参数和种子，不再复制源码，不使用旧的逐轮源码缓存。正式实验在生成命令追加 `--freeze-source`，才将当前核心、实验脚本、配置与 requirements 保存进输出的 `code/`。
+日常运行记录 `source_sha256`、实验参数和种子，不再复制源码，不使用旧的逐轮源码缓存。需要把当前源码一并保存时，将生成脚本顶部的 `FREEZE_SOURCE` 改为 `True`。
 
 未冻结源码的 SDCP 实验只能在源码哈希仍匹配时通过源码核验；代码已改就不能把当前实现冒充当时版本。正式要长期复现的结果请显式冻结。
 
