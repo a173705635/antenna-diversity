@@ -3,12 +3,12 @@ import inspect
 import numpy as np
 import pytest
 
-from antenna import antenna_response, build_antenna_model
-from channel_delay import fractional_delay
-from config import Direction
-from gnss import ca_code
-from multipath import detect_multipath, evaluate_multipath, project_out_los
-from presets import default_config
+from core.antenna import antenna_response, build_antenna_model
+from core.channel_delay import fractional_delay
+from core.config import Direction
+from core.gnss import ca_code
+from core.multipath import detect_multipath, evaluate_multipath, project_out_los
+from core.presets import default_config
 
 
 def _acquisition(fs_hz):

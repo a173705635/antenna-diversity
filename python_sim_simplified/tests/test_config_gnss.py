@@ -1,8 +1,8 @@
 import numpy as np
 
-from config import CORNER_NAMES, CWInterferer, MultipathPath, WidebandInterferer
-from gnss import ca_code
-from presets import default_config
+from core.config import CORNER_NAMES, CWInterferer, MultipathPath, WidebandInterferer
+from core.gnss import ca_code
+from core.presets import default_config
 
 
 def test_default_config_uses_mate70_geometry_and_signal_values():

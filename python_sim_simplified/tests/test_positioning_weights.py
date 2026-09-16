@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from test_carrier_positioning import observations
-from positioning import solve_position, solve_code_carrier_float
+from core.positioning import solve_position, solve_code_carrier_float
 
 
 def test_weighted_code_and_float_reject_low_quality_duplicate():

@@ -1,11 +1,11 @@
 import numpy as np
 
-from audit_sdcp_multipath_no_positioning import scores, confirmed, TIMES
-from antenna import build_antenna_model
-from config import MultipathPath
-from gnss import generate_scenario, _multipath_scene
-from presets import default_config
-from audit_sdcp_window_change import change_score, alarm
+from experiments.sdcp_multipath import scores, confirmed, TIMES
+from core.antenna import build_antenna_model
+from core.config import MultipathPath
+from core.gnss import generate_scenario, _multipath_scene
+from core.presets import default_config
+from experiments.sdcp_window_change import change_score, alarm
 
 
 def test_causal_average_and_confirmation_preserve_large_offsets():

@@ -5,9 +5,9 @@ import shutil
 import subprocess
 import sys
 
-from antenna import antenna_response, build_antenna_model
-from pipeline import run_end_to_end
-from presets import default_config
+from core.antenna import antenna_response, build_antenna_model
+from core.pipeline import run_end_to_end
+from core.presets import default_config
 
 
 def test_standalone_copy_runs_without_research_package(tmp_path):
@@ -16,14 +16,14 @@ def test_standalone_copy_runs_without_research_package(tmp_path):
     shutil.copytree(
         source,
         standalone,
-        ignore=shutil.ignore_patterns("tests", "results", "__pycache__"),
+        ignore=shutil.ignore_patterns("tests", "results", "validation", "archive", "__pycache__"),
     )
     environment = os.environ.copy()
     environment["MPLBACKEND"] = "Agg"
     environment["PYTHONWARNINGS"] = "error"
 
     completed = subprocess.run(
-        [sys.executable, str(standalone / "run_end_to_end.py")],
+        [sys.executable, str(standalone / "experiments" / "full_chain.py")],
         cwd=tmp_path,
         env=environment,
         text=True,
@@ -32,7 +32,7 @@ def test_standalone_copy_runs_without_research_package(tmp_path):
 
     assert completed.returncode == 0, completed.stderr
     output_names = {
-        path.stem for path in (standalone / "results").glob("*.png")
+        path.stem for path in (standalone / "results" / "full_chain").glob("*.png")
     }
     assert output_names >= {
         "detailed_rf_dfe_TL",

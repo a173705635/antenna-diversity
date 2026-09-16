@@ -2,17 +2,17 @@ import csv
 
 import numpy as np
 
-from antenna import (
+from core.antenna import (
     antenna_response,
     build_antenna_model,
     interpolate_measured,
     load_measured_pattern,
 )
-from config import (
+from core.config import (
     Direction,
     WavePolarization,
 )
-from presets import default_config, measured_config, parametric_config
+from core.presets import default_config, measured_config, parametric_config
 
 
 def test_antenna_model_owns_only_antenna_inputs():

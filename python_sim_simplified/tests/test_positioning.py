@@ -1,12 +1,12 @@
 import numpy as np
 import pytest
 
-from config import SPEED_OF_LIGHT_MPS, TrackingConfig
-from tracking import track
+from core.config import SPEED_OF_LIGHT_MPS, TrackingConfig
+from core.tracking import track
 
 
 def test_position_and_clock_recovery_and_degenerate_geometry():
-    from positioning import solve_position
+    from core.positioning import solve_position
     receiver = np.array([4e6, 3e6, 4e6])
     satellites = np.array([[2e7, 0, 1e7], [0, 2e7, 1e7], [-2e7, 0, 1e7],
                            [0, -2e7, 1e7], [1e7, 1e7, 2e7], [1e7, 1e7, -2e7]])
@@ -21,7 +21,7 @@ def test_position_and_clock_recovery_and_degenerate_geometry():
 
 
 def test_code_range_common_time_and_period_boundary():
-    from positioning import code_pseudorange
+    from core.positioning import code_pseudorange
     fs = 4.092e6
     starts = np.array([4092, 8184, 12276])
     # Range crosses a 1 ms ambiguity boundary between observation epochs.
@@ -53,7 +53,7 @@ def test_invalid_tracking_returns_failure_without_nan_or_exception():
 
 
 def test_multisatellite_source_matches_geometry_and_sums_before_rf():
-    from run_gps_spp import build_scene, satellite_setup, receiver_reference
+    from core.gps_simulation import build_scene, satellite_setup, receiver_reference
     reference, _ = receiver_reference()
     satellites = satellite_setup()
     signal, config = build_scene(satellites[:2], duration_ms=10)
@@ -73,7 +73,7 @@ def test_multisatellite_source_matches_geometry_and_sums_before_rf():
 
 
 def test_continuous_source_is_diagnostic_opt_in():
-    from run_gps_spp import build_scene, satellite_setup
+    from core.gps_simulation import build_scene, satellite_setup
     satellites = satellite_setup()[:1]
     old, default = build_scene(satellites, 10)
     continuous, control = build_scene(satellites, 10, code_bandwidth_hz=1.8e6)

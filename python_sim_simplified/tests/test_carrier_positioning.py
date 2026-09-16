@@ -3,7 +3,7 @@ import pytest
 
 
 def observations():
-    from run_gps_spp import satellite_setup, receiver_reference
+    from core.gps_simulation import satellite_setup, receiver_reference
     times = np.arange(5)*.01
     satellites = satellite_setup()
     states = np.array([[s['position_m']+s['velocity_mps']*t for s in satellites] for t in times])
@@ -16,7 +16,7 @@ def observations():
 
 
 def test_float_joint_recovery_and_phase_origin_invariance():
-    from positioning import solve_code_carrier_float
+    from core.positioning import solve_code_carrier_float
     states, positions, clocks, code, carrier, biases = observations()
     result = solve_code_carrier_float(states, code, carrier)
     np.testing.assert_allclose(result['position_m'], positions, atol=1e-4)
@@ -29,14 +29,14 @@ def test_float_joint_recovery_and_phase_origin_invariance():
 
 
 def test_joint_rejects_degenerate_geometry():
-    from positioning import solve_code_carrier_float
+    from core.positioning import solve_code_carrier_float
     states, _, _, code, carrier, _ = observations()
     with pytest.raises(ValueError):
         solve_code_carrier_float(np.repeat(states[:, :1], 8, axis=1), code, code)
 
 
 def test_common_time_carrier_sign_and_block_frequency():
-    from positioning import carrier_range
+    from core.positioning import carrier_range
     history = {'success': True, 'epoch_start_samples': np.array([10, 20]),
                'carrier_nco_phase_rad': np.array([3., 5.]),
                'carrier_nco_frequency_hz': np.array([100., 150.])}
@@ -46,7 +46,7 @@ def test_common_time_carrier_sign_and_block_frequency():
 
 
 def test_carrier_constrains_motion_without_static_receiver_prior():
-    from positioning import solve_code_carrier_float, solve_position
+    from core.positioning import solve_code_carrier_float, solve_position
     states, positions, _, code, carrier, _ = observations()
     noisy = code+np.random.default_rng(123).normal(0, 3., code.shape)
     baseline = np.array([solve_position(s, p)['position_m'] for s, p in zip(states, noisy)])
@@ -57,11 +57,3 @@ def test_carrier_constrains_motion_without_static_receiver_prior():
     after -= after.mean(axis=0)
     assert np.linalg.norm(after) < .001
     assert np.linalg.norm(before) > 1.
-
-
-def test_analysis_splits_invalid_observation_epochs():
-    from audit_code_carrier_float import continuous_arcs
-    values = np.ones((6, 8))
-    values[2, 3] = np.nan
-    arcs = continuous_arcs(np.arange(6)*.01, values, values)
-    assert [a.tolist() for a in arcs] == [[0, 1], [3, 4, 5]]

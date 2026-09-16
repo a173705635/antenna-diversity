@@ -1,6 +1,6 @@
 import numpy as np
 
-from channel_delay import apply_channel_delays, delay_phase, fractional_delay
+from core.channel_delay import apply_channel_delays, delay_phase, fractional_delay
 
 
 def test_zero_delay_is_an_exact_copy():

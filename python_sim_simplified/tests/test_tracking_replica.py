@@ -3,9 +3,9 @@
 import numpy as np
 import pytest
 
-from config import TrackingConfig
-from gnss import ca_code
-from tracking import _sample_code, bandlimited_code_replica
+from core.config import TrackingConfig
+from core.gnss import ca_code
+from core.tracking import _sample_code, bandlimited_code_replica
 
 
 def test_bandlimited_replica_preserves_dc_and_periodic_boundary():
@@ -35,44 +35,3 @@ def test_reference_is_opt_in_and_rejects_invalid_bandwidth():
     assert TrackingConfig().code_replica_bandwidth_hz is None
     with pytest.raises(ValueError):
         bandlimited_code_replica(ca_code(1), 1.023e6, -1.0)
-
-
-@pytest.mark.parametrize("doppler", [-1500.0, 1500.0])
-def test_linear_tracking_is_consistent_across_output_sample_rates(doppler):
-    from acquisition import acquire
-    from audit_multipath_baseline import baseline_config
-    from dfe import process_dfe
-    from gnss import _desired_waveform
-    from tracking import track
-
-    cfg = baseline_config()
-    cfg.signal.doppler_hz = doppler
-    cfg.tracking.code_replica_bandwidth_hz = cfg.dfe.cutoff_hz
-    cfg.dfe.output_bits = 0
-    n = np.arange(round(cfg.signal.fs_rf_hz * 0.1))
-    waveform, _, _ = _desired_waveform(cfg, n, n / cfg.signal.fs_rf_hz)
-    phases = []
-    common_decimation = cfg.dfe.decimation
-    common_start_rf = common_decimation * round(
-        cfg.signal.code_delay_chips * cfg.signal.fs_rf_hz
-        / cfg.signal.code_rate_hz / common_decimation
-    )
-    for decimation in (1, common_decimation):
-        cfg.dfe.decimation = decimation
-        channels, info = process_dfe(
-            waveform[None, :], cfg.dfe, cfg.signal.fs_rf_hz, cfg.signal.if_hz
-        )
-        fs_hz = info["fs_out_hz"]
-        acquisition = acquire(channels[0], fs_hz, 1, cfg.signal.code_rate_hz, cfg.acquisition)
-        assert acquisition["success"]
-        # Isolate the correlator: coarse acquisition may select different
-        # physical epochs on different grids. Give both the same start time.
-        # This known-delay initialization is confined to this reference test.
-        acquisition["code_phase_samples"] = common_start_rf // decimation
-        result = track(channels[0], fs_hz, 1, acquisition, cfg.tracking,
-                       cfg.signal.carrier_hz, cfg.signal.code_rate_hz)
-        phases.append(result["code_phase_chips"])
-    # Same physical signal and filter should give the same phase trajectory;
-    # 0.0001 chip is about 3 cm, far below the previous metre-scale discrepancy.
-    difference = (phases[0] - phases[1] + 511.5) % 1023 - 511.5
-    assert np.max(np.abs(difference)) < 1e-4

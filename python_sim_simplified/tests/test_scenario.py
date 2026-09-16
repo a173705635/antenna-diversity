@@ -3,9 +3,9 @@ from dataclasses import replace
 import numpy as np
 import pytest
 
-from config import CORNER_NAMES, Direction, WidebandInterferer
-from gnss import generate_scenario
-from presets import default_config
+from core.config import CORNER_NAMES, Direction, WidebandInterferer
+from core.gnss import generate_scenario
+from core.presets import default_config
 
 
 def test_scenario_public_keys_remain_stable():

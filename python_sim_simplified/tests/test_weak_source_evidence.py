@@ -1,6 +1,6 @@
 """Aligned residual signal should be distinguished from residual noise."""
 import numpy as np
-from weak_source_evidence import source_evidence
+from core.single_source import source_evidence
 
 
 def test_residual_genuine_signal_has_directional_evidence():

@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from l5 import l5q_code, NH20, synchronize_nh
+from core.l5 import l5q_code, NH20, synchronize_nh
 
 
 def test_q5_icd_initial_states():
@@ -32,12 +32,12 @@ def test_nh_search_unknown_phase_frequency_and_offset():
 
 
 def test_l5_rf_dfe_tracking_and_observation():
-    from run_gps_spp import build_scene, satellite_setup
-    from rf import process_rf
-    from dfe import process_dfe
-    from acquisition import acquire
-    from tracking import track
-    from positioning import code_pseudorange
+    from core.gps_simulation import build_scene, satellite_setup
+    from core.rf import process_rf
+    from core.dfe import process_dfe
+    from core.acquisition import acquire
+    from core.tracking import track
+    from core.positioning import code_pseudorange
     satellite = satellite_setup()[1]
     scene, cfg = build_scene([satellite], 100, signal_kind='L5Q')
     assert cfg.signal.fs_rf_hz == 33e6 and cfg.dfe.decimation == 1

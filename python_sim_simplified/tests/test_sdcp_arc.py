@@ -1,5 +1,5 @@
 import pytest
-from sdcp_arc import SDCPArc
+from core.sdcp_arc import SDCPArc
 
 
 def step(m,t,**kw):

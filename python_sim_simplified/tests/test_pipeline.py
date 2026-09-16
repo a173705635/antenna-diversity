@@ -1,13 +1,13 @@
 import numpy as np
 import pytest
 
-from config import SPEED_OF_LIGHT_MPS
-from metrics import (
+from core.config import SPEED_OF_LIGHT_MPS
+from core.metrics import (
     acquisition_code_bias_chips,
     tracking_code_bias_chips,
 )
-from pipeline import run_end_to_end
-from presets import default_config
+from core.pipeline import run_end_to_end
+from core.presets import default_config
 
 
 def test_pipeline_runs_four_branches_and_tracks_an_antijam_branch():

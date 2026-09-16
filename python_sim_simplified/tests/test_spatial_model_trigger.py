@@ -1,8 +1,8 @@
 """A genuine anisotropic sky must not trigger a spatial null."""
 import numpy as np
-from single_source_receiver_spatial import residual_trigger
-from signal_recovery import sky,steering
-from presets import mate70_phase_centers
+from core.single_source import residual_trigger
+from core.recovery_geometry import sky,steering
+from core.presets import mate70_phase_centers
 
 
 def test_genuine_anisotropic_sky_does_not_trigger():

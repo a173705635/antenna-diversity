@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from pipeline import run_end_to_end
-from presets import default_config
+from core.pipeline import run_end_to_end
+from core.presets import default_config
 
 
 EXPECTED = {

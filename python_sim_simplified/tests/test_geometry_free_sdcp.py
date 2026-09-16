@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from sdcp import geometry_free_sdcp
+from core.sdcp import geometry_free_sdcp
 
 
 def test_geometry_cancels_but_static_bias_is_indistinguishable():

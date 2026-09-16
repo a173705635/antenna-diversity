@@ -1,9 +1,9 @@
 import numpy as np
 
-from acquisition import acquire
-from config import AcquisitionConfig, TrackingConfig
-from gnss import ca_code
-from tracking import estimate_cn0_db_hz, track
+from core.acquisition import acquire
+from core.config import AcquisitionConfig, TrackingConfig
+from core.gnss import ca_code
+from core.tracking import estimate_cn0_db_hz, track
 
 
 def receiver_signal(

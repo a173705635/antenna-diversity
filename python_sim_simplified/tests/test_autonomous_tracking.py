@@ -1,9 +1,9 @@
 import numpy as np
 
-from config import TrackingConfig, AcquisitionConfig
-from gnss import ca_code
-from tracking import track
-from autonomous_tracking import receive
+from core.config import TrackingConfig, AcquisitionConfig
+from core.gnss import ca_code
+from core.tracking import track
+from core.autonomous_tracking import receive
 
 
 def samples():

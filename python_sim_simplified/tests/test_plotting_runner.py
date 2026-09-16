@@ -7,10 +7,10 @@ import sys
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from pipeline import run_end_to_end
-from plotting import plot_detailed_results, plot_multipath_results, plot_results
-from presets import default_config
-from run_end_to_end import save_results_figures
+from core.pipeline import run_end_to_end
+from core.plotting import plot_detailed_results, plot_multipath_results, plot_results
+from core.presets import default_config
+from experiments.full_chain import save_results_figures
 
 
 def test_plot_results_returns_seven_independent_figures():
@@ -164,14 +164,14 @@ def test_detected_path_gets_an_independent_angle_figure():
         plt.close(figure)
 
 
-def test_direct_runner_does_not_show_on_noninteractive_backend():
-    script = Path(__file__).resolve().parents[1] / "run_end_to_end.py"
+def test_direct_runner_does_not_show_on_noninteractive_backend(tmp_path):
+    script = Path(__file__).resolve().parents[1] / "experiments" / "full_chain.py"
     environment = os.environ.copy()
     environment["MPLBACKEND"] = "Agg"
     environment["PYTHONWARNINGS"] = "error"
 
     completed = subprocess.run(
-        [sys.executable, str(script)],
+        [sys.executable, str(script), "--output", str(tmp_path / "figures")],
         cwd=script.parents[1],
         env=environment,
         text=True,

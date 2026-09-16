@@ -3,7 +3,7 @@ import pytest
 
 
 def test_recorded_iq_preserves_signed_components(tmp_path):
-    from audit_real_gnss import read_iq8
+    from core.recorded_receiver import read_iq8
     path = tmp_path/'iq.bin'
     path.write_bytes(bytes([127, 128, 255, 1, 0, 17]))
     np.testing.assert_array_equal(read_iq8(path, 1, 2), [-1+1j, 17j])
@@ -12,9 +12,9 @@ def test_recorded_iq_preserves_signed_components(tmp_path):
 def test_costas_tracking_does_not_integrate_navigation_bit_flips():
     # Same carrier/code with and without 50-bps data. A full-angle PLL
     # incorrectly puts the data sign changes into its accumulated NCO phase.
-    from config import TrackingConfig
-    from gnss import ca_code
-    from tracking import track
+    from core.config import TrackingConfig
+    from core.gnss import ca_code
+    from core.tracking import track
     fs = 1.023e6
     n = np.arange(307*1023)
     x = ca_code(7)[n % 1023]*np.exp(1j*(.2+2*np.pi*40*n/fs))
@@ -31,7 +31,7 @@ def test_costas_tracking_does_not_integrate_navigation_bit_flips():
 
 
 def test_lnav_parity_recovers_payload_and_rejects_every_single_bit_error():
-    from audit_real_gnss import decode_lnav_word
+    from core.gps_lnav import decode_lnav_word
     # RTKLIB decode_word reference vectors; previous D29/D30 occupy bits 31/30.
     for word, payload in [(0,0), (0x2000002a,0x800000),
                           (0x22c00012,0x8b0000), (0x5d3fffc4,0x8b0000)]:
@@ -41,7 +41,7 @@ def test_lnav_parity_recovers_payload_and_rejects_every_single_bit_error():
 
 
 def test_constant_prompt_is_not_navigation_evidence_even_if_zero_words_pass_parity():
-    from audit_real_gnss import navigation_check
+    from core.gps_lnav import navigation_check
     result=navigation_check({'prompt':np.ones(9000,dtype=complex)})
     assert result['valid_words'] > 0  # all-zero GPS words pass parity
     assert result.get('demodulation_evidence') is False

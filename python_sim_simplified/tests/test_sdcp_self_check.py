@@ -1,5 +1,5 @@
 import numpy as np
-from sdcp_self_check import detect, SelfCheckConfig
+from core.sdcp_self_check import detect, SelfCheckConfig
 
 
 def run(r, **kw):

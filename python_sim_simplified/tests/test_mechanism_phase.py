@@ -1,7 +1,10 @@
 from pathlib import Path
 import json
 import numpy as np
-from mechanism_phase import phase_prediction
+import pytest
+from core.mechanism_phase import phase_prediction
+
+pytestmark = pytest.mark.local_evidence
 
 
 def fixture():

@@ -1,5 +1,5 @@
 import numpy as np
-from mechanism_smoothing import smooth_history
+from core.mechanism_smoothing import smooth_history
 
 
 def record(arc):

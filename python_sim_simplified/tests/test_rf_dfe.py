@@ -1,8 +1,8 @@
 import numpy as np
 
-from config import DFEConfig, RFConfig, RFStage
-from dfe import design_decimator, process_dfe
-from rf import process_rf
+from core.config import DFEConfig, RFConfig, RFStage
+from core.dfe import design_decimator, process_dfe
+from core.rf import process_rf
 
 
 def test_rf_is_repeatable_and_adc_codes_are_signed_integers():

@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from config import BlindNullConfig
-from diversity import combine_blind_null, combine_known, combine_lcmv
+from core.config import BlindNullConfig
+from core.diversity import combine_blind_null, combine_known, combine_lcmv
 
 
 def test_known_combiners_have_unit_target_response():
