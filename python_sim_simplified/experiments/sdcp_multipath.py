@@ -25,7 +25,7 @@ from core.gnss import generate_scenario, _multipath_scene
 from core.presets import default_config
 from core.sdcp_observation import raw_sdcp, receive as receive_observation
 from core.provenance import source_hashes, freeze_source
-from experiments.sdcp_support import save_json, statistics, verify_sources, plot_case_scores
+from experiments.sdcp_support import save_json, statistics, verify_sources, plot_case_scores, case_plot_title
 from experiments.paths import RESULTS, reset_output
 
 # 实验参数：时间以秒计，载波距离以米计；表格和图中转换为毫米。
@@ -35,26 +35,36 @@ FREEZE_SOURCE = False
 
 CALIBRATION_SEEDS = (11900, 11902, 11904)
 TEST_SEEDS = (12000, 12002, 12004)
-TIMES = np.arange(200, 1491)*.001
+DURATION_MS = 1500  # 唯一时长设置；例如改成 700。
+OBSERVATION_START_MS = 200
+END_MARGIN_MS = 10
+TAIL_DURATION_MS = 400
 WINDOW = 200
 STRIDE = 10
 CONFIRM = 3
 MARGIN = 1.25
 
 
+def analysis_timing(duration_ms):
+    """共同观测网格留出末端 10 ms；尾段取记录最后 400 ms。"""
+    times = np.arange(OBSERVATION_START_MS, duration_ms-END_MARGIN_MS+1)*.001
+    tail_start_s = (duration_ms-TAIL_DURATION_MS)*.001
+    return times, tail_start_s
+
+
 def cases():
     result = [dict(name=n, kind=n) for n in ('los', 'hardware', 'drift')]
     specs = [
-        ('mp_start_strong', -3, .3, 90, 0, 110, 15),
-        ('mp_late_strong', -3, .3, 90, .6, 110, 15),
-        ('mp_start_weak', -20, .3, 90, 0, 110, 15),
-        ('mp_late_weak', -20, .3, 90, .6, 110, 15),
-        ('mp_short', -6, .05, 90, .6, 110, 15),
-        ('mp_long', -6, 1.2, 90, .6, 110, 15),
-        ('mp_phase0', -6, .3, 0, .6, 110, 15),
-        ('mp_phase180', -6, .3, 180, .6, 110, 15),
-        ('mp_other_direction', -6, .3, 90, .6, 210, 35),
-        ('mp_both_diff', -6, .3, 90, .6, 110, 15),
+        ('mp_t0ms_p-3dB_d0p3chip_phi90_az110_el15', -3, .3, 90, 0, 110, 15),
+        ('mp_t600ms_p-3dB_d0p3chip_phi90_az110_el15', -3, .3, 90, .6, 110, 15),
+        ('mp_t0ms_p-20dB_d0p3chip_phi90_az110_el15', -20, .3, 90, 0, 110, 15),
+        ('mp_t600ms_p-20dB_d0p3chip_phi90_az110_el15', -20, .3, 90, .6, 110, 15),
+        ('mp_t600ms_p-6dB_d0p05chip_phi90_az110_el15', -6, .05, 90, .6, 110, 15),
+        ('mp_t600ms_p-6dB_d1p2chip_phi90_az110_el15', -6, 1.2, 90, .6, 110, 15),
+        ('mp_t600ms_p-6dB_d0p3chip_phi0_az110_el15', -6, .3, 0, .6, 110, 15),
+        ('mp_t600ms_p-6dB_d0p3chip_phi180_az110_el15', -6, .3, 180, .6, 110, 15),
+        ('mp_t600ms_p-6dB_d0p3chip_phi90_az210_el35', -6, .3, 90, .6, 210, 35),
+        ('mp_t600ms_p-6dB_d0p3chip_phi90_az110_el15', -6, .3, 90, .6, 110, 15),
     ]
     for name, db, delay, phase, onset, az, el in specs:
         result.append(dict(name=name, kind='multipath', power_db=db,
@@ -66,14 +76,17 @@ def cases():
 def scores(residual):
     """绝对残差的因果均值；保留固定偏差，不做前后窗口相减。"""
     ends = np.arange(WINDOW-1, len(residual), STRIDE)
-    return ends, np.convolve(residual, np.ones(WINDOW)/WINDOW, mode='valid')[::STRIDE]
+    cumulative = np.r_[0., np.cumsum(residual)]
+    means = (cumulative[WINDOW:]-cumulative[:-WINDOW])/WINDOW
+    return ends, means[::STRIDE]
 
 
 def confirmed(score, threshold):
     """每 STRIDE 个采样判决一次，连续 CONFIRM 次越限才确认报警。"""
     exceed = np.abs(score) > threshold
     alarm = np.zeros(len(score), dtype=bool)
-    alarm[CONFIRM-1:] = np.convolve(exceed.astype(int), np.ones(CONFIRM, int), 'valid') == CONFIRM
+    count = np.r_[0, np.cumsum(exceed)]
+    alarm[CONFIRM-1:] = (count[CONFIRM:]-count[:-CONFIRM]) == CONFIRM
     return alarm
 
 
@@ -87,23 +100,27 @@ def receive(signal, cfg, seed, out, name, hardware=False):
     return h
 
 
-def residual(first, second, cfg, geometry):
+def residual(first, second, cfg, geometry, times):
     fs = cfg.signal.fs_rf_hz/cfg.dfe.decimation
     for h in (first, second):
-        assert TIMES[0] >= h['epoch_start_samples'][0]/fs
-        assert TIMES[-1] < h['epoch_start_samples'][-1]/fs + .001
-    return raw_sdcp(first, second, fs, TIMES, cfg.signal.wavelength_m)-geometry
+        assert times[0] >= h['epoch_start_samples'][0]/fs
+        assert times[-1] < h['epoch_start_samples'][-1]/fs + .001
+    return raw_sdcp(first, second, fs, times, cfg.signal.wavelength_m)-geometry
 
 
 def run_simulation():
     """生成标定和测试数据，冻结门限，保存双路 NCO 与初次判决。"""
     # 1. 配置与来源记录。重跑只清理本实验的固定输出目录。
+    minimum_ms = OBSERVATION_START_MS + WINDOW-1 + STRIDE*(CONFIRM-1) + END_MARGIN_MS
+    if DURATION_MS < minimum_ms:
+        raise ValueError(f'Multipath detection needs at least {minimum_ms} ms for a complete window and confirmation; got {DURATION_MS} ms.')
     out = reset_output(OUTPUT.name)
     (out/'.gitattributes').write_text('** -text\n', encoding='utf-8')
     started = time.perf_counter()
     cfg = default_config()
     cfg.phone.active_antennas = ('TL', 'TR')
-    cfg.signal.duration_ms = cfg.tracking.max_epochs = 1500
+    cfg.signal.duration_ms = cfg.tracking.max_epochs = DURATION_MS
+    times, tail_start_s = analysis_timing(cfg.signal.duration_ms)
     cfg.signal.multipath_paths = []
     cfg.interferers = []
     cfg.tracking.carrier_discriminator = 'costas'
@@ -116,7 +133,8 @@ def run_simulation():
     save_json(out/'plan.json', dict(cases=cases(), calibration_seeds=CALIBRATION_SEEDS,
         test_seeds=TEST_SEEDS, window_samples=WINDOW, stride_samples=STRIDE,
         confirmation=CONFIRM, margin=MARGIN, observation_interval_s=.001,
-        ignored_start_s=.2, late_onset_ramp_s=.01, duration_s=1.5,
+        ignored_start_s=times[0], late_onset_ramp_s=.01,
+        duration_s=cfg.signal.duration_ms/1000, tail_start_s=tail_start_s,
         phase_policy='Raw NCO, no wrap, no centering, no integer adjustment.',
         threshold='1.25 times largest absolute calibration window mean; frozen before tests.',
         assumptions='Exact known LOS geometry; zero calibrated hardware offset; controlled initial carrier branch.',
@@ -142,11 +160,11 @@ def run_simulation():
     for seed in CALIBRATION_SEEDS:
         a = receive(scene[0], cfg, seed, out, f'cal_{seed}_A')
         b = receive(scene[1], cfg, seed+1, out, f'cal_{seed}_B')
-        r = residual(a,b,cfg,geometry)
+        r = residual(a,b,cfg,geometry,times)
         ends, score = scores(r)
         calibration.append(float(np.max(abs(score))))
-        np.savez_compressed(out/f'cal_{seed}_decision.npz', time_s=TIMES,
-            residual_m=r, decision_time_s=TIMES[ends], score_m=score)
+        np.savez_compressed(out/f'cal_{seed}_decision.npz', time_s=times,
+            residual_m=r, decision_time_s=times[ends], score_m=score)
     threshold = MARGIN*max(calibration)
     save_json(out/'threshold.json', dict(threshold_m=threshold,
         calibration_max_abs_mean_m=calibration, margin=MARGIN, geometry_m=geometry,
@@ -185,27 +203,30 @@ def run_simulation():
         for seed in TEST_SEEDS:
             a = receive(signal_a,cfg,seed,out,f'{seed}_{name}_A') if is_multipath else clean_a[seed]
             b = receive(signal_b,cfg,seed+1,out,f'{seed}_{name}_B',name=='hardware')
-            r = residual(a,b,cfg,geometry)
+            r = residual(a,b,cfg,geometry,times)
             ends, score = scores(r)
-            dt = TIMES[ends]
+            dt = times[ends]
             alarm = confirmed(score,threshold)
             onset = case.get('onset_s',.4 if name=='drift' else 0.)
             event = dt >= onset
             first_alarm = dt[alarm & event]
-            quality = np.ones(len(TIMES),bool)
+            quality = np.ones(len(times),bool)
             fs = fs0/cfg.dfe.decimation
             for h in (a,b):
-                ix = np.searchsorted(h['epoch_start_samples']/fs,TIMES,side='right')-1
+                ix = np.searchsorted(h['epoch_start_samples']/fs,times,side='right')-1
                 quality &= (h['phase_lock_metric'][ix]>=.8) & (abs(h['pll_error_rad'][ix])<np.pi/2)
-            np.savez_compressed(out/f'{seed}_{name}_decision.npz', time_s=TIMES,
+            np.savez_compressed(out/f'{seed}_{name}_decision.npz', time_s=times,
                 residual_m=r, decision_time_s=dt, score_m=score, alarm=alarm, quality=quality)
-            row = dict(case=name, seed=seed, detected=bool(len(first_alarm)),
+            row = dict(case=name, seed=seed,
+                assessment_status='evaluated' if np.any(event) else 'not_evaluated_event_outside_record',
+                detected=bool(len(first_alarm)) if np.any(event) else None,
+                full_post_event_window=bool(np.any(dt >= onset+(WINDOW-1)*.001)),
                 first_alarm_s=float(first_alarm[0]) if len(first_alarm) else None,
                 delay_s=float(first_alarm[0]-onset) if len(first_alarm) else None,
                 event_alarm_count=int(np.sum(alarm & event)), event_decisions=int(np.sum(event)),
                 pre_event_alarm_count=int(np.sum(alarm & ~event)),
-                tail_score_mean_mm=float(np.mean(score[dt>=1.1])*1000),
-                tail_residual=statistics(r[TIMES>=1.1]), all_residual=statistics(r),
+                tail_score_mean_mm=float(np.mean(score[dt>=tail_start_s])*1000),
+                tail_residual=statistics(r[times>=tail_start_s]), all_residual=statistics(r),
                 quality_fraction=float(np.mean(quality)))
             rows.append(row)
             save_json(out/'results.json', rows)
@@ -239,8 +260,8 @@ def phase_distance(path, times, fs, wavelength):
 def plot_paired_changes(traces, seed, out):
     fig=plt.figure(figsize=(14,18),layout='constrained')
     panels=fig.add_gridspec(3,2,hspace=.12)
-    names=('mp_late_strong','mp_both_diff','mp_phase0',
-           'mp_late_weak','mp_long','mp_other_direction')
+    names=('mp_t600ms_p-3dB_d0p3chip_phi90_az110_el15','mp_t600ms_p-6dB_d0p3chip_phi90_az110_el15','mp_t600ms_p-6dB_d0p3chip_phi0_az110_el15',
+           'mp_t600ms_p-20dB_d0p3chip_phi90_az110_el15','mp_t600ms_p-6dB_d1p2chip_phi90_az110_el15','mp_t600ms_p-6dB_d0p3chip_phi90_az210_el35')
     for panel,name in zip(panels,names):
         rows=panel.subgridspec(3,1,hspace=.05)
         upper=fig.add_subplot(rows[0])
@@ -253,7 +274,7 @@ def plot_paired_changes(traces, seed, out):
                    label='B: change from LOS-only reference')
         lower.plot(d['time_s'],d['paired_B_mm']-d['paired_A_mm'],color='tab:green',lw=.9,
                    label='SDCP change = B change - A change')
-        upper.set(title=name,ylabel='A change (mm)')
+        upper.set(title=case_plot_title(name),ylabel='A change (mm)')
         middle.set_ylabel('B change (mm)')
         upper.tick_params(labelbottom=False)
         middle.tick_params(labelbottom=False)
@@ -276,6 +297,10 @@ def verify_and_plot(out):
     assert completion['records'] == len(rows) == len(plan['cases'])*len(plan['test_seeds'])
     assert hashlib.sha256((out/'threshold.json').read_bytes()).hexdigest() == completion['threshold_sha256']
     source_mode = verify_sources(out, plan['source_sha256'])
+    tail_start_s = plan['tail_start_s']
+    window = plan['window_samples']
+    stride = plan['stride_samples']
+    confirmation = plan['confirmation']
     fs = cfg['signal']['fs_rf_hz']/cfg['dfe']['decimation']
     wavelength = 299792458./cfg['signal']['carrier_hz']
     geom = threshold['geometry_m']
@@ -290,7 +315,7 @@ def verify_and_plot(out):
             recomputed = (phase_distance(out/f'cal_{seed}_B.npz',times,fs,wavelength)
                 -phase_distance(out/f'cal_{seed}_A.npz',times,fs,wavelength)-geom)
             np.testing.assert_allclose(recomputed,d['residual_m'],atol=1e-10,rtol=0)
-            means = np.array([np.mean(recomputed[j-199:j+1]) for j in range(199,len(times),10)])
+            means = np.array([np.mean(recomputed[j-window+1:j+1]) for j in range(window-1,len(times),stride)])
             np.testing.assert_allclose(means,d['score_m'],atol=1e-10,rtol=0)
             calibrated.append(float(np.max(abs(means))))
             with np.load(out/f'cal_{seed}_A.npz') as a, np.load(out/f'cal_{seed}_B.npz') as b:
@@ -316,27 +341,29 @@ def verify_and_plot(out):
         b = phase_distance(out/f'{seed}_{name}_B.npz',t,fs,wavelength)
         r = b-a-geom
         np.testing.assert_allclose(r,d['residual_m'],atol=1e-10,rtol=0)
-        means = np.array([np.mean(r[j-199:j+1]) for j in range(199,len(t),10)])
-        dt = t[np.arange(199,len(t),10)]
+        means = np.array([np.mean(r[j-window+1:j+1]) for j in range(window-1,len(t),stride)])
+        dt = t[np.arange(window-1,len(t),stride)]
         np.testing.assert_array_equal(dt,d['decision_time_s'])
         np.testing.assert_allclose(means,d['score_m'],atol=1e-10,rtol=0)
-        alarm = np.array([j>=2 and all(abs(means[j-2:j+1])>limit) for j in range(len(means))])
+        alarm = np.array([j>=confirmation-1 and all(abs(means[j-confirmation+1:j+1])>limit) for j in range(len(means))])
         np.testing.assert_array_equal(alarm,d['alarm'])
         onset = c.get('onset_s',.4 if name=='drift' else 0.)
         event = dt>=onset
         fired = dt[event & alarm]
-        assert bool(len(fired)) == row['detected']
+        assert (bool(len(fired)) if np.any(event) else None) == row['detected']
+        assert row['assessment_status'] == ('evaluated' if np.any(event) else 'not_evaluated_event_outside_record')
+        assert row['full_post_event_window'] == bool(np.any(dt >= onset+(window-1)*plan['observation_interval_s']))
         assert int(np.sum(event & alarm)) == row['event_alarm_count']
         assert int(np.sum(event)) == row['event_decisions']
         assert int(np.sum(~event & alarm)) == row['pre_event_alarm_count']
         if len(fired):
             assert fired[0] == row['first_alarm_s']
             assert fired[0]-onset == row['delay_s']
-        for mask,key in ((t>=1.1,'tail_residual'),(t>=.2,'all_residual')):
+        for mask,key in ((t>=tail_start_s,'tail_residual'),(t>=plan['ignored_start_s'],'all_residual')):
             x=r[mask]*1000
             for k,v in dict(mean_mm=np.mean(x),std_mm=np.std(x),rms_mm=np.sqrt(np.mean(x*x)),max_abs_mm=np.max(abs(x))).items():
                 np.testing.assert_allclose(v,row[key][k],atol=1e-7,rtol=0)
-        np.testing.assert_allclose(np.mean(means[dt>=1.1])*1000,row['tail_score_mean_mm'],atol=1e-7,rtol=0)
+        np.testing.assert_allclose(np.mean(means[dt>=tail_start_s])*1000,row['tail_score_mean_mm'],atol=1e-7,rtol=0)
         quality = np.ones(len(t),bool)
         for file in (a_file,out/f'{seed}_{name}_B.npz'):
             with np.load(file) as h:
@@ -347,8 +374,8 @@ def verify_and_plot(out):
         clean_a = phase_distance(out/f'{seed}_clean_A.npz',t,fs,wavelength)
         clean_b = phase_distance(out/f'{seed}_los_B.npz',t,fs,wavelength)
         pa,pb = (a-clean_a)*1000,(b-clean_b)*1000
-        enriched.append(dict(row,paired_A_tail_mm=float(np.mean(pa[t>=1.1])),
-            paired_B_tail_mm=float(np.mean(pb[t>=1.1]))))
+        enriched.append(dict(row,paired_A_tail_mm=float(np.mean(pa[t>=tail_start_s])),
+            paired_B_tail_mm=float(np.mean(pb[t>=tail_start_s]))))
         d['paired_A_mm']=pa
         d['paired_B_mm']=pb
         traces[name,seed] = d
@@ -357,7 +384,7 @@ def verify_and_plot(out):
     plot_case_scores(plan,
         {key:(d['decision_time_s'],d['score_m'],d['alarm']) for key,d in traces.items()},
         limit,'200 ms mean (mm)','Absolute SDCP residual',out/'all_cases.png')
-    selected=('los','mp_late_strong','mp_long','mp_both_diff','hardware','drift')
+    selected=('los','mp_t600ms_p-3dB_d0p3chip_phi90_az110_el15','mp_t600ms_p-6dB_d1p2chip_phi90_az110_el15','mp_t600ms_p-6dB_d0p3chip_phi90_az110_el15','hardware','drift')
     fig,axs=plt.subplots(3,2,figsize=(13,11))
     for ax,name in zip(axs.flat,selected):
         d=traces[name,plan['test_seeds'][0]]
@@ -366,7 +393,7 @@ def verify_and_plot(out):
         ax.scatter(d['decision_time_s'][d['alarm']],d['score_m'][d['alarm']]*1000,s=8,color='red',label='Confirmed alarm')
         ax.axhline(limit*1000,color='black',ls='--',lw=.7)
         ax.axhline(-limit*1000,color='black',ls='--',lw=.7)
-        ax.set(title=name,xlabel='Time (s)',ylabel='Residual (mm)')
+        ax.set(title=case_plot_title(name),xlabel='Time (s)',ylabel='Residual (mm)')
         ax.grid(alpha=.2)
     axs.flat[0].legend(fontsize=8)
     fig.tight_layout()
@@ -379,14 +406,14 @@ def verify_and_plot(out):
         approach='Separate reconstruction of NCO phase, explicit window means and confirmation loops; quality and metrics checked.',
         verifier_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
     (out/'verification.json').write_text(json.dumps(checks,indent=2),encoding='utf-8')
-    lines=['| 场景 | 报警记录数 | 事件后报警判定数/判定数 | 首次报警延迟 ms | 尾段平均 SDCP mm | A/B 配对载波变化 mm |',
+    lines=['| 场景 | 报警/已评估记录数（0/0 表示未评估） | 事件后报警判定数/判定数 | 首次报警延迟 ms | 尾段平均 SDCP mm | A/B 配对载波变化 mm |',
         '|---|---:|---:|---|---|---|']
     for c in plan['cases']:
         rs=[r for r in enriched if r['case']==c['name']]
         delays=' / '.join('—' if r['delay_s'] is None else f"{r['delay_s']*1000:.0f}" for r in rs)
         tail=' / '.join(f"{r['tail_score_mean_mm']:.3f}" for r in rs)
         pair=' / '.join(f"{r['paired_A_tail_mm']:.2f},{r['paired_B_tail_mm']:.2f}" for r in rs)
-        lines.append(f"| {c['name']} | {sum(r['detected'] for r in rs)}/3 | {sum(r['event_alarm_count'] for r in rs)}/{sum(r['event_decisions'] for r in rs)} | {delays} | {tail} | {pair} |")
+        lines.append(f"| {c['name']} | {sum(r['detected'] is True for r in rs)}/{sum(r['detected'] is not None for r in rs)} | {sum(r['event_alarm_count'] for r in rs)}/{sum(r['event_decisions'] for r in rs)} | {delays} | {tail} | {pair} |")
     (out/'result_table.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
     print(json.dumps(dict(threshold_mm=limit*1000,verification=checks,elapsed_s=completion['seconds']),indent=2))
     print('\n'.join(lines))

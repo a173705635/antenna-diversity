@@ -28,11 +28,30 @@ from experiments.paths import RESULTS, reset_output
 
 OUTPUT = RESULTS/'sdcp_baseline'
 FREEZE_SOURCE = False
+DURATION_MS = 1500
+TAIL_DURATION_MS = 400
 
 
 CASES = ('zero', 'fixed_plus10', 'fixed_minus10', 'ramp', 'sine',
          'step', 'gap', 'hardware')
 SEEDS = (11600, 11602, 11604)
+
+
+def analysis_timing(duration_ms):
+    """观测止于记录结束前 10 ms；事件时间保持物理定义，不随记录缩放。"""
+    times = np.arange(10, duration_ms-10+1)*.001
+    intervals = dict(all=[.01, duration_ms/1000], settled=[.2, duration_ms/1000],
+                     before_event=[.2, .55], event=[.6, .8],
+                     tail=[(duration_ms-TAIL_DURATION_MS)/1000, duration_ms/1000])
+    return times, intervals
+
+
+def region_statistics(values):
+    """中断或截短导致没有有效观测时，明确没有统计值，而不是零误差。"""
+    if len(values) == 0:
+        return dict(epochs=0, status='not_evaluated', reason='no_valid_samples_in_region',
+                    mean_mm=None, std_mm=None, rms_mm=None, max_abs_mm=None)
+    return dict(statistics(values), status='evaluated')
 
 
 def phase_degrees(case, t):
@@ -62,12 +81,15 @@ def receive(signal, cfg, seed, out, name, hardware=False):
 def run_simulation():
     """生成双路跟踪记录、统计和图表，保存核验所需的数据哈希。"""
     # 1. 配置无多径接收场景并记录实验来源。
+    if DURATION_MS < 30:
+        raise ValueError("Baseline needs at least 30 ms for its 10 ms observation start and end margin.")
+    times, intervals = analysis_timing(DURATION_MS)
     out = reset_output(OUTPUT.name)
     (out/'.gitattributes').write_text('** -text\n', encoding='utf-8')
     started = time.perf_counter()
     cfg = default_config()
     cfg.phone.active_antennas = ('TL', 'TR')
-    cfg.signal.duration_ms = cfg.tracking.max_epochs = 1500
+    cfg.signal.duration_ms = cfg.tracking.max_epochs = DURATION_MS
     cfg.interferers = []
     cfg.signal.multipath_paths = []
     cfg.tracking.carrier_discriminator = 'costas'
@@ -79,7 +101,7 @@ def run_simulation():
         freeze_source(out)
     bits = np.array([1, 1, -1, 1, -1, -1, 1, -1])
     save_json(out/'manifest.json', {'scope': __doc__, 'cases': CASES, 'seeds': SEEDS,
-        'duration_s': 1.5, 'data_symbols': bits, 'symbol_duration_s': .020,
+        'duration_s': cfg.signal.duration_ms/1000, 'statistic_intervals_s': intervals, 'data_symbols': bits, 'symbol_duration_s': .020,
         'data_note': 'Synthetic repeated 50 bps symbols, not valid LNAV.',
         'gap_s': [.6, .75], 'step_deg': 30., 'step_start_s': .6,
         'ramp_deg_per_s': 20., 'dynamic_start_s': .4, 'sine_amplitude_deg': 10., 'sine_hz': 2.,
@@ -88,7 +110,7 @@ def run_simulation():
         'quality_policy': 'Report only, never used to select statistics.',
         'source_sha256': hashes, 'python_version': sys.version, 'numpy_version': np.__version__})
     # 2. 生成两天线共同时间轴上的信号及合成数据位。
-    print('Generating 1.5 s dual-antenna source', flush=True)
+    print(f'Generating {cfg.signal.duration_ms/1000:g} s dual-antenna source', flush=True)
     scene, truth = generate_scenario(cfg)
     del truth
     fs0 = cfg.signal.fs_rf_hz
@@ -97,13 +119,11 @@ def run_simulation():
         t = np.arange(first, last)/fs0
         scene[:, first:last] *= bits[(np.arange(first, last)//round(.020*fs0)) % len(bits)]
     fs = fs0/cfg.dfe.decimation
-    times = np.arange(10, 1491)*.001
     wave = cfg.signal.wavelength_m
     baseline = np.array(cfg.phone.phase_centers_m['TR'])-np.array(cfg.phone.phase_centers_m['TL'])
     geometry = float(baseline @ direction_vector(cfg.signal.true_direction))
-    masks = {'all': times >= .01, 'settled': times >= .2,
-             'before_event': (times >= .2) & (times < .55),
-             'event': (times >= .6) & (times < .8), 'tail': times >= 1.1}
+    masks = {name: (times >= start) & (times < stop)
+             for name, (start, stop) in intervals.items()}
     rows, arrays = [], {'time_s': times}
     # 3. 逐种子运行正常 A，逐场景运行 B，并对齐相位与计算响应误差。
     for seed in SEEDS:
@@ -132,18 +152,25 @@ def run_simulation():
                 ix = np.searchsorted(channel['epoch_start_samples']/fs, times, side='right')-1
                 quality &= (channel['phase_lock_metric'][ix] >= .8) & (abs(channel['pll_error_rad'][ix]) < np.pi/2)
             present = ~((times >= .6) & (times < .75)) if case == 'gap' else np.ones(len(times), bool)
-            regions = {region: {'raw_sdcp': statistics(d[mask]),
-                       'truth_error': statistics((d-expected)[mask & present]),
-                       'paired_error': statistics((d-control-injected)[mask & present]),
+            regions = {region: {'raw_sdcp': region_statistics(d[mask]),
+                       'truth_error': region_statistics((d-expected)[mask & present]),
+                       'paired_error': region_statistics((d-control-injected)[mask & present]),
                        'quality_pass': int(quality[mask].sum()), 'quality_total': int(mask.sum())}
                        for region, mask in masks.items()}
             row = {'seed': seed, 'case': case, 'regions': regions}
+            if case == 'gap':
+                row['recovery_status'] = ('observed' if np.any(times >= .75)
+                                          else 'not_evaluated_record_ends_before_recovery')
             fit_mask = times >= .55
             recovered_deg = -(d-control)*360/wave
-            if case == 'ramp':
+            if case in ('ramp', 'sine'):
+                minimum = 2 if case == 'ramp' else 3
+                row['fit_status'] = ('evaluated' if fit_mask.sum() >= minimum
+                                     else 'not_evaluated_insufficient_fit_samples')
+            if case == 'ramp' and row['fit_status'] == 'evaluated':
                 slope, intercept = np.polyfit(times[fit_mask]-.4, recovered_deg[fit_mask], 1)
                 row['ramp_fit'] = {'slope_deg_s': float(slope), 'intercept_deg': float(intercept)}
-            if case == 'sine':
+            if case == 'sine' and row['fit_status'] == 'evaluated':
                 angle = 4*np.pi*(times[fit_mask]-.4)
                 design = np.column_stack([np.sin(angle), np.cos(angle), np.ones(len(angle))])
                 sine, cosine, dc = np.linalg.lstsq(design, recovered_deg[fit_mask], rcond=None)[0]
@@ -215,9 +242,8 @@ def verify_results(root):
     # 2. 逐记录重算；不调用生成阶段的观测与统计函数。
     with np.load(root/'aligned.npz') as arrays:
         times = arrays['time_s']
-        masks = {'all': times >= .01, 'settled': times >= .2,
-                 'before_event': (times >= .2) & (times < .55),
-                 'event': (times >= .6) & (times < .8), 'tail': times >= 1.1}
+        masks = {name: (times >= start) & (times < stop)
+                 for name, (start, stop) in manifest['statistic_intervals_s'].items()}
         for row in summary['rows']:
             seed, case = row['seed'], row['case']
             phase = []
@@ -252,13 +278,20 @@ def verify_results(root):
             np.testing.assert_allclose(expected, arrays[label+'_expected_m'], atol=1e-14, rtol=0)
             fit = times >= .55
             recovered_deg = -(reconstructed-arrays[f'{seed}_zero_d_m'])*360/wave
-            if case == 'ramp':
+            if case in ('ramp', 'sine'):
+                minimum = 2 if case == 'ramp' else 3
+                assert row['fit_status'] == ('evaluated' if fit.sum() >= minimum
+                                             else 'not_evaluated_insufficient_fit_samples')
+            if case == 'gap':
+                assert row['recovery_status'] == ('observed' if np.any(times >= .75)
+                                                  else 'not_evaluated_record_ends_before_recovery')
+            if case == 'ramp' and row['fit_status'] == 'evaluated':
                 design = np.column_stack([times[fit]-.4, np.ones(fit.sum())])
                 slope, intercept = np.linalg.solve(design.T @ design, design.T @ recovered_deg[fit])
                 np.testing.assert_allclose([slope, intercept],
                     [row['ramp_fit']['slope_deg_s'], row['ramp_fit']['intercept_deg']], atol=1e-8, rtol=0)
                 fitted_parameters += 2
-            if case == 'sine':
+            if case == 'sine' and row['fit_status'] == 'evaluated':
                 angle = 4*np.pi*(times[fit]-.4)
                 design = np.column_stack([np.sin(angle), np.cos(angle), np.ones(fit.sum())])
                 sine, cosine, dc = np.linalg.solve(design.T @ design, design.T @ recovered_deg[fit])
@@ -274,6 +307,12 @@ def verify_results(root):
                     assert np.isfinite(x).all()
                     recorded = row['regions'][region][label]
                     assert len(x) == recorded['epochs']
+                    if len(x) == 0:
+                        assert recorded['status'] == 'not_evaluated'
+                        assert recorded['reason'] == 'no_valid_samples_in_region'
+                        assert all(recorded[k] is None for k in ('mean_mm', 'std_mm', 'rms_mm', 'max_abs_mm'))
+                        continue
+                    assert recorded['status'] == 'evaluated'
                     for metric, value in {'mean_mm': np.mean(x)*1000, 'std_mm': np.std(x)*1000,
                         'rms_mm': np.linalg.norm(x)/np.sqrt(len(x))*1000,
                         'max_abs_mm': np.max(abs(x))*1000}.items():

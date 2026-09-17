@@ -56,18 +56,18 @@
 | 场景 | 类型/功率 | 时延 chip | 反射相位 ° | 起始 s | 回波方位/仰角 ° | A 加回波 | B 加回波 |
 |---|---|---:|---:|---:|---|---|---|
 | los | 正常直达波 | — | — | — | — | 否 | 否 |
-| mp_start_strong | -3 dB | 0.3 | 90 | 0 | 110/15 | 是 | 是 |
-| mp_late_strong | -3 dB | 0.3 | 90 | 0.6 | 110/15 | 是 | 是 |
-| mp_start_weak | -20 dB | 0.3 | 90 | 0 | 110/15 | 是 | 是 |
-| mp_late_weak | -20 dB | 0.3 | 90 | 0.6 | 110/15 | 是 | 是 |
-| mp_short | -6 dB | 0.05 | 90 | 0.6 | 110/15 | 是 | 是 |
-| mp_long | -6 dB | 1.2 | 90 | 0.6 | 110/15 | 是 | 是 |
-| mp_phase0 | -6 dB | 0.3 | 0 | 0.6 | 110/15 | 是 | 是 |
-| mp_phase180 | -6 dB | 0.3 | 180 | 0.6 | 110/15 | 是 | 是 |
-| mp_other_direction | -6 dB | 0.3 | 90 | 0.6 | 210/35 | 是 | 是 |
-| mp_both_diff | -6 dB | 0.3 | 90 | 0.6 | 110/15 | 是 | 是 |
+| mp_t0ms_p-3dB_d0p3chip_phi90_az110_el15 | -3 dB | 0.3 | 90 | 0 | 110/15 | 是 | 是 |
+| mp_t600ms_p-3dB_d0p3chip_phi90_az110_el15 | -3 dB | 0.3 | 90 | 0.6 | 110/15 | 是 | 是 |
+| mp_t0ms_p-20dB_d0p3chip_phi90_az110_el15 | -20 dB | 0.3 | 90 | 0 | 110/15 | 是 | 是 |
+| mp_t600ms_p-20dB_d0p3chip_phi90_az110_el15 | -20 dB | 0.3 | 90 | 0.6 | 110/15 | 是 | 是 |
+| mp_t600ms_p-6dB_d0p05chip_phi90_az110_el15 | -6 dB | 0.05 | 90 | 0.6 | 110/15 | 是 | 是 |
+| mp_t600ms_p-6dB_d1p2chip_phi90_az110_el15 | -6 dB | 1.2 | 90 | 0.6 | 110/15 | 是 | 是 |
+| mp_t600ms_p-6dB_d0p3chip_phi0_az110_el15 | -6 dB | 0.3 | 0 | 0.6 | 110/15 | 是 | 是 |
+| mp_t600ms_p-6dB_d0p3chip_phi180_az110_el15 | -6 dB | 0.3 | 180 | 0.6 | 110/15 | 是 | 是 |
+| mp_t600ms_p-6dB_d0p3chip_phi90_az210_el35 | -6 dB | 0.3 | 90 | 0.6 | 210/35 | 是 | 是 |
+| mp_t600ms_p-6dB_d0p3chip_phi90_az110_el15 | -6 dB | 0.3 | 90 | 0.6 | 110/15 | 是 | 是 |
 
-相对功率为复信号幅度平方比。反射相位不是接收点的完整回波相对相位，后者还包含传播时延和空间相位。时延是回波额外传播路径对应的时延，不是载波测距误差。旧单路场景及同方向场景已排除，旧同名结果不可混用；mp_medium 与双路 mp_both_diff 重复，已合并。
+相对功率为复信号幅度平方比。反射相位不是接收点的完整回波相对相位，后者还包含传播时延和空间相位。时延是回波额外传播路径对应的时延，不是载波测距误差。旧单路场景及同方向场景已排除，旧同名结果不可混用；重复参数场景已合并。
 
 ## 5. 观测构造与检测方法
 
@@ -110,16 +110,16 @@ L1 波长约 190.294 mm，G = 32.865664 mm。r 保留原始相位分支，不取
 | 场景 | 报警记录数 | 事件后报警判决/判决总数 | 尾段窗口均值 mm（三个种子） |
 |---|---:|---:|---|
 | los | 0/3 | 0/330 | -0.207 / 0.116 / -95.158 |
-| mp_start_strong | 0/3 | 0/330 | -22.441 / -22.148 / -22.283 |
-| mp_late_strong | 0/3 | 0/267 | -22.451 / -22.157 / -117.440 |
-| mp_start_weak | 0/3 | 0/330 | -3.749 / -3.453 / -3.566 |
-| mp_late_weak | 0/3 | 0/267 | -3.749 / -3.453 / -98.713 |
-| mp_short | 0/3 | 0/267 | -18.639 / -18.418 / -113.688 |
-| mp_long | 0/3 | 0/267 | -0.008 / 0.298 / -94.851 |
-| mp_phase0 | 0/3 | 0/267 | 0.832 / 1.358 / -94.051 |
-| mp_phase180 | 0/3 | 0/267 | -5.922 / -5.658 / -100.872 |
-| mp_other_direction | 0/3 | 0/267 | 23.205 / 23.602 / -71.637 |
-| mp_both_diff | 0/3 | 0/267 | -16.698 / -16.396 / -111.628 |
+| mp_t0ms_p-3dB_d0p3chip_phi90_az110_el15 | 0/3 | 0/330 | -22.441 / -22.148 / -22.283 |
+| mp_t600ms_p-3dB_d0p3chip_phi90_az110_el15 | 0/3 | 0/267 | -22.451 / -22.157 / -117.440 |
+| mp_t0ms_p-20dB_d0p3chip_phi90_az110_el15 | 0/3 | 0/330 | -3.749 / -3.453 / -3.566 |
+| mp_t600ms_p-20dB_d0p3chip_phi90_az110_el15 | 0/3 | 0/267 | -3.749 / -3.453 / -98.713 |
+| mp_t600ms_p-6dB_d0p05chip_phi90_az110_el15 | 0/3 | 0/267 | -18.639 / -18.418 / -113.688 |
+| mp_t600ms_p-6dB_d1p2chip_phi90_az110_el15 | 0/3 | 0/267 | -0.008 / 0.298 / -94.851 |
+| mp_t600ms_p-6dB_d0p3chip_phi0_az110_el15 | 0/3 | 0/267 | 0.832 / 1.358 / -94.051 |
+| mp_t600ms_p-6dB_d0p3chip_phi180_az110_el15 | 0/3 | 0/267 | -5.922 / -5.658 / -100.872 |
+| mp_t600ms_p-6dB_d0p3chip_phi90_az210_el35 | 0/3 | 0/267 | 23.205 / 23.602 / -71.637 |
+| mp_t600ms_p-6dB_d0p3chip_phi90_az110_el15 | 0/3 | 0/267 | -16.698 / -16.396 / -111.628 |
 
 全部记录无确认报警，因此首次报警时刻与延迟均不存在，不应记为 0 ms。本轮没有证据证明当前门限可有效检出双路多径。
 
@@ -129,26 +129,26 @@ L1 波长约 190.294 mm，G = 32.865664 mm。r 保留原始相位分支，不取
 
 | 场景 | A 变化 mm | B 变化 mm | B−A 变化 mm |
 |---|---:|---:|---:|
-| mp_start_strong | 13.056 | -9.169 | -22.225 |
-| mp_late_strong | 13.058 | -9.170 | -22.228 |
-| mp_start_weak | 2.017 | -1.531 | -3.548 |
-| mp_late_weak | 2.018 | -1.531 | -3.549 |
-| mp_short | 10.809 | -7.629 | -18.438 |
-| mp_long | -0.080 | 0.103 | 0.183 |
-| mp_phase0 | 6.042 | 7.081 | 1.039 |
-| mp_phase180 | -4.009 | -9.753 | -5.744 |
-| mp_other_direction | -11.893 | 11.542 | 23.435 |
-| mp_both_diff | 9.565 | -6.916 | -16.481 |
+| mp_t0ms_p-3dB_d0p3chip_phi90_az110_el15 | 13.056 | -9.169 | -22.225 |
+| mp_t600ms_p-3dB_d0p3chip_phi90_az110_el15 | 13.058 | -9.170 | -22.228 |
+| mp_t0ms_p-20dB_d0p3chip_phi90_az110_el15 | 2.017 | -1.531 | -3.548 |
+| mp_t600ms_p-20dB_d0p3chip_phi90_az110_el15 | 2.018 | -1.531 | -3.549 |
+| mp_t600ms_p-6dB_d0p05chip_phi90_az110_el15 | 10.809 | -7.629 | -18.438 |
+| mp_t600ms_p-6dB_d1p2chip_phi90_az110_el15 | -0.080 | 0.103 | 0.183 |
+| mp_t600ms_p-6dB_d0p3chip_phi0_az110_el15 | 6.042 | 7.081 | 1.039 |
+| mp_t600ms_p-6dB_d0p3chip_phi180_az110_el15 | -4.009 | -9.753 | -5.744 |
+| mp_t600ms_p-6dB_d0p3chip_phi90_az210_el35 | -11.893 | 11.542 | 23.435 |
+| mp_t600ms_p-6dB_d0p3chip_phi90_az110_el15 | 9.565 | -6.916 | -16.481 |
 
 中途强多径导致约 −22.23 mm 差分变化，但仍小于 119.83 mm 门限。0° 反射相位组两路各有约 6～7 mm 变化，差分仅约 1.04 mm，说明不同回波方向不保证空间单差足够大。长时延组在本参数下的差分较小，不能推广为所有长时延回波都无影响。
 
 启动场景与 LOS 是不同接收机运行，初始化可落入不同半周分支；特别是种子 12004，不能把配对差值中的半周成分全部归因于物理多径。
 
-![分轴显示 A、B 与差分的离线载波变化](results/sdcp_multipath/paired_carrier_changes.png)
+![分轴显示 A、B 与差分的离线载波变化](results/sdcp_multipath/named_view/paired_carrier_changes.png)
 
 图中每个场景从上到下分别是 A、B、B−A，避免三条曲线互相遮挡。虚线为 600 ms 回波进入时刻；图示是离线对照，不是报警统计量。
 
-![双路多径与纯 LOS 的绝对残差](results/sdcp_multipath/report_cases.png)
+![双路多径与纯 LOS 的绝对残差](results/sdcp_multipath/named_view/report_cases.png)
 
 本图仅展示本文的双路多径与纯 LOS 场景。每行一个场景，每列一个随机种子；红点仅表示确认报警，本轮没有红点。
 
@@ -180,10 +180,12 @@ run_simulation() 完成配置、直达波/回波、独立标定、测试和落�
 - [完整配置](results/sdcp_multipath/config.json)
 - [冻结门限](results/sdcp_multipath/threshold.json)
 - [标定诊断](results/sdcp_multipath/calibration_diagnostics.json)
-- [本文范围内的逐条统计与配对变化](results/sdcp_multipath/report_results.json)
+- [本文范围内的逐条统计与配对变化](results/sdcp_multipath/named_view/report_results.json)
 - [删除方案前的历史核验记录](results/sdcp_multipath/verification.json)
 - [当前一体化实验源码](experiments/sdcp_multipath.py)
 
 本报告替代并删除旧 SDCP_MULTIPATH_NO_POSITIONING_REPORT.md（48 条旧场景及窗口变化结论）与 results/sdcp_multipath/RUN_SUMMARY.md（重复运行摘要）。旧多径实验计划同步更新到当前范围。原始数据、冻结证据及无多径基线/其他独立专题报告保留，避免将当前范围调整误写成历史实验从未发生。
 
 冻结目录 README 内对已删除旧报告的链接属于历史文本，未改写以保持 SHA256 证据完整；当前查阅入口以本报告和项目 README 为准。
+
+场景名称现已统一为完整参数名。本文图表与筛选数据位于 [named_view](results/sdcp_multipath/named_view/result_table.md)，仅更改展示名称，未重跑 RF；原始运行参数和数组仍保留原名以保护来源记录。映射见 [名称对应表](results/sdcp_multipath/named_view/name_map.json)，原输入哈希见 [展示来源记录](results/sdcp_multipath/named_view/view_provenance.json)。

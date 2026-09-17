@@ -73,6 +73,8 @@ def position_channels(channels, fs_hz, times_s, *, common_travel_s=.075):
     near its end can be used earlier. No receiver reference position is input.
     """
     times=np.asarray(times_s,float)
+    if times.size == 0:
+        return {'status':'not_evaluated_no_observation_times', 'navigation':{}, 'epochs':[]}
     usable={};navigation={};carriers={}
     for prn,h in channels.items():
         nav=decode_lnav(h,fs_hz);navigation[prn]=nav

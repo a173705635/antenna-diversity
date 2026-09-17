@@ -32,12 +32,17 @@ def verify_sources(root, expected):
     return mode
 
 
+def case_plot_title(name):
+    """完整参数名分行显示，避免功率、时延、相位和方向挤在一行。"""
+    return name.replace('_d', '\nd').replace('_az', '\naz')
+
+
 def plot_case_scores(plan, traces, limit, ylabel, title, output):
     """One scenario per row and one independent noise seed per column."""
     import matplotlib.pyplot as plt
 
     fig, axes = plt.subplots(len(plan['cases']), len(plan['test_seeds']),
-                             figsize=(15, 2*len(plan['cases'])),
+                             figsize=(15, 2.5*len(plan['cases'])),
                              sharex=True, sharey='row', squeeze=False,
                              layout='constrained')
     for row, case in enumerate(plan['cases']):
@@ -51,7 +56,7 @@ def plot_case_scores(plan, traces, limit, ylabel, title, output):
             onset = case.get('onset_s', .4 if case['name']=='drift' else 0.)
             if onset > 0:
                 ax.axvline(onset, color='gray', ls=':', lw=.8)
-            ax.set_title(f"{case['name']} | seed {seed}", fontsize=9)
+            ax.set_title(f"{case_plot_title(case['name'])} | seed {seed}", fontsize=9)
             ax.grid(alpha=.2)
             if col == 0:
                 ax.set_ylabel(ylabel, fontsize=9)

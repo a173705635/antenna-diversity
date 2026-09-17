@@ -1,10 +1,12 @@
 import numpy as np
 
-from experiments.sdcp_multipath import scores, confirmed, TIMES, cases
+from experiments.sdcp_multipath import scores, confirmed, analysis_timing, cases
 from core.antenna import build_antenna_model
 from core.config import MultipathPath
 from core.gnss import generate_scenario, _multipath_scene
 from core.presets import default_config
+
+TIMES, _ = analysis_timing(1500)
 
 
 def test_one_entry_runs_simulation_then_verification(monkeypatch, tmp_path):
@@ -71,3 +73,37 @@ def test_common_direction_echo_has_identical_relative_channel_response():
         cfg,build_antenna_model(cfg.phone,cfg.signal.carrier_hz),waveform,t,np.zeros(2)).truth['component']
     np.testing.assert_allclose(echo[0]/scene[0],echo[1]/scene[1],atol=1e-12)
     assert not np.allclose(echo[1]/scene[1], (echo[1]/scene[1])[1000],atol=1e-5)
+
+
+def test_short_record_uses_valid_observation_and_tail_times():
+    from experiments.sdcp_multipath import residual
+
+    cfg = default_config()
+    cfg.signal.duration_ms = 700
+    fs = cfg.signal.fs_rf_hz/cfg.dfe.decimation
+    times, tail_start = analysis_timing(cfg.signal.duration_ms)
+    np.testing.assert_allclose(times[[0, -1]], [.2, .69])
+    assert tail_start == .3
+    starts = np.arange(695)*round(fs*.001)
+    history = dict(epoch_start_samples=starts,
+                   carrier_nco_phase_rad=np.zeros(len(starts)),
+                   carrier_nco_frequency_hz=np.zeros(len(starts)))
+    r = residual(history, history, cfg, 0., times)
+    ends, score = scores(r)
+    assert len(r) == 491 and len(score) == 30
+    assert np.any(times[ends] >= tail_start)
+    assert np.any(times >= tail_start)
+    np.testing.assert_allclose(r, 0.)
+    original_times, original_tail = analysis_timing(1500)
+    np.testing.assert_array_equal(original_times, np.arange(200,1491)*.001)
+    assert original_tail == 1.1
+
+
+def test_multipath_names_describe_all_configured_parameters():
+    for case in cases():
+        if case['kind'] != 'multipath':
+            continue
+        delay = f"{case['delay_chips']:g}".replace('.', 'p')
+        expected = (f"mp_t{case['onset_s']*1000:g}ms_p{case['power_db']:g}dB_d{delay}chip"
+                    f"_phi{case['reflection_deg']:g}_az{case['azimuth_deg']:g}_el{case['elevation_deg']:g}")
+        assert case['name'] == expected

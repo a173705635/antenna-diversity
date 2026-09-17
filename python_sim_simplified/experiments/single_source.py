@@ -47,17 +47,26 @@ def evaluate(record, subset, case):
     available = np.isfinite(errors)
     runs = np.diff(np.flatnonzero(np.r_[True, available, True])) - 1
     init = navigation['initialization_time']
-    score = dict(opportunities=len(errors), solved=int(available.sum()),
+    score = dict(assessment_status='evaluated' if len(errors) else 'not_evaluated_no_post_attack_observations',
+                 initialization_status='initialized' if init is not None else 'not_initialized_in_record',
+                 opportunities=len(errors), solved=int(available.sum()),
                  good20=int((errors <= 20).sum()), error30=int((errors >= 30).sum()),
                  error50=int((errors >= 50).sum()), errors_m=errors,
                  initialization_time=init, attack_start_s=case['attack_start'],
                  initialized_before_attack=init is not None and init < case['attack_start'],
                  initialization_gap_s=None if init is None else case['attack_start'] - init,
-                 longest_unavailable_s=float(runs.max() * .01))
+                 longest_unavailable_s=float(runs.max() * .01) if len(errors) else None)
     return observations, navigation, score
 
 
 def main():
+    if INPUT is None:
+        parameters = (json.loads(CASE.read_text(encoding='utf-8')) if CASE is not None else
+                      dict(duration=DURATION_S, stars=SATELLITES, cn0=CN0_DB_HZ,
+                           attack_start=.3, phase_deg=10., amplitude_db=1., velocity_east=2.))
+        case = Case(**parameters)
+        if case.duration <= .17:
+            raise ValueError('Single-source evaluation needs more than 170 ms for its 150 ms start and 20 ms processing window.')
     output = reset_output(OUTPUT.name)
     if FREEZE_SOURCE:
         freeze_source(output)
@@ -74,10 +83,6 @@ def main():
                 hashes[name] = hashlib.file_digest(stream, 'sha256').hexdigest()
         identity = dict(input=str(INPUT.resolve()), input_sha256=hashes)
     else:
-        parameters = (json.loads(CASE.read_text(encoding='utf-8')) if CASE is not None else
-                      dict(duration=DURATION_S, stars=SATELLITES, cn0=CN0_DB_HZ,
-                           attack_start=.3, phase_deg=10., amplitude_db=1., velocity_east=2.))
-        case = Case(**parameters)
         samples, nominal, codes, times, satellites, radii = generate(case, SEED, ATTACKED)
         record = dict(samples=samples, nominal=nominal, codes=np.array(codes), times=times,
                       satellites=satellites, coarse=np.round((radii + 75000) / 10000) * 10000)
