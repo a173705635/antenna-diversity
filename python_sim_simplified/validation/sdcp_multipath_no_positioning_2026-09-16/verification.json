@@ -1,9 +1,0 @@
-{
-  "records_verified": 48,
-  "calibrations_verified": 3,
-  "source_files_verified": 16,
-  "decision_arrays_verified": 51,
-  "window_change_records_verified": 48,
-  "approach": "Separate reconstruction of NCO phase, explicit window means and confirmation loops; quality and metrics checked.",
-  "verifier_sha256": "7dbd42de747c01dd2cb3b09eb2a36ebd9a5092459d7dc61ec6b7447d870c69f4"
-}

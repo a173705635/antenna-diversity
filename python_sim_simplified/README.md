@@ -8,9 +8,8 @@ experiments/   当前实验：参数、场景、运行、统计和绘图
 configs/       冻结权重等实验配置
 tests/        当前功能与新旧版本数值对照测试
 tools/        冻结版校验与恢复
-archive/       仅本地保留的冻结版，不提交 Git
 results/       实验输出与既有大体积研究数据
-validation/    已归档的独立验证证据（未修改）
+archive/       历史代码、报告与验证证据，仅在本地保留
 ```
 
 ## 运行入口
@@ -22,8 +21,7 @@ validation/    已归档的独立验证证据（未修改）
 | 实验 | 命令 |
 |---|---|
 | 完整 RF→DFE→合并→捕获→跟踪及绘图 | `python -m experiments.full_chain` |
-| 无定位的双通道 SDCP 基线 | `python -m experiments.sdcp_baseline` |
-| SDCP 基线独立核验 | `python -m experiments.verify_sdcp_baseline` |
+| 无定位 SDCP 基线：仿真、绘图与独立核验一次完成 | `python -m experiments.sdcp_baseline` |
 | SDCP 多径：标定、测试、独立复算及绘图一次完成 | `python -m experiments.sdcp_multipath` |
 | 最新单源接收机，比较三/四天线 | `python -m experiments.single_source` |
 | GPS L1 仿真定位 | `python -m experiments.gps_spp` |
@@ -31,6 +29,8 @@ validation/    已归档的独立验证证据（未修改）
 | 真实录波 GPS L1 码定位 | `python -m experiments.recorded_iq` |
 
 单源实验的顶部常量默认用同一份四路录波分别选择三/四天线、24 星、45 dB-Hz、2 秒、0.3 秒引入攻击。设置 `ATTACKED = False` 运行正常对照，修改 `ANTENNAS` 增减天线配置，设置 `CASE` 使用 JSON 配置，设置 `INPUT` 回放已有 `samples.npy`、`observations.npz`、`metadata.json`。`SAVE_IQ = True` 才额外保存新生成的 RF。
+
+SDCP 基线只运行 `python -m experiments.sdcp_baseline`，自动生成数据、绘图并独立核验；全部检查通过后写入 `verification.json`。
 
 SDCP 多径只运行 `python -m experiments.sdcp_multipath`。同一脚本中，`run_simulation()` 负责生成与首次判决，`verify_and_plot()` 从保存的 NCO 独立复算并绘图，`main()` 按顺序调用；无需再运行单独的 verify 脚本。已移除相邻两个 200 ms 窗口均值做差的检测方案及其输出；保留绝对 SDCP 残差的 200 ms 均值判据。核验阶段保留独立 NCO 重建和原有判据，不通过删除失败场景提高结果。
 
