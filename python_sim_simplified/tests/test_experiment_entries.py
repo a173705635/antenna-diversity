@@ -8,8 +8,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 @pytest.mark.parametrize('name', [
     'full_chain', 'gps_spp', 'gps_l1_l5', 'recorded_iq', 'single_source',
-    'sdcp_baseline', 'sdcp_multipath', 'sdcp_window_change',
-    'verify_sdcp_baseline', 'verify_sdcp_multipath',
+    'sdcp_baseline', 'sdcp_multipath',
+    'verify_sdcp_baseline',
 ])
 def test_entry_has_fixed_paths_and_no_argument_parser(name):
     module = importlib.import_module(f'experiments.{name}')

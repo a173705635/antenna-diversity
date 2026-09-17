@@ -15,7 +15,7 @@ validation/    已归档的独立验证证据（未修改）
 
 ## 运行入口
 
-2026-09-16 更新：后续多径研究排除直达波与回波同方向的场景。`sdcp_multipath` 当前为 14 类场景 × 3 组噪声（42 条测试）：11 类不同方向多径及 3 类无多径控制；移除了 `mp_both_common_late`、`mp_both_common_start`，保留 `mp_both_diff`。历史 16 类/48 条结果仍保留原样，不能混作新范围的验收结果。
+2026-09-17 更新：后续多径研究排除直达波与回波同方向、以及仅一路存在多径的场景。`sdcp_multipath` 当前为 13 类场景 × 3 组噪声（39 条测试）：10 类双路不同方向回波场景及 3 类无多径控制。强弱、时延、反射相位、方向、启动/中途进入的对比均保留；`mp_medium` 改为双路后与 `mp_both_diff` 相同，合并到后者。两路相位影响由天线空间响应产生，并非强制相同。历史 16 类/48 条、14 类/42 条结果保留原样；旧同名场景可能只对 B 加多径，应以各次 `plan.json` 的 `channels` 为准，不可混作新场景结果。
 
 在 `python_sim_simplified` 目录执行下列命令，不需要命令行参数。输入、输出和实验参数都固定在对应脚本顶部；要换条件时直接修改这些常量。生成型实验重复运行会先删除并重建自己的固定输出目录，不影响其他实验目录。
 
@@ -24,9 +24,7 @@ validation/    已归档的独立验证证据（未修改）
 | 完整 RF→DFE→合并→捕获→跟踪及绘图 | `python -m experiments.full_chain` |
 | 无定位的双通道 SDCP 基线 | `python -m experiments.sdcp_baseline` |
 | SDCP 基线独立核验 | `python -m experiments.verify_sdcp_baseline` |
-| SDCP 多径实验（含独立标定与留出） | `python -m experiments.sdcp_multipath` |
-| 相邻窗口变化判据 | `python -m experiments.sdcp_window_change` |
-| 多径及窗口变化独立复算、绘图 | `python -m experiments.verify_sdcp_multipath` |
+| SDCP 多径：标定、测试、独立复算及绘图一次完成 | `python -m experiments.sdcp_multipath` |
 | 最新单源接收机，比较三/四天线 | `python -m experiments.single_source` |
 | GPS L1 仿真定位 | `python -m experiments.gps_spp` |
 | GPS L1/L5 仿真定位与冻结权重对照 | `python -m experiments.gps_l1_l5` |
@@ -34,7 +32,9 @@ validation/    已归档的独立验证证据（未修改）
 
 单源实验的顶部常量默认用同一份四路录波分别选择三/四天线、24 星、45 dB-Hz、2 秒、0.3 秒引入攻击。设置 `ATTACKED = False` 运行正常对照，修改 `ANTENNAS` 增减天线配置，设置 `CASE` 使用 JSON 配置，设置 `INPUT` 回放已有 `samples.npy`、`observations.npz`、`metadata.json`。`SAVE_IQ = True` 才额外保存新生成的 RF。
 
-SDCP 多径完整顺序为：生成 → window_change → verify。核验脚本保留独立 NCO 重建和原有判据，不通过删除失败场景提高结果。
+SDCP 多径只运行 `python -m experiments.sdcp_multipath`。同一脚本中，`run_simulation()` 负责生成与首次判决，`verify_and_plot()` 从保存的 NCO 独立复算并绘图，`main()` 按顺序调用；无需再运行单独的 verify 脚本。已移除相邻两个 200 ms 窗口均值做差的检测方案及其输出；保留绝对 SDCP 残差的 200 ms 均值判据。核验阶段保留独立 NCO 重建和原有判据，不通过删除失败场景提高结果。
+
+当前双路多径实验的方法、逐场景结果与限制见 [SDCP 多径验证报告](SDCP_MULTIPATH_REPORT.md)。
 
 ## 修改核心
 
