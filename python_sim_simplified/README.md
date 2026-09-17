@@ -79,3 +79,5 @@ python -m pytest -q
 有本地冻结源码和原始研究观测时，额外执行 `python -m pytest -m local_evidence -q`。显式运行会要求这些输入实际存在，不会静默跳过缺失证据。
 
 验证结果和已知限制见 `REFACTOR_VALIDATION.md`。这次重构改善组织和复现方式，不代表三天线可靠导航问题已经解决。
+
+当前双路多径代码的执行顺序、变量和输出说明见 [代码讲解](SDCP_MULTIPATH_CODE_GUIDE.md)。
