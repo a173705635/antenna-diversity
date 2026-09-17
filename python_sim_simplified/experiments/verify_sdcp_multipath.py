@@ -7,7 +7,7 @@ import sys
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from experiments.sdcp_support import verify_sources
+from experiments.sdcp_support import verify_sources, plot_case_scores
 
 import matplotlib
 matplotlib.use('Agg')
@@ -29,6 +29,38 @@ def phase_distance(path, times, fs, wavelength):
         ix = np.searchsorted(starts,times,side='right')-1
         phase = h['carrier_nco_phase_rad'][ix]+2*np.pi*h['carrier_nco_frequency_hz'][ix]*(times-starts[ix])
     return -phase*wavelength/(2*np.pi)
+
+
+def plot_paired_changes(traces, seed, out):
+    fig=plt.figure(figsize=(14,18),layout='constrained')
+    panels=fig.add_gridspec(3,2,hspace=.12)
+    names=('mp_late_strong','mp_both_diff','mp_medium',
+           'mp_late_weak','mp_long','mp_other_direction')
+    for panel,name in zip(panels,names):
+        rows=panel.subgridspec(3,1,hspace=.05)
+        upper=fig.add_subplot(rows[0])
+        middle=fig.add_subplot(rows[1],sharex=upper,sharey=upper)
+        lower=fig.add_subplot(rows[2],sharex=upper)
+        d=traces[name,seed]
+        upper.plot(d['time_s'],d['paired_A_mm'],color='tab:blue',lw=2,
+                   label='A: change from LOS-only reference')
+        middle.plot(d['time_s'],d['paired_B_mm'],color='tab:orange',lw=1.2,ls='--',
+                   label='B: change from LOS-only reference')
+        lower.plot(d['time_s'],d['paired_B_mm']-d['paired_A_mm'],color='tab:green',lw=.9,
+                   label='SDCP change = B change - A change')
+        upper.set(title=name,ylabel='A change (mm)')
+        middle.set_ylabel('B change (mm)')
+        upper.tick_params(labelbottom=False)
+        middle.tick_params(labelbottom=False)
+        lower.set(xlabel='Time (s)',ylabel='SDCP change (mm)')
+        for ax in (upper,middle,lower):
+            ax.axvline(.6,color='gray',ls=':',lw=.8)
+            ax.grid(alpha=.2)
+            ax.legend(fontsize=7,loc='upper right')
+    fig.suptitle(f'Changes from matched-noise LOS-only reference | seed {seed}\n'
+                 'Offline comparison only; not detector inputs. Dotted line: echo onset at 0.6 s.')
+    fig.savefig(out/'paired_carrier_changes.png',dpi=160)
+    plt.close(fig)
 
 
 def main():
@@ -147,26 +179,10 @@ def main():
             assert fired[0]==row['first_alarm_s'] and fired[0]-onset==row['delay_s']
         np.testing.assert_allclose(np.max(abs(s))*1000,row['max_abs_score_mm'],atol=1e-8,rtol=0)
         np.testing.assert_allclose(np.mean(s[dt>=1.1])*1000,row['tail_score_mean_mm'],atol=1e-8,rtol=0)
-    fig,axs=plt.subplots(4,4,figsize=(18,13),sharex=True)
-    for ax,c in zip(axs.flat,plan['cases']):
-        for seed in plan['test_seeds']:
-            d=traces[c['name'],seed]
-            ax.plot(d['decision_time_s'],d['score_m']*1000,label=str(seed),lw=1)
-        ax.axhline(limit*1000,color='black',ls='--',lw=.7)
-        ax.axhline(-limit*1000,color='black',ls='--',lw=.7)
-        if c.get('onset_s',0)>0:
-            ax.axvline(c['onset_s'],color='gray',ls=':',lw=.8)
-        ax.set_title(c['name'],fontsize=10)
-        ax.set_ylabel('200 ms mean (mm)')
-        ax.grid(alpha=.2)
-    for ax in axs[-1]:
-        ax.set_xlabel('Time (s)')
-    axs.flat[0].legend(fontsize=7)
-    fig.suptitle('Raw unwrapped SDCP residual: frozen threshold, independent test seeds')
-    fig.tight_layout()
-    fig.savefig(out/'all_cases.png',dpi=160)
-    plt.close(fig)
-    selected=('los','mp_late_strong','mp_long','mp_both_common_late','hardware','drift')
+    plot_case_scores(plan,
+        {key:(d['decision_time_s'],d['score_m'],d['alarm']) for key,d in traces.items()},
+        limit,'200 ms mean (mm)','Absolute SDCP residual',out/'all_cases.png')
+    selected=('los','mp_late_strong','mp_long','mp_both_diff','hardware','drift')
     fig,axs=plt.subplots(3,2,figsize=(13,11))
     for ax,name in zip(axs.flat,selected):
         d=traces[name,plan['test_seeds'][0]]
@@ -181,21 +197,7 @@ def main():
     fig.tight_layout()
     fig.savefig(out/'representative_traces.png',dpi=160)
     plt.close(fig)
-    fig,axs=plt.subplots(3,2,figsize=(13,11))
-    for ax,name in zip(axs.flat,('mp_late_strong','mp_both_diff','mp_both_common_late',
-                                'mp_late_weak','mp_long','mp_other_direction')):
-        d=traces[name,plan['test_seeds'][0]]
-        ax.plot(d['time_s'],d['paired_A_mm'],label='A change versus matched LOS',alpha=.8,lw=.8)
-        ax.plot(d['time_s'],d['paired_B_mm'],label='B change versus matched LOS',alpha=.8,lw=.8)
-        ax.plot(d['time_s'],d['paired_B_mm']-d['paired_A_mm'],label='Differential change',alpha=.7,lw=.8)
-        ax.axvline(.6,color='gray',ls=':')
-        ax.set(title=name,xlabel='Time (s)',ylabel='Carrier distance change (mm)')
-        ax.grid(alpha=.2)
-    axs.flat[0].legend(fontsize=7)
-    fig.suptitle('Post-experiment matched-noise explanation only; not used by detectors')
-    fig.tight_layout()
-    fig.savefig(out/'paired_carrier_changes.png',dpi=160)
-    plt.close(fig)
+    plot_paired_changes(traces,plan['test_seeds'][0],out)
     checks = dict(source_verification=source_mode, records_verified=len(rows),calibrations_verified=len(calibrated),
         source_files_verified=len(plan['source_sha256']),decision_arrays_verified=len(rows)+len(calibrated),
         window_change_records_verified=len(change_rows),

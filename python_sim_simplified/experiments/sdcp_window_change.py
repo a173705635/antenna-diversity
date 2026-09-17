@@ -9,6 +9,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 from experiments.paths import RESULTS
+from experiments.sdcp_support import plot_case_scores
 
 OUTPUT = RESULTS/'sdcp_multipath'
 
@@ -41,8 +42,8 @@ def main():
         design='Exploratory amendment after primary calibration exposed half-cycle offsets.',
         code_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()),indent=2),encoding='utf-8')
     rows=[]
-    fig,axs=plt.subplots(4,4,figsize=(18,13),sharex=True)
-    for ax,c in zip(axs.flat,plan['cases']):
+    traces={}
+    for c in plan['cases']:
         name=c['name']
         for seed in plan['test_seeds']:
             with np.load(out/f'{seed}_{name}_decision.npz') as d:
@@ -62,19 +63,9 @@ def main():
                 tail_score_mean_mm=float(np.mean(s[dt>=1.1])*1000))
             rows.append(row)
             np.savez_compressed(supplement/f'{seed}_{name}.npz',time_s=dt,score_m=s,alarm=a)
-            ax.plot(dt,s*1000,lw=1,label=str(seed))
-        ax.axhline(limit*1000,color='black',ls='--',lw=.7)
-        ax.axhline(-limit*1000,color='black',ls='--',lw=.7)
-        ax.set_title(name,fontsize=10)
-        ax.set_ylabel('Adjacent mean change (mm)')
-        ax.grid(alpha=.2)
-    for ax in axs[-1]:
-        ax.set_xlabel('Time (s)')
-    axs.flat[0].legend(fontsize=7)
-    fig.suptitle('Exploratory change detector: two adjacent 200 ms windows')
-    fig.tight_layout()
-    fig.savefig(supplement/'all_cases.png',dpi=160)
-    plt.close(fig)
+            traces[name,seed]=(dt,s,a)
+    plot_case_scores(plan,traces,limit,'Mean change (mm)',
+                     'Adjacent 200 ms window change',supplement/'all_cases.png')
     (supplement/'results.json').write_text(json.dumps(rows,indent=2,allow_nan=False),encoding='utf-8')
     lines=['| 场景 | 报警记录数 | 报警判定数/判定数 | 首次报警延迟 ms | 最大绝对变化 mm |',
         '|---|---:|---:|---|---|']

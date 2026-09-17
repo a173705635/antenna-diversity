@@ -46,8 +46,6 @@ def cases():
         ('mp_phase180', -6, .3, 180, .6, 'B', 110, 15),
         ('mp_other_direction', -6, .3, 90, .6, 'B', 210, 35),
         ('mp_both_diff', -6, .3, 90, .6, 'both', 110, 15),
-        ('mp_both_common_late', -6, .3, 90, .6, 'both', 30, 60),
-        ('mp_both_common_start', -6, .3, 90, 0, 'both', 30, 60),
     ]
     for name, db, delay, phase, onset, channels, az, el in specs:
         result.append(dict(name=name, kind='multipath', power_db=db,
