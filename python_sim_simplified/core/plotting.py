@@ -347,24 +347,27 @@ def _plot_detailed_combined(results):
     y_max = float(np.max(all_magnitudes))
     padding = max(1.0, 0.03 * (y_max - y_min))
 
-    figures = {}
+    figure, axis = plt.subplots(figsize=(10, 5))
     for mode in modes:
         frequency_mhz, magnitude_db = spectra[mode]
-        figure, axis = plt.subplots(figsize=(10, 5))
-        axis.plot(frequency_mhz, magnitude_db, linewidth=0.8)
-        _mark_frequencies(axis, results, False)
-        axis.set(
-            title=f"{mode.upper()} combined output",
-            xlabel="Frequency (MHz)",
-            ylabel="Magnitude (dB)",
-            xlim=(frequency_mhz[0], frequency_mhz[-1]),
-            ylim=(y_min - padding, y_max + padding),
+        axis.plot(
+            frequency_mhz,
+            magnitude_db,
+            linewidth=0.8,
+            label=mode.upper(),
         )
-        axis.grid(True, alpha=0.3)
-        axis.legend()
-        figure.tight_layout()
-        figures[f"detailed_combined_{mode}"] = figure
-    return figures
+    _mark_frequencies(axis, results, False)
+    axis.set(
+        title="Spectra after antenna combining",
+        xlabel="Frequency (MHz)",
+        ylabel="Magnitude (dB)",
+        xlim=(frequency_mhz[0], frequency_mhz[-1]),
+        ylim=(y_min - padding, y_max + padding),
+    )
+    axis.grid(True, alpha=0.3)
+    axis.legend()
+    figure.tight_layout()
+    return {"detailed_combined_spectra": figure}
 
 
 def _plot_detailed_array_response(results):

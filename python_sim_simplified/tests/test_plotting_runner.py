@@ -36,7 +36,7 @@ def test_plot_results_returns_seven_independent_figures():
         plt.close(figure)
 
 
-def test_detailed_results_create_one_clear_figure_per_channel_and_mode():
+def test_detailed_results_put_combined_output_spectra_in_one_figure():
     cfg = default_config()
     cfg.signal.duration_ms = 20
     cfg.tracking.max_epochs = 10
@@ -45,7 +45,7 @@ def test_detailed_results_create_one_clear_figure_per_channel_and_mode():
     figures = plot_detailed_results(results)
     expected = {
         *(f"detailed_rf_dfe_{name}" for name in cfg.phone.active_antennas),
-        *(f"detailed_combined_{mode}" for mode in results["branches"]),
+        "detailed_combined_spectra",
         *(
             f"detailed_array_response_{mode}"
             for mode in results["branches"]
@@ -54,28 +54,28 @@ def test_detailed_results_create_one_clear_figure_per_channel_and_mode():
     }
 
     assert set(figures) == expected
-    assert len(figures) == 19
+    assert len(figures) == 15
     for name in cfg.phone.active_antennas:
         assert len(figures[f"detailed_rf_dfe_{name}"].axes) == 3
+    combined_axis = figures["detailed_combined_spectra"].axes[0]
+    assert {
+        mode.upper() for mode in results["branches"]
+    } <= {line.get_label() for line in combined_axis.lines}
     for figure in figures.values():
         plt.close(figure)
 
 
-def test_detailed_combined_spectra_share_absolute_limits_and_mark_frequencies():
+def test_detailed_combined_spectra_use_absolute_scale_and_mark_frequencies():
     cfg = default_config()
     cfg.signal.duration_ms = 20
     cfg.tracking.max_epochs = 10
     results = run_end_to_end(cfg)
     figures = plot_detailed_results(results)
-    axes = [
-        figures[f"detailed_combined_{mode}"].axes[0]
-        for mode in results["branches"]
-    ]
+    axis = figures["detailed_combined_spectra"].axes[0]
 
-    assert all(axis.get_ylim() == axes[0].get_ylim() for axis in axes)
-    assert all(axis.get_ylabel() == "Magnitude (dB)" for axis in axes)
-    assert all(len(axis.lines) == 4 for axis in axes)
-    assert all(len(axis.patches) == 1 for axis in axes)
+    assert axis.get_ylabel() == "Magnitude (dB)"
+    assert len(axis.lines) == len(results["branches"]) + 3
+    assert len(axis.patches) == 1
     for figure in figures.values():
         plt.close(figure)
 
@@ -122,8 +122,7 @@ def test_save_results_figures_keeps_existing_and_adds_multipath_outputs(tmp_path
 
     assert set(paths) >= {
         "detailed_rf_dfe_TL",
-        "detailed_combined_mvdr",
-        "detailed_combined_multipath_lcmv",
+        "detailed_combined_spectra",
         "detailed_array_response_blind_null",
         "detailed_array_response_multipath_lcmv",
         "detailed_acquisition_egc",

@@ -36,8 +36,7 @@ def test_standalone_copy_runs_without_research_package(tmp_path):
     }
     assert output_names >= {
         "detailed_rf_dfe_TL",
-        "detailed_combined_mvdr",
-        "detailed_combined_multipath_lcmv",
+        "detailed_combined_spectra",
         "detailed_array_response_blind_null",
         "detailed_array_response_multipath_lcmv",
         "detailed_acquisition_egc",
