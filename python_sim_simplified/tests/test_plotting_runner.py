@@ -57,10 +57,13 @@ def test_detailed_results_put_combined_output_spectra_in_one_figure():
     assert len(figures) == 15
     for name in cfg.phone.active_antennas:
         assert len(figures[f"detailed_rf_dfe_{name}"].axes) == 3
-    combined_axis = figures["detailed_combined_spectra"].axes[0]
-    assert {
-        mode.upper() for mode in results["branches"]
-    } <= {line.get_label() for line in combined_axis.lines}
+    combined_figure = figures["detailed_combined_spectra"]
+    visible_axes = [axis for axis in combined_figure.axes if axis.get_visible()]
+    assert len(visible_axes) == len(results["branches"])
+    for axis, mode in zip(visible_axes, results["branches"]):
+        assert axis.get_title() == mode.upper()
+        assert axis.get_legend() is None
+    assert len(combined_figure.legends) == 1
     for figure in figures.values():
         plt.close(figure)
 
@@ -71,11 +74,16 @@ def test_detailed_combined_spectra_use_absolute_scale_and_mark_frequencies():
     cfg.tracking.max_epochs = 10
     results = run_end_to_end(cfg)
     figures = plot_detailed_results(results)
-    axis = figures["detailed_combined_spectra"].axes[0]
+    axes = [
+        axis
+        for axis in figures["detailed_combined_spectra"].axes
+        if axis.get_visible()
+    ]
 
-    assert axis.get_ylabel() == "Magnitude (dB)"
-    assert len(axis.lines) == len(results["branches"]) + 3
-    assert len(axis.patches) == 1
+    assert all(axis.get_ylim() == axes[0].get_ylim() for axis in axes)
+    assert all(axis.get_ylabel() == "Magnitude (dB)" for axis in axes)
+    assert all(len(axis.lines) == 4 for axis in axes)
+    assert all(len(axis.patches) == 1 for axis in axes)
     for figure in figures.values():
         plt.close(figure)
 

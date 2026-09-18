@@ -347,26 +347,46 @@ def _plot_detailed_combined(results):
     y_max = float(np.max(all_magnitudes))
     padding = max(1.0, 0.03 * (y_max - y_min))
 
-    figure, axis = plt.subplots(figsize=(10, 5))
-    for mode in modes:
+    columns = min(2, len(modes))
+    rows = int(np.ceil(len(modes) / columns))
+    figure, axes = plt.subplots(
+        rows,
+        columns,
+        figsize=(7 * columns, 3.5 * rows),
+        sharex=True,
+        sharey=True,
+        squeeze=False,
+    )
+    legend_handles = None
+    legend_labels = None
+    for axis, mode in zip(axes.flat, modes):
         frequency_mhz, magnitude_db = spectra[mode]
         axis.plot(
             frequency_mhz,
             magnitude_db,
             linewidth=0.8,
-            label=mode.upper(),
         )
-    _mark_frequencies(axis, results, False)
-    axis.set(
-        title="Spectra after antenna combining",
-        xlabel="Frequency (MHz)",
-        ylabel="Magnitude (dB)",
-        xlim=(frequency_mhz[0], frequency_mhz[-1]),
-        ylim=(y_min - padding, y_max + padding),
+        _mark_frequencies(axis, results, False)
+        if legend_handles is None:
+            legend_handles, legend_labels = axis.get_legend_handles_labels()
+        axis.set(
+            title=mode.upper(),
+            xlabel="Frequency (MHz)",
+            ylabel="Magnitude (dB)",
+            xlim=(frequency_mhz[0], frequency_mhz[-1]),
+            ylim=(y_min - padding, y_max + padding),
+        )
+        axis.grid(True, alpha=0.3)
+    for axis in axes.flat[len(modes):]:
+        axis.set_visible(False)
+    figure.suptitle("Spectra after antenna combining")
+    figure.legend(
+        legend_handles,
+        legend_labels,
+        loc="lower center",
+        ncol=len(legend_labels),
     )
-    axis.grid(True, alpha=0.3)
-    axis.legend()
-    figure.tight_layout()
+    figure.tight_layout(rect=(0.0, 0.06, 1.0, 0.96))
     return {"detailed_combined_spectra": figure}
 
 
