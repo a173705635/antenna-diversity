@@ -32,6 +32,7 @@ class Case:
     sic_radius: float=.5
     velocity_east: float=0.
     fake_rate: float=0.
+    nav_bit_epoch_s: float=0.
 
 
 def generate(case,seed,attacked):
@@ -65,7 +66,7 @@ def generate(case,seed,attacked):
         for ranges,vector,scale in ((rho,a[:,i],np.where(attack&~np.array(case.genuine),0.,1.)),
                                    (forged,v,attack*np.sqrt(10**(case.spoof_db/10)))):
             signal=_sample_code(code,(t-ranges/C)*1.023e6)*np.exp(-2j*np.pi*ranges/WAVELENGTH)
-            if case.data_bits:signal*=bits[(np.floor((t-ranges/C)/.02).astype(int)+5)%len(bits)]
+            if case.data_bits:signal*=bits[(np.floor((t-ranges/C-case.nav_bit_epoch_s)/.02).astype(int)+5)%len(bits)]
             x+=(gain*vector)[:,None]*(signal*scale)
     reference,rotation=receiver_reference()
     evaluation=np.arange(.15,case.duration-.01,.01)
