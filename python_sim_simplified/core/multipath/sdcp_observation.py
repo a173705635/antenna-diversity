@@ -3,10 +3,10 @@ from dataclasses import replace
 
 import numpy as np
 
-from .acquisition import acquire
-from .dfe import process_dfe
-from .rf import process_rf
-from .tracking import track
+from ..acquisition import acquire
+from ..dfe import process_dfe
+from ..rf import process_rf
+from ..tracking import track
 
 
 def raw_sdcp(first, second, fs, times, wavelength):

@@ -6,14 +6,14 @@ code-period aiding and synchronized samples remain explicit assumptions.
 from dataclasses import replace
 import numpy as np
 from ..acquisition import acquire
-from ..array_acquisition import acquire_array
+from .array_acquisition import acquire_array
 from ..tracking import track
 from ..presets import default_config
 from ..positioning import code_pseudorange, carrier_range, solve_position
 from .single_source_scene import local_signal
 from .recovery_geometry import FS, WAVELENGTH, position_solution
 from ..code_replica import _sample_code
-from ..array_processing import prompt_projector,startup_relative_amplitude
+from .array_processing import prompt_projector,startup_relative_amplitude
 from ..gps_simulation import receiver_reference
 from .mechanism_phase import (phase_prediction, phase_prediction_leave_one_out,
                               phase_prediction_long_anchor)

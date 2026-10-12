@@ -147,7 +147,7 @@ signal_a[start:stop] += echo[0, start:stop] * envelope
 
 ## 8. receive()：如何进入 RF、DFE 与跟踪
 
-实验文件中的 receive() 主要负责调用链路和保存文件。实际处理在 [core/sdcp_observation.py](../../core/sdcp_observation.py)：
+实验文件中的 receive() 主要负责调用链路和保存文件。实际处理在 [core/multipath/sdcp_observation.py](../../core/multipath/sdcp_observation.py)：
 
 ```text
 process_rf → process_dfe → acquire → track

@@ -170,13 +170,17 @@ SDCP 多径只运行 `python -m experiments.multipath.sdcp_multipath`。同一�
 | 配置、手机几何、天线 | `core/config.py`、`presets.py`、`antenna.py` |
 | 信号、RF、DFE | `core/gnss.py`、`rf.py`、`dfe.py` |
 | 捕获、跟踪、重捕 | `core/acquisition.py`、`tracking.py`、`autonomous_tracking.py` |
-| 分集合并、多径检测 | `core/diversity.py`、`multipath.py`、`pipeline.py` |
-| SDCP 与相位弧 | `core/sdcp_observation.py`、`sdcp.py`、`sdcp_arc.py`、`sdcp_self_check.py` |
+| 公共分集与联合编排 | `core/diversity.py`、`core/pipeline.py` |
+| 干扰专用场景与盲置零 | `core/interference/` 下的 `scene.py`、`interference.py`、`combining.py` |
+| 多径专用场景、检测与合并 | `core/multipath/` 下的 `scene.py`、`multipath.py`、`combining.py` |
+| SDCP 与相位弧 | `core/multipath/` 下的 `sdcp_observation.py`、`sdcp.py`、`sdcp_arc.py`、`sdcp_self_check.py` |
 | 最新单源接收机 | `core/spoofing/single_source.py`；平滑与载波预测分别在 `mechanism_smoothing.py`、`mechanism_phase.py` |
-| 单源场景与空间投影 | `core/spoofing/single_source_scene.py`、`recovery_geometry.py`、`array_processing.py` |
+| 单源场景、阵列捕获与空间投影 | `core/spoofing/` 下的 `single_source_scene.py`、`recovery_geometry.py`、`array_acquisition.py`、`array_processing.py` |
 | 仿真定位与真实录波 | `core/gps_simulation.py`、`positioning.py`、`recorded_receiver.py`、`gps_*.py` |
 
 `core` 不导入实验入口或历史脚本。只服务一个实验的参数和统计留在实验内；有意保留的不同研究方法不强行合并。此次调整不修正既有算法局限，不改变门限或数值模型。
+
+公共层按实际职责保留接收基础和联合接口：`config.py`、`models.py` 是统一配置与结果结构，`pipeline.py` 编排跨方向链路，`metrics.py` 汇总分支比较，`plotting.py` 绘制公共接收阶段。多径专用图在 `core/multipath/plotting.py`；历史抗欺骗运动结果汇总在 [docs/spoofing/motion_summary.json](docs/spoofing/motion_summary.json)，不是运行配置。冻结源码和历史结果中的旧路径保持原样，不作为当前模块导入入口。
 
 ## 版本与归档
 

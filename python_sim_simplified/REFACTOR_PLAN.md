@@ -8,10 +8,20 @@
 
 **Global constraints:** work in this existing authorized workspace; modify only the maintained simplified project. Preserve local archive and frozen result bytes, research parameters, source identity checks, and independent verification. Do not commit or push as part of this task. No new dependencies or defensive fallback paths. Preserve general navigation/recorded data locations when not owned by a direction.
 
+### Follow-up ownership correction (2026-10-12)
+
+The first directional pass left six dedicated modules in the shared layer. Re-audit actual consumers, not hypothetical future reuse. Move the SDCP quartet to `core/multipath/`, the measured common-emitter array acquisition/projection pair to `core/spoofing/`, and the five multipath-only plotting functions to `core/multipath/plotting.py`. Keep all function bodies and experiment parameters unchanged. Update imports, documentation, recursive freezes and historical-key file location mapping together; never rewrite old evidence keys or relax byte-identity checks.
+
+`config.py` and `models.py` remain shared contracts; `gnss.py` and `pipeline.py` are joint orchestration; `metrics.py` and the remaining `plotting.py` are common receiver/branch comparisons. A shared orchestrator may call multiple research modules; that does not make those dedicated modules shared. `configs/motion_summary.json` is an old spoofing result summary, not a configuration: preserve its bytes under `docs/spoofing/motion_summary.json`, map the old evidence key, and exclude it from new source/config manifests. Preserve the three pre-existing plotting/test/document changes without reverting them.
+
+Validation: first reproduce missing directional ownership with layout tests, then run affected numerical/plotting/provenance tests, the full default suite, module and link checks, definition-level AST comparison against the pre-correction working files, frozen archive verification, and independent read-only review. Record outcomes in REFACTOR_VALIDATION.md. The following completed ledger describes the initial pass, not this correction.
+
+**Follow-up outcome:** completed without staging or pushing. Two historical report-key lookup errors found by review were reproduced and fixed with strict byte checks, not fallback behavior. Final verification: 556 default tests passed (25 local-evidence tests deselected), three independent old/new numerical comparisons passed, all 124 modules imported, 909 file links resolved, and all 584 frozen original files matched. The pre-existing plotting definitions/tests and interference documentation were preserved. Details are in REFACTOR_VALIDATION.md.
+
 ### Task 1: move dedicated code and update active references
 
 - [x] Capture the current default test baseline before editing: 528 passed and 6 Windows-sandbox atomic-replace errors; those same 6 tests passed outside the sandbox, for 534 passing default tests total. 25 local-evidence tests were deselected.
-- [x] Move dedicated core modules, directional experiment entries, and specialized diagnostic tools; add package initializers. Keep shared RF/DFE/tracking/GPS/array primitives shared where used across directions.
+- [x] Move dedicated core modules, directional experiment entries, and specialized diagnostic tools; add package initializers. Keep shared RF/DFE/tracking/GPS primitives shared where used across directions. The array pair was initially misclassified; see the follow-up ownership correction above.
 - [x] Move dedicated echo/interferer scene helpers and their small result dataclasses out of shared `gnss.py`; move blind-null combining and multipath-specific LCMV combining out of shared `diversity.py`. Preserve function bodies and shared scenario/pipeline orchestration; do not add old-path re-export wrappers.
 - [x] Update absolute/relative imports, dynamic imports, script bootstraps, test paths, monkeypatches, and provenance to recursively cover the maintained nested code. No old import compatibility shims.
 - [x] Classify new outputs and known existing result trees by direction; update current consumers. Move existing results without editing frozen contents; leave unclassified and general positioning inputs in place.

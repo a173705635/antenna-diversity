@@ -1,4 +1,4 @@
-"""Single, EGC, MVDR, and sample-only Blind Null combining."""
+"""Shared single-channel, EGC and MVDR combining primitives."""
 
 import numpy as np
 

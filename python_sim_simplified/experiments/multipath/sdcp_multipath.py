@@ -24,7 +24,7 @@ from core.config import Direction, MultipathPath
 from core.gnss import generate_scenario
 from core.multipath.scene import _multipath_scene
 from core.presets import default_config
-from core.sdcp_observation import raw_sdcp, receive as receive_observation
+from core.multipath.sdcp_observation import raw_sdcp, receive as receive_observation
 from core.provenance import source_hashes, freeze_source
 from experiments.multipath.sdcp_support import save_json, statistics, verify_sources, plot_case_scores, case_plot_title
 from experiments.paths import MULTIPATH_RESULTS as RESULTS, reset_output

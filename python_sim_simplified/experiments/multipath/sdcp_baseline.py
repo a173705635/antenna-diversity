@@ -21,7 +21,7 @@ import numpy as np
 from core.antenna import direction_vector
 from core.gnss import generate_scenario
 from core.presets import default_config
-from core.sdcp_observation import raw_sdcp, receive as receive_observation
+from core.multipath.sdcp_observation import raw_sdcp, receive as receive_observation
 from core.provenance import source_hashes, freeze_source
 from experiments.multipath.sdcp_support import save_json, statistics, verify_sources
 from experiments.paths import MULTIPATH_RESULTS as RESULTS, reset_output

@@ -2,7 +2,7 @@
 import numpy as np
 
 from core.spoofing import single_source
-from core.array_processing import startup_relative_amplitude
+from core.spoofing.array_processing import startup_relative_amplitude
 from core.spoofing.recovery_geometry import FS
 
 

@@ -12,7 +12,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 
-from core.array_processing import startup_relative_amplitude
+from core.spoofing.array_processing import startup_relative_amplitude
 from core.presets import mate70_phase_centers
 from core.provenance import source_hashes
 from core.spoofing.recovery_geometry import FS,sky,steering

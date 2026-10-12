@@ -390,17 +390,190 @@ def _plot_detailed_combined(results):
     return {"detailed_combined_spectra": figure}
 
 
+def _array_response_directions(cfg):
+    directions = [(cfg.signal.true_direction, "Target", "*", "limegreen")]
+    for index, interferer in enumerate(cfg.interferers, start=1):
+        if interferer.enable:
+            kind = "CW" if isinstance(interferer, CWInterferer) else "Wideband"
+            directions.append((interferer.direction, f"{kind} {index}", "x", "red"))
+    for index, path in enumerate(cfg.signal.multipath_paths, start=1):
+        if path.enable:
+            directions.append((path.direction, f"Multipath {index}", "o", "deepskyblue"))
+    return directions
+
+
+def _spherical_response_coordinates(azimuths, elevations, radius):
+    """Azimuth from +X toward +Y; elevation from XY toward +Z, in degrees."""
+    azimuth_grid, elevation_grid = np.meshgrid(
+        np.deg2rad(azimuths), np.deg2rad(elevations)
+    )
+    x = radius * np.cos(elevation_grid) * np.cos(azimuth_grid)
+    y = radius * np.cos(elevation_grid) * np.sin(azimuth_grid)
+    z = radius * np.sin(elevation_grid)
+    return x, y, z
+
+
+def _plot_array_response_spherical(results, mode, azimuths, elevations, response):
+    """Fixed unit sphere with dB colors and two opposite, opaque views."""
+    cfg = results["config"]
+    peak_response = np.max(response)
+    response_db = 20.0 * np.log10(
+        np.maximum(response / peak_response, np.finfo(float).tiny)
+    )
+    x, y, z = _spherical_response_coordinates(azimuths, elevations, 1.0)
+    color_scale = plt.Normalize(vmin=-40.0, vmax=0.0)
+    color_map = plt.get_cmap("turbo")
+    model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
+    weights = results["branches"][mode]["combining"]["weights"]
+    directions = _array_response_directions(cfg)
+    # Aim the first camera at the first enabled interferer, then show its antipode.
+    view_azimuth = next(
+        (item.direction.azimuth_deg for item in cfg.interferers if item.enable),
+        cfg.signal.true_direction.azimuth_deg,
+    )
+    markers = {}
+    legend_labels = []
+    for index, (direction, label, marker, color) in enumerate(directions, start=1):
+        steering, _ = antenna_response(model, direction, cfg.signal.true_polarization)
+        gain = abs(np.vdot(weights, steering)) / peak_response
+        gain_db = 20.0 * np.log10(np.maximum(gain, np.finfo(float).tiny))
+        legend_labels.append(
+            f"{index}: {label} | az {direction.azimuth_deg:g}°, "
+            f"el {direction.elevation_deg:g}° | {gain_db:.1f} dB"
+        )
+        key = (direction.azimuth_deg, direction.elevation_deg)
+        if key in markers:
+            markers[key][0].append(str(index))
+        else:
+            markers[key] = ([str(index)], marker, color)
+
+    figure = plt.figure(figsize=(14, 8))
+    for view_index, (camera_elevation, camera_azimuth) in enumerate(
+        ((25.0, view_azimuth), (-25.0, view_azimuth + 180.0)), start=1
+    ):
+        axis = figure.add_subplot(1, 2, view_index, projection="3d", computed_zorder=False)
+        axis.plot_surface(
+            x, y, z,
+            facecolors=color_map(color_scale(response_db)),
+            rcount=elevations.size, ccount=azimuths.size,
+            linewidth=0, antialiased=False, shade=False, zorder=1,
+        )
+        camera = np.asarray(_spherical_response_coordinates(
+            [camera_azimuth], [camera_elevation], 1.0
+        )).reshape(3)
+        for (azimuth, elevation), (numbers, marker, color) in markers.items():
+            tip = np.asarray(_spherical_response_coordinates(
+                [azimuth], [elevation], 1.03
+            )).reshape(3)
+            # Only annotate the visible hemisphere; hidden directions appear in the other view.
+            if np.dot(tip, camera) > 0.0:
+                axis.plot(
+                    [tip[0]], [tip[1]], [tip[2]], marker=marker, color=color,
+                    markeredgecolor="black", markeredgewidth=1,
+                    linestyle="none", markersize=11, zorder=10,
+                )
+                axis.text(
+                    *(tip * 1.10), "/".join(numbers), color="black", fontsize=11,
+                    bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.9},
+                    zorder=11,
+                )
+        axis.set(
+            title="Interference-facing view" if view_index == 1 else "Opposite view",
+            xlabel="X", ylabel="Y", zlabel="Z",
+            xlim=(-1.2, 1.2), ylim=(-1.2, 1.2), zlim=(-1.2, 1.2),
+            xticks=(-1, 0, 1), yticks=(-1, 0, 1), zticks=(-1, 0, 1),
+        )
+        axis.set_box_aspect((1, 1, 1))
+        axis.set_proj_type("ortho")
+        axis.view_init(elev=camera_elevation, azim=camera_azimuth)
+        axis.grid(False)
+        for coordinate_axis in (axis.xaxis, axis.yaxis, axis.zaxis):
+            coordinate_axis.pane.set_alpha(0.0)
+    color_axis = figure.add_axes((0.91, 0.28, 0.015, 0.45))
+    figure.colorbar(
+        plt.cm.ScalarMappable(norm=color_scale, cmap=color_map),
+        cax=color_axis, label="Normalized response (dB)", extend="min",
+        ticks=(-40, -30, -20, -10, 0),
+    )
+    figure.suptitle(
+        f"{mode.upper()} spherical response\nFixed radius; color shows gain and nulls", fontsize=16
+    )
+    for index, label in enumerate(legend_labels):
+        figure.text(0.06 + 0.45 * (index % 2), 0.12 - 0.035 * (index // 2), label, fontsize=10)
+    figure.text(0.06, 0.02, "Colors below -40 dB share the darkest shade; listed values are not clipped.", fontsize=10)
+    figure.subplots_adjust(left=0.01, right=0.88, bottom=0.18, top=0.83, wspace=0.06)
+    return figure
+
+
+def _plot_array_response_3d(
+    results, mode, azimuths, elevations, response_db, peak_response
+):
+    """Upper-hemisphere response at the model carrier; dB floor is display-only."""
+    cfg = results["config"]
+    model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
+    weights = results["branches"][mode]["combining"]["weights"]
+    azimuth_grid, elevation_grid = np.meshgrid(azimuths, elevations)
+    figure = plt.figure(figsize=(11, 7))
+    axis = figure.add_subplot(111, projection="3d", computed_zorder=False)
+    surface = axis.plot_surface(
+        azimuth_grid,
+        elevation_grid,
+        np.maximum(response_db, -60.0),
+        cmap="viridis",
+        vmin=-60.0,
+        vmax=0.0,
+        rcount=elevations.size,
+        ccount=azimuths.size,
+        linewidth=0,
+        antialiased=True,
+        alpha=0.85,
+        zorder=1,
+    )
+    for direction, label, marker, color in _array_response_directions(cfg):
+        steering, _ = antenna_response(model, direction, cfg.signal.true_polarization)
+        gain = abs(np.vdot(weights, steering)) / peak_response
+        gain_db = 20.0 * np.log10(np.maximum(gain, np.finfo(float).tiny))
+        axis.plot(
+            [direction.azimuth_deg],
+            [direction.elevation_deg],
+            [np.clip(gain_db, -60.0, 0.0)],
+            marker=marker,
+            color=color,
+            linestyle="none",
+            markersize=10,
+            label=label,
+            zorder=10,
+        )
+    axis.set(
+        title=f"{mode.upper()} 3D array response",
+        xlabel="Azimuth (deg)",
+        ylabel="Elevation (deg)",
+        zlabel="Normalized response (dB)",
+        xlim=(0.0, 360.0),
+        ylim=(0.0, 90.0),
+        zlim=(-60.0, 0.0),
+    )
+    axis.view_init(elev=28, azim=-125)
+    axis.set_box_aspect((2.0, 1.0, 1.0))
+    axis.legend(loc="upper left")
+    figure.colorbar(surface, ax=axis, shrink=0.65, pad=0.12, label="Normalized response (dB)")
+    figure.subplots_adjust(left=0.03, right=0.9, bottom=0.08, top=0.9)
+    return figure
+
+
 def _plot_detailed_array_response(results):
     cfg = results["config"]
     model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
     azimuths = np.arange(0.0, 361.0, 2.0)
-    elevations = np.arange(0.0, 91.0, 2.0)
+    sphere_elevations = np.arange(-90.0, 91.0, 2.0)
+    upper_hemisphere = sphere_elevations >= 0.0
+    elevations = sphere_elevations[upper_hemisphere]
     manifolds = np.empty(
-        (len(model.active_antennas), elevations.size, azimuths.size),
+        (len(model.active_antennas), sphere_elevations.size, azimuths.size),
         dtype=complex,
     )
     direction_type = type(cfg.signal.true_direction)
-    for elevation_index, elevation in enumerate(elevations):
+    for elevation_index, elevation in enumerate(sphere_elevations):
         for azimuth_index, azimuth in enumerate(azimuths):
             manifolds[:, elevation_index, azimuth_index] = antenna_response(
                 model,
@@ -411,9 +584,10 @@ def _plot_detailed_array_response(results):
     figures = {}
     for mode in _ordered_modes(results):
         weights = results["branches"][mode]["combining"]["weights"]
-        response = np.abs(
+        sphere_response = np.abs(
             np.tensordot(weights.conj(), manifolds, axes=(0, 0))
         )
+        response = sphere_response[upper_hemisphere]
         response_db = 20.0 * np.log10(
             np.maximum(response / np.max(response), np.finfo(float).tiny)
         )
@@ -485,6 +659,12 @@ def _plot_detailed_array_response(results):
         figure.colorbar(image, ax=axis, label="Normalized response (dB)")
         figure.tight_layout()
         figures[f"detailed_array_response_{mode}"] = figure
+        figures[f"detailed_array_response_3d_{mode}"] = _plot_array_response_3d(
+            results, mode, azimuths, elevations, response_db, np.max(response)
+        )
+        figures[f"detailed_array_response_spherical_{mode}"] = _plot_array_response_spherical(
+            results, mode, azimuths, sphere_elevations, sphere_response
+        )
     return figures
 
 
@@ -589,185 +769,13 @@ def _plot_detailed_acquisition(results):
     return figures
 
 def plot_detailed_results(results):
-    return {
-        **_plot_detailed_rf_dfe(results),
-        **_plot_detailed_combined(results),
-        **_plot_detailed_array_response(results),
-        **_plot_detailed_acquisition(results),
-    }
-
-
-def _plot_multipath_delay_profile(results):
-    detection = results["multipath_detection"]
-    figure, axis = plt.subplots(figsize=(10, 5))
-    delays = detection["delay_axis_chips"]
-    raw = detection["raw_power"]
-    residual = detection["residual_power"]
-    if delays.size:
-        scale = max(
-            float(np.max(raw)),
-            float(np.max(residual)),
-            np.finfo(float).tiny,
-        )
-        raw_db = 10.0 * np.log10(np.maximum(raw / scale, np.finfo(float).tiny))
-        residual_db = 10.0 * np.log10(
-            np.maximum(residual / scale, np.finfo(float).tiny)
-        )
-        axis.plot(delays, raw_db, label="Raw array correlation")
-        axis.plot(delays, residual_db, label="After LOS projection")
-        threshold_db = 10.0 * np.log10(
-            max(detection["threshold_power"] / scale, np.finfo(float).tiny)
-        )
-        axis.axhline(threshold_db, color="black", linestyle=":", label="Threshold")
-    for index, path in enumerate(results["truth"]["multipath_paths"], start=1):
-        axis.axvline(
-            path["excess_delay_chips"],
-            color="blue",
-            linestyle="--",
-            label="True path" if index == 1 else None,
-        )
-    for index, candidate in enumerate(detection["candidates"], start=1):
-        axis.axvline(
-            candidate["excess_delay_chips"],
-            color="red",
-            linestyle="-.",
-            label="Detected path" if index == 1 else None,
-        )
-    axis.set(
-        title=f"Multipath delay profile: {detection['status']}",
-        xlabel="Excess delay (chips)",
-        ylabel="Relative power (dB)",
-        ylim=(-80.0, 5.0),
-    )
-    axis.grid(True, alpha=0.3)
-    if axis.lines:
-        axis.legend()
-    figure.tight_layout()
-    return figure
-
-
-def _plot_multipath_angle(candidate, index):
-    peak = max(float(np.max(candidate["angle_power"])), np.finfo(float).tiny)
-    power_db = 10.0 * np.log10(
-        np.maximum(candidate["angle_power"] / peak, np.finfo(float).tiny)
-    )
-    figure, axis = plt.subplots(figsize=(9, 5))
-    image = axis.imshow(
-        power_db,
-        origin="lower",
-        aspect="auto",
-        extent=(
-            candidate["azimuths_deg"][0],
-            candidate["azimuths_deg"][-1],
-            candidate["elevations_deg"][0],
-            candidate["elevations_deg"][-1],
-        ),
-        vmin=-30.0,
-        vmax=0.0,
-        cmap="viridis",
-    )
-    axis.plot(
-        candidate["direction"].azimuth_deg,
-        candidate["direction"].elevation_deg,
-        "rx",
-        markersize=10,
-        markeredgewidth=2,
-        label="Estimate",
-    )
-    axis.set(
-        title=(
-            f"Multipath {index} Bartlett map, "
-            f"delay={candidate['excess_delay_chips']:.2f} chips"
-        ),
-        xlabel="Azimuth (deg)",
-        ylabel="Elevation (deg)",
-    )
-    axis.legend()
-    figure.colorbar(image, ax=axis, label="Normalized power (dB)")
-    figure.tight_layout()
-    return figure
-
-
-def _plot_multipath_correlation_comparison(results):
-    figure, axis = plt.subplots(figsize=(10, 5))
-    fs_hz = results["dfe_info"]["fs_out_hz"]
-    code_rate_hz = results["config"].signal.code_rate_hz
-    true_delay = results["truth"]["code_delay_chips"]
-    for mode in _ordered_modes(results):
-        acquisition = results["branches"][mode]["acquisition"]
-        row = int(
-            np.argmin(
-                np.abs(
-                    acquisition["doppler_bins_hz"]
-                    - acquisition["doppler_hz"]
-                )
-            )
-        )
-        power = acquisition["search_power"][row]
-        chips = np.arange(power.size) * code_rate_hz / fs_hz
-        offset = circular_chip_error(chips, true_delay)
-        selected = np.abs(offset) <= 3.0
-        order = np.argsort(offset[selected])
-        normalized_db = 10.0 * np.log10(
-            np.maximum(power[selected] / np.max(power), np.finfo(float).tiny)
-        )
-        axis.plot(offset[selected][order], normalized_db[order], label=mode.upper())
-    axis.set(
-        title="Acquisition correlation around the direct path",
-        xlabel="Code delay relative to true LOS (chips)",
-        ylabel="Normalized power (dB)",
-        xlim=(-3.0, 3.0),
-        ylim=(-40.0, 3.0),
-    )
-    axis.grid(True, alpha=0.3)
-    axis.legend()
-    figure.tight_layout()
-    return figure
-
-
-def _plot_multipath_tracking_bias(results):
-    figure, axes = plt.subplots(2, 1, figsize=(10, 7), sharex=True)
-    fs_hz = results["dfe_info"]["fs_out_hz"]
-    cfg = results["config"]
-    metres_per_chip = 299_792_458.0 / cfg.signal.code_rate_hz
-    for mode in _ordered_modes(results):
-        tracking = results["branches"][mode]["tracking"]
-        bias = tracking_code_bias_chips(
-            tracking,
-            results["truth"],
-            fs_hz,
-            cfg.tracking.coherent_ms,
-        )
-        if bias.size:
-            epoch = np.arange(bias.size) + 1
-            axes[0].plot(epoch, bias, label=mode.upper())
-            axes[1].plot(epoch, bias * metres_per_chip, label=mode.upper())
-    axes[0].set(ylabel="Code bias (chips)")
-    axes[1].set(xlabel="Epoch", ylabel="Code bias (m)")
-    for axis in axes:
-        axis.grid(True, alpha=0.3)
-        if axis.lines:
-            axis.legend()
-    figure.suptitle("Tracking code bias relative to true LOS")
-    figure.tight_layout()
-    return figure
-
-
-def plot_multipath_results(results):
-    figures = {
-        "multipath_delay_profile": _plot_multipath_delay_profile(results),
-        "multipath_correlation_comparison": _plot_multipath_correlation_comparison(results),
-        "multipath_tracking_bias": _plot_multipath_tracking_bias(results),
-    }
-    for index, candidate in enumerate(
-        results["multipath_detection"]["candidates"],
-        start=1,
-    ):
-        figures[f"multipath_angle_path_{index}"] = _plot_multipath_angle(
-            candidate,
-            index,
-        )
-    return figures
+    with plt.rc_context({"figure.max_open_warning": 0}):
+        return {
+            **_plot_detailed_rf_dfe(results),
+            **_plot_detailed_combined(results),
+            **_plot_detailed_array_response(results),
+            **_plot_detailed_acquisition(results),
+        }
 
 
 def plot_results(results):

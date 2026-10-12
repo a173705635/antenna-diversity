@@ -11,7 +11,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 
-from core.array_acquisition import acquire_array
+from core.spoofing.array_acquisition import acquire_array
 from core.presets import default_config,mate70_phase_centers
 from core.provenance import source_hashes
 from core.spoofing.recovery_geometry import C,FS,WAVELENGTH,sky,steering

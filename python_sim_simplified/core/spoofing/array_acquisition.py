@@ -1,8 +1,8 @@
 """Array acquisition proposals: measured power only, no transmitter truth."""
 import numpy as np
-from .acquisition import acquire
-from .gnss import ca_code
-from .code_replica import bandlimited_code_replica,_sample_code
+from ..acquisition import acquire
+from ..gnss import ca_code
+from ..code_replica import bandlimited_code_replica,_sample_code
 
 
 def select(power,record,cfg):

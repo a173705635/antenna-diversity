@@ -136,7 +136,7 @@ def preflight():
                           ('manifest_sha256', 'manifest.json')):
             assert summary[key] == digest(folder/file)
     for name, sha in summaries['stage43'][1]['source_sha256'].items():
-        assert current[current_path_for_historical_source(ROOT, name).relative_to(ROOT).as_posix()] == sha, name
+        assert digest(current_path_for_historical_source(ROOT, name)) == sha, name
     stage39 = summaries['stage39'][1]
     stage40 = summaries['stage40'][1]
     for scene in SCENES:

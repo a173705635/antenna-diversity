@@ -75,7 +75,7 @@ def verify_inputs():
     stage42 = historical['stage42'][1]
     for name, sha in stage42['source_sha256'].items():
         if name not in ('core/tracking.py', 'core/single_source.py'):
-            assert current[current_path_for_historical_source(ROOT, name).relative_to(ROOT).as_posix()] == sha, name
+            assert digest(current_path_for_historical_source(ROOT, name)) == sha, name
     for name, input_folder, reference, _ in CASES:
         if name == 'h0_114001_on':
             expected = historical['stage41'][1]['cases']['h0_114001']['input_sha256']

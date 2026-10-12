@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from core.sdcp import calibrated_sdcp
+from core.multipath.sdcp import calibrated_sdcp
 
 
 def test_integer_invariance_static_echo_and_external_bias():

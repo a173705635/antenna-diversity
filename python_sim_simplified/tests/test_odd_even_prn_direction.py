@@ -2,7 +2,7 @@ import json
 
 import numpy as np
 
-from core.array_processing import prompt_projector
+from core.spoofing.array_processing import prompt_projector
 from tools.spoofing import odd_even_prn_direction as study
 
 

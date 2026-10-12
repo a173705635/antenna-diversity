@@ -4,11 +4,17 @@ from pathlib import Path
 import subprocess
 import sys
 
+import numpy as np
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from core.pipeline import run_end_to_end
-from core.plotting import plot_detailed_results, plot_multipath_results, plot_results
+from core.plotting import (
+    _spherical_response_coordinates,
+    plot_detailed_results, plot_results,
+)
+from core.multipath.plotting import plot_multipath_results
 from core.presets import default_config
 from experiments.interference.full_chain import save_results_figures
 
@@ -50,11 +56,13 @@ def test_detailed_results_put_combined_output_spectra_in_one_figure():
             f"detailed_array_response_{mode}"
             for mode in results["branches"]
         ),
+        *(f"detailed_array_response_3d_{mode}" for mode in results["branches"]),
+        *(f"detailed_array_response_spherical_{mode}" for mode in results["branches"]),
         *(f"detailed_acquisition_{mode}" for mode in results["branches"]),
     }
 
     assert set(figures) == expected
-    assert len(figures) == 15
+    assert len(figures) == 25
     for name in cfg.phone.active_antennas:
         assert len(figures[f"detailed_rf_dfe_{name}"].axes) == 3
     combined_figure = figures["detailed_combined_spectra"]
@@ -107,6 +115,23 @@ def test_detailed_spatial_and_acquisition_figures_keep_diagnostics_separate():
             "Multipath 1",
         } <= {line.get_label() for line in spatial_axis.lines}
 
+        surface = figures[f"detailed_array_response_3d_{mode}"]
+        surface_axis = next(axis for axis in surface.axes if axis.name == "3d")
+        assert surface_axis.get_zlim() == (-60.0, 0.0)
+        assert surface_axis.collections[0].get_clim() == (-60.0, 0.0)
+        assert surface_axis.get_xlabel() == "Azimuth (deg)"
+        assert surface_axis.get_ylabel() == "Elevation (deg)"
+        assert {line.get_label() for line in spatial_axis.lines} == {
+            line.get_label() for line in surface_axis.lines
+        }
+
+        spherical = figures[f"detailed_array_response_spherical_{mode}"]
+        spherical_axes = [axis for axis in spherical.axes if axis.name == "3d"]
+        assert len(spherical_axes) == 2
+        assert all(axis.get_zlim() == (-1.2, 1.2) for axis in spherical_axes)
+        assert spherical.axes[-1].get_ylim() == (-40.0, 0.0)
+        assert spherical_axes[1].azim - spherical_axes[0].azim == 180.0
+
         acquisition = figures[f"detailed_acquisition_{mode}"]
         assert any(axis.images for axis in acquisition.axes)
         assert any(
@@ -133,6 +158,10 @@ def test_save_results_figures_keeps_existing_and_adds_multipath_outputs(tmp_path
         "detailed_combined_spectra",
         "detailed_array_response_blind_null",
         "detailed_array_response_multipath_lcmv",
+        "detailed_array_response_3d_mvdr",
+        "detailed_array_response_3d_blind_null",
+        "detailed_array_response_spherical_mvdr",
+        "detailed_array_response_spherical_blind_null",
         "detailed_acquisition_egc",
         "detailed_acquisition_multipath_lcmv",
         "tracking",
@@ -146,6 +175,17 @@ def test_save_results_figures_keeps_existing_and_adds_multipath_outputs(tmp_path
         path.is_file() and path.stat().st_size > 0
         for path in paths.values()
     )
+
+
+def test_spherical_coordinates_preserve_response_radius_and_direction():
+    azimuths = np.array([0, 90, 180, 270, 360])
+    elevations = np.array([-90, 0, 90])
+    radius = np.array([[0.25]*5, [1, 0.5, 0.1, 0.001, 1], [0.75]*5])
+    x, y, z = _spherical_response_coordinates(azimuths, elevations, radius)
+    np.testing.assert_allclose(np.sqrt(x*x+y*y+z*z), radius, atol=1e-15)
+    np.testing.assert_allclose(x[1], [1, 0, -0.1, 0, 1], atol=1e-15)
+    np.testing.assert_allclose(y[1], [0, 0.5, 0, -0.001, 0], atol=1e-15)
+    np.testing.assert_allclose(z[[0, 2]], radius[[0, 2]]*np.array([[-1], [1]]))
 
 
 def test_detected_path_gets_an_independent_angle_figure():

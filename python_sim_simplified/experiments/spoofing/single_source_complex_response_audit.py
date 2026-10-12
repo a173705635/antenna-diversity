@@ -12,7 +12,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-from core.array_acquisition import acquire_array
+from core.spoofing.array_acquisition import acquire_array
 from core.gps_simulation import receiver_reference
 from core.presets import default_config, mate70_phase_centers
 from core.provenance import source_hashes

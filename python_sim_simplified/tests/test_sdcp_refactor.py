@@ -8,7 +8,7 @@ import sys
 import numpy as np
 import pytest
 
-from core.sdcp_observation import raw_sdcp
+from core.multipath.sdcp_observation import raw_sdcp
 from experiments.multipath import sdcp_baseline, sdcp_multipath, sdcp_support
 
 

@@ -184,14 +184,26 @@ def test_preflight_checks_all_98_source_hashes(monkeypatch, tmp_path):
         oracle.verify_current_sources(tmp_path, expected)
 
 
-def test_frozen_source_check_uses_moved_path_and_rejects_changed_bytes(tmp_path):
+@pytest.mark.parametrize(('old_name', 'new_name'), [
+    ('core/single_source.py', 'core/spoofing/single_source.py'),
+    ('core/sdcp.py', 'core/multipath/sdcp.py'),
+    ('core/sdcp_arc.py', 'core/multipath/sdcp_arc.py'),
+    ('core/sdcp_observation.py', 'core/multipath/sdcp_observation.py'),
+    ('core/sdcp_self_check.py', 'core/multipath/sdcp_self_check.py'),
+    ('core/array_acquisition.py', 'core/spoofing/array_acquisition.py'),
+    ('core/array_processing.py', 'core/spoofing/array_processing.py'),
+    ('configs/motion_summary.json', 'docs/spoofing/motion_summary.json'),
+])
+def test_frozen_source_check_uses_moved_path_and_rejects_changed_bytes(
+        tmp_path, old_name, new_name):
     """A historical key still binds the exact bytes at its relocated path."""
     import hashlib
 
-    source = tmp_path/'core/spoofing/single_source.py'
+    source = tmp_path/new_name
     source.parent.mkdir(parents=True)
     source.write_bytes(b'original receiver source')
-    expected = {'core/single_source.py': hashlib.sha256(source.read_bytes()).hexdigest()}
+    expected = {old_name: hashlib.sha256(source.read_bytes()).hexdigest()}
+    (tmp_path/'core').mkdir(exist_ok=True)
     for index in range(97):
         path = tmp_path/f'core/file_{index}.py'
         path.write_bytes(b'shared source')
@@ -199,7 +211,7 @@ def test_frozen_source_check_uses_moved_path_and_rejects_changed_bytes(tmp_path)
 
     oracle.verify_current_sources(tmp_path, expected)
     source.write_bytes(b'changed receiver source')
-    with pytest.raises(AssertionError, match=r'core/single_source\.py'):
+    with pytest.raises(AssertionError, match=old_name.replace('.', r'\.')):
         oracle.verify_current_sources(tmp_path, expected)
 
 

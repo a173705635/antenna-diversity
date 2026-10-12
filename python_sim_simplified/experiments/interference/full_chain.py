@@ -13,9 +13,9 @@ from core.pipeline import run_end_to_end
 from core.plotting import (
     plot_cn0,
     plot_detailed_results,
-    plot_multipath_results,
     plot_tracking,
 )
+from core.multipath.plotting import plot_multipath_results
 from core.presets import default_config
 from core.provenance import source_hashes, freeze_source
 from core.serialization import serializable
