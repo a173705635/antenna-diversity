@@ -4,10 +4,10 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from experiments import single_source_projection_long as study
-from experiments.single_source_suppression_study import digest
-from tools import common_residual_phase_transfer as common
-from tools import startup_complex_phase_transfer as phase
+from experiments.spoofing import single_source_projection_long as study
+from experiments.spoofing.single_source_suppression_study import digest
+from tools.spoofing import common_residual_phase_transfer as common
+from tools.spoofing import startup_complex_phase_transfer as phase
 
 
 def test_complex_ratios_have_correct_sign_and_equal_prn_covariance():

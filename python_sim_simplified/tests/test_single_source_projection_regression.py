@@ -1,7 +1,7 @@
 """Run-before-data absolute safety check for the fixed Stage 26 IQ replay."""
 import numpy as np
 
-from experiments import single_source_projection_regression as regression
+from experiments.spoofing import single_source_projection_regression as regression
 
 
 def positions(east):

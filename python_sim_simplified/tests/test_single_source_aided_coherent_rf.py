@@ -2,8 +2,8 @@
 import numpy as np
 import pytest
 
-from core import single_source
-from core.recovery_geometry import FS
+from core.spoofing import single_source
+from core.spoofing.recovery_geometry import FS
 
 
 @pytest.mark.parametrize('coherent_ms',(5,10))

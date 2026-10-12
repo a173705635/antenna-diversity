@@ -102,7 +102,7 @@ def compare(records, satellites, weights=None):
 def main():
     if DURATION_MS < 210:
         raise ValueError('GPS positioning is not evaluated: need at least 210 ms to include the first 200 ms observation and end margin.')
-    output = reset_output(OUTPUT.name)
+    output = reset_output(OUTPUT)
     if FREEZE_SOURCE:
         freeze_source(output)
     weights = json.loads(WEIGHTS.read_text(encoding='utf-8'))

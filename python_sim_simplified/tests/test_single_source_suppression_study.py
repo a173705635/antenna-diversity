@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from experiments import single_source_suppression_study as study
+from experiments.spoofing import single_source_suppression_study as study
 
 
 def test_saved_energy_recalculates_split_support_and_detects_corruption():

@@ -1,8 +1,8 @@
 """One-second carrier anchor remains causal and rejects ambiguous exclusions."""
 import numpy as np
 
-from core import single_source
-from core.mechanism_phase import phase_prediction_long_anchor
+from core.spoofing import single_source
+from core.spoofing.mechanism_phase import phase_prediction_long_anchor
 from test_single_source_code_blend import patch_geometry, record
 from test_single_source_phase_leave_one_out import phase_record
 

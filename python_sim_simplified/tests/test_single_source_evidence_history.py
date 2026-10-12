@@ -3,11 +3,11 @@ import json
 import numpy as np
 import pytest
 
-from core import single_source
-from core.recovery_geometry import FS
-from core.single_source import split_source_evidence
-from experiments import single_source_evidence_history as evidence_history
-from experiments.single_source_evidence_history import (
+from core.spoofing import single_source
+from core.spoofing.recovery_geometry import FS
+from core.spoofing.single_source import split_source_evidence
+from experiments.spoofing import single_source_evidence_history as evidence_history
+from experiments.spoofing.single_source_evidence_history import (
     analyze_trace, prompt_energy, support_counts, support_statistics,
 )
 

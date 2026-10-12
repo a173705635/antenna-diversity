@@ -1,11 +1,11 @@
 """Fixed velocity-step takeover uses observation time and an actual IQ pair."""
 import numpy as np
 
-from core.recovery_geometry import FS
-from experiments import single_source_spoof_power as power
-from experiments import single_source_ramp_takeover as ramp
-from experiments.single_source_history_study import generate_new_record
-from experiments.single_source_template_coherence import truth_code_phases
+from core.spoofing.recovery_geometry import FS
+from experiments.spoofing import single_source_spoof_power as power
+from experiments.spoofing import single_source_ramp_takeover as ramp
+from experiments.spoofing.single_source_history_study import generate_new_record
+from experiments.spoofing.single_source_template_coherence import truth_code_phases
 
 
 def small_plan():

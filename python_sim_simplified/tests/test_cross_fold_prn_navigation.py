@@ -3,10 +3,10 @@ import json
 import numpy as np
 import pytest
 
-from core.single_source import beam as core_beam
-from core.single_source import frontend as core_frontend
-from experiments.single_source_temporal_trigger import navigation_input
-from tools import cross_fold_prn_navigation as study
+from core.spoofing.single_source import beam as core_beam
+from core.spoofing.single_source import frontend as core_frontend
+from experiments.spoofing.single_source_temporal_trigger import navigation_input
+from tools.spoofing import cross_fold_prn_navigation as study
 
 
 def test_fold_beam_keeps_full_raw_gate_and_one_fold_projector(monkeypatch):

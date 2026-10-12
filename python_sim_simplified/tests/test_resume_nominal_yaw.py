@@ -4,7 +4,7 @@ import pytest
 import json
 
 from core.positioning import PositioningFailure
-from tools import resume_nominal_yaw as recovery
+from tools.spoofing import resume_nominal_yaw as recovery
 
 
 def test_original_solver_failure_does_not_skip_independent_short_replay(monkeypatch):

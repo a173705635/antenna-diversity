@@ -2,8 +2,8 @@
 import numpy as np
 import pytest
 
-from core import single_source
-from experiments.single_source_long_phase_replay import replay_pair
+from core.spoofing import single_source
+from experiments.spoofing.single_source_long_phase_replay import replay_pair
 from test_single_source_code_blend import patch_geometry, record
 
 

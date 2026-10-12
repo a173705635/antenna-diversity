@@ -2,8 +2,8 @@
 import numpy as np
 import pytest
 
-from core import single_source
-from experiments.single_source_code_blend import assert_saved_navigation
+from core.spoofing import single_source
+from experiments.spoofing.single_source_code_blend import assert_saved_navigation
 
 
 def record(n):

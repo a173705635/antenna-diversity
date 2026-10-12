@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from tools import nominal_yaw_transition_shape as shape
+from tools.spoofing import nominal_yaw_transition_shape as shape
 
 
 def synthetic_paths():

@@ -4,8 +4,8 @@ from copy import deepcopy
 import numpy as np
 import pytest
 
-from core.single_source import residual_trigger
-from experiments.single_source_beam_coherence_lengths import (
+from core.spoofing.single_source import residual_trigger
+from experiments.spoofing.single_source_beam_coherence_lengths import (
     LENGTHS,audit_saved_lengths,fit_prompt_lengths,group_prompts,
 )
 

@@ -1,5 +1,5 @@
 import numpy as np
-from core.spatial_spoofing import confirm_windows, spatial_scores, detect_windows
+from core.spoofing.spatial_spoofing import confirm_windows, spatial_scores, detect_windows
 
 
 def windows(states):

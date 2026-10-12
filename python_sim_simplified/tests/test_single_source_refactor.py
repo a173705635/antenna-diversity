@@ -8,8 +8,8 @@ import pytest
 
 pytestmark = pytest.mark.local_evidence
 
-from core.single_source import frontend, navigate
-from core.single_source_scene import Case, generate
+from core.spoofing.single_source import frontend, navigate
+from core.spoofing.single_source_scene import Case, generate
 
 ROOT = Path(__file__).resolve().parents[1]
 FROZEN = ROOT / "archive" / "pre_refactor_2026-09-16"

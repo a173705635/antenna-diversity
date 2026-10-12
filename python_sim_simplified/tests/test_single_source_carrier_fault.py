@@ -2,8 +2,8 @@
 import numpy as np
 import pytest
 
-from core.recovery_geometry import WAVELENGTH
-from experiments.single_source_carrier_fault import (
+from core.spoofing.recovery_geometry import WAVELENGTH
+from experiments.spoofing.single_source_carrier_fault import (
     assert_prefault_equal, compare_fault, inject_carrier_fault,
 )
 

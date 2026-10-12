@@ -2,8 +2,8 @@
 
 import numpy as np
 
-from experiments.single_source_float_validation import coherent_displacement, carrier_fault
-from experiments.single_source_float_window_study import solve_history
+from experiments.spoofing.single_source_float_validation import coherent_displacement, carrier_fault
+from experiments.spoofing.single_source_float_window_study import solve_history
 
 
 def fixture():

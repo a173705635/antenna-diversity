@@ -3,8 +3,8 @@ import json
 
 import pytest
 
-from experiments.single_source_coherent_transfer import preflight_input
-from experiments.single_source_suppression_study import digest
+from experiments.spoofing.single_source_coherent_transfer import preflight_input
+from experiments.spoofing.single_source_suppression_study import digest
 
 
 def test_transfer_preflight_checks_saved_iq_and_observation_hashes(tmp_path):

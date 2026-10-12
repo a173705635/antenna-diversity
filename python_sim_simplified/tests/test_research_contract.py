@@ -23,7 +23,7 @@ def test_standalone_copy_runs_without_research_package(tmp_path):
     environment["PYTHONWARNINGS"] = "error"
 
     completed = subprocess.run(
-        [sys.executable, str(standalone / "experiments" / "full_chain.py")],
+        [sys.executable, str(standalone / "experiments" / "interference" / "full_chain.py")],
         cwd=tmp_path,
         env=environment,
         text=True,
@@ -32,7 +32,7 @@ def test_standalone_copy_runs_without_research_package(tmp_path):
 
     assert completed.returncode == 0, completed.stderr
     output_names = {
-        path.stem for path in (standalone / "results" / "full_chain").glob("*.png")
+        path.stem for path in (standalone / "results" / "interference" / "full_chain").glob("*.png")
     }
     assert output_names >= {
         "detailed_rf_dfe_TL",

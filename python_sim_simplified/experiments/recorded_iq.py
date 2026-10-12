@@ -35,7 +35,7 @@ def _json_write(path,value):
 def main():
     if DURATION_S <= 1.01:
         raise ValueError('Recorded positioning is not evaluated: observations start at 1 s with a 10 ms end margin; use more than 1.01 s. Decoded ephemerides are also required.')
-    output = reset_output(OUTPUT.name)
+    output = reset_output(OUTPUT)
     if FREEZE_SOURCE:freeze_source(output)
     dcfg=DFEConfig(decimation=2,output_bits=0)
     acfg=AcquisitionConfig(doppler_bins_hz=np.arange(-10000.,10000.1,250.))

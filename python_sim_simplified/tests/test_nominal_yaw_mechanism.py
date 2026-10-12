@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from tools import nominal_yaw_mechanism as mechanism
+from tools.spoofing import nominal_yaw_mechanism as mechanism
 
 
 def test_anchor_decomposition_keeps_vector_and_cross_term():

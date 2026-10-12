@@ -2,7 +2,30 @@
 
 验证日期：2026-09-16。范围限于当前 RF/DFE/捕获/跟踪、SDCP/多径、最新单源接收机、GPS L1/L5 定位和真实 IQ 接收。算法改善、检测门限调整和新性能结论不属于此次重构。
 
-## 冻结与组织
+## 2026-10-12 研究方向整理
+
+本次只整理维护代码、文档和结果目录，并同步调整引用；没有改动研究参数和数值算法。公共接收链仍在 `core/`，专用算法与实验分别位于 `interference/`、`spoofing/`、`multipath/`，抗欺骗诊断工具在 `tools/spoofing/`。正式报告在对应 `docs/` 子目录；64 份历史 Markdown 在本地忽略的 `docs/spoofing/history/`。
+
+### 实际验证
+
+- 修改前：默认测试 528 通过，另 6 项因 Windows 沙箱原子文件替换权限失败；在沙箱外复跑相同 6 项全部通过。基线共 534 项默认测试，25 项本地证据测试默认排除。
+- 修改后完整默认测试：`python -B -m pytest -q -p no:cacheprovider --tb=short`，**539 passed, 25 deselected**，138.02 秒。在沙箱外运行以避免上述已确认的权限限制。
+- 历史键映射、来源 ZIP、输出隔离等修正后的针对性测试：**40 passed, 2 deselected**。新增的真实文件测试证明：历史键能定位移动后的源码，原始字节匹配时通过，篡改后仍拒绝。
+- 独立旧/新解释器数值对照：设置 `PYTHONDONTWRITEBYTECODE=1` 后执行 `python -B -m pytest -q -p no:cacheprovider -m local_evidence tests/test_frozen_equivalence.py --tb=short`，**3 passed**，72.33 秒；覆盖 20 ms 联合接收链及 300 ms GPS L1、L5。
+- 所有 **123** 个维护模块导入成功；已检查的当前入口、专题报告及本地历史 Markdown 共无未解析文件链接。此前删除的 validation 图片与数据以历史文件名说明，不再保留失效链接。
+- 对 Git 基线与当前 core 的函数／类 AST 做比较，只排除导入语句以允许命名空间迁移。211 个原有定义一致；变化仅为来源清单递归扫描及新增历史键到当前文件位置的映射。
+- 37 个已归类结果目录通过同盘目录移动整理。迁移前后核对全部 **77** 个结果树的相对文件名、长度、总字节数，以及根层 summary／manifest／plan／verification／results JSON 和 source_snapshot ZIP 的 SHA-256，均一致。未逐字节重新哈希全部大型 IQ 数组。
+- 两份移动的 Word 成品及 HTML 内容与 Git 基线字节一致。`git diff --check` 通过。
+
+### 审查与限制
+
+独立审查发现并修正了三个共享定位入口仍传输出 basename 的问题、历史源码键当作当前文件路径的问题、项目相对路径缺少 results 前缀的问题，以及迁移后的报告附件链接。复审未发现剩余实质性代码问题，补齐了五个历史归档链接。
+
+旧研究的源码清单、哈希常量和数据内容保持原样。当前源码经过目录整理后字节身份已经变化，固定历史阶段的严格 replay/resume 工具仍会拒绝不匹配的当前源码；严格复现需使用对应冻结源码或 source_snapshot ZIP。这不是对全部历史阶段 RF 研究的重跑或性能复验。除上述三项数值对照外，其余本地证据测试本轮没有执行。`full_chain` 仍是干扰和多径的联合配置，不能据目录名称将其视为纯抗干扰结果。
+
+以下章节记录之前的重构及其当时验证，不作为本次新增测试数量或数据位置说明。
+
+## 冻结与组织（历史重构）
 
 - 原版 286 个顶层 Python 文件及配置、测试、报告、日志共 584 个文件，按字节保存在 `archive/pre_refactor_2026-09-16/`。
 - `FREEZE_MANIFEST.json` 记录原 Git HEAD 和各文件 SHA256；包含当时未提交的 `build_feasibility_chapter7.py`。

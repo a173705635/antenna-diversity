@@ -1,7 +1,7 @@
 """Segmented spatial evidence must count every prompt in its real basis."""
 import numpy as np
 
-from core import single_source
+from core.spoofing import single_source
 
 source_evidence=single_source.source_evidence
 

@@ -1,6 +1,8 @@
 # 文档导航
 
-最新抗欺骗：[GPSPATRON公开原理启发的2–4天线本地实现](reports/2026-09-14-gpspatron-spatial-diversity.md)，包含公式、独立标定、配对统计、RF链路、输出保护和负面边界；区分本地模型与商业产品能力。
+当前维护入口：[实验与共享代码目录](../python_sim_simplified/README.md)、[抗干扰联合链路](../python_sim_simplified/docs/interference/README.md)、[单源抗欺骗研究](../python_sim_simplified/docs/spoofing/SINGLE_SOURCE_SUPPRESSION_REPORT.md)、[双路 SDCP 多径研究](../python_sim_simplified/docs/multipath/SDCP_MULTIPATH_REPORT.md)。
+
+历史抗欺骗：[GPSPATRON公开原理启发的2–4天线本地实现](reports/2026-09-14-gpspatron-spatial-diversity.md)，包含公式、独立标定、配对统计、RF链路、输出保护和负面边界；区分本地模型与商业产品能力。
 
 SDCP 全链路误差入口：[天线、RF、DFE、跟踪与后级偏差清单](reports/2026-09-13-sdcp-error-inventory.md)，包含影响因素、处理办法和参考数值；定位优化暂不推进。
 

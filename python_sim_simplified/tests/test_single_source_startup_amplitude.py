@@ -1,8 +1,8 @@
 """Startup amplitude uses calibrated, same-PRN 1 ms prompts only."""
 import numpy as np
 
-import experiments.single_source_startup_amplitude as study
-from core.single_source import residual_trigger
+import experiments.spoofing.single_source_startup_amplitude as study
+from core.spoofing.single_source import residual_trigger
 
 
 def test_cross_prn_covariance_recovers_relative_amplitudes_without_bit_wiping():

@@ -6,7 +6,7 @@ from core.config import Direction
 from core.code_replica import bandlimited_code_replica, _sample_code
 from core.gnss import ca_code
 from core.presets import default_config
-from core.multipath import refine_single_path_delays
+from core.multipath.multipath import refine_single_path_delays
 
 
 @pytest.mark.parametrize("delay", [.25, .5, .7])

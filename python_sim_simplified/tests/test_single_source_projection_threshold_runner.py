@@ -2,9 +2,9 @@
 import numpy as np
 import pytest
 
-from core.single_source import residual_trigger
-from core.recovery_geometry import FS
-from experiments import single_source_projection_threshold as study
+from core.spoofing.single_source import residual_trigger
+from core.spoofing.recovery_geometry import FS
+from experiments.spoofing import single_source_projection_threshold as study
 
 
 def test_independent_fit_switches_projector_and_weight_at_two():

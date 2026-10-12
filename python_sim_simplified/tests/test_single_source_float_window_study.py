@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from experiments.single_source_float_window_study import solve_window
+from experiments.spoofing.single_source_float_window_study import solve_window
 
 
 GEOMETRY = np.array([[1., 0., 0.], [-1., 0., 0.],

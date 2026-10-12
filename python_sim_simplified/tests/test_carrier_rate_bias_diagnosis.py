@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from tools import carrier_rate_bias_diagnosis as diagnosis
+from tools.spoofing import carrier_rate_bias_diagnosis as diagnosis
 
 
 def test_final_mask_uses_actual_lag_and_exclusion():

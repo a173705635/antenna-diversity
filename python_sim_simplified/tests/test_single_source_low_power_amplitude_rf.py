@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from experiments.single_source_low_power_amplitude_rf import (
+from experiments.spoofing.single_source_low_power_amplitude_rf import (
     navigation_field_map, compare_mapped_navigation,
     selected_carrier_increment_error,
 )
@@ -52,8 +52,8 @@ def test_selected_carrier_increment_uses_same_arc_pairs_only():
 
 @pytest.mark.local_evidence
 def test_real_stage39_and_new_navigation_layout_mapping():
-    from experiments.single_source_early_truncation import saved_arrays
-    from experiments.single_source_low_power_amplitude_rf import (
+    from experiments.spoofing.single_source_early_truncation import saved_arrays
+    from experiments.spoofing.single_source_low_power_amplitude_rf import (
         STAGE39, STAGE43, preflight,
     )
 
@@ -72,11 +72,11 @@ def test_saved_stage39_navigation_replays_with_explicit_mapping(tmp_path):
     import json
 
     from core.serialization import serializable
-    from experiments.single_source_early_truncation import saved_arrays
-    from experiments.single_source_low_power_amplitude_rf import (
+    from experiments.spoofing.single_source_early_truncation import saved_arrays
+    from experiments.spoofing.single_source_low_power_amplitude_rf import (
         STAGE39, check_historical_navigation_layout, check_truth_fields,
     )
-    from experiments.single_source_startup_amplitude_rf import replay_navigation
+    from experiments.spoofing.single_source_startup_amplitude_rf import replay_navigation
 
     folder = STAGE39/'weak'
     tracking = saved_arrays(folder/'aided_five_ms'/'tracking.npz')

@@ -2,13 +2,13 @@
 import numpy as np
 from zipfile import ZipFile
 
-from core.recovery_geometry import FS
-from experiments.single_source_history_study import generate_new_record
-from experiments.single_source_long_coherent import (
+from core.spoofing.recovery_geometry import FS
+from experiments.spoofing.single_source_history_study import generate_new_record
+from experiments.spoofing.single_source_long_coherent import (
     comparative_metrics, navigation_prefix, source_snapshot,
 )
 from experiments.paths import RESULTS
-from experiments.single_source_suppression_study import digest
+from experiments.spoofing.single_source_suppression_study import digest
 
 
 def test_same_seed_generator_has_exact_preattack_iq_across_three_scenes():

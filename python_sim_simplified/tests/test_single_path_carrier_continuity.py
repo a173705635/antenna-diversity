@@ -3,7 +3,7 @@ from types import FunctionType
 import numpy as np
 import pytest
 
-from tools import single_path_carrier_continuity as continuity
+from tools.spoofing import single_path_carrier_continuity as continuity
 
 
 def observations(count=5):
@@ -76,7 +76,7 @@ def test_private_function_without_replacement_matches_original(monkeypatch):
 
 
 def test_original_phase_fit_retains_lag_two_fallback(monkeypatch):
-    from core import mechanism_phase
+    from core.spoofing import mechanism_phase
 
     z = observations(3)
     z['satellites'] = np.ones((3, 6, 3))
@@ -167,9 +167,9 @@ def test_saved_gate_three_short_baseline_reproduces_every_field():
         folder, path['output_sha256'], 'weak', 2.)
     assert result['baseline_reproduced']
     assert len(arrays['time']) == 1984
-    from experiments.single_source_long_coherent import navigation_prefix
-    from experiments.single_source_phase_state_gate import projection_eligibility
-    from experiments.single_source_temporal_trigger import navigation_input
+    from experiments.spoofing.single_source_long_coherent import navigation_prefix
+    from experiments.spoofing.single_source_phase_state_gate import projection_eligibility
+    from experiments.spoofing.single_source_temporal_trigger import navigation_input
 
     tracking = continuity.read_npz(folder/'tracking.npz')
     trace = continuity.read_npz(folder/'trace.npz')

@@ -1,7 +1,7 @@
 """Unpublished phase state carries only valid output-gated carrier motion."""
 import numpy as np
 
-from core import single_source
+from core.spoofing import single_source
 from test_single_source_phase_leave_one_out import phase_record
 
 

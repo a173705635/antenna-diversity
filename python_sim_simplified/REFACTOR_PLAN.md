@@ -1,5 +1,33 @@
 # Core and experiments implementation plan
 
+## 2026-10-12: approved research-direction layout
+
+**Goal:** share the common receiver code, separate interference/spoofing/multipath algorithms and experiments, and update their consumers and documentation together.
+
+**Approved design:** keep common modules directly in `core/`; place dedicated modules in `core/interference/`, `core/spoofing/`, and `core/multipath/`. Mirror those directions under `experiments/`, `docs/`, and `results/`. General GPS/recorded-IQ experiments and `experiments/paths.py` remain shared. Keep filenames and numerical behavior; no forwarding wrappers or duplicate algorithms. `full_chain` belongs to interference as a documented mixed interference/multipath demonstration, with its existing configuration unchanged.
+
+**Global constraints:** work in this existing authorized workspace; modify only the maintained simplified project. Preserve local archive and frozen result bytes, research parameters, source identity checks, and independent verification. Do not commit or push as part of this task. No new dependencies or defensive fallback paths. Preserve general navigation/recorded data locations when not owned by a direction.
+
+### Task 1: move dedicated code and update active references
+
+- [x] Capture the current default test baseline before editing: 528 passed and 6 Windows-sandbox atomic-replace errors; those same 6 tests passed outside the sandbox, for 534 passing default tests total. 25 local-evidence tests were deselected.
+- [x] Move dedicated core modules, directional experiment entries, and specialized diagnostic tools; add package initializers. Keep shared RF/DFE/tracking/GPS/array primitives shared where used across directions.
+- [x] Move dedicated echo/interferer scene helpers and their small result dataclasses out of shared `gnss.py`; move blind-null combining and multipath-specific LCMV combining out of shared `diversity.py`. Preserve function bodies and shared scenario/pipeline orchestration; do not add old-path re-export wrappers.
+- [x] Update absolute/relative imports, dynamic imports, script bootstraps, test paths, monkeypatches, and provenance to recursively cover the maintained nested code. No old import compatibility shims.
+- [x] Classify new outputs and known existing result trees by direction; update current consumers. Move existing results without editing frozen contents; leave unclassified and general positioning inputs in place.
+- [x] Organize current and previously temporary research Markdown under matching `docs/` directories, repair active links and commands. Keep historical commands/source maps explicitly historical.
+- [x] Update README, local project instructions and existing refactor documentation to describe the final paths.
+- [x] Run targeted layout/import/path tests, then the default suite; run practical smoke checks in temporary outputs without overwriting saved research evidence.
+
+### Task 2: independent review and final verification
+
+- [x] Reviewer checks import boundaries, output reset paths, moved report links, current/legacy provenance separation, and source freeze completeness.
+- [x] Correct substantive findings and rerun affected checks; Main runs final verification and reports any evidence-only limitations.
+
+**Review focus:** nested source files omitted from freeze; wrong `__file__` parent after a move; reset deleting a direction directory instead of one experiment; historical manifests silently rewritten; replay input moved without consumer updates; existing source-byte gates accidentally weakened; default tests depending on ignored local evidence.
+
+**Progress:** completed without staging, committing, or pushing. Initial workspace clean at `326d3f7`; two read-only audits and independent review completed. Main took over after the implementation agent became unavailable, corrected the review findings, and verified 539 default tests plus three independent old/new numerical comparisons. All 77 existing result trees retain their metadata fingerprints and selected root summary/manifest/plan/snapshot byte hashes; 37 trees moved. All maintained modules import and checked document links resolve. Deleted validation evidence is described explicitly as historical, with no substitute results. Exact commands and verification limits are in REFACTOR_VALIDATION.md. The earlier sections below describe the previous completed refactor and remain historical.
+
 > For agentic workers: use subagent-driven-development for independent implementation and review; preserve the approved numerical behavior.
 
 **Goal:** one maintained core package and one independent entry per current experiment, with the original research tree frozen once.

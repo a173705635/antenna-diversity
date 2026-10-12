@@ -1,8 +1,8 @@
 """Causal raw-trigger history must select the current block projector."""
 import numpy as np
 
-from core import single_source
-from core.recovery_geometry import FS
+from core.spoofing import single_source
+from core.spoofing.recovery_geometry import FS
 
 
 def test_history_uses_only_measured_blocks_and_drops_oldest_at_five():

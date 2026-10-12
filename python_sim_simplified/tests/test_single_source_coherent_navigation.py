@@ -4,10 +4,10 @@ import json
 import numpy as np
 import pytest
 
-from experiments.single_source_coherent_navigation import (
+from experiments.spoofing.single_source_coherent_navigation import (
     build_coherent_support, run_navigation_modes, validate_sources,
 )
-from experiments.single_source_suppression_study import digest
+from experiments.spoofing.single_source_suppression_study import digest
 
 
 CHIP = 2046

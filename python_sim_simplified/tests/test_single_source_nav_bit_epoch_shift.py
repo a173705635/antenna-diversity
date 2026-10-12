@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 
-from experiments import single_source_nav_bit_epoch_shift as study
+from experiments.spoofing import single_source_nav_bit_epoch_shift as study
 
 
 def test_new_epoch_pair_requires_same_clean_samples_and_observations(monkeypatch):

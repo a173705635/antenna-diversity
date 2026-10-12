@@ -1,9 +1,9 @@
 """Template-rate and five-millisecond trigger factors without local IQ."""
 import numpy as np
 
-from core.single_source import residual_trigger
-import experiments.single_source_template_coherence as diagnosis
-from experiments.single_source_template_coherence import (
+from core.spoofing.single_source import residual_trigger
+import experiments.spoofing.single_source_template_coherence as diagnosis
+from experiments.spoofing.single_source_template_coherence import (
     aided_template,group_five_ms,projected_power_retention,trigger_fit,
     phase_masks,truth_code_phases,wrapped_code_error,
 )

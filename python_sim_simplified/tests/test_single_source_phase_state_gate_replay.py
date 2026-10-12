@@ -2,9 +2,9 @@
 import numpy as np
 import pytest
 
-from core.recovery_geometry import FS
-from core.single_source import navigate
-from experiments.single_source_phase_state_gate import (
+from core.spoofing.recovery_geometry import FS
+from core.spoofing.single_source import navigate
+from experiments.spoofing.single_source_phase_state_gate import (
     projection_eligibility, replay_triplet,
 )
 from test_single_source_phase_state import fixed_code_geometry, observations

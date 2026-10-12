@@ -2,7 +2,9 @@ import numpy as np
 import pytest
 
 from core.config import BlindNullConfig
-from core.diversity import combine_blind_null, combine_known, combine_lcmv
+from core.diversity import combine_known
+from core.interference.combining import combine_blind_null
+from core.multipath.combining import combine_lcmv
 
 
 def test_known_combiners_have_unit_target_response():

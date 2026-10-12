@@ -3,8 +3,8 @@ import json
 import numpy as np
 import pytest
 
-from core.recovery_geometry import WAVELENGTH
-from experiments import single_source_nominal_yaw as study
+from core.spoofing.recovery_geometry import WAVELENGTH
+from experiments.spoofing import single_source_nominal_yaw as study
 
 
 def test_positive_yaw_rotates_receiver_baseline_counterclockwise_only():

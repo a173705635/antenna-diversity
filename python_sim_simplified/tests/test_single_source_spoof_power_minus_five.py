@@ -4,10 +4,10 @@ from copy import deepcopy
 import numpy as np
 import pytest
 
-from core import single_source_scene
-from core.recovery_geometry import FS
-from experiments.single_source_history_study import generate_new_record
-from experiments.single_source_spoof_power_minus_five import (
+from core.spoofing import single_source_scene
+from core.spoofing.recovery_geometry import FS
+from experiments.spoofing.single_source_history_study import generate_new_record
+from experiments.spoofing.single_source_spoof_power_minus_five import (
     audit_new_fit,verify_power_pair,
 )
 

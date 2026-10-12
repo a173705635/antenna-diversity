@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from experiments.single_source_complex_response_audit import effective_response, phase_changes
+from experiments.spoofing.single_source_complex_response_audit import effective_response, phase_changes
 
 
 def test_effective_response_and_noise_gain_use_calibration_not_physical_noise_scaling():

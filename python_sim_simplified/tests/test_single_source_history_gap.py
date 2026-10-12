@@ -2,9 +2,9 @@
 import numpy as np
 
 from core.gps_simulation import receiver_reference
-from core.recovery_geometry import sky
-from core.mechanism_smoothing import smooth_history
-from core.mechanism_phase import fit_carrier_displacement
+from core.spoofing.recovery_geometry import sky
+from core.spoofing.mechanism_smoothing import smooth_history
+from core.spoofing.mechanism_phase import fit_carrier_displacement
 
 
 def record(times, count=6):

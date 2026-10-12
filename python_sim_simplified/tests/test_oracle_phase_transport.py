@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from types import FunctionType
 
-from tools import oracle_phase_transport as oracle
+from tools.spoofing import oracle_phase_transport as oracle
 
 
 def test_oracle_factor_uses_first_sample_reference_and_physical_sign():
@@ -174,15 +174,33 @@ def test_short_replay_does_not_run_original_navigation(monkeypatch, tmp_path):
 
 
 def test_preflight_checks_all_98_source_hashes(monkeypatch, tmp_path):
-    stage = oracle.stage47.OUTPUT
-    summary = json.loads((stage/'summary.json').read_text(encoding='utf-8'))
-    expected = dict(summary['source_sha256'])
+    expected = {f'core/file_{index}.py': str(index) for index in range(98)}
     assert len(expected) == 98
     last = next(reversed(expected))
     expected[last] = '0' * 64
+    monkeypatch.setattr(oracle, 'digest',
+                        lambda path: path.stem.removeprefix('file_'))
     with pytest.raises(AssertionError, match=last.replace('.', r'\.')):
-        oracle.verify_current_sources(oracle.Path(oracle.__file__).resolve().parents[1],
-                                      expected)
+        oracle.verify_current_sources(tmp_path, expected)
+
+
+def test_frozen_source_check_uses_moved_path_and_rejects_changed_bytes(tmp_path):
+    """A historical key still binds the exact bytes at its relocated path."""
+    import hashlib
+
+    source = tmp_path/'core/spoofing/single_source.py'
+    source.parent.mkdir(parents=True)
+    source.write_bytes(b'original receiver source')
+    expected = {'core/single_source.py': hashlib.sha256(source.read_bytes()).hexdigest()}
+    for index in range(97):
+        path = tmp_path/f'core/file_{index}.py'
+        path.write_bytes(b'shared source')
+        expected[f'core/file_{index}.py'] = hashlib.sha256(path.read_bytes()).hexdigest()
+
+    oracle.verify_current_sources(tmp_path, expected)
+    source.write_bytes(b'changed receiver source')
+    with pytest.raises(AssertionError, match=r'core/single_source\.py'):
+        oracle.verify_current_sources(tmp_path, expected)
 
 
 def test_source_snapshot_is_reusable_without_rewriting(tmp_path):

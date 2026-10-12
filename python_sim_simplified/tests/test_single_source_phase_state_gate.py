@@ -1,7 +1,7 @@
 """A temporal projection gate restricts only unpublished short anchors."""
 import numpy as np
 
-from core import single_source
+from core.spoofing import single_source
 from test_single_source_phase_state import fixed_code_geometry, observations
 
 

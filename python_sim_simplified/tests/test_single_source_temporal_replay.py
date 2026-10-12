@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from core.serialization import serializable
-from experiments.single_source_temporal_trigger import (
+from experiments.spoofing.single_source_temporal_trigger import (
     block_summary, compare_publications, current_projector_diagnostics,
     navigation_input,
 )

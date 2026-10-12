@@ -2,10 +2,10 @@
 import numpy as np
 
 from core.gps_simulation import receiver_reference
-from core.mechanism_phase import (fit_carrier_displacement,
+from core.spoofing.mechanism_phase import (fit_carrier_displacement,
                                   phase_prediction_leave_one_out)
-from core.recovery_geometry import sky
-from core.single_source import navigate
+from core.spoofing.recovery_geometry import sky
+from core.spoofing.single_source import navigate
 
 
 def phase_record(stars=8):
@@ -129,7 +129,7 @@ def test_future_carrier_cannot_change_earlier_candidate():
 
 
 def test_navigation_off_path_does_not_add_diagnostics(monkeypatch):
-    from core import single_source
+    from core.spoofing import single_source
     from test_single_source_code_blend import patch_geometry, record
 
     patch_geometry(monkeypatch)
@@ -149,7 +149,7 @@ def test_navigation_off_path_does_not_add_diagnostics(monkeypatch):
 
 
 def test_navigation_enabled_records_exclusion_without_changing_admission(monkeypatch):
-    from core import single_source
+    from core.spoofing import single_source
     from test_single_source_code_blend import patch_geometry, record
 
     patch_geometry(monkeypatch)

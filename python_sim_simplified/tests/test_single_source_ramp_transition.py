@@ -3,12 +3,12 @@ import json
 import numpy as np
 import pytest
 
-from experiments import single_source_ramp_transition as transition
-from experiments.single_source_ramp_transition import (
+from experiments.spoofing import single_source_ramp_transition as transition
+from experiments.spoofing.single_source_ramp_transition import (
     TRANSITION_PLAN,interpolation_alpha,verify_interpolated_samples,
     verify_power_metadata,trigger_counts,
 )
-from experiments.single_source_history_study import generate_new_record
+from experiments.spoofing.single_source_history_study import generate_new_record
 
 
 def test_fixed_power_interpolation_checks_every_sample():

@@ -2,8 +2,8 @@
 import numpy as np
 import pytest
 
-import experiments.single_source_aided_ten_ms_rf as replay
-import experiments.single_source_aided_coherent_rf as stage28
+import experiments.spoofing.single_source_aided_ten_ms_rf as replay
+import experiments.spoofing.single_source_aided_coherent_rf as stage28
 
 
 def test_saved_five_ms_paths_replay_from_separate_states(monkeypatch):

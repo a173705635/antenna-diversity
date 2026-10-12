@@ -6,7 +6,9 @@ from .antenna import build_antenna_model
 from .acquisition import acquire
 from .config import SimulationConfig
 from .dfe import process_dfe
-from .diversity import combine_blind_null, combine_known, combine_lcmv
+from .diversity import combine_known
+from .interference.combining import combine_blind_null
+from .multipath.combining import combine_lcmv
 from .gnss import generate_scenario
 from .metrics import compute_metrics
 from .models import (
@@ -16,7 +18,7 @@ from .models import (
     SimulationResults,
     TrackingResult,
 )
-from .multipath import detect_multipath, empty_detection, evaluate_multipath
+from .multipath.multipath import detect_multipath, empty_detection, evaluate_multipath
 from .presets import default_config
 from .rf import process_rf
 from .tracking import track

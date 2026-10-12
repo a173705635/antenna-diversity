@@ -1,7 +1,7 @@
 import numpy as np
 
-from core import single_source
-from experiments.single_source_diagnosis import outage_events
+from core.spoofing import single_source
+from experiments.spoofing.single_source_diagnosis import outage_events
 
 
 def test_optional_diagnostics_preserves_navigation_and_counts_gates(monkeypatch):

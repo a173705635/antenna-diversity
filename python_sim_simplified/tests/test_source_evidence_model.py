@@ -3,7 +3,7 @@
 import numpy as np
 from scipy.stats import f
 
-from experiments.source_evidence_model import binomial_interval, gates, ideal_probabilities, statistics
+from experiments.spoofing.source_evidence_model import binomial_interval, gates, ideal_probabilities, statistics
 
 
 def test_group_statistics_use_coherent_sum_and_disjoint_off_residual():

@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 
-from experiments.single_source_ramp_low_power import (
+from experiments.spoofing.single_source_ramp_low_power import (
     compare_iq_components, compare_power_pair, cross_power, verify_power_input,
 )
 

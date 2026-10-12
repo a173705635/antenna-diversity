@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from core.pipeline import run_end_to_end
 from core.plotting import plot_detailed_results, plot_multipath_results, plot_results
 from core.presets import default_config
-from experiments.full_chain import save_results_figures
+from experiments.interference.full_chain import save_results_figures
 
 
 def test_plot_results_returns_seven_independent_figures():
@@ -177,7 +177,7 @@ def test_direct_runner_does_not_show_on_noninteractive_backend(tmp_path):
     import shutil
     shutil.copytree(source, standalone,
                     ignore=shutil.ignore_patterns('tests', 'results', 'validation', 'archive', '__pycache__'))
-    script = standalone / "experiments" / "full_chain.py"
+    script = standalone / "experiments" / "interference" / "full_chain.py"
     environment = os.environ.copy()
     environment["MPLBACKEND"] = "Agg"
     environment["PYTHONWARNINGS"] = "error"

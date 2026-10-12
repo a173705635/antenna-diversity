@@ -2,8 +2,8 @@
 import numpy as np
 import pytest
 
-import experiments.single_source_ramp_takeover_long as study
-from experiments.single_source_ramp_takeover_long import long_tail_scores
+import experiments.spoofing.single_source_ramp_takeover_long as study
+from experiments.spoofing.single_source_ramp_takeover_long import long_tail_scores
 
 
 def test_long_tail_masks_and_error_runs_use_observation_time():

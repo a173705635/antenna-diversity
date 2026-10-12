@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from experiments.single_source_cv_bridge import cv_bridge
+from experiments.spoofing.single_source_cv_bridge import cv_bridge
 
 
 def test_prediction_expires_from_last_measurement_not_last_prediction():

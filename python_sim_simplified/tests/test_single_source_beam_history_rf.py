@@ -4,8 +4,8 @@ import json
 import numpy as np
 import pytest
 
-from core.single_source import beam_history_weight, frontend
-from experiments import single_source_beam_history_rf as beam_rf
+from core.spoofing.single_source import beam_history_weight, frontend
+from experiments.spoofing import single_source_beam_history_rf as beam_rf
 
 
 def steering():

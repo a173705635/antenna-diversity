@@ -7,8 +7,8 @@ from zipfile import ZipFile
 import numpy as np
 import pytest
 
-from core import single_source
-from core.recovery_geometry import FS
+from core.spoofing import single_source
+from core.spoofing.recovery_geometry import FS
 
 
 STEERING = np.array([[1., 1., 1.], [1., 1j, -1.], [1., -1., 1j]])

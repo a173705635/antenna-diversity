@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from core.config import Direction, WidebandInterferer
-from core.interference import generate_wideband_waveform
+from core.interference.interference import generate_wideband_waveform
 
 
 FS_HZ = 16.368e6

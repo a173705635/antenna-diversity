@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 
 from core.sdcp_observation import raw_sdcp
-from experiments import sdcp_baseline, sdcp_multipath, sdcp_support
+from experiments.multipath import sdcp_baseline, sdcp_multipath, sdcp_support
 
 
 def test_raw_observation_preserves_unwrapped_cycles_at_common_times():

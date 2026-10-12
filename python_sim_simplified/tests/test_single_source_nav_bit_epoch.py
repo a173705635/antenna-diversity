@@ -4,8 +4,8 @@ from copy import deepcopy
 import numpy as np
 import pytest
 
-from core import single_source_scene as scene
-from core.recovery_geometry import C,FS,WAVELENGTH,sky,steering
+from core.spoofing import single_source_scene as scene
+from core.spoofing.recovery_geometry import C,FS,WAVELENGTH,sky,steering
 from core.presets import mate70_phase_centers
 
 

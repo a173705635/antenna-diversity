@@ -2,8 +2,8 @@
 import numpy as np
 import pytest
 
-from core.single_source import navigate
-from experiments.single_source_phase_state import replay_pair
+from core.spoofing.single_source import navigate
+from experiments.spoofing.single_source_phase_state import replay_pair
 from test_single_source_phase_state import fixed_code_geometry, observations
 
 

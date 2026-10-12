@@ -1,7 +1,7 @@
 """Fixed-support float replay uses independent solvers and explicit clocks."""
 import numpy as np
 
-from experiments.single_source_coherent_float import (
+from experiments.spoofing.single_source_coherent_float import (
     float_metrics, observation_masks, score_pair, solve_pair,
 )
 

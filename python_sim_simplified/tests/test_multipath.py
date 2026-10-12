@@ -7,7 +7,7 @@ from core.antenna import antenna_response, build_antenna_model
 from core.channel_delay import fractional_delay
 from core.config import Direction
 from core.gnss import ca_code
-from core.multipath import detect_multipath, evaluate_multipath, project_out_los
+from core.multipath.multipath import detect_multipath, evaluate_multipath, project_out_los
 from core.presets import default_config
 
 

@@ -3,8 +3,8 @@ import json
 import sys
 import numpy as np
 import pytest
-from experiments import sdcp_baseline as baseline, sdcp_multipath as multipath
-from experiments.sdcp_support import save_json
+from experiments.multipath import sdcp_baseline as baseline, sdcp_multipath as multipath
+from experiments.multipath.sdcp_support import save_json
 
 
 @pytest.mark.parametrize('duration', [300, 700, 1500])
@@ -70,9 +70,9 @@ def test_multipath_incomplete_windows_have_no_scores_or_alarms():
 
 
 @pytest.mark.parametrize('module,setting,value', [
-    ('sdcp_multipath','DURATION_MS',390), ('sdcp_baseline','DURATION_MS',10),
+    ('multipath.sdcp_multipath','DURATION_MS',390), ('multipath.sdcp_baseline','DURATION_MS',10),
     ('gps_spp','DURATION_MS',200), ('gps_l1_l5','DURATION_MS',200),
-    ('recorded_iq','DURATION_S',.7), ('single_source','DURATION_S',.1),
+    ('recorded_iq','DURATION_S',.7), ('spoofing.single_source','DURATION_S',.1),
 ])
 def test_unsupported_duration_is_explained_before_output_reset(monkeypatch, module, setting, value):
     import importlib
@@ -93,7 +93,7 @@ def test_recorded_positioning_without_epochs_is_not_evaluated():
 
 
 def test_single_source_no_post_attack_data_is_not_zero_outage(monkeypatch):
-    from experiments import single_source
+    from experiments.spoofing import single_source
     z = dict(available_time=np.array([.2,.21]))
     nav = dict(position=np.zeros((2,3)), initialization_time=None)
     monkeypatch.setattr(single_source, 'frontend', lambda *args: z)

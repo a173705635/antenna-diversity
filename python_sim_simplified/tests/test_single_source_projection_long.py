@@ -1,7 +1,7 @@
 """Fixed long-batch plan and preregistered relative-plus-absolute screen."""
 import numpy as np
 
-from experiments import single_source_projection_long as study
+from experiments.spoofing import single_source_projection_long as study
 
 
 def positions(east):

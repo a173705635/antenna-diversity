@@ -1,9 +1,9 @@
 """The optional startup magnitude model changes the actual beam path."""
 import numpy as np
 
-from core import single_source
+from core.spoofing import single_source
 from core.array_processing import startup_relative_amplitude
-from core.recovery_geometry import FS
+from core.spoofing.recovery_geometry import FS
 
 
 def test_three_antenna_covariance_recovers_rms_relative_magnitude():

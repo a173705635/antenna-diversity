@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from experiments.single_source_early_truncation import (
+from experiments.spoofing.single_source_early_truncation import (
     CASES, compare_arrays, near_tail_energy_check, saved_arrays, verify_inputs,
 )
 

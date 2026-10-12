@@ -5,14 +5,14 @@ import numpy as np
 import pytest
 from scipy.optimize import minimize
 
-from core import mechanism_phase, mechanism_smoothing, single_source
+from core.spoofing import mechanism_phase, mechanism_smoothing, single_source
 from core.gps_simulation import receiver_reference
-from experiments import single_source_projection_long as study
-from experiments.single_source_phase_state_gate import projection_eligibility
-from experiments.single_source_suppression_study import digest
-from experiments.single_source_temporal_trigger import navigation_input
-from tools import huber_carrier_short_bridge as huber
-from tools import single_path_carrier_continuity as replay
+from experiments.spoofing import single_source_projection_long as study
+from experiments.spoofing.single_source_phase_state_gate import projection_eligibility
+from experiments.spoofing.single_source_suppression_study import digest
+from experiments.spoofing.single_source_temporal_trigger import navigation_input
+from tools.spoofing import huber_carrier_short_bridge as huber
+from tools.spoofing import single_path_carrier_continuity as replay
 
 
 def constellation(seed=3, count=9, spread=1.):

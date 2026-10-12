@@ -1,8 +1,8 @@
 """Optional accepted-loop logging does not enter the receiver calculation."""
 import numpy as np
 
-from core import single_source
-from core.recovery_geometry import FS
+from core.spoofing import single_source
+from core.spoofing.recovery_geometry import FS
 
 
 def test_loop_history_copies_only_accepted_segments_without_changing_science(monkeypatch):

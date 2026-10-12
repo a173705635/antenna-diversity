@@ -3,7 +3,7 @@ import json
 import numpy as np
 
 from core.array_processing import prompt_projector
-from tools import odd_even_prn_direction as study
+from tools.spoofing import odd_even_prn_direction as study
 
 
 def test_parity_split_precedes_grouping_and_preserves_column_order():

@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from tools import leave_one_out_future_innovation as innovation
+from tools.spoofing import leave_one_out_future_innovation as innovation
 
 
 def geometry():

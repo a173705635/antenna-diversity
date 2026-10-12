@@ -1,16 +1,17 @@
 import numpy as np
 
-from experiments.sdcp_multipath import scores, confirmed, analysis_timing, cases
+from experiments.multipath.sdcp_multipath import scores, confirmed, analysis_timing, cases
 from core.antenna import build_antenna_model
 from core.config import MultipathPath
-from core.gnss import generate_scenario, _multipath_scene
+from core.gnss import generate_scenario
+from core.multipath.scene import _multipath_scene
 from core.presets import default_config
 
 TIMES, _ = analysis_timing(1500)
 
 
 def test_one_entry_runs_simulation_then_verification(monkeypatch, tmp_path):
-    from experiments import sdcp_multipath
+    from experiments.multipath import sdcp_multipath
 
     stages = []
 
@@ -76,7 +77,7 @@ def test_common_direction_echo_has_identical_relative_channel_response():
 
 
 def test_short_record_uses_valid_observation_and_tail_times():
-    from experiments.sdcp_multipath import residual
+    from experiments.multipath.sdcp_multipath import residual
 
     cfg = default_config()
     cfg.signal.duration_ms = 700

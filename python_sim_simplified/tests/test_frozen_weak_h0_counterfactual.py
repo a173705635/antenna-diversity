@@ -6,7 +6,7 @@ from zipfile import ZipFile
 import numpy as np
 import pytest
 
-from tools import frozen_weak_h0_counterfactual as study
+from tools.spoofing import frozen_weak_h0_counterfactual as study
 
 
 def test_paired_prefix_and_all_observation_fields_are_required():
@@ -131,19 +131,19 @@ def test_old_oracle_snapshot_rejects_tampered_current_helper(tmp_path, monkeypat
     names = ('tools/oracle_phase_transport.py', 'tools/resume_projection_long.py')
     monkeypatch.setattr(study.oracle, 'EXTRA_SOURCES', names)
     root = tmp_path/'source'
-    (root/'tools').mkdir(parents=True)
+    (root/'tools/spoofing').mkdir(parents=True)
     for name in names:
-        (root/name).write_bytes(name.encode())
+        (root/'tools/spoofing'/Path(name).name).write_bytes(name.encode())
     snapshot = tmp_path/'old_oracle.zip'
     with ZipFile(snapshot, 'w') as archive:
         for name in names:
-            archive.writestr(name, (root/name).read_bytes())
+            archive.writestr(name, (root/'tools/spoofing'/Path(name).name).read_bytes())
     sha = study.digest(snapshot)
     study.verify_oracle_helper_snapshot(snapshot, sha, root)
-    (root/names[0]).write_bytes(b'tampered current helper')
+    (root/'tools/spoofing'/Path(names[0]).name).write_bytes(b'tampered current helper')
     with pytest.raises(AssertionError, match='oracle_phase_transport.py'):
         study.verify_oracle_helper_snapshot(snapshot, sha, root)
-    (root/names[0]).write_bytes(names[0].encode())
+    (root/'tools/spoofing'/Path(names[0]).name).write_bytes(names[0].encode())
     with pytest.raises(AssertionError):
         study.verify_oracle_helper_snapshot(snapshot, '0' * 64, root)
 

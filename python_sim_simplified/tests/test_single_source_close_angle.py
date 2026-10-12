@@ -4,10 +4,10 @@ from copy import deepcopy
 import numpy as np
 import pytest
 
-from core.recovery_geometry import FS
-from core import single_source, single_source_scene
-from experiments.single_source_history_study import generate_new_record
-from experiments.single_source_close_angle import (
+from core.spoofing.recovery_geometry import FS
+from core.spoofing import single_source, single_source_scene
+from experiments.spoofing.single_source_history_study import generate_new_record
+from experiments.spoofing.single_source_close_angle import (
     angle_pair_metrics, remaining_geometry, replay_modes, scene_geometry,
 )
 from test_single_source_code_blend import patch_geometry, record
@@ -96,7 +96,7 @@ def test_replay_uses_separate_support_and_exact_historical_references(monkeypatc
 
 def test_remaining_geometry_uses_actual_selected_stars_excluding_prn1():
     from core.gps_simulation import receiver_reference
-    from core.recovery_geometry import sky
+    from core.spoofing.recovery_geometry import sky
 
     reference, rotation = receiver_reference()
     directions = sky(3104, 8)

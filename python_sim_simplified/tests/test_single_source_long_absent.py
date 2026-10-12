@@ -6,9 +6,9 @@ import zipfile
 import numpy as np
 import pytest
 
-from core.single_source import navigate
-from experiments import single_source_long_absent as study
-from experiments.single_source_long_absent import replay_three, verify_pair
+from core.spoofing.single_source import navigate
+from experiments.spoofing import single_source_long_absent as study
+from experiments.spoofing.single_source_long_absent import replay_three, verify_pair
 from test_single_source_phase_state import fixed_code_geometry, observations
 from test_single_source_phase_state_replay import saved_short
 

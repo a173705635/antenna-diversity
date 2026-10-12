@@ -1,6 +1,6 @@
 """A continuously present, phase-locked 30 dB-Hz signal must not look lost."""
 import numpy as np
-from core.single_source import coherent_cn0
+from core.spoofing.single_source import coherent_cn0
 
 
 def test_continuously_locked_signal_survives_quality_estimation():

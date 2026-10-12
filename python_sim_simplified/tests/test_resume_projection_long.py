@@ -3,7 +3,7 @@ import json
 
 import numpy as np
 
-from tools import resume_projection_long as resume
+from tools.spoofing import resume_projection_long as resume
 
 
 def test_reconstructed_loop_count_and_missing_runtime(tmp_path):

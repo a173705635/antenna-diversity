@@ -1,6 +1,6 @@
 import numpy as np
 
-from core import single_source
+from core.spoofing import single_source
 from core.config import AcquisitionConfig, TrackingConfig
 from core.tracking import track
 from test_autonomous_tracking import samples

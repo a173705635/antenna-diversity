@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from tools import nominal_yaw_common_carrier as carrier
+from tools.spoofing import nominal_yaw_common_carrier as carrier
 
 
 def fixture_path():

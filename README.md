@@ -8,22 +8,19 @@
 
 ## 研究入口
 
-以下入口均位于 `python_sim_simplified/`，从项目根目录执行 `python python_sim_simplified/<脚本名>`。
+在 `python_sim_simplified/` 目录执行以下模块入口。共享接收链位于 `core/`；各方向的专用算法、实验、文档和结果分别归入 `interference/`、`spoofing/`、`multipath/`。完整目录和研究阶段说明见[当前版本入口](python_sim_simplified/README.md)。
 
 | 研究任务 | 入口 | 验证记录 |
 |---|---|---|
-| 2–4天线抗欺骗及输出保护 | `audit_spatial_diversity.py` / `audit_spatial_diversity_rf.py` | [方法、配对收益与RF验证](docs/reports/2026-09-14-gpspatron-spatial-diversity.md) |
-| 真实单天线 GPS 接收与码定位 | `recorded_receiver.py` | [40 秒实测定位与模块说明](docs/reports/2026-09-13-recorded-receiver.md) |
-| 双 RF / DFE / 独立环路相位差 | `audit_dual_tracking_phase.py` | [双通道相位](docs/reports/2026-09-10-dual-tracking-phase.md) |
-| GPS 码/载波浮点定位 | `run_gps_spp.py` | [定位验证](docs/reports/2026-09-11-code-carrier-float.md) |
-| GPS L1/L5 定位 | `run_gps_l1_l5.py` | [双频权重](docs/reports/2026-09-11-dual-frequency-optimization.md) |
-| 多径：三态自检与压力测试 | `audit_sdcp_self_check.py` | [自检、独立RF与定位对照](docs/reports/2026-09-12-sdcp-self-check.md) |
-| 多径：校准取余 SDCP | `audit_calibrated_sdcp.py` | [实现与边界](docs/reports/2026-09-11-calibrated-sdcp.md) |
-| 多径：500 ms / 1 s 窗口 | `audit_sdcp_long.py` | [长记录验证](docs/reports/2026-09-11-sdcp-long.md) |
-| 多径：SDCP 接入定位 | `audit_sdcp_positioning.py` | [定位效果](docs/reports/2026-09-11-sdcp-positioning.md) |
-| 外部干扰：空域合并 | `run_end_to_end.py` | [配置与运行说明](python_sim_simplified/README.md) |
+| 单源抗欺骗与持续导航研究 | `python -m experiments.spoofing.single_source` | [方法、结果与局限](python_sim_simplified/docs/spoofing/SINGLE_SOURCE_SUPPRESSION_REPORT.md) |
+| 真实单天线 GPS 接收与码定位 | `python -m experiments.recorded_iq` | [40 秒实测定位与模块说明](docs/reports/2026-09-13-recorded-receiver.md) |
+| 双通道无定位 SDCP 基线 | `python -m experiments.multipath.sdcp_baseline` | [基线验证](python_sim_simplified/docs/multipath/SDCP_NO_POSITIONING_REPORT.md) |
+| GPS 码/载波浮点定位 | `python -m experiments.gps_spp` | [定位验证](docs/reports/2026-09-11-code-carrier-float.md) |
+| GPS L1/L5 定位 | `python -m experiments.gps_l1_l5` | [双频权重](docs/reports/2026-09-11-dual-frequency-optimization.md) |
+| 双路不同方向回波的 SDCP 多径实验 | `python -m experiments.multipath.sdcp_multipath` | [当前多径报告](python_sim_simplified/docs/multipath/SDCP_MULTIPATH_REPORT.md) |
+| 外部干扰与多径的联合接收链演示 | `python -m experiments.interference.full_chain` | [配置与运行说明](python_sim_simplified/docs/interference/README.md) |
 
-各实验有不同前提，不能把不同 SDCP 版本的结果混为同一流程。输入、输出和已有结果目录的处理方式见对应脚本说明与报告。
+各实验有不同前提，不能把不同 SDCP 版本的结果混为同一流程。历史 `audit_*` 脚本及其报告属于原版本，可从本地 `archive/pre_refactor_2026-09-16/` 或 Git 历史追溯。旧数据中的来源哈希不会随目录整理改写，严格复现需要对应冻结源码。
 
 ## 目录职责
 
@@ -47,8 +44,9 @@
 ```powershell
 cd F:\antenna_diversity
 python -m pip install -r python_sim_simplified/requirements.txt
-python python_sim_simplified/run_end_to_end.py
-python -m pytest -q python_sim_simplified/tests
+cd python_sim_simplified
+python -m experiments.interference.full_chain
+python -m pytest -q
 ```
 
 仿真结果保存到 `python_sim_simplified/results/`。默认场景包含一个 CW 干扰和一个 2 MHz 带限复高斯噪声干扰；具体配置、18 张结果图及代码阅读顺序见 [`python_sim_simplified/README.md`](python_sim_simplified/README.md)。

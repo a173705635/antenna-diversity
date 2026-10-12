@@ -1,7 +1,7 @@
 """Causal projector history, including its direction-change failure mode."""
 import numpy as np
 
-from experiments.single_source_subspace_history import smooth_nulls
+from experiments.spoofing.single_source_subspace_history import smooth_nulls
 
 
 def test_constant_direction_and_arbitrary_complex_phase():

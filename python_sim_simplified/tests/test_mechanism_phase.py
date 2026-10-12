@@ -2,7 +2,7 @@ from pathlib import Path
 import json
 import numpy as np
 import pytest
-from core.mechanism_phase import phase_prediction
+from core.spoofing.mechanism_phase import phase_prediction
 
 pytestmark = pytest.mark.local_evidence
 

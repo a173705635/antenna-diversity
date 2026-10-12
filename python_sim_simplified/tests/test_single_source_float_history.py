@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from experiments.single_source_float_window_study import solve_history, solve_window
+from experiments.spoofing.single_source_float_window_study import solve_history, solve_window
 
 
 def fixture(epochs=4):

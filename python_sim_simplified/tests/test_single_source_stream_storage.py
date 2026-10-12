@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 
-from experiments.single_source_stream_storage import assert_saved_arrays
+from experiments.spoofing.single_source_stream_storage import assert_saved_arrays
 
 
 def test_saved_array_audit_rejects_changed_receiver_field(tmp_path):

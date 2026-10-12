@@ -5,10 +5,10 @@ from zipfile import ZipFile
 import numpy as np
 import pytest
 
-from core import single_source
-from core.mechanism_phase import phase_prediction_leave_one_out
-from experiments.single_source_carrier_fault import compare_fault
-from experiments.single_source_phase_exclusion import (
+from core.spoofing import single_source
+from core.spoofing.mechanism_phase import phase_prediction_leave_one_out
+from experiments.spoofing.single_source_carrier_fault import compare_fault
+from experiments.spoofing.single_source_phase_exclusion import (
     exclusion_geometry, fault_window_mask, fit_geometry,
     replay_pair, verify_source_snapshot,
 )

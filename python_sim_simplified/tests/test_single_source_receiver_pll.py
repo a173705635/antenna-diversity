@@ -2,9 +2,9 @@
 import numpy as np
 from scipy.linalg import solve_discrete_lyapunov
 
-from core import single_source
+from core.spoofing import single_source
 from core.config import TrackingConfig
-from core.recovery_geometry import FS
+from core.spoofing.recovery_geometry import FS
 from core.tracking import _TrackingState, _update_tracking_loops
 
 
