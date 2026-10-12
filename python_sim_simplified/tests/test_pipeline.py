@@ -31,7 +31,7 @@ def test_pipeline_runs_four_branches_and_tracks_an_antijam_branch():
         "metrics",
     }
     assert set(results["branches"]) == {
-        "single", "egc", "mvdr", "blind_null", "multipath_lcmv"
+        "single", "egc", "mvdr", "blind_null"
     }
     assert results["dfe_channels"].shape[0] == 4
     assert all(
@@ -63,6 +63,7 @@ def test_known_combiners_use_assumed_target_but_blind_null_does_not():
 
 def test_pipeline_detects_before_appending_multipath_lcmv_branch():
     cfg = default_config()
+    cfg.enable_multipath_research = True
     cfg.signal.duration_ms = 30
     cfg.tracking.max_epochs = 20
 
@@ -76,6 +77,7 @@ def test_pipeline_detects_before_appending_multipath_lcmv_branch():
 
 def test_pipeline_reports_no_pilot_and_uses_mvdr_fallback():
     cfg = default_config()
+    cfg.enable_multipath_research = True
     cfg.signal.duration_ms = 12
     cfg.tracking.max_epochs = 5
     cfg.acquisition.threshold = 1e9
@@ -111,6 +113,7 @@ def test_code_bias_helpers_use_direct_path_and_tracking_epoch_time():
 
 def test_pipeline_metrics_include_multipath_gain_and_code_bias():
     cfg = default_config()
+    cfg.enable_multipath_research = True
     cfg.signal.duration_ms = 20
     cfg.tracking.max_epochs = 10
 
@@ -130,6 +133,7 @@ def test_pipeline_metrics_include_multipath_gain_and_code_bias():
 
 def test_resolvable_multipath_lcmv_reduces_echo_gain_and_code_bias():
     cfg = default_config()
+    cfg.enable_multipath_research = True
     cfg.interferers = []
     cfg.signal.power_dbm = -95.0
     cfg.signal.duration_ms = 30

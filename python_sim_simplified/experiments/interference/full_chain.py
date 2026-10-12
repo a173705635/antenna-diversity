@@ -1,4 +1,4 @@
-"""Run the complete simplified simulation and save its figures."""
+"""Run the complete simplified simulation, save figures, and display them."""
 
 from pathlib import Path
 import sys
@@ -23,7 +23,7 @@ from experiments.paths import INTERFERENCE_RESULTS as RESULTS, reset_output
 
 OUTPUT = RESULTS/'full_chain'
 DURATION_MS = None
-SHOW_PLOTS = False
+SHOW_PLOTS = True
 FREEZE_SOURCE = False
 
 

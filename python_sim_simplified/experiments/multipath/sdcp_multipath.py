@@ -111,6 +111,10 @@ def residual(first, second, cfg, geometry, times):
 
 def run_simulation():
     """生成标定和测试数据，冻结门限，保存双路 NCO 与初次判决。"""
+    cfg = default_config()
+    if not cfg.enable_multipath_research:
+        print('Multipath research is disabled in core/config.py; experiment skipped.', flush=True)
+        return None
     # 1. 配置与来源记录。重跑只清理本实验的固定输出目录。
     minimum_ms = OBSERVATION_START_MS + WINDOW-1 + STRIDE*(CONFIRM-1) + END_MARGIN_MS
     if DURATION_MS < minimum_ms:
@@ -118,7 +122,6 @@ def run_simulation():
     out = reset_output(OUTPUT)
     (out/'.gitattributes').write_text('** -text\n', encoding='utf-8')
     started = time.perf_counter()
-    cfg = default_config()
     cfg.phone.active_antennas = ('TL', 'TR')
     cfg.signal.duration_ms = cfg.tracking.max_epochs = DURATION_MS
     times, tail_start_s = analysis_timing(cfg.signal.duration_ms)
@@ -424,6 +427,8 @@ def main():
     """唯一运行入口：生成 → 独立复算 → 图表和统计输出。"""
     print('[1/2] Simulating calibration and multipath cases...', flush=True)
     output = run_simulation()
+    if output is None:
+        return
     print('[2/2] Independently verifying observations and rendering plots...', flush=True)
     verify_and_plot(output)
     print(f'Experiment and verification complete: {output}', flush=True)

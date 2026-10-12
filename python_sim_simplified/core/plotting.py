@@ -1,6 +1,7 @@
 """Independent figures for each important stage of the simulation."""
 
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import numpy as np
 
 from .antenna import antenna_response, build_antenna_model
@@ -181,7 +182,7 @@ def plot_array_response(results):
                 label=f"{kind} {index}",
             )
     for index, path in enumerate(cfg.signal.multipath_paths, start=1):
-        if path.enable:
+        if cfg.enable_multipath_research and path.enable:
             axis.axvline(
                 path.direction.azimuth_deg,
                 color="blue",
@@ -394,12 +395,22 @@ def _array_response_directions(cfg):
     directions = [(cfg.signal.true_direction, "Target", "*", "limegreen")]
     for index, interferer in enumerate(cfg.interferers, start=1):
         if interferer.enable:
-            kind = "CW" if isinstance(interferer, CWInterferer) else "Wideband"
-            directions.append((interferer.direction, f"{kind} {index}", "x", "red"))
+            if isinstance(interferer, CWInterferer):
+                kind, marker, color = "CW", "x", "red"
+            else:
+                kind, marker, color = "Wideband", "D", "magenta"
+            directions.append((interferer.direction, f"{kind} {index}", marker, color))
     for index, path in enumerate(cfg.signal.multipath_paths, start=1):
-        if path.enable:
+        if cfg.enable_multipath_research and path.enable:
             directions.append((path.direction, f"Multipath {index}", "o", "deepskyblue"))
     return directions
+
+
+def _array_response_legend_label(direction, label, gain_db):
+    return (
+        f"{label} | az {direction.azimuth_deg:g}°, "
+        f"el {direction.elevation_deg:g}° | {gain_db:.1f} dB"
+    )
 
 
 def _spherical_response_coordinates(azimuths, elevations, radius):
@@ -431,21 +442,22 @@ def _plot_array_response_spherical(results, mode, azimuths, elevations, response
         (item.direction.azimuth_deg for item in cfg.interferers if item.enable),
         cfg.signal.true_direction.azimuth_deg,
     )
-    markers = {}
+    markers = []
+    legend_handles = []
     legend_labels = []
-    for index, (direction, label, marker, color) in enumerate(directions, start=1):
+    for direction, label, marker, color in directions:
         steering, _ = antenna_response(model, direction, cfg.signal.true_polarization)
         gain = abs(np.vdot(weights, steering)) / peak_response
         gain_db = 20.0 * np.log10(np.maximum(gain, np.finfo(float).tiny))
-        legend_labels.append(
-            f"{index}: {label} | az {direction.azimuth_deg:g}°, "
-            f"el {direction.elevation_deg:g}° | {gain_db:.1f} dB"
-        )
-        key = (direction.azimuth_deg, direction.elevation_deg)
-        if key in markers:
-            markers[key][0].append(str(index))
-        else:
-            markers[key] = ([str(index)], marker, color)
+        legend_labels.append(_array_response_legend_label(direction, label, gain_db))
+        legend_handles.append(Line2D(
+            [], [], marker=marker, color=color, linestyle="none", markersize=10,
+            markeredgecolor=color if marker == "x" else "black", markeredgewidth=1,
+        ))
+        tip = np.asarray(_spherical_response_coordinates(
+            [direction.azimuth_deg], [direction.elevation_deg], 1.03
+        )).reshape(3)
+        markers.append((tip, marker, color))
 
     figure = plt.figure(figsize=(14, 8))
     for view_index, (camera_elevation, camera_azimuth) in enumerate(
@@ -461,21 +473,14 @@ def _plot_array_response_spherical(results, mode, azimuths, elevations, response
         camera = np.asarray(_spherical_response_coordinates(
             [camera_azimuth], [camera_elevation], 1.0
         )).reshape(3)
-        for (azimuth, elevation), (numbers, marker, color) in markers.items():
-            tip = np.asarray(_spherical_response_coordinates(
-                [azimuth], [elevation], 1.03
-            )).reshape(3)
+        for tip, marker, color in markers:
             # Only annotate the visible hemisphere; hidden directions appear in the other view.
             if np.dot(tip, camera) > 0.0:
                 axis.plot(
                     [tip[0]], [tip[1]], [tip[2]], marker=marker, color=color,
-                    markeredgecolor="black", markeredgewidth=1,
-                    linestyle="none", markersize=11, zorder=10,
-                )
-                axis.text(
-                    *(tip * 1.10), "/".join(numbers), color="black", fontsize=11,
-                    bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.9},
-                    zorder=11,
+                    markeredgecolor=color if marker == "x" else "black", markeredgewidth=1,
+                    linestyle="none", markersize=11,
+                    zorder=11 if marker == "x" else 10,
                 )
         axis.set(
             title="Interference-facing view" if view_index == 1 else "Opposite view",
@@ -498,8 +503,10 @@ def _plot_array_response_spherical(results, mode, azimuths, elevations, response
     figure.suptitle(
         f"{mode.upper()} spherical response\nFixed radius; color shows gain and nulls", fontsize=16
     )
-    for index, label in enumerate(legend_labels):
-        figure.text(0.06 + 0.45 * (index % 2), 0.12 - 0.035 * (index // 2), label, fontsize=10)
+    figure.legend(
+        legend_handles, legend_labels, loc="lower center", bbox_to_anchor=(0.46, 0.065),
+        ncol=2, fontsize=10, frameon=False, columnspacing=3,
+    )
     figure.text(0.06, 0.02, "Colors below -40 dB share the darkest shade; listed values are not clipped.", fontsize=10)
     figure.subplots_adjust(left=0.01, right=0.88, bottom=0.18, top=0.83, wspace=0.06)
     return figure
@@ -529,10 +536,12 @@ def _plot_array_response_3d(
         alpha=0.85,
         zorder=1,
     )
+    legend_labels = []
     for direction, label, marker, color in _array_response_directions(cfg):
         steering, _ = antenna_response(model, direction, cfg.signal.true_polarization)
         gain = abs(np.vdot(weights, steering)) / peak_response
         gain_db = 20.0 * np.log10(np.maximum(gain, np.finfo(float).tiny))
+        legend_labels.append(_array_response_legend_label(direction, label, gain_db))
         axis.plot(
             [direction.azimuth_deg],
             [direction.elevation_deg],
@@ -555,7 +564,7 @@ def _plot_array_response_3d(
     )
     axis.view_init(elev=28, azim=-125)
     axis.set_box_aspect((2.0, 1.0, 1.0))
-    axis.legend(loc="upper left")
+    axis.legend(labels=legend_labels, loc="upper left", fontsize=9)
     figure.colorbar(surface, ax=axis, shrink=0.65, pad=0.12, label="Normalized response (dB)")
     figure.subplots_adjust(left=0.03, right=0.9, bottom=0.08, top=0.9)
     return figure
@@ -638,7 +647,7 @@ def _plot_detailed_array_response(results):
                     label=f"{kind} {index}",
                 )
         for index, path in enumerate(cfg.signal.multipath_paths, start=1):
-            if path.enable:
+            if cfg.enable_multipath_research and path.enable:
                 axis.plot(
                     path.direction.azimuth_deg,
                     path.direction.elevation_deg,

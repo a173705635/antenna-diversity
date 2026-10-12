@@ -9,6 +9,7 @@ from experiments.multipath.sdcp_support import save_json
 
 @pytest.mark.parametrize('duration', [300, 700, 1500])
 def test_baseline_full_analysis_and_verification_with_short_histories(tmp_path, monkeypatch, duration):
+    monkeypatch.setattr('core.config.ENABLE_MULTIPATH_RESEARCH', True)
     # Synthetic NCO fixtures exercise orchestration, saving, statistics, plots and
     # independent verification. They are not RF performance simulations.
     # Other tests import positioning; isolate the module registry for this no-positioning run.
@@ -76,6 +77,8 @@ def test_multipath_incomplete_windows_have_no_scores_or_alarms():
 ])
 def test_unsupported_duration_is_explained_before_output_reset(monkeypatch, module, setting, value):
     import importlib
+    if module.startswith('multipath.'):
+        monkeypatch.setattr('core.config.ENABLE_MULTIPATH_RESEARCH', True)
     experiment = importlib.import_module('experiments.'+module)
     monkeypatch.setattr(experiment, setting, value)
     def no_reset(*args):
@@ -106,6 +109,7 @@ def test_single_source_no_post_attack_data_is_not_zero_outage(monkeypatch):
 
 @pytest.mark.parametrize('duration', [430, 700])
 def test_multipath_full_short_record_analysis(tmp_path, monkeypatch, duration):
+    monkeypatch.setattr('core.config.ENABLE_MULTIPATH_RESEARCH', True)
     for name in ('core.positioning', 'core.gps_simulation'):
         monkeypatch.delitem(sys.modules, name, raising=False)
     monkeypatch.setattr(multipath, 'DURATION_MS', duration)

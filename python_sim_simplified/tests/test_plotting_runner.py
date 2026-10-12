@@ -44,6 +44,7 @@ def test_plot_results_returns_seven_independent_figures():
 
 def test_detailed_results_put_combined_output_spectra_in_one_figure():
     cfg = default_config()
+    cfg.enable_multipath_research = True
     cfg.signal.duration_ms = 20
     cfg.tracking.max_epochs = 10
     results = run_end_to_end(cfg)
@@ -98,6 +99,7 @@ def test_detailed_combined_spectra_use_absolute_scale_and_mark_frequencies():
 
 def test_detailed_spatial_and_acquisition_figures_keep_diagnostics_separate():
     cfg = default_config()
+    cfg.enable_multipath_research = True
     cfg.signal.duration_ms = 20
     cfg.tracking.max_epochs = 10
     results = run_end_to_end(cfg)
@@ -131,6 +133,13 @@ def test_detailed_spatial_and_acquisition_figures_keep_diagnostics_separate():
         assert all(axis.get_zlim() == (-1.2, 1.2) for axis in spherical_axes)
         assert spherical.axes[-1].get_ylim() == (-40.0, 0.0)
         assert spherical_axes[1].azim - spherical_axes[0].azim == 180.0
+        assert all(not axis.texts for axis in spherical_axes)
+        for legend in (surface_axis.get_legend(), spherical.legends[0]):
+            labels = [text.get_text() for text in legend.get_texts()]
+            assert all("az " in label and "el " in label and "dB" in label for label in labels)
+            assert {label.split(" | ")[0] for label in labels} == {
+                line.get_label() for line in spatial_axis.lines
+            }
 
         acquisition = figures[f"detailed_acquisition_{mode}"]
         assert any(axis.images for axis in acquisition.axes)
@@ -144,6 +153,7 @@ def test_detailed_spatial_and_acquisition_figures_keep_diagnostics_separate():
 
 def test_save_results_figures_keeps_existing_and_adds_multipath_outputs(tmp_path):
     cfg = default_config()
+    cfg.enable_multipath_research = True
     cfg.signal.duration_ms = 20
     cfg.tracking.max_epochs = 10
     cfg.plot.show = False
@@ -190,6 +200,7 @@ def test_spherical_coordinates_preserve_response_radius_and_direction():
 
 def test_detected_path_gets_an_independent_angle_figure():
     cfg = default_config()
+    cfg.enable_multipath_research = True
     cfg.interferers = []
     cfg.signal.power_dbm = -95.0
     cfg.signal.duration_ms = 30

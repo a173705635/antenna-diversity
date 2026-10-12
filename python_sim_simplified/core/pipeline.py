@@ -153,7 +153,9 @@ def run_end_to_end(cfg: SimulationConfig | None = None) -> SimulationResults:
         if successful
         else None
     )
-    if not cfg.multipath_detection.enable:
+    if not cfg.enable_multipath_research:
+        detection = empty_detection("multipath_research_disabled")
+    elif not cfg.multipath_detection.enable:
         detection = empty_detection("detection_disabled")
     elif pilot is None:
         detection = empty_detection("no_pilot_acquisition")
@@ -178,7 +180,7 @@ def run_end_to_end(cfg: SimulationConfig | None = None) -> SimulationResults:
         )
         detection["pilot_mode"] = pilot_mode
 
-    if cfg.multipath_suppression.enable:
+    if cfg.enable_multipath_research and cfg.multipath_suppression.enable:
         estimated_multipath = [
             candidate["steering_estimated"]
             for candidate in detection["candidates"]
@@ -199,16 +201,18 @@ def run_end_to_end(cfg: SimulationConfig | None = None) -> SimulationResults:
             dfe_info["fs_out_hz"],
             dfe_channels.shape[1],
         )
-    multipath_evaluation = evaluate_multipath(
-        detection,
-        truth["multipath_paths"],
-        max(0.5, 2.0 * cfg.multipath_detection.delay_step_chips),
-        2.0
-        * max(
-            cfg.multipath_detection.azimuth_step_deg,
-            cfg.multipath_detection.elevation_step_deg,
-        ),
-    )
+    multipath_evaluation = None
+    if cfg.enable_multipath_research:
+        multipath_evaluation = evaluate_multipath(
+            detection,
+            truth["multipath_paths"],
+            max(0.5, 2.0 * cfg.multipath_detection.delay_step_chips),
+            2.0
+            * max(
+                cfg.multipath_detection.azimuth_step_deg,
+                cfg.multipath_detection.elevation_step_deg,
+            ),
+        )
     results: SimulationResults = {
         "config": cfg,
         "truth": truth,

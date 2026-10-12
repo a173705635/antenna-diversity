@@ -258,5 +258,5 @@ class SimulationResults(TypedDict):
     dfe_info: DFEInfo
     branches: dict[str, BranchResult]
     multipath_detection: MultipathDetectionResult
-    multipath_evaluation: MultipathEvaluation
+    multipath_evaluation: MultipathEvaluation | None
     metrics: list[MetricRecord]

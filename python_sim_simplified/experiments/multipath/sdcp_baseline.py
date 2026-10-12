@@ -80,6 +80,10 @@ def receive(signal, cfg, seed, out, name, hardware=False):
 
 def run_simulation():
     """生成双路跟踪记录、统计和图表，保存核验所需的数据哈希。"""
+    cfg = default_config()
+    if not cfg.enable_multipath_research:
+        print('Multipath research is disabled in core/config.py; baseline skipped.', flush=True)
+        return None
     # 1. 配置无多径接收场景并记录实验来源。
     if DURATION_MS < 30:
         raise ValueError("Baseline needs at least 30 ms for its 10 ms observation start and end margin.")
@@ -87,7 +91,6 @@ def run_simulation():
     out = reset_output(OUTPUT)
     (out/'.gitattributes').write_text('** -text\n', encoding='utf-8')
     started = time.perf_counter()
-    cfg = default_config()
     cfg.phone.active_antennas = ('TL', 'TR')
     cfg.signal.duration_ms = cfg.tracking.max_epochs = DURATION_MS
     cfg.interferers = []
@@ -331,6 +334,8 @@ def main():
     """唯一入口：仿真与绘图完成后，自动执行独立核验。"""
     print('[1/2] Simulating baseline cases and plotting responses...', flush=True)
     output = run_simulation()
+    if output is None:
+        return
     print('[2/2] Independently verifying saved NCO observations...', flush=True)
     verify_results(output)
     print(f'Baseline experiment and verification complete: {output}', flush=True)

@@ -54,6 +54,7 @@ def test_empty_multipath_list_keeps_scene_equal_to_direct_component():
 
 def test_multipath_applies_power_delay_reflection_phase_and_direction():
     cfg = default_config()
+    cfg.enable_multipath_research = True
     cfg.interferers = []
     cfg.signal.duration_ms = 4
     cfg.phone.channel_delay_ns = {name: 0.0 for name in CORNER_NAMES}
@@ -80,6 +81,7 @@ def test_multipath_applies_power_delay_reflection_phase_and_direction():
 
 def test_two_multipath_paths_are_summed_independently():
     cfg = default_config()
+    cfg.enable_multipath_research = True
     cfg.interferers = []
     cfg.signal.duration_ms = 4
     first = cfg.signal.multipath_paths[0]

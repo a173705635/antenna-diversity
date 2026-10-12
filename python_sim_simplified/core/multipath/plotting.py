@@ -164,6 +164,8 @@ def _plot_multipath_tracking_bias(results):
 
 
 def plot_multipath_results(results):
+    if not results["config"].enable_multipath_research:
+        return {}
     figures = {
         "multipath_delay_profile": _plot_multipath_delay_profile(results),
         "multipath_correlation_comparison": _plot_multipath_correlation_comparison(results),

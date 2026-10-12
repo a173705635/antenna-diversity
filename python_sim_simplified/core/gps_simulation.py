@@ -96,7 +96,7 @@ def build_scene(satellites, duration_ms, *, code_bandwidth_hz=None,
         cfg.signal.code_delay_chips = delay if signal_kind == 'L5Q' else delay % 1023.
         cfg.signal.initial_phase_rad = float((-2*np.pi*satellite['range_at_zero_m']/cfg.signal.wavelength_m) % (2*np.pi))
         component, truth = generate_scenario(cfg)
-        if multipath_start_ms is not None and cfg.signal.multipath_paths:
+        if multipath_start_ms is not None and truth['multipath_paths']:
             if not 0 <= multipath_start_ms < duration_ms-10:
                 raise ValueError('multipath onset must leave a full 10 ms ramp')
             progress = np.clip((truth['time_s']-multipath_start_ms*.001)/.01, 0., 1.)

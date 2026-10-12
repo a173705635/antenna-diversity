@@ -182,7 +182,7 @@ def generate_scenario(
             true_delays_s,
         )
         for path in cfg.signal.multipath_paths
-        if path.enable
+        if cfg.enable_multipath_research and path.enable
     ]
     scene = desired_component.copy()
     for path in multipath_scenes:

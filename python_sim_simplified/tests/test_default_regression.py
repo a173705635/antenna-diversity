@@ -50,6 +50,7 @@ def test_default_multipath_pipeline_contract():
     cfg = default_config()
     results = run_end_to_end(cfg)
 
+    assert cfg.enable_multipath_research is False
     assert len(cfg.signal.multipath_paths) == 1
     assert cfg.signal.multipath_paths[0].enable
     assert cfg.multipath_detection.enable
@@ -59,17 +60,10 @@ def test_default_multipath_pipeline_contract():
         "egc",
         "mvdr",
         "blind_null",
-        "multipath_lcmv",
     }
-    assert results["multipath_detection"]["status"] in {
-        "detected",
-        "no_multipath_detected",
-        "no_pilot_acquisition",
-    }
-    assert len(results["truth"]["multipath_paths"]) == 1
-    assert np.all(
-        np.isfinite(results["truth"]["multipath_paths"][0]["component"])
-    )
+    assert results["multipath_detection"]["status"] == "multipath_research_disabled"
+    assert results["multipath_evaluation"] is None
+    assert results["truth"]["multipath_paths"] == []
     for branch in results["branches"].values():
         assert np.all(np.isfinite(branch["combined"]))
     for record in results["metrics"]:

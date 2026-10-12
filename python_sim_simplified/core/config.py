@@ -8,6 +8,7 @@ import numpy as np
 
 CORNER_NAMES = ("TL", "TR", "BL", "BR")
 SPEED_OF_LIGHT_MPS = 299_792_458.0
+ENABLE_MULTIPATH_RESEARCH = False
 
 
 @dataclass
@@ -301,6 +302,7 @@ class SimulationConfig:
     acquisition: AcquisitionConfig
     tracking: TrackingConfig
     plot: PlotConfig
+    enable_multipath_research: bool = field(default_factory=lambda: ENABLE_MULTIPATH_RESEARCH)
 
 
 # Ready-to-run configuration factories are defined in presets.py.

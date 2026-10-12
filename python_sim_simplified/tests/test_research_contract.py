@@ -38,9 +38,7 @@ def test_standalone_copy_runs_without_research_package(tmp_path):
         "detailed_rf_dfe_TL",
         "detailed_combined_spectra",
         "detailed_array_response_blind_null",
-        "detailed_array_response_multipath_lcmv",
         "detailed_acquisition_egc",
-        "detailed_acquisition_multipath_lcmv",
         "tracking",
         "cn0",
     }
@@ -79,5 +77,4 @@ def test_two_three_and_four_channels_reach_dfe_and_combining():
         assert results["dfe_channels"].shape[0] == len(active)
         assert set(results["branches"]) == {
             *cfg.diversity.modes,
-            "multipath_lcmv",
         }

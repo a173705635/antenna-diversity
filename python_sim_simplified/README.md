@@ -73,7 +73,7 @@ archive/       历史代码、报告与验证证据，仅在本地保留
 | GPS L1/L5 仿真定位与冻结权重对照 | `python -m experiments.gps_l1_l5` |
 | 真实录波 GPS L1 码定位 | `python -m experiments.recorded_iq` |
 
-`full_chain` 是同时演示干扰和多径的完整接收链，入口归入 `interference/`，其原实验参数及两类分支均保留。直接运行脚本时使用 `python experiments/interference/full_chain.py`；其他方向入口同样可从项目根目录用上表模块命令运行。新生成的方向输出分别写到 `results/<方向>/<实验名>/`，重跑只重建该实验自己的目录。既有冻结结果仅移动目录，文件内容和旧源码哈希不变；历史源码哈希与当前布局不匹配时，严格历史重放会拒绝把当前源码冒充为原版本。`docs/spoofing/history/` 仅本地保存，不纳入版本库。
+`full_chain` 支持干扰与多径联合演示，入口归入 `interference/`；当前多径研究开关默认关闭，只运行干扰与四个常规合并分支。将 `core/config.py` 中的 `ENABLE_MULTIPATH_RESEARCH = True` 后，默认配置恢复回波生成、检测、评估、多径 LCMV 分支和专用绘图；也可对单次配置设置 `cfg.enable_multipath_research = True`。原有回波参数和检测/抑制子开关保持可编辑。直接运行脚本时使用 `python experiments/interference/full_chain.py`；其他方向入口同样可从项目根目录用上表模块命令运行。新生成的方向输出分别写到 `results/<方向>/<实验名>/`，重跑只重建该实验自己的目录。既有冻结结果仅移动目录，文件内容和旧源码哈希不变；历史源码哈希与当前布局不匹配时，严格历史重放会拒绝把当前源码冒充为原版本。`docs/spoofing/history/` 仅本地保存，不纳入版本库。
 
 单源实验的顶部常量默认用同一份四路录波分别选择三/四天线、24 星、45 dB-Hz、2 秒、0.3 秒引入攻击。设置 `ATTACKED = False` 运行正常对照，修改 `ANTENNAS` 增减天线配置，设置 `CASE` 使用 JSON 配置，设置 `INPUT` 回放已有 `samples.npy`、`observations.npz`、`metadata.json`。`SAVE_IQ = True` 才额外保存新生成的 RF。
 
@@ -153,13 +153,13 @@ archive/       历史代码、报告与验证证据，仅在本地保留
 
 第四十八阶段复用其中种子 `2026100404` 的三场景 IQ，对接收机名义方向固定施加 ±2° 偏航，完成 **6/6** 路 RF；其中 **5/6** 路两模式导航完整，`weak/−2°` 原支持求解失败，短桥独立完成评分。严格短桥压力判据 **4/6 通过、总体失败**，失败方向为 `h0_drop/−2°` 与 `weak/+2°`。撤真两方向短桥各仅早期发布 **8** 次，`≥0.5 s` 后零发布；不能称持续导航。默认门仍为 **3**。Main 与 Reviewer 已完成全批来源、输出和评分核对；[恢复摘要](results/spoofing/single_source_suppression_study/nominal_yaw/recovery_summary.json) SHA-256 为 `b9c0b5b3887353716520cfb5df73995c74b4ef3e7ef39b7c869c81d8780e5724`，完整判据与限制见报告第四十八阶段。
 
-SDCP 基线只运行 `python -m experiments.multipath.sdcp_baseline`，自动生成数据、绘图并独立核验；全部检查通过后写入 `verification.json`。
+开启多径研究开关后，SDCP 基线运行 `python -m experiments.multipath.sdcp_baseline`，自动生成数据、绘图并独立核验；全部检查通过后写入 `verification.json`。开关关闭时入口直接退出，保留已有输出。
 
-SDCP 多径只运行 `python -m experiments.multipath.sdcp_multipath`。同一脚本中，`run_simulation()` 负责生成与首次判决，`verify_and_plot()` 从保存的 NCO 独立复算并绘图，`main()` 按顺序调用；无需再运行单独的 verify 脚本。已移除相邻两个 200 ms 窗口均值做差的检测方案及其输出；保留绝对 SDCP 残差的 200 ms 均值判据。核验阶段保留独立 NCO 重建和原有判据，不通过删除失败场景提高结果。
+开启多径研究开关后，SDCP 多径运行 `python -m experiments.multipath.sdcp_multipath`。同一脚本中，`run_simulation()` 负责生成与首次判决，`verify_and_plot()` 从保存的 NCO 独立复算并绘图，`main()` 按顺序调用；无需再运行单独的 verify 脚本。开关关闭时入口直接退出，保留已有输出。已移除相邻两个 200 ms 窗口均值做差的检测方案及其输出；保留绝对 SDCP 残差的 200 ms 均值判据。核验阶段保留独立 NCO 重建和原有判据，不通过删除失败场景提高结果。
 
 当前双路多径实验的方法、逐场景结果与限制见 [SDCP 多径验证报告](docs/multipath/SDCP_MULTIPATH_REPORT.md)。
 
-`full_chain` 是含 CW、宽带干扰和多径的联合场景，整理目录没有改变其默认配置。若要评价纯抗干扰收益，需要另外明确无多径控制。其文件与运行说明见 [抗干扰目录入口](docs/interference/README.md)。
+`full_chain` 默认包含 CW 和宽带干扰；开启多径研究开关后才加入回波和多径 LCMV，成为联合场景。历史联合实验结果不因当前默认值变化而改变。其文件与运行说明见 [抗干扰目录入口](docs/interference/README.md)。
 
 历史固定阶段的 replay/resume 工具仍检查旧结果中的源码字节与清单键。当前文件位置通过显式目录映射定位，但移动后的源码导入和来源清单已经变化，因此不能直接视为旧冻结版本；校验不一致时会拒绝运行。需要复现旧阶段时使用该阶段的 `source_snapshot.zip`／冻结源码，不能修改旧 SHA-256 让当前代码通过。新的独立生成实验使用当前目录和源码哈希。
 
