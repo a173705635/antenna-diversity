@@ -116,11 +116,15 @@ def _finish_branch(
     }
 
 
-def run_end_to_end(cfg: SimulationConfig | None = None) -> SimulationResults:
+def run_end_to_end(
+    cfg: SimulationConfig | None = None,
+    *,
+    scene: tuple[np.ndarray, ScenarioTruth] | None = None,
+) -> SimulationResults:
     """Run the complete chain and return every stage needed for analysis."""
 
     cfg = default_config() if cfg is None else cfg
-    scene_input_v, truth = generate_scenario(cfg)
+    scene_input_v, truth = generate_scenario(cfg) if scene is None else scene
     adc_codes, rf_info = process_rf(
         scene_input_v,
         cfg.rf,

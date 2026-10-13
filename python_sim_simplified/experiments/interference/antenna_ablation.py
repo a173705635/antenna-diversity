@@ -285,9 +285,9 @@ def _db_ratio(numerator, denominator):
     return float(10.0 * np.log10(numerator / denominator))
 
 
-def run_case(cfg, case_name, context, trim_ms=10):
+def run_case(cfg, case_name, context, trim_ms=10, *, scene=None):
     """Run one complete receiver, then audit its frozen combining weights."""
-    results = run_end_to_end(cfg)
+    results = run_end_to_end(cfg, scene=scene)
     budgets = evaluate_budget(results, trim_ms)
     single = budgets['single']
     rows = []

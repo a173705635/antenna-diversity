@@ -80,6 +80,8 @@ class MultipathEvaluation(TypedDict):
 
 
 class ScenarioTruth(TypedDict):
+    source_response_convention: NotRequired[str]
+    source_response_coefficients: NotRequired[dict[str, object]]
     time_s: np.ndarray
     code: np.ndarray
     desired_waveform: np.ndarray

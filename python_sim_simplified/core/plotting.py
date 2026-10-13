@@ -425,13 +425,16 @@ def _spherical_response_coordinates(azimuths, elevations, radius):
 
 
 def _plot_array_response_spherical(results, mode, azimuths, elevations, response):
-    """Fixed unit sphere with dB colors and two opposite, opaque views."""
+    """Gain-shaped radial surface: normalized amplitude radius and dB colors."""
     cfg = results["config"]
     peak_response = np.max(response)
+    normalized_response = response / peak_response
     response_db = 20.0 * np.log10(
-        np.maximum(response / peak_response, np.finfo(float).tiny)
+        np.maximum(normalized_response, np.finfo(float).tiny)
     )
-    x, y, z = _spherical_response_coordinates(azimuths, elevations, 1.0)
+    x, y, z = _spherical_response_coordinates(
+        azimuths, elevations, normalized_response
+    )
     color_scale = plt.Normalize(vmin=-40.0, vmax=0.0)
     color_map = plt.get_cmap("turbo")
     model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
@@ -454,10 +457,11 @@ def _plot_array_response_spherical(results, mode, azimuths, elevations, response
             [], [], marker=marker, color=color, linestyle="none", markersize=10,
             markeredgecolor=color if marker == "x" else "black", markeredgewidth=1,
         ))
-        tip = np.asarray(_spherical_response_coordinates(
-            [direction.azimuth_deg], [direction.elevation_deg], 1.03
+        direction_unit = np.asarray(_spherical_response_coordinates(
+            [direction.azimuth_deg], [direction.elevation_deg], 1.0
         )).reshape(3)
-        markers.append((tip, marker, color))
+        tip = 1.03 * gain * direction_unit
+        markers.append((direction_unit, tip, marker, color))
 
     figure = plt.figure(figsize=(14, 8))
     for view_index, (camera_elevation, camera_azimuth) in enumerate(
@@ -473,9 +477,9 @@ def _plot_array_response_spherical(results, mode, azimuths, elevations, response
         camera = np.asarray(_spherical_response_coordinates(
             [camera_azimuth], [camera_elevation], 1.0
         )).reshape(3)
-        for tip, marker, color in markers:
-            # Only annotate the visible hemisphere; hidden directions appear in the other view.
-            if np.dot(tip, camera) > 0.0:
+        for direction_unit, tip, marker, color in markers:
+            # Split direction markers between opposite views, even at zero radius.
+            if np.dot(direction_unit, camera) > 0.0:
                 axis.plot(
                     [tip[0]], [tip[1]], [tip[2]], marker=marker, color=color,
                     markeredgecolor=color if marker == "x" else "black", markeredgewidth=1,
@@ -483,10 +487,12 @@ def _plot_array_response_spherical(results, mode, azimuths, elevations, response
                     zorder=11 if marker == "x" else 10,
                 )
         axis.set(
-            title="Interference-facing view" if view_index == 1 else "Opposite view",
             xlabel="X", ylabel="Y", zlabel="Z",
             xlim=(-1.2, 1.2), ylim=(-1.2, 1.2), zlim=(-1.2, 1.2),
             xticks=(-1, 0, 1), yticks=(-1, 0, 1), zticks=(-1, 0, 1),
+        )
+        axis.set_title(
+            "Interference-facing view" if view_index == 1 else "Opposite view", pad=28
         )
         axis.set_box_aspect((1, 1, 1))
         axis.set_proj_type("ortho")
@@ -501,13 +507,18 @@ def _plot_array_response_spherical(results, mode, azimuths, elevations, response
         ticks=(-40, -30, -20, -10, 0),
     )
     figure.suptitle(
-        f"{mode.upper()} spherical response\nFixed radius; color shows gain and nulls", fontsize=16
+        f"{mode.upper()} gain-shaped 3D response\n"
+        "Radius = normalized amplitude; color = response (dB)", fontsize=16
     )
     figure.legend(
         legend_handles, legend_labels, loc="lower center", bbox_to_anchor=(0.46, 0.065),
         ncol=2, fontsize=10, frameon=False, columnspacing=3,
     )
-    figure.text(0.06, 0.02, "Colors below -40 dB share the darkest shade; listed values are not clipped.", fontsize=10)
+    figure.text(
+        0.06, 0.02,
+        "Color floor: -40 dB. Radius and listed values are not clipped; nulls contract toward the origin.",
+        fontsize=10,
+    )
     figure.subplots_adjust(left=0.01, right=0.88, bottom=0.18, top=0.83, wspace=0.06)
     return figure
 

@@ -2,7 +2,7 @@
 
 日常只需要看 `core/` 和 `experiments/`。公共算法只有一份维护位置，每个实验有独立入口。历史研究代码冻结在 `archive/pre_refactor_2026-09-16/`，不参与当前导入与测试收集。
 
-每次上库的改动、默认行为和验证结果统一记录在 [上库修改记录](CHANGELOG.md)。
+每次修改、实验迭代和验证的改动、默认行为与结果统一记录在 [开发迭代与验证记录](CHANGELOG.md)，不等到上库时才补。
 
 ```text
 core/          共享物理模型、RF/DFE、捕获跟踪与定位；interference/、spoofing/、multipath/ 放各方向专用算法
@@ -25,6 +25,7 @@ archive/       历史代码、报告与验证证据，仅在本地保留
 |---|---|
 | 完整 RF→DFE→合并→捕获→跟踪及绘图 | `python -m experiments.interference.full_chain` |
 | RF 噪声标定、天线单因素配对消融与独立功率预算 | `python -m experiments.interference.antenna_ablation` |
+| 目标/CW/宽带响应直接赋值，已知/未知目标相位配对扫描 | `python -m experiments.interference.direct_response_boundary` |
 | 无定位 SDCP 基线：仿真、绘图与独立核验一次完成 | `python -m experiments.multipath.sdcp_baseline` |
 | SDCP 多径：标定、测试、独立复算及绘图一次完成 | `python -m experiments.multipath.sdcp_multipath` |
 | 最新单源接收机，比较三/四天线 | `python -m experiments.spoofing.single_source` |

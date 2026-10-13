@@ -8,9 +8,12 @@ import numpy as np
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
+from core.config import Direction
 from core.pipeline import run_end_to_end
 from core.plotting import (
+    _plot_array_response_spherical,
     _spherical_response_coordinates,
     plot_detailed_results, plot_results,
 )
@@ -199,6 +202,80 @@ def test_spherical_coordinates_preserve_response_radius_and_direction():
     np.testing.assert_allclose(x[1], [1, 0, -0.1, 0, 1], atol=1e-15)
     np.testing.assert_allclose(y[1], [0, 0.5, 0, -0.001, 0], atol=1e-15)
     np.testing.assert_allclose(z[[0, 2]], radius[[0, 2]]*np.array([[-1], [1]]))
+
+
+def test_spherical_surface_radius_tracks_response_without_color_floor(monkeypatch):
+    # A fixed unit radius or a -40 dB radius floor would lose these null depths.
+    surfaces = []
+    real_plot_surface = Axes3D.plot_surface
+
+    def capture_surface(axis, x, y, z, **kwargs):
+        surfaces.append(np.sqrt(x*x + y*y + z*z))
+        return real_plot_surface(axis, x, y, z, **kwargs)
+
+    monkeypatch.setattr(Axes3D, 'plot_surface', capture_surface)
+    cfg = default_config()
+    results = {'config': cfg, 'branches': {
+        'single': {'combining': {'weights': np.array([1., 0., 0., 0.])}}
+    }}
+    response = np.array([[0.]*5, [4., 2., 0.4, 0.004, 4.], [3.]*5])
+    figure = _plot_array_response_spherical(
+        results, 'single', np.array([0., 90., 180., 270., 360.]),
+        np.array([-90., 0., 90.]), response,
+    )
+    expected_radius = [[0.]*5, [1., 0.5, 0.1, 0.001, 1.], [0.75]*5]
+    assert len(surfaces) == 2
+    for radius in surfaces:
+        np.testing.assert_allclose(radius, expected_radius, atol=1e-15)
+    plt.close(figure)
+
+
+def test_spherical_direction_marker_follows_exact_off_grid_response():
+    cfg = default_config()
+    cfg.phone.active_antennas = ('TL', 'TR')
+    cfg.phone.phase_centers_m = {
+        'TL': (0., 0., 0.), 'TR': (cfg.signal.wavelength_m / 2., 0., 0.)
+    }
+    cfg.signal.true_direction = Direction(60., 0.)
+    cfg.interferers = []
+    results = {'config': cfg, 'branches': {
+        'egc': {'combining': {'weights': np.array([0.5, 0.5])}}
+    }}
+    figure = _plot_array_response_spherical(
+        results, 'egc', np.array([0., 90., 180., 270., 360.]),
+        np.array([-90., 0., 90.]),
+        np.array([[1.]*5, [0., 1., 0., 1., 0.], [1.]*5]),
+    )
+    axis = next(axis for axis in figure.axes if axis.name == '3d')
+    target = next(line for line in axis.lines if line.get_marker() == '*')
+    # Half-wavelength baseline: at az=60°, response is cos(pi/4)=sqrt(1/2).
+    radius = 1.03 / np.sqrt(2.)
+    expected_tip = [radius / 2., radius * np.sqrt(3.) / 2., 0.]
+    np.testing.assert_allclose(np.asarray(target.get_data_3d()).reshape(3),
+                               expected_tip, atol=1e-15)
+    plt.close(figure)
+
+
+def test_spherical_isotropic_response_still_forms_unit_sphere(monkeypatch):
+    surfaces = []
+    real_plot_surface = Axes3D.plot_surface
+
+    def capture_surface(axis, x, y, z, **kwargs):
+        surfaces.append(np.sqrt(x*x + y*y + z*z))
+        return real_plot_surface(axis, x, y, z, **kwargs)
+
+    monkeypatch.setattr(Axes3D, 'plot_surface', capture_surface)
+    cfg = default_config()
+    results = {'config': cfg, 'branches': {
+        'single': {'combining': {'weights': np.array([2., 0., 0., 0.])}}
+    }}
+    figure = _plot_array_response_spherical(
+        results, 'single', np.array([0., 90., 180., 270., 360.]),
+        np.array([-90., 0., 90.]), np.full((3, 5), 2.),
+    )
+    for radius in surfaces:
+        np.testing.assert_allclose(radius, np.ones((3, 5)), atol=1e-15)
+    plt.close(figure)
 
 
 def test_detected_path_gets_an_independent_angle_figure():
