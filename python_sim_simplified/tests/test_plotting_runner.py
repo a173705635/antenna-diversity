@@ -134,7 +134,10 @@ def test_detailed_spatial_and_acquisition_figures_keep_diagnostics_separate():
         assert spherical.axes[-1].get_ylim() == (-40.0, 0.0)
         assert spherical_axes[1].azim - spherical_axes[0].azim == 180.0
         assert all(not axis.texts for axis in spherical_axes)
-        for legend in (surface_axis.get_legend(), spherical.legends[0]):
+        assert [text.get_text() for text in spatial_axis.get_legend().get_texts()] == [
+            text.get_text() for text in surface_axis.get_legend().get_texts()
+        ]
+        for legend in (spatial_axis.get_legend(), surface_axis.get_legend(), spherical.legends[0]):
             labels = [text.get_text() for text in legend.get_texts()]
             assert all("az " in label and "el " in label and "dB" in label for label in labels)
             assert {label.split(" | ")[0] for label in labels} == {

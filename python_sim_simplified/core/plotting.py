@@ -601,7 +601,7 @@ def _plot_detailed_array_response(results):
             np.maximum(response / np.max(response), np.finfo(float).tiny)
         )
 
-        figure, axis = plt.subplots(figsize=(9, 5))
+        figure, axis = plt.subplots(figsize=(10, 6.5))
         image = axis.imshow(
             response_db,
             origin="lower",
@@ -620,51 +620,27 @@ def _plot_detailed_array_response(results):
                 colors="white",
                 linewidths=1.0,
             )
-        axis.plot(
-            cfg.signal.true_direction.azimuth_deg,
-            cfg.signal.true_direction.elevation_deg,
-            marker="*",
-            color="green",
-            linestyle="none",
-            markersize=12,
-            label="Target",
-        )
-        for index, interferer in enumerate(cfg.interferers, start=1):
-            if interferer.enable:
-                kind = (
-                    "CW"
-                    if isinstance(interferer, CWInterferer)
-                    else "Wideband"
-                )
-                axis.plot(
-                    interferer.direction.azimuth_deg,
-                    interferer.direction.elevation_deg,
-                    marker="x",
-                    color="red",
-                    linestyle="none",
-                    markersize=9,
-                    markeredgewidth=2,
-                    label=f"{kind} {index}",
-                )
-        for index, path in enumerate(cfg.signal.multipath_paths, start=1):
-            if cfg.enable_multipath_research and path.enable:
-                axis.plot(
-                    path.direction.azimuth_deg,
-                    path.direction.elevation_deg,
-                    marker="o",
-                    markerfacecolor="none",
-                    color="deepskyblue",
-                    linestyle="none",
-                    markersize=9,
-                    markeredgewidth=2,
-                    label=f"Multipath {index}",
-                )
+        legend_labels = []
+        for direction, label, marker, color in _array_response_directions(cfg):
+            steering, _ = antenna_response(model, direction, cfg.signal.true_polarization)
+            gain = abs(np.vdot(weights, steering)) / np.max(response)
+            gain_db = 20.0 * np.log10(np.maximum(gain, np.finfo(float).tiny))
+            legend_labels.append(_array_response_legend_label(direction, label, gain_db))
+            axis.plot(
+                direction.azimuth_deg, direction.elevation_deg,
+                marker=marker, color=color, linestyle="none", markersize=10,
+                markeredgewidth=1.5, label=label,
+                zorder=11 if marker == "x" else 10,
+            )
         axis.set(
             title=f"{mode.upper()} array response",
             xlabel="Azimuth (deg)",
             ylabel="Elevation (deg)",
         )
-        axis.legend()
+        axis.legend(
+            labels=legend_labels, loc="upper center", bbox_to_anchor=(0.5, -0.16),
+            fontsize=9, frameon=False,
+        )
         figure.colorbar(image, ax=axis, label="Normalized response (dB)")
         figure.tight_layout()
         figures[f"detailed_array_response_{mode}"] = figure
