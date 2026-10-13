@@ -16,12 +16,13 @@ from core.plotting import (
     plot_tracking,
 )
 from core.multipath.plotting import plot_multipath_results
-from core.presets import default_config
+from core.presets import default_config, parametric_config
 from core.provenance import source_hashes, freeze_source
 from core.serialization import serializable
 from experiments.paths import INTERFERENCE_RESULTS as RESULTS, reset_output
 
 OUTPUT = RESULTS/'full_chain'
+ANTENNA_MODEL = "parametric"  # "ideal" or "parametric"; synthetic, not measured phone data.
 DURATION_MS = None
 SHOW_PLOTS = True
 FREEZE_SOURCE = False
@@ -56,7 +57,7 @@ def save_results_figures(results, output_dir):
 def main():
     import json
     from dataclasses import asdict
-    cfg = default_config()
+    cfg = {"ideal": default_config, "parametric": parametric_config}[ANTENNA_MODEL]()
     output = reset_output(OUTPUT)
     cfg.plot.output_dir = output
     if DURATION_MS is not None:
@@ -77,6 +78,7 @@ def main():
 
     # Edit cfg here when studying frequency, antenna combinations, or phase.
     results = run_end_to_end(cfg)
+    print(f"Antenna model: {cfg.phone.antenna_model.model_label}")
     print(format_metrics(results["metrics"]))
 
     save_results_figures(results, cfg.plot.output_dir)

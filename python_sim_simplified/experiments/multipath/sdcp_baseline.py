@@ -70,8 +70,8 @@ def phase_degrees(case, t):
     return np.zeros_like(t)
 
 
-def receive(signal, cfg, seed, out, name, hardware=False):
-    h, metadata = receive_observation(signal, cfg, seed, hardware)
+def receive(signal, cfg, seed, out, name, hardware=False, *, channel_id):
+    h, metadata = receive_observation(signal, cfg, seed, hardware, channel_id=channel_id)
     np.savez_compressed(out/(name+'.npz'), **{k: v for k, v in h.items() if isinstance(v, np.ndarray)})
     save_json(out/(name+'.json'), metadata)
     print(name, h['status'], len(h['epoch_start_samples']), flush=True)
@@ -130,7 +130,7 @@ def run_simulation():
     rows, arrays = [], {'time_s': times}
     # 3. 逐种子运行正常 A，逐场景运行 B，并对齐相位与计算响应误差。
     for seed in SEEDS:
-        first_h = receive(scene[0], cfg, seed, out, f'{seed}_A')
+        first_h = receive(scene[0], cfg, seed, out, f'{seed}_A', channel_id='TL')
         for case in CASES:
             signal = scene[1].copy()
             for first in range(0, signal.size, 1000000):
@@ -143,7 +143,7 @@ def run_simulation():
                     signal[first:last] *= np.exp(1j*np.deg2rad(phase))
                 if case == 'gap':
                     signal[first:last] *= ~((t >= .6) & (t < .75))
-            h = receive(signal, cfg, seed+1, out, f'{seed}_{case}_B', case == 'hardware')
+            h = receive(signal, cfg, seed+1, out, f'{seed}_{case}_B', case == 'hardware', channel_id='TR')
             del signal
             d = raw_sdcp(first_h, h, fs, times, wave)
             injected = -wave*phase_degrees(case, times)/360

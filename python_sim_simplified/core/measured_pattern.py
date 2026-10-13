@@ -1,4 +1,8 @@
-"""Measured antenna-pattern CSV loading and angular interpolation."""
+"""Complex normalized receive Jones coefficients from CSV.
+
+The dimensionless h_az/h_el values carry their directional phase. They are
+not absolute effective heights in metres or S-parameters of antenna ports.
+"""
 
 import csv
 from dataclasses import dataclass
@@ -21,7 +25,7 @@ def load_measured_pattern(
     grouped: dict[str, list[tuple[float, float, complex, complex]]] = {}
     with Path(path).open(newline="", encoding="utf-8-sig") as stream:
         for row in csv.DictReader(stream):
-            if np.isclose(float(row["frequency_hz"]), frequency_hz, atol=1.0):
+            if np.isclose(float(row["frequency_hz"]), frequency_hz, atol=1.0, rtol=0.0):
                 grouped.setdefault(row["element_name"], []).append(
                     (
                         float(row["azimuth_deg"]) % 360.0,

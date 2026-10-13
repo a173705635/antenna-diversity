@@ -33,8 +33,8 @@ def test_receive_outputs_preserve_experiment_metadata(monkeypatch, tmp_path,
     history = dict(epoch_start_samples=np.array([0, 10]), status='tracking', success=True)
     metadata = dict(noise_seed=17, acquisition=dict(success=True, grid=np.array([2, 3])),
                     tracking_status='tracking', tracking_success=True, rf={}, dfe={})
-    monkeypatch.setattr(experiment, 'receive_observation', lambda *args: (history, metadata))
-    result = experiment.receive(np.zeros(20), None, 17, tmp_path, 'A')
+    monkeypatch.setattr(experiment, 'receive_observation', lambda *args, **kwargs: (history, metadata))
+    result = experiment.receive(np.zeros(20), None, 17, tmp_path, 'A', channel_id='TL')
     assert result is history
     saved = json.loads((tmp_path/'A.json').read_text())
     assert ('grid' in saved['acquisition']) == keeps_search_array

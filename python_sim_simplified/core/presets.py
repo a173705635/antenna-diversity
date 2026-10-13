@@ -1,5 +1,6 @@
 """Ready-to-run configurations for the simplified research simulation."""
 
+from copy import deepcopy
 from math import pi
 from pathlib import Path
 
@@ -91,6 +92,11 @@ def default_config() -> SimulationConfig:
 def parametric_config(
     active_antennas: tuple[str, ...] = CORNER_NAMES,
 ) -> SimulationConfig:
+    """Hypothetical corner patterns; not measured or validated Mate70 data.
+
+    Azimuth depths (2–3.5 dB), PCV coefficients (within 3 mm), and the
+    15° blockage phase are illustrative sensitivity parameters.
+    """
     cfg = default_config()
     cfg.phone.active_antennas = active_antennas
     orientations = {
@@ -106,6 +112,9 @@ def parametric_config(
             -17.0,
             cross_polar_discrimination_db=22.0,
             cross_phase_deg=8.0,
+            azimuth_peak_deg=20.0,
+            azimuth_attenuation_db=3.0,
+            phase_variation_mm=(3.0, -1.0, 0.5),
         ),
         "TR": ParametricPattern(
             1.0,
@@ -113,6 +122,9 @@ def parametric_config(
             -18.0,
             cross_polar_discrimination_db=24.0,
             cross_phase_deg=-6.0,
+            azimuth_peak_deg=340.0,
+            azimuth_attenuation_db=2.5,
+            phase_variation_mm=(-2.0, 2.0, -0.5),
         ),
         "BL": ParametricPattern(
             0.5,
@@ -120,6 +132,9 @@ def parametric_config(
             -19.0,
             cross_polar_discrimination_db=21.0,
             cross_phase_deg=12.0,
+            azimuth_peak_deg=60.0,
+            azimuth_attenuation_db=3.5,
+            phase_variation_mm=(1.0, -3.0, 1.0),
         ),
         "BR": ParametricPattern(
             1.2,
@@ -127,10 +142,16 @@ def parametric_config(
             -18.5,
             cross_polar_discrimination_db=23.0,
             cross_phase_deg=-10.0,
+            azimuth_peak_deg=300.0,
+            azimuth_attenuation_db=2.0,
+            phase_variation_mm=(-1.0, 2.5, -1.0),
         ),
     }
     blockage = (
-        AttenuationRegion(("BL", "BR"), 225.0, 20.0, 42.0, 8.0, 18.0),
+        AttenuationRegion(
+            ("BL", "BR"), 225.0, 20.0, 42.0, 8.0, 18.0,
+            phase_shift_deg=15.0,
+        ),
     )
     coupling = (
         CouplingPath("TL", "TR", -18.0, 32.0),
@@ -141,7 +162,7 @@ def parametric_config(
         CouplingPath("BR", "TL", -27.0, -48.0),
     )
     cfg.phone.antenna_model = AntennaModelConfig(
-        "synthetic_phone_corner_v1",
+        "synthetic_phone_corner_v2",
         AntennaState(
             "parametric",
             patterns,
@@ -151,9 +172,9 @@ def parametric_config(
         ),
         AntennaState(
             "parametric",
-            patterns.copy(),
-            orientations=orientations.copy(),
-            coupling_paths=coupling,
+            deepcopy(patterns),
+            orientations=deepcopy(orientations),
+            coupling_paths=deepcopy(coupling),
         ),
     )
     return cfg

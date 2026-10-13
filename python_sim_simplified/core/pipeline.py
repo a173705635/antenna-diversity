@@ -126,6 +126,9 @@ def run_end_to_end(cfg: SimulationConfig | None = None) -> SimulationResults:
         cfg.rf,
         cfg.reference_impedance_ohm,
         cfg.random_seed,
+        fs_hz=cfg.signal.fs_rf_hz,
+        if_hz=cfg.signal.if_hz,
+        channel_ids=cfg.phone.active_antennas,
     )
     dfe_channels, dfe_info = process_dfe(
         adc_codes,

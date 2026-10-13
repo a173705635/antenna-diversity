@@ -19,10 +19,14 @@ def raw_sdcp(first, second, fs, times, wavelength):
     return -wavelength*(phases[1]-phases[0])/(2*np.pi)
 
 
-def receive(signal, cfg, seed, hardware=False):
+def receive(signal, cfg, seed, hardware=False, *, channel_id):
     rf_cfg = replace(cfg.rf, amplitude_error_db=1. if hardware else 0.,
                      phase_error_deg=3. if hardware else 0.)
-    adc, rf_info = process_rf(signal[None, :], rf_cfg, cfg.reference_impedance_ohm, seed)
+    adc, rf_info = process_rf(
+        signal[None, :], rf_cfg, cfg.reference_impedance_ohm, seed,
+        fs_hz=cfg.signal.fs_rf_hz, if_hz=cfg.signal.if_hz,
+        channel_ids=(channel_id,),
+    )
     baseband, dfe_info = process_dfe(adc, cfg.dfe, cfg.signal.fs_rf_hz, cfg.signal.if_hz)
     del adc
     fs = dfe_info['fs_out_hz']

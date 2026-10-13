@@ -41,7 +41,9 @@ def test_l5_rf_dfe_tracking_and_observation():
     satellite = satellite_setup()[1]
     scene, cfg = build_scene([satellite], 100, signal_kind='L5Q')
     assert cfg.signal.fs_rf_hz == 33e6 and cfg.dfe.decimation == 1
-    adc, _ = process_rf(scene, cfg.rf, cfg.reference_impedance_ohm, 4000)
+    adc, _ = process_rf(scene, cfg.rf, cfg.reference_impedance_ohm, 4000,
+                        fs_hz=cfg.signal.fs_rf_hz, if_hz=cfg.signal.if_hz,
+                        channel_ids=cfg.phone.active_antennas)
     baseband, info = process_dfe(adc, cfg.dfe, cfg.signal.fs_rf_hz, cfg.signal.if_hz)
     acq = acquire(baseband[0], info['fs_out_hz'], 2, cfg.signal.code_rate_hz,
                   cfg.acquisition, signal_kind='L5Q')

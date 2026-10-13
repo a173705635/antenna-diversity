@@ -110,7 +110,11 @@ def build_scene(satellites, duration_ms, *, code_bandwidth_hz=None,
 
 def run_record(seed, satellites, scene, cfg):
     """Receiver consumes one shared DFE stream; solver receives observations only."""
-    adc, rf_info = process_rf(scene, cfg.rf, cfg.reference_impedance_ohm, seed)
+    adc, rf_info = process_rf(
+        scene, cfg.rf, cfg.reference_impedance_ohm, seed,
+        fs_hz=cfg.signal.fs_rf_hz, if_hz=cfg.signal.if_hz,
+        channel_ids=cfg.phone.active_antennas,
+    )
     baseband, dfe_info = process_dfe(adc, cfg.dfe, cfg.signal.fs_rf_hz, cfg.signal.if_hz)
     del adc
     fs = dfe_info['fs_out_hz']

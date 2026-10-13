@@ -36,6 +36,7 @@ class ElementOrientation:
 
 @dataclass
 class ParametricPattern:
+    """Synthetic dimensionless receive Jones pattern, not handset data."""
     peak_gain_db: float = 0.0
     cosine_exponent: float = 1.0
     back_lobe_gain_db: float = -20.0
@@ -44,6 +45,10 @@ class ParametricPattern:
     )
     cross_polar_discrimination_db: float = 30.0
     cross_phase_deg: float = 0.0
+    azimuth_peak_deg: float = 0.0
+    azimuth_attenuation_db: float = 0.0
+    # Extra receive-path length (mm): qx*ux² + qy*uy² + qxy*ux*uy.
+    phase_variation_mm: tuple[float, float, float] = (0.0, 0.0, 0.0)
 
 
 @dataclass
@@ -54,10 +59,13 @@ class AttenuationRegion:
     radius_deg: float
     attenuation_db: float
     transition_width_deg: float = 0.0
+    # Positive means a positive received-voltage phase rotation, not delay.
+    phase_shift_deg: float = 0.0
 
 
 @dataclass
 class CouplingPath:
+    """Phenomenological constant voltage transfer, not an RF S-parameter."""
     source: str
     receiver: str
     magnitude_db: float
@@ -189,6 +197,8 @@ class RFStage:
 class RFConfig:
     temperature_k: float = 290.0
     noise_bandwidth_hz: float = 8.184e6
+    # Odd FIR length; noise_bandwidth_hz is total/two-sided IF ENBW.
+    noise_filter_taps: int = 129
     stages: tuple[RFStage, ...] = field(
         default_factory=lambda: (
             RFStage("LNA", 28.0, 1.2),

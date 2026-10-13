@@ -130,6 +130,7 @@ def wave_in_element_frame(
 def parametric_height(
     parameters: ParametricPattern,
     local_elevation_deg: float,
+    local_azimuth_deg: float = 0.0,
 ) -> np.ndarray:
     front_power = max(np.sin(np.deg2rad(local_elevation_deg)), 0.0) ** (
         parameters.cosine_exponent
@@ -139,6 +140,11 @@ def parametric_height(
         relative_db,
         parameters.back_lobe_gain_db - parameters.peak_gain_db,
     )
+    azimuth_offset = np.deg2rad(local_azimuth_deg - parameters.azimuth_peak_deg)
+    zenith_factor = np.cos(np.deg2rad(local_elevation_deg)) ** 2
+    gain_db -= parameters.azimuth_attenuation_db * zenith_factor * (
+        1.0 - np.cos(azimuth_offset)
+    ) / 2.0
     nominal = jones_vector(parameters.nominal_polarization)
     orthogonal = np.array([-np.conj(nominal[1]), np.conj(nominal[0])])
     cross = 10.0 ** (-parameters.cross_polar_discrimination_db / 20.0)
@@ -155,6 +161,7 @@ def attenuation_voltage(
 ) -> np.ndarray:
     direction_unit = direction_vector(direction)
     attenuation_db = np.zeros(len(names))
+    phase_shift_deg = np.zeros(len(names))
     for region in state.attenuation_regions:
         center = direction_vector(
             Direction(region.center_azimuth_deg, region.center_elevation_deg)
@@ -178,7 +185,10 @@ def attenuation_voltage(
         for index, name in enumerate(names):
             if name in selected:
                 attenuation_db[index] += fraction * region.attenuation_db
-    return 10.0 ** (-attenuation_db / 20.0)
+                phase_shift_deg[index] += fraction * region.phase_shift_deg
+    return 10.0 ** (-attenuation_db / 20.0) * np.exp(
+        1j * np.deg2rad(phase_shift_deg)
+    )
 
 
 def coupling_matrix(state: AntennaState, names: tuple[str, ...]) -> np.ndarray:
@@ -266,9 +276,11 @@ def antenna_response(
     )
 
     pattern_voltage = []
+    pcv_path_length_mm = []
     for name in names:
         if state.pattern_kind == "ideal":
             voltage = 1.0 + 0.0j
+            pcv_mm = 0.0
         else:
             local_direction, local_jones = wave_in_element_frame(
                 direction,
@@ -276,19 +288,34 @@ def antenna_response(
                 rotation_matrix_ypr(state.orientations[name]),
             )
             if state.pattern_kind == "parametric":
+                parameters = state.parametric_patterns[name]
                 height = parametric_height(
-                    state.parametric_patterns[name],
+                    parameters,
                     local_direction.elevation_deg,
+                    local_direction.azimuth_deg,
                 )
+                local_azimuth_rad = np.deg2rad(local_direction.azimuth_deg)
+                horizontal = np.cos(np.deg2rad(local_direction.elevation_deg))
+                ux = horizontal * np.cos(local_azimuth_rad)
+                uy = horizontal * np.sin(local_azimuth_rad)
+                qx, qy, qxy = parameters.phase_variation_mm
+                pcv_mm = qx * ux**2 + qy * uy**2 + qxy * ux * uy
             else:
                 height = interpolate_measured(
                     measured[name],
                     local_direction.azimuth_deg,
                     local_direction.elevation_deg,
                 )
+                pcv_mm = 0.0  # Measured complex heights already include phase.
             voltage = np.vdot(height, local_jones)
         pattern_voltage.append(voltage)
+        pcv_path_length_mm.append(pcv_mm)
     pattern_voltage = np.asarray(pattern_voltage)
+    pcv_path_length_mm = np.asarray(pcv_path_length_mm)
+    pcv_response = np.exp(
+        -1j * 2.0 * np.pi * model.carrier_hz / SPEED_OF_LIGHT_MPS
+        * pcv_path_length_mm * 1e-3
+    )
 
     if (set(state.amplitude_error_db) | set(state.phase_error_deg)) - set(position_map):
         raise ValueError('antenna error maps contain unknown element names')
@@ -300,7 +327,7 @@ def antenna_response(
         element_error = 10.**(amplitude_db/20.) * np.exp(1j*np.deg2rad(phase_deg))
 
     blockage = attenuation_voltage(state, names, direction)
-    open_circuit = spatial * pattern_voltage * element_error * blockage
+    open_circuit = spatial * pattern_voltage * pcv_response * element_error * blockage
     coupling = coupling_matrix(state, names)
     coupled = coupling @ open_circuit
     channel = (
@@ -313,6 +340,8 @@ def antenna_response(
         "positions_m": positions,
         "spatial_phase": spatial,
         "pattern_polarization_voltage": pattern_voltage,
+        "pcv_path_length_mm": pcv_path_length_mm,
+        "pcv_response": pcv_response,
         "element_error_response": element_error,
         "blockage_voltage": blockage,
         "open_circuit_response": open_circuit,

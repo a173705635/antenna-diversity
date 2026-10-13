@@ -91,8 +91,8 @@ def confirmed(score, threshold):
     return alarm
 
 
-def receive(signal, cfg, seed, out, name, hardware=False):
-    h, metadata = receive_observation(signal, cfg, seed, hardware)
+def receive(signal, cfg, seed, out, name, hardware=False, *, channel_id):
+    h, metadata = receive_observation(signal, cfg, seed, hardware, channel_id=channel_id)
     np.savez_compressed(out/(name+'.npz'), **{k: v for k, v in h.items() if isinstance(v, np.ndarray)})
     metadata['acquisition'] = {k: v for k, v in metadata['acquisition'].items()
                                if not isinstance(v, np.ndarray)}
@@ -162,8 +162,8 @@ def run_simulation():
     # 3. 独立无多径标定。门限在测试之前确定，测试过程中不调整。
     calibration = []
     for seed in CALIBRATION_SEEDS:
-        a = receive(scene[0], cfg, seed, out, f'cal_{seed}_A')
-        b = receive(scene[1], cfg, seed+1, out, f'cal_{seed}_B')
+        a = receive(scene[0], cfg, seed, out, f'cal_{seed}_A', channel_id='TL')
+        b = receive(scene[1], cfg, seed+1, out, f'cal_{seed}_B', channel_id='TR')
         r = residual(a,b,cfg,geometry,times)
         ends, score = scores(r)
         calibration.append(float(np.max(abs(score))))
@@ -176,7 +176,7 @@ def run_simulation():
     threshold_hash = hashlib.sha256((out/'threshold.json').read_bytes()).hexdigest()
     print('FROZEN THRESHOLD mm:', threshold*1000, flush=True)
     # 4. 逐场景、逐种子通过 RF → DFE → 独立跟踪，保存观测与判决。
-    clean_a = {seed:receive(scene[0],cfg,seed,out,f'{seed}_clean_A') for seed in TEST_SEEDS}
+    clean_a = {seed:receive(scene[0],cfg,seed,out,f'{seed}_clean_A',channel_id='TL') for seed in TEST_SEEDS}
     model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
     time_s = np.arange(waveform.size)/fs0
     rows = []
@@ -205,8 +205,8 @@ def run_simulation():
                 stop = min(start+1000000, waveform.size)
                 signal_b[start:stop] *= np.exp(1j*np.deg2rad(20*np.maximum(time_s[start:stop]-.4,0)))
         for seed in TEST_SEEDS:
-            a = receive(signal_a,cfg,seed,out,f'{seed}_{name}_A') if is_multipath else clean_a[seed]
-            b = receive(signal_b,cfg,seed+1,out,f'{seed}_{name}_B',name=='hardware')
+            a = receive(signal_a,cfg,seed,out,f'{seed}_{name}_A',channel_id='TL') if is_multipath else clean_a[seed]
+            b = receive(signal_b,cfg,seed+1,out,f'{seed}_{name}_B',name=='hardware',channel_id='TR')
             r = residual(a,b,cfg,geometry,times)
             ends, score = scores(r)
             dt = times[ends]

@@ -11,6 +11,8 @@ class AntennaDiagnostics(TypedDict):
     positions_m: np.ndarray
     spatial_phase: np.ndarray
     pattern_polarization_voltage: np.ndarray
+    pcv_path_length_mm: np.ndarray
+    pcv_response: np.ndarray
     element_error_response: np.ndarray
     blockage_voltage: np.ndarray
     open_circuit_response: np.ndarray
@@ -107,6 +109,14 @@ class ScenarioTruth(TypedDict):
 
 
 class RFInfo(TypedDict):
+    fs_hz: float
+    if_hz: float
+    channel_ids: tuple[str, ...]
+    filter_coefficients: np.ndarray
+    noise_bandwidth_hz: float
+    measured_noise_bandwidth_hz: float
+    group_delay_compensation_samples: int
+    noise_psd_w_per_hz: float
     total_gain_db: float
     channel_total_gain_db: np.ndarray
     amplitude_error_db: np.ndarray

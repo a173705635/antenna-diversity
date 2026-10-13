@@ -20,7 +20,7 @@ def test_baseline_full_analysis_and_verification_with_short_histories(tmp_path, 
     monkeypatch.setattr(baseline, 'generate_scenario',
                         lambda cfg: (np.ones((2, 32), complex), {}))
 
-    def receive(signal, cfg, seed, out, name, hardware=False):
+    def receive(signal, cfg, seed, out, name, hardware=False, *, channel_id):
         fs = cfg.signal.fs_rf_hz/cfg.dfe.decimation
         starts = np.arange(duration-5)*round(fs*.001)
         t = starts/fs
@@ -120,7 +120,7 @@ def test_multipath_full_short_record_analysis(tmp_path, monkeypatch, duration):
     monkeypatch.setattr(multipath, '_multipath_scene',
                         lambda *args: SimpleNamespace(truth={'component':np.zeros((2,32),complex)}))
 
-    def receive(signal, cfg, seed, out, name, hardware=False):
+    def receive(signal, cfg, seed, out, name, hardware=False, *, channel_id):
         fs=cfg.signal.fs_rf_hz/cfg.dfe.decimation
         starts=np.arange(duration-5)*round(fs*.001)
         h=dict(epoch_start_samples=starts,carrier_nco_phase_rad=np.zeros(len(starts)),
