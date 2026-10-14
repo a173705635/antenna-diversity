@@ -2,6 +2,26 @@
 
 记录每次修改、实验迭代和验证的目的、实际改动、默认行为、实验条件、验证结果、结论与限制，不等到上库时才补。新记录放在最前面，旧记录及其条件保留；同一迭代的失败、修正和复验归入同一条记录。详细研究说明复用各方向既有文档，并在记录中链接，不另建重复报告。每条记录与对应修改一起提交；提交编号可通过本文件的 Git 历史查询。此前提交保留在原有 Git 历史中。
 
+## 2026-10-14 双天线整通道相位补偿闭环
+
+- 目的：建立理想双天线无误差基准，验证整通道静态相位误差、准确补偿与单 CW 条件下的配对恢复；与历史仅改变目标响应的扫描明确分开。
+- 范围：新增独立实验和对应测试，不改变公共算法、`full_chain` 默认配置或历史扫描；误差明确放在 DFE 输出后，对目标、干扰、噪声和已有前端残差一起旋转。准确相位人为已知，不是自动校准；RF/ADC 前误差留待下一项独立验证。
+- 实际改动与条件：新增 `experiments/interference/channel_phase_validation.py` 和 `tests/test_channel_phase_validation.py`；按配置、数据生成、整行旋转/补偿、接收、独立评分、核验与绘图组织，顶部参数可编辑。默认 TL/BR、扰动 BR，seeds 42/43/44、100 ms、0/30/60/90/120/180°，无干扰/单 CW，目标功率/NF/门限不变；6 份 RF/DFE 基准、36 个配对条件、324 行方法结果。运行入口及指标定义同步 README，未新增防御兜底。
+- 修改前基础检查：`python -B -m pytest -p no:cacheprovider -q tests/test_rf_dfe.py tests/test_pipeline.py tests/test_antenna.py --basetemp=results/_pytest_phase_baseline` 为 **31 passed**；未据此宣称新实验通过。
+- 首轮与修正：模块缺失时 RED，随后修正评分更新顺序和 Path/numpy bool JSON 序列化，针对性测试 4 passed；首次 324 分支批次的闭环核验通过，首次完整回归 **605 passed、25 deselected**。独立审查复现配对 C/N₀ 单侧缺失仍误通过，先负测试后补跟踪状态、可用性和有限计数核验；图 QA 后将热噪声收益改为线性倍率显示，表格保留 dB，增加缺测图注及统一相位横轴。针对性测试最终 `python -m pytest tests/test_channel_phase_validation.py -q` 为 **5 passed**。
+- 最终验证：`MPLBACKEND=Agg` 下 `python -u -B -m experiments.interference.channel_phase_validation` 退出码 0，21 项核验通过、108 个补偿/基准配对一致；`python -B -m pytest -p no:cacheprovider -q --basetemp=results/_pytest_channel_phase_final` 为 **606 passed、25 deselected**。Main 的 `python -B -` 独立几何复算目标功率比最大差 `1.78e-15`、CW 抑制差 `4.97e-14 dB`；全部 129 个来源哈希匹配，三张保存图检查完成，`git diff --check` 通过。
+- 结果与边界：无干扰 EGC/MVDR 收益约 3.00 dB；EGC 90° 未补目标功率保留 0.5、180° 理论抵消并失捕。准确补偿后 DFE/合并输出相对基准差≤`1.06e-16/8.70e-16`，单 CW 的 MVDR 抑制恢复 36.94～37.10 dB并恢复基准捕获，EGC 则即使准确补偿仍因残余干扰失捕。这里只证明 DFE 后静态相位线性闭环，不证明自动校准、RF/ADC 前误差、动态相位、时延对齐或真实手机性能。桌面弹窗按默认开启，本轮仅用 Agg 验证保存图；旧扫描与历史研究未重跑。
+- 详细说明、阅读顺序及实际结果：[双天线整通道相位补偿闭环](docs/interference/README.md#2026-10-14-双天线整通道相位补偿闭环)。结果在 `results/interference/channel_phase_validation/`；沿用本地忽略规则，不复制 IQ 或归档源码。
+- 上库复核（基准 `4a0f3d4`）：`python -m pytest -q tests/test_channel_phase_validation.py tests/test_rf_dfe.py tests/test_pipeline.py tests/test_antenna.py --basetemp=results/_pytest_upload_channel_phase` 为 **36 passed**，覆盖短记录闭环、单侧 C/N₀ 缺失拒绝、输出保存和配套接收模块。只读复查核对了整行旋转、分量评分、配对核验及既存 21 项核验结果，未发现阻塞问题。`git diff --cached --check` 通过；本次未另行重跑完整相位批次，只提交实验、测试和说明记录，结果及归档仍保留本地。
+
+## 2026-10-14 无干扰 EGC/MVDR 小差异的独立控制核对
+
+- 目的：核对用户提出的“无干扰时 EGC 也更好”，区分真正无干扰与含干扰权值的事后热噪声指标；未修改算法或持久配置。读取到保存的 `full_chain` 和 `direct_response_boundary` 清单仍有两个启用干扰，没有用户所指具体无干扰记录，未把独立控制说成该记录的复现。
+- 实际条件与执行：`python_sim_simplified/` 内用 `python -u -B -c '<内存诊断代码>'` 执行一条完整接收记录；代码排版展开见下方详细说明。理想四角、真实/假设响应匹配、零时延、seed 42、100 ms，进程内 `cfg.interferers=[]` 且多径关闭；原目标功率/NF/门限不变，SINGLE/EGC/MVDR 共用同一 RF/DFE 数据。独立线性 RF/DFE 评分去掉两端各 10 ms，跟踪 C/N₀ 取后半段中位数。
+- 实际结果：EGC/MVDR 真码热噪声相关 C/N₀ 为 50.326788/50.326124 dB-Hz，仅差 0.000665 dB；实际跟踪后半段估计为 51.332753/51.339575 dB-Hz，次序相反。两者权值范数平方 0.25/0.2500005234，相对权值差 0.1447%，理想白噪声损失约 `9.09e-6 dB`；导向匹配误差 0。
+- 结论与限制：此控制下二者基本相同，有限样本求权和短窗统计可产生微小排名变化，不支持“EGC 明显更好”；不能据此判断用户尚未提供的运行条件。当前 EGC 在幅度不等时为 MRC 型权重，命名限制已说明。未新建结果文件/图片；未改源代码，因此未重跑 pytest、完整消融、相位扫描或标定。文档 `git diff --check` 核对无空白错误。
+- 详细说明及实际诊断代码：[无干扰下 EGC/MVDR 的小差异核对](docs/interference/README.md#2026-10-14-无干扰下-egcmvdr-的小差异核对)。
+
 ## 2026-10-14 球形图内凹表达与阅读性修正
 
 - 目的与依据：原线性半径低增益已经向内，但弱响应压缩、图标过大和背面投影遮挡使凹陷不清楚。仅修改球形图显示，不改变天线/接收算法或响应数据。

@@ -26,6 +26,7 @@ archive/       历史代码、报告与验证证据，仅在本地保留
 | 完整 RF→DFE→合并→捕获→跟踪及绘图 | `python -m experiments.interference.full_chain` |
 | RF 噪声标定、天线单因素配对消融与独立功率预算 | `python -m experiments.interference.antenna_ablation` |
 | 目标/CW/宽带响应直接赋值，已知/未知目标相位配对扫描 | `python -m experiments.interference.direct_response_boundary` |
+| 理想双天线整通道相位误差、准确补偿与单 CW 配对验证 | `python -m experiments.interference.channel_phase_validation` |
 | 无定位 SDCP 基线：仿真、绘图与独立核验一次完成 | `python -m experiments.multipath.sdcp_baseline` |
 | SDCP 多径：标定、测试、独立复算及绘图一次完成 | `python -m experiments.multipath.sdcp_multipath` |
 | 最新单源接收机，比较三/四天线 | `python -m experiments.spoofing.single_source` |

@@ -270,3 +270,157 @@ a_i(source) = a_ideal_geometry_i(source) × c_i(source) × channel_response_i
 - 实际绘图前后逐项核对接收指标和全部分支权值，完全一致；128 个来源文件哈希与最终源码一致。MVDR 峰比仍为 12.863909，其余三分支仍失捕。本轮不重新执行历史消融或相位扫描，也不新增抗干扰性能结论。
 
 限制：半径并非线性幅度，≤−40 dB 的几何深度不再区分；深度看图例真实值。图标和引线是方向辅助、不是严格遮挡判定。固定半球遮罩不会随 GUI 相机旋转自动更新；两视图互补展示原始方向集合，但半球切边可能出现网格锯齿，不能把它视为真实波瓣边界。
+
+### 2026-10-14 无干扰下 EGC/MVDR 的小差异核对
+
+目的：区分“从含干扰数据求权、事后只评价目标/热噪声”与“实际关闭全部干扰”的实验，并检查无干扰时 EGC 是否明显优于 MVDR。本轮读取到磁盘 `full_chain/manifest.json` 与 `direct_response_boundary/manifest.json` 仍各有两个启用干扰，未取得用户所指无干扰运行的具体图片/配置。因此下面是独立控制组，不声称已复现用户那次运行。
+
+控制条件为 `default_config()` 理想四角、真实/假设响应一致、零通道时延、seed 42、100 ms、目标 −128.5 dBm；进程内设置 `cfg.interferers=[]`、关闭并清空多径，只运行 SINGLE/EGC/MVDR。接收处理完整记录，独立线性目标/热噪声评分去掉首尾各 10 ms；实际跟踪 C/N₀ 取后半段有限值中位数。未修改源码或持久配置，没有写结果文件或绘图，只将 stdout 数值记在此处；默认入口条件不变。
+
+| 指标 | EGC | MVDR |
+|---|---:|---:|
+| 权值范数平方 | 0.2500000000 | 0.2500005234 |
+| 线性分量热噪声 SNR / dB | −15.324913 | −15.324910 |
+| 真码热噪声相关 C/N₀ / dB-Hz | 50.326788 | 50.326124 |
+| 后半段实际跟踪 C/N₀ 中位数 / dB-Hz | 51.332753 | 51.339575 |
+| 捕获峰比 | 21.996093 | 21.982893 |
+
+两者目标真实/假设导向的最大差为 0。MVDR 相对 EGC 的权值向量差约 0.1447%；按理想独立同功率热噪声与相同目标单位响应计算，额外白噪声损失仅 `9.09e-6 dB`。相关 oracle 上 EGC 高 `0.000665 dB`，跟踪短窗估计则 MVDR 高 `0.006822 dB`，并不存在一致、明显的 EGC 优势。
+
+解释与边界：独立同功率空间白噪声且响应准确时，`w=a/(aᴴa)` 是保持目标单位响应的最小范数权值。当前四路等幅，所以它也是相位对齐的等权平均；代码名为 EGC 的分支在幅度不等时实为 MRC 型权重，而非严格等幅 EGC。精确总体协方差下，MVDR 会得到相同权值；实际代码使用有限记录的 `XXᴴ/N`，与理想总体协方差不同，oracle 和跟踪的短窗评分又不是该全记录协方差优化目标，因此微小偏差或指标次序变化不能据此认定算法有问题。[MathWorks 的 MVDR 协方差估计说明](https://www.mathworks.com/help/phased/ref/phased.mvdrbeamformer-system-object.html)
+
+本次结果只覆盖一个 seed、零额外相位的理想无干扰控制；不证明其他增益、时延、方向失配或任意配置下的等价，也未诊断用户未提供的具体运行。没有改算法，未重跑 pytest、消融、相位扫描或标定。
+
+实际执行为在 `python_sim_simplified/` 下用 `python -u -B -c '<Python 代码>'` 运行；以下是该内存诊断代码的排版展开，不另建脚本：
+
+```python
+from dataclasses import replace
+import numpy as np
+from core.presets import default_config
+from core.pipeline import run_end_to_end
+from core.dfe import process_dfe
+from core.rf import filter_rf_input, generate_rf_noise
+from experiments.interference.antenna_ablation import thermal_oracle_prompt_cn0
+
+cfg = default_config()
+cfg.interferers = []
+cfg.enable_multipath_research = False
+cfg.signal.multipath_paths = []
+cfg.signal.duration_ms = cfg.tracking.max_epochs = 100
+cfg.diversity.modes = ('single', 'egc', 'mvdr')
+r = run_end_to_end(cfg)
+info = r['rf_info']
+a = r['truth']['desired_steering_true']
+fs = r['dfe_info']['fs_out_hz']
+scale = r['dfe_info']['output_scale']
+fcfg = replace(cfg.dfe, output_bits=0)
+gain = (10 ** (info['channel_total_gain_db'] / 20)
+        * np.exp(1j * np.deg2rad(info['phase_error_deg'])))[:, None] / info['adc_lsb_v']
+
+def linear_dfe(v):
+    output, _ = process_dfe(v * gain, fcfg, cfg.signal.fs_rf_hz, cfg.signal.if_hz)
+    return output / scale
+
+signal = linear_dfe(filter_rf_input(
+    r['truth']['desired_component'], info['filter_coefficients'],
+    cfg.signal.fs_rf_hz, cfg.signal.if_hz))
+noise = linear_dfe(generate_rf_noise(
+    r['scene_input_v'].shape[1], info['noise_psd_w_per_hz'],
+    cfg.reference_impedance_ohm, cfg.signal.fs_rf_hz, cfg.signal.if_hz,
+    cfg.phone.active_antennas, cfg.random_seed, info['filter_coefficients']))
+trim = round(0.01 * fs)
+interval = slice(trim, -trim)
+for mode, branch in r['branches'].items():
+    w = branch['combining']['weights']
+    target, thermal = w.conj() @ signal, w.conj() @ noise
+    snr = 10 * np.log10(np.mean(abs(target[interval]) ** 2)
+                        / np.mean(abs(thermal[interval]) ** 2))
+    oracle = thermal_oracle_prompt_cn0(target, thermal, r['truth'], fs, trim)
+    cn0 = branch['tracking']['cn0_db_hz']
+    print(mode, np.vdot(w, w).real, snr, oracle,
+          np.nanmedian(cn0[len(cn0) // 2:]), branch['acquisition']['metric'])
+w0 = r['branches']['egc']['combining']['weights']
+w1 = r['branches']['mvdr']['combining']['weights']
+print('relative_weight_difference', np.linalg.norm(w1 - w0) / np.linalg.norm(w0))
+print('white_noise_penalty_dB', 10 * np.log10(np.vdot(w1, w1).real / np.vdot(w0, w0).real))
+print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assumed'])))
+```
+
+## 2026-10-14 双天线整通道相位补偿闭环
+
+### 本轮范围与实施约定
+
+本轮只验证恒定、频率无关的复数通道相位误差及其准确补偿。入口为 `experiments/interference/channel_phase_validation.py`；历史 `direct_response_boundary` 是目标源级响应变化实验，不作为本轮通道校准证据，也不覆盖其数据。
+
+误差放在 **DFE 输出之后、天线合并之前**，对整行复数序列施加同一个相位旋转。目标、CW、热噪声以及已有前端量化残差共同旋转。此位置用于隔离相位补偿的线性数学闭环，不等同于在 RF 限幅/ADC 前注入误差，不验证硬件校准能力或真实手机天线。
+
+设基准数据为 `X0`，通道相位矩阵为 `D = diag(exp(jφ))`：
+
+| 组别 | 合并器输入 | 接收机使用的导向 |
+|---|---|---|
+| `baseline` 无误差基准 | `X0` | 基准目标导向 `a0` |
+| `uncalibrated` 有误差、未补偿 | `D @ X0` | 仍使用 `a0`，故存在失配 |
+| `calibrated` 同样误差、准确补偿 | `D_est^-1 @ D @ X0`，本轮 `D_est=D` | 使用 `a0`，不重复补偿导向 |
+
+补偿作用于整个接收序列，不是只调整本地码或目标分量。准确相位值是本轮人为提供的已知校准量；接收机没有自动估计相位。
+
+- 理想双天线默认 `TL/BR`，参考为第一根，误差施加到 `BR`；顶部可改为任意组合。默认对角组合用于减少本轮目标/CW 在短横基线上的空间响应接近问题，保留位置导致的几何相位，真实/假设几何匹配。
+- 固定 `noise_only` 和 `single_cw` 两个场景，后者只保留原 CW；不增加宽带干扰、方向图、互耦、遮挡或多径。
+- seeds 为 `42/43/44`，每条记录 100 ms；扫描 `0/30/60/90/120/180°`；目标功率、CW 功率、NF、采样率和捕获门限沿用原配置。
+- 每个 seed/场景只生成一次 RF/DFE 基准。全部相位点、组别、SINGLE/EGC/MVDR 使用配对数据和同一个参考通道，避免重新抽噪声造成伪差异。
+- 独立重建目标、CW 和热噪声的线性 RF/DFE 分量；实际 DFE 与线性总和的差单列为非线性/量化残差，不当作热噪声。
+- 分开显示热噪声合并收益、CW 抑制、带内 `C/(N+I)`、实际捕获与跟踪 C/N₀；带内 SINR 不是 C/N₀，纯热噪声指标不是抗干扰综合成绩。
+
+实施顺序：先写相位整行旋转/逆旋转、独立白噪声收益和短入口的失败测试，再实现实验；运行默认批次及回归、独立审查与绘图检查后追加实际结果。严格检查补偿序列/输出恢复及独立功率重建；不要求未补偿组通过捕获，不为获得成功而调整信号强度或门限。
+
+线性独立等功率噪声下，双天线等幅同相合并的理论热噪声收益为 `10 log10(2)=3.0103 dB`。有限数据的实测功率和短窗跟踪估计允许统计差异；先判断与理论和基准的一致性，不用某次 C/N₀ 排名代替校准验证。RF/ADC 前相位误差及量化、限幅的非交换性留作下一项独立复验。
+
+对于双路等幅目标，第一路无额外相位、第二路有未补偿的 `φ` 时，EGC 的目标电压响应为 `(1+exp(jφ))/2`，功率响应为 `cos²(φ/2)`。因此 90° 时目标功率比基准低 3.0103 dB，180° 时理论抵消；准确逆旋转后恢复。该手推关系核验的是目标失配损失，与 CW 抑制不能混为一个指标。
+
+### 实际验证与结论
+
+本轮代码阅读顺序如下，参数集中在入口顶部：
+
+1. `build_config()`：固定理想双天线、无干扰/单 CW 两个场景，不改功率、NF 和门限。
+2. `run_sweep()`：每个 seed/场景只生成一次 RF/DFE 输入和基准接收结果，再遍历相位点。
+3. `apply_channel_phase()` / `_case_channels()`：按物理天线名旋转整行数据，对同一份受扰数据逆旋转；参考通道不动。更换双天线组合时同步设置 `PERTURBED_ANTENNA` 为非参考通道。
+4. `_receive()`：调用既有合并、捕获和跟踪算法；不读取评分用的真值分量，也不将精确相位交给相位估计算法。
+5. `_linear_components()` / `_score_branch()`：独立重放线性目标、CW、噪声，固定已求出的权重核算功率；联合非线性/量化残差另列。
+6. `verify_rows()`：对照每条补偿组与同 seed/场景/相位/方法的基准；核验数据、权值、功率、捕获和跟踪状态及数值。
+7. `plot_summary()` / `main()`：一次运行完成数据生成、核验、保存和三张图，核验失败会写明失败项并以非零退出结束。
+
+运行：在 `python_sim_simplified/` 内执行 `python -m experiments.interference.channel_phase_validation`。只刷新 `results/interference/channel_phase_validation/`，不覆盖旧目标响应扫描。`summary.json/csv` 为逐条件结果，`verification.json` 为核验判据与配对差，`manifest.json` 保存实际条件、指标定义和源码哈希。
+
+三图按方法分行、场景分列，不把所有方法挤在同一坐标轴：
+
+- `thermal_gain.png`：显示线性热噪声 SNR 收益倍率，约 2 对应约 3.01 dB；表格仍保存完整 dB 值。180° 理论抵消在浮点中产生约 −316 dB 的残值，若直接画 dB 会压扁其他相位点，因此仅改变显示单位，不截断或修改数据。
+- `target_and_cw.png`：目标功率比与 CW 抑制分开；“无 CW”明确标出。未补偿 MVDR 的目标功率比可能超过 1，因为它此时仅约束错误的目标导向；不把放大目标误认为正确校准。
+- `receiver.png`：实际捕获峰比含门限线，跟踪 C/N₀ 缺测不记为 0，缺口/无曲线有说明。曲线按每点可用 seed 值求均值，不是成功概率；补偿组与基准重合是闭环预期。
+
+`SHOW_PLOTS=True` 默认保存并弹出图；本轮自动验证使用 `MPLBACKEND=Agg`，只核验保存图，尚未实际测试桌面弹窗交互。
+
+实现中的首次模块缺失、评分更新顺序、Path/numpy bool JSON 序列化问题已修正。独立审查又复现了“基准有有限 C/N₀、补偿组无值仍被核验为通过”的缺口；已先负测试再增加跟踪成功、可用性和有限样本数的配对检查，只允许双方都不可评价时跳过数值差。图 QA 中的 dB 压缩和空曲线横轴问题也先复现再修正。
+
+实际执行：
+
+- 修改前 `python -B -m pytest -p no:cacheprovider -q tests/test_rf_dfe.py tests/test_pipeline.py tests/test_antenna.py --basetemp=results/_pytest_phase_baseline`：31 passed。
+- 新测试初次因模块缺失而收集失败；首次实现 4 passed，修正核验缺口与图显示后 `python -m pytest tests/test_channel_phase_validation.py -q`：5 passed，包含篡改目标功率、单侧 C/N₀ 缺失、跟踪成功状态改变的负测试，以及线性显示/缺测坐标轴检查。
+- 首次默认扫描完成 324 行，初次完整回归 605 passed、25 deselected；其后修正核验与图显示，没有用初轮结果冒充最终版本。
+- 最终 `MPLBACKEND=Agg` 下执行 `python -u -B -m experiments.interference.channel_phase_validation`，退出码 0；6 份基准 RF/DFE、36 个 seed/场景/相位配对条件、324 行方法结果完成，21 项核验通过，108 个补偿/基准方法配对一致。
+- 最终 `python -B -m pytest -p no:cacheprovider -q --basetemp=results/_pytest_channel_phase_final`：**606 passed、25 deselected**，252.35 s；本地归档证据测试按既有配置排除。
+- Main 用 `python -B -` 内存脚本从角点坐标与方位/仰角独立计算 `exp(-j2π f r·u/c)`，不调用天线响应或相位助手：目标功率比最大绝对差 `1.78e-15`，CW 抑制最大差 `4.97e-14 dB`；EGC 对 `cos²(φ/2)` 的最大绝对差 `3.33e-16`。最终清单全部 **129** 个来源哈希匹配，三张保存图逐张检查，`git diff --check` 无空白错误。
+
+结果：
+
+| 条件 | 实际结果 | 判断 |
+|---|---|---|
+| 无干扰、无误差/准确补偿 | EGC 热噪声收益 2.9986～3.0073 dB；与理论最大差 0.01167 dB。MVDR 为 2.9987～3.0073 dB | 两者接近，同样满足双天线基准 |
+| 无干扰、90° 未补偿、EGC | 目标功率保留 0.5 | 符合手推 −3.0103 dB 目标损失 |
+| 无干扰、180° 未补偿、EGC | 目标功率保留约 `1.09e-32`；三个 seed 均失捕 | 浮点残值对应理论抵消，不是正常目标保留 |
+| 单 CW、无误差/准确补偿、MVDR | CW 抑制 36.94～37.10 dB；三个 seed 的基准均正确捕获。六个相位点全部恢复各自基准 | 校准恢复空间抑制及实际接收；18 个配对成功不等于独立捕获概率 |
+| 单 CW、无误差/准确补偿、EGC | CW 抑制 4.14 dB；三个 seed 均失捕，跟踪 C/N₀ 无值 | 相位校准正确不等于 EGC 具备足够抗干扰能力 |
+| seed 42、单 CW、90° 未补偿/准确补偿、MVDR | CW 抑制 5.74→36.94 dB；捕获峰比 1.10→7.01，门限 2.5 | 未补失捕，补偿后恢复基准；不能只看热噪声指标 |
+
+准确补偿后的 DFE 数据、合并输出相对基准最大误差分别为 `1.06e-16`、`8.70e-16`；权值逐值一致。捕获峰比最大绝对差 `1.07e-14`，可用跟踪 C/N₀ 最大差 `7.11e-14 dB-Hz`；CW 抑制最大差 `7.11e-15 dB`。这说明本轮闭环恢复到了浮点舍入精度。
+
+结论只适用于本轮模型：**整通道恒定相位误差在准确逆补偿后恢复基准；补偿正确性与不同合并算法的抗干扰能力是两回事。** 没有实现自动相位估计、相位漂移、频率相关误差或整序列时延对齐；没有验证 RF/ADC 前误差或真实手机方向图/校准能力。三种 seed 与固定姿态/功率/方向不足以推断一般可靠性。主链路默认配置未修改，历史研究批次未重跑；未提交、推送或合并 Git。
