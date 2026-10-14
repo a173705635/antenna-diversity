@@ -2,6 +2,17 @@
 
 记录每次修改、实验迭代和验证的目的、实际改动、默认行为、实验条件、验证结果、结论与限制，不等到上库时才补。新记录放在最前面，旧记录及其条件保留；同一迭代的失败、修正和复验归入同一条记录。详细研究说明复用各方向既有文档，并在记录中链接，不另建重复报告。每条记录与对应修改一起提交；提交编号可通过本文件的 Git 历史查询。此前提交保留在原有 Git 历史中。
 
+## 2026-10-14 球形图内凹表达与阅读性修正
+
+- 目的与依据：原线性半径低增益已经向内，但弱响应压缩、图标过大和背面投影遮挡使凹陷不清楚。仅修改球形图显示，不改变天线/接收算法或响应数据。
+- 实际改动：显示半径改为 `clip(1-G_dB/G_floor,0,1)`，默认 0/−20/≤−40 dB 对应 1/0.5/0；增加 0 dB 参考轮廓/球心，方向图标移到外侧并引线连接精确响应半径，低冷高暖加光照网格，扩大图体并移除坐标框。首次新图 QA 后继续加入互补固定半球剖视，避免背面填住前方凹陷。
+- 默认行为与限制：原球形图文件名、保存和弹窗规则保留；二维、普通三维图及接收计算不变。半径是显示刻度，不是线性电压或功率；≤−40 dB 共用半径 0，但图例保留精确 dB。固定半球剖视不随 GUI 旋转重新裁切，图标是方向辅助而非增益凸起。弱旁瓣即使相对峰值低，也可为局部凸瓣，未人为改变增益排序；未增加兜底分支。
+- 条件与输出：四路参数化预设、seed 42、100 ms、目标 30°/60°、默认 CW/2 MHz 宽带、多径关闭。四张新版图及配置/权值/源码清单、接收摘要在 `results/interference/spherical_readability/`；未覆盖此前绘图或实验历史。实际渲染使用 Agg，只核验静态图。
+- 失败与复验：新增显示期望在旧实现上 **3 failed**，第一版球形测试 **5 passed**；QA 发现背面仍遮蔽凹陷，再先复现背面测试 **1 failed**、修正后 `python -B -m pytest -p no:cacheprovider -q tests/test_plotting_runner.py -k spherical` 为 **6 passed、7 deselected**。默认完整回归 `python -B -m pytest -p no:cacheprovider -q --basetemp=results/_pytest_spherical_readability` 为 **601 passed、25 deselected**。
+- 结论与检查：四图已逐张检查，全部权值与接收指标绘图前后完全一致；清单 128 个来源哈希匹配最终源码，MVDR 峰比仍为 12.863909，其他三分支仍失捕。只读审查无实质/阻塞问题，`git diff --check` 通过。未重跑历史消融、相位扫描或标定，不新增抗干扰性能结论。
+- 上库复核（基准 `946d27d`）：`python -m pytest -q tests/test_plotting_runner.py tests/test_research_contract.py --basetemp=results/_pytest_upload_spherical_readability` 为 **16 passed**，包含 FULLCHAIN 直接运行和输出保存检查；检查了本轮测试生成的 MVDR 球形图，参考轮廓、深凹陷、方向引线与图例可读。`git diff --cached --check` 通过；只提交绘图、测试和说明记录，结果和归档仍保留本地。
+- 详细说明：[球形图内凹表达与阅读性修正](docs/interference/README.md#2026-10-14-球形图内凹表达与阅读性修正)。
+
 ## 2026-10-13 源级幅相直接赋值与已知/未知相位配对扫描
 
 - 目的与改动：新增独立入口 `experiments/interference/direct_response_boundary.py`，在理想四角几何基底上直接赋目标/CW/宽带每个天线的非几何幅相；真实目标与接收机假设分开，系数作用到实际信号、导向和分级诊断一次。保留原实际序列时延与 RF 相位处理。公共接收链增加可选 `scene` 注入，功率预算复用 `antenna_ablation.run_case`，不复制 RF/DFE/捕获跟踪。

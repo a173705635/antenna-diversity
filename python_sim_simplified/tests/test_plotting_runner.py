@@ -133,7 +133,7 @@ def test_detailed_spatial_and_acquisition_figures_keep_diagnostics_separate():
         spherical = figures[f"detailed_array_response_spherical_{mode}"]
         spherical_axes = [axis for axis in spherical.axes if axis.name == "3d"]
         assert len(spherical_axes) == 2
-        assert all(axis.get_zlim() == (-1.2, 1.2) for axis in spherical_axes)
+        assert all(axis.get_zlim()[0] < -1 < 1 < axis.get_zlim()[1] for axis in spherical_axes)
         assert spherical.axes[-1].get_ylim() == (-40.0, 0.0)
         assert spherical_axes[1].azim - spherical_axes[0].azim == 180.0
         assert all(not axis.texts for axis in spherical_axes)
@@ -204,8 +204,8 @@ def test_spherical_coordinates_preserve_response_radius_and_direction():
     np.testing.assert_allclose(z[[0, 2]], radius[[0, 2]]*np.array([[-1], [1]]))
 
 
-def test_spherical_surface_radius_tracks_response_without_color_floor(monkeypatch):
-    # A fixed unit radius or a -40 dB radius floor would lose these null depths.
+def test_spherical_surface_uses_inward_db_display_radius(monkeypatch):
+    # 0 dB is the outer sphere; -20 dB is halfway inward, not an outward bump.
     surfaces = []
     real_plot_surface = Axes3D.plot_surface
 
@@ -223,14 +223,20 @@ def test_spherical_surface_radius_tracks_response_without_color_floor(monkeypatc
         results, 'single', np.array([0., 90., 180., 270., 360.]),
         np.array([-90., 0., 90.]), response,
     )
-    expected_radius = [[0.]*5, [1., 0.5, 0.1, 0.001, 1.], [0.75]*5]
+    expected_radius = [
+        [0.]*5,
+        [1., 0.8494850021680094, 0.5, 0., 1.],
+        [0.93753063169585]*5,
+    ]
     assert len(surfaces) == 2
     for radius in surfaces:
-        np.testing.assert_allclose(radius, expected_radius, atol=1e-15)
+        visible = np.isfinite(radius)
+        np.testing.assert_allclose(radius[visible], np.asarray(expected_radius)[visible], atol=1e-15)
+    assert np.all(np.isfinite(surfaces[0]) | np.isfinite(surfaces[1]))
     plt.close(figure)
 
 
-def test_spherical_direction_marker_follows_exact_off_grid_response():
+def test_spherical_direction_ray_follows_exact_response_with_external_icon():
     cfg = default_config()
     cfg.phone.active_antennas = ('TL', 'TR')
     cfg.phone.phase_centers_m = {
@@ -248,11 +254,61 @@ def test_spherical_direction_marker_follows_exact_off_grid_response():
     )
     axis = next(axis for axis in figure.axes if axis.name == '3d')
     target = next(line for line in axis.lines if line.get_marker() == '*')
-    # Half-wavelength baseline: at az=60°, response is cos(pi/4)=sqrt(1/2).
-    radius = 1.03 / np.sqrt(2.)
-    expected_tip = [radius / 2., radius * np.sqrt(3.) / 2., 0.]
+    # The icon shows direction outside the reference sphere, not apparent gain.
+    expected_tip = [1.06 / 2., 1.06 * np.sqrt(3.) / 2., 0.]
     np.testing.assert_allclose(np.asarray(target.get_data_3d()).reshape(3),
                                expected_tip, atol=1e-15)
+    ray = next(line for line in axis.lines if line.get_label() == '_direction_ray')
+    # Analytic -3.01029995664 dB gives the inner radial endpoint, off the grid.
+    inner_radius = 0.9247425010840047
+    expected_ray = np.array([0.5, np.sqrt(3.) / 2., 0.])[:, None] * [inner_radius, 1.06]
+    np.testing.assert_allclose(np.asarray(ray.get_data_3d()), expected_ray, atol=1e-15)
+    plt.close(figure)
+
+
+def test_spherical_reference_encloses_weak_response_and_marks_origin():
+    cfg = default_config()
+    cfg.interferers = []
+    results = {'config': cfg, 'branches': {
+        'single': {'combining': {'weights': np.array([1., 0., 0., 0.])}}
+    }}
+    figure = _plot_array_response_spherical(
+        results, 'single', np.array([0., 90., 180., 270., 360.]),
+        np.array([-90., 0., 90.]), np.full((3, 5), 1.),
+    )
+    for axis in (axis for axis in figure.axes if axis.name == '3d'):
+        reference = next(line for line in axis.lines if line.get_label() == '_zero_db_reference')
+        np.testing.assert_allclose(np.linalg.norm(reference.get_data_3d(), axis=0),
+                                   1., atol=1e-15)
+        origin = next(line for line in axis.lines if line.get_label() == '_sphere_origin')
+        np.testing.assert_array_equal(np.asarray(origin.get_data_3d()).reshape(3), [0., 0., 0.])
+    plt.close(figure)
+
+
+def test_spherical_cutaway_hides_far_surface_that_fills_in_nulls(monkeypatch):
+    surfaces = []
+    real_plot_surface = Axes3D.plot_surface
+
+    def capture_surface(axis, x, y, z, **kwargs):
+        surfaces.append((axis, np.array([x, y, z])))
+        return real_plot_surface(axis, x, y, z, **kwargs)
+
+    monkeypatch.setattr(Axes3D, 'plot_surface', capture_surface)
+    cfg = default_config()
+    cfg.interferers = []
+    results = {'config': cfg, 'branches': {
+        'single': {'combining': {'weights': np.array([1., 0., 0., 0.])}}
+    }}
+    figure = _plot_array_response_spherical(
+        results, 'single', np.arange(0., 361., 30.),
+        np.arange(-90., 91., 30.), np.ones((7, 13)),
+    )
+    for axis, coordinates in surfaces:
+        az, el = np.deg2rad([axis.azim, axis.elev])
+        camera = [np.cos(el)*np.cos(az), np.cos(el)*np.sin(az), np.sin(el)]
+        projected = np.einsum('i,ijk->jk', camera, coordinates)
+        assert np.isnan(projected).any()
+        assert np.nanmin(projected) >= -1e-15
     plt.close(figure)
 
 
@@ -274,7 +330,8 @@ def test_spherical_isotropic_response_still_forms_unit_sphere(monkeypatch):
         np.array([-90., 0., 90.]), np.full((3, 5), 2.),
     )
     for radius in surfaces:
-        np.testing.assert_allclose(radius, np.ones((3, 5)), atol=1e-15)
+        np.testing.assert_allclose(radius[np.isfinite(radius)], 1., atol=1e-15)
+    assert np.all(np.isfinite(surfaces[0]) | np.isfinite(surfaces[1]))
     plt.close(figure)
 
 

@@ -1,6 +1,7 @@
 """Independent figures for each important stage of the simulation."""
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import LightSource
 from matplotlib.lines import Line2D
 import numpy as np
 
@@ -10,6 +11,7 @@ from .metrics import circular_chip_error, tracking_code_bias_chips
 
 
 MODE_ORDER = ("single", "egc", "mvdr", "blind_null", "multipath_lcmv")
+SPHERICAL_RESPONSE_FLOOR_DB = -40.0
 
 
 def _ordered_modes(results):
@@ -424,8 +426,13 @@ def _spherical_response_coordinates(azimuths, elevations, radius):
     return x, y, z
 
 
+def _spherical_display_radius(gain_db):
+    """Display scale: 0 dB at radius 1, the negative dB floor at the origin."""
+    return np.clip(1.0 - np.asarray(gain_db) / SPHERICAL_RESPONSE_FLOOR_DB, 0.0, 1.0)
+
+
 def _plot_array_response_spherical(results, mode, azimuths, elevations, response):
-    """Gain-shaped radial surface: normalized amplitude radius and dB colors."""
+    """dB-shaped display surface; lower gain contracts toward the 0 dB sphere's centre."""
     cfg = results["config"]
     peak_response = np.max(response)
     normalized_response = response / peak_response
@@ -433,15 +440,16 @@ def _plot_array_response_spherical(results, mode, azimuths, elevations, response
         np.maximum(normalized_response, np.finfo(float).tiny)
     )
     x, y, z = _spherical_response_coordinates(
-        azimuths, elevations, normalized_response
+        azimuths, elevations, _spherical_display_radius(response_db)
     )
-    color_scale = plt.Normalize(vmin=-40.0, vmax=0.0)
-    color_map = plt.get_cmap("turbo")
+    unit_x, unit_y, unit_z = _spherical_response_coordinates(azimuths, elevations, 1.0)
+    color_scale = plt.Normalize(vmin=SPHERICAL_RESPONSE_FLOOR_DB, vmax=0.0)
+    color_map = plt.get_cmap("RdYlBu_r")
     model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
     weights = results["branches"][mode]["combining"]["weights"]
     directions = _array_response_directions(cfg)
     # Aim the first camera at the first enabled interferer, then show its antipode.
-    view_azimuth = next(
+    view_azimuth = 25.0 + next(
         (item.direction.azimuth_deg for item in cfg.interferers if item.enable),
         cfg.signal.true_direction.azimuth_deg,
     )
@@ -460,66 +468,92 @@ def _plot_array_response_spherical(results, mode, azimuths, elevations, response
         direction_unit = np.asarray(_spherical_response_coordinates(
             [direction.azimuth_deg], [direction.elevation_deg], 1.0
         )).reshape(3)
-        tip = 1.03 * gain * direction_unit
-        markers.append((direction_unit, tip, marker, color))
+        surface_tip = _spherical_display_radius(gain_db) * direction_unit
+        # Icons identify incoming directions, not gain; keep them outside the
+        # reference sphere so a large icon cannot look like a weak-gain lobe.
+        icon_tip = 1.06 * direction_unit
+        markers.append((direction_unit, surface_tip, icon_tip, marker, color))
 
-    figure = plt.figure(figsize=(14, 8))
+    figure = plt.figure(figsize=(15, 8.5))
     for view_index, (camera_elevation, camera_azimuth) in enumerate(
         ((25.0, view_azimuth), (-25.0, view_azimuth + 180.0)), start=1
     ):
         axis = figure.add_subplot(1, 2, view_index, projection="3d", computed_zorder=False)
-        axis.plot_surface(
-            x, y, z,
-            facecolors=color_map(color_scale(response_db)),
-            rcount=elevations.size, ccount=azimuths.size,
-            linewidth=0, antialiased=False, shade=False, zorder=1,
-        )
         camera = np.asarray(_spherical_response_coordinates(
             [camera_azimuth], [camera_elevation], 1.0
         )).reshape(3)
-        for direction_unit, tip, marker, color in markers:
-            # Split direction markers between opposite views, even at zero radius.
+        # This is a fixed hemisphere cutaway. Without it, the far-side surface
+        # fills the projected hole and makes a deep inward null look solid.
+        facing = camera[0] * unit_x + camera[1] * unit_y + camera[2] * unit_z >= 0.0
+        visible_surface = [np.where(facing, coordinate, np.nan) for coordinate in (x, y, z)]
+        axis.plot_surface(
+            *visible_surface,
+            facecolors=color_map(color_scale(response_db)),
+            rcount=elevations.size, ccount=azimuths.size,
+            linewidth=0.12, edgecolor=(0.1, 0.1, 0.1, 0.08), antialiased=True,
+            shade=True, lightsource=LightSource(azdeg=315, altdeg=45), zorder=1,
+        )
+        # Unit circle in the camera plane is the projected 0 dB reference sphere.
+        azimuth_rad, elevation_rad = np.deg2rad([camera_azimuth, camera_elevation])
+        horizontal = np.array([-np.sin(azimuth_rad), np.cos(azimuth_rad), 0.0])
+        vertical = np.cross(camera, horizontal)
+        angles = np.linspace(0.0, 2.0 * np.pi, 361)
+        reference = horizontal[:, None] * np.cos(angles) + vertical[:, None] * np.sin(angles)
+        axis.plot(*reference, color="0.55", linestyle=":", linewidth=1.3,
+                  label="_zero_db_reference", zorder=2)
+        axis.plot([0.0], [0.0], [0.0], marker="o", color="0.15", markersize=4,
+                  label="_sphere_origin", zorder=3)
+        for direction_unit, surface_tip, icon_tip, marker, color in markers:
+            # Split directions between antipodal views; overlays are orientation
+            # aids, not a claim of exact surface occlusion.
             if np.dot(direction_unit, camera) > 0.0:
+                ray = np.column_stack((surface_tip, icon_tip))
+                axis.plot(*ray, color=color, linestyle="--", linewidth=1.3,
+                          label="_direction_ray", zorder=9)
                 axis.plot(
-                    [tip[0]], [tip[1]], [tip[2]], marker=marker, color=color,
+                    [icon_tip[0]], [icon_tip[1]], [icon_tip[2]], marker=marker, color=color,
                     markeredgecolor=color if marker == "x" else "black", markeredgewidth=1,
-                    linestyle="none", markersize=11,
+                    linestyle="none", markersize=9,
                     zorder=11 if marker == "x" else 10,
                 )
         axis.set(
             xlabel="X", ylabel="Y", zlabel="Z",
-            xlim=(-1.2, 1.2), ylim=(-1.2, 1.2), zlim=(-1.2, 1.2),
+            xlim=(-1.12, 1.12), ylim=(-1.12, 1.12), zlim=(-1.12, 1.12),
             xticks=(-1, 0, 1), yticks=(-1, 0, 1), zticks=(-1, 0, 1),
         )
         axis.set_title(
-            "Interference-facing view" if view_index == 1 else "Opposite view", pad=28
+            "Front hemisphere cutaway" if view_index == 1 else "Opposite hemisphere cutaway", pad=4
         )
-        axis.set_box_aspect((1, 1, 1))
+        axis.set_box_aspect((1, 1, 1), zoom=1.5)
         axis.set_proj_type("ortho")
         axis.view_init(elev=camera_elevation, azim=camera_azimuth)
+        axis.set_axis_off()
         axis.grid(False)
         for coordinate_axis in (axis.xaxis, axis.yaxis, axis.zaxis):
             coordinate_axis.pane.set_alpha(0.0)
-    color_axis = figure.add_axes((0.91, 0.28, 0.015, 0.45))
+    color_axis = figure.add_axes((0.92, 0.3, 0.015, 0.43))
     figure.colorbar(
         plt.cm.ScalarMappable(norm=color_scale, cmap=color_map),
         cax=color_axis, label="Normalized response (dB)", extend="min",
         ticks=(-40, -30, -20, -10, 0),
     )
     figure.suptitle(
-        f"{mode.upper()} gain-shaped 3D response\n"
-        "Radius = normalized amplitude; color = response (dB)", fontsize=16
+        f"{mode.upper()} 3D gain: lower response dents INWARD\n"
+        f"Display radius: 0 dB = outer sphere; {SPHERICAL_RESPONSE_FLOOR_DB:g} dB = centre",
+        fontsize=16,
     )
     figure.legend(
-        legend_handles, legend_labels, loc="lower center", bbox_to_anchor=(0.46, 0.065),
+        legend_handles, legend_labels, loc="lower center", bbox_to_anchor=(0.46, 0.095),
         ncol=2, fontsize=10, frameon=False, columnspacing=3,
     )
     figure.text(
-        0.06, 0.02,
-        "Color floor: -40 dB. Radius and listed values are not clipped; nulls contract toward the origin.",
-        fontsize=10,
+        0.06, 0.018,
+        "Dotted circle: 0 dB reference. Icons show directions; dashed lines end at the surface.\n"
+        "Only the facing hemisphere is shown per view, so the far side cannot fill the inward dents.\n"
+        "Radius is a dB display scale, NOT amplitude. Below-floor gains share radius 0; legend values remain exact.",
+        fontsize=9.5,
     )
-    figure.subplots_adjust(left=0.01, right=0.88, bottom=0.18, top=0.83, wspace=0.06)
+    figure.subplots_adjust(left=0.01, right=0.89, bottom=0.21, top=0.83, wspace=0.12)
     return figure
 
 
