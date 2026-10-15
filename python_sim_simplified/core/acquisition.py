@@ -62,7 +62,7 @@ def acquire(
     second_peak = row_without_peak[second_code]
     metric = peak / second_peak
     return {
-        "success": bool(metric >= cfg.threshold),
+        "success_flag": bool(metric >= cfg.threshold),
         "prn": prn,
         "doppler_hz": float(cfg.doppler_bins_hz[best_row]),
         "code_phase_samples": int(best_code),

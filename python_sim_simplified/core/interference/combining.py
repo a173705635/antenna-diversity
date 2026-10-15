@@ -37,15 +37,15 @@ def combine_blind_null(
         "detection_threshold_db": cfg.detection_threshold_db,
         "estimated_interference_vector": interference_vector,
         "reference_channel": cfg.reference_channel,
-        "weights_are_fixed": True,
+        "weights_are_fixed_flag": True,
     }
     if score_db < cfg.detection_threshold_db:
         info.update(
             {
                 "weights": reference,
                 "weight_norm": 1.0,
-                "interference_detected": False,
-                "nulling_enabled": False,
+                "interference_detected_flag": False,
+                "nulling_enabled_flag": False,
                 "reference_projection_power": 1.0,
             }
         )
@@ -61,8 +61,8 @@ def combine_blind_null(
         {
             "weights": weights,
             "weight_norm": np.linalg.norm(weights),
-            "interference_detected": True,
-            "nulling_enabled": True,
+            "interference_detected_flag": True,
+            "nulling_enabled_flag": True,
             "reference_projection_power": gamma,
             "estimated_interference_response": np.vdot(
                 weights, interference_vector

@@ -32,7 +32,7 @@ OUTPUT = INTERFERENCE_RESULTS / 'antenna_ablation'
 SEEDS = (42, 43, 44)
 DURATION_MS = 100
 ANTENNAS = CORNER_NAMES
-SHOW_PLOTS = True
+SHOW_PLOTS_FLAG = True
 POWER_TRIM_MS = 10
 CASES = (
     'ideal', 'elevation_gain_only', 'orientation_polarization_only',
@@ -177,7 +177,7 @@ def evaluate_budget(results, trim_ms=10):
     before_limit *= (10 ** (info['amplitude_error_db'] / 20.0) *
                      np.exp(1j * np.deg2rad(info['phase_error_deg'])))[:, None]
     limit_v = cfg.rf.adc_vpp / 2.0
-    if cfg.rf.enable_soft_limiting:
+    if cfg.rf.enable_soft_limiting_flag:
         adc_input = limit_v * np.tanh(before_limit.real / limit_v) + 1j * (
             limit_v * np.tanh(before_limit.imag / limit_v)
         )
@@ -265,7 +265,7 @@ def _db_ratio(numerator, denominator):
 
 def run_case(cfg, case_name, context, trim_ms=10, *, scene=None):
     """Run one complete receiver, then audit its frozen combining weights."""
-    results = run_end_to_end(cfg, scene=scene, retain_analysis=True)
+    results = run_end_to_end(cfg, scene=scene, retain_analysis_flag=True)
     budgets = evaluate_budget(results, trim_ms)
     single = budgets['single']
     rows = []
@@ -280,7 +280,7 @@ def run_case(cfg, case_name, context, trim_ms=10, *, scene=None):
             code_estimate, cfg.signal.code_delay_chips
         ))
         doppler_error = float(acquisition['doppler_hz'] - cfg.signal.doppler_hz)
-        if tracking['success']:
+        if tracking['success_flag']:
             cn0 = tracking['cn0_db_hz'][len(tracking['cn0_db_hz']) // 2:]
             finite = cn0[np.isfinite(cn0)]
         else:
@@ -299,13 +299,13 @@ def run_case(cfg, case_name, context, trim_ms=10, *, scene=None):
                 single['wideband_power'], budget['wideband_power']
             ),
             'acquisition_metric': float(acquisition['metric']),
-            'acquired': bool(acquisition['success']),
+            'acquired_flag': bool(acquisition['success_flag']),
             'acquired_code_error_chips': code_error,
             'acquired_doppler_error_hz': doppler_error,
-            'correct_acquisition': bool(acquisition['success'] and
+            'correct_acquisition_flag': bool(acquisition['success_flag'] and
                                         abs(code_error) <= 0.5 and
                                         abs(doppler_error) <= 125.0),
-            'tracking_success': bool(tracking['success']),
+            'tracking_success_flag': bool(tracking['success_flag']),
             'tracking_cn0_late_median_db_hz': float(np.median(finite)) if finite.size else None,
             'tracking_cn0_late_finite_count': int(finite.size),
         })
@@ -319,7 +319,7 @@ def calibrate_noise(seeds=SEEDS, duration_ms=DURATION_MS):
         cfg = build_case('ideal', 'default', seed, duration_ms, ('TL',))
         cfg.interferers = []
         cfg.diversity.modes = ('single',)
-        results = run_end_to_end(cfg, retain_analysis=True)
+        results = run_end_to_end(cfg, retain_analysis_flag=True)
         info = results['rf_info']
         stage_gains = 10 ** (np.array([stage.gain_db for stage in cfg.rf.stages]) / 10.0)
         stage_noise_factors = 10 ** (
@@ -354,7 +354,7 @@ def calibrate_noise(seeds=SEEDS, duration_ms=DURATION_MS):
                           rtol=0.02, atol=0.0)
         signal_power_w = 10 ** ((cfg.signal.power_dbm - 30.0) / 10.0)
         tracking = results['branches']['single']['tracking']
-        if tracking['success']:
+        if tracking['success_flag']:
             late_cn0 = tracking['cn0_db_hz'][len(tracking['cn0_db_hz']) // 2:]
             finite_cn0 = late_cn0[np.isfinite(late_cn0)]
         else:
@@ -405,12 +405,12 @@ def summarize(rows):
                 group = {'context': context, 'case': case, 'mode': mode,
                          'seeds': [row['seed'] for row in members],
                          'seed_count': len(members),
-                         'acquired_count': sum(row['acquired'] for row in members),
+                         'acquired_count': sum(row['acquired_flag'] for row in members),
                          'correct_acquisition_count': sum(
-                             row['correct_acquisition'] for row in members),
-                         'tracked_count': sum(row['tracking_success'] for row in members),
+                             row['correct_acquisition_flag'] for row in members),
+                         'tracked_count': sum(row['tracking_success_flag'] for row in members),
                          'correct_acquisition_rate': float(np.mean([
-                             row['correct_acquisition'] for row in members
+                             row['correct_acquisition_flag'] for row in members
                          ]))}
                 for key in paired_keys:
                     group[key + '_mean'] = float(np.mean([row[key] for row in members]))
@@ -466,7 +466,7 @@ def plot_summary(groups, output):
         path = output / f'{filename}.png'
         fig.savefig(path, dpi=150)
         paths.append(path)
-        if not SHOW_PLOTS:
+        if not SHOW_PLOTS_FLAG:
             plt.close(fig)
 
     fig, axes = plt.subplots(1, len(contexts),
@@ -493,9 +493,9 @@ def plot_summary(groups, output):
     path = output / 'correct_acquisition_rate.png'
     fig.savefig(path, dpi=150)
     paths.append(path)
-    if not SHOW_PLOTS:
+    if not SHOW_PLOTS_FLAG:
         plt.close(fig)
-    if SHOW_PLOTS and plt.get_backend().lower() != 'agg':
+    if SHOW_PLOTS_FLAG and plt.get_backend().lower() != 'agg':
         plt.show()
     return paths
 
@@ -531,7 +531,7 @@ def main():
             'joint_residual': 'Actual quantized DFE minus all four linear components; includes limiter, ADC and DFE quantization jointly. Actual-minus-linear power also includes linear/residual cross terms.',
             'gain_baseline': 'Same context, case and seed SINGLE actual component power.',
             'paired_baseline': 'Same context, seed and receiver mode ideal case.',
-            'correct_acquisition': 'Acquisition success plus |code bias| <= 0.5 chip and |Doppler bias| <= 125 Hz.',
+            'correct_acquisition_flag': 'Acquisition success plus |code bias| <= 0.5 chip and |Doppler bias| <= 125 Hz.',
             'tracking_cn0': 'Late-half finite median from receiver tracking; short-window estimate, not oracle C/N0.',
             'thermal_oracle_prompt_cn0': 'Post-hoc true-code/Doppler 1 ms target-vs-thermal projection; not receiver input and includes RF/DFE/code losses.',
             'default_blockage': 'Default LOS 30/60 does not intersect 225/20 blockage; active context does.',

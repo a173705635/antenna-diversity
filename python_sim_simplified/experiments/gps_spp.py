@@ -16,13 +16,13 @@ from experiments.paths import RESULTS, reset_output
 OUTPUT = RESULTS/'gps_spp'
 DURATION_MS = 1000
 SEEDS = [3000, 3001, 3002]
-FREEZE_SOURCE = False
+FREEZE_SOURCE_FLAG = False
 
 def main():
     if DURATION_MS < 210:
         raise ValueError('GPS positioning is not evaluated: need at least 210 ms to include the first 200 ms observation and end margin.')
     output = reset_output(OUTPUT)
-    if FREEZE_SOURCE:
+    if FREEZE_SOURCE_FLAG:
         freeze_source(output)
     hashes = source_hashes()
     satellites = satellite_setup()

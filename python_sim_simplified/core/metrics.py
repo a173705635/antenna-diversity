@@ -37,7 +37,7 @@ def tracking_code_bias_chips(
     fs_out_hz: float,
     coherent_ms: int,
 ) -> np.ndarray:
-    if not tracking["success"]:
+    if not tracking["success_flag"]:
         return np.array([], dtype=float)
     samples_per_epoch = round(fs_out_hz * coherent_ms * 1e-3)
     comparison_samples = tracking["epoch_start_samples"] + samples_per_epoch
@@ -50,7 +50,7 @@ def tracking_code_bias_chips(
 
 
 def _final_cn0(tracking: TrackingResult) -> float | None:
-    if not tracking["success"]:
+    if not tracking["success_flag"]:
         return None
     finite = tracking["cn0_db_hz"][np.isfinite(tracking["cn0_db_hz"])]
     return float(finite[-1]) if finite.size else None
@@ -61,8 +61,8 @@ def compute_metrics(results: SimulationResults) -> list[MetricRecord]:
     for mode, branch in results["branches"].items():
         acquisition = branch["acquisition"]
         tracking = branch["tracking"]
-        tracked = bool(tracking["success"])
-        if tracked:
+        tracked_flag = bool(tracking["success_flag"])
+        if tracked_flag:
             window = slice(max(0, tracking["prompt"].size - 10), None)
             final_doppler = float(tracking["carrier_frequency_hz"][-1])
             pll_rms = float(np.sqrt(np.mean(tracking["pll_error_rad"][window] ** 2)))
@@ -88,12 +88,12 @@ def compute_metrics(results: SimulationResults) -> list[MetricRecord]:
         records.append(
             {
                 "mode": mode,
-                "acquired": bool(acquisition["success"]),
+                "acquired_flag": bool(acquisition["success_flag"]),
                 "acquisition_metric": float(acquisition["metric"]),
                 "acquired_doppler_hz": float(acquisition["doppler_hz"]),
                 "target_direction_gain": branch["combining"]["target_direction_gain"],
                 "worst_interferer_gain": branch["combining"]["worst_interferer_gain"],
-                "tracking": tracked,
+                "tracking_flag": tracked_flag,
                 "final_doppler_hz": final_doppler,
                 "pll_rms_rad": pll_rms,
                 "dll_rms": dll_rms,
@@ -122,9 +122,9 @@ def format_metrics(records: list[MetricRecord]) -> str:
         cn0 = record["final_cn0_db_hz"]
         code_bias_m = record["tracking_code_bias_rms_m"]
         lines.append(
-            f"{record['mode']:>10} {str(record['acquired']):>6} "
+            f"{record['mode']:>10} {str(record['acquired_flag']):>6} "
             f"{record['acquisition_metric']:>9.3f} "
-            f"{str(record['tracking']):>9} "
+            f"{str(record['tracking_flag']):>9} "
             f"{doppler if doppler is not None else np.nan:>10.2f} "
             f"{cn0 if cn0 is not None else np.nan:>9.2f} "
             f"{code_bias_m if code_bias_m is not None else np.nan:>12.3f}"

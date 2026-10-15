@@ -27,15 +27,15 @@ OUTPUT = RESULTS/'gps_l1_l5'
 WEIGHTS = ROOT/'configs/dual_frequency_weights.json'
 DURATION_MS = 1000
 SEEDS = [4000, 4001, 4002]
-FREEZE_SOURCE = False
+FREEZE_SOURCE_FLAG = False
 
 
 def position_stats(positions):
     error = np.asarray(positions)-receiver_reference()[0]
-    valid = np.isfinite(error).all(axis=1)
-    result = {'epochs': len(error), 'solved_epochs': int(valid.sum())}
-    if valid.any():
-        e = error[valid]
+    valid_flag = np.isfinite(error).all(axis=1)
+    result = {'epochs': len(error), 'solved_epochs': int(valid_flag.sum())}
+    if valid_flag.any():
+        e = error[valid_flag]
         result.update(position_rms_m=float(np.sqrt(np.mean(np.sum(e*e, axis=1)))),
                       demeaned_rms_m=float(np.sqrt(np.mean(np.sum((e-e.mean(axis=0))**2, axis=1)))))
     return result
@@ -53,8 +53,8 @@ def compare(records, satellites, weights=None):
         codes[kind] = np.asarray(record['pseudoranges_m'], dtype=float)
         phases[kind] = np.full_like(codes[kind], np.nan)
         for column, history in enumerate(record['satellite_tracking']):
-            if (history['acquired'] and history['tracking_status'] == 'tracking'):
-                phases[kind][:, column] = carrier_range(dict(history, success=True), times,
+            if (history['acquired_flag'] and history['tracking_status'] == 'tracking'):
+                phases[kind][:, column] = carrier_range(dict(history, success_flag=True), times,
                     record['fs_dfe_hz'], .001, SPEED_OF_LIGHT_MPS/frequency)
         phases[kind][~np.isfinite(codes[kind])] = np.nan
     output = {}
@@ -75,9 +75,9 @@ def compare(records, satellites, weights=None):
         positions = np.full((len(times), 3), np.nan)
         code_failures = []
         for i in range(len(times)):
-            valid = np.isfinite(p[i])
+            valid_flag = np.isfinite(p[i])
             try:
-                positions[i] = solve_position(geometry[i, valid], p[i, valid], sigma_m=cs[valid])['position_m']
+                positions[i] = solve_position(geometry[i, valid_flag], p[i, valid_flag], sigma_m=cs[valid_flag])['position_m']
             except PositioningFailure as exc:
                 code_failures.append({'index': i, 'reason': str(exc)})
         result = {'code_failures': code_failures, 'code': position_stats(positions), 'code_position_ecef_m': positions,
@@ -90,7 +90,7 @@ def compare(records, satellites, weights=None):
                 result['float'] = position_stats(solution['position_m'])
                 result['float_solution'] = solution
                 result['carrier_postfit_max_m'] = float(abs(solution['carrier_residual_m']).max())
-                result['phase_residual_screen_passed'] = result['carrier_postfit_max_m'] <= .05
+                result['phase_residual_screen_passed_flag'] = result['carrier_postfit_max_m'] <= .05
             except PositioningFailure as exc:
                 result['float_failure'] = str(exc)
         else:
@@ -103,7 +103,7 @@ def main():
     if DURATION_MS < 210:
         raise ValueError('GPS positioning is not evaluated: need at least 210 ms to include the first 200 ms observation and end margin.')
     output = reset_output(OUTPUT)
-    if FREEZE_SOURCE:
+    if FREEZE_SOURCE_FLAG:
         freeze_source(output)
     weights = json.loads(WEIGHTS.read_text(encoding='utf-8'))
     def save(name, data):
@@ -140,7 +140,7 @@ def main():
         result = compare(records[seed], satellites, weights)
         save(f'comparison_{seed}.json', result)
         summary = {'seed': seed, 'modes': {name: {key: value for key, value in mode.items()
-                    if key in ('code', 'float', 'float_failure', 'carrier_postfit_max_m', 'phase_residual_screen_passed')}
+                    if key in ('code', 'float', 'float_failure', 'carrier_postfit_max_m', 'phase_residual_screen_passed_flag')}
                    for name, mode in result.items()}}
         summaries.append(summary)
         print(json.dumps(summary), flush=True)

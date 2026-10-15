@@ -113,15 +113,15 @@ def run_record(seed, satellites, scene, cfg):
         prn = satellite['prn']
         acq = acquire(baseband[0], fs, prn, cfg.signal.code_rate_hz, cfg.acquisition,
                       signal_kind=cfg.signal.signal_kind)
-        entry = {'prn': prn, 'acquired': bool(acq['success']),
+        entry = {'prn': prn, 'acquired_flag': bool(acq['success_flag']),
                  'acquisition_metric': float(acq['metric']),
                  'acquisition_doppler_hz': float(acq['doppler_hz']),
                  'acquisition_code_phase_samples': int(acq['code_phase_samples'])}
-        if acq['success']:
+        if acq['success_flag']:
             history = track(baseband[0], fs, prn, acq, cfg.tracking,
                             cfg.signal.carrier_hz, cfg.signal.code_rate_hz)
             entry['tracking_status'] = history['status']
-            if history['success']:
+            if history['success_flag']:
                 ranges[:, column] = code_pseudorange(history, times, fs,
                     cfg.tracking.coherent_ms*.001, satellite['coarse_range_m'],
                     code_rate_hz=cfg.signal.code_rate_hz,
@@ -131,15 +131,15 @@ def run_record(seed, satellites, scene, cfg):
                 # A basic current-epoch quality screen, not a cycle-slip certification.
                 index = np.searchsorted(history['epoch_start_samples']/fs, times, side='right')-1
                 safe = np.clip(index, 0, len(history['prompt'])-1)
-                quality = ((index >= 0) & (history['phase_lock_metric'][safe] >= .8)
+                quality_flag = ((index >= 0) & (history['phase_lock_metric'][safe] >= .8)
                            & (abs(history['pll_error_rad'][safe]) < np.pi/2))
-                ranges[~quality, column] = np.nan
+                ranges[~quality_flag, column] = np.nan
                 for key in ('epoch_start_samples', 'code_nco_phase_chips', 'code_nco_rate_hz',
                             'carrier_nco_phase_rad', 'carrier_nco_frequency_hz',
                             'pll_error_rad', 'phase_lock_metric', 'cn0_db_hz'):
                     entry[key] = history[key].tolist()
         records.append(entry)
-        print(f"seed={seed} PRN={prn} acquired={entry['acquired']} usable={np.isfinite(ranges[:, column]).sum()}/{times.size}", flush=True)
+        print(f"seed={seed} PRN={prn} acquired={entry['acquired_flag']} usable={np.isfinite(ranges[:, column]).sum()}/{times.size}", flush=True)
     positions = np.full((times.size, 3), np.nan)
     clocks = np.full(times.size, np.nan)
     conditions = np.full(times.size, np.nan)
@@ -147,24 +147,24 @@ def run_record(seed, satellites, scene, cfg):
     failures = []
     for epoch, time in enumerate(times):
         states = np.array([s['position_m']+s['velocity_mps']*time for s in satellites])
-        valid = np.isfinite(ranges[epoch])
+        valid_flag = np.isfinite(ranges[epoch])
         try:
-            solution = solve_position(states[valid], ranges[epoch, valid])
+            solution = solve_position(states[valid_flag], ranges[epoch, valid_flag])
             positions[epoch] = solution['position_m']
             clocks[epoch] = solution['clock_bias_m']
             conditions[epoch] = solution['geometry_condition']
-            residuals[epoch, valid] = solution['residual_m']
+            residuals[epoch, valid_flag] = solution['residual_m']
         except PositioningFailure as exc:
             failures.append({'time_s': float(time), 'reason': str(exc)})
     # Truth is introduced only here, after every receiver/position solution.
     reference, rotation = receiver_reference()
     enu = (positions-reference) @ rotation.T
-    valid = np.isfinite(positions).all(axis=1)
-    summary = {'seed': seed, 'epochs': len(times), 'solved_epochs': int(valid.sum()),
-               'availability': float(np.mean(valid)),
-               'acquired_satellites': sum(r['acquired'] for r in records)}
-    if valid.any():
-        error = enu[valid]
+    valid_flag = np.isfinite(positions).all(axis=1)
+    summary = {'seed': seed, 'epochs': len(times), 'solved_epochs': int(valid_flag.sum()),
+               'availability': float(np.mean(valid_flag)),
+               'acquired_satellites': sum(r['acquired_flag'] for r in records)}
+    if valid_flag.any():
+        error = enu[valid_flag]
         norm = np.linalg.norm(error, axis=1)
         summary.update({'enu_mean_m': np.mean(error, axis=0).tolist(),
                         'enu_std_m': np.std(error, axis=0).tolist(),
@@ -172,8 +172,8 @@ def run_record(seed, satellites, scene, cfg):
                         'position_rms_m': float(np.sqrt(np.mean(norm**2))),
                         'position_p95_m': float(np.quantile(norm, .95)),
                         'position_max_m': float(norm.max()),
-                        'clock_error_mean_m': float(np.mean(clocks[valid]-75000.)),
-                        'used_satellites_min': int(np.min(np.isfinite(ranges[valid]).sum(axis=1)))})
+                        'clock_error_mean_m': float(np.mean(clocks[valid_flag]-75000.)),
+                        'used_satellites_min': int(np.min(np.isfinite(ranges[valid_flag]).sum(axis=1)))})
     return {'summary': summary, 'time_s': times, 'pseudoranges_m': ranges,
             'position_ecef_m': positions, 'clock_bias_m': clocks,
             'enu_error_m': enu, 'geometry_condition': conditions, 'residual_m': residuals,

@@ -51,13 +51,13 @@ def navigation_check(h):
         if d is not None and d>>16==0x8b and how is not None:
             frames.append({'bit_index':w['bit_index'],'next_subframe_tow_s':(how>>7)*6,
                 'subframe_id':(how>>2)&7,
-                'ten_words_parity_ok':len(words[j:j+10])==10 and all(v['payload'] is not None for v in words[j:j+10])})
+                'ten_words_parity_ok_flag':len(words[j:j+10])==10 and all(v['payload'] is not None for v in words[j:j+10])})
     return {'status':'evaluated','bit_offset_epochs_after_500':offset,
         'bit_sync_scores':scores,'bit_count':n,'bits':bits,'polarity':polarity,
         'word_start_bit':start,'words':words,'valid_words':valid,'tested_words':len(words),
         'longest_consecutive_valid_words':longest,'preambles':frames,
-        'half_cycle_ambiguity_resolved_for_nco':False,
-        'demodulation_evidence':longest>=4 and len(set(bits))==2 and any(
+        'half_cycle_ambiguity_resolved_for_nco_flag':False,
+        'demodulation_evidence_flag':longest>=4 and len(set(bits))==2 and any(
             1<=f['subframe_id']<=5 and 0<=f['next_subframe_tow_s']<604800 for f in frames)}
 
 
@@ -78,9 +78,9 @@ def decode_ephemeris(subframes):
         if words[0]>>16!=0x8b or ((words[1]>>2)&7)!=sf:
             raise ValueError('subframe header mismatch')
         streams[sf]=''.join(f'{w:024b}' for w in words)
-    def field(sf,offset,n,signed=False):
+    def field(sf,offset,n,signed_flag=False):
         v=int(streams[sf][offset:offset+n],2)
-        return v-(1<<n) if signed and v&(1<<(n-1)) else v
+        return v-(1<<n) if signed_flag and v&(1<<(n-1)) else v
     eph={'week_mod1024':field(1,48,10),'health':field(1,64,6),'ura_index':field(1,60,4),
          'iodc':(field(1,70,2)<<8)|field(1,168,8),'iode':field(2,48,8),
          'toc':field(1,176,16)*16.,'toe':field(2,216,16)*16.,
@@ -89,7 +89,7 @@ def decode_ephemeris(subframes):
          'af0':field(1,216,22,True)*2**-31}
     if field(3,216,8)!=eph['iode'] or (eph['iodc']&255)!=eph['iode']:
         raise ValueError('ephemeris issue identifiers are inconsistent')
-    for name,sf,offset,n,power,angular,signed in (
+    for name,sf,offset,n,power,angular_flag,signed_flag in (
         ('crs',2,56,16,-5,False,True),('delta_n',2,72,16,-43,True,True),
         ('m0',2,88,32,-31,True,True),('cuc',2,120,16,-29,False,True),
         ('e',2,136,32,-33,False,False),('cus',2,168,16,-29,False,True),
@@ -98,9 +98,9 @@ def decode_ephemeris(subframes):
         ('i0',3,112,32,-31,True,True),('crc',3,144,16,-5,False,True),
         ('omega',3,160,32,-31,True,True),('omega_dot',3,192,24,-43,True,True),
         ('idot',3,224,14,-43,True,True)):
-        eph[name]=field(sf,offset,n,signed)*2.**power*(np.pi if angular else 1.)
-    eph['tgd_unavailable']=field(1,160,8,True)==-128
-    if eph['tgd_unavailable']: eph['tgd']=0.
+        eph[name]=field(sf,offset,n,signed_flag)*2.**power*(np.pi if angular_flag else 1.)
+    eph['tgd_unavailable_flag']=field(1,160,8,True)==-128
+    if eph['tgd_unavailable_flag']: eph['tgd']=0.
     if not (0<=eph['e']<1 and 2e7<eph['sqrt_a']**2<3e7):
         raise ValueError('invalid decoded orbit')
     return eph
@@ -115,8 +115,8 @@ def decode_lnav(history, fs_hz):
     """
     diagnostics=navigation_check(history)
     out={'status':'no_verified_time','diagnostics':diagnostics,'subframes':[],
-         'time_anchors':[],'ephemeris':None,'half_cycle_resolved':False}
-    if diagnostics.get('status')!='evaluated' or not diagnostics['demodulation_evidence']:
+         'time_anchors':[],'ephemeris':None,'half_cycle_resolved_flag':False}
+    if diagnostics.get('status')!='evaluated' or not diagnostics['demodulation_evidence_flag']:
         return out
     starts=np.asarray(history['epoch_start_samples'])
     if len(starts)!=len(history['prompt']) or not np.allclose(np.diff(starts)/fs_hz,.001,atol=1e-10,rtol=0):

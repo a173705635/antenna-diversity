@@ -147,7 +147,7 @@ class PhoneConfig:
 @dataclass
 class CWInterferer:
     direction: Direction
-    enable: bool = True
+    enable_flag: bool = True
     power_dbm: float = -90.0
     offset_hz: float = 250e3
     initial_phase_rad: float = 0.8
@@ -159,7 +159,7 @@ class CWInterferer:
 @dataclass
 class WidebandInterferer:
     direction: Direction
-    enable: bool = True
+    enable_flag: bool = True
     power_dbm: float = -90.0
     center_offset_hz: float = 0.0
     bandwidth_hz: float = 2.0e6
@@ -195,7 +195,7 @@ class RFConfig:
     )
     adc_bits: int = 10
     adc_vpp: float = 1.0
-    enable_soft_limiting: bool = True
+    enable_soft_limiting_flag: bool = True
     # Equivalent output error at fixed noise figure, before limiter/ADC.
     # A scalar applies to every row; a tuple follows input channel row order.
     amplitude_error_db: float | tuple[float, ...] = 0.0
@@ -256,12 +256,12 @@ class TrackingConfig:
     # None preserves the legacy rectangular replica. Positive Hz enables an
     # ideal-lowpass research reference; this is a one-sided baseband cutoff.
     code_replica_bandwidth_hz: float | None = None
-    refine_initial_phase: bool = False
+    refine_initial_phase_flag: bool = False
 
 
 @dataclass
 class PlotConfig:
-    show: bool = True
+    show_flag: bool = True
     output_dir: Path = field(
         default_factory=lambda: Path(__file__).resolve().parents[1] / "results"
     )

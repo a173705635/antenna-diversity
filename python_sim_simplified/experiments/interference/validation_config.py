@@ -13,20 +13,24 @@ from experiments.interference.validation_support import ValidationCase, Validati
 
 
 # 常用编辑区：天线顺序第一根是 SINGLE 参考；可用任意两至四根物理天线。
+BATCH = "pattern_gain_first44"  # 改为 "legacy" 可运行原相位/方向/增益系列。
 ANTENNAS = ("TL", "BR")
 MODES = ("single", "egc", "mvdr", "blind_null")
-SEEDS = (42, 43, 44)
+SEEDS = tuple(range(42, 72))
 # 每个用例独立生成采样；配对条件保持相同 seed 和物理配置，以复现相同噪声。
 DURATION_MS = 100
 # 功率统计首尾各舍弃此时长，避开滤波瞬态；不裁掉送入捕获跟踪的数据。
 POWER_TRIM_MS = 10
-SHOW_PLOTS = True
-OUTPUT_DIR = INTERFERENCE_RESULTS / "validation"
+SHOW_PLOTS_FLAG = True
+OUTPUT_DIR = INTERFERENCE_RESULTS / "pattern_gain_first44"
+WORKERS = 4  # 首批 TC 互相独立；Windows 上按进程并行、逐条记录进度。
 # 每次成功生成数据后刷新此目录；需要保留不同实验时修改目录名。
 
 # 单因素扫描；PHASE_ANTENNA 按物理名字定位，不使用固定行号。
 PHASE_ANTENNA = "BR"
 PHASE_SCAN_DEG = (0, 30, 60, 90, 120, 180)
+# legacy 相位扫描：无误差基准、未补偿、准确补偿；选 calibrated 会自动带上基准。
+PHASE_VARIANTS = ("baseline", "uncalibrated")
 TARGET_AZIMUTH_SCAN_DEG = (30, 40, 50)
 ELEMENT_GAIN_ANTENNA = "BR"
 ELEMENT_GAIN_SCAN_DB = (0.0, 6.020599913279624)
@@ -59,14 +63,54 @@ def _base_config(scene: str):
     return cfg
 
 
+def _pattern_gain_cases() -> list[ValidationCase]:
+    """按文档 TC-001～044 建立单方法、单物理条件，不继承上一条的改动。"""
+    definitions = []
+    for gain in (0, -3, -6, -10, -20):
+        definitions.append((gain, 0, "single", None))
+    modes = ("egc", "egc_strict", "mvdr")
+    definitions.extend((0, 0, mode, None) for mode in modes)
+    for gain in (-3, -6, -10, -20):
+        definitions.extend((gain, gain, mode, f"TC-{6 + modes.index(mode):03d}")
+                           for mode in modes)
+    for gain in (0, -3, -6, -10, -20, -40):
+        definitions.extend((0, gain, mode, None) for mode in modes)
+    for gain, opposite_start in ((-6, 27), (-20, 33)):
+        definitions.extend((gain, 0, mode, f"TC-{opposite_start + modes.index(mode):03d}")
+                           for mode in modes)
+
+    cases = []
+    for seed in SEEDS:
+        for number, (tl_gain, br_gain, mode, reference) in enumerate(definitions, 1):
+            cfg = _base_config("noise_only")
+            cfg.random_seed = seed
+            cfg.signal.duration_ms = DURATION_MS
+            cfg.tracking.max_epochs = DURATION_MS
+            cfg.diversity.modes = (mode,)
+            # I0：只有真实/名义阵元电压增益同步改变，几何相位和热噪声不动。
+            gains = {"TL": tl_gain, "BR": br_gain}
+            cfg.phone.antenna_model.true_state.amplitude_error_db = gains.copy()
+            cfg.phone.antenna_model.assumed_state.amplitude_error_db = gains.copy()
+            if 2 <= number <= 5:
+                reference = "TC-001"
+            cases.append(ValidationCase(
+                name=f"TC-{number:03d}", config=cfg, scene_label="noise_only",
+                series_label=mode, scan_label="test case", scan_value=number,
+                scan_unit="TC", reference_case=reference, checks=("pattern_gain",),
+            ))
+    return cases
+
+
 def build_cases() -> list[ValidationCase]:
     """选择具名条件或系列，并按 seed 顺序生成独立的最终配置。"""
+    if BATCH == "pattern_gain_first44":
+        return _pattern_gain_cases()
     cases = []
     known_names = set()
     selected_names = set(SELECTED_CASES)
-    phase_series = not SELECTED_CASES and "phase" in SELECTED_SERIES
-    direction_series = not SELECTED_CASES and "direction" in SELECTED_SERIES
-    gain_series = not SELECTED_CASES and "gain" in SELECTED_SERIES
+    phase_series_flag = not SELECTED_CASES and "phase" in SELECTED_SERIES
+    direction_series_flag = not SELECTED_CASES and "direction" in SELECTED_SERIES
+    gain_series_flag = not SELECTED_CASES and "gain" in SELECTED_SERIES
     for scene in SCENES:
         base = _base_config(scene)
         for phase in PHASE_SCAN_DEG:
@@ -89,16 +133,17 @@ def build_cases() -> list[ValidationCase]:
                 # 这里故意令估计相位等于真实相位，验证补偿闭环，不是自动估相。
                 dfe_phase_deg={PHASE_ANTENNA: phase},
                 dfe_estimated_phase_deg={PHASE_ANTENNA: phase},
-                compensate_dfe_phase=True, reference_case=f"{prefix}/baseline",
+                compensate_dfe_phase_flag=True, reference_case=f"{prefix}/baseline",
                 checks=("phase_pair",), **common,
             )
             known_names.update((baseline.name, uncalibrated.name, calibrated.name))
             # 选准确补偿时先加入同扫描点的基准；重复点名不会重复生成条件。
-            if phase_series or baseline.name in selected_names or calibrated.name in selected_names:
+            if ((phase_series_flag and ("baseline" in PHASE_VARIANTS or "calibrated" in PHASE_VARIANTS))
+                    or baseline.name in selected_names or calibrated.name in selected_names):
                 cases.append(baseline)
-            if phase_series or uncalibrated.name in selected_names:
+            if (phase_series_flag and "uncalibrated" in PHASE_VARIANTS) or uncalibrated.name in selected_names:
                 cases.append(uncalibrated)
-            if phase_series or calibrated.name in selected_names:
+            if (phase_series_flag and "calibrated" in PHASE_VARIANTS) or calibrated.name in selected_names:
                 cases.append(calibrated)
         for azimuth in TARGET_AZIMUTH_SCAN_DEG:
             # 只改真实方向，不改名义导向，研究接收机方向假设不准的影响。
@@ -110,7 +155,7 @@ def build_cases() -> list[ValidationCase]:
                 scan_value=azimuth, scan_unit="deg",
             )
             known_names.add(direction.name)
-            if direction_series or direction.name in selected_names:
+            if direction_series_flag or direction.name in selected_names:
                 cases.append(direction)
         for gain_db in ELEMENT_GAIN_SCAN_DB:
             # dB 增益作用于阵元响应，6.02 dB 约为电压两倍；名义增益保持不变。
@@ -122,7 +167,7 @@ def build_cases() -> list[ValidationCase]:
                 scan_value=gain_db, scan_unit="dB",
             )
             known_names.add(gain.name)
-            if gain_series or gain.name in selected_names:
+            if gain_series_flag or gain.name in selected_names:
                 cases.append(gain)
 
     # 具名选择中的拼写错误必须立即显式报出，不能变成空批次。
@@ -144,5 +189,6 @@ def build_cases() -> list[ValidationCase]:
 def build_settings() -> ValidationSettings:
     """生成仅用于统计、保存与绘图的批次设置。"""
     return ValidationSettings(
-        power_trim_ms=POWER_TRIM_MS, output_dir=OUTPUT_DIR, show_plots=SHOW_PLOTS,
+        power_trim_ms=POWER_TRIM_MS, output_dir=OUTPUT_DIR, show_plots_flag=SHOW_PLOTS_FLAG,
+        workers=WORKERS if BATCH == "pattern_gain_first44" else 1,
     )

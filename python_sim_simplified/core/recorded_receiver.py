@@ -56,12 +56,12 @@ def prepare_recording(path, cache_path, *, start_sample, sample_count,
     return out,info
 
 
-def receive_channels(baseband, fs_hz, prns, acquisition_config, tracking_config, *, acquisition_only=False):
+def receive_channels(baseband, fs_hz, prns, acquisition_config, tracking_config, *, acquisition_only_flag=False):
     """Yield independent GPS L1 channels from one common baseband stream."""
     for prn in prns:
         a=acquire(baseband,fs_hz,prn,1.023e6,acquisition_config)
         row={'prn':prn,'acquisition':{k:v for k,v in a.items() if k not in ('search_power','doppler_bins_hz')}}
-        if a['success'] and not acquisition_only:
+        if a['success_flag'] and not acquisition_only_flag:
             row['history']=track(baseband,fs_hz,prn,a,tracking_config,1575.42e6,1.023e6)
         yield row
 
@@ -79,7 +79,7 @@ def position_channels(channels, fs_hz, times_s, *, common_travel_s=.075):
     for prn,h in channels.items():
         nav=decode_lnav(h,fs_hz);navigation[prn]=nav
         eph=nav['ephemeris']
-        if eph is not None and eph['health']==0 and not eph['tgd_unavailable']:
+        if eph is not None and eph['health']==0 and not eph['tgd_unavailable_flag']:
             usable[prn]=(eph,transmit_time(h,nav['time_anchors'][0],times,fs_hz))
             carriers[prn]=carrier_range(h,times,fs_hz,.001,C/1575.42e6)
     if len(usable)<4:return {'status':'insufficient_decoded_ephemerides','navigation':navigation,'epochs':[]}
@@ -101,7 +101,7 @@ def position_channels(channels, fs_hz, times_s, *, common_travel_s=.075):
         epochs.append({'sample_time_s':float(t),'status':'position','prns':prns,
                        'transmit_tow_s':txs,
                        'carrier_range_m':[float(carriers[prn][k]) for prn in prns],
-                       'carrier_half_cycle_resolved':False,**solution})
+                       'carrier_half_cycle_resolved_flag':False,**solution})
     return {'status':'evaluated','navigation':navigation,'epochs':epochs,
             'common_clock_origin_tow_s':origin,'common_clock_origin_sample_s':float(times[0]),
             'mode':'offline GPS L1 code SPP; decoded clocks/TGD, Sagnac; no atmosphere correction'}

@@ -1,4 +1,4 @@
-"""Shared single-channel, EGC and MVDR combining primitives."""
+"""公共单通道、幅度匹配、严格等增益和 MVDR 合并。"""
 
 import numpy as np
 
@@ -23,6 +23,10 @@ def combine_known(
         weights[0] = 1.0 / np.conj(desired[0])
     elif mode == "egc":
         weights = desired / np.vdot(desired, desired)
+    elif mode == "egc_strict":
+        # 只用名义响应的相位；所有阵元权值等幅，并令 wᴴa=1。
+        phase_only = desired / np.abs(desired)
+        weights = phase_only / np.sum(np.abs(desired))
     elif mode == "mvdr":
         solved = np.linalg.solve(loaded, desired)
         weights = solved / np.vdot(desired, solved)
@@ -38,6 +42,6 @@ def combine_known(
         "diagonal_loading": loading,
         "weight_norm": np.linalg.norm(weights),
         "condition_number": np.linalg.cond(loaded),
-        "weights_are_fixed": True,
+        "weights_are_fixed_flag": True,
     }
     return combined, info

@@ -10,7 +10,7 @@ from .rf import filter_rf_input
 def linear_components(frontend: SimulationResults) -> dict[str, np.ndarray]:
     """把天线端各源与本次 RF 热噪声映射到真实 DFE 码值尺度。
 
-    输入须由 retain_analysis=True 的前端产生。分量不经过限幅和量化；
+    输入须由 retain_analysis_flag=True 的前端产生。分量不经过限幅和量化；
     它们与实际输出的差值由实验层单独记作联合残差。
     """
     cfg = frontend["config"]
@@ -23,16 +23,16 @@ def linear_components(frontend: SimulationResults) -> dict[str, np.ndarray]:
     adc_scale = gain[:, None] / rf_info["adc_lsb_v"]
     output_scale = dfe_info["output_scale"]
 
-    def replay(voltage: np.ndarray, *, already_filtered: bool = False) -> np.ndarray:
+    def replay(voltage: np.ndarray, *, already_filtered_flag: bool = False) -> np.ndarray:
         # 源信号经 RF 滤波；热噪声在 RF 滤后节点生成，不能再次滤波。
-        filtered = voltage if already_filtered else filter_rf_input(
+        filtered = voltage if already_filtered_flag else filter_rf_input(
             voltage, rf_info["filter_coefficients"], rf_info["fs_hz"], rf_info["if_hz"],
         )
         return linear_dfe(filtered * adc_scale, dfe_info) / output_scale
 
     components = {"target": replay(truth["desired_component"])}
-    enabled = [source for source in cfg.interferers if source.enable]
+    enabled = [source for source in cfg.interferers if source.enable_flag]
     for index, (source, voltage) in enumerate(zip(enabled, truth["interferer_components"])):
         components[f"interferer_{index}_{type(source).__name__}"] = replay(voltage)
-    components["thermal"] = replay(thermal_noise_v, already_filtered=True)
+    components["thermal"] = replay(thermal_noise_v, already_filtered_flag=True)
     return components

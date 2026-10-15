@@ -40,7 +40,7 @@ DURATION_MS = 100
 PHASE_ERRORS_DEG = (0, 30, 60, 90, 120, 180)
 # 只在事后功率统计中去掉两端瞬态，不截短用于合并、捕获和跟踪的数据。
 POWER_TRIM_MS = 10
-SHOW_PLOTS = True
+SHOW_PLOTS_FLAG = True
 # noise_only 没有外加干扰；single_cw 只保留默认 CW，不包含宽带干扰。
 SCENES = ('noise_only', 'single_cw')
 # 分别表示无误差、有误差未补偿、同样误差准确补偿。
@@ -142,7 +142,7 @@ def _score_branch(channels, components, branch, cfg, fs_out_hz, trim_ms):
     code_estimate = (acquisition['code_phase_samples'] *
                      cfg.signal.code_rate_hz / fs_out_hz)
     code_error = float(circular_chip_error(code_estimate, cfg.signal.code_delay_chips))
-    if tracking['success']:
+    if tracking['success_flag']:
         # 后半段降低启动瞬态影响；短窗 C/N₀ 估计中的无效值不参与中位数。
         late = tracking['cn0_db_hz'][len(tracking['cn0_db_hz']) // 2:]
         finite = late[np.isfinite(late)]
@@ -171,12 +171,12 @@ def _score_branch(channels, components, branch, cfg, fs_out_hz, trim_ms):
         'combined_direct_max_abs_error': float(np.max(np.abs(output_window - direct))),
         'quadratic_power_relative_error': abs(actual_power - quadratic) / actual_power,
         'acquisition_metric': float(acquisition['metric']),
-        'acquired': bool(acquisition['success']),
+        'acquired_flag': bool(acquisition['success_flag']),
         'acquired_code_error_chips': code_error,
         'acquired_doppler_error_hz': float(
             acquisition['doppler_hz'] - cfg.signal.doppler_hz
         ),
-        'tracking_success': bool(tracking['success']),
+        'tracking_success_flag': bool(tracking['success_flag']),
         'tracking_status': tracking['status'],
         # 无可用估计保留 None 与计数 0，不用 0 dB-Hz 代替缺测。
         'tracking_cn0_late_median_db_hz': float(np.median(finite)) if finite.size else None,
@@ -244,7 +244,7 @@ def _paired_rows(seed, scene, phase_deg, cfg, truth, baseline, dfe_info,
                 'antennas': ','.join(cfg.phone.active_antennas),
                 'perturbed_antenna': PERTURBED_ANTENNA,
                 'acquisition_threshold': cfg.acquisition.threshold,
-                'steering_unchanged': bool(np.array_equal(
+                'steering_unchanged_flag': bool(np.array_equal(
                     current_branch['combining']['constraint_steering'],
                     truth['desired_steering_assumed'])),
                 'target_output_gain_db': _db_ratio(
@@ -322,25 +322,25 @@ def verify_rows(rows):
         comparison['acquisition_metric_abs_error'] = abs(
             calibrated['acquisition_metric'] - baseline['acquisition_metric']
         )
-        comparison['acquired_equal'] = calibrated['acquired'] == baseline['acquired']
+        comparison['acquired_equal_flag'] = calibrated['acquired_flag'] == baseline['acquired_flag']
         comparison['code_error_abs_difference_chips'] = abs(
             calibrated['acquired_code_error_chips'] - baseline['acquired_code_error_chips']
         )
         comparison['doppler_error_abs_difference_hz'] = abs(
             calibrated['acquired_doppler_error_hz'] - baseline['acquired_doppler_error_hz']
         )
-        comparison['tracking_status_equal'] = (
+        comparison['tracking_status_equal_flag'] = (
             calibrated['tracking_status'] == baseline['tracking_status']
         )
-        comparison['tracking_success_equal'] = (
-            calibrated['tracking_success'] == baseline['tracking_success']
+        comparison['tracking_success_equal_flag'] = (
+            calibrated['tracking_success_flag'] == baseline['tracking_success_flag']
         )
         calibrated_cn0 = calibrated['tracking_cn0_late_median_db_hz']
         baseline_cn0 = baseline['tracking_cn0_late_median_db_hz']
-        comparison['tracking_cn0_availability_equal'] = (
+        comparison['tracking_cn0_availability_equal_flag'] = (
             (calibrated_cn0 is None) == (baseline_cn0 is None)
         )
-        comparison['tracking_cn0_finite_count_equal'] = (
+        comparison['tracking_cn0_finite_count_equal_flag'] = (
             calibrated['tracking_cn0_late_finite_count'] ==
             baseline['tracking_cn0_late_finite_count']
         )
@@ -366,39 +366,39 @@ def verify_rows(rows):
     # 严格的舍入级闭环误差与宽松的有限样本白噪声收益误差分开设置。
     # 这些阈值只判研究核验，不修改捕获门限、输入信号或合并权重。
     checks = {
-        'complete_case_mode_grid': len(rows) == len({
+        'complete_case_mode_grid_flag': len(rows) == len({
             (row['seed'], row['scene'], row['phase_error_deg']) for row in rows
         }) * len(CASES) * len(MODES),
-        'steering_unchanged': all(row['steering_unchanged'] for row in rows),
-        'direct_combining': all(row['combined_direct_max_abs_error'] < 1e-8 for row in rows),
-        'covariance_quadratic': all(row['quadratic_power_relative_error'] < 1e-10
+        'steering_unchanged_flag': all(row['steering_unchanged_flag'] for row in rows),
+        'direct_combining_flag': all(row['combined_direct_max_abs_error'] < 1e-8 for row in rows),
+        'covariance_quadratic_flag': all(row['quadratic_power_relative_error'] < 1e-10
                                     for row in rows),
-        'accurate_inverse': all(row['dfe_compensation_relative_error'] < 1e-12
+        'accurate_inverse_flag': all(row['dfe_compensation_relative_error'] < 1e-12
                                 for row in rows if row['case'] == 'calibrated'),
-        'calibrated_output': all(row['calibrated_output_relative_error'] < 1e-12
+        'calibrated_output_flag': all(row['calibrated_output_relative_error'] < 1e-12
                                  for row in rows if row['case'] == 'calibrated'),
-        'calibrated_weights': all(row['calibrated_weight_relative_error'] < 1e-12
+        'calibrated_weights_flag': all(row['calibrated_weight_relative_error'] < 1e-12
                                   for row in rows if row['case'] == 'calibrated'),
-        'white_noise_egc': bool(maximum_white_noise_error_db < 0.5),
-        'paired_target_power': within('target_power_relative_error', 1e-12),
-        'paired_thermal_power': within('thermal_power_relative_error', 1e-12),
-        'paired_cw_power': within('cw_power_relative_error', 1e-12),
-        'paired_cw_suppression': within('cw_suppression_abs_error_db', 1e-9),
-        'paired_acquisition_metric': within('acquisition_metric_abs_error', 1e-9),
-        'paired_acquisition_status': all(item['acquired_equal'] for item in paired),
-        'paired_code_error': within('code_error_abs_difference_chips', 1e-9),
-        'paired_doppler_error': within('doppler_error_abs_difference_hz', 1e-9),
-        'paired_tracking_status': all(item['tracking_status_equal'] for item in paired),
-        'paired_tracking_success': all(item['tracking_success_equal'] for item in paired),
-        'paired_tracking_cn0_availability': all(
-            item['tracking_cn0_availability_equal'] for item in paired
+        'white_noise_egc_flag': bool(maximum_white_noise_error_db < 0.5),
+        'paired_target_power_flag': within('target_power_relative_error', 1e-12),
+        'paired_thermal_power_flag': within('thermal_power_relative_error', 1e-12),
+        'paired_cw_power_flag': within('cw_power_relative_error', 1e-12),
+        'paired_cw_suppression_flag': within('cw_suppression_abs_error_db', 1e-9),
+        'paired_acquisition_metric_flag': within('acquisition_metric_abs_error', 1e-9),
+        'paired_acquisition_status_flag': all(item['acquired_equal_flag'] for item in paired),
+        'paired_code_error_flag': within('code_error_abs_difference_chips', 1e-9),
+        'paired_doppler_error_flag': within('doppler_error_abs_difference_hz', 1e-9),
+        'paired_tracking_status_flag': all(item['tracking_status_equal_flag'] for item in paired),
+        'paired_tracking_success_flag': all(item['tracking_success_equal_flag'] for item in paired),
+        'paired_tracking_cn0_availability_flag': all(
+            item['tracking_cn0_availability_equal_flag'] for item in paired
         ),
-        'paired_tracking_cn0_finite_count': all(
-            item['tracking_cn0_finite_count_equal'] for item in paired
+        'paired_tracking_cn0_finite_count_flag': all(
+            item['tracking_cn0_finite_count_equal_flag'] for item in paired
         ),
-        'paired_tracking_cn0': within('tracking_cn0_abs_error_db_hz', 1e-7),
+        'paired_tracking_cn0_flag': within('tracking_cn0_abs_error_db_hz', 1e-7),
     }
-    return {'passed': all(checks.values()), 'checks': checks,
+    return {'passed_flag': all(checks.values()), 'checks': checks,
             'paired_comparisons': paired,
             'white_noise_egc_errors_db': white_noise_errors,
             'white_noise_egc_max_abs_error_db': maximum_white_noise_error_db,
@@ -417,7 +417,7 @@ def run_sweep(seeds=SEEDS, duration_ms=DURATION_MS, phases=PHASE_ERRORS_DEG,
         for scene in SCENES:
             # RF 加噪声与 ADC 量化、DFE 下变频/抽取只在本层执行，不随相位重抽噪声。
             cfg = build_config(seed, duration_ms, antennas, scene)
-            frontend = run_frontend(cfg, retain_analysis=True)
+            frontend = run_frontend(cfg, retain_analysis_flag=True)
             truth = frontend['truth']
             baseline = frontend['dfe_channels']
             dfe_info = frontend['dfe_info']
@@ -521,9 +521,9 @@ def plot_summary(rows, output, phases):
         # 先保存，再按设置显示；Agg 是无 GUI 后端，不调用阻塞式弹窗。
         fig.savefig(path, dpi=150)
         paths.append(path)
-        if not SHOW_PLOTS:
+        if not SHOW_PLOTS_FLAG:
             plt.close(fig)
-    if SHOW_PLOTS and plt.get_backend().lower() != 'agg':
+    if SHOW_PLOTS_FLAG and plt.get_backend().lower() != 'agg':
         plt.show()
     return paths
 
@@ -544,7 +544,7 @@ def main():
             'DFE channel including target, CW, thermal noise, and pre-existing '
             'nonlinear/quantization residual; not RF/ADC hardware, pattern or delay.'
         ),
-        'estimated_phase_equals_true': True,
+        'estimated_phase_equals_true_flag': True,
         'reference_antenna_unchanged': ANTENNAS[0],
         'metric_definitions': {
             'linear_in_band_sinr_db': 'Post-hoc truth-linear sample-power C/(thermal+CW), excluding the separately reported nonlinear/quantization residual and cross terms; not actual quantized-output C/N0.',
@@ -582,7 +582,7 @@ def main():
         writer.writerows(rows)
     plot_summary(rows, output, PHASE_ERRORS_DEG)
     # 失败也先保存结果/图，便于定位问题；非零退出防止把“跑完”误当成“通过”。
-    if not verification['passed']:
+    if not verification['passed_flag']:
         raise AssertionError(f'channel phase verification failed: {verification["checks"]}')
     return summary
 

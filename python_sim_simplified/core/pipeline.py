@@ -73,7 +73,7 @@ def _finish_branch(
             "interferer_direction_gains": interferer_gains,
             "worst_interferer_gain": max(interferer_gains, default=0.0),
             "covariance_snapshots": covariance_snapshots,
-            "weights_are_fixed": True,
+            "weights_are_fixed_flag": True,
         }
     )
     acquisition = acquire(
@@ -83,7 +83,7 @@ def _finish_branch(
         cfg.signal.code_rate_hz,
         cfg.acquisition,
     )
-    if acquisition["success"]:
+    if acquisition["success_flag"]:
         tracking = track(
             combined,
             fs_out_hz,
@@ -95,7 +95,7 @@ def _finish_branch(
         )
     else:
         tracking: TrackingResult = {
-            "success": False,
+            "success_flag": False,
             "status": "acquisition_failed",
             "prompt": np.array([], dtype=complex),
         }
@@ -111,11 +111,11 @@ def run_end_to_end(
     cfg: SimulationConfig | None = None,
     *,
     scene: tuple[np.ndarray, ScenarioTruth] | None = None,
-    retain_analysis: bool = False,
+    retain_analysis_flag: bool = False,
 ) -> SimulationResults:
-    """运行完整真实链；仅在 retain_analysis=True 时保留事后评分输入。"""
+    """运行完整真实链；仅在 retain_analysis_flag=True 时保留事后评分输入。"""
 
-    results = run_frontend(cfg, scene=scene, retain_analysis=retain_analysis)
+    results = run_frontend(cfg, scene=scene, retain_analysis_flag=retain_analysis_flag)
     results["branches"] = run_receiver(
         results["dfe_channels"], results["truth"], results["config"],
         results["dfe_info"]["fs_out_hz"],
@@ -128,7 +128,7 @@ def run_frontend(
     cfg: SimulationConfig | None = None,
     *,
     scene: tuple[np.ndarray, ScenarioTruth] | None = None,
-    retain_analysis: bool = False,
+    retain_analysis_flag: bool = False,
 ) -> SimulationResults:
     """生成一次场景并完成 RF/DFE；默认不保留热噪声评分数组。"""
     cfg = default_config() if cfg is None else cfg
@@ -141,7 +141,7 @@ def run_frontend(
         fs_hz=cfg.signal.fs_rf_hz,
         if_hz=cfg.signal.if_hz,
         channel_ids=cfg.phone.active_antennas,
-        retain_analysis=retain_analysis,
+        retain_analysis_flag=retain_analysis_flag,
     )
     dfe_channels, dfe_info = process_dfe(
         adc_codes,
@@ -160,7 +160,7 @@ def run_frontend(
         "branches": {},
         "metrics": [],
     }
-    if retain_analysis:
+    if retain_analysis_flag:
         results["analysis_inputs"] = {
             "thermal_noise_v": rf_info.pop("thermal_noise_v"),
         }

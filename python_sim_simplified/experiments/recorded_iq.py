@@ -21,7 +21,7 @@ DURATION_S = 39.
 SAMPLE_RATE_HZ = 1e7
 IF_HZ = 420e3
 PRNS = list(range(1, 33))
-FREEZE_SOURCE = False
+FREEZE_SOURCE_FLAG = False
 
 def _json_write(path,value):
     def convert(x):
@@ -36,7 +36,7 @@ def main():
     if DURATION_S <= 1.01:
         raise ValueError('Recorded positioning is not evaluated: observations start at 1 s with a 10 ms end margin; use more than 1.01 s. Decoded ephemerides are also required.')
     output = reset_output(OUTPUT)
-    if FREEZE_SOURCE:freeze_source(output)
+    if FREEZE_SOURCE_FLAG:freeze_source(output)
     dcfg=DFEConfig(decimation=2,output_bits=0)
     acfg=AcquisitionConfig(doppler_bins_hz=np.arange(-10000.,10000.1,250.))
     tcfg=TrackingConfig(carrier_discriminator='costas',max_epochs=round(DURATION_S*1000))
@@ -47,10 +47,10 @@ def main():
         'sample_rate_hz':SAMPLE_RATE_HZ,'if_hz':IF_HZ,'prns':PRNS,'dfe':info,'tracking':asdict(tcfg),
         'acquisition':asdict(acfg),'source_sha256':source_hashes()})
     for row in receive_channels(bb[0],fs,PRNS,acfg,tcfg):
-        print('PRN',row['prn'],'acquired',row['acquisition']['success'],flush=True)
+        print('PRN',row['prn'],'acquired',row['acquisition']['success_flag'],flush=True)
         acquisitions.append({'prn':row['prn'],'acquisition':row['acquisition']})
         h=row.get('history')
-        if h and h['success']:
+        if h and h['success_flag']:
             channels[row['prn']]=h
             np.savez_compressed(output/f"prn{row['prn']:02d}.npz",**{k:v for k,v in h.items() if isinstance(v,np.ndarray)})
     _json_write(output/'acquisition.json',acquisitions)

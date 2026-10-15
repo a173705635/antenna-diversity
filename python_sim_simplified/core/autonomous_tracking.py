@@ -18,13 +18,13 @@ def receive(x, fs_hz, prn, code_rate_hz, carrier_hz, acquisition_cfg, tracking_c
     while cursor+window+2*epoch_samples <= len(x):
         acq=acquire(x[cursor:cursor+window],fs_hz,prn,code_rate_hz,acquisition_cfg)
         events.append(dict(kind='acquisition',start_sample=cursor,
-                           evidence_end_sample=cursor+window,success=acq['success'],metric=acq['metric']))
-        if not acq['success']:
+                           evidence_end_sample=cursor+window,success_flag=acq['success_flag'],metric=acq['metric']))
+        if not acq['success_flag']:
             cursor+=window
             continue
         h=track(x[cursor:],fs_hz,prn,acq,cfg,carrier_hz,code_rate_hz,
                 loss_confirm_epochs=loss_confirm_epochs,loss_settle_epochs=loss_settle_epochs)
-        if not h['success']:
+        if not h['success_flag']:
             events.append(dict(kind='tracking_failure',start_sample=cursor,status=h['status']))
             break
         h['epoch_start_samples']+=cursor

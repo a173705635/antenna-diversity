@@ -21,7 +21,7 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 | 实验 | 命令 | 固定输出 |
 |---|---|---|
-| 通用条件验证：整通道相位、方向、阵元增益 | `python -m experiments.interference.validation` | `results/interference/validation/` |
+| 通用条件验证：当前默认 TC-001～044 增益基准批次 | `python -m experiments.interference.validation` | `results/interference/pattern_gain_first44/` |
 | 完整接收链及绘图 | `python -m experiments.interference.full_chain` | `results/interference/full_chain/` |
 | 噪声标定、天线配对消融与独立功率预算 | `python -m experiments.interference.antenna_ablation` | `results/interference/antenna_ablation/` |
 | 目标/CW/宽带响应直接赋值，已知/未知目标相位扫描 | `python -m experiments.interference.direct_response_boundary` | `results/interference/direct_response_boundary/` |
@@ -60,7 +60,7 @@ GPS 仿真定位的 `DURATION_MS` 至少为 210 ms 才包含当前首个定位�
 | 仿真定位与真实接收 | [gps_simulation.py](core/gps_simulation.py)、[positioning.py](core/positioning.py)、[recorded_receiver.py](core/recorded_receiver.py)、`gps_*.py` |
 | 来源哈希和显式源码冻结 | [provenance.py](core/provenance.py) |
 
-`run_end_to_end(cfg)` 默认只运行实际接收链；需要精确分量指标时传入 `retain_analysis=True`，再调用 `core.evaluation.linear_components(results)`。评估复用源真值、本次 RF 噪声和实际滤波参数，不重抽噪声，也不将分量送入合并器求权。线性分量不经过限幅/量化，其总和不等于实际输出，交叉项和联合残差分别统计。
+`run_end_to_end(cfg)` 默认只运行实际接收链；需要精确分量指标时传入 `retain_analysis_flag=True`，再调用 `core.evaluation.linear_components(results)`。评估复用源真值、本次 RF 噪声和实际滤波参数，不重抽噪声，也不将分量送入合并器求权。线性分量不经过限幅/量化，其总和不等于实际输出，交叉项和联合残差分别统计。
 
 `core` 不导入实验入口或历史脚本。实验独有的参数、评分口径与统计留在实验脚本；公共接收链只包含当前维护方向所需接口。天线参数仍是合成研究假设，不能作为真实手机规格或标定结果。
 
@@ -77,7 +77,7 @@ python tools/frozen_version.py
 python tools/frozen_version.py --restore results/restored_original
 ```
 
-日常实验记录参数、种子和 `source_sha256`。仅当需要冻结当前源码时，将脚本顶部 `FREEZE_SOURCE` 改为 `True`；运行结果不会默认生成源码副本。
+日常实验记录参数、种子和 `source_sha256`。仅当需要冻结当前源码时，将脚本顶部 `FREEZE_SOURCE_FLAG` 改为 `True`；运行结果不会默认生成源码副本。
 
 ## 验证
 

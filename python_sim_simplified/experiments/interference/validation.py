@@ -45,7 +45,9 @@ def _write_json(path: Path, content: object) -> None:
 def save_results(settings: ValidationSettings, summary: dict) -> None:
     """刷新本批次输出，保存执行配置、结果行和验收证据供追溯。"""
     # 仿真完成后才刷新本入口的专用输出，避免换扫描因素后残留旧图。
-    reset_output(settings.output_dir)
+    if settings.workers == 1:
+        reset_output(settings.output_dir)
+    # 并行批次已在启动时刷新专用目录；保留逐条件 progress.jsonl。
     manifest = {
         # 清单用于追溯参数与代码版本，不是下一次仿真的配置输入。
         "settings": asdict(settings),
@@ -69,6 +71,31 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
         writer.writeheader()
         writer.writerows({key: json.dumps(value) if isinstance(value, (list, dict)) else value
                          for key, value in row.items()} for row in rows)
+    if "pattern_gain" in summary:
+        # 一行一个 TC：30 seed 的统计结论与逐 seed 原始行分开，便于直接筛选。
+        records = []
+        for tc, result in summary["pattern_gain"]["cases"].items():
+            records.append({
+                "tc": tc, "mode": result["mode"], "n": result["seeds"],
+                "status": result["status"],
+                "expected_gain_db": result["expected_gain_db"],
+                "measured_gain_mean_db": result["measured_gain_db"]["mean"],
+                "gain_error_mean_db": result["gain_error_db"]["mean"],
+                "expected_absolute_change_db": result["expected_absolute_change_db"],
+                "absolute_snr_change_mean_db": result["absolute_snr_change_mean_db"],
+                "input_target_change_max_error_db": result["input_target_change_max_error_db"],
+                "input_thermal_change_max_error_db": result["input_thermal_change_max_error_db"],
+                "weight_max_relative_error": result["weight_max_relative_error"],
+                "acquisition_success_count": result["acquisition_success_count"],
+                "tracking_success_count": result["tracking_success_count"],
+                "tracking_cn0_missing_count": result["tracking_cn0_missing_count"],
+            })
+        with (settings.output_dir / "case_summary.csv").open(
+            "w", newline="", encoding="utf-8"
+        ) as stream:
+            writer = csv.DictWriter(stream, fieldnames=list(records[0]))
+            writer.writeheader()
+            writer.writerows(records)
 
 
 def main() -> dict:
@@ -78,7 +105,7 @@ def main() -> dict:
     summary = run_validation(settings, cases)
     save_results(settings, summary)
     plot_validation(summary["rows"], settings)
-    if not summary["verification"]["passed"]:
+    if not summary["verification"]["passed_flag"]:
         # 这是实验验收失败，不是接收机防御分支；不能把失败批次静默当成功。
         raise AssertionError("validation verification failed; inspect verification.json")
     return summary

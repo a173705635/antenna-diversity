@@ -14,7 +14,7 @@ def transmit_time(history, anchor, times_s, fs_hz):
     """
     t=np.asarray(times_s,dtype=float)
     result=np.full(t.shape,np.nan)
-    if not history['success']:return result
+    if not history['success_flag']:return result
     starts=np.asarray(history['epoch_start_samples'],dtype=float)/fs_hz
     phase=np.asarray(history['code_nco_phase_chips'],dtype=float)
     rate=np.asarray(history['code_nco_rate_hz'],dtype=float)
@@ -26,9 +26,9 @@ def transmit_time(history, anchor, times_s, fs_hz):
     residual=np.unwrap(phase*2*np.pi/1023)*1023/(2*np.pi)
     residual-=round(residual[a]/1023)*1023
     i=np.searchsorted(starts,t,side='right')-1;j=np.clip(i,0,len(starts)-1)
-    valid=(i>=0)&(t<starts[j]+.001)
-    result[valid]=(anchor['tow_s']+(j[valid]-a)*.001+
-        (residual[j[valid]]+rate[j[valid]]*(t[valid]-starts[j[valid]]))/1.023e6)
+    valid_flag=(i>=0)&(t<starts[j]+.001)
+    result[valid_flag]=(anchor['tow_s']+(j[valid_flag]-a)*.001+
+        (residual[j[valid_flag]]+rate[j[valid_flag]]*(t[valid_flag]-starts[j[valid_flag]]))/1.023e6)
     return result
 
 

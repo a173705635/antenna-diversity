@@ -31,7 +31,7 @@ SEEDS = (42,)
 DURATION_MS = 100
 PHASE_ERRORS_DEG = (0, 20, 40, 60, 90, 120, 180)
 PERTURBED_ANTENNA = ANTENNAS[1]
-SHOW_PLOTS = True
+SHOW_PLOTS_FLAG = True
 POWER_TRIM_MS = 10
 
 # Edit each source's complete four-corner voltage gain and phase independently.
@@ -230,9 +230,9 @@ def plot_summary(rows, output, phases=PHASE_ERRORS_DEG):
         path = output / f'{filename}.png'
         fig.savefig(path, dpi=150)
         paths.append(path)
-        if not SHOW_PLOTS:
+        if not SHOW_PLOTS_FLAG:
             plt.close(fig)
-    if SHOW_PLOTS and plt.get_backend().lower() != 'agg':
+    if SHOW_PLOTS_FLAG and plt.get_backend().lower() != 'agg':
         plt.show()
     return paths
 

@@ -101,7 +101,7 @@ class DFEInfo(TypedDict):
 class CombiningInfo(TypedDict):
     mode: str
     weights: np.ndarray
-    weights_are_fixed: bool
+    weights_are_fixed_flag: bool
     sample_covariance: np.ndarray
     condition_number: float
     covariance_snapshots: NotRequired[int]
@@ -117,8 +117,8 @@ class CombiningInfo(TypedDict):
     detection_threshold_db: NotRequired[float]
     estimated_interference_vector: NotRequired[np.ndarray]
     reference_channel: NotRequired[int]
-    interference_detected: NotRequired[bool]
-    nulling_enabled: NotRequired[bool]
+    interference_detected_flag: NotRequired[bool]
+    nulling_enabled_flag: NotRequired[bool]
     reference_projection_power: NotRequired[float]
     estimated_interference_response: NotRequired[complex]
     constraint_matrix: NotRequired[np.ndarray]
@@ -129,7 +129,7 @@ class CombiningInfo(TypedDict):
 
 
 class AcquisitionResult(TypedDict):
-    success: bool
+    success_flag: bool
     prn: int
     doppler_hz: float
     code_phase_samples: int
@@ -147,13 +147,13 @@ class AcquisitionResult(TypedDict):
 class TrackingInitialization(TypedDict):
     code_phase_offset_chips: float
     carrier_phase_rad: float
-    at_search_boundary: bool
+    at_search_boundary_flag: bool
     samples_used: int
-    uses_truth: bool
+    uses_truth_flag: bool
 
 
 class TrackingResult(TypedDict):
-    success: bool
+    success_flag: bool
     status: str
     prompt: np.ndarray
     first_epoch_sample: NotRequired[int]
@@ -185,12 +185,12 @@ class BranchResult(TypedDict):
 
 class MetricRecord(TypedDict):
     mode: str
-    acquired: bool
+    acquired_flag: bool
     acquisition_metric: float
     acquired_doppler_hz: float
     target_direction_gain: float
     worst_interferer_gain: float
-    tracking: bool
+    tracking_flag: bool
     final_doppler_hz: float | None
     pll_rms_rad: float | None
     dll_rms: float | None

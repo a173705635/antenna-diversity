@@ -43,9 +43,9 @@ def _absolute_spectrum(x, fs_hz, n_fft=None):
     return frequency_mhz, magnitude_db
 
 
-def _mark_frequencies(axis, results, rf_domain):
+def _mark_frequencies(axis, results, rf_domain_flag):
     cfg = results["config"]
-    frequency_shift_hz = cfg.signal.if_hz if rf_domain else 0.0
+    frequency_shift_hz = cfg.signal.if_hz if rf_domain_flag else 0.0
     axis.axvline(
         (frequency_shift_hz + results["truth"]["doppler_hz"]) / 1e6,
         color="green",
@@ -53,7 +53,7 @@ def _mark_frequencies(axis, results, rf_domain):
         label="Target",
     )
     for index, interferer in enumerate(cfg.interferers, start=1):
-        if not interferer.enable:
+        if not interferer.enable_flag:
             continue
         if isinstance(interferer, CWInterferer):
             axis.axvline(
@@ -80,10 +80,10 @@ def _mark_frequencies(axis, results, rf_domain):
             )
 
 
-def _plot_absolute_spectrum(axis, samples, fs_hz, title, results, rf_domain):
+def _plot_absolute_spectrum(axis, samples, fs_hz, title, results, rf_domain_flag):
     frequency_mhz, magnitude_db = _absolute_spectrum(samples, fs_hz)
     axis.plot(frequency_mhz, magnitude_db, linewidth=0.8)
-    _mark_frequencies(axis, results, rf_domain)
+    _mark_frequencies(axis, results, rf_domain_flag)
     axis.set(
         title=title,
         xlabel="Frequency (MHz)",
@@ -175,7 +175,7 @@ def plot_array_response(results):
         label="Target",
     )
     for index, interferer in enumerate(cfg.interferers, start=1):
-        if interferer.enable:
+        if interferer.enable_flag:
             kind = "CW" if isinstance(interferer, CWInterferer) else "Wideband"
             axis.axvline(
                 interferer.direction.azimuth_deg,
@@ -255,7 +255,7 @@ def plot_tracking(results):
     for axis, (field, ylabel) in zip(axes.flat, labels):
         for mode in MODE_ORDER:
             branch = results["branches"].get(mode)
-            if branch and branch["tracking"]["success"]:
+            if branch and branch["tracking"]["success_flag"]:
                 values = branch["tracking"][field]
                 axis.plot(np.arange(values.size) + 1, values, label=mode.upper())
         axis.set(xlabel="Epoch (ms)", ylabel=ylabel)
@@ -271,7 +271,7 @@ def plot_cn0(results):
     figure, axis = plt.subplots(figsize=(9, 5))
     for mode in MODE_ORDER:
         branch = results["branches"].get(mode)
-        if branch and branch["tracking"]["success"]:
+        if branch and branch["tracking"]["success_flag"]:
             values = branch["tracking"]["cn0_db_hz"]
             axis.plot(np.arange(values.size) + 1, values, label=mode.upper())
     axis.set(
@@ -388,7 +388,7 @@ def _plot_detailed_combined(results):
 def _array_response_directions(cfg):
     directions = [(cfg.signal.true_direction, "Target", "*", "limegreen")]
     for index, interferer in enumerate(cfg.interferers, start=1):
-        if interferer.enable:
+        if interferer.enable_flag:
             if isinstance(interferer, CWInterferer):
                 kind, marker, color = "CW", "x", "red"
             else:
@@ -439,7 +439,7 @@ def _plot_array_response_spherical(results, mode, azimuths, elevations, response
     directions = _array_response_directions(cfg)
     # Aim the first camera at the first enabled interferer, then show its antipode.
     view_azimuth = 25.0 + next(
-        (item.direction.azimuth_deg for item in cfg.interferers if item.enable),
+        (item.direction.azimuth_deg for item in cfg.interferers if item.enable_flag),
         cfg.signal.true_direction.azimuth_deg,
     )
     markers = []
@@ -473,8 +473,8 @@ def _plot_array_response_spherical(results, mode, azimuths, elevations, response
         )).reshape(3)
         # This is a fixed hemisphere cutaway. Without it, the far-side surface
         # fills the projected hole and makes a deep inward null look solid.
-        facing = camera[0] * unit_x + camera[1] * unit_y + camera[2] * unit_z >= 0.0
-        visible_surface = [np.where(facing, coordinate, np.nan) for coordinate in (x, y, z)]
+        facing_flag = camera[0] * unit_x + camera[1] * unit_y + camera[2] * unit_z >= 0.0
+        visible_surface = [np.where(facing_flag, coordinate, np.nan) for coordinate in (x, y, z)]
         axis.plot_surface(
             *visible_surface,
             facecolors=color_map(color_scale(response_db)),
@@ -609,8 +609,8 @@ def _plot_detailed_array_response(results):
     model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
     azimuths = np.arange(0.0, 361.0, 2.0)
     sphere_elevations = np.arange(-90.0, 91.0, 2.0)
-    upper_hemisphere = sphere_elevations >= 0.0
-    elevations = sphere_elevations[upper_hemisphere]
+    upper_hemisphere_flag = sphere_elevations >= 0.0
+    elevations = sphere_elevations[upper_hemisphere_flag]
     manifolds = np.empty(
         (len(model.active_antennas), sphere_elevations.size, azimuths.size),
         dtype=complex,
@@ -630,7 +630,7 @@ def _plot_detailed_array_response(results):
         sphere_response = np.abs(
             np.tensordot(weights.conj(), manifolds, axes=(0, 0))
         )
-        response = sphere_response[upper_hemisphere]
+        response = sphere_response[upper_hemisphere_flag]
         response_db = 20.0 * np.log10(
             np.maximum(response / np.max(response), np.finfo(float).tiny)
         )
@@ -769,7 +769,7 @@ def _plot_detailed_acquisition(results):
             markersize=7,
             label="Second peak",
         )
-        status = "PASS" if acquisition["success"] else "FAIL"
+        status = "PASS" if acquisition["success_flag"] else "FAIL"
         axes[1].set(
             title=(
                 f"{mode.upper()}: {status}, metric={acquisition['metric']:.2f}\n"

@@ -23,8 +23,8 @@ from experiments.paths import INTERFERENCE_RESULTS as RESULTS, reset_output
 OUTPUT = RESULTS/'full_chain'
 ANTENNA_MODEL = "parametric"  # "ideal" or "parametric"; synthetic, not measured phone data.
 DURATION_MS = None
-SHOW_PLOTS = True
-FREEZE_SOURCE = False
+SHOW_PLOTS_FLAG = True
+FREEZE_SOURCE_FLAG = False
 
 
 def save_results_figures(results, output_dir):
@@ -47,7 +47,7 @@ def save_results_figures(results, output_dir):
         path = directory / f"{name}.png"
         figure.savefig(path, dpi=150)
         paths[name] = path.resolve()
-        if not results["config"].plot.show:
+        if not results["config"].plot.show_flag:
             plt.close(figure)
     return paths
 
@@ -60,7 +60,7 @@ def main():
     cfg.plot.output_dir = output
     if DURATION_MS is not None:
         cfg.signal.duration_ms = cfg.tracking.max_epochs = DURATION_MS
-    cfg.plot.show = SHOW_PLOTS
+    cfg.plot.show_flag = SHOW_PLOTS_FLAG
     cfg.phone.channel_delay_ns = {
         "BL": 0,
         "BR": 0,
@@ -85,10 +85,10 @@ def main():
         default=str, indent=2, allow_nan=False), encoding='utf-8')
     (output/'summary.json').write_text(json.dumps(serializable(results['metrics']),
         indent=2, allow_nan=False), encoding='utf-8')
-    if FREEZE_SOURCE:
+    if FREEZE_SOURCE_FLAG:
         freeze_source(output)
 
-    if cfg.plot.show:
+    if cfg.plot.show_flag:
         import matplotlib.pyplot as plt
 
         if plt.get_backend().lower() != "agg":

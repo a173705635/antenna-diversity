@@ -50,19 +50,19 @@ def code_pseudorange(history, times_s, fs_hz, coherent_s, coarse_range_m,
     """
     times = np.asarray(times_s, dtype=float)
     result = np.full(times.shape, np.nan)
-    if not history['success']:
+    if not history['success_flag']:
         return result
     starts = np.asarray(history['epoch_start_samples'])/fs_hz
     phase = np.asarray(history['code_nco_phase_chips'])
     rate = np.asarray(history['code_nco_rate_hz'])
     index = np.searchsorted(starts, times, side='right')-1
     safe = np.clip(index, 0, starts.size-1)
-    valid = (index >= 0) & (times < starts[safe]+coherent_s)
+    valid_flag = (index >= 0) & (times < starts[safe]+coherent_s)
     local_phase = phase[safe]+rate[safe]*(times-starts[safe])
     period_m = SPEED_OF_LIGHT_MPS*code_length/code_rate_hz
     fractional = np.mod(times*code_rate_hz-local_phase, code_length)*SPEED_OF_LIGHT_MPS/code_rate_hz
     aided = fractional + np.rint((coarse_range_m-fractional)/period_m)*period_m
-    result[valid] = aided[valid]
+    result[valid_flag] = aided[valid_flag]
     return result
 
 
@@ -74,16 +74,16 @@ def carrier_range(history, times_s, fs_hz, coherent_s, wavelength_m):
     """
     times = np.asarray(times_s, dtype=float)
     result = np.full(times.shape, np.nan)
-    if not history['success']:
+    if not history['success_flag']:
         return result
     starts = np.asarray(history['epoch_start_samples'])/fs_hz
     phase = np.asarray(history['carrier_nco_phase_rad'])
     frequency = np.asarray(history['carrier_nco_frequency_hz'])
     index = np.searchsorted(starts, times, side='right')-1
     safe = np.clip(index, 0, starts.size-1)
-    valid = (index >= 0) & (times < starts[safe]+coherent_s)
+    valid_flag = (index >= 0) & (times < starts[safe]+coherent_s)
     accumulated = phase[safe]+2*np.pi*frequency[safe]*(times-starts[safe])
-    result[valid] = -accumulated[valid]*wavelength_m/(2*np.pi)
+    result[valid_flag] = -accumulated[valid_flag]*wavelength_m/(2*np.pi)
     return result
 
 
@@ -144,5 +144,5 @@ def solve_code_carrier_float(satellite_positions_m, code_m, carrier_m,
                     'code_residual_m': code-distance-clock[:, None],
                     'carrier_residual_m': carrier-distance-clock[:, None]-bias,
                     'iterations': iteration+1, 'rank': rank,
-                    'unknowns': design.shape[1], 'integer_fixed': False}
+                    'unknowns': design.shape[1], 'integer_fixed_flag': False}
     raise PositioningFailure('joint float solution did not converge')

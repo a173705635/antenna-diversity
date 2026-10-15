@@ -83,7 +83,7 @@ def process_rf(
     fs_hz: float,
     if_hz: float,
     channel_ids: tuple[str, ...],
-    retain_analysis: bool = False,
+    retain_analysis_flag: bool = False,
 ) -> tuple[np.ndarray, RFInfo]:
     if x_antenna_v.ndim != 2 or x_antenna_v.shape[0] == 0:
         raise ValueError('RF input must have shape (channels, samples)')
@@ -122,15 +122,15 @@ def process_rf(
     )
     # RF 滤后电压与本次热噪声相加，再经增益、通道误差、限幅和 ADC。
     before_limit = (filtered_signal + noise) * np.sqrt(total_gain_linear)
-    analysis_noise = noise if retain_analysis else None
+    analysis_noise = noise if retain_analysis_flag else None
     del filtered_signal, noise
     if np.any(amplitude_db != 0.) or np.any(phase_deg != 0.):
         before_limit *= error_response[:, None]
     limit_v = cfg.adc_vpp / 2.0
-    saturated = (np.abs(before_limit.real) > limit_v) | (
+    saturated_flag = (np.abs(before_limit.real) > limit_v) | (
         np.abs(before_limit.imag) > limit_v
     )
-    if cfg.enable_soft_limiting:
+    if cfg.enable_soft_limiting_flag:
         adc_input = limit_v * np.tanh(before_limit.real / limit_v) + 1j * (
             limit_v * np.tanh(before_limit.imag / limit_v)
         )
@@ -166,13 +166,13 @@ def process_rf(
         "input_noise_power_w": input_noise_power_w,
         "input_noise_rms_v": noise_rms_v,
         "adc_lsb_v": lsb_v,
-        "saturation_fraction": np.mean(saturated, axis=1),
+        "saturation_fraction": np.mean(saturated_flag, axis=1),
         "input_rms_v": np.sqrt(np.mean(np.abs(x_antenna_v) ** 2, axis=1)),
         "adc_input_rms_v": np.sqrt(np.mean(np.abs(before_limit) ** 2, axis=1)),
         "adc_output_rms_code": np.sqrt(np.mean(np.abs(adc_codes) ** 2, axis=1)),
         "adc_bits": cfg.adc_bits,
         "adc_vpp": cfg.adc_vpp,
     }
-    if retain_analysis:
+    if retain_analysis_flag:
         info["thermal_noise_v"] = analysis_noise
     return adc_codes, info

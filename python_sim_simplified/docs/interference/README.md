@@ -1,6 +1,14 @@
 # 抗干扰接收链实验
 
-无干扰方向图研究的逐条用例见 [天线方向图增益验证用例](antenna_pattern_validation_cases.md)：20 条，包含固定条件、具体参数、对照、指标、判据和覆盖边界；当前为设计，尚未按清单执行。
+当前代码的布尔名称统一带 `_flag`（常量为 `_FLAG`），如 `SHOW_PLOTS_FLAG`、`success_flag`、`passed_flag`；旧结果及下文历史运行记录保留原名称。
+
+无干扰方向图研究见 [天线方向图增益验证用例](antenna_pattern_validation_cases.md)：20 个分类下共 **425 条独立用例 TC-001～TC-425**，每条固定参数、一个被测方法、明确对照和判据。TC-001～044已执行，余下381条未执行，不将扫描组记作一条用例。
+
+首批执行入口仍为 `python -m experiments.interference.validation`。`validation_config.py` 的 `BATCH="pattern_gain_first44"` 固定运行 TC-001～044，默认100 ms、seed 42～71、4个进程；输出 `results/interference/pattern_gain_first44/`。`progress.jsonl` 是逐次完成记录，`summary.csv` 是逐seed数据，`case_summary.csv` 是44条汇总结论，完整统计和判据在 `summary.json` / `verification.json`。切回旧实验用 `BATCH="legacy"`，并自行设置 `SEEDS`、`OUTPUT_DIR` 等公共参数。运行中不要再次启动同输出目录的批次。
+
+`egc` 保持旧幅度匹配实现，新增 `egc_strict` 才是等幅相位对齐；首批每条仅运行文档指定的一种方法。SINGLE的输出有单位响应归一，天线增益传递通过合并前的逐通道线性分量功率单独验证。TC编号是离散类别，因此本批图只画散点、不连成连续扫描曲线。
+
+接收统计口径：`acquisition_success_count` 是捕获峰值比通过门限的次数，需要结合保存的码相位/多普勒误差判断是否捕获到正确位置；`tracking_success_count` 是当前跟踪函数成功返回（流程完成）的次数，不能当作保持锁定成功率。当前默认跟踪入口没有启用独立的失锁确认判据，因此本批不作真实锁定概率结论。上述接收统计不决定增益模型的A/B/D科学判定。
 
 在 `python_sim_simplified/` 目录运行：
 
@@ -16,12 +24,44 @@ python -m experiments.interference.full_chain
 
 重跑入口只重建它自己的输出目录。已冻结的历史数据和来源清单保留原内容。
 
+## 2026-10-15 首批44条增益用例结果
+
+条件：TC-001～044，TL/BR双天线，无干扰，入射信号−128.5 dBm，固定RF噪声系数；100 ms、seed 42～71、统计10～90 ms，详见用例公共条件C0。每个用例独立执行完整链路，没有提高信号强度。它们验证理想阵元的定值增益传递与合并，尚未验证参数化方向图的角度响应。
+
+在精简版目录执行：
+
+```powershell
+$env:OPENBLAS_NUM_THREADS='1'
+$env:OMP_NUM_THREADS='1'
+$env:PYTHONDONTWRITEBYTECODE='1'
+$env:MPLBACKEND='Agg'
+python -u -B -m experiments.interference.validation
+```
+
+1320次运行正常结束；44条各30次、无重复或缺项，1364项核验通过（1320项输出恒等式、44项增益/权值/预算判据）。逐通道目标功率变化误差最大4.44e-16 dB，热噪声变化为0；44条收益均值与解析参考最大偏差0.001710 dB。独立按用例参数重算非MVDR公式，单seed最大偏差0.018233 dB；MVDR独立求解权值相对误差最大5.09e-16，响应约束误差小于1e-8。以上不等于所有接收都成功。
+
+| 条件（TL/BR增益） | 幅度匹配 egc 收益 | 严格等增益 egc_strict 收益 | MVDR 收益 |
+|---|---:|---:|---:|
+| 0 / 0 dB | +3.008927 dB | +3.008927 dB | +3.008936 dB |
+| 0 / −6 dB | +0.972433 dB | +0.517024 dB | +0.972444 dB |
+| 0 / −10 dB | +0.413438 dB | −0.625052 dB | +0.413449 dB |
+| 0 / −20 dB | +0.043078 dB | −2.183819 dB | +0.043091 dB |
+| 0 / −40 dB | +0.000422 dB | −2.925245 dB | +0.000435 dB |
+
+表中均为30次线性热噪声SNR收益均值，相对固定SINGLE-TL，不是C/N₀估计。等强时约3 dB收益；一根明显变弱时严格等增益会引入过多噪声，幅度匹配与本条件下MVDR则接近强单天线。共同衰减不会消除相对合并收益，但绝对SNR仍随衰减下降。强弱交换后，幅度匹配的绝对输出SNR均值差最大约0.00150 dB；相对固定TL的收益会随参考通道变弱而增大，不能误读为额外获得20 dB阵列收益。
+
+接收方面，SINGLE在TL增益0/−3/−6/−10/−20 dB时，捕获门限通过分别30/24/4/0/0次（各30次）。全批1035次过门限，其中TC-002、seed 57的多普勒误差为+250 Hz（一个搜索格）；其余过门限记录多普勒误差0，码相位误差绝对值均不超过0.08 chip。因此不能把门限通过直接称为正确捕获或保持锁定。缺测C/N₀原样保留，成功样本的C/N₀统计不代表所有运行。
+
+文件：每条汇总在 [case_summary.csv](../../results/interference/pattern_gain_first44/case_summary.csv)，逐次数据在同目录summary.csv/progress.jsonl，置信区间和检查详情在summary.json/verification.json，共20张PNG。本次使用Agg保存图，不弹GUI；图为跨seed汇总，离散TC不连线。结果仅本地保留。
+
+来源限制：运行期间其他窗口进行了布尔字段重命名等修改。进程使用启动时加载的模块和配置；manifest的source_sha256保留启动前哈希，source_sha256_at_save保留原保存器读取的结束时磁盘哈希，并附说明。未保存启动源码完整副本，哈希本身不能恢复源码。本批及此前191 passed、2 deselected回归结果不能作为后续最新工作区的验证；未覆盖其他窗口修改，也未运行TC-045～425。
+
 ## 统一实际链与按需评估（2026-10-15）
 
 参考 FULLCHAIN 的阶段组织：配置 → 源波形 → 天线响应/互耦/通道时延 → 天线端合成 → RF 滤波与热噪声 → RF 增益/幅相 → 限幅/ADC → DDC/FIR/抽取/DFE 量化 → 合并、捕获跟踪 → 评估。保留原有物理运算顺序。
 
 - `core/pipeline.py` 负责实际前端与接收；当前通用验证逐用例独立执行，不再按配置判断能否共享前端。GPS 多卫星接收继续共用 RF/DFE 底层函数，保留自身多星处理流程。
-- `retain_analysis=True` 仅额外保留本次实际 RF 热噪声；`core/evaluation.py::linear_components` 按需传播源真值与噪声，复用实际滤波器、NCO、抽取和码值尺度。FULLCHAIN 默认不调用此分析；精确分量功率仍需要线性滤波，不能直接从非线性输出拆分。
+- `retain_analysis_flag=True` 仅额外保留本次实际 RF 热噪声；`core/evaluation.py::linear_components` 按需传播源真值与噪声，复用实际滤波器、NCO、抽取和码值尺度。FULLCHAIN 默认不调用此分析；精确分量功率仍需要线性滤波，不能直接从非线性输出拆分。
 - 线性分量绕过限幅及量化，固定真实接收权值后才评分；不参与求权。其相加结果与实际输出的差是联合非线性/量化残差，分量交叉项另列，不能称为独立热噪声。消融实验保留独立 ADC 重建核验。
 - 各实验的配置、统计窗口、输出字段和绘图保持原口径；共用分量传播，旧相位入口也调用公共前端/接收函数。调用 `evaluate_budget` 前需显式保留分析输入，不再事后重抽噪声。
 
@@ -127,7 +167,7 @@ assumed.parametric_patterns["TL"].phase_variation_mm = (0.0, 0.0, 0.0)
 python -m experiments.interference.antenna_ablation
 ```
 
-入口 [antenna_ablation.py](../../experiments/interference/antenna_ablation.py) 一次完成数据生成、独立复算、统计和绘图。顶部设置 `SEEDS`、`DURATION_MS`、`ANTENNAS`、`POWER_TRIM_MS` 和 `SHOW_PLOTS`。默认四天线、100 ms、噪声种子 42/43/44，不提高 GNSS 功率（−128.5 dBm），不改变捕获门限 2.5、盲干扰检测门限 6 dB，关闭多径。
+入口 [antenna_ablation.py](../../experiments/interference/antenna_ablation.py) 一次完成数据生成、独立复算、统计和绘图。顶部设置 `SEEDS`、`DURATION_MS`、`ANTENNAS`、`POWER_TRIM_MS` 和 `SHOW_PLOTS_FLAG`。默认四天线、100 ms、噪声种子 42/43/44，不提高 GNSS 功率（−128.5 dBm），不改变捕获门限 2.5、盲干扰检测门限 6 dB，关闭多径。
 
 有两个独立比较场景：默认 LOS 为方位 30°/仰角 60°；遮挡生效场景为 225°/20°。CW 和 2 MHz 宽带干扰均为 −90 dBm、方向 80°/10°。每个场景内部与同 seed 理想模型配对，不能把两个 LOS 之间的差异全部归因于遮挡。默认目标和干扰都不在遮挡区域内，因此不能用默认场景判断遮挡影响。
 
@@ -206,7 +246,7 @@ a_i(source) = a_ideal_geometry_i(source) × c_i(source) × channel_response_i
 - `ANTENNAS`：任意 2～4 个角点组合，行顺序按该元组；`TL/TR/BL/BR` 为左上/右上/左下/右下。
 - `DESIRED_GAIN_DB`、`DESIRED_PHASE_DEG`：目标各角点的基础幅相；CW 与宽带各有独立的 `*_GAIN_DB`、`*_PHASE_DEG` 字典。
 - `TRUE_CHANNEL_DELAY_NS`、`ESTIMATED_CHANNEL_DELAY_NS`：实际/估计硬件通道时延，单位 ns。真实时延仍延迟整个 IF 序列并补上被下变频移除的 RF 相位，且作用于所有源；估计时延只进入目标导向的窄带相位，**不会自动对齐 DFE 输出的码包络**。
-- `PERTURBED_ANTENNA`、`PHASE_ERRORS_DEG`：给指定天线的真实目标响应追加相位偏差；`SEEDS`、`DURATION_MS`、`POWER_TRIM_MS`、`SHOW_PLOTS` 控制实验和显示。
+- `PERTURBED_ANTENNA`、`PHASE_ERRORS_DEG`：给指定天线的真实目标响应追加相位偏差；`SEEDS`、`DURATION_MS`、`POWER_TRIM_MS`、`SHOW_PLOTS_FLAG` 控制实验和显示。
 
 每个扫描点有两组：`known_response` 的目标假设系数包含真实追加相位；`unmodeled_phase` 只知道基础系数，未建模该追加相位。两组使用相同的实际信号、噪声、RF 和 DFE 数据，只改变接收机导向假设；Blind Null 不获得目标真值。这里的“已知”仅指源级指定系数，不意味着估计硬件时延必然准确，也不意味着已完成序列对齐。
 
@@ -254,7 +294,7 @@ a_i(source) = a_ideal_geometry_i(source) × c_i(source) × channel_response_i
 
 `full_chain` 保留各合并分支的二维响应图，并同时输出独立的 `detailed_array_response_3d_{mode}.png` 三维曲面图。方位角为 0～360°，仰角为 0～90°，间隔为 2°；高度与颜色均表示 `20 log10(|wᴴa| / max|wᴴa|)`，每个分支按自己的扫描最大值归一化。目标和干扰方向始终标出；开启多径研究后才标出回波方向。
 
-显示下限为 −60 dB，低于该值的响应只在绘图时截到 −60 dB；二维和三维使用相同的扫描数据。该图展示当前天线模型、目标极化及载频下的固定权值空间响应，不代表绝对增益或宽带内所有频率的抑制度。入口默认 `SHOW_PLOTS = True`，保存全部图片后同时弹窗显示，三维图可拖动视角。设置 `SHOW_PLOTS = False` 可只保存不显示；无窗口的 Agg 后端只输出文件。
+显示下限为 −60 dB，低于该值的响应只在绘图时截到 −60 dB；二维和三维使用相同的扫描数据。该图展示当前天线模型、目标极化及载频下的固定权值空间响应，不代表绝对增益或宽带内所有频率的抑制度。入口默认 `SHOW_PLOTS_FLAG = True`，保存全部图片后同时弹窗显示，三维图可拖动视角。设置 `SHOW_PLOTS_FLAG = False` 可只保存不显示；无窗口的 Agg 后端只输出文件。
 
 另输出 `detailed_array_response_spherical_{mode}.png`。扫描仰角 −90～90°，仍计算全空间响应；为看清深凹陷，两个相反视角分别画各自面向观察者的半球，避免背面曲面在投影中把前方零陷填实。这是固定半球剖视，不是完整不透明球壳；拖动视角只旋转该剖面，不会自动重建被隐藏的背面。两视图互补，未删除或改变背面响应数据。
 
@@ -458,16 +498,17 @@ print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assu
 | 选择合并方法 | `MODES`；默认 `single`、`egc`、`mvdr`、`blind_null` |
 | 修改噪声重复次数、时长和统计去边 | `SEEDS`、`DURATION_MS`、`POWER_TRIM_MS`；统计窗口应在记录内部 |
 | 扫描整通道相位 | `SELECTED_SERIES = ("phase",)`、`PHASE_ANTENNA`、`PHASE_SCAN_DEG` |
+| 选择相位补偿组别 | `BATCH = "legacy"` 时设置 `PHASE_VARIANTS`；默认 `("baseline", "uncalibrated")`，仅不补偿用 `("uncalibrated",)`，选择 `calibrated` 自动带基准；`SELECTED_CASES` 优先 |
 | 扫描目标真实方位角 | `SELECTED_SERIES = ("direction",)`、`TARGET_AZIMUTH_SCAN_DEG` |
 | 扫描阵元真实增益 | `SELECTED_SERIES = ("gain",)`、`ELEMENT_GAIN_ANTENNA`、`ELEMENT_GAIN_SCAN_DB` |
 | 设置卫星真实/名义方向及干扰方向 | `TARGET_TRUE_DIRECTION`、`TARGET_ASSUMED_DIRECTION`、`JAMMER_DIRECTION`；角度单位为度 |
 | 只跑指定条件 | `SELECTED_CASES`；例如 `("single_cw/phase_90/calibrated",)`，构造用例时自动加入其参考条件 |
-| 显示/保存图 | `SHOW_PLOTS`、`OUTPUT_DIR` |
+| 显示/保存图 | `SHOW_PLOTS_FLAG`、`OUTPUT_DIR` |
 | 更改其他模型参数 | 同一文件内 `_base_config()` 直接赋值现有 `SimulationConfig` 字段 |
 
 例如，把 `SELECTED_SERIES` 改成 `("direction",)`、`TARGET_AZIMUTH_SCAN_DEG` 改成 `(20, 30, 40)`，就运行这三个真实方位角。名义方向保持配置值，表示研究导向失配；若要研究已知方向，应在方向条件构造处同时明确赋值 `cfg.signal.assumed_direction`。多个系列分别扫描，不交叉展开为全部参数组合。每个条件独立复制基础配置，改一个条件不会污染其他条件。
 
-需要自定义单点时，在 `build_cases()` 中增加具名条件并明确选择规则，最后统一展开种子；相位补偿条件在同处带入基准，基准先于补偿执行。`dfe_phase_deg` 和 `dfe_estimated_phase_deg` 按物理天线名配置；`compensate_dfe_phase=True` 才执行估计相位的逆旋转。相位误差和补偿都作用于整行复数样本。真实阵元增益则修改 `cfg.phone.antenna_model.true_state.amplitude_error_db`，它改变目标和各干扰在天线端的响应，不改变独立 RF 热噪声的生成强度。
+需要自定义单点时，在 `build_cases()` 中增加具名条件并明确选择规则，最后统一展开种子；相位补偿条件在同处带入基准，基准先于补偿执行。`dfe_phase_deg` 和 `dfe_estimated_phase_deg` 按物理天线名配置；`compensate_dfe_phase_flag=True` 才执行估计相位的逆旋转。相位误差和补偿都作用于整行复数样本。真实阵元增益则修改 `cfg.phone.antenna_model.true_state.amplitude_error_db`，它改变目标和各干扰在天线端的响应，不改变独立 RF 热噪声的生成强度。
 
 处理阶段固定在 [validation_support.py](../../experiments/interference/validation_support.py)：每个用例独立生成前端并执行接收和独立预算，同一用例的各算法共用本次采样。独立评分逐个重建启用的干扰源，不要求场景同时包含 CW 与宽带；公共接收机仍仅使用完整 IQ 和配置的名义导向。输出的线性 SINR 不含联合非线性/量化残差，分量交叉项单列，跟踪 C/N₀ 缺测不画成零。
 

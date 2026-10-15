@@ -202,15 +202,15 @@ def coupling_matrix(state: AntennaState, names: tuple[str, ...]) -> np.ndarray:
     return matrix
 
 
-def channel_response(phone: PhoneConfig, estimated: bool = False) -> np.ndarray:
+def channel_response(phone: PhoneConfig, estimated_flag: bool = False) -> np.ndarray:
     amplitude = (
         phone.estimated_channel_amplitude_error_db
-        if estimated
+        if estimated_flag
         else phone.channel_amplitude_error_db
     )
     phase = (
         phone.estimated_channel_phase_error_deg
-        if estimated
+        if estimated_flag
         else phone.channel_phase_error_deg
     )
     amplitude_db = np.array([amplitude[name] for name in phone.active_antennas])
@@ -240,8 +240,8 @@ def build_antenna_model(phone: PhoneConfig, carrier_hz: float) -> AntennaModel:
         assumed_positions_m=phone.assumed_phase_centers_m,
         true_state=true_state,
         assumed_state=assumed_state,
-        true_channel_response=channel_response(phone, estimated=False),
-        assumed_channel_response=channel_response(phone, estimated=True),
+        true_channel_response=channel_response(phone, estimated_flag=False),
+        assumed_channel_response=channel_response(phone, estimated_flag=True),
         true_measured=true_measured,
         assumed_measured=assumed_measured,
     )
@@ -251,20 +251,20 @@ def antenna_response(
     model: AntennaModel,
     direction: Direction,
     polarization: WavePolarization,
-    estimated: bool = False,
+    estimated_flag: bool = False,
 ) -> tuple[np.ndarray, AntennaDiagnostics]:
     names = model.active_antennas
     state = (
         model.assumed_state
-        if estimated
+        if estimated_flag
         else model.true_state
     )
     position_map = (
         model.assumed_positions_m
-        if estimated
+        if estimated_flag
         else model.true_positions_m
     )
-    measured = model.assumed_measured if estimated else model.true_measured
+    measured = model.assumed_measured if estimated_flag else model.true_measured
     positions = np.array([position_map[name] for name in names])
     spatial = np.exp(
         -1j
@@ -332,7 +332,7 @@ def antenna_response(
     coupled = coupling @ open_circuit
     channel = (
         model.assumed_channel_response
-        if estimated
+        if estimated_flag
         else model.true_channel_response
     )
     effective = channel * coupled

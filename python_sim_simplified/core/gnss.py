@@ -43,10 +43,10 @@ def ca_code(prn: int) -> np.ndarray:
     return code
 
 
-def _channel_delays_s(phone: PhoneConfig, estimated: bool) -> np.ndarray:
+def _channel_delays_s(phone: PhoneConfig, estimated_flag: bool) -> np.ndarray:
     delay_map = (
         phone.estimated_channel_delay_ns
-        if estimated
+        if estimated_flag
         else phone.channel_delay_ns
     )
     return 1e-9 * np.asarray(
@@ -111,8 +111,8 @@ def generate_scenario(
     """Generate target and CW-interference voltages at the antenna ports."""
 
     n_samples = round(cfg.signal.fs_rf_hz * cfg.signal.duration_ms * 1e-3)
-    true_delays_s = _channel_delays_s(cfg.phone, estimated=False)
-    estimated_delays_s = _channel_delays_s(cfg.phone, estimated=True)
+    true_delays_s = _channel_delays_s(cfg.phone, estimated_flag=False)
+    estimated_delays_s = _channel_delays_s(cfg.phone, estimated_flag=True)
     sample_index = np.arange(n_samples)
     time_s = sample_index / cfg.signal.fs_rf_hz
     desired_waveform, code, received_code_rate_hz = _desired_waveform(
@@ -131,7 +131,7 @@ def generate_scenario(
         antenna_model,
         cfg.signal.assumed_direction,
         cfg.signal.assumed_polarization,
-        estimated=True,
+        estimated_flag=True,
     )
     desired_component = apply_channel_delays(
         desired_true_base[:, None] * desired_waveform[None, :],
@@ -169,7 +169,7 @@ def generate_scenario(
             true_delays_s,
         )
         for interferer in cfg.interferers
-        if interferer.enable
+        if interferer.enable_flag
     ]
     scene = desired_component.copy()
     for interferer in interferer_scenes:
