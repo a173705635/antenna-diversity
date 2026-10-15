@@ -452,6 +452,12 @@ print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assu
 
 本轮验证首先记录当前维护版的 20 ms、seed 42、默认四天线、CW＋宽带、12 跟踪历元数值，提取前端/接收函数后重算。场景、ADC、DFE 以及四种方法的权值、合并序列、捕获/跟踪序列化结果哈希全部一致。
 
+### 2026-10-15 绘图使用更新
+
+现在每指标、每方法独立窗口，只横排比较场景。默认 18 张图：thermal_gain、target_gain、sinr、acquisition、cn0、suppression_0 分别加方法名后缀；多个扫描因素另加 factor 后缀。热噪声收益、目标功率相对 SINGLE 的差异、SINR 用 dB；C/N₀ 用 dB-Hz。捕获峰值比保持无量纲比值，门限仍为原始门限（默认 2.5），不转 dB。跨 seed 在各图所示单位下取算术平均。
+
+不同条件使用不同线型和空心标记；曲线整段在所示单位下绝对差不超过 1e-8 时注明 Overlapping，不偏移真实数据。局部交点保持原始坐标。极低功率保留实际 dB，完全抵消为负无穷，不设置虚构下限。本轮只复用已有 summary 重绘，保留原仿真 manifest。下节四张/八张是旧布局记录，当前分别为 18 张/36 张。
+
 ### 实际验证与结论（2026-10-15 完成）
 
 - 默认批次：运行 `python -u -B -m experiments.interference.validation`，TL/BR、seed 42/43/44、100 ms、两端各去除 10 ms，6 个相位点、无干扰/单 CW、基准/未补/准确补偿。324 行方法结果、450 项逐行/理论/配对检查全部通过；这些检查不是 450 次独立实验。输出在 `results/interference/validation/`，包括 summary JSON/CSV、verification、manifest，以及 thermal_gain、target_interference、receiver、suppression_0 四张 PNG。

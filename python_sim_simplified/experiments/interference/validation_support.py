@@ -472,13 +472,11 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
             source for row in factor_rows for source in row["interferer_suppression_db"]
         ))
         figures = [
-            ("thermal_gain", (("thermal_snr_ratio", "Linear thermal SNR ratio vs SINGLE"),)),
-            ("target_interference", (
-                ("target_power_retention", "Target power ratio vs SINGLE"),
-                ("linear_in_band_sinr_ratio", "C / (I + N), linear power ratio"),
-            )),
-            ("receiver", (("acquisition_metric", "Acquisition peak ratio"),
-                          ("tracking_cn0_late_median_db_hz", "Late tracking C/N0 (dB-Hz)"))),
+            ("thermal_gain", (("thermal_snr_gain_db", "Thermal SNR gain vs SINGLE (dB)"),)),
+            ("target_gain", (("target_gain_db", "Target power gain vs SINGLE (dB)"),)),
+            ("sinr", (("linear_in_band_sinr_db", "C / (I + N) (dB)"),)),
+            ("acquisition", (("acquisition_metric", "Acquisition peak ratio"),)),
+            ("cn0", (("tracking_cn0_late_median_db_hz", "Late tracking C/N0 (dB-Hz)"),)),
         ]
         # 各干扰源独立成图，避免长标签和过多行把目标/接收指标挤在一起。
         figures.extend((f"suppression_{index}", ((f"suppression:{source}",
@@ -487,23 +485,28 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
         scenes = list(dict.fromkeys(row["scene"] for row in factor_rows))
         modes = list(dict.fromkeys(row["mode"] for row in factor_rows))
         series = list(dict.fromkeys(row["series"] for row in factor_rows))
-        for filename, metrics in figures:
+        # 每个指标、每种方法单独一个窗口，仅横排比较场景，不纵向堆叠。
+        separate_figures = [(filename, metrics, mode)
+                            for filename, metrics in figures for mode in modes]
+        for filename, metrics, figure_mode in separate_figures:
             figure_scenes = scenes
             if filename.startswith("suppression_"):
                 source = metrics[0][0].removeprefix("suppression:")
                 figure_scenes = [scene for scene in scenes if any(
                     row["scene"] == scene and source in row["interferer_suppression_db"]
                     for row in factor_rows)]
-            fig, axes = plt.subplots(len(metrics) * len(modes), len(figure_scenes),
-                                     figsize=(5 * len(figure_scenes), 3 * len(metrics) * len(modes)),
+            fig, axes = plt.subplots(1, len(figure_scenes),
+                                     figsize=(6 * len(figure_scenes), 4.8),
                                      squeeze=False, constrained_layout=True)
             if filename.startswith("suppression_"):
                 fig.suptitle(source, fontsize=11)
             for metric_index, (metric, ylabel) in enumerate(metrics):
-                for mode_index, mode in enumerate(modes):
+                for mode_index, mode in enumerate([figure_mode]):
                     for scene_index, scene in enumerate(figure_scenes):
-                        axis = axes[metric_index * len(modes) + mode_index, scene_index]
-                        for label in series:
+                        axis = axes[0, scene_index]
+                        plotted = []
+                        overlaps = []
+                        for series_index, label in enumerate(series):
                             selected = [row for row in factor_rows if row["scene"] == scene
                                         and row["mode"] == mode and row["series"] == label]
                             if not selected:
@@ -519,14 +522,29 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                                 if metric.startswith("suppression:"):
                                     observations = [row["interferer_suppression_db"].get(
                                         metric.removeprefix("suppression:")) for row in matching]
-                                elif metric == "linear_in_band_sinr_ratio":
-                                    observations = [10 ** (row["linear_in_band_sinr_db"] / 10)
+                                elif metric == "target_gain_db":
+                                    observations = [10 * np.log10(row["target_power_retention"])
                                                     for row in matching]
                                 else:
                                     observations = [row.get(metric) for row in matching]
                                 available = [value for value in observations if value is not None]
                                 values.append(float(np.mean(available)) if available else np.nan)
-                            axis.plot(points, values, marker="o", label=label)
+                            # 不偏移真实数据：嵌套空心标记、不同线型，并明确注明重合。
+                            for previous_label, previous_points, previous_values in plotted:
+                                if points == previous_points and np.allclose(
+                                        values, previous_values, atol=1e-8, rtol=0, equal_nan=True
+                                ) and np.any(np.isfinite(values)):
+                                    overlaps.append(f"{previous_label} = {label}")
+                            plotted.append((label, points, values))
+                            axis.plot(points, values,
+                                      linestyle=("-", "--", ":", "-.")[series_index % 4],
+                                      marker=("o", "s", "x", "^")[series_index % 4],
+                                      markersize=(10, 7, 5, 8)[series_index % 4],
+                                      markerfacecolor="none", linewidth=1.6, label=label)
+                        if overlaps:
+                            axis.text(0.02, 0.98, "Overlapping (tolerance 1e-8):\n" + "\n".join(overlaps),
+                                      va="top", fontsize=9, transform=axis.transAxes,
+                                      bbox={"facecolor": "white", "alpha": 0.8, "edgecolor": "none"})
                         xlabel = factor_label or "condition"
                         if factor_unit:
                             xlabel += f" ({factor_unit})"
@@ -555,10 +573,10 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                                           ha="center", transform=axis.transAxes)
                                 axis.set_yticks([])
                         axis.grid(alpha=0.3)
-                        axis.legend(fontsize=7)
+                        axis.legend(fontsize=9, loc="lower right")
             # 序号避免自定义标签中的斜杠或不同单位导致路径/文件名冲突。
             suffix = "" if len(factors) == 1 else f"_factor_{factors.index((factor_label, factor_unit)) + 1}"
-            path = settings.output_dir / f"{filename}{suffix}.png"
+            path = settings.output_dir / f"{filename}_{figure_mode}{suffix}.png"
             fig.savefig(path, dpi=150)
             paths.append(path)
             if not settings.show_plots:

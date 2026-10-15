@@ -2,6 +2,13 @@
 
 只记录实际改动、重要行为变化、最终验证和必要限制；实验细节见对应说明。以下路径除注明外均相对于 `python_sim_simplified/`，测试数字为各次修改当时的结果。
 
+## 2026-10-15 通用验证绘图可读性调整
+
+- `experiments/interference/validation_support.py` 按指标和方法分别成图，横排比较场景；使用不同线型、空心标记及重合标注，不偏移数据。默认批次由 4 张改为 18 张，方向/增益批次由 8 张改为 36 张，文件名增加方法后缀。
+- 热噪声收益、目标功率差异和 SINR 改用 dB，C/N₀ 保持 dB-Hz；捕获峰值比及门限保持原始比值。跨 seed 按所示单位求均值，不截断极低 dB 值；原始 summary 不变。
+- 已有批次复用 summary 重绘，保留原仿真 manifest；条件和显示口径见[绘图说明](docs/interference/README.md#2026-10-15-绘图使用更新)。
+- 上库专项验证：`python -B -m pytest -p no:cacheprovider -q tests/test_validation.py --basetemp=results/_pytest_upload_plot_readability`，**17 passed**，覆盖绘图数据、捕获门限、布局及重合标注；未重跑全套测试或完整研究批次。
+
 ## 2026-10-15 精简修改记录
 
 - 合并重复验证，删除工具操作、Agent 分工和过期中间状态；保留历史改动、关键结论及维护/归档位置。
