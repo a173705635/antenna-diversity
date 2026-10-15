@@ -6,31 +6,35 @@
 
 from copy import deepcopy
 
-from core.config import Direction
+from core.config import CouplingPath, Direction
 from core.presets import default_config
 from experiments.paths import INTERFERENCE_RESULTS_DIR
 from experiments.interference.validation_support import ValidationCase, ValidationSettings
 
 
 # 常用编辑区：天线顺序第一根是 SINGLE 参考；可用任意两至四根物理天线。
-BATCH = "pattern_gain_first44"  # 改为 "legacy" 可运行原相位/方向/增益系列。
+BATCH = "mutual_coupling"  # "legacy" 和 "pattern_gain_first44" 仍可单独选择。
 ANTENNAS = ("TL", "BR")
 MODES = ("single", "egc", "mvdr", "blind_null")
-SEEDS = tuple(range(42, 72))
+SEEDS = tuple(range(42, 43))
 # 每个用例独立生成采样；配对条件保持相同 seed 和物理配置，以复现相同噪声。
 DURATION_MS = 100
 # 功率统计首尾各舍弃此时长，避开滤波瞬态；不裁掉送入捕获跟踪的数据。
 EVALUATION_EDGE_TRIM_MS = 10
-SHOW_PLOTS_FLAG = True
+GENERATE_PLOTS_FLAG = True  # 旧批次生成图片开关；互耦批次在 build_settings 中单独关闭。
+SHOW_PLOTS_FLAG = True  # 仅在生成图片时决定是否同时弹窗。
 OUTPUT_DIR = INTERFERENCE_RESULTS_DIR / "pattern_gain_first44"
 WORKERS = 4  # 首批 TC 互相独立；Windows 上按进程并行、逐条记录进度。
+# 互耦批次独立于上面的旧批次编辑区；不改旧 SEEDS/图片/路径设置。
+COUPLING_SEEDS = tuple(range(42, 72))
+COUPLING_DURATION_MS = 100
+COUPLING_WORKERS = 4
+COUPLING_OUTPUT_DIR = INTERFERENCE_RESULTS_DIR / "mutual_coupling"
 # 每次成功生成数据后刷新此目录；需要保留不同实验时修改目录名。
 
 # 单因素扫描；PHASE_ANTENNA 按物理名字定位，不使用固定行号。
 PHASE_ANTENNA = "BR"
 PHASE_SCAN_DEG = (0, 30, 60, 90, 120, 180)
-# legacy 相位扫描：无误差基准、未补偿、准确补偿；选 calibrated 会自动带上基准。
-PHASE_VARIANTS = ("baseline", "uncalibrated")
 TARGET_AZIMUTH_SCAN_DEG = (30, 40, 50)
 ELEMENT_GAIN_ANTENNA = "BR"
 ELEMENT_GAIN_SCAN_DB = (0.0, 6.020599913279624)
@@ -64,20 +68,38 @@ def _base_config(scene: str):
 
 
 def _pattern_gain_cases() -> list[ValidationCase]:
-    """按文档 TC-001～044 建立单方法、单物理条件，不继承上一条的改动。"""
+    """建立增益用例；对照按参数与算法关联，TC编号仅表示本批次顺序。"""
     case_definitions = []
-    for gain_db in (0, -3, -6, -10, -20):
-        case_definitions.append((gain_db, 0, "single", None))
+    case_names = {}
+
+    def add_case(tl_gain_db, br_gain_db, mode, reference_key=None):
+        """登记条件，并将物理对照键转换为本批次的用例名称。"""
+        reference_name = (
+            None if reference_key is None else case_names[reference_key]
+        )
+        case_definitions.append((tl_gain_db, br_gain_db, mode, reference_name))
+        # 相同条件可属于不同分类，对照统一引用首次登记的条件。
+        case_names.setdefault(
+            (tl_gain_db, br_gain_db, mode), f"TC-{len(case_definitions):03d}"
+        )
+
+    for gain_db in range(0, -11, -1):
+        reference = None if gain_db == 0 else (0, 0, "single")
+        add_case(gain_db, 0, "single", reference)
     modes = ("egc", "egc_strict", "mvdr")
-    case_definitions.extend((0, 0, mode, None) for mode in modes)
+    for mode in modes:
+        add_case(0, 0, mode)
+    # 共同衰减与同算法的零增益基准比较。
     for gain_db in (-3, -6, -10, -20):
-        case_definitions.extend((gain_db, gain_db, mode, f"TC-{6 + modes.index(mode):03d}")
-                           for mode in modes)
+        for mode in modes:
+            add_case(gain_db, gain_db, mode, (0, 0, mode))
     for gain_db in (0, -3, -6, -10, -20, -40):
-        case_definitions.extend((0, gain_db, mode, None) for mode in modes)
-    for gain_db, swapped_reference_start in ((-6, 27), (-20, 33)):
-        case_definitions.extend((gain_db, 0, mode, f"TC-{swapped_reference_start + modes.index(mode):03d}")
-                           for mode in modes)
+        for mode in modes:
+            add_case(0, gain_db, mode)
+    # 强弱交换与相同增益、相同算法的交换前条件比较。
+    for gain_db in (-6, -20):
+        for mode in modes:
+            add_case(gain_db, 0, mode, (0, gain_db, mode))
 
     cases = []
     for seed in SEEDS:
@@ -91,8 +113,6 @@ def _pattern_gain_cases() -> list[ValidationCase]:
             antenna_gains_db = {"TL": tl_gain_db, "BR": br_gain_db}
             case_cfg.phone.antenna_model.true_state.amplitude_error_db = antenna_gains_db.copy()
             case_cfg.phone.antenna_model.assumed_state.amplitude_error_db = antenna_gains_db.copy()
-            if 2 <= case_number <= 5:
-                reference_case_name = "TC-001"
             cases.append(ValidationCase(
                 name=f"TC-{case_number:03d}", config=case_cfg, scene_label="noise_only",
                 series_label=mode, scan_label="test case", scan_value=case_number,
@@ -101,10 +121,75 @@ def _pattern_gain_cases() -> list[ValidationCase]:
     return cases
 
 
+def _coupling_paths(magnitude_db: float | None, phase_deg: float | None) -> tuple[CouplingPath, ...]:
+    """复数电压传递系数按两个有向路径写入；None 明确表示不互耦。"""
+    if magnitude_db is None:
+        return ()
+    return (
+        CouplingPath("TL", "BR", magnitude_db, phase_deg),
+        CouplingPath("BR", "TL", magnitude_db, phase_deg),
+    )
+
+
+def _coupling_config(
+    seed: int, duration_ms: int,
+    true_db: float | None, true_phase_deg: float | None,
+    assumed_db: float | None, assumed_phase_deg: float | None,
+):
+    """从干净默认配置生成物理和名义互耦独立的双天线、无干扰条件。"""
+    cfg = default_config()
+    cfg.random_seed = seed
+    cfg.signal.duration_ms = duration_ms
+    cfg.tracking.max_epochs = duration_ms
+    cfg.phone.active_antennas = ("TL", "BR")
+    cfg.interferers = []
+    cfg.signal.true_direction = Direction(30.0, 60.0)
+    cfg.signal.assumed_direction = Direction(30.0, 60.0)
+    cfg.phone.antenna_model.true_state.coupling_paths = _coupling_paths(true_db, true_phase_deg)
+    cfg.phone.antenna_model.assumed_state.coupling_paths = _coupling_paths(assumed_db, assumed_phase_deg)
+    return cfg
+
+
+def _coupling_cases() -> list[ValidationCase]:
+    """12 个物理/名义条件各运行四种合并方法，编号不随 seed 变化。"""
+    conditions = (
+        ("MC-008", None, None, None, None),
+        ("MC-009", -30.0, 0.0, -30.0, 0.0),
+        ("MC-010", -20.0, 0.0, -20.0, 0.0),
+        ("MC-011", -10.0, 0.0, -10.0, 0.0),
+        ("MC-012", -10.0, 90.0, -10.0, 90.0),
+        ("MC-013", -10.0, 180.0, -10.0, 180.0),
+        ("MC-014", -10.0, 270.0, -10.0, 270.0),
+        ("MC-015", -10.0, 90.0, None, None),
+        ("MC-016", -10.0, 90.0, -13.0, 90.0),
+        ("MC-017", -10.0, 90.0, -7.0, 90.0),
+        ("MC-018", -10.0, 90.0, -10.0, 60.0),
+        ("MC-019", -10.0, 90.0, -10.0, 120.0),
+    )
+    modes = ("single", "egc", "egc_strict", "mvdr")
+    cases = []
+    for seed in COUPLING_SEEDS:
+        for case_id, true_db, true_phase, assumed_db, assumed_phase in conditions:
+            for mode in modes:
+                cfg = _coupling_config(seed, COUPLING_DURATION_MS,
+                                       true_db, true_phase, assumed_db, assumed_phase)
+                cfg.diversity.modes = (mode,)
+                reference = None if case_id == "MC-008" else f"MC-008-{mode}"
+                cases.append(ValidationCase(
+                    name=f"{case_id}-{mode}", config=cfg,
+                    scene_label="noise_only", series_label=mode,
+                    scan_label="coupling condition", scan_value=int(case_id[3:]),
+                    scan_unit="MC", reference_case=reference, checks=("mutual_coupling",),
+                ))
+    return cases
+
+
 def build_cases() -> list[ValidationCase]:
     """选择具名条件或系列，并按 seed 顺序生成独立的最终配置。"""
     if BATCH == "pattern_gain_first44":
         return _pattern_gain_cases()
+    if BATCH == "mutual_coupling":
+        return _coupling_cases()
     cases = []
     known_case_names = set()
     selected_case_names = set(SELECTED_CASES)
@@ -140,12 +225,12 @@ def build_cases() -> list[ValidationCase]:
             )
             known_case_names.update((baseline_case.name, uncalibrated_case.name, calibrated_case.name))
             # 选准确补偿时先加入同扫描点的基准；重复点名不会重复生成条件。
-            if ((phase_series_flag and ("baseline" in PHASE_VARIANTS or "calibrated" in PHASE_VARIANTS))
-                    or baseline_case.name in selected_case_names or calibrated_case.name in selected_case_names):
+            if (phase_series_flag or baseline_case.name in selected_case_names
+                    or calibrated_case.name in selected_case_names):
                 cases.append(baseline_case)
-            if (phase_series_flag and "uncalibrated" in PHASE_VARIANTS) or uncalibrated_case.name in selected_case_names:
+            if phase_series_flag or uncalibrated_case.name in selected_case_names:
                 cases.append(uncalibrated_case)
-            if (phase_series_flag and "calibrated" in PHASE_VARIANTS) or calibrated_case.name in selected_case_names:
+            if phase_series_flag or calibrated_case.name in selected_case_names:
                 cases.append(calibrated_case)
         for azimuth_deg in TARGET_AZIMUTH_SCAN_DEG:
             # 只改真实方向，不改名义导向，研究接收机方向假设不准的影响。
@@ -190,7 +275,14 @@ def build_cases() -> list[ValidationCase]:
 
 def build_settings() -> ValidationSettings:
     """生成仅用于统计、保存与绘图的批次设置。"""
+    if BATCH == "mutual_coupling":
+        return ValidationSettings(
+            evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS,
+            output_dir=COUPLING_OUTPUT_DIR, show_plots_flag=False,
+            workers=COUPLING_WORKERS, generate_plots_flag=False,
+        )
     return ValidationSettings(
         evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS, output_dir=OUTPUT_DIR, show_plots_flag=SHOW_PLOTS_FLAG,
         workers=WORKERS if BATCH == "pattern_gain_first44" else 1,
+        generate_plots_flag=GENERATE_PLOTS_FLAG,
     )

@@ -2,6 +2,43 @@
 
 只记录实际改动、重要行为变化、最终验证和必要限制；实验细节见对应说明。以下路径除注明外均相对于 `python_sim_simplified/`，测试数字为各次修改当时的结果。
 
+## 2026-10-16 加入互耦独立验证批次
+
+- 复用validation入口，新增coupling_support集中处理7条模型检查、独立响应/权重复算和48条链路用例评分；未修改生产天线、RF或合并算法。用例使用固定MC编号和具名对照，检查名义参数变化前后实际DFE输入一致。
+- 默认BATCH改为mutual_coupling，专用配置为100 ms、seed 42～71、4进程，正式输出results/interference/mutual_coupling/；不生成图片、不弹窗。原legacy/增益批次设置保留。新增逐天线真实/名义响应增益及相位、捕获正确性、峰值比和TRK C/N₀统计。
+- 实际执行seed 42、100 ms全部48条链路与7条模型检查，保存results/interference/mutual_coupling_smoke/；171项核验通过，48条捕获位置符合本轮判据。未执行正式30 seed、1440次链路批次。当前互耦只混合信号电压，后级独立接收机热噪声不经过互耦矩阵，不能据此声称实际效率提升或真实相关噪声性能。
+- 专项命令 `python -m pytest tests/test_coupling_validation.py -q`：7 passed；完整回归 `python -B -m pytest -p no:cacheprovider -q`：198 passed、2 deselected（265.81 s）。测试仅本地保留。复现命令、单seed数值结果及解释见[互耦验证说明](docs/interference/README.md#本轮实际验证2026-10-16)。
+
+## 2026-10-15 用例汇总加入天线衰减和接收指标
+
+- case_summary.csv新增逐天线gain_db/attenuation_db列、捕获峰值比均值、TRK C/N₀均值和有效seed数。衰减为增益相反数；C/N₀缺测留空，不填0；不改仿真和核验算法。
+- 8项增益专项测试通过，含12 ms短链保存核对。已有summary.json可直接导出新增列，但当前case_summary.csv写入被占用阻止，旧文件未改变；下次正常运行自动输出。统计口径见[说明](docs/interference/README.md#用例汇总表字段)。
+- 完整回归 `python -B -m pytest -p no:cacheprovider -q`：191 passed、2 deselected（204.88 s）。
+- 用户关闭占用程序后，已从现存summary.json更新case_summary.csv，核对50行及新增字段完整；未重跑仿真，未修改原始指标或核验结论。
+
+## 2026-10-15 移除相位组别开关
+
+- 删除 `PHASE_VARIANTS` 及其筛选逻辑；legacy 相位系列包含基准、未补偿和准确补偿三组，仍可用 `SELECTED_CASES` 单独选择，准确补偿自动带基准。当前增益批次配置不变。
+- 用例构造、具名选择、基准依赖和顺序相关 9 项测试通过；未重跑仿真。
+
+## 2026-10-15 批量验证默认仅保存数据
+
+- validation新增GENERATE_PLOTS_FLAG，默认False；SHOW_PLOTS_FLAG默认False。数据、汇总表及核验文件照常保存，默认不生成图片、不弹窗；终端列出核验失败项，保留失败断言。不改变其他实验入口或仿真算法。
+- 入口测试覆盖默认跳过绘图、显式开启绘图、失败先保存并打印原因；通过。另以seed 42、12 ms运行前2条，真实入口保存汇总且无PNG，核验通过；临时输出自动清理，未覆盖研究结果或删除已有图片。使用方式见[说明](docs/interference/README.md#批量验证默认只保存数据)。
+- 全套193 passed、2 failed、2 deselected；两项旧绘图测试补充显式开启开关及完整失败样本后，3项入口/保存专项复验通过。失败列表按status筛选，不将not_applicable算成失败；未再次运行全套。
+
+## 2026-10-15 验证图改用物理横轴
+
+- 增益批次按TL增益、共同增益、BR增益及强弱交换分组，数值扫描连线、交换条件成对散点；每种指标和算法仍独立绘图。各图横轴只覆盖本方法数据，图例移至图外，标明seed数、SINGLE-TL参考及C/N₀仅统计有效估计。
+- 用现存seed 42数据重绘50张图至 `results/interference/pattern_gain_first44/physical_axes/`，未重跑仿真或覆盖原始指标；以后正常运行直接输出新格式。专项测试45 passed；详细说明见[绘图说明](docs/interference/README.md#增益验证图的横轴2026-10-15)。
+- 全套回归194 passed、2 deselected（201.39 s）；末次交换排序和标签微调后另做3项绘图专项复验通过。
+
+## 2026-10-15 修复增益扫描扩展后的对照错位
+
+- 增益用例改按TL/BR增益与算法关联对照，移除固定编号6/27/33及单天线前5条限制；保留用户当前0至−10 dB扫描、seed 42、100 ms及输出设置。
+- 配置对照复现由失败转为通过，7项增益专项测试通过。保存的500行数据仅在内存按新关联复算，50条均通过；未重跑完整仿真，未覆盖原结果。详情见[说明](docs/interference/README.md#增益扫描对照修复2026-10-15)。
+- 全套回归190 passed、2 failed、2 deselected；两项失败均为旧测试写死44条及第二点−3 dB，与用户新扫描不符。同步测试后上述7项专项复验通过，未再次运行全套。
+
 ## 2026-10-15 明确评估职责与接收代码表达
 
 - 消融实验函数改名为 `build_case_config()`、`validate_noise_model()`，明确返回配置及核验噪声模型的职责；参考使用计数、导向向量、样本标准差、捕获结果、跟踪历史和保留热噪声使用具体名称。调用方同步，旧函数名/关键字需迁移，结果文件名与字段保持不变。

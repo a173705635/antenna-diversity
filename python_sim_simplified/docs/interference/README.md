@@ -1,5 +1,169 @@
 # 抗干扰接收链实验
 
+## 互耦验证用例与实现约束（2026-10-16）
+
+目标：先验证窄带互耦实现，再区分物理互耦与名义响应失配。共55条独立用例：7条确定性模型检查，以及12个链路条件×4种算法=48条链路用例。模型检查每批一次；标准链路每条30 seed，共1440次，不把模型检查虚报为接收仿真。
+
+物理模型：`C=[[1,c],[c,1]]`，`c=10**(L/20)*exp(j*phi)`。两个交叉项是同一复数而非共轭，表示本轮互易交叉电压假设；它不是能量归一化网络、实测S参数或效率模型。无互耦用交叉系数0表示，不能用0 dB代替。当前代码在天线响应处作用C，RF接收机热噪声在后级独立加入，不经过C；本轮不引入天空噪声、外部相关噪声或互耦损耗模型。
+
+公共条件：TL/BR理想天线，阵元附加增益均0 dB；手机角点位置沿用预设，方向30°/60°，真实/名义方向一致；信号−128.5 dBm；无干扰、额外通道误差、时延、遮挡。RF/DFE与捕获跟踪沿用默认值。链路100 ms、统计去边各10 ms、seed 42～71；四算法single、egc（幅度匹配）、egc_strict（严格等幅）、mvdr。SINGLE固定TL，不随条件选择强通道。
+
+### 模型级用例：逐条定义
+
+| 用例 | 条件 | 独立预期 |
+|---|---|---|
+| MC-001 | 任意双通道复序列，无互耦 | 输出等于输入 |
+| MC-002 | 仅TL输入，双向−20 dB/0° | TL原样，BR为输入的0.1倍 |
+| MC-003 | 仅BR输入，双向−20 dB/0° | BR原样，TL为输入的0.1倍 |
+| MC-004 | 仅TL输入，双向−20 dB/90° | BR为输入的0.1j倍 |
+| MC-005 | 仅TL输入，双向−20 dB/180° | BR为输入的−0.1倍 |
+| MC-006 | 两路独立复序列，双向−10 dB/45° | 逐通道显式交叉相加，与实际矩阵输出一致 |
+| MC-007 | 同步交换物理通道顺序及矩阵行列 | 按天线名还原后输出一致 |
+
+### 链路级用例：逐条定义
+
+每行只运行名称后缀对应的一种算法，编号不是数组位置依赖；对照按条件和算法关联。无互耦对照为同算法MC-008；准确已知对照为真实物理条件相同、名义参数准确的用例。MC-015～019只改名义响应，必须以同seed的DFE输入指纹证明与MC-012实际信号完全相同。
+
+| 独立用例 | 真实交叉耦合 | 接收机名义交叉耦合 | 唯一变化／用途 |
+|---|---|---|---|
+| MC-008-single | 无互耦 | 无互耦 | 零耦合基准 |
+| MC-008-egc | 无互耦 | 无互耦 | 零耦合基准 |
+| MC-008-egc_strict | 无互耦 | 无互耦 | 零耦合基准 |
+| MC-008-mvdr | 无互耦 | 无互耦 | 零耦合基准 |
+| MC-009-single | −30 dB / 0° | 同真实 | 弱耦合，比较008 |
+| MC-009-egc | −30 dB / 0° | 同真实 | 弱耦合，比较008 |
+| MC-009-egc_strict | −30 dB / 0° | 同真实 | 弱耦合，比较008 |
+| MC-009-mvdr | −30 dB / 0° | 同真实 | 弱耦合，比较008 |
+| MC-010-single | −20 dB / 0° | 同真实 | 中等耦合，比较008 |
+| MC-010-egc | −20 dB / 0° | 同真实 | 中等耦合，比较008 |
+| MC-010-egc_strict | −20 dB / 0° | 同真实 | 中等耦合，比较008 |
+| MC-010-mvdr | −20 dB / 0° | 同真实 | 中等耦合，比较008 |
+| MC-011-single | −10 dB / 0° | 同真实 | 较强耦合，比较008 |
+| MC-011-egc | −10 dB / 0° | 同真实 | 较强耦合，比较008 |
+| MC-011-egc_strict | −10 dB / 0° | 同真实 | 较强耦合，比较008 |
+| MC-011-mvdr | −10 dB / 0° | 同真实 | 较强耦合，比较008 |
+| MC-012-single | −10 dB / 90° | 同真实 | 相位扫描及失配组基准 |
+| MC-012-egc | −10 dB / 90° | 同真实 | 相位扫描及失配组基准 |
+| MC-012-egc_strict | −10 dB / 90° | 同真实 | 相位扫描及失配组基准 |
+| MC-012-mvdr | −10 dB / 90° | 同真实 | 相位扫描及失配组基准 |
+| MC-013-single | −10 dB / 180° | 同真实 | 与011比较相位影响 |
+| MC-013-egc | −10 dB / 180° | 同真实 | 与011比较相位影响 |
+| MC-013-egc_strict | −10 dB / 180° | 同真实 | 与011比较相位影响 |
+| MC-013-mvdr | −10 dB / 180° | 同真实 | 与011比较相位影响 |
+| MC-014-single | −10 dB / 270° | 同真实 | 与012比较相位影响 |
+| MC-014-egc | −10 dB / 270° | 同真实 | 与012比较相位影响 |
+| MC-014-egc_strict | −10 dB / 270° | 同真实 | 与012比较相位影响 |
+| MC-014-mvdr | −10 dB / 270° | 同真实 | 与012比较相位影响 |
+| MC-015-single | −10 dB / 90° | 无互耦 | 完全忽略互耦，比较012 |
+| MC-015-egc | −10 dB / 90° | 无互耦 | 完全忽略互耦，比较012 |
+| MC-015-egc_strict | −10 dB / 90° | 无互耦 | 完全忽略互耦，比较012 |
+| MC-015-mvdr | −10 dB / 90° | 无互耦 | 完全忽略互耦，比较012 |
+| MC-016-single | −10 dB / 90° | −13 dB / 90° | 低估耦合幅度3 dB，比较012 |
+| MC-016-egc | −10 dB / 90° | −13 dB / 90° | 低估耦合幅度3 dB，比较012 |
+| MC-016-egc_strict | −10 dB / 90° | −13 dB / 90° | 低估耦合幅度3 dB，比较012 |
+| MC-016-mvdr | −10 dB / 90° | −13 dB / 90° | 低估耦合幅度3 dB，比较012 |
+| MC-017-single | −10 dB / 90° | −7 dB / 90° | 高估耦合幅度3 dB，比较012 |
+| MC-017-egc | −10 dB / 90° | −7 dB / 90° | 高估耦合幅度3 dB，比较012 |
+| MC-017-egc_strict | −10 dB / 90° | −7 dB / 90° | 高估耦合幅度3 dB，比较012 |
+| MC-017-mvdr | −10 dB / 90° | −7 dB / 90° | 高估耦合幅度3 dB，比较012 |
+| MC-018-single | −10 dB / 90° | −10 dB / 60° | 相位偏差−30°，比较012 |
+| MC-018-egc | −10 dB / 90° | −10 dB / 60° | 相位偏差−30°，比较012 |
+| MC-018-egc_strict | −10 dB / 90° | −10 dB / 60° | 相位偏差−30°，比较012 |
+| MC-018-mvdr | −10 dB / 90° | −10 dB / 60° | 相位偏差−30°，比较012 |
+| MC-019-single | −10 dB / 90° | −10 dB / 120° | 相位偏差+30°，比较012 |
+| MC-019-egc | −10 dB / 90° | −10 dB / 120° | 相位偏差+30°，比较012 |
+| MC-019-egc_strict | −10 dB / 90° | −10 dB / 120° | 相位偏差+30°，比较012 |
+| MC-019-mvdr | −10 dB / 90° | −10 dB / 120° | 相位偏差+30°，比较012 |
+
+### 核验与输出要求
+
+- 从位置和角度独立计算几何相位，再显式交叉相加得到真实/名义响应，与生产模型核对；不能再次调用同一响应函数冒充独立复算。
+- 固定实际接收权值，按独立响应、源标量功率和热噪声样本协方差计算 `P*abs(wᴴa)**2/(wᴴRn*w)`，对照线性分量实测SNR。量化/限幅残差独立保留，不混入热噪声。
+- 独立核对算法权值与名义响应约束；失配时真实目标响应可偏离1，作为性能结果记录，不能据此直接判实现失败。
+- 报告相对无耦合及准确已知条件的配对SNR变化；不预设耦合一定有害，也不要求MVDR等于幅度匹配。
+- 每条保存真实/名义耦合强度和相位、各阵元耦合前后增益和相位、目标/热噪声功率、SNR及复算偏差、捕获峰值比、过门限次数与正确捕获次数、TRK C/N₀及有效seed数。正确捕获采用过门限且码误差≤0.5 chip、多普勒误差≤半个搜索格；跟踪流程完成不等于保持锁定。
+- 默认只保存数据和表，不批量绘图。测试仅本地保存；不恢复历史多径接口，不修改物理核心模型。本轮先做模型、短链及单seed完整时长核验，标准30seed配置与实际已跑范围分开记录。
+
+实施顺序：先补模型及用例构造测试；在现有validation入口接入互耦评分和统计；检查失配物理输入相同、串并行一致、表格完整及旧批次回归；完成后由独立审查核对科学判据，再写入实际验证结果。
+
+### 运行互耦批次
+
+仍使用 `python -m experiments.interference.validation`。在validation_config.py中选择 `BATCH="mutual_coupling"`；互耦专用设置为 `COUPLING_SEEDS`、`COUPLING_DURATION_MS`、`COUPLING_WORKERS`、`COUPLING_OUTPUT_DIR`，默认30 seed、100 ms、4进程，输出 `results/interference/mutual_coupling/`。它不使用旧批次的SEEDS/OUTPUT_DIR，避免覆盖增益结果；切回legacy或pattern_gain_first44仍使用原有设置。互耦批次默认不生成或弹出图片。
+
+优先阅读 `model_checks.csv`（7行模型检查）和 `case_summary.csv`（48行接收条件汇总）；`summary.csv`记录逐seed指标，`summary.json`、`verification.json`保留独立复算与失败原因，`manifest.json`记录实际配置。接收机权值仍只来自实际DFE数据和名义响应，真值与分量仅用于接收完成后的评分。
+
+
+### 本轮实际验证（2026-10-16）
+
+已运行7条模型检查，以及seed 42、100 ms的全部48条链路用例；结果保存在 `results/interference/mutual_coupling_smoke/`，与正式30 seed输出目录分开。171项核验全部通过，48条均通过捕获门限且码相位/多普勒误差在本轮判据内；不等于已经验证持续锁定概率。未运行正式1440次链路批次。
+
+本轮最大响应复数绝对误差为5.56e−17，权重相对误差3.52e−16，独立理论与分量测量的SNR差7.11e−15 dB。MC-015～019与MC-012同seed、同算法的DFE输入指纹一致；运行前源码哈希与结果manifest一致。输出含7行model_checks、48行case_summary，未生成PNG。
+
+在此双天线几何与噪声假设下，−10 dB交叉互耦相位为0°时，EGC输出热噪声SNR相对无互耦增加约2.340 dB；180°时降低约3.133 dB。90°时TL/BR有效电压响应增益分别为−0.233/+0.977 dB，270°时交换。它们是交叉电压叠加的模型结果，不代表被动天线凭空产生功率，也不能代替效率或相关噪声研究。
+
+本轮名义响应失配的EGC/MVDR损失仅约0.002～0.024 dB（相对同物理条件的准确已知响应）。这只说明当前方向、对称互耦和失配幅度下影响较小，不能推断其他方向、非对称互耦或实际硬件也如此。单seed结果不作统计显著性结论。DFE分量功率采用数字码值平方，不标为瓦特；捕获峰值比仍为无量纲。
+
+复现本轮单seed验证（在python_sim_simplified目录，不改配置文件）：
+
+```powershell
+$env:OPENBLAS_NUM_THREADS='1'
+$env:OMP_NUM_THREADS='1'
+$env:MPLBACKEND='Agg'
+python -u -B -c 'from experiments.interference import validation_config as config; from experiments.interference import validation; config.COUPLING_SEEDS=(42,); config.COUPLING_OUTPUT_DIR=config.INTERFERENCE_RESULTS_DIR/"mutual_coupling_smoke"; validation.main()'
+```
+
+专项验证：`python -m pytest tests/test_coupling_validation.py -q`，7 passed。完整回归结果见CHANGELOG本轮记录。测试只保留本地，不强制加入版本库。
+
+## 用例汇总表字段
+
+case_summary.csv每行一个条件及算法，n为seed数；新增字段如下：
+
+- `TL_gain_db`、`BR_gain_db`及对应`*_attenuation_db`：本条各阵元注入增益/衰减，按实际天线名称生成列，衰减=−增益。例如增益−6 dB即衰减6 dB；不是包含几何、极化等因素后的总有效增益。
+- `acquisition_peak_ratio_mean`：所有seed捕获峰值比的算术均值，包含未过门限样本，无量纲，不转dB。
+- `tracking_cn0_mean_db_hz`：每seed已有“跟踪后段C/N₀中位数”的跨有效seed算术均值，单位dB-Hz；不是全历元混合平均或线性功率平均。无有效估计时留空。
+- `tracking_cn0_valid_seed_count`：有后段C/N₀估计的seed数，配合原missing_count阅读，不能把仅成功样本均值当作整体接收性能。
+
+保存流程专项8项通过，包含短链实际输出校验。此次未重跑正式批次；当前CSV被占用无法覆盖，旧文件未改动，关闭表格后可从已有summary.json导出，无须重新生成信号。
+
+后续更新：用户关闭占用程序后，已从现存summary.json重新导出case_summary.csv，50行及新增列检查通过。只更新汇总CSV，原始指标、核验结论及图片保持不变，没有重跑仿真。
+
+## 批量验证默认只保存数据
+
+`validation_config.py` 默认 `GENERATE_PLOTS_FLAG=False`、`SHOW_PLOTS_FLAG=False`：运行validation只保存原始指标、case_summary.csv汇总、配置和核验文件，不生成PNG也不弹窗。终端显示输出目录、失败项数量及名称/原因；核验失败仍先保存证据再报错。
+
+需要图片时设 `GENERATE_PLOTS_FLAG=True`；只保存图片保持 `SHOW_PLOTS_FLAG=False`，需要弹窗再设为True。此设置只影响通用validation入口，不改变full_chain等其他入口。原有图片本次未删除；下次运行仍按既有规则刷新该批次输出目录。下文生成50张图的记录是历史重绘，不再是默认行为。
+
+验证：入口专项测试覆盖默认不调用绘图、开启绘图、失败先保存并打印原因；另在临时目录用seed 42、12 ms、1 ms去边执行TC-001/002，核验通过、case_summary.csv存在、无PNG。临时产物已自动清理，未覆盖研究结果；短跑只确认输出流程，不产生性能结论。
+
+全套 `python -B -m pytest -p no:cacheprovider -q` 为193 passed、2 failed、2 deselected；失败是原绘图测试未开启新开关。调整 `test_short_saved_run_is_isolated_and_has_readable_plots` 与 `test_saved_phase_pairs_include_csv_columns_and_failed_verification`，并补齐后者的失败样本reason字段；失败列表只取status=failed，排除not_applicable。随后 `-k 'skips_plots or short_saved or saved_phase_pairs'` 三项通过，未再次运行全套。
+
+## 增益验证图的横轴（2026-10-15）
+
+增益批次的五类指标（热噪声SNR收益、目标功率收益、SINR、捕获峰值比、跟踪C/N₀）均按物理条件分图，不再把所有TC混在同一横轴：
+
+- factor_1：SINGLE的TL增益，单位dB。
+- factor_2：两路共同增益，单位dB。
+- factor_3：固定TL=0 dB时的BR增益，单位dB。
+- factor_4：强弱交换，横轴为TL/BR增益对，例如0/−6与−6/0，不连线。
+
+当前50条件生成50张图（单天线5张，其余三类各3种算法×5张）。零增益点用于共同增益及BR增益曲线的基准，交换图补上交换前的条件；同一物理条件、算法和seed去重，不重复计入均值。横轴编号仅用于原始数据追溯，绘图转换不改原始记录。其他相位/方向扫描保留原物理横轴，但范围按当前图的方法计算。
+
+图题n为该图seed数量，曲线为跨seed算术均值；C/N₀只平均有估计的样本，缺测不补零，不代表接收成功率。收益图固定相对SINGLE-TL：交换后TL变弱时，相对收益大不等于绝对输出增强。捕获峰值比保持无量纲及2.5门限，SNR收益为dB、C/N₀为dB-Hz。图例在图外，不遮住数据。
+
+本次读取现存summary.json（seed 42）直接重绘到 `results/interference/pattern_gain_first44/physical_axes/`，保留旧图及原始指标，未重跑RF/DFE/接收链；下次正常运行自动使用新图格式并按原SHOW_PLOTS_FLAG设置弹窗。45项增益与通用验证专项测试通过，已检查单天线捕获及强弱交换收益图。
+
+完整回归 `python -B -m pytest -p no:cacheprovider -q`：194 passed、2 deselected（201.39 s）。末次交换排序及标签微调后，`-k 'plot or plots'` 绘图专项3 passed；单天线C/N₀图也已检查。
+
+## 增益扫描对照修复（2026-10-15）
+
+`validation_config.py::_pattern_gain_cases()` 现在按(TL增益, BR增益, 算法)查找对照，不再写死TC编号。用户将SINGLE扫描改为0至−10 dB后，共50个条件；共同衰减基准自动指向TC-012～014，强弱交换自动指向对应的交换前条件。非零增益SINGLE均与零增益SINGLE配对。扫描仍需保留0 dB基准，以及交换实验所引用的增益点。
+
+验证：配置对照断言在修复前失败、修复后通过；`python -B -m pytest -p no:cacheprovider -q tests/test_pattern_gain_validation.py` 为7 passed。读取用户现存500行summary.json，用新配置的对照映射调用 `summarize_pattern_gain(rows, references)`，50条核验全部通过。此操作只在内存复算，未覆盖原summary/verification/manifest及图片，也未重新生成IQ。
+
+当前参数仍为100 ms、seed 42，运行入口不变。原500次文件仍保留错误对照下的判定，不能当作已经修复的报告；重新运行会使用新关联并覆盖同名输出目录。TC编号代表本批次顺序，扩展后的50条不能直接套用历史44条文档编号；下文历史结果保留当时条件。
+
+全套回归命令 `python -B -m pytest -p no:cacheprovider -q`：190 passed、2 failed、2 deselected（209.81 s）。失败为 `test_first44_builds_one_method_and_one_physical_condition_per_tc` 和 `test_short_parallel_pattern_batch_keeps_order_and_scalar_progress`，断言仍使用原44条及−3 dB第二点；同步为用户50条及−1 dB后，增益文件7项复验通过。未再次运行全套，测试仅本地保留。
+
 当前代码的布尔名称统一带 `_flag`（常量为 `_FLAG`），如 `SHOW_PLOTS_FLAG`、`success_flag`、`passed_flag`；旧结果及下文历史运行记录保留原名称。
 
 无干扰方向图研究见 [天线方向图增益验证用例](antenna_pattern_validation_cases.md)：20 个分类下共 **425 条独立用例 TC-001～TC-425**，每条固定参数、一个被测方法、明确对照和判据。TC-001～044已执行，余下381条未执行，不将扫描组记作一条用例。
@@ -498,7 +662,7 @@ print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assu
 | 选择合并方法 | `MODES`；默认 `single`、`egc`、`mvdr`、`blind_null` |
 | 修改噪声重复次数、时长和统计去边 | `SEEDS`、`DURATION_MS`、`EVALUATION_EDGE_TRIM_MS`；统计窗口应在记录内部 |
 | 扫描整通道相位 | `SELECTED_SERIES = ("phase",)`、`PHASE_ANTENNA`、`PHASE_SCAN_DEG` |
-| 选择相位补偿组别 | `BATCH = "legacy"` 时设置 `PHASE_VARIANTS`；默认 `("baseline", "uncalibrated")`，仅不补偿用 `("uncalibrated",)`，选择 `calibrated` 自动带基准；`SELECTED_CASES` 优先 |
+| 选择相位用例 | `BATCH = "legacy"` 的相位系列包含基准、未补偿、准确补偿三组；单独运行用 `SELECTED_CASES` 指定完整名称，准确补偿自动带基准 |
 | 扫描目标真实方位角 | `SELECTED_SERIES = ("direction",)`、`TARGET_AZIMUTH_SCAN_DEG` |
 | 扫描阵元真实增益 | `SELECTED_SERIES = ("gain",)`、`ELEMENT_GAIN_ANTENNA`、`ELEMENT_GAIN_SCAN_DB` |
 | 设置卫星真实/名义方向及干扰方向 | `TARGET_TRUE_DIRECTION`、`TARGET_ASSUMED_DIRECTION`、`JAMMER_DIRECTION`；角度单位为度 |

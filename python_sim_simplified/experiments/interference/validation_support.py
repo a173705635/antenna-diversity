@@ -19,6 +19,9 @@ from core.evaluation import linear_components
 from core.diversity import combine_known
 from core.metrics import circular_chip_error
 from core.pipeline import run_frontend, run_receiver
+from experiments.interference.coupling_support import (
+    coupling_row_fields, model_checks, summarize_coupling,
+)
 from experiments.paths import reset_output
 
 
@@ -51,6 +54,7 @@ class ValidationSettings:
     output_dir: Path = Path("results/interference/validation")
     show_plots_flag: bool = True
     workers: int = 1
+    generate_plots_flag: bool = False
 
 
 def pattern_gain_theory(gain_db: tuple[float, ...], mode: str) -> float:
@@ -252,6 +256,9 @@ def evaluate_case(
                                                 if mode == "mvdr" else None)
             row["pattern_mvdr_constraint_error"] = (row["pattern_response_constraint_error"]
                                                     if mode == "mvdr" else None)
+        if "mutual_coupling" in case.checks:
+            row.update(coupling_row_fields(case, frontend, channels, components,
+                                           window, weights))
         rows.append(row)
     # 即使仅运行 MVDR，也以第一根物理天线计算 SINGLE 的指标参考。
     _, reference_info = combine_known(
@@ -672,7 +679,62 @@ def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) ->
                 "reason": "independent gain, input power, weight and paired SNR checks",
             }
         verification["passed_flag"] = verification["passed_flag"] and pattern["passed_flag"]
+    if any("mutual_coupling" in case.checks for case in cases):
+        model = model_checks()
+        coupling = summarize_coupling(rows)
+        summary["model_checks"] = model
+        summary["mutual_coupling"] = coupling
+        verification["checks"].update({f"coupling_model:{name}": check
+                                       for name, check in model.items()})
+        verification["checks"].update(coupling["checks"])
+        verification["passed_flag"] = (
+            verification["passed_flag"] and coupling["passed_flag"]
+            and all(check["passed_flag"] for check in model.values())
+        )
     return summary
+
+
+def gain_plot_rows(rows: list[dict]) -> list[dict]:
+    """将双天线增益批次转为物理横轴，仅复制绘图字段，不改原始记录。
+
+    零增益点同时作为共同衰减和BR衰减的基准；交换图补上交换前条件。
+    相同物理条件的重复用例按seed去重，避免统计时重复计入。
+    """
+    swapped_gains = {
+        row["input_gain_db_by_antenna"][0] for row in rows
+        if row["mode"] != "single" and row["input_gain_db_by_antenna"][1] == 0
+        and row["input_gain_db_by_antenna"][0] != 0
+    }
+    prepared = []
+    seen = set()
+    for row in rows:
+        tl_gain, br_gain = row["input_gain_db_by_antenna"]
+        axes = []
+        if row["mode"] == "single":
+            axes.append(("TL gain", tl_gain, row["case"]))
+        else:
+            if tl_gain == br_gain:
+                axes.append(("Common antenna gain", tl_gain, row["case"]))
+            if tl_gain == 0:
+                axes.append(("BR gain (TL = 0 dB)", br_gain, row["case"]))
+            if ((tl_gain in swapped_gains and br_gain == 0)
+                    or (tl_gain == 0 and br_gain in swapped_gains)):
+                axes.append(("TL / BR gain", None, f"{tl_gain:g} / {br_gain:g}"))
+        for label, value, name in axes:
+            key = (label, row.get("scene"), row["mode"], row.get("seed"),
+                   tl_gain, br_gain)
+            if key in seen:
+                continue
+            seen.add(key)
+            prepared.append(dict(row, scan_label=label, scan_unit="dB",
+                                 scan_value=value, case=name))
+    # 交换图按衰减深度成对排列：0/-6、-6/0、0/-20、-20/0。
+    swap_rows = [row for row in prepared if row["scan_label"] == "TL / BR gain"]
+    swap_rows.sort(key=lambda row: (
+        abs(sum(row["input_gain_db_by_antenna"])),
+        -row["input_gain_db_by_antenna"][0],
+    ))
+    return [row for row in prepared if row["scan_label"] != "TL / BR gain"] + swap_rows
 
 
 def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path]:
@@ -683,6 +745,13 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
     """
     import matplotlib.pyplot as plt
 
+    # 只转换具备逐天线增益记录的原子批次；旧相位/方向扫描保持原横轴。
+    gain_batch_flag = all(
+        row["case"].startswith("TC-") and "input_gain_db_by_antenna" in row
+        for row in rows
+    )
+    if gain_batch_flag:
+        rows = gain_plot_rows(rows)
     factors = list(dict.fromkeys((row["scan_label"], row["scan_unit"]) for row in rows))
     figure_paths = []
     for factor_label, factor_unit in factors:
@@ -758,8 +827,8 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                                 ) and np.any(np.isfinite(values)):
                                     overlaps.append(f"{previous_label} = {label}")
                             plotted.append((label, points, values))
-                            # TC 编号不是连续物理量，首批原子用例只画点，不连成趋势线。
-                            atomic_cases_flag = all(row["case"].startswith("TC-") for row in selected)
+                            # 物理数值扫描可连线；TC编号和强弱交换类别只画点。
+                            atomic_cases_flag = factor_unit == "TC" or not numeric_scan_flag
                             axis.plot(points, values,
                                       linestyle=("None" if atomic_cases_flag else
                                                  ("-", "--", ":", "-.")[series_index % 4]),
@@ -773,9 +842,19 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                         xlabel = factor_label or "condition"
                         if factor_unit:
                             xlabel += f" ({factor_unit})"
-                        axis.set(title=f"{scene} / {mode}", xlabel=xlabel, ylabel=ylabel)
+                        displayed_rows = [row for row in factor_rows
+                                          if row["scene"] == scene and row["mode"] == mode]
+                        title = f"{scene} / {mode}"
+                        if gain_batch_flag:
+                            seed_count = len({row["seed"] for row in displayed_rows})
+                            title += f"\nMean across seeds (n={seed_count})"
+                            ylabel = ylabel.replace("vs SINGLE", "vs SINGLE-TL")
+                            if metric == "tracking_cn0_late_median_db_hz":
+                                title += "; available estimates only"
+                        axis.set(title=title, xlabel=xlabel, ylabel=ylabel)
                         scan_points = [row["scan_value"] for row in factor_rows
-                                       if row["scene"] == scene and row["scan_value"] is not None]
+                                       if row["scene"] == scene and row["mode"] == mode
+                                       and row["scan_value"] is not None]
                         if scan_points:
                             low, high = min(scan_points), max(scan_points)
                             padding = (high - low) * 0.03 if high != low else 0.5
@@ -798,7 +877,7 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                                           ha="center", transform=axis.transAxes)
                                 axis.set_yticks([])
                         axis.grid(alpha=0.3)
-                        axis.legend(fontsize=9, loc="lower right")
+                        axis.legend(fontsize=9, loc="upper left", bbox_to_anchor=(1.01, 1))
             # 序号避免自定义标签中的斜杠或不同单位导致路径/文件名冲突。
             suffix = "" if len(factors) == 1 else f"_factor_{factors.index((factor_label, factor_unit)) + 1}"
             figure_path = settings.output_dir / f"{filename}_{figure_mode}{suffix}.png"
