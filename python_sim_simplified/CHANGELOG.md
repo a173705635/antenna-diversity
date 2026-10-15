@@ -2,6 +2,12 @@
 
 只记录实际改动、重要行为变化、最终验证和必要限制；实验细节见对应说明。以下路径除注明外均相对于 `python_sim_simplified/`，测试数字为各次修改当时的结果。
 
+## 2026-10-15 统一前端与按需分量评估
+
+- 沿用 FULLCHAIN 的公共链路，旧相位入口也改用 `core/pipeline.py`；三份分量分析统一到 `core/evaluation.py`，实际接收与分析复用 `core/dfe.py` 的线性处理，实验保留各自配置和评分口径。
+- 默认只运行实际链；精确评估通过 `retain_analysis=True` 保留本次 RF 热噪声，不再重抽噪声或重复设计 DFE 滤波器。保留原物理顺序、独立 ADC 重建、交叉项和联合非线性/量化残差，不将线性分量和冒充真实输出。
+- 完整回归 **164 passed、2 deselected**；十组实际链指纹、138 行实验结果与改前完全一致，另以旧代码独立核对 16 组/48 个分量数组一致。条件、命令与本地证据见[重构验证](docs/interference/README.md#本次重构数值对照)；未重跑完整历史研究批次。
+
 ## 2026-10-15 通用验证入口中文注释完善
 
 - 为 `experiments/interference/` 下的 `validation_config.py`、`validation.py`、`validation_support.py` 补充中文说明，解释条件选择、真实/名义参数、相位补偿、功率预算、配对核验和绘图统计。

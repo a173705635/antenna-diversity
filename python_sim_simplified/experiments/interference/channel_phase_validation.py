@@ -8,7 +8,7 @@
 接收只使用名义目标导向；真实目标/干扰分量只用于事后评分。
 """
 
-from dataclasses import asdict, replace
+from dataclasses import asdict
 import csv
 import json
 from pathlib import Path
@@ -20,16 +20,12 @@ if __package__ in (None, ''):
 
 import numpy as np
 
-from core.acquisition import acquire
-from core.dfe import process_dfe
-from core.diversity import combine_known
-from core.gnss import generate_scenario
+from core.evaluation import linear_components
 from core.metrics import circular_chip_error
+from core.pipeline import run_frontend, run_receiver
 from core.presets import default_config
 from core.provenance import source_hashes
-from core.rf import filter_rf_input, generate_rf_noise, process_rf
 from core.serialization import serializable
-from core.tracking import track
 from experiments.paths import INTERFERENCE_RESULTS, reset_output
 
 
@@ -101,84 +97,6 @@ def _case_channels(baseline, antennas, phase_deg):
             'calibrated': calibrated}
 
 
-def _linear_components(cfg, scene_input_v, truth, rf_info, dfe_info):
-    """独立重放线性分量；返回与实际 DFE 输出相同长度和码值单位的矩阵。
-
-    scene_input_v 为天线端电压，rf_info/dfe_info 来自已运行的实际前端。
-    这里只重放线性滤波与增益，不把限幅/量化误差塞入目标或热噪声。
-    实际 DFE 与线性分量总和的差，会在评分阶段单列为联合残差。
-    """
-    fs_hz = cfg.signal.fs_rf_hz
-    # 处理的是复电压，因此 dB 增益除以 20；通道 RF 相位也随线性分量重放。
-    gain = 10.0 ** (np.asarray(rf_info['channel_total_gain_db']) / 20.0)
-    gain = gain * np.exp(1j * np.deg2rad(rf_info['phase_error_deg']))
-    # 只对评分副本关闭 DFE 输出量化；实际接收链配置不变。
-    float_cfg = replace(cfg.dfe, output_bits=0)
-
-    def linear_dfe(filtered_voltage):
-        """RF 滤后电压 → 理想 ADC 码值 → 浮点 DFE → 实际输出码值尺度。"""
-        # 除以 ADC 每码对应的伏特数，将模拟电压换成未舍入的 ADC 码值。
-        adc_units = filtered_voltage * gain[:, None] / rf_info['adc_lsb_v']
-        values, _ = process_dfe(adc_units, float_cfg, fs_hz, cfg.signal.if_hz)
-        # 实际 DFE 的输出移位会改变码值尺度；评分也除以同一尺度才能比较功率。
-        return values / dfe_info['output_scale']
-
-    # 各分量单独通过与实际前端相同的 RF 滤波器、DDC 和抽取滤波器。
-    target_filtered = filter_rf_input(
-        truth['desired_component'], rf_info['filter_coefficients'],
-        fs_hz, cfg.signal.if_hz,
-    )
-    target = linear_dfe(target_filtered)
-    if cfg.interferers:
-        cw_filtered = filter_rf_input(
-            truth['interferer_components'][0], rf_info['filter_coefficients'],
-            fs_hz, cfg.signal.if_hz,
-        )
-        cw = linear_dfe(cw_filtered)
-    else:
-        # 无干扰场景的 CW 分量物理上为零，不是文件/配置失败时的默认回退。
-        cw = np.zeros_like(target)
-    # 相同 seed、通道名和滤波参数重建同一份 RF 热噪声，而不是另抽一次噪声。
-    thermal_voltage = generate_rf_noise(
-        scene_input_v.shape[1], rf_info['noise_psd_w_per_hz'],
-        cfg.reference_impedance_ohm, fs_hz, cfg.signal.if_hz,
-        cfg.phone.active_antennas, cfg.random_seed,
-        rf_info['filter_coefficients'],
-    )
-    thermal = linear_dfe(thermal_voltage)
-    return {'target': target, 'cw': cw, 'thermal': thermal}
-
-
-def _receive(channels, steering, cfg, fs_out_hz):
-    """调用公共接收算法；fs_out_hz 单位为 Hz，steering 为名义目标导向。
-
-    每个方法返回 (合并序列, 合并信息, 捕获结果, 跟踪结果)。
-    三组均使用基准导向：未补组故意存在失配；补偿组已校正输入，不再改导向。
-    """
-    branches = {}
-    for mode in MODES:
-        # MVDR 从当前实际数据求协方差；没有把分离的真目标/CW/噪声交给合并器。
-        combined, combining = combine_known(
-            channels, steering, mode, cfg.diversity.diagonal_loading_factor
-        )
-        acquisition = acquire(
-            combined, fs_out_hz, cfg.signal.prn, cfg.signal.code_rate_hz,
-            cfg.acquisition,
-        )
-        if acquisition['success']:
-            # 捕获提供码相位和多普勒初值，成功后才进入公共 DLL/PLL 跟踪。
-            tracking = track(
-                combined, fs_out_hz, cfg.signal.prn, acquisition,
-                cfg.tracking, cfg.signal.carrier_hz, cfg.signal.code_rate_hz,
-            )
-        else:
-            # 这是接收机的正常失捕状态；不伪造跟踪值，也不调整门限强行成功。
-            tracking = {'success': False, 'status': 'acquisition_failed',
-                        'prompt': np.array([], dtype=complex)}
-        branches[mode] = (combined, combining, acquisition, tracking)
-    return branches
-
-
 def _power(values):
     """样本平均模平方；输入是 DFE 码值时，单位为码值平方，而不是瓦特。"""
     return float(np.mean(np.abs(values) ** 2))
@@ -193,9 +111,12 @@ def _score_branch(channels, components, branch, cfg, fs_out_hz, trim_ms):
     """接收完成后，以实际求出的固定权值独立核算一个方法的指标。
 
     channels 是该组实际 DFE 输入；components 是同组线性分量；
-    branch 是 _receive 返回的四元组。trim_ms 只作用于功率统计窗口。
+    branch 是公共 run_receiver 返回的记录。trim_ms 只作用于功率统计窗口。
     """
-    combined, combining, acquisition, tracking = branch
+    combined = branch['combined']
+    combining = branch['combining']
+    acquisition = branch['acquisition']
+    tracking = branch['tracking']
     weights = combining['weights']
     # 两端各去掉 trim_ms，降低滤波/补零边缘影响；所有分量采用相同窗口。
     trim = round(trim_ms * 1e-3 * fs_out_hz)
@@ -275,8 +196,7 @@ def _paired_rows(seed, scene, phase_deg, cfg, truth, baseline, dfe_info,
     # 基准接收已在外层算过一次；只对未补偿/补偿两组重新求权并接收。
     case_branches = {'baseline': baseline_branches}
     case_branches.update({
-        case: _receive(channels, truth['desired_steering_assumed'],
-                       cfg, dfe_info['fs_out_hz'])
+        case: run_receiver(channels, truth, cfg, dfe_info['fs_out_hz'])
         for case, channels in channels_by_case.items()
         if case != 'baseline'
     })
@@ -312,9 +232,9 @@ def _paired_rows(seed, scene, phase_deg, cfg, truth, baseline, dfe_info,
             )
             baseline_branch = case_branches['baseline'][mode]
             current_branch = case_branches[case][mode]
-            baseline_output = baseline_branch[0]
-            baseline_weights = baseline_branch[1]['weights']
-            current_weights = current_branch[1]['weights']
+            baseline_output = baseline_branch['combined']
+            baseline_weights = baseline_branch['combining']['weights']
+            current_weights = current_branch['combining']['weights']
             # 所有输出/权值恢复误差均与该方法自身的无误差基准比较，而非与 EGC 比。
             row.update({
                 'seed': seed, 'scene': scene, 'phase_error_deg': phase_deg,
@@ -325,7 +245,7 @@ def _paired_rows(seed, scene, phase_deg, cfg, truth, baseline, dfe_info,
                 'perturbed_antenna': PERTURBED_ANTENNA,
                 'acquisition_threshold': cfg.acquisition.threshold,
                 'steering_unchanged': bool(np.array_equal(
-                    current_branch[1]['constraint_steering'],
+                    current_branch['combining']['constraint_steering'],
                     truth['desired_steering_assumed'])),
                 'target_output_gain_db': _db_ratio(
                     row['target_power'], reference['target_power']
@@ -354,7 +274,7 @@ def _paired_rows(seed, scene, phase_deg, cfg, truth, baseline, dfe_info,
                 ),
                 'dfe_compensation_relative_error': compensated_error if case == 'calibrated' else None,
                 'calibrated_output_relative_error': float(
-                    np.linalg.norm(current_branch[0] - baseline_output) /
+                    np.linalg.norm(current_branch['combined'] - baseline_output) /
                     np.linalg.norm(baseline_output)
                 ) if case == 'calibrated' else None,
                 'calibrated_weight_relative_error': float(
@@ -497,24 +417,22 @@ def run_sweep(seeds=SEEDS, duration_ms=DURATION_MS, phases=PHASE_ERRORS_DEG,
         for scene in SCENES:
             # RF 加噪声与 ADC 量化、DFE 下变频/抽取只在本层执行，不随相位重抽噪声。
             cfg = build_config(seed, duration_ms, antennas, scene)
-            scene_input_v, truth = generate_scenario(cfg)
-            adc_codes, rf_info = process_rf(
-                scene_input_v, cfg.rf, cfg.reference_impedance_ohm, seed,
-                fs_hz=cfg.signal.fs_rf_hz, if_hz=cfg.signal.if_hz,
-                channel_ids=antennas,
-            )
-            baseline, dfe_info = process_dfe(
-                adc_codes, cfg.dfe, cfg.signal.fs_rf_hz, cfg.signal.if_hz
-            )
+            frontend = run_frontend(cfg, retain_analysis=True)
+            truth = frontend['truth']
+            baseline = frontend['dfe_channels']
+            dfe_info = frontend['dfe_info']
             # 事后评分另重建线性分量；它们不会替换实际接收输入。
-            components = _linear_components(
-                cfg, scene_input_v, truth, rf_info, dfe_info
-            )
+            shared = linear_components(frontend)
+            # 旧报告在无干扰场景仍保留零功率 CW 字段。
+            if scene == 'noise_only':
+                cw = np.zeros_like(shared['target'])
+            else:
+                cw = shared['interferer_0_CWInterferer']
+            # 保持既有 target/CW/thermal 求和顺序，避免交叉项舍入改变。
+            components = {'target': shared['target'], 'cw': cw,
+                          'thermal': shared['thermal']}
             # 缓存各方法基准接收，后续相位点共享它们，只重复保存配对结果行。
-            baseline_branches = _receive(
-                baseline, truth['desired_steering_assumed'], cfg,
-                dfe_info['fs_out_hz'],
-            )
+            baseline_branches = run_receiver(baseline, truth, cfg, dfe_info['fs_out_hz'])
             for phase_deg in phases:
                 rows.extend(_paired_rows(
                     seed, scene, phase_deg, cfg, truth, baseline, dfe_info,

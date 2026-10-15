@@ -40,7 +40,7 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 配置中的 `build_settings()` 设置种子、时长、统计窗口、条件选择、输出位置及是否弹图；`build_cases()` 返回具名条件，各条件持有独立的 `SimulationConfig`。目标真实方向使用 `cfg.signal.true_direction`，合并器假设方向使用 `cfg.signal.assumed_direction`，两者分别修改。天线组合使用 `cfg.phone.active_antennas`，第一根是 SINGLE 的参考通道；逐通道相位按天线名字典赋值。
 
-运行顺序为：场景/RF/DFE → 整通道相位与补偿 → 合并/捕获/跟踪 → 独立分量预算与核验 → 保存与绘图。公共阶段在 `core/pipeline.py`，实验条件、评分和图在 `validation_support.py`。真实方向或增益改变时重新生成对应前端；仅名义导向或 DFE 后相位变化的条件共享物理前端。
+运行顺序为：用例配置 → 信号源与天线响应 → RF → ADC → DFE → 合并/捕获/跟踪 → 评估与绘图。公共链路在 `core/pipeline.py`，共用分量分析在 `core/evaluation.py`，实验条件、统计与图留在实验层。真实方向或增益改变时重新生成前端；仅名义导向或 DFE 后相位变化的条件共享物理前端。
 
 相位补偿量由用户配置，作用于整个 DFE 复数序列。它不代表自动估相或宽带时延对齐。天线增益作用在接收机热噪声产生前，不能用 DFE 整通道缩放代替。热噪声收益、含干扰的线性 SINR、接收机跟踪 C/N₀ 分别输出；失捕与缺测保留原状态。具体参数示例和本轮验证记录见 [抗干扰说明](docs/interference/README.md)。
 
@@ -56,11 +56,13 @@ GPS 仿真定位的 `DURATION_MS` 至少为 210 ms 才包含当前首个定位�
 | 捕获、跟踪与重捕 | [acquisition.py](core/acquisition.py)、[tracking.py](core/tracking.py)、[autonomous_tracking.py](core/autonomous_tracking.py) |
 | 公共分集合并与完整链路 | [diversity.py](core/diversity.py)、[pipeline.py](core/pipeline.py) |
 | 干扰生成、场景响应与盲零陷 | [core/interference/](core/interference/) |
-| 结果结构、指标与绘图 | [models.py](core/models.py)、[metrics.py](core/metrics.py)、[plotting.py](core/plotting.py) |
+| 结果结构、分量分析、指标与绘图 | [models.py](core/models.py)、[evaluation.py](core/evaluation.py)、[metrics.py](core/metrics.py)、[plotting.py](core/plotting.py) |
 | 仿真定位与真实接收 | [gps_simulation.py](core/gps_simulation.py)、[positioning.py](core/positioning.py)、[recorded_receiver.py](core/recorded_receiver.py)、`gps_*.py` |
 | 来源哈希和显式源码冻结 | [provenance.py](core/provenance.py) |
 
-`core` 不导入实验入口或历史脚本。实验独有的参数、独立评分与统计留在实验脚本；公共接收链只包含当前维护方向所需接口。天线参数仍是合成研究假设，不能作为真实手机规格或标定结果。
+`run_end_to_end(cfg)` 默认只运行实际接收链；需要精确分量指标时传入 `retain_analysis=True`，再调用 `core.evaluation.linear_components(results)`。评估复用源真值、本次 RF 噪声和实际滤波参数，不重抽噪声，也不将分量送入合并器求权。线性分量不经过限幅/量化，其总和不等于实际输出，交叉项和联合残差分别统计。
+
+`core` 不导入实验入口或历史脚本。实验独有的参数、评分口径与统计留在实验脚本；公共接收链只包含当前维护方向所需接口。天线参数仍是合成研究假设，不能作为真实手机规格或标定结果。
 
 ## 本地备份与历史报告
 

@@ -29,6 +29,15 @@ def design_decimator(fs_in_hz, decimation, cutoff_hz, num_taps):
     }
 
 
+def linear_dfe(adc_codes: np.ndarray, info: DFEInfo) -> np.ndarray:
+    """使用本次 DFE 参数处理真实 ADC 码值或线性未量化码值。"""
+    n = np.arange(adc_codes.shape[1])
+    nco = np.exp(-1j * 2.0 * np.pi * info["if_hz"] * n / info["fs_in_hz"])
+    mixed = adc_codes * nco[None, :]
+    filtered = lfilter(info["filter_coefficients"], [1.0], mixed, axis=1)
+    return filtered[:, info["group_delay_input_samples"] :: info["decimation"]]
+
+
 def process_dfe(
     adc_codes: np.ndarray,
     cfg: DFEConfig,
@@ -43,13 +52,13 @@ def process_dfe(
     h, raw_info = design_decimator(
         fs_in_hz, cfg.decimation, cfg.cutoff_hz, cfg.num_taps
     )
-    n = np.arange(adc_codes.shape[1])
-    nco = np.exp(-1j * 2.0 * np.pi * nco_frequency_hz * n / fs_in_hz)
-    mixed = adc_codes * nco[None, :]
-    filtered = lfilter(h, [1.0], mixed, axis=1)
-    output = filtered[
-        :, raw_info["group_delay_input_samples"] :: cfg.decimation
-    ]
+    output = linear_dfe(adc_codes, {
+        "fs_in_hz": fs_in_hz,
+        "if_hz": nco_frequency_hz,
+        "filter_coefficients": h,
+        "group_delay_input_samples": raw_info["group_delay_input_samples"],
+        "decimation": cfg.decimation,
+    })
 
     output_scale = 1
     if cfg.output_bits > 0:

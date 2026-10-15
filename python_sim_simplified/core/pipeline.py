@@ -111,10 +111,11 @@ def run_end_to_end(
     cfg: SimulationConfig | None = None,
     *,
     scene: tuple[np.ndarray, ScenarioTruth] | None = None,
+    retain_analysis: bool = False,
 ) -> SimulationResults:
-    """Run the complete chain and return every stage needed for analysis."""
+    """运行完整真实链；仅在 retain_analysis=True 时保留事后评分输入。"""
 
-    results = run_frontend(cfg, scene=scene)
+    results = run_frontend(cfg, scene=scene, retain_analysis=retain_analysis)
     results["branches"] = run_receiver(
         results["dfe_channels"], results["truth"], results["config"],
         results["dfe_info"]["fs_out_hz"],
@@ -127,8 +128,9 @@ def run_frontend(
     cfg: SimulationConfig | None = None,
     *,
     scene: tuple[np.ndarray, ScenarioTruth] | None = None,
+    retain_analysis: bool = False,
 ) -> SimulationResults:
-    """Generate one physical scene and process it through RF and DFE."""
+    """生成一次场景并完成 RF/DFE；默认不保留热噪声评分数组。"""
     cfg = default_config() if cfg is None else cfg
     scene_input_v, truth = generate_scenario(cfg) if scene is None else scene
     adc_codes, rf_info = process_rf(
@@ -139,6 +141,7 @@ def run_frontend(
         fs_hz=cfg.signal.fs_rf_hz,
         if_hz=cfg.signal.if_hz,
         channel_ids=cfg.phone.active_antennas,
+        retain_analysis=retain_analysis,
     )
     dfe_channels, dfe_info = process_dfe(
         adc_codes,
@@ -146,7 +149,7 @@ def run_frontend(
         cfg.signal.fs_rf_hz,
         cfg.signal.if_hz,
     )
-    return {
+    results: SimulationResults = {
         "config": cfg,
         "truth": truth,
         "scene_input_v": scene_input_v,
@@ -157,6 +160,11 @@ def run_frontend(
         "branches": {},
         "metrics": [],
     }
+    if retain_analysis:
+        results["analysis_inputs"] = {
+            "thermal_noise_v": rf_info.pop("thermal_noise_v"),
+        }
+    return results
 
 
 def run_receiver(

@@ -83,6 +83,7 @@ def process_rf(
     fs_hz: float,
     if_hz: float,
     channel_ids: tuple[str, ...],
+    retain_analysis: bool = False,
 ) -> tuple[np.ndarray, RFInfo]:
     if x_antenna_v.ndim != 2 or x_antenna_v.shape[0] == 0:
         raise ValueError('RF input must have shape (channels, samples)')
@@ -119,7 +120,9 @@ def process_rf(
         x_antenna_v.shape[1], noise_psd_w_per_hz, reference_impedance_ohm,
         fs_hz, if_hz, channel_ids, seed, coefficients,
     )
+    # RF 滤后电压与本次热噪声相加，再经增益、通道误差、限幅和 ADC。
     before_limit = (filtered_signal + noise) * np.sqrt(total_gain_linear)
+    analysis_noise = noise if retain_analysis else None
     del filtered_signal, noise
     if np.any(amplitude_db != 0.) or np.any(phase_deg != 0.):
         before_limit *= error_response[:, None]
@@ -170,4 +173,6 @@ def process_rf(
         "adc_bits": cfg.adc_bits,
         "adc_vpp": cfg.adc_vpp,
     }
+    if retain_analysis:
+        info["thermal_noise_v"] = analysis_noise
     return adc_codes, info

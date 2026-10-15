@@ -18,12 +18,12 @@ import numpy as np
 from scipy.signal import welch
 
 from core.config import AntennaModelConfig, AntennaState, CORNER_NAMES, Direction, ParametricPattern
-from core.dfe import process_dfe
+from core.evaluation import linear_components
 from core.metrics import circular_chip_error
 from core.pipeline import run_end_to_end
 from core.presets import default_config, parametric_config
 from core.provenance import source_hashes
-from core.rf import BOLTZMANN_J_PER_K, filter_rf_input, generate_rf_noise
+from core.rf import BOLTZMANN_J_PER_K, filter_rf_input
 from core.serialization import serializable
 from experiments.paths import INTERFERENCE_RESULTS, reset_output
 
@@ -153,6 +153,7 @@ def thermal_oracle_prompt_cn0(target, thermal, truth, fs_out_hz, trim_samples):
 def evaluate_budget(results, trim_ms=10):
     """Recompute linear component powers in actual DFE-code units.
 
+    Results must retain the RF noise from the actual frontend run.
     Cross terms between linear components and the joint nonlinear/quantization
     residual remain explicit; none is relabelled as thermal noise.
     """
@@ -160,33 +161,13 @@ def evaluate_budget(results, trim_ms=10):
     info = results['rf_info']
     truth = results['truth']
     fs_hz = cfg.signal.fs_rf_hz
-    scale = results['dfe_info']['output_scale']
     lsb_v = info['adc_lsb_v']
-    voltage_gain = (10.0 ** (info['channel_total_gain_db'] / 20.0) *
-                    np.exp(1j * np.deg2rad(info['phase_error_deg'])))
-    float_dfe_cfg = replace(cfg.dfe, output_bits=0)
-
-    def linear_dfe(if_samples):
-        if_samples *= voltage_gain[:, None] / lsb_v
-        output, _ = process_dfe(if_samples, float_dfe_cfg, fs_hz, cfg.signal.if_hz)
-        return output / scale
-
-    components = {}
-    for name, source in (
-        ('target', truth['desired_component']),
-        ('cw', truth['interferer_components'][0]),
-        ('wideband', truth['interferer_components'][1]),
-    ):
-        filtered = filter_rf_input(
-            source, info['filter_coefficients'], fs_hz, cfg.signal.if_hz
-        )
-        components[name] = linear_dfe(filtered)
-
-    noise = generate_rf_noise(
-        results['scene_input_v'].shape[1], info['noise_psd_w_per_hz'],
-        cfg.reference_impedance_ohm, fs_hz, cfg.signal.if_hz,
-        cfg.phone.active_antennas, cfg.random_seed, info['filter_coefficients'],
-    )
+    shared = linear_components(results)
+    components = {'target': shared['target'],
+                  'cw': shared['interferer_0_CWInterferer'],
+                  'wideband': shared['interferer_1_WidebandInterferer'],
+                  'thermal': shared['thermal']}
+    noise = results['analysis_inputs']['thermal_noise_v']
     # Independent replay of the nonlinear ADC path checks the decomposition's
     # RF source and deterministic noise stream before quantization losses.
     filtered_scene = filter_rf_input(
@@ -217,7 +198,6 @@ def evaluate_budget(results, trim_ms=10):
     )))
     assert adc_reconstruction_error == 0.0
     del filtered_scene, before_limit, adc_input, real_codes, imag_codes
-    components['thermal'] = linear_dfe(noise)
     fs_out_hz = results['dfe_info']['fs_out_hz']
     trim = round(trim_ms * 1e-3 * fs_out_hz)
     interval = slice(trim, results['dfe_channels'].shape[1] - trim)
@@ -285,7 +265,7 @@ def _db_ratio(numerator, denominator):
 
 def run_case(cfg, case_name, context, trim_ms=10, *, scene=None):
     """Run one complete receiver, then audit its frozen combining weights."""
-    results = run_end_to_end(cfg, scene=scene)
+    results = run_end_to_end(cfg, scene=scene, retain_analysis=True)
     budgets = evaluate_budget(results, trim_ms)
     single = budgets['single']
     rows = []
@@ -339,7 +319,7 @@ def calibrate_noise(seeds=SEEDS, duration_ms=DURATION_MS):
         cfg = build_case('ideal', 'default', seed, duration_ms, ('TL',))
         cfg.interferers = []
         cfg.diversity.modes = ('single',)
-        results = run_end_to_end(cfg)
+        results = run_end_to_end(cfg, retain_analysis=True)
         info = results['rf_info']
         stage_gains = 10 ** (np.array([stage.gain_db for stage in cfg.rf.stages]) / 10.0)
         stage_noise_factors = 10 ** (
@@ -356,11 +336,7 @@ def calibrate_noise(seeds=SEEDS, duration_ms=DURATION_MS):
                           rtol=1e-12, atol=0.0)
         assert np.isclose(filter_enbw_hz, cfg.rf.noise_bandwidth_hz,
                           rtol=1e-10, atol=0.0)
-        noise = generate_rf_noise(
-            results['scene_input_v'].shape[1], info['noise_psd_w_per_hz'],
-            cfg.reference_impedance_ohm, cfg.signal.fs_rf_hz, cfg.signal.if_hz,
-            ('TL',), seed, info['filter_coefficients'],
-        )[0]
+        noise = results['analysis_inputs']['thermal_noise_v'][0]
         frequencies, spectrum = welch(
             noise, fs=cfg.signal.fs_rf_hz, nperseg=8192,
             return_onesided=False,
@@ -550,7 +526,7 @@ def main():
         'source_sha256': source_hashes(),
         'definitions': {
             'power_interval': f'Discard first and last {POWER_TRIM_MS} ms for power only; receiver processes full record.',
-            'decomposition': 'Truth target/CW/WB and regenerated thermal noise through linear RF and floating DFE, using actual frozen weights.',
+            'decomposition': 'Truth target/CW/WB and the actual retained RF thermal noise through linear RF and floating DFE, using actual frozen weights.',
             'cross_terms': 'Linear sum power minus sum of individual component powers; not thermal noise.',
             'joint_residual': 'Actual quantized DFE minus all four linear components; includes limiter, ADC and DFE quantization jointly. Actual-minus-linear power also includes linear/residual cross terms.',
             'gain_baseline': 'Same context, case and seed SINGLE actual component power.',

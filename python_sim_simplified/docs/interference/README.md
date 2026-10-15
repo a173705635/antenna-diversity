@@ -14,6 +14,25 @@ python -m experiments.interference.full_chain
 
 重跑入口只重建它自己的输出目录。已冻结的历史数据和来源清单保留原内容。
 
+## 统一实际链与按需评估（2026-10-15）
+
+参考 FULLCHAIN 的阶段组织：配置 → 源波形 → 天线响应/互耦/通道时延 → 天线端合成 → RF 滤波与热噪声 → RF 增益/幅相 → 限幅/ADC → DDC/FIR/抽取/DFE 量化 → 合并、捕获跟踪 → 评估。保留原有物理运算顺序。
+
+- `core/pipeline.py` 负责实际前端与接收；不同物理条件分别运行，名义假设和 DFE 后相位条件共享相同物理输入。GPS 多卫星接收继续共用 RF/DFE 底层函数，保留自身多星处理流程。
+- `retain_analysis=True` 仅额外保留本次实际 RF 热噪声；`core/evaluation.py::linear_components` 按需传播源真值与噪声，复用实际滤波器、NCO、抽取和码值尺度。FULLCHAIN 默认不调用此分析；精确分量功率仍需要线性滤波，不能直接从非线性输出拆分。
+- 线性分量绕过限幅及量化，固定真实接收权值后才评分；不参与求权。其相加结果与实际输出的差是联合非线性/量化残差，分量交叉项另列，不能称为独立热噪声。消融实验保留独立 ADC 重建核验。
+- 各实验的配置、统计窗口、输出字段和绘图保持原口径；共用分量传播，旧相位入口也调用公共前端/接收函数。调用 `evaluate_budget` 前需显式保留分析输入，不再事后重抽噪声。
+
+### 本次重构数值对照
+
+基准为 Git `d53e639`。`python -B tests/frontend_refactor_probe.py before` / `after`（本地测试脚本）使用 seed 42、20 ms：十组实际链覆盖理想/参数化天线、无/CW/宽带/同时干扰、RF 幅相、非负非零通道时延、软硬限幅及浮点 DFE；比较场景、ADC、DFE、各分支权值/合并/捕获/跟踪和指标，指纹完全一致。
+
+同一对照还包括 12 行天线消融、24 行直接响应、54 行旧相位和 48 行通用验证。相位点为 0/90/180°，统计去边 2 ms；通用验证包含反序 BR/TL、四种干扰集合及相位/方向/增益条件。138 行结果与核验状态全部一致；旧相位入口恢复原分量求和顺序后，交叉项与残差也严格一致。前后数据和比较结果在 `results/interference/frontend_refactor/{before,after}.pickle`、`comparison.json`。
+
+另从 Git 基准在内存加载旧分量函数和旧 DFE/RF 实现，以 4 ms、BR/TL 反序、RF 增益 3/−2 dB、相位 25/−40°、NCO 偏移 0/123 Hz、DFE 位宽 0/8、四种干扰集合核对 16 组条件，共 48 个分量数组完全一致。这是重构等价验证，不产生新的抗干扰性能结论；历史批次与来源哈希未改写。
+
+完整回归：`python -B -m pytest -p no:cacheprovider -q --basetemp=results/_pytest_frontend_refactor_final`，**164 passed、2 deselected**；覆盖实际噪声仅生成一次、非零 RF 幅相、错误噪声拒绝、残差及各入口输出。两项依赖本地冻结证据的测试按默认配置排除；未重跑 100 ms 完整研究批次或 GUI 交互。
+
 ## 天线模型与参数
 
 `full_chain.py` 顶部的 `ANTENNA_MODEL = "parametric"` 默认启用 `synthetic_phone_corner_v2`。改成 `"ideal"` 可运行原各向同性基线；公共 `default_config()` 仍保持理想模型。两种模型均支持 2～4 根天线的任意组合，在配置生成后设置 `cfg.phone.active_antennas = ("TL", "BR")` 等即可。

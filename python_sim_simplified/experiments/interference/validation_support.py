@@ -14,11 +14,10 @@ import numpy as np
 from core.antenna import antenna_response, build_antenna_model
 from core.channel_delay import delay_phase
 from core.config import SimulationConfig
-from core.dfe import process_dfe
+from core.evaluation import linear_components
 from core.diversity import combine_known
 from core.metrics import circular_chip_error
 from core.pipeline import run_frontend, run_receiver
-from core.rf import filter_rf_input, generate_rf_noise
 from core.serialization import serializable
 
 
@@ -98,47 +97,6 @@ def _assumed_steering(cfg: SimulationConfig) -> np.ndarray:
         # 这里只描述窄带载波相位，不能替代宽带码包络的序列时延对齐。
         delays_s, cfg.signal.carrier_hz + cfg.signal.doppler_hz,
     )
-
-
-def _linear_components(frontend: dict, cfg: SimulationConfig) -> dict[str, np.ndarray]:
-    """各源独立重放线性 RF/DFE，输出使用实际 DFE 的码值尺度。
-
-    相同 seed 和物理通道名重建同一热噪声。限幅/量化不在线性重放中，
-    它们与模型差异产生的联合残差在评分中单列。
-    """
-    truth = frontend["truth"]
-    rf_info = frontend["rf_info"]
-    dfe_info = frontend["dfe_info"]
-    fs_hz = cfg.signal.fs_rf_hz
-    gain = 10.0 ** (np.asarray(rf_info["channel_total_gain_db"]) / 20.0)
-    gain = gain * np.exp(1j * np.deg2rad(rf_info["phase_error_deg"]))
-    float_dfe = deepcopy(cfg.dfe)
-    float_dfe.output_bits = 0
-    # 分量预算保持线性，不能把各分量分别量化后再相加当作真实 ADC 输出。
-
-    def replay(voltage: np.ndarray, *, filtered: bool = False) -> np.ndarray:
-        """输入各天线电压 [天线, 时间]，输出与真实 DFE 同尺度的线性分量。"""
-        filtered_voltage = voltage if filtered else filter_rf_input(
-            voltage, rf_info["filter_coefficients"], fs_hz, cfg.signal.if_hz,
-        )
-        adc_units = filtered_voltage * gain[:, None] / rf_info["adc_lsb_v"]
-        # 电压除以 ADC 的 V/LSB 得码值；最后再使用实际 DFE 输出缩放系数。
-        values, _ = process_dfe(adc_units, float_dfe, fs_hz, cfg.signal.if_hz)
-        return values / dfe_info["output_scale"]
-
-    components = {"target": replay(truth["desired_component"])}
-    enabled = [source for source in cfg.interferers if source.enable]
-    for index, (source, voltage) in enumerate(zip(enabled, truth["interferer_components"])):
-        label = f"interferer_{index}_{type(source).__name__}"
-        components[label] = replay(voltage)
-    thermal_voltage = generate_rf_noise(
-        frontend["scene_input_v"].shape[1], rf_info["noise_psd_w_per_hz"],
-        cfg.reference_impedance_ohm, fs_hz, cfg.signal.if_hz,
-        cfg.phone.active_antennas, cfg.random_seed, rf_info["filter_coefficients"],
-    )
-    components["thermal"] = replay(thermal_voltage, filtered=True)
-    # 噪声生成函数已执行 RF 滤波，不能再次滤波而改变噪声带宽。
-    return components
 
 
 def _power(values: np.ndarray) -> float:
@@ -402,9 +360,9 @@ def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) ->
         _, front_cfg, _ = group[0]
         print(f"Frontend {group_index}/{len(grouped)}: seed={front_cfg.random_seed}, "
               f"conditions={len(group)}", flush=True)
-        frontend = run_frontend(front_cfg)
+        frontend = run_frontend(front_cfg, retain_analysis=True)
         # 真值分量只提供给评分，不交给合并器求权；防止使用真值改善接收结果。
-        components = _linear_components(frontend, front_cfg)
+        components = linear_components(frontend)
         remaining_references = {}
         for case, _, _ in group:
             if case.reference_case is not None:

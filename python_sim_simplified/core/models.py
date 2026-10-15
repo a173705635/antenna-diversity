@@ -59,6 +59,7 @@ class ScenarioTruth(TypedDict):
 
 
 class RFInfo(TypedDict):
+    thermal_noise_v: NotRequired[np.ndarray]
     fs_hz: float
     if_hz: float
     channel_ids: tuple[str, ...]
@@ -201,6 +202,7 @@ class MetricRecord(TypedDict):
 
 
 class SimulationResults(TypedDict):
+    analysis_inputs: NotRequired[dict[str, np.ndarray]]
     config: SimulationConfig
     truth: ScenarioTruth
     scene_input_v: np.ndarray
