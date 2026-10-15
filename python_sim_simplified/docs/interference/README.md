@@ -1,5 +1,7 @@
 # 抗干扰接收链实验
 
+无干扰方向图研究的逐条用例见 [天线方向图增益验证用例](antenna_pattern_validation_cases.md)：20 条，包含固定条件、具体参数、对照、指标、判据和覆盖边界；当前为设计，尚未按清单执行。
+
 在 `python_sim_simplified/` 目录运行：
 
 ```powershell
