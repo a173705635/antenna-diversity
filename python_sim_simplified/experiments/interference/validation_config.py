@@ -14,7 +14,7 @@ from experiments.interference.validation_support import ValidationCase, Validati
 
 # 常用编辑区：天线顺序第一根是 SINGLE 参考；可用任意两至四根物理天线。
 ANTENNAS = ("TL", "BR")
-MODES = ("single", "egc", "mvdr")
+MODES = ("single", "egc", "mvdr", "blind_null")
 SEEDS = (42, 43, 44)
 # 每个 seed 对应一次噪声实现；相同物理条件复用同一份采样做公平比较。
 DURATION_MS = 100

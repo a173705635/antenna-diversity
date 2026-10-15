@@ -19,7 +19,9 @@ if __package__ in (None, ""):
 from core.provenance import source_hashes
 from core.serialization import serializable
 from experiments.interference.validation_config import build_cases, build_settings
-from experiments.interference.validation_support import plot_validation, run_validation
+from experiments.interference.validation_support import (
+    ValidationSettings, plot_validation, run_validation,
+)
 from experiments.paths import reset_output
 
 
@@ -40,22 +42,18 @@ def _write_json(path: Path, content: object) -> None:
                                allow_nan=False), encoding="utf-8")
 
 
-def main() -> dict:
-    """完成整个批次并返回结果字典；检查失败也先保存证据，再报告失败。"""
-    settings = build_settings()
-    cases = build_cases()
-    summary = run_validation(settings, cases)
-    # 当前批次完成后刷新本入口的专用输出，避免换扫描因素后残留旧图。
+def save_results(settings: ValidationSettings, summary: dict) -> None:
+    """刷新本批次输出，保存执行配置、结果行和验收证据供追溯。"""
+    # 仿真完成后才刷新本入口的专用输出，避免换扫描因素后残留旧图。
     reset_output(settings.output_dir)
-    actual_configs = {}
-    # 条件已包含实际执行的 seed、时长和跟踪上限，直接保存原配置。
-    for case in cases:
-        actual_configs.setdefault(case.name, {})[str(case.config.random_seed)] = asdict(case.config)
     manifest = {
         # 清单用于追溯参数与代码版本，不是下一次仿真的配置输入。
         "settings": asdict(settings),
         "cases": summary["cases"],
-        "actual_receiver_configs": actual_configs,
+        # run_validation 已按条件和 seed 保存实际执行配置，直接复用。
+        "actual_receiver_configs": {
+            case["name"]: case["receiver_configs"] for case in summary["cases"]
+        },
         "dfe_phase_definition": "Whole DFE row including target, every enabled interferer, thermal noise and frontend residual; estimated phase is an externally supplied inverse rotation.",
         "source_sha256": source_hashes(),
     }
@@ -71,7 +69,15 @@ def main() -> dict:
         writer.writeheader()
         writer.writerows({key: json.dumps(value) if isinstance(value, (list, dict)) else value
                          for key, value in row.items()} for row in rows)
-    plot_validation(rows, settings)
+
+
+def main() -> dict:
+    """运行批次、保存并绘图；验收失败也先留下结果证据再报告。"""
+    settings = build_settings()
+    cases = build_cases()
+    summary = run_validation(settings, cases)
+    save_results(settings, summary)
+    plot_validation(summary["rows"], settings)
     if not summary["verification"]["passed"]:
         # 这是实验验收失败，不是接收机防御分支；不能把失败批次静默当成功。
         raise AssertionError("validation verification failed; inspect verification.json")

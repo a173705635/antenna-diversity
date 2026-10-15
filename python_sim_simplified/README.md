@@ -36,7 +36,7 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 ### 通用条件验证
 
-日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。已有参数的单点验证或单因素扫描共用这一入口，不需要再复制接收流程。
+日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。已有参数的单点验证或单因素扫描共用这一入口，不需要再复制接收流程。默认比较 SINGLE、EGC、MVDR 和 Blind Null（`blind_null`）。
 
 配置中的 `build_cases()` 一次完成条件选择、相位基准配对和种子展开，返回已写入种子、时长的独立用例；`build_settings()` 只设置统计窗口、输出位置及是否弹图。运行器直接执行用例，保存端直接记录实际配置。目标真实方向使用 `cfg.signal.true_direction`，合并器假设方向使用 `cfg.signal.assumed_direction`，两者分别修改。天线组合使用 `cfg.phone.active_antennas`，第一根是 SINGLE 的参考通道；逐通道相位按天线名字典赋值。
 

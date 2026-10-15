@@ -453,7 +453,7 @@ print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assu
 | 目的 | 配置位置 |
 |---|---|
 | 选择两至四根天线、改变顺序 | `ANTENNAS`；第一根是 SINGLE 参考 |
-| 选择合并方法 | `MODES` |
+| 选择合并方法 | `MODES`；默认 `single`、`egc`、`mvdr`、`blind_null` |
 | 修改噪声重复次数、时长和统计去边 | `SEEDS`、`DURATION_MS`、`POWER_TRIM_MS`；统计窗口应在记录内部 |
 | 扫描整通道相位 | `SELECTED_SERIES = ("phase",)`、`PHASE_ANTENNA`、`PHASE_SCAN_DEG` |
 | 扫描目标真实方位角 | `SELECTED_SERIES = ("direction",)`、`TARGET_AZIMUTH_SCAN_DEG` |
@@ -473,7 +473,7 @@ print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assu
 
 ### 2026-10-15 用例构造更新
 
-`validation_config.py` 的 `build_cases()` 一次完成系列/具名选择、相位基准配对和 seed 展开；每个最终用例的 `config` 已包含实际种子、时长及跟踪上限。运行器只按完整配置执行并复用相同物理前端，保存入口不再重建配置。默认仍是 36 个条件 × 3 个 seed × 3 种方法；两种选择都为空时生成空批次，不再隐式运行全部系列。
+`validation_config.py` 的 `build_cases()` 一次完成系列/具名选择、相位基准配对和 seed 展开；每个最终用例的 `config` 已包含实际种子、时长及跟踪上限。运行器只按完整配置执行并复用相同物理前端，保存入口不再重建配置。加入 Blind Null 后默认是 36 个条件 × 3 个 seed × 4 种方法（432 行）；两种选择都为空时生成空批次，不再隐式运行全部系列。
 
 `ValidationSettings` 只保留统计去边、输出目录和绘图开关；直接调用运行器的自定义脚本需先准备完整用例。输出行与指标字段不变；清单的 `actual_receiver_configs[条件名][seed]` 路径保留，`cases` 中的 `base_config` 改为逐 seed 的 `receiver_configs`，便于追溯实际执行参数。
 
@@ -481,11 +481,17 @@ print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assu
 
 后续简化将选择、基准配对和种子展开全部放入 `build_cases()`，删除 `prepare_cases()` 和递归遍历。专项测试 25 passed；对照提交 `efd8a1d`，全部 46 个具名条件的单选、8 种系列组合及混合/重复选择共 57 组的完整配置和顺序一致，以上 168 行对照再次严格通过。本次未重跑全套核心测试。
 
+### 2026-10-15 Blind Null 与入口整理
+
+默认 `MODES` 新增 `blind_null`。`validation.py` 的 `main()` 依次读取设置、构造用例、仿真、保存、绘图和验收；`save_results()` 集中刷新输出目录和保存清单/JSON/CSV，直接复用结果中的实际配置，不改变输出格式，验收失败仍先保存证据再报错。
+
+专项 `python -m pytest tests/test_validation.py -q`：26 passed。按上节 12 ms、seed 42/43、相位/方向/增益配置运行四方法得到 224 行，含 56 行 Blind Null；全部核验通过，原三方法的 168 行及检查与原基准严格一致。本地数据在 `results/interference/validation_blind_null/short_comparison.pickle`；未重跑完整默认批次或全套核心测试。
+
 ### 2026-10-15 绘图使用更新
 
-现在每指标、每方法独立窗口，只横排比较场景。默认 18 张图：thermal_gain、target_gain、sinr、acquisition、cn0、suppression_0 分别加方法名后缀；多个扫描因素另加 factor 后缀。热噪声收益、目标功率相对 SINGLE 的差异、SINR 用 dB；C/N₀ 用 dB-Hz。捕获峰值比保持无量纲比值，门限仍为原始门限（默认 2.5），不转 dB。跨 seed 在各图所示单位下取算术平均。
+现在每指标、每方法独立窗口，只横排比较场景。原三方法默认 18 张图，加入 Blind Null 后为 24 张：thermal_gain、target_gain、sinr、acquisition、cn0、suppression_0 分别加方法名后缀；多个扫描因素另加 factor 后缀。热噪声收益、目标功率相对 SINGLE 的差异、SINR 用 dB；C/N₀ 用 dB-Hz。捕获峰值比保持无量纲比值，门限仍为原始门限（默认 2.5），不转 dB。跨 seed 在各图所示单位下取算术平均。
 
-不同条件使用不同线型和空心标记；曲线整段在所示单位下绝对差不超过 1e-8 时注明 Overlapping，不偏移真实数据。局部交点保持原始坐标。极低功率保留实际 dB，完全抵消为负无穷，不设置虚构下限。本轮只复用已有 summary 重绘，保留原仿真 manifest。下节四张/八张是旧布局记录，当前分别为 18 张/36 张。
+不同条件使用不同线型和空心标记；曲线整段在所示单位下绝对差不超过 1e-8 时注明 Overlapping，不偏移真实数据。局部交点保持原始坐标。极低功率保留实际 dB，完全抵消为负无穷，不设置虚构下限。本轮只复用已有 summary 重绘，保留原仿真 manifest。下节四张/八张是旧布局记录，三方法更新布局后分别为 18 张/36 张；当前四方法分别为 24 张/48 张。
 
 ### 实际验证与结论（2026-10-15 完成）
 
