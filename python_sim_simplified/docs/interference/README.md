@@ -487,6 +487,12 @@ print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assu
 
 专项 `python -m pytest tests/test_validation.py -q`：26 passed。按上节 12 ms、seed 42/43、相位/方向/增益配置运行四方法得到 224 行，含 56 行 Blind Null；全部核验通过，原三方法的 168 行及检查与原基准严格一致。本地数据在 `results/interference/validation_blind_null/short_comparison.pickle`；未重跑完整默认批次或全套核心测试。
 
+### 2026-10-15 验证运行器简化
+
+`run_validation()` 负责物理分组、调用组内处理和汇总核验；`_run_physical_group()` 只返回结果行，避免上一组波形和基准分支被局部变量带入下一组。相位注入/逆补偿系数供完整 IQ 与分量共用，仍执行两步乘法；同一条件的 DFE 恢复误差不再逐方法重复计算。
+
+专项 `python -m pytest tests/test_validation.py -q`：29 passed，新增跨组数组弱引用释放、DFE 范数调用次数和 35° 两步相位逐位一致性检查。沿用上节四方法、两 seed、12 ms 的 224 行条件，完整摘要、配置及核验报告与改前严格一致；本地对照文件为 `results/interference/validation_blind_null/short_comparison.pickle` 和 `group_refactor.pickle`。未测量峰值内存或耗时降幅，未重跑完整默认批次或全套核心测试。
+
 ### 2026-10-15 绘图使用更新
 
 现在每指标、每方法独立窗口，只横排比较场景。原三方法默认 18 张图，加入 Blind Null 后为 24 张：thermal_gain、target_gain、sinr、acquisition、cn0、suppression_0 分别加方法名后缀；多个扫描因素另加 factor 后缀。热噪声收益、目标功率相对 SINGLE 的差异、SINR 用 dB；C/N₀ 用 dB-Hz。捕获峰值比保持无量纲比值，门限仍为原始门限（默认 2.5），不转 dB。跨 seed 在各图所示单位下取算术平均。

@@ -312,97 +312,110 @@ def verify_validation(rows: list[dict], cases: dict[tuple[str, int], ValidationC
             "checks": checks}
 
 
+def _run_physical_group(group: list[ValidationCase], power_trim_ms: int) -> list[dict]:
+    """复用一次物理前端，返回标量结果行；本组 IQ 和参考分支在返回时释放。"""
+    front_cfg = group[0].config
+    frontend = run_frontend(front_cfg, retain_analysis=True)
+    # 真值分量只提供给评分，不交给合并器求权；防止使用真值改善接收结果。
+    components = linear_components(frontend)
+    remaining_references = {}
+    for case in group:
+        if "phase_pair" in case.checks:
+            remaining_references[case.reference_case] = (
+                remaining_references.get(case.reference_case, 0) + 1
+            )
+    reference_data = {}
+    rows = []
+    for case in group:
+        cfg = case.config
+        seed = cfg.random_seed
+        antennas = cfg.phone.active_antennas
+        # 两次复数乘法与原注入、逆补偿顺序一致；零净相位也保留浮点残差。
+        injection_factors = np.exp(1j * np.deg2rad([
+            case.dfe_phase_deg.get(name, 0.0) for name in antennas
+        ]))[:, None]
+        channels = frontend["dfe_channels"] * injection_factors
+        if case.compensate_dfe_phase:
+            correction_factors = np.exp(1j * np.deg2rad([
+                -case.dfe_estimated_phase_deg.get(name, 0.0) for name in antennas
+            ]))[:, None]
+            channels = channels * correction_factors
+        factors = np.exp(1j * np.deg2rad([
+            case.dfe_phase_deg.get(name, 0.0) -
+            (case.dfe_estimated_phase_deg.get(name, 0.0)
+             if case.compensate_dfe_phase else 0.0)
+            for name in antennas
+        ]))
+        # 更新本条件的名义导向与相位后诊断响应；不向导向再补一次相位。
+        truth = dict(frontend["truth"])
+        truth["desired_steering_assumed"] = _assumed_steering(cfg)
+        truth["desired_steering_true"] = truth["desired_steering_true"] * factors
+        truth["interferer_steering_effective"] = [
+            steering * factors for steering in truth["interferer_steering_effective"]
+        ]
+        branches = run_receiver(channels, truth, cfg, frontend["dfe_info"]["fs_out_hz"])
+        rotated_components = {
+            name: values * injection_factors for name, values in components.items()
+        }
+        if case.compensate_dfe_phase:
+            rotated_components = {
+                name: values * correction_factors
+                for name, values in rotated_components.items()
+            }
+        case_rows = _score(
+            case, cfg, channels, rotated_components, branches,
+            frontend["dfe_info"]["fs_out_hz"], power_trim_ms, seed,
+            truth["desired_steering_assumed"],
+        )
+        if case.name in remaining_references:
+            reference_data[case.name] = (channels, branches)
+        if "phase_pair" in case.checks:
+            reference = reference_data.get(case.reference_case)
+            if reference is None:
+                dfe_input_error = None
+            else:
+                baseline_channels, baseline_branches = reference
+                dfe_input_error = float(
+                    np.linalg.norm(channels - baseline_channels)
+                    / np.linalg.norm(baseline_channels)
+                )
+            for row in case_rows:
+                row["phase_reference_available"] = reference is not None
+                row["dfe_input_relative_error"] = dfe_input_error
+                if reference is None:
+                    row["combined_relative_error"] = None
+                    row["weight_relative_error"] = None
+                    continue
+                baseline_branch = baseline_branches[row["mode"]]
+                current_branch = branches[row["mode"]]
+                row["combined_relative_error"] = float(
+                    np.linalg.norm(current_branch["combined"] - baseline_branch["combined"])
+                    / np.linalg.norm(baseline_branch["combined"])
+                )
+                row["weight_relative_error"] = float(
+                    np.linalg.norm(current_branch["combining"]["weights"]
+                                   - baseline_branch["combining"]["weights"])
+                    / np.linalg.norm(baseline_branch["combining"]["weights"])
+                )
+            remaining_references[case.reference_case] -= 1
+            if remaining_references[case.reference_case] == 0:
+                reference_data.pop(case.reference_case, None)
+        rows.extend(case_rows)
+    return rows
+
+
 def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) -> dict:
     """直接执行已准备的条件；同物理条件复用前端，大数组只保留到本组结束。"""
     # seed、真实方向和增益属于物理键；仅名义假设变化可共享 IQ。
     grouped = {}
     for case in cases:
-        cfg = case.config
-        key = _physical_key(cfg)
-        grouped.setdefault(key, []).append((case, cfg, cfg.random_seed))
+        key = _physical_key(case.config)
+        grouped.setdefault(key, []).append(case)
     rows = []
     for group_index, group in enumerate(grouped.values(), start=1):
-        _, front_cfg, _ = group[0]
-        print(f"Frontend {group_index}/{len(grouped)}: seed={front_cfg.random_seed}, "
+        print(f"Frontend {group_index}/{len(grouped)}: seed={group[0].config.random_seed}, "
               f"conditions={len(group)}", flush=True)
-        frontend = run_frontend(front_cfg, retain_analysis=True)
-        # 真值分量只提供给评分，不交给合并器求权；防止使用真值改善接收结果。
-        components = linear_components(frontend)
-        remaining_references = {}
-        for case, _, _ in group:
-            if case.reference_case is not None:
-                remaining_references[case.reference_case] = (
-                    remaining_references.get(case.reference_case, 0) + 1
-                )
-        reference_data = {}
-        for case, cfg, seed in group:
-            antennas = cfg.phone.active_antennas
-            channels = apply_dfe_phase(frontend["dfe_channels"], antennas, case.dfe_phase_deg)
-            if case.compensate_dfe_phase:
-                channels = apply_dfe_phase(channels, antennas, {
-                    name: -phase for name, phase in case.dfe_estimated_phase_deg.items()
-                })
-            factors = np.exp(1j * np.deg2rad([
-                case.dfe_phase_deg.get(name, 0.0) -
-                (case.dfe_estimated_phase_deg.get(name, 0.0)
-                 if case.compensate_dfe_phase else 0.0)
-                for name in antennas
-            ]))
-            # 更新本条件的名义导向与相位后诊断响应；不向导向再补一次相位。
-            truth = dict(frontend["truth"])
-            truth["desired_steering_assumed"] = _assumed_steering(cfg)
-            truth["desired_steering_true"] = truth["desired_steering_true"] * factors
-            truth["interferer_steering_effective"] = [
-                steering * factors for steering in truth["interferer_steering_effective"]
-            ]
-            branches = run_receiver(channels, truth, cfg, frontend["dfe_info"]["fs_out_hz"])
-            rotated_components = {
-                name: apply_dfe_phase(values, antennas, case.dfe_phase_deg)
-                for name, values in components.items()
-            }
-            if case.compensate_dfe_phase:
-                rotated_components = {
-                    name: apply_dfe_phase(values, antennas, {
-                        antenna: -phase for antenna, phase in case.dfe_estimated_phase_deg.items()
-                    }) for name, values in rotated_components.items()
-                }
-            case_rows = _score(
-                case, cfg, channels, rotated_components, branches,
-                frontend["dfe_info"]["fs_out_hz"], settings.power_trim_ms, seed,
-                truth["desired_steering_assumed"],
-            )
-            if case.name in remaining_references:
-                reference_data[case.name] = (channels, branches)
-            if "phase_pair" in case.checks:
-                reference = reference_data.get(case.reference_case)
-                for row in case_rows:
-                    row["phase_reference_available"] = reference is not None
-                    if reference is None:
-                        row["dfe_input_relative_error"] = None
-                        row["combined_relative_error"] = None
-                        row["weight_relative_error"] = None
-                        continue
-                    baseline_channels, baseline_branches = reference
-                    baseline_branch = baseline_branches[row["mode"]]
-                    current_branch = branches[row["mode"]]
-                    row["dfe_input_relative_error"] = float(
-                        np.linalg.norm(channels - baseline_channels)
-                        / np.linalg.norm(baseline_channels)
-                    )
-                    row["combined_relative_error"] = float(
-                        np.linalg.norm(current_branch["combined"] - baseline_branch["combined"])
-                        / np.linalg.norm(baseline_branch["combined"])
-                    )
-                    row["weight_relative_error"] = float(
-                        np.linalg.norm(current_branch["combining"]["weights"]
-                                       - baseline_branch["combining"]["weights"])
-                        / np.linalg.norm(baseline_branch["combining"]["weights"])
-                    )
-                remaining_references[case.reference_case] -= 1
-                if remaining_references[case.reference_case] == 0:
-                    reference_data.pop(case.reference_case, None)
-            rows.extend(case_rows)
-        del frontend, components
+        rows.extend(_run_physical_group(group, settings.power_trim_ms))
     case_summaries = {}
     for case in cases:
         summary = case_summaries.setdefault(case.name, {
