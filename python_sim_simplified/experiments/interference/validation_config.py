@@ -16,10 +16,13 @@ from experiments.interference.validation_support import ValidationCase, Validati
 ANTENNAS = ("TL", "BR")
 MODES = ("single", "egc", "mvdr")
 SEEDS = (42, 43, 44)
+# 每个 seed 对应一次噪声实现；相同物理条件复用同一份采样做公平比较。
 DURATION_MS = 100
+# 功率统计首尾各舍弃此时长，避开滤波瞬态；不裁掉送入捕获跟踪的数据。
 POWER_TRIM_MS = 10
 SHOW_PLOTS = True
 OUTPUT_DIR = INTERFERENCE_RESULTS / "validation"
+# 每次成功生成数据后刷新此目录；需要保留不同实验时修改目录名。
 
 # 单因素扫描；PHASE_ANTENNA 按物理名字定位，不使用固定行号。
 PHASE_ANTENNA = "BR"
@@ -38,11 +41,13 @@ SELECTED_CASES = ()
 
 # 基础物理方向与接收机名义假设可分别修改；扫描只覆盖下面标明的单因素。
 TARGET_TRUE_DIRECTION = Direction(30.0, 60.0)
+# Direction 的顺序为方位角、仰角，单位均为度；ASSUMED 是接收机知道的方向。
 TARGET_ASSUMED_DIRECTION = Direction(30.0, 60.0)
 JAMMER_DIRECTION = Direction(80.0, 10.0)
 
 
 def _base_config(scene: str):
+    """生成一个场景的基础接收配置；noise_only 去掉干扰，single_cw 保留首个 CW。"""
     cfg = default_config()
     cfg.phone.active_antennas = ANTENNAS
     cfg.diversity.modes = MODES
@@ -55,10 +60,13 @@ def _base_config(scene: str):
 
 
 def build_cases() -> list[ValidationCase]:
+    """构造候选条件，不执行仿真；实际运行哪些由 build_settings 选择。"""
     cases = []
     for scene in SCENES:
         base = _base_config(scene)
         for phase in PHASE_SCAN_DEG:
+            # 每个横轴点放三组：无误差基准、注入但不补偿、注入后准确逆补偿。
+            # baseline 不注入 phase，只把相同基准画到各扫描点用于配对比较。
             prefix = f"{scene}/phase_{phase}"
             common = dict(scene_label=scene, scan_label="DFE channel phase",
                           scan_value=phase, scan_unit="deg")
@@ -73,12 +81,14 @@ def build_cases() -> list[ValidationCase]:
             ))
             cases.append(ValidationCase(
                 f"{prefix}/calibrated", deepcopy(base), series_label="calibrated",
+                # 这里故意令估计相位等于真实相位，验证补偿闭环，不是自动估相。
                 dfe_phase_deg={PHASE_ANTENNA: phase},
                 dfe_estimated_phase_deg={PHASE_ANTENNA: phase},
                 compensate_dfe_phase=True, reference_case=f"{prefix}/baseline",
                 checks=("phase_pair",), **common,
             ))
         for azimuth in TARGET_AZIMUTH_SCAN_DEG:
+            # 只改真实方向，不改名义导向，研究接收机方向假设不准的影响。
             cfg = deepcopy(base)
             cfg.signal.true_direction = Direction(azimuth, cfg.signal.true_direction.elevation_deg)
             cases.append(ValidationCase(
@@ -87,6 +97,7 @@ def build_cases() -> list[ValidationCase]:
                 scan_value=azimuth, scan_unit="deg",
             ))
         for gain_db in ELEMENT_GAIN_SCAN_DB:
+            # dB 增益作用于阵元响应，6.02 dB 约为电压两倍；名义增益保持不变。
             cfg = deepcopy(base)
             cfg.phone.antenna_model.true_state.amplitude_error_db[ELEMENT_GAIN_ANTENNA] = gain_db
             cases.append(ValidationCase(
@@ -98,6 +109,7 @@ def build_cases() -> list[ValidationCase]:
 
 
 def build_settings() -> ValidationSettings:
+    """生成运行控制；显式 SELECTED_CASES 优先于按系列生成的条件列表。"""
     selected = []
     for scene in SCENES:
         if "phase" in SELECTED_SERIES:

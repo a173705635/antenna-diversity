@@ -1,4 +1,8 @@
-"""Fixed anti-interference validation entry: conditions live in validation_config.py."""
+"""通用验证固定入口：读取条件 → 仿真与核验 → 保存配置和数据 → 绘图。
+
+日常修改 validation_config.py；本文件只负责组织运行与输出，不实现接收算法。
+在 python_sim_simplified 目录运行 python -m experiments.interference.validation。
+"""
 
 from dataclasses import asdict
 import csv
@@ -9,6 +13,7 @@ import sys
 import numpy as np
 
 if __package__ in (None, ""):
+    # 支持直接运行本文件；模块方式启动时无需修改导入路径。
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from core.provenance import source_hashes
@@ -19,6 +24,7 @@ from experiments.paths import reset_output
 
 
 def _write_json(path: Path, content: object) -> None:
+    """将路径、NumPy 标量和嵌套结构转成 JSON 可保存的形式。"""
     def paths_as_text(value):
         if isinstance(value, Path):
             return str(value)
@@ -35,7 +41,7 @@ def _write_json(path: Path, content: object) -> None:
 
 
 def main() -> dict:
-    """Generate, independently score, verify, save and plot selected conditions."""
+    """完成整个批次并返回结果字典；检查失败也先保存证据，再报告失败。"""
     settings = build_settings()
     cases = build_cases()
     summary = run_validation(settings, cases)
@@ -43,6 +49,7 @@ def main() -> dict:
     reset_output(settings.output_dir)
     selected_names = {item["name"] for item in summary["cases"]}
     actual_configs = {}
+    # case 中是基础配置；清单另存每个 seed 实际使用的时长和跟踪上限。
     for case in cases:
         if case.name not in selected_names:
             continue
@@ -54,6 +61,7 @@ def main() -> dict:
             cfg["tracking"]["max_epochs"] = settings.duration_ms
             actual_configs[case.name][str(seed)] = cfg
     manifest = {
+        # 清单用于追溯参数与代码版本，不是下一次仿真的配置输入。
         "settings": asdict(settings),
         "cases": summary["cases"],
         "actual_receiver_configs": actual_configs,
@@ -61,6 +69,7 @@ def main() -> dict:
         "source_sha256": source_hashes(),
     }
     _write_json(settings.output_dir / "manifest.json", manifest)
+    # summary 用于看数值/后续重绘；verification 用于逐项查看判据及失败原因。
     _write_json(settings.output_dir / "summary.json", summary)
     _write_json(settings.output_dir / "verification.json", summary["verification"])
     rows = summary["rows"]
@@ -73,6 +82,7 @@ def main() -> dict:
                          for key, value in row.items()} for row in rows)
     plot_validation(rows, settings)
     if not summary["verification"]["passed"]:
+        # 这是实验验收失败，不是接收机防御分支；不能把失败批次静默当成功。
         raise AssertionError("validation verification failed; inspect verification.json")
     return summary
 

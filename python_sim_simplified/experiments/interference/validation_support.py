@@ -24,6 +24,11 @@ from core.serialization import serializable
 
 @dataclass
 class ValidationCase:
+    """一个实验条件：物理/接收配置 + 图上标签 + DFE 注入/补偿 + 验收项目。
+
+    scan_value 是横轴坐标，不会自动修改 config；修改物理参数由配置文件完成。
+    reference_case 指向基准条件名，checks 可选 ideal_noise 或 phase_pair。
+    """
     name: str
     config: SimulationConfig
     scene_label: str = "scenario"
@@ -32,6 +37,7 @@ class ValidationCase:
     scan_value: float | None = None
     scan_unit: str = ""
     dfe_phase_deg: dict[str, float] = field(default_factory=dict)
+    # 估计值由外部给定；只有 compensate_dfe_phase=True 时才执行逆旋转。
     dfe_estimated_phase_deg: dict[str, float] = field(default_factory=dict)
     compensate_dfe_phase: bool = False
     reference_case: str | None = None
@@ -40,6 +46,7 @@ class ValidationCase:
 
 @dataclass
 class ValidationSettings:
+    """整个批次的公共运行设置；时长和去边单位为 ms，空选择表示所有候选条件。"""
     seeds: tuple[int, ...] = (42, 43, 44)
     duration_ms: int = 100
     power_trim_ms: int = 10
@@ -53,12 +60,16 @@ def apply_dfe_phase(
 ) -> np.ndarray:
     """按天线名旋转整行 DFE 样本；单位为度，未列出的通道定义为零相位。"""
     factors = np.exp(1j * np.deg2rad([phase_deg.get(name, 0.0) for name in antennas]))
+    # channels 为 [天线数, 时间采样数]；列向量广播使整行乘同一个复系数。
+    # 目标、干扰、噪声一起旋转，不等同于只给目标导向矢量加相位。
     return channels * factors[:, None]
 
 
 def _physical_key(cfg: SimulationConfig) -> str:
     """生成物理前端的分组键；名义导向、接收控制和绘图参数不改变采样。"""
     physical = asdict(cfg)
+    # 去掉仅影响接收机假设/处理的字段，避免只改名义方向时重复生成物理 IQ。
+    # 真实增益、真实方向、seed 等仍留在键中，变化后必须重新生成前端数据。
     for name in ("assumed_direction", "assumed_polarization"):
         physical["signal"].pop(name)
     for name in ("assumed_phase_centers_m", "estimated_channel_amplitude_error_db",
@@ -84,6 +95,7 @@ def _assumed_steering(cfg: SimulationConfig) -> np.ndarray:
     if np.all(delays_s == 0.0):
         return base
     return base * delay_phase(
+        # 这里只描述窄带载波相位，不能替代宽带码包络的序列时延对齐。
         delays_s, cfg.signal.carrier_hz + cfg.signal.doppler_hz,
     )
 
@@ -102,12 +114,15 @@ def _linear_components(frontend: dict, cfg: SimulationConfig) -> dict[str, np.nd
     gain = gain * np.exp(1j * np.deg2rad(rf_info["phase_error_deg"]))
     float_dfe = deepcopy(cfg.dfe)
     float_dfe.output_bits = 0
+    # 分量预算保持线性，不能把各分量分别量化后再相加当作真实 ADC 输出。
 
     def replay(voltage: np.ndarray, *, filtered: bool = False) -> np.ndarray:
+        """输入各天线电压 [天线, 时间]，输出与真实 DFE 同尺度的线性分量。"""
         filtered_voltage = voltage if filtered else filter_rf_input(
             voltage, rf_info["filter_coefficients"], fs_hz, cfg.signal.if_hz,
         )
         adc_units = filtered_voltage * gain[:, None] / rf_info["adc_lsb_v"]
+        # 电压除以 ADC 的 V/LSB 得码值；最后再使用实际 DFE 输出缩放系数。
         values, _ = process_dfe(adc_units, float_dfe, fs_hz, cfg.signal.if_hz)
         return values / dfe_info["output_scale"]
 
@@ -122,10 +137,12 @@ def _linear_components(frontend: dict, cfg: SimulationConfig) -> dict[str, np.nd
         cfg.phone.active_antennas, cfg.random_seed, rf_info["filter_coefficients"],
     )
     components["thermal"] = replay(thermal_voltage, filtered=True)
+    # 噪声生成函数已执行 RF 滤波，不能再次滤波而改变噪声带宽。
     return components
 
 
 def _power(values: np.ndarray) -> float:
+    """复数码值均方功率（码值平方），不是瓦特；同尺度功率比可转换为 dB。"""
     return float(np.mean(np.abs(values) ** 2))
 
 
@@ -137,6 +154,7 @@ def _score(
     """固定实际接收权值，独立投影分量并用 wᴴRw 复算输出功率。"""
     trim = round(trim_ms * 1e-3 * fs_out_hz)
     window = slice(trim, channels.shape[1] - trim)
+    # 只裁评分窗口；捕获跟踪已使用完整序列。R 为各通道零时延样本协方差。
     samples = channels[:, window]
     covariance = samples @ samples.conj().T / samples.shape[1]
     rows = []
@@ -144,6 +162,7 @@ def _score(
         weights = branch["combining"]["weights"]
         output = branch["combined"][window]
         projected = {
+            # 使用接收机实际求出的同一组 w；不能对目标/干扰各自重新优化权值。
             name: weights.conj() @ values[:, window]
             for name, values in components.items()
         }
@@ -154,11 +173,13 @@ def _score(
         acquisition = branch["acquisition"]
         tracking = branch["tracking"]
         cn0 = tracking["cn0_db_hz"] if tracking["success"] else np.array([])
+        # 取跟踪后半段的有限 C/N₀ 中位数；缺测保存 None，不伪造成 0 dB-Hz。
         finite = cn0[len(cn0) // 2:]
         finite = finite[np.isfinite(finite)]
         code_estimate = (acquisition["code_phase_samples"]
                          * cfg.signal.code_rate_hz / fs_out_hz)
         quadratic = float(np.vdot(weights, covariance @ weights).real)
+        # 两条独立路径：实际合并序列均方，和输入协方差二次型 wᴴRw。
         actual = _power(output)
         rows.append({
             "case": case.name, "seed": seed, "scene": case.scene_label,
@@ -171,9 +192,11 @@ def _score(
             "interferer_powers": [{"source": name, "power": power}
                                     for name, power in interference.items()],
             "joint_nonlinear_quantization_residual_power": _power(output - linear_sum),
+            # 分量可能相关，合成均方不一定等于各均方之和；差值是交叉项。
             "linear_component_cross_power": _power(linear_sum) - sum(powers.values()),
             "actual_power": actual,
             "linear_in_band_sinr_db": float(10 * np.log10(
+                # 这里是线性分量预算，不把联合量化残差冒充独立热噪声。
                 powers["target"] / (powers["thermal"] + sum(interference.values()))
             )),
             "weight_real_imag": [[float(value.real), float(value.imag)] for value in weights],
@@ -217,6 +240,7 @@ def _score(
         row["thermal_snr_ratio"] = float(10 ** (row["thermal_snr_gain_db"] / 10))
         row["target_power_retention"] = row["target_power"] / reference_target
         row["interferer_suppression_db"] = {
+            # 参考干扰功率 / 合并后干扰功率：正值表示压制，负值表示放大。
             item["source"]: float(10 * np.log10(
                 _power(reference_weights.conj() @ components[item["source"]][:, window])
                 / item["power"]
@@ -226,6 +250,10 @@ def _score(
 
 
 def _ideal_noise_applicability(case: ValidationCase) -> str | None:
+    """检查理想 EGC 的 10log10(N) 前提；返回不适用原因，None 表示可检查。
+
+    这是理论结论的适用范围判断，不是为错误配置提供默认回退。
+    """
     cfg = case.config
     if any(source.enable for source in cfg.interferers):
         return "external interference is enabled"
@@ -256,6 +284,7 @@ def _ideal_noise_applicability(case: ValidationCase) -> str | None:
 def verify_validation(rows: list[dict], cases: dict[str, ValidationCase]) -> dict:
     """区分通过、失败、不适用；双方 C/N₀ 缺测时只核对状态，不伪造数值。"""
     checks = {}
+    # 第一层：每行检查线性合并恒等式；满足理想前提才检查 N 路热噪声收益。
     for row in rows:
         key = f'math:{row["case"]}:{row["seed"]}:{row["mode"]}'
         direct = row["combined_direct_max_abs_error"] < 1e-8
@@ -279,6 +308,7 @@ def verify_validation(rows: list[dict], cases: dict[str, ValidationCase]) -> dic
                 "reason": f"EGC thermal SNR error {error:.6g} dB; limit 0.5 dB",
             }
     indexed = {(row["case"], row["seed"], row["mode"]): row for row in rows}
+    # 第二层：同 seed、同方法与无误差基准配对，避免噪声差异混入补偿误差。
     for row in rows:
         case = cases[row["case"]]
         if "phase_pair" not in case.checks:
@@ -308,6 +338,7 @@ def verify_validation(rows: list[dict], cases: dict[str, ValidationCase]) -> dic
         baseline_cn0 = reference["tracking_cn0_late_median_db_hz"]
         comparisons["cn0_availability"] = (current_cn0 is None) == (baseline_cn0 is None)
         if current_cn0 is None and baseline_cn0 is None:
+            # 两者都没跟踪估计只能说明状态一致，不能宣称 C/N₀ 数值验证通过。
             cn0_status = "not_evaluated"
             comparisons["cn0_value"] = None
         elif current_cn0 is None or baseline_cn0 is None:
@@ -332,6 +363,7 @@ def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) ->
     by_name = {case.name: case for case in cases}
     selected = set(settings.selected_cases or by_name)
     pending = list(selected)
+    # 用户只选补偿条件时，递归带入其基准；随后仍按候选顺序整理输出。
     while pending:
         reference = by_name[pending.pop()].reference_case
         if reference is not None and reference not in selected:
@@ -371,6 +403,7 @@ def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) ->
         print(f"Frontend {group_index}/{len(grouped)}: seed={front_cfg.random_seed}, "
               f"conditions={len(group)}", flush=True)
         frontend = run_frontend(front_cfg)
+        # 真值分量只提供给评分，不交给合并器求权；防止使用真值改善接收结果。
         components = _linear_components(frontend, front_cfg)
         remaining_references = {}
         for case, _, _ in group:
@@ -460,7 +493,11 @@ def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) ->
 
 
 def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path]:
-    """按真实扫描因素分图；缺测 C/N0 保持断线，不补零。"""
+    """从结果行绘图并返回 PNG 路径；不重新仿真，也不修改原始结果。
+
+    每因素、指标、方法独立窗口，场景横排；增益/SINR 为 dB，捕获保留比值。
+    同一横轴点跨 seed 按当前显示单位取均值，缺测 C/N₀ 保持断线而非补零。
+    """
     import matplotlib.pyplot as plt
 
     factors = list(dict.fromkeys((row["scan_label"], row["scan_unit"]) for row in rows))
@@ -528,9 +565,11 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                                 else:
                                     observations = [row.get(metric) for row in matching]
                                 available = [value for value in observations if value is not None]
+                                # 这是跨 seed 的显示统计，不是把线性功率平均后再转 dB。
                                 values.append(float(np.mean(available)) if available else np.nan)
                             # 不偏移真实数据：嵌套空心标记、不同线型，并明确注明重合。
                             for previous_label, previous_points, previous_values in plotted:
+                                # 只标整条曲线数值一致；局部交点不做人工错位。
                                 if points == previous_points and np.allclose(
                                         values, previous_values, atol=1e-8, rtol=0, equal_nan=True
                                 ) and np.any(np.isfinite(values)):
