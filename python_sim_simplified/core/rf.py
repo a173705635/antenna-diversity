@@ -122,7 +122,7 @@ def process_rf(
     )
     # RF 滤后电压与本次热噪声相加，再经增益、通道误差、限幅和 ADC。
     before_limit = (filtered_signal + noise) * np.sqrt(total_gain_linear)
-    analysis_noise = noise if retain_analysis_flag else None
+    retained_thermal_noise_v = noise if retain_analysis_flag else None
     del filtered_signal, noise
     if np.any(amplitude_db != 0.) or np.any(phase_deg != 0.):
         before_limit *= error_response[:, None]
@@ -174,5 +174,5 @@ def process_rf(
         "adc_vpp": cfg.adc_vpp,
     }
     if retain_analysis_flag:
-        info["thermal_noise_v"] = analysis_noise
+        info["thermal_noise_v"] = retained_thermal_noise_v
     return adc_codes, info

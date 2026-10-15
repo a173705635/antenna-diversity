@@ -56,7 +56,7 @@ def neutral_pattern() -> ParametricPattern:
     )
 
 
-def build_case(case_name, context, seed, duration_ms, antennas):
+def build_case_config(case_name, context, seed, duration_ms, antennas):
     """Construct one receiver configuration; only named antenna factors vary."""
     cfg = default_config()
     cfg.random_seed = seed
@@ -312,11 +312,11 @@ def run_case(cfg, case_name, context, evaluation_edge_trim_ms=10, *, scene=None)
     return rows
 
 
-def calibrate_noise(seeds=SEEDS, duration_ms=DURATION_MS):
+def validate_noise_model(seeds=SEEDS, duration_ms=DURATION_MS):
     """No-interference ideal TL runs; Welch PSD is independent of RF metadata ENBW."""
     rows = []
     for seed in seeds:
-        cfg = build_case('ideal', 'default', seed, duration_ms, ('TL',))
+        cfg = build_case_config('ideal', 'default', seed, duration_ms, ('TL',))
         cfg.interferers = []
         cfg.diversity.modes = ('single',)
         results = run_end_to_end(cfg, retain_analysis_flag=True)
@@ -514,7 +514,7 @@ def _manifest_config(value):
 def main():
     output_dir = reset_output(OUTPUT_DIR)
     configurations = {
-        context: {case: _manifest_config(asdict(build_case(
+        context: {case: _manifest_config(asdict(build_case_config(
             case, context, SEEDS[0], DURATION_MS, ANTENNAS)))
                   for case in CASES}
         for context in CONTEXTS
@@ -541,19 +541,19 @@ def main():
         json.dumps(serializable(manifest), indent=2, allow_nan=False, default=str),
         encoding='utf-8'
     )
-    calibration = calibrate_noise(SEEDS, DURATION_MS)
+    noise_validation_rows = validate_noise_model(SEEDS, DURATION_MS)
     (output_dir / 'noise_calibration.json').write_text(
-        json.dumps(serializable(calibration), indent=2, allow_nan=False), encoding='utf-8'
+        json.dumps(serializable(noise_validation_rows), indent=2, allow_nan=False), encoding='utf-8'
     )
     rows = []
     for context in CONTEXTS:
         for seed in SEEDS:
             for case in CASES:
-                cfg = build_case(case, context, seed, DURATION_MS, ANTENNAS)
+                cfg = build_case_config(case, context, seed, DURATION_MS, ANTENNAS)
                 rows.extend(run_case(cfg, case, context, evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS))
                 print(context, seed, case, 'complete', flush=True)
     groups = summarize(rows)
-    summary = {'rows': rows, 'groups': groups, 'noise_calibration': calibration}
+    summary = {'rows': rows, 'groups': groups, 'noise_calibration': noise_validation_rows}
     (output_dir / 'summary.json').write_text(
         json.dumps(serializable(summary), indent=2, allow_nan=False), encoding='utf-8'
     )

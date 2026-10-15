@@ -25,7 +25,7 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 |---|---|---|
 | 通用条件验证：当前默认 TC-001～044 增益基准批次 | `python -m experiments.interference.validation` | `results/interference/pattern_gain_first44/` |
 | 完整接收链及绘图 | `python -m experiments.interference.full_chain` | `results/interference/full_chain/` |
-| 噪声标定、天线配对消融与独立功率预算 | `python -m experiments.interference.antenna_ablation` | `results/interference/antenna_ablation/` |
+| 噪声模型核验、天线配对消融与独立功率预算 | `python -m experiments.interference.antenna_ablation` | `results/interference/antenna_ablation/` |
 | 目标/CW/宽带响应直接赋值，已知/未知目标相位扫描 | `python -m experiments.interference.direct_response_boundary` | `results/interference/direct_response_boundary/` |
 | 理想双天线整通道相位误差、准确补偿与单 CW 对照 | `python -m experiments.interference.channel_phase_validation` | `results/interference/channel_phase_validation/` |
 | GPS L1 仿真码/载波浮点定位 | `python -m experiments.gps_spp` | `results/gps_spp/` |

@@ -99,7 +99,7 @@ def _power(values: np.ndarray) -> float:
 
 def evaluate_case(
     case: ValidationCase, result: dict, evaluation_edge_trim_ms: int,
-    remaining_references: dict[tuple[str, int], int],
+    remaining_reference_uses: dict[tuple[str, int], int],
     reference_data: dict[tuple[str, int], tuple[np.ndarray, dict]],
 ) -> list[dict]:
     """对一次已完成的接收独立复算分量、指标和相位配对；返回标量行。"""
@@ -282,7 +282,7 @@ def evaluate_case(
             )) for item in row["interferer_powers"]
         }
     case_key = (case.name, seed)
-    if case_key in remaining_references:
+    if case_key in remaining_reference_uses:
         # 仅保留相位配对需要的 DFE 样本、合并序列与权值。
         reference_data[case_key] = (channels, {
             mode: (branch["combined"], branch["combining"]["weights"])
@@ -316,8 +316,8 @@ def evaluate_case(
                 np.linalg.norm(current_branch["combining"]["weights"] - baseline_weights)
                 / np.linalg.norm(baseline_weights)
             )
-        remaining_references[reference_key] -= 1
-        if remaining_references[reference_key] == 0:
+        remaining_reference_uses[reference_key] -= 1
+        if remaining_reference_uses[reference_key] == 0:
             reference_data.pop(reference_key, None)
     return rows
 
@@ -343,13 +343,13 @@ def _ideal_noise_applicability(case: ValidationCase) -> str | None:
            for name in case_cfg.phone.active_antennas):
         return "DFE phases are not corrected"
     model = build_antenna_model(case_cfg.phone, case_cfg.signal.carrier_hz)
-    true, _ = antenna_response(
+    true_steering, _ = antenna_response(
         model, case_cfg.signal.true_direction, case_cfg.signal.true_polarization,
     )
-    assumed = _assumed_steering(case_cfg)
-    if not np.allclose(true, assumed, rtol=1e-12, atol=1e-12):
+    assumed_steering = _assumed_steering(case_cfg)
+    if not np.allclose(true_steering, assumed_steering, rtol=1e-12, atol=1e-12):
         return "true and assumed target manifolds differ"
-    if not np.allclose(np.abs(true), np.abs(true[0]), rtol=1e-12, atol=1e-12):
+    if not np.allclose(np.abs(true_steering), np.abs(true_steering[0]), rtol=1e-12, atol=1e-12):
         return "element target gains are not equal"
     return None
 
@@ -360,10 +360,10 @@ def _mean_interval(values: list[float]) -> dict:
     mean = float(np.mean(samples))
     if len(samples) == 1:
         return {"mean": mean, "std": None, "ci95": None}
-    standard = float(np.std(samples, ddof=1))
-    half_width = float(student_t.ppf(0.975, len(samples) - 1) * standard
+    sample_std = float(np.std(samples, ddof=1))
+    half_width = float(student_t.ppf(0.975, len(samples) - 1) * sample_std
                        / np.sqrt(len(samples)))
-    return {"mean": mean, "std": standard,
+    return {"mean": mean, "std": sample_std,
             "ci95": [mean - half_width, mean + half_width]}
 
 
@@ -609,11 +609,11 @@ def _run_evaluated_case(case: ValidationCase, evaluation_edge_trim_ms: int) -> l
 
 def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) -> dict:
     """按输入顺序独立运行各条件，仅跨条件保留相位配对的参考数组。"""
-    remaining_references = {}
+    remaining_reference_uses = {}
     for case in cases:
         if "phase_pair" in case.checks:
             key = (case.reference_case, case.config.random_seed)
-            remaining_references[key] = remaining_references.get(key, 0) + 1
+            remaining_reference_uses[key] = remaining_reference_uses.get(key, 0) + 1
     reference_data = {}
     rows = []
     if settings.workers > 1:
@@ -643,7 +643,7 @@ def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) ->
                   f"condition={case.name}", flush=True)
             result = run_case(case)
             rows.extend(evaluate_case(case, result, settings.evaluation_edge_trim_ms,
-                                      remaining_references, reference_data))
+                                      remaining_reference_uses, reference_data))
             del result
     case_summaries = {}
     for case in cases:

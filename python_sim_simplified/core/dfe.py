@@ -99,25 +99,33 @@ def process_dfe_blocks(blocks, cfg, fs_in_hz, signal_if_hz):
     NCO, FIR state, group-delay removal and decimation phase are continuous.
     A caller must start a new stream when the original capture has a gap.
     """
-    h,info=design_decimator(fs_in_hz,cfg.decimation,cfg.cutoff_hz,cfg.num_taps)
-    frequency=signal_if_hz if cfg.nco_frequency_hz is None else cfg.nco_frequency_hz
-    offset=0;state=None;channels=None
+    h, info = design_decimator(fs_in_hz, cfg.decimation, cfg.cutoff_hz, cfg.num_taps)
+    frequency = signal_if_hz if cfg.nco_frequency_hz is None else cfg.nco_frequency_hz
+    offset = 0
+    state = None
+    channels = None
     for block in blocks:
-        block=np.asarray(block)
-        if block.ndim!=2 or block.shape[1]==0:
+        block = np.asarray(block)
+        if block.ndim != 2 or block.shape[1] == 0:
             raise ValueError('DFE blocks must be nonempty channel-by-sample arrays')
         if state is None:
-            channels=block.shape[0];state=np.zeros((channels,len(h)-1),complex)
-        if block.shape[0]!=channels:raise ValueError('DFE channel count changed')
-        n=np.arange(offset,offset+block.shape[1])
-        mixed=block*np.exp(-1j*2*np.pi*frequency*n/fs_in_hz)[None,:]
-        filtered,state=lfilter(h,[1.],mixed,axis=1,zi=state)
-        first=max(offset,info['group_delay_input_samples'])
-        first+=(info['group_delay_input_samples']-first)%cfg.decimation
-        output=filtered[:,first-offset::cfg.decimation]
-        offset+=block.shape[1]
-        if cfg.output_bits>0:
-            scale=2**cfg.output_binary_shift;minimum=-(2**(cfg.output_bits-1));maximum=-minimum-1
-            output=(np.clip(_round_half_away_from_zero(output.real/scale),minimum,maximum)+
-                    1j*np.clip(_round_half_away_from_zero(output.imag/scale),minimum,maximum))
-        if output.shape[1]:yield output
+            channels = block.shape[0]
+            state = np.zeros((channels, len(h) - 1), complex)
+        if block.shape[0] != channels:
+            raise ValueError('DFE channel count changed')
+        # 块间延续 NCO 相位和 FIR 状态，并按全局采样位置确定抽取相位。
+        n = np.arange(offset, offset + block.shape[1])
+        mixed = block * np.exp(-1j * 2 * np.pi * frequency * n / fs_in_hz)[None, :]
+        filtered, state = lfilter(h, [1.], mixed, axis=1, zi=state)
+        first = max(offset, info['group_delay_input_samples'])
+        first += (info['group_delay_input_samples'] - first) % cfg.decimation
+        output = filtered[:, first - offset::cfg.decimation]
+        offset += block.shape[1]
+        if cfg.output_bits > 0:
+            scale = 2**cfg.output_binary_shift
+            minimum = -(2**(cfg.output_bits - 1))
+            maximum = -minimum - 1
+            output = (np.clip(_round_half_away_from_zero(output.real / scale), minimum, maximum)
+                      + 1j * np.clip(_round_half_away_from_zero(output.imag / scale), minimum, maximum))
+        if output.shape[1]:
+            yield output
