@@ -26,10 +26,10 @@ from core.pipeline import run_frontend, run_receiver
 from core.presets import default_config
 from core.provenance import source_hashes
 from core.serialization import serializable
-from experiments.paths import INTERFERENCE_RESULTS, reset_output
+from experiments.paths import INTERFERENCE_RESULTS_DIR, reset_output
 
 
-OUTPUT = INTERFERENCE_RESULTS / 'channel_phase_validation'
+OUTPUT_DIR = INTERFERENCE_RESULTS_DIR / 'channel_phase_validation'
 # 行顺序与此元组一致，第一根是 SINGLE 参考；扰动天线应选另一根。
 # 更换组合时同时修改 PERTURBED_ANTENNA，几何相位仍由原天线模型计算。
 ANTENNAS = ('TL', 'BR')
@@ -39,7 +39,7 @@ SEEDS = (42, 43, 44)
 DURATION_MS = 100
 PHASE_ERRORS_DEG = (0, 30, 60, 90, 120, 180)
 # 只在事后功率统计中去掉两端瞬态，不截短用于合并、捕获和跟踪的数据。
-POWER_TRIM_MS = 10
+EVALUATION_EDGE_TRIM_MS = 10
 SHOW_PLOTS_FLAG = True
 # noise_only 没有外加干扰；single_cw 只保留默认 CW，不包含宽带干扰。
 SCENES = ('noise_only', 'single_cw')
@@ -107,20 +107,20 @@ def _db_ratio(numerator, denominator):
     return float(10.0 * np.log10(numerator / denominator))
 
 
-def _score_branch(channels, components, branch, cfg, fs_out_hz, trim_ms):
+def _score_branch(channels, components, branch, cfg, fs_out_hz, evaluation_edge_trim_ms):
     """接收完成后，以实际求出的固定权值独立核算一个方法的指标。
 
     channels 是该组实际 DFE 输入；components 是同组线性分量；
-    branch 是公共 run_receiver 返回的记录。trim_ms 只作用于功率统计窗口。
+    branch 是公共 run_receiver 返回的记录。evaluation_edge_trim_ms 只作用于功率统计窗口。
     """
     combined = branch['combined']
     combining = branch['combining']
     acquisition = branch['acquisition']
     tracking = branch['tracking']
     weights = combining['weights']
-    # 两端各去掉 trim_ms，降低滤波/补零边缘影响；所有分量采用相同窗口。
-    trim = round(trim_ms * 1e-3 * fs_out_hz)
-    window = slice(trim, channels.shape[1] - trim)
+    # 两端各去掉 evaluation_edge_trim_ms，降低滤波/补零边缘影响；所有分量采用相同窗口。
+    edge_trim_samples = round(evaluation_edge_trim_ms * 1e-3 * fs_out_hz)
+    window = slice(edge_trim_samples, channels.shape[1] - edge_trim_samples)
     input_window = channels[:, window]
     output_window = combined[window]
     # 输出定义为 y=wᴴX，conj() 实现共轭；分别投影目标、CW、热噪声用于事后评分。
@@ -185,7 +185,7 @@ def _score_branch(channels, components, branch, cfg, fs_out_hz, trim_ms):
 
 
 def _paired_rows(seed, scene, phase_deg, cfg, truth, baseline, dfe_info,
-                 linear_components, baseline_branches, trim_ms):
+                 linear_components, baseline_branches, evaluation_edge_trim_ms):
     """构造同一相位点三组×三种方法的九行结果，与同一份基准配对。"""
     channels_by_case = _case_channels(baseline, cfg.phone.active_antennas, phase_deg)
     baseline_norm = np.linalg.norm(baseline)
@@ -218,7 +218,7 @@ def _paired_rows(seed, scene, phase_deg, cfg, truth, baseline, dfe_info,
         scored = {
             mode: _score_branch(channels_by_case[case], components,
                                 case_branches[case][mode], cfg,
-                                dfe_info['fs_out_hz'], trim_ms)
+                                dfe_info['fs_out_hz'], evaluation_edge_trim_ms)
             for mode in MODES
         }
         # 每组都相对同一根 SINGLE 通道比较；参考通道本轮不施加相位误差。
@@ -410,7 +410,7 @@ def verify_rows(rows):
 
 
 def run_sweep(seeds=SEEDS, duration_ms=DURATION_MS, phases=PHASE_ERRORS_DEG,
-              antennas=ANTENNAS, trim_ms=POWER_TRIM_MS):
+              antennas=ANTENNAS, evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS):
     """逐 seed/场景生成一次前端，遍历相位；返回结果行和配对核验报告。"""
     rows = []
     for seed in seeds:
@@ -436,13 +436,13 @@ def run_sweep(seeds=SEEDS, duration_ms=DURATION_MS, phases=PHASE_ERRORS_DEG,
             for phase_deg in phases:
                 rows.extend(_paired_rows(
                     seed, scene, phase_deg, cfg, truth, baseline, dfe_info,
-                    components, baseline_branches, trim_ms,
+                    components, baseline_branches, evaluation_edge_trim_ms,
                 ))
                 print(seed, scene, phase_deg, 'complete', flush=True)
     return rows, verify_rows(rows)
 
 
-def plot_summary(rows, output, phases):
+def plot_summary(rows, output_dir, phases):
     """分方法/场景绘制三张图；横轴为度，曲线不是 Monte Carlo 成功率。"""
     import matplotlib.pyplot as plt
 
@@ -476,7 +476,7 @@ def plot_summary(rows, output, phases):
             ('tracking_cn0_late_median_db_hz', 'Late finite tracking C/N0 (dB-Hz)'),
         )),
     )
-    paths = []
+    figure_paths = []
     for filename, metrics in figures:
         # 列是场景，行按“指标→方法”排列；每个坐标轴只有三组配对曲线。
         fig, axes = plt.subplots(len(metrics) * len(MODES), len(SCENES),
@@ -517,26 +517,26 @@ def plot_summary(rows, output, phases):
                     axis.grid(alpha=0.3)
                     if not (metric == 'cw_suppression_db' and scene == 'noise_only'):
                         axis.legend(fontsize=7, ncol=2)
-        path = output / f'{filename}.png'
+        figure_path = output_dir / f'{filename}.png'
         # 先保存，再按设置显示；Agg 是无 GUI 后端，不调用阻塞式弹窗。
-        fig.savefig(path, dpi=150)
-        paths.append(path)
+        fig.savefig(figure_path, dpi=150)
+        figure_paths.append(figure_path)
         if not SHOW_PLOTS_FLAG:
             plt.close(fig)
     if SHOW_PLOTS_FLAG and plt.get_backend().lower() != 'agg':
         plt.show()
-    return paths
+    return figure_paths
 
 
 def main():
     """一次完成生成、核验、结果保存和绘图；核验失败仍保留诊断结果。"""
     # 按项目惯例重建本实验自己的输出目录，不能指向其他实验或已有报告目录。
-    output = reset_output(OUTPUT)
+    output_dir = reset_output(OUTPUT_DIR)
     # 先保存实际参数和当前源码身份，方便后续判断某份结果来自哪个版本。
     # 只保存清单，不复制整套源码或大体积 IQ；输入可由配置与 seed 重建。
     manifest = {
         'seeds': SEEDS, 'duration_ms': DURATION_MS, 'phases_deg': PHASE_ERRORS_DEG,
-        'power_trim_ms': POWER_TRIM_MS, 'antennas': ANTENNAS,
+        'evaluation_edge_trim_ms': EVALUATION_EDGE_TRIM_MS, 'antennas': ANTENNAS,
         'perturbed_antenna': PERTURBED_ANTENNA,
         'injection_stage': 'DFE output',
         'injection_definition': (
@@ -559,28 +559,28 @@ def main():
         },
         'source_sha256': source_hashes(),
     }
-    (output / 'manifest.json').write_text(
+    (output_dir / 'manifest.json').write_text(
         json.dumps(serializable(manifest), indent=2, allow_nan=False, default=str),
         encoding='utf-8',
     )
     # 显式传当前顶部常量，使 main 使用修改后的条件，而非函数定义时绑定的默认值。
     rows, verification = run_sweep(SEEDS, DURATION_MS, PHASE_ERRORS_DEG,
-                                   ANTENNAS, POWER_TRIM_MS)
-    (output / 'verification.json').write_text(
+                                   ANTENNAS, EVALUATION_EDGE_TRIM_MS)
+    (output_dir / 'verification.json').write_text(
         json.dumps(serializable(verification), indent=2, allow_nan=False),
         encoding='utf-8',
     )
     # JSON 保留嵌套核验详情，CSV 提供每条件一行的表格；两者来自同一批结果。
     summary = {'rows': rows, 'verification': verification}
-    (output / 'summary.json').write_text(
+    (output_dir / 'summary.json').write_text(
         json.dumps(serializable(summary), indent=2, allow_nan=False),
         encoding='utf-8',
     )
-    with (output / 'summary.csv').open('w', newline='', encoding='utf-8') as stream:
+    with (output_dir / 'summary.csv').open('w', newline='', encoding='utf-8') as stream:
         writer = csv.DictWriter(stream, fieldnames=rows[0].keys())
         writer.writeheader()
         writer.writerows(rows)
-    plot_summary(rows, output, PHASE_ERRORS_DEG)
+    plot_summary(rows, output_dir, PHASE_ERRORS_DEG)
     # 失败也先保存结果/图，便于定位问题；非零退出防止把“跑完”误当成“通过”。
     if not verification['passed_flag']:
         raise AssertionError(f'channel phase verification failed: {verification["checks"]}')

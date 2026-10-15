@@ -11,9 +11,9 @@ import numpy as np
 from core.provenance import source_hashes, freeze_source
 from core.serialization import serializable
 from core.gps_simulation import receiver_reference, satellite_setup, build_scene, run_record
-from experiments.paths import RESULTS, reset_output
+from experiments.paths import RESULTS_DIR, reset_output
 
-OUTPUT = RESULTS/'gps_spp'
+OUTPUT_DIR = RESULTS_DIR/'gps_spp'
 DURATION_MS = 1000
 SEEDS = [3000, 3001, 3002]
 FREEZE_SOURCE_FLAG = False
@@ -21,9 +21,9 @@ FREEZE_SOURCE_FLAG = False
 def main():
     if DURATION_MS < 210:
         raise ValueError('GPS positioning is not evaluated: need at least 210 ms to include the first 200 ms observation and end margin.')
-    output = reset_output(OUTPUT)
+    output_dir = reset_output(OUTPUT_DIR)
     if FREEZE_SOURCE_FLAG:
-        freeze_source(output)
+        freeze_source(output_dir)
     hashes = source_hashes()
     satellites = satellite_setup()
     print('Generating eight GPS PRNs before shared RF/DFE...', flush=True)
@@ -40,14 +40,14 @@ def main():
                 'signal_config_last_prn': asdict(cfg.signal), 'rf_config': asdict(cfg.rf),
                 'dfe_config': asdict(cfg.dfe), 'tracking_config': asdict(cfg.tracking),
                 'source_sha256': hashes}
-    (output/'manifest.json').write_text(json.dumps(serializable(metadata), indent=2, allow_nan=False), encoding='utf-8')
+    (output_dir/'manifest.json').write_text(json.dumps(serializable(metadata), indent=2, allow_nan=False), encoding='utf-8')
     all_records = []
     for seed in SEEDS:
         result = run_record(seed, satellites, scene, cfg)
-        (output/f'seed_{seed}.json').write_text(json.dumps(serializable(result), indent=2, allow_nan=False), encoding='utf-8')
+        (output_dir/f'seed_{seed}.json').write_text(json.dumps(serializable(result), indent=2, allow_nan=False), encoding='utf-8')
         print(json.dumps(result['summary']), flush=True)
         all_records.append(result)
-    (output/'summary.json').write_text(json.dumps([r['summary'] for r in all_records], indent=2, allow_nan=False), encoding='utf-8')
+    (output_dir/'summary.json').write_text(json.dumps([r['summary'] for r in all_records], indent=2, allow_nan=False), encoding='utf-8')
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
@@ -61,7 +61,7 @@ def main():
     for axis in axes:
         axis.grid(alpha=.3)
         axis.legend()
-    fig.savefig(output/'position_error.png', dpi=160)
+    fig.savefig(output_dir/'position_error.png', dpi=160)
     plt.close(fig)
 
 

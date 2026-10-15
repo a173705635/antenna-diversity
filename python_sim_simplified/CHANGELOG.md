@@ -2,6 +2,17 @@
 
 只记录实际改动、重要行为变化、最终验证和必要限制；实验细节见对应说明。以下路径除注明外均相对于 `python_sim_simplified/`，测试数字为各次修改当时的结果。
 
+## 2026-10-15 明确用例构造中的对象命名
+
+- 验证配置与执行代码使用 `base_cfg`、`case_cfg`、`baseline_case`、`common_case_fields` 等用途明确的名称，扫描变量标明角度/增益单位；同步命名规则，配置值、用例名称与计算逻辑不变。
+- 用例构造、独立执行、配对评估和首批增益验证共 43 项测试通过。
+
+## 2026-10-15 明确路径与评估裁剪命名
+
+- 目录统一使用 `_DIR` / `_dir`，文件路径使用 `_PATH` / `_path`，如 `INTERFERENCE_RESULTS_DIR`、`OUTPUT_DIR`、`IQ_PATH`、`WEIGHTS_PATH`；实际路径、算法和默认值不变，调用方、README 与命名规则同步。
+- `POWER_TRIM_MS` 改为 `EVALUATION_EDGE_TRIM_MS`，明确评估时首尾各舍弃的毫秒数；配置键/关键字同步为 `evaluation_edge_trim_ms`、`measured_pattern_csv_path`，旧调用需改名，历史结果与归档保持原样。
+- 入口、评估、方向图、配置与录波等 93 项专项测试通过，未重跑完整实验批次。
+
 ## 2026-10-15 统一布尔命名
 
 - 当前 `core/`、`experiments/` 的自有布尔变量、参数、配置和结果字段统一为 `_flag` / `_FLAG`，调用方及命名规则同步；算法、默认配置和非布尔字段不变。新 JSON/CSV 布尔字段使用新名，历史结果与归档不迁移。

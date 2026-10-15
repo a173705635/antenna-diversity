@@ -22,17 +22,17 @@ from core.presets import default_config
 from core.provenance import source_hashes
 from core.serialization import serializable
 from experiments.interference.antenna_ablation import run_case
-from experiments.paths import INTERFERENCE_RESULTS, reset_output
+from experiments.paths import INTERFERENCE_RESULTS_DIR, reset_output
 
 
-OUTPUT = INTERFERENCE_RESULTS / 'direct_response_boundary'
+OUTPUT_DIR = INTERFERENCE_RESULTS_DIR / 'direct_response_boundary'
 ANTENNAS = CORNER_NAMES
 SEEDS = (42,)
 DURATION_MS = 100
 PHASE_ERRORS_DEG = (0, 20, 40, 60, 90, 120, 180)
 PERTURBED_ANTENNA = ANTENNAS[1]
 SHOW_PLOTS_FLAG = True
-POWER_TRIM_MS = 10
+EVALUATION_EDGE_TRIM_MS = 10
 
 # Edit each source's complete four-corner voltage gain and phase independently.
 DESIRED_GAIN_DB = {name: 0.0 for name in CORNER_NAMES}
@@ -159,7 +159,7 @@ def build_responses(phase_error_deg, *, perturbed_antenna) -> tuple[DirectRespon
 
 
 def run_sweep(seeds=SEEDS, duration_ms=DURATION_MS, phases=PHASE_ERRORS_DEG,
-              antennas=ANTENNAS, trim_ms=POWER_TRIM_MS):
+              antennas=ANTENNAS, evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS):
     """Run each paired case through the existing audited RF/DFE receiver."""
     rows = []
     for seed in seeds:
@@ -171,7 +171,7 @@ def run_sweep(seeds=SEEDS, duration_ms=DURATION_MS, phases=PHASE_ERRORS_DEG,
             for name, response in (('known_response', known),
                                    ('unmodeled_phase', mismatch)):
                 scene = generate_direct_scenario(cfg, response)
-                case_rows = run_case(cfg, name, 'direct_response', trim_ms,
+                case_rows = run_case(cfg, name, 'direct_response', evaluation_edge_trim_ms,
                                      scene=scene)
                 for row in case_rows:
                     row['phase_error_deg'] = phase
@@ -181,7 +181,7 @@ def run_sweep(seeds=SEEDS, duration_ms=DURATION_MS, phases=PHASE_ERRORS_DEG,
     return rows
 
 
-def plot_summary(rows, output, phases=PHASE_ERRORS_DEG):
+def plot_summary(rows, output_dir, phases=PHASE_ERRORS_DEG):
     import matplotlib.pyplot as plt
 
     modes = tuple(dict.fromkeys(row['mode'] for row in rows))
@@ -209,7 +209,7 @@ def plot_summary(rows, output, phases=PHASE_ERRORS_DEG):
             ('tracking_cn0_late_median_db_hz', 'Receiver late C/N0 (dB-Hz)'),
         )),
     )
-    paths = []
+    figure_paths = []
     for filename, metrics in figures:
         fig, axes = plt.subplots(len(metrics), len(case_names),
                                  figsize=(12, 3.8 * len(metrics)),
@@ -227,22 +227,22 @@ def plot_summary(rows, output, phases=PHASE_ERRORS_DEG):
                          xlabel='Injected target phase (deg)', ylabel=ylabel)
                 axis.grid(alpha=0.3)
                 axis.legend(fontsize=8)
-        path = output / f'{filename}.png'
-        fig.savefig(path, dpi=150)
-        paths.append(path)
+        figure_path = output_dir / f'{filename}.png'
+        fig.savefig(figure_path, dpi=150)
+        figure_paths.append(figure_path)
         if not SHOW_PLOTS_FLAG:
             plt.close(fig)
     if SHOW_PLOTS_FLAG and plt.get_backend().lower() != 'agg':
         plt.show()
-    return paths
+    return figure_paths
 
 
 def main():
-    output = reset_output(OUTPUT)
+    output_dir = reset_output(OUTPUT_DIR)
     manifest = {
         'seeds': SEEDS, 'duration_ms': DURATION_MS, 'phases_deg': PHASE_ERRORS_DEG,
         'antennas': ANTENNAS, 'perturbed_antenna': PERTURBED_ANTENNA,
-        'power_trim_ms': POWER_TRIM_MS,
+        'evaluation_edge_trim_ms': EVALUATION_EDGE_TRIM_MS,
         'receiver_config_by_seed': {
             str(seed): asdict(build_config(seed, DURATION_MS, ANTENNAS))
             for seed in SEEDS
@@ -277,21 +277,21 @@ def main():
         },
         'source_sha256': source_hashes(),
     }
-    (output / 'manifest.json').write_text(
+    (output_dir / 'manifest.json').write_text(
         json.dumps(serializable(manifest), indent=2, allow_nan=False, default=str),
         encoding='utf-8',
     )
     rows = run_sweep(SEEDS, DURATION_MS, PHASE_ERRORS_DEG,
-                     ANTENNAS, POWER_TRIM_MS)
+                     ANTENNAS, EVALUATION_EDGE_TRIM_MS)
     summary = {'rows': rows}
-    (output / 'summary.json').write_text(
+    (output_dir / 'summary.json').write_text(
         json.dumps(serializable(summary), indent=2, allow_nan=False), encoding='utf-8'
     )
-    with (output / 'summary.csv').open('w', newline='', encoding='utf-8') as stream:
+    with (output_dir / 'summary.csv').open('w', newline='', encoding='utf-8') as stream:
         writer = csv.DictWriter(stream, fieldnames=rows[0].keys())
         writer.writeheader()
         writer.writerows(rows)
-    plot_summary(rows, output, phases=PHASE_ERRORS_DEG)
+    plot_summary(rows, output_dir, phases=PHASE_ERRORS_DEG)
     return summary
 
 

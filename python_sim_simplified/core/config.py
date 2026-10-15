@@ -77,7 +77,7 @@ class AntennaState:
     parametric_patterns: dict[str, ParametricPattern] = field(
         default_factory=dict
     )
-    measured_pattern_csv: Path | None = None
+    measured_pattern_csv_path: Path | None = None
     orientations: dict[str, ElementOrientation] = field(
         default_factory=lambda: {
             name: ElementOrientation() for name in CORNER_NAMES

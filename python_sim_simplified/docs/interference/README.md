@@ -167,7 +167,7 @@ assumed.parametric_patterns["TL"].phase_variation_mm = (0.0, 0.0, 0.0)
 python -m experiments.interference.antenna_ablation
 ```
 
-入口 [antenna_ablation.py](../../experiments/interference/antenna_ablation.py) 一次完成数据生成、独立复算、统计和绘图。顶部设置 `SEEDS`、`DURATION_MS`、`ANTENNAS`、`POWER_TRIM_MS` 和 `SHOW_PLOTS_FLAG`。默认四天线、100 ms、噪声种子 42/43/44，不提高 GNSS 功率（−128.5 dBm），不改变捕获门限 2.5、盲干扰检测门限 6 dB，关闭多径。
+入口 [antenna_ablation.py](../../experiments/interference/antenna_ablation.py) 一次完成数据生成、独立复算、统计和绘图。顶部设置 `SEEDS`、`DURATION_MS`、`ANTENNAS`、`EVALUATION_EDGE_TRIM_MS` 和 `SHOW_PLOTS_FLAG`。默认四天线、100 ms、噪声种子 42/43/44，不提高 GNSS 功率（−128.5 dBm），不改变捕获门限 2.5、盲干扰检测门限 6 dB，关闭多径。
 
 有两个独立比较场景：默认 LOS 为方位 30°/仰角 60°；遮挡生效场景为 225°/20°。CW 和 2 MHz 宽带干扰均为 −90 dBm、方向 80°/10°。每个场景内部与同 seed 理想模型配对，不能把两个 LOS 之间的差异全部归因于遮挡。默认目标和干扰都不在遮挡区域内，因此不能用默认场景判断遮挡影响。
 
@@ -246,7 +246,7 @@ a_i(source) = a_ideal_geometry_i(source) × c_i(source) × channel_response_i
 - `ANTENNAS`：任意 2～4 个角点组合，行顺序按该元组；`TL/TR/BL/BR` 为左上/右上/左下/右下。
 - `DESIRED_GAIN_DB`、`DESIRED_PHASE_DEG`：目标各角点的基础幅相；CW 与宽带各有独立的 `*_GAIN_DB`、`*_PHASE_DEG` 字典。
 - `TRUE_CHANNEL_DELAY_NS`、`ESTIMATED_CHANNEL_DELAY_NS`：实际/估计硬件通道时延，单位 ns。真实时延仍延迟整个 IF 序列并补上被下变频移除的 RF 相位，且作用于所有源；估计时延只进入目标导向的窄带相位，**不会自动对齐 DFE 输出的码包络**。
-- `PERTURBED_ANTENNA`、`PHASE_ERRORS_DEG`：给指定天线的真实目标响应追加相位偏差；`SEEDS`、`DURATION_MS`、`POWER_TRIM_MS`、`SHOW_PLOTS_FLAG` 控制实验和显示。
+- `PERTURBED_ANTENNA`、`PHASE_ERRORS_DEG`：给指定天线的真实目标响应追加相位偏差；`SEEDS`、`DURATION_MS`、`EVALUATION_EDGE_TRIM_MS`、`SHOW_PLOTS_FLAG` 控制实验和显示。
 
 每个扫描点有两组：`known_response` 的目标假设系数包含真实追加相位；`unmodeled_phase` 只知道基础系数，未建模该追加相位。两组使用相同的实际信号、噪声、RF 和 DFE 数据，只改变接收机导向假设；Blind Null 不获得目标真值。这里的“已知”仅指源级指定系数，不意味着估计硬件时延必然准确，也不意味着已完成序列对齐。
 
@@ -496,7 +496,7 @@ print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assu
 |---|---|
 | 选择两至四根天线、改变顺序 | `ANTENNAS`；第一根是 SINGLE 参考 |
 | 选择合并方法 | `MODES`；默认 `single`、`egc`、`mvdr`、`blind_null` |
-| 修改噪声重复次数、时长和统计去边 | `SEEDS`、`DURATION_MS`、`POWER_TRIM_MS`；统计窗口应在记录内部 |
+| 修改噪声重复次数、时长和统计去边 | `SEEDS`、`DURATION_MS`、`EVALUATION_EDGE_TRIM_MS`；统计窗口应在记录内部 |
 | 扫描整通道相位 | `SELECTED_SERIES = ("phase",)`、`PHASE_ANTENNA`、`PHASE_SCAN_DEG` |
 | 选择相位补偿组别 | `BATCH = "legacy"` 时设置 `PHASE_VARIANTS`；默认 `("baseline", "uncalibrated")`，仅不补偿用 `("uncalibrated",)`，选择 `calibrated` 自动带基准；`SELECTED_CASES` 优先 |
 | 扫描目标真实方位角 | `SELECTED_SERIES = ("direction",)`、`TARGET_AZIMUTH_SCAN_DEG` |

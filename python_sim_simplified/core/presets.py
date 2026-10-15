@@ -166,14 +166,14 @@ def parametric_config(
 
 
 def measured_config(
-    csv_path: Path,
+    measured_pattern_csv_path: Path,
     active_antennas: tuple[str, ...] = CORNER_NAMES,
 ) -> SimulationConfig:
     cfg = default_config()
     cfg.phone.active_antennas = active_antennas
     cfg.phone.antenna_model = AntennaModelConfig(
         "measured_pattern",
-        AntennaState("measured", measured_pattern_csv=Path(csv_path)),
-        AntennaState("measured", measured_pattern_csv=Path(csv_path)),
+        AntennaState("measured", measured_pattern_csv_path=Path(measured_pattern_csv_path)),
+        AntennaState("measured", measured_pattern_csv_path=Path(measured_pattern_csv_path)),
     )
     return cfg

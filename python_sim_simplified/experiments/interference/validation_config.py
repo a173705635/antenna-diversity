@@ -8,7 +8,7 @@ from copy import deepcopy
 
 from core.config import Direction
 from core.presets import default_config
-from experiments.paths import INTERFERENCE_RESULTS
+from experiments.paths import INTERFERENCE_RESULTS_DIR
 from experiments.interference.validation_support import ValidationCase, ValidationSettings
 
 
@@ -20,9 +20,9 @@ SEEDS = tuple(range(42, 72))
 # 每个用例独立生成采样；配对条件保持相同 seed 和物理配置，以复现相同噪声。
 DURATION_MS = 100
 # 功率统计首尾各舍弃此时长，避开滤波瞬态；不裁掉送入捕获跟踪的数据。
-POWER_TRIM_MS = 10
+EVALUATION_EDGE_TRIM_MS = 10
 SHOW_PLOTS_FLAG = True
-OUTPUT_DIR = INTERFERENCE_RESULTS / "pattern_gain_first44"
+OUTPUT_DIR = INTERFERENCE_RESULTS_DIR / "pattern_gain_first44"
 WORKERS = 4  # 首批 TC 互相独立；Windows 上按进程并行、逐条记录进度。
 # 每次成功生成数据后刷新此目录；需要保留不同实验时修改目录名。
 
@@ -52,51 +52,51 @@ JAMMER_DIRECTION = Direction(80.0, 10.0)
 
 def _base_config(scene: str):
     """生成一个场景的基础接收配置；noise_only 去掉干扰，single_cw 保留首个 CW。"""
-    cfg = default_config()
-    cfg.phone.active_antennas = ANTENNAS
-    cfg.diversity.modes = MODES
-    cfg.interferers = [] if scene == "noise_only" else cfg.interferers[:1]
-    cfg.signal.true_direction = deepcopy(TARGET_TRUE_DIRECTION)
-    cfg.signal.assumed_direction = deepcopy(TARGET_ASSUMED_DIRECTION)
-    for source in cfg.interferers:
-        source.direction = deepcopy(JAMMER_DIRECTION)
-    return cfg
+    base_cfg = default_config()
+    base_cfg.phone.active_antennas = ANTENNAS
+    base_cfg.diversity.modes = MODES
+    base_cfg.interferers = [] if scene == "noise_only" else base_cfg.interferers[:1]
+    base_cfg.signal.true_direction = deepcopy(TARGET_TRUE_DIRECTION)
+    base_cfg.signal.assumed_direction = deepcopy(TARGET_ASSUMED_DIRECTION)
+    for interferer in base_cfg.interferers:
+        interferer.direction = deepcopy(JAMMER_DIRECTION)
+    return base_cfg
 
 
 def _pattern_gain_cases() -> list[ValidationCase]:
     """按文档 TC-001～044 建立单方法、单物理条件，不继承上一条的改动。"""
-    definitions = []
-    for gain in (0, -3, -6, -10, -20):
-        definitions.append((gain, 0, "single", None))
+    case_definitions = []
+    for gain_db in (0, -3, -6, -10, -20):
+        case_definitions.append((gain_db, 0, "single", None))
     modes = ("egc", "egc_strict", "mvdr")
-    definitions.extend((0, 0, mode, None) for mode in modes)
-    for gain in (-3, -6, -10, -20):
-        definitions.extend((gain, gain, mode, f"TC-{6 + modes.index(mode):03d}")
+    case_definitions.extend((0, 0, mode, None) for mode in modes)
+    for gain_db in (-3, -6, -10, -20):
+        case_definitions.extend((gain_db, gain_db, mode, f"TC-{6 + modes.index(mode):03d}")
                            for mode in modes)
-    for gain in (0, -3, -6, -10, -20, -40):
-        definitions.extend((0, gain, mode, None) for mode in modes)
-    for gain, opposite_start in ((-6, 27), (-20, 33)):
-        definitions.extend((gain, 0, mode, f"TC-{opposite_start + modes.index(mode):03d}")
+    for gain_db in (0, -3, -6, -10, -20, -40):
+        case_definitions.extend((0, gain_db, mode, None) for mode in modes)
+    for gain_db, swapped_reference_start in ((-6, 27), (-20, 33)):
+        case_definitions.extend((gain_db, 0, mode, f"TC-{swapped_reference_start + modes.index(mode):03d}")
                            for mode in modes)
 
     cases = []
     for seed in SEEDS:
-        for number, (tl_gain, br_gain, mode, reference) in enumerate(definitions, 1):
-            cfg = _base_config("noise_only")
-            cfg.random_seed = seed
-            cfg.signal.duration_ms = DURATION_MS
-            cfg.tracking.max_epochs = DURATION_MS
-            cfg.diversity.modes = (mode,)
+        for case_number, (tl_gain_db, br_gain_db, mode, reference_case_name) in enumerate(case_definitions, 1):
+            case_cfg = _base_config("noise_only")
+            case_cfg.random_seed = seed
+            case_cfg.signal.duration_ms = DURATION_MS
+            case_cfg.tracking.max_epochs = DURATION_MS
+            case_cfg.diversity.modes = (mode,)
             # I0：只有真实/名义阵元电压增益同步改变，几何相位和热噪声不动。
-            gains = {"TL": tl_gain, "BR": br_gain}
-            cfg.phone.antenna_model.true_state.amplitude_error_db = gains.copy()
-            cfg.phone.antenna_model.assumed_state.amplitude_error_db = gains.copy()
-            if 2 <= number <= 5:
-                reference = "TC-001"
+            antenna_gains_db = {"TL": tl_gain_db, "BR": br_gain_db}
+            case_cfg.phone.antenna_model.true_state.amplitude_error_db = antenna_gains_db.copy()
+            case_cfg.phone.antenna_model.assumed_state.amplitude_error_db = antenna_gains_db.copy()
+            if 2 <= case_number <= 5:
+                reference_case_name = "TC-001"
             cases.append(ValidationCase(
-                name=f"TC-{number:03d}", config=cfg, scene_label="noise_only",
-                series_label=mode, scan_label="test case", scan_value=number,
-                scan_unit="TC", reference_case=reference, checks=("pattern_gain",),
+                name=f"TC-{case_number:03d}", config=case_cfg, scene_label="noise_only",
+                series_label=mode, scan_label="test case", scan_value=case_number,
+                scan_unit="TC", reference_case=reference_case_name, checks=("pattern_gain",),
             ))
     return cases
 
@@ -106,89 +106,91 @@ def build_cases() -> list[ValidationCase]:
     if BATCH == "pattern_gain_first44":
         return _pattern_gain_cases()
     cases = []
-    known_names = set()
-    selected_names = set(SELECTED_CASES)
+    known_case_names = set()
+    selected_case_names = set(SELECTED_CASES)
     phase_series_flag = not SELECTED_CASES and "phase" in SELECTED_SERIES
     direction_series_flag = not SELECTED_CASES and "direction" in SELECTED_SERIES
     gain_series_flag = not SELECTED_CASES and "gain" in SELECTED_SERIES
     for scene in SCENES:
-        base = _base_config(scene)
-        for phase in PHASE_SCAN_DEG:
+        base_cfg = _base_config(scene)
+        for phase_deg in PHASE_SCAN_DEG:
             # 每个横轴点放三组：无误差基准、注入但不补偿、注入后准确逆补偿。
-            # baseline 不注入 phase，只把相同基准画到各扫描点用于配对比较。
-            prefix = f"{scene}/phase_{phase}"
-            common = dict(scene_label=scene, scan_label="DFE channel phase",
-                          scan_value=phase, scan_unit="deg")
+            # 基准用例不注入相位误差，只把相同基准画到各扫描点用于配对比较。
+            phase_case_prefix = f"{scene}/phase_{phase_deg}"
+            common_case_fields = dict(
+                scene_label=scene, scan_label="DFE channel phase",
+                scan_value=phase_deg, scan_unit="deg",
+            )
             ideal_checks = ("ideal_noise",) if scene == "noise_only" else ()
-            baseline = ValidationCase(
-                f"{prefix}/baseline", deepcopy(base), series_label="baseline",
-                checks=ideal_checks, **common,
+            baseline_case = ValidationCase(
+                f"{phase_case_prefix}/baseline", deepcopy(base_cfg), series_label="baseline",
+                checks=ideal_checks, **common_case_fields,
             )
-            uncalibrated = ValidationCase(
-                f"{prefix}/uncalibrated", deepcopy(base), series_label="uncalibrated",
-                dfe_phase_deg={PHASE_ANTENNA: phase}, **common,
+            uncalibrated_case = ValidationCase(
+                f"{phase_case_prefix}/uncalibrated", deepcopy(base_cfg), series_label="uncalibrated",
+                dfe_phase_deg={PHASE_ANTENNA: phase_deg}, **common_case_fields,
             )
-            calibrated = ValidationCase(
-                f"{prefix}/calibrated", deepcopy(base), series_label="calibrated",
+            calibrated_case = ValidationCase(
+                f"{phase_case_prefix}/calibrated", deepcopy(base_cfg), series_label="calibrated",
                 # 这里故意令估计相位等于真实相位，验证补偿闭环，不是自动估相。
-                dfe_phase_deg={PHASE_ANTENNA: phase},
-                dfe_estimated_phase_deg={PHASE_ANTENNA: phase},
-                compensate_dfe_phase_flag=True, reference_case=f"{prefix}/baseline",
-                checks=("phase_pair",), **common,
+                dfe_phase_deg={PHASE_ANTENNA: phase_deg},
+                dfe_estimated_phase_deg={PHASE_ANTENNA: phase_deg},
+                compensate_dfe_phase_flag=True, reference_case=f"{phase_case_prefix}/baseline",
+                checks=("phase_pair",), **common_case_fields,
             )
-            known_names.update((baseline.name, uncalibrated.name, calibrated.name))
+            known_case_names.update((baseline_case.name, uncalibrated_case.name, calibrated_case.name))
             # 选准确补偿时先加入同扫描点的基准；重复点名不会重复生成条件。
             if ((phase_series_flag and ("baseline" in PHASE_VARIANTS or "calibrated" in PHASE_VARIANTS))
-                    or baseline.name in selected_names or calibrated.name in selected_names):
-                cases.append(baseline)
-            if (phase_series_flag and "uncalibrated" in PHASE_VARIANTS) or uncalibrated.name in selected_names:
-                cases.append(uncalibrated)
-            if (phase_series_flag and "calibrated" in PHASE_VARIANTS) or calibrated.name in selected_names:
-                cases.append(calibrated)
-        for azimuth in TARGET_AZIMUTH_SCAN_DEG:
+                    or baseline_case.name in selected_case_names or calibrated_case.name in selected_case_names):
+                cases.append(baseline_case)
+            if (phase_series_flag and "uncalibrated" in PHASE_VARIANTS) or uncalibrated_case.name in selected_case_names:
+                cases.append(uncalibrated_case)
+            if (phase_series_flag and "calibrated" in PHASE_VARIANTS) or calibrated_case.name in selected_case_names:
+                cases.append(calibrated_case)
+        for azimuth_deg in TARGET_AZIMUTH_SCAN_DEG:
             # 只改真实方向，不改名义导向，研究接收机方向假设不准的影响。
-            cfg = deepcopy(base)
-            cfg.signal.true_direction = Direction(azimuth, cfg.signal.true_direction.elevation_deg)
-            direction = ValidationCase(
-                f"{scene}/direction_{azimuth}", cfg, scene_label=scene,
+            case_cfg = deepcopy(base_cfg)
+            case_cfg.signal.true_direction = Direction(azimuth_deg, case_cfg.signal.true_direction.elevation_deg)
+            direction_case = ValidationCase(
+                f"{scene}/direction_{azimuth_deg}", case_cfg, scene_label=scene,
                 series_label="true direction", scan_label="target true azimuth",
-                scan_value=azimuth, scan_unit="deg",
+                scan_value=azimuth_deg, scan_unit="deg",
             )
-            known_names.add(direction.name)
-            if direction_series_flag or direction.name in selected_names:
-                cases.append(direction)
+            known_case_names.add(direction_case.name)
+            if direction_series_flag or direction_case.name in selected_case_names:
+                cases.append(direction_case)
         for gain_db in ELEMENT_GAIN_SCAN_DB:
             # dB 增益作用于阵元响应，6.02 dB 约为电压两倍；名义增益保持不变。
-            cfg = deepcopy(base)
-            cfg.phone.antenna_model.true_state.amplitude_error_db[ELEMENT_GAIN_ANTENNA] = gain_db
-            gain = ValidationCase(
-                f"{scene}/gain_{gain_db}", cfg, scene_label=scene,
+            case_cfg = deepcopy(base_cfg)
+            case_cfg.phone.antenna_model.true_state.amplitude_error_db[ELEMENT_GAIN_ANTENNA] = gain_db
+            gain_case = ValidationCase(
+                f"{scene}/gain_{gain_db}", case_cfg, scene_label=scene,
                 series_label="true element gain", scan_label=f"{ELEMENT_GAIN_ANTENNA} gain",
                 scan_value=gain_db, scan_unit="dB",
             )
-            known_names.add(gain.name)
-            if gain_series_flag or gain.name in selected_names:
-                cases.append(gain)
+            known_case_names.add(gain_case.name)
+            if gain_series_flag or gain_case.name in selected_case_names:
+                cases.append(gain_case)
 
     # 具名选择中的拼写错误必须立即显式报出，不能变成空批次。
     for name in SELECTED_CASES:
-        if name not in known_names:
+        if name not in known_case_names:
             raise KeyError(name)
 
-    prepared = []
+    seeded_cases = []
     for seed in SEEDS:
-        for candidate in cases:
-            case = deepcopy(candidate)
+        for case_template in cases:
+            case = deepcopy(case_template)
             case.config.random_seed = seed
             case.config.signal.duration_ms = DURATION_MS
             case.config.tracking.max_epochs = DURATION_MS
-            prepared.append(case)
-    return prepared
+            seeded_cases.append(case)
+    return seeded_cases
 
 
 def build_settings() -> ValidationSettings:
     """生成仅用于统计、保存与绘图的批次设置。"""
     return ValidationSettings(
-        power_trim_ms=POWER_TRIM_MS, output_dir=OUTPUT_DIR, show_plots_flag=SHOW_PLOTS_FLAG,
+        evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS, output_dir=OUTPUT_DIR, show_plots_flag=SHOW_PLOTS_FLAG,
         workers=WORKERS if BATCH == "pattern_gain_first44" else 1,
     )

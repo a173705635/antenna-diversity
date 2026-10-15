@@ -2,14 +2,14 @@
 from pathlib import Path
 import shutil
 
-ROOT = Path(__file__).resolve().parents[1]
-RESULTS = ROOT/'results'
-INTERFERENCE_RESULTS = RESULTS/'interference'
+PROJECT_ROOT_DIR = Path(__file__).resolve().parents[1]
+RESULTS_DIR = PROJECT_ROOT_DIR/'results'
+INTERFERENCE_RESULTS_DIR = RESULTS_DIR/'interference'
 
 
-def reset_output(output):
-    output = Path(output)
-    if output.exists():
-        shutil.rmtree(output)
-    output.mkdir(parents=True)
-    return output
+def reset_output(output_dir):
+    output_dir = Path(output_dir)
+    if output_dir.exists():
+        shutil.rmtree(output_dir)
+    output_dir.mkdir(parents=True)
+    return output_dir

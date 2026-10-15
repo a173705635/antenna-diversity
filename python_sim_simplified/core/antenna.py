@@ -222,13 +222,13 @@ def build_antenna_model(phone: PhoneConfig, carrier_hz: float) -> AntennaModel:
     true_state = phone.antenna_model.true_state
     assumed_state = phone.antenna_model.assumed_state
     true_measured = (
-        load_measured_pattern(true_state.measured_pattern_csv, carrier_hz)
+        load_measured_pattern(true_state.measured_pattern_csv_path, carrier_hz)
         if true_state.pattern_kind == "measured"
         else None
     )
     assumed_measured = (
         load_measured_pattern(
-            assumed_state.measured_pattern_csv, carrier_hz
+            assumed_state.measured_pattern_csv_path, carrier_hz
         )
         if assumed_state.pattern_kind == "measured"
         else None

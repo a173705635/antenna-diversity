@@ -25,7 +25,7 @@ from experiments.interference.validation_support import (
 from experiments.paths import reset_output
 
 
-def _write_json(path: Path, content: object) -> None:
+def _write_json(output_path: Path, content: object) -> None:
     """将路径、NumPy 标量和嵌套结构转成 JSON 可保存的形式。"""
     def paths_as_text(value):
         if isinstance(value, Path):
@@ -38,7 +38,7 @@ def _write_json(path: Path, content: object) -> None:
             return [paths_as_text(item) for item in value]
         return value
 
-    path.write_text(json.dumps(serializable(paths_as_text(content)), indent=2,
+    output_path.write_text(json.dumps(serializable(paths_as_text(content)), indent=2,
                                allow_nan=False), encoding="utf-8")
 
 

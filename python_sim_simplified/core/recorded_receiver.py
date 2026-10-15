@@ -16,15 +16,15 @@ from .positioning import carrier_range
 from .config import SPEED_OF_LIGHT_MPS as C
 
 
-def read_iq8(path, start_sample, count):
-    raw = np.fromfile(path, dtype=np.int8, offset=start_sample*2, count=count*2)
+def read_iq8(iq_path, start_sample, count):
+    raw = np.fromfile(iq_path, dtype=np.int8, offset=start_sample*2, count=count*2)
     return raw[::2].astype(np.float32) + 1j*raw[1::2].astype(np.float32)
 
 
-def prepare_recording(path, cache_path, *, start_sample, sample_count,
+def prepare_recording(iq_path, cache_path, *, start_sample, sample_count,
                       fs_hz, if_hz, dfe_config, block_samples=1000000):
     """Read once into a disk-backed DFE output; input sample units stay explicit."""
-    path=Path(path);cache_path=Path(cache_path)
+    iq_path=Path(iq_path);cache_path=Path(cache_path)
     if cache_path.exists():raise ValueError('refusing to overwrite an existing DFE cache')
     h,info=design_decimator(fs_hz,dfe_config.decimation,dfe_config.cutoff_hz,dfe_config.num_taps)
     delay=info['group_delay_input_samples']
@@ -34,7 +34,7 @@ def prepare_recording(path, cache_path, *, start_sample, sample_count,
     digest=hashlib.sha256();sum_i=sum_q=sum_power=0.;rails=0
     def blocks():
         nonlocal sum_i,sum_q,sum_power,rails
-        with path.open('rb') as f:
+        with iq_path.open('rb') as f:
             f.seek(start_sample*2);remaining=sample_count
             while remaining:
                 n=min(block_samples,remaining);data=f.read(n*2)

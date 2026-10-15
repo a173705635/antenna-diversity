@@ -19,6 +19,8 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 在本目录运行下列命令，无需命令行参数。输入、输出、种子、时长和绘图设置固定在各脚本顶部，修改条件直接编辑这些常量。生成型实验重跑只重建自己的固定输出目录。
 
+目录常量以 `_DIR` 结尾（如 `INTERFERENCE_RESULTS_DIR`、`OUTPUT_DIR`），输入文件路径以 `_PATH` 结尾（如 `IQ_PATH`）；`EVALUATION_EDGE_TRIM_MS` 表示评估时首尾各舍弃的毫秒数，不裁掉捕获跟踪的数据。
+
 | 实验 | 命令 | 固定输出 |
 |---|---|---|
 | 通用条件验证：当前默认 TC-001～044 增益基准批次 | `python -m experiments.interference.validation` | `results/interference/pattern_gain_first44/` |

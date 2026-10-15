@@ -18,9 +18,9 @@ from core.plotting import (
 from core.presets import default_config, parametric_config
 from core.provenance import source_hashes, freeze_source
 from core.serialization import serializable
-from experiments.paths import INTERFERENCE_RESULTS as RESULTS, reset_output
+from experiments.paths import INTERFERENCE_RESULTS_DIR, reset_output
 
-OUTPUT = RESULTS/'full_chain'
+OUTPUT_DIR = INTERFERENCE_RESULTS_DIR/'full_chain'
 ANTENNA_MODEL = "parametric"  # "ideal" or "parametric"; synthetic, not measured phone data.
 DURATION_MS = None
 SHOW_PLOTS_FLAG = True
@@ -30,8 +30,8 @@ FREEZE_SOURCE_FLAG = False
 def save_results_figures(results, output_dir):
     import matplotlib.pyplot as plt
 
-    directory = Path(output_dir)
-    directory.mkdir(parents=True, exist_ok=True)
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
     with plt.rc_context({"figure.max_open_warning": 0}):
         figures = {
             **plot_detailed_results(results),
@@ -39,25 +39,25 @@ def save_results_figures(results, output_dir):
             "cn0": plot_cn0(results),
         }
 
-    for old_path in directory.glob("*.png"):
+    for old_path in output_dir.glob("*.png"):
         old_path.unlink()
 
-    paths = {}
+    figure_paths = {}
     for name, figure in figures.items():
-        path = directory / f"{name}.png"
-        figure.savefig(path, dpi=150)
-        paths[name] = path.resolve()
+        figure_path = output_dir / f"{name}.png"
+        figure.savefig(figure_path, dpi=150)
+        figure_paths[name] = figure_path.resolve()
         if not results["config"].plot.show_flag:
             plt.close(figure)
-    return paths
+    return figure_paths
 
 
 def main():
     import json
     from dataclasses import asdict
     cfg = {"ideal": default_config, "parametric": parametric_config}[ANTENNA_MODEL]()
-    output = reset_output(OUTPUT)
-    cfg.plot.output_dir = output
+    output_dir = reset_output(OUTPUT_DIR)
+    cfg.plot.output_dir = output_dir
     if DURATION_MS is not None:
         cfg.signal.duration_ms = cfg.tracking.max_epochs = DURATION_MS
     cfg.plot.show_flag = SHOW_PLOTS_FLAG
@@ -80,13 +80,13 @@ def main():
     print(format_metrics(results["metrics"]))
 
     save_results_figures(results, cfg.plot.output_dir)
-    (output/'manifest.json').write_text(json.dumps(serializable({
+    (output_dir/'manifest.json').write_text(json.dumps(serializable({
         'config': asdict(cfg), 'source_sha256': source_hashes()}),
         default=str, indent=2, allow_nan=False), encoding='utf-8')
-    (output/'summary.json').write_text(json.dumps(serializable(results['metrics']),
+    (output_dir/'summary.json').write_text(json.dumps(serializable(results['metrics']),
         indent=2, allow_nan=False), encoding='utf-8')
     if FREEZE_SOURCE_FLAG:
-        freeze_source(output)
+        freeze_source(output_dir)
 
     if cfg.plot.show_flag:
         import matplotlib.pyplot as plt

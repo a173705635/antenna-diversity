@@ -25,15 +25,15 @@ from core.presets import default_config, parametric_config
 from core.provenance import source_hashes
 from core.rf import BOLTZMANN_J_PER_K, filter_rf_input
 from core.serialization import serializable
-from experiments.paths import INTERFERENCE_RESULTS, reset_output
+from experiments.paths import INTERFERENCE_RESULTS_DIR, reset_output
 
 
-OUTPUT = INTERFERENCE_RESULTS / 'antenna_ablation'
+OUTPUT_DIR = INTERFERENCE_RESULTS_DIR / 'antenna_ablation'
 SEEDS = (42, 43, 44)
 DURATION_MS = 100
 ANTENNAS = CORNER_NAMES
 SHOW_PLOTS_FLAG = True
-POWER_TRIM_MS = 10
+EVALUATION_EDGE_TRIM_MS = 10
 CASES = (
     'ideal', 'elevation_gain_only', 'orientation_polarization_only',
     'azimuth_dependence_only', 'pcv_only', 'coupling_only',
@@ -129,15 +129,15 @@ def _power(samples, interval):
     return float(np.mean(np.abs(samples[interval]) ** 2))
 
 
-def thermal_oracle_prompt_cn0(target, thermal, truth, fs_out_hz, trim_samples):
+def thermal_oracle_prompt_cn0(target, thermal, truth, fs_out_hz, edge_trim_samples):
     """Post-hoc true-code/Doppler 1 ms C/N0 against thermal noise alone.
 
     This is not a receiver observable. Its level includes RF/DFE passband and
     sampled-code mismatch losses, so it need not equal input C/N0.
     """
     samples_per_ms = round(fs_out_hz * 0.001)
-    first = ((trim_samples + samples_per_ms - 1) // samples_per_ms) * samples_per_ms
-    last = ((len(target) - trim_samples) // samples_per_ms) * samples_per_ms
+    first = ((edge_trim_samples + samples_per_ms - 1) // samples_per_ms) * samples_per_ms
+    last = ((len(target) - edge_trim_samples) // samples_per_ms) * samples_per_ms
     indices = np.arange(first, last)
     chip_phase = (indices * truth['code_rate_hz'] / fs_out_hz -
                   truth['code_delay_chips']) % len(truth['code'])
@@ -150,7 +150,7 @@ def thermal_oracle_prompt_cn0(target, thermal, truth, fs_out_hz, trim_samples):
                      np.mean(np.abs(noise_prompts) ** 2) * 0.001)
 
 
-def evaluate_budget(results, trim_ms=10):
+def evaluate_budget(results, evaluation_edge_trim_ms=10):
     """Recompute linear component powers in actual DFE-code units.
 
     Results must retain the RF noise from the actual frontend run.
@@ -199,8 +199,8 @@ def evaluate_budget(results, trim_ms=10):
     assert adc_reconstruction_error == 0.0
     del filtered_scene, before_limit, adc_input, real_codes, imag_codes
     fs_out_hz = results['dfe_info']['fs_out_hz']
-    trim = round(trim_ms * 1e-3 * fs_out_hz)
-    interval = slice(trim, results['dfe_channels'].shape[1] - trim)
+    edge_trim_samples = round(evaluation_edge_trim_ms * 1e-3 * fs_out_hz)
+    interval = slice(edge_trim_samples, results['dfe_channels'].shape[1] - edge_trim_samples)
     channels = results['dfe_channels'][:, interval]
     covariance = channels @ channels.conj().T / channels.shape[1]
 
@@ -250,7 +250,7 @@ def evaluate_budget(results, trim_ms=10):
             ))),
             'adc_reconstruction_max_abs_error': adc_reconstruction_error,
             'thermal_oracle_prompt_cn0_db_hz': thermal_oracle_prompt_cn0(
-                oracle_target, oracle_thermal, truth, fs_out_hz, trim
+                oracle_target, oracle_thermal, truth, fs_out_hz, edge_trim_samples
             ),
         }
         assert budgets[mode]['combined_max_abs_error'] < 1e-8
@@ -263,10 +263,10 @@ def _db_ratio(numerator, denominator):
     return float(10.0 * np.log10(numerator / denominator))
 
 
-def run_case(cfg, case_name, context, trim_ms=10, *, scene=None):
+def run_case(cfg, case_name, context, evaluation_edge_trim_ms=10, *, scene=None):
     """Run one complete receiver, then audit its frozen combining weights."""
     results = run_end_to_end(cfg, scene=scene, retain_analysis_flag=True)
-    budgets = evaluate_budget(results, trim_ms)
+    budgets = evaluate_budget(results, evaluation_edge_trim_ms)
     single = budgets['single']
     rows = []
     for mode, branch in results['branches'].items():
@@ -422,7 +422,7 @@ def summarize(rows):
     return groups
 
 
-def plot_summary(groups, output):
+def plot_summary(groups, output_dir):
     """Five separate figures, each with paired context panels and readable labels."""
     import matplotlib.pyplot as plt
 
@@ -441,7 +441,7 @@ def plot_summary(groups, output):
     )
     colors = {'single': '#555555', 'egc': '#1f77b4',
               'mvdr': '#d95f02', 'blind_null': '#2ca02c'}
-    paths = []
+    figure_paths = []
     contexts = tuple(CONTEXTS)
     for filename, metrics in specs:
         fig, axes = plt.subplots(len(metrics), len(contexts),
@@ -463,9 +463,9 @@ def plot_summary(groups, output):
                 axis.set_ylabel(ylabel)
                 axis.grid(alpha=0.25)
                 axis.legend(ncol=2, fontsize=8)
-        path = output / f'{filename}.png'
-        fig.savefig(path, dpi=150)
-        paths.append(path)
+        figure_path = output_dir / f'{filename}.png'
+        fig.savefig(figure_path, dpi=150)
+        figure_paths.append(figure_path)
         if not SHOW_PLOTS_FLAG:
             plt.close(fig)
 
@@ -490,14 +490,14 @@ def plot_summary(groups, output):
         axis.set_xticks(range(len(CASES)), CASES, rotation=55, ha='right')
         axis.set_title(context + ' — correct acquisition count')
     fig.colorbar(image, ax=axes.ravel().tolist(), label='Correct acquisition rate')
-    path = output / 'correct_acquisition_rate.png'
-    fig.savefig(path, dpi=150)
-    paths.append(path)
+    figure_path = output_dir / 'correct_acquisition_rate.png'
+    fig.savefig(figure_path, dpi=150)
+    figure_paths.append(figure_path)
     if not SHOW_PLOTS_FLAG:
         plt.close(fig)
     if SHOW_PLOTS_FLAG and plt.get_backend().lower() != 'agg':
         plt.show()
-    return paths
+    return figure_paths
 
 
 def _manifest_config(value):
@@ -512,7 +512,7 @@ def _manifest_config(value):
 
 
 def main():
-    output = reset_output(OUTPUT)
+    output_dir = reset_output(OUTPUT_DIR)
     configurations = {
         context: {case: _manifest_config(asdict(build_case(
             case, context, SEEDS[0], DURATION_MS, ANTENNAS)))
@@ -525,7 +525,7 @@ def main():
         'cases': CASES, 'configurations': configurations,
         'source_sha256': source_hashes(),
         'definitions': {
-            'power_interval': f'Discard first and last {POWER_TRIM_MS} ms for power only; receiver processes full record.',
+            'power_interval': f'Discard first and last {EVALUATION_EDGE_TRIM_MS} ms for power only; receiver processes full record.',
             'decomposition': 'Truth target/CW/WB and the actual retained RF thermal noise through linear RF and floating DFE, using actual frozen weights.',
             'cross_terms': 'Linear sum power minus sum of individual component powers; not thermal noise.',
             'joint_residual': 'Actual quantized DFE minus all four linear components; includes limiter, ADC and DFE quantization jointly. Actual-minus-linear power also includes linear/residual cross terms.',
@@ -537,12 +537,12 @@ def main():
             'default_blockage': 'Default LOS 30/60 does not intersect 225/20 blockage; active context does.',
         },
     }
-    (output / 'manifest.json').write_text(
+    (output_dir / 'manifest.json').write_text(
         json.dumps(serializable(manifest), indent=2, allow_nan=False, default=str),
         encoding='utf-8'
     )
     calibration = calibrate_noise(SEEDS, DURATION_MS)
-    (output / 'noise_calibration.json').write_text(
+    (output_dir / 'noise_calibration.json').write_text(
         json.dumps(serializable(calibration), indent=2, allow_nan=False), encoding='utf-8'
     )
     rows = []
@@ -550,18 +550,18 @@ def main():
         for seed in SEEDS:
             for case in CASES:
                 cfg = build_case(case, context, seed, DURATION_MS, ANTENNAS)
-                rows.extend(run_case(cfg, case, context, trim_ms=POWER_TRIM_MS))
+                rows.extend(run_case(cfg, case, context, evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS))
                 print(context, seed, case, 'complete', flush=True)
     groups = summarize(rows)
     summary = {'rows': rows, 'groups': groups, 'noise_calibration': calibration}
-    (output / 'summary.json').write_text(
+    (output_dir / 'summary.json').write_text(
         json.dumps(serializable(summary), indent=2, allow_nan=False), encoding='utf-8'
     )
-    with (output / 'summary.csv').open('w', newline='', encoding='utf-8') as stream:
+    with (output_dir / 'summary.csv').open('w', newline='', encoding='utf-8') as stream:
         writer = csv.DictWriter(stream, fieldnames=rows[0].keys())
         writer.writeheader()
         writer.writerows(rows)
-    plot_summary(groups, output)
+    plot_summary(groups, output_dir)
     return summary
 
 

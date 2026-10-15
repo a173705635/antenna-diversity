@@ -21,10 +21,10 @@ from core.config import SPEED_OF_LIGHT_MPS
 from core.positioning import PositioningFailure
 from core.positioning import carrier_range, solve_position, solve_code_carrier_float
 from core.gps_simulation import build_scene, satellite_setup, run_record, receiver_reference
-from experiments.paths import ROOT, RESULTS, reset_output
+from experiments.paths import PROJECT_ROOT_DIR, RESULTS_DIR, reset_output
 
-OUTPUT = RESULTS/'gps_l1_l5'
-WEIGHTS = ROOT/'configs/dual_frequency_weights.json'
+OUTPUT_DIR = RESULTS_DIR/'gps_l1_l5'
+WEIGHTS_PATH = PROJECT_ROOT_DIR/'configs/dual_frequency_weights.json'
 DURATION_MS = 1000
 SEEDS = [4000, 4001, 4002]
 FREEZE_SOURCE_FLAG = False
@@ -102,12 +102,12 @@ def compare(records, satellites, weights=None):
 def main():
     if DURATION_MS < 210:
         raise ValueError('GPS positioning is not evaluated: need at least 210 ms to include the first 200 ms observation and end margin.')
-    output = reset_output(OUTPUT)
+    output_dir = reset_output(OUTPUT_DIR)
     if FREEZE_SOURCE_FLAG:
-        freeze_source(output)
-    weights = json.loads(WEIGHTS.read_text(encoding='utf-8'))
+        freeze_source(output_dir)
+    weights = json.loads(WEIGHTS_PATH.read_text(encoding='utf-8'))
     def save(name, data):
-        (output/name).write_text(json.dumps(serializable(data), indent=2, allow_nan=False), encoding='utf-8')
+        (output_dir/name).write_text(json.dumps(serializable(data), indent=2, allow_nan=False), encoding='utf-8')
     satellites = satellite_setup()
     manifest = {'scope': __doc__, 'satellites': satellites, 'duration_ms': DURATION_MS,
                 'seeds': SEEDS, 'frequency_noise_seeds': 'L1=seed; L5=seed+100000',
@@ -119,7 +119,7 @@ def main():
                 'recommended_mode': 'L5_code_dual_phase',
                 'weight_calibration': 'seeds 4000..4002, observation scatter only; this receiver configuration',
                 'weights': weights,
-                'weights_sha256': hashlib.sha256(WEIGHTS.read_bytes()).hexdigest(),
+                'weights_sha256': hashlib.sha256(WEIGHTS_PATH.read_bytes()).hexdigest(),
                 'phase_screen': '50 mm maximum postfit residual, not certified cycle-slip protection',
                 'noise_model': 'IID discrete RF samples; band-specific configured noise bandwidth',
                 'frequency_configs': {}}
@@ -146,7 +146,7 @@ def main():
         print(json.dumps(summary), flush=True)
     save('summary.json', summaries)
     save('sha256.json', {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
-                        for p in output.glob('*.json') if p.name != 'sha256.json'})
+                        for p in output_dir.glob('*.json') if p.name != 'sha256.json'})
 
 
 if __name__ == '__main__':

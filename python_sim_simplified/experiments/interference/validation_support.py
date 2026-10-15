@@ -47,7 +47,7 @@ class ValidationCase:
 @dataclass
 class ValidationSettings:
     """整个批次的统计与输出设置；功率去边单位为 ms。"""
-    power_trim_ms: int = 10
+    evaluation_edge_trim_ms: int = 10
     output_dir: Path = Path("results/interference/validation")
     show_plots_flag: bool = True
     workers: int = 1
@@ -76,7 +76,7 @@ def apply_dfe_phase(
 def _assumed_steering(cfg: SimulationConfig) -> np.ndarray:
     """为理想噪声适用性检查计算估计导向，包含估计通道时延。"""
     model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
-    base, _ = antenna_response(
+    antenna_steering, _ = antenna_response(
         model, cfg.signal.assumed_direction, cfg.signal.assumed_polarization,
         estimated_flag=True,
     )
@@ -85,8 +85,8 @@ def _assumed_steering(cfg: SimulationConfig) -> np.ndarray:
         for name in cfg.phone.active_antennas
     ])
     if np.all(delays_s == 0.0):
-        return base
-    return base * delay_phase(
+        return antenna_steering
+    return antenna_steering * delay_phase(
         # 这里只描述窄带载波相位，不能替代宽带码包络的序列时延对齐。
         delays_s, cfg.signal.carrier_hz + cfg.signal.doppler_hz,
     )
@@ -98,13 +98,13 @@ def _power(values: np.ndarray) -> float:
 
 
 def evaluate_case(
-    case: ValidationCase, result: dict, power_trim_ms: int,
+    case: ValidationCase, result: dict, evaluation_edge_trim_ms: int,
     remaining_references: dict[tuple[str, int], int],
     reference_data: dict[tuple[str, int], tuple[np.ndarray, dict]],
 ) -> list[dict]:
     """对一次已完成的接收独立复算分量、指标和相位配对；返回标量行。"""
-    cfg = case.config
-    seed = cfg.random_seed
+    case_cfg = case.config
+    seed = case_cfg.random_seed
     frontend = result["frontend"]
     channels = result["channels"]
     branches = result["branches"]
@@ -120,8 +120,8 @@ def evaluate_case(
             for name, values in components.items()
         }
     fs_out_hz = frontend["dfe_info"]["fs_out_hz"]
-    trim = round(power_trim_ms * 1e-3 * fs_out_hz)
-    window = slice(trim, channels.shape[1] - trim)
+    edge_trim_samples = round(evaluation_edge_trim_ms * 1e-3 * fs_out_hz)
+    window = slice(edge_trim_samples, channels.shape[1] - edge_trim_samples)
     # 只裁指标窗口；捕获跟踪已使用完整序列。R 为各通道零时延样本协方差。
     samples = channels[:, window]
     covariance = samples @ samples.conj().T / samples.shape[1]
@@ -132,8 +132,8 @@ def evaluate_case(
         thermal_input = [_power(values) for values in components["thermal"][:, window]]
         input_snr = [float(10 * np.log10(signal / noise))
                      for signal, noise in zip(target_input, thermal_input)]
-        gain_db = tuple(cfg.phone.antenna_model.true_state.amplitude_error_db[name]
-                        for name in cfg.phone.active_antennas)
+        gain_db = tuple(case_cfg.phone.antenna_model.true_state.amplitude_error_db[name]
+                        for name in case_cfg.phone.active_antennas)
         physical_gain_db = 10 * np.log10(
             np.abs(frontend["truth"]["desired_steering_true"]) ** 2
         )
@@ -142,7 +142,7 @@ def evaluate_case(
             "input_target_power_by_antenna": target_input,
             "input_thermal_power_by_antenna": thermal_input,
             "input_snr_db_by_antenna": input_snr,
-            "best_single_antenna": cfg.phone.active_antennas[int(np.argmax(input_snr))],
+            "best_single_antenna": case_cfg.phone.active_antennas[int(np.argmax(input_snr))],
             "best_single_snr_db": max(input_snr),
             "pattern_expected_gain_db": pattern_gain_theory(gain_db, "egc"),
             "pattern_response_gain_error_db": float(np.max(np.abs(physical_gain_db - gain_db))),
@@ -167,7 +167,7 @@ def evaluate_case(
         finite = cn0[len(cn0) // 2:]
         finite = finite[np.isfinite(finite)]
         code_estimate = (acquisition["code_phase_samples"]
-                         * cfg.signal.code_rate_hz / fs_out_hz)
+                         * case_cfg.signal.code_rate_hz / fs_out_hz)
         quadratic = float(np.vdot(weights, covariance @ weights).real)
         # 两条独立路径：实际合并序列均方，和输入协方差二次型 wᴴRw。
         actual = _power(output)
@@ -176,8 +176,8 @@ def evaluate_case(
             "series": case.series_label, "scan_label": case.scan_label,
             "scan_value": case.scan_value, "scan_unit": case.scan_unit,
             "reference_case": case.reference_case, "mode": mode,
-            "antennas": ",".join(cfg.phone.active_antennas),
-            "single_reference_antenna": cfg.phone.active_antennas[0],
+            "antennas": ",".join(case_cfg.phone.active_antennas),
+            "single_reference_antenna": case_cfg.phone.active_antennas[0],
             "target_power": powers["target"], "thermal_power": powers["thermal"],
             "interferer_powers": [{"source": name, "power": power}
                                     for name, power in interference.items()],
@@ -196,13 +196,13 @@ def evaluate_case(
             ))),
             "quadratic_power_relative_error": abs(actual - quadratic) / actual,
             "acquisition_metric": float(acquisition["metric"]),
-            "acquisition_threshold": cfg.acquisition.threshold,
+            "acquisition_threshold": case_cfg.acquisition.threshold,
             "acquired_flag": bool(acquisition["success_flag"]),
             "acquired_code_error_chips": float(circular_chip_error(
-                code_estimate, cfg.signal.code_delay_chips,
+                code_estimate, case_cfg.signal.code_delay_chips,
             )),
             "acquired_doppler_error_hz": float(
-                acquisition["doppler_hz"] - cfg.signal.doppler_hz
+                acquisition["doppler_hz"] - case_cfg.signal.doppler_hz
             ),
             "tracking_success_flag": bool(tracking["success_flag"]),
             "tracking_status": tracking["status"],
@@ -227,7 +227,7 @@ def evaluate_case(
             desired = frontend["truth"]["desired_steering_assumed"]
             if mode == "mvdr":
                 full_covariance = channels @ channels.conj().T / channels.shape[1]
-                loading = (cfg.diversity.diagonal_loading_factor
+                loading = (case_cfg.diversity.diagonal_loading_factor
                            * np.trace(full_covariance).real / channels.shape[0])
                 eigenvalues, eigenvectors = np.linalg.eigh(
                     full_covariance + loading * np.eye(channels.shape[0])
@@ -256,7 +256,7 @@ def evaluate_case(
     # 即使仅运行 MVDR，也以第一根物理天线计算 SINGLE 的指标参考。
     _, reference_info = combine_known(
         channels, frontend["truth"]["desired_steering_assumed"], "single",
-        cfg.diversity.diagonal_loading_factor,
+        case_cfg.diversity.diagonal_loading_factor,
     )
     reference_weights = reference_info["weights"]
     reference_target = _power(reference_weights.conj() @ components["target"][:, window])
@@ -327,26 +327,26 @@ def _ideal_noise_applicability(case: ValidationCase) -> str | None:
 
     这是理论结论的适用范围判断，不是为错误配置提供默认回退。
     """
-    cfg = case.config
-    if any(source.enable_flag for source in cfg.interferers):
+    case_cfg = case.config
+    if any(source.enable_flag for source in case_cfg.interferers):
         return "external interference is enabled"
-    if any(cfg.phone.channel_delay_ns[name] != 0
-           for name in cfg.phone.active_antennas):
+    if any(case_cfg.phone.channel_delay_ns[name] != 0
+           for name in case_cfg.phone.active_antennas):
         return "true sequence delays need a wideband alignment analysis"
-    if np.ptp(np.broadcast_to(cfg.rf.amplitude_error_db, len(cfg.phone.active_antennas))) != 0:
+    if np.ptp(np.broadcast_to(case_cfg.rf.amplitude_error_db, len(case_cfg.phone.active_antennas))) != 0:
         return "RF channel amplitudes differ"
-    if np.ptp(np.broadcast_to(cfg.rf.phase_error_deg, len(cfg.phone.active_antennas))) != 0:
+    if np.ptp(np.broadcast_to(case_cfg.rf.phase_error_deg, len(case_cfg.phone.active_antennas))) != 0:
         return "RF channel phases differ"
     if any(case.dfe_phase_deg.get(name, 0.0) -
            (case.dfe_estimated_phase_deg.get(name, 0.0)
             if case.compensate_dfe_phase_flag else 0.0) != 0.0
-           for name in cfg.phone.active_antennas):
+           for name in case_cfg.phone.active_antennas):
         return "DFE phases are not corrected"
-    model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
+    model = build_antenna_model(case_cfg.phone, case_cfg.signal.carrier_hz)
     true, _ = antenna_response(
-        model, cfg.signal.true_direction, cfg.signal.true_polarization,
+        model, case_cfg.signal.true_direction, case_cfg.signal.true_polarization,
     )
-    assumed = _assumed_steering(cfg)
+    assumed = _assumed_steering(case_cfg)
     if not np.allclose(true, assumed, rtol=1e-12, atol=1e-12):
         return "true and assumed target manifolds differ"
     if not np.allclose(np.abs(true), np.abs(true[0]), rtol=1e-12, atol=1e-12):
@@ -567,9 +567,9 @@ def verify_validation(rows: list[dict], cases: dict[tuple[str, int], ValidationC
 
 def run_case(case: ValidationCase) -> dict:
     """用本条件运行前端、相位处理与接收，返回本次评估需要的数据引用。"""
-    cfg = case.config
-    antennas = cfg.phone.active_antennas
-    frontend = run_frontend(cfg, retain_analysis_flag=True)
+    case_cfg = case.config
+    antennas = case_cfg.phone.active_antennas
+    frontend = run_frontend(case_cfg, retain_analysis_flag=True)
     # 两次复数乘法与原注入、逆补偿顺序一致；零净相位也保留浮点残差。
     injection_factors = np.exp(1j * np.deg2rad([
         case.dfe_phase_deg.get(name, 0.0) for name in antennas
@@ -593,7 +593,7 @@ def run_case(case: ValidationCase) -> dict:
     truth["interferer_steering_effective"] = [
         steering * factors for steering in truth["interferer_steering_effective"]
     ]
-    branches = run_receiver(channels, truth, cfg, frontend["dfe_info"]["fs_out_hz"])
+    branches = run_receiver(channels, truth, case_cfg, frontend["dfe_info"]["fs_out_hz"])
     return {
         "frontend": frontend, "channels": channels, "branches": branches,
         "injection_factors": injection_factors,
@@ -601,10 +601,10 @@ def run_case(case: ValidationCase) -> dict:
     }
 
 
-def _run_evaluated_case(case: ValidationCase, power_trim_ms: int) -> list[dict]:
+def _run_evaluated_case(case: ValidationCase, evaluation_edge_trim_ms: int) -> list[dict]:
     """进程内完成一个 TC 的前端、接收和评分，只向父进程返回标量。"""
     result = run_case(case)
-    return evaluate_case(case, result, power_trim_ms, {}, {})
+    return evaluate_case(case, result, evaluation_edge_trim_ms, {}, {})
 
 
 def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) -> dict:
@@ -622,7 +622,7 @@ def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) ->
         ordered_results = [None] * len(cases)
         with (settings.output_dir / "progress.jsonl").open("w", encoding="utf-8") as progress:
             with ProcessPoolExecutor(max_workers=settings.workers) as executor:
-                futures = {executor.submit(_run_evaluated_case, case, settings.power_trim_ms): index
+                futures = {executor.submit(_run_evaluated_case, case, settings.evaluation_edge_trim_ms): index
                            for index, case in enumerate(cases)}
                 for future in as_completed(futures):
                     index = futures[future]
@@ -642,7 +642,7 @@ def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) ->
             print(f"Frontend {case_index}/{len(cases)}: seed={case.config.random_seed}, "
                   f"condition={case.name}", flush=True)
             result = run_case(case)
-            rows.extend(evaluate_case(case, result, settings.power_trim_ms,
+            rows.extend(evaluate_case(case, result, settings.evaluation_edge_trim_ms,
                                       remaining_references, reference_data))
             del result
     case_summaries = {}
@@ -684,7 +684,7 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
     import matplotlib.pyplot as plt
 
     factors = list(dict.fromkeys((row["scan_label"], row["scan_unit"]) for row in rows))
-    paths = []
+    figure_paths = []
     for factor_label, factor_unit in factors:
         factor_rows = [row for row in rows
                        if (row["scan_label"], row["scan_unit"]) == (factor_label, factor_unit)]
@@ -801,11 +801,11 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                         axis.legend(fontsize=9, loc="lower right")
             # 序号避免自定义标签中的斜杠或不同单位导致路径/文件名冲突。
             suffix = "" if len(factors) == 1 else f"_factor_{factors.index((factor_label, factor_unit)) + 1}"
-            path = settings.output_dir / f"{filename}_{figure_mode}{suffix}.png"
-            fig.savefig(path, dpi=150)
-            paths.append(path)
+            figure_path = settings.output_dir / f"{filename}_{figure_mode}{suffix}.png"
+            fig.savefig(figure_path, dpi=150)
+            figure_paths.append(figure_path)
             if not settings.show_plots_flag:
                 plt.close(fig)
     if settings.show_plots_flag and plt.get_backend().lower() != "agg":
         plt.show()
-    return paths
+    return figure_paths

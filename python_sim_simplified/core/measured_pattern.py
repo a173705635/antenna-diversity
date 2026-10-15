@@ -19,11 +19,11 @@ class MeasuredGrid:
 
 
 def load_measured_pattern(
-    path: Path,
+    csv_path: Path,
     frequency_hz: float,
 ) -> dict[str, MeasuredGrid]:
     grouped: dict[str, list[tuple[float, float, complex, complex]]] = {}
-    with Path(path).open(newline="", encoding="utf-8-sig") as stream:
+    with Path(csv_path).open(newline="", encoding="utf-8-sig") as stream:
         for row in csv.DictReader(stream):
             if np.isclose(float(row["frequency_hz"]), frequency_hz, atol=1.0, rtol=0.0):
                 grouped.setdefault(row["element_name"], []).append(
