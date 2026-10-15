@@ -18,7 +18,7 @@ python -m experiments.interference.full_chain
 
 参考 FULLCHAIN 的阶段组织：配置 → 源波形 → 天线响应/互耦/通道时延 → 天线端合成 → RF 滤波与热噪声 → RF 增益/幅相 → 限幅/ADC → DDC/FIR/抽取/DFE 量化 → 合并、捕获跟踪 → 评估。保留原有物理运算顺序。
 
-- `core/pipeline.py` 负责实际前端与接收；不同物理条件分别运行，名义假设和 DFE 后相位条件共享相同物理输入。GPS 多卫星接收继续共用 RF/DFE 底层函数，保留自身多星处理流程。
+- `core/pipeline.py` 负责实际前端与接收；当前通用验证逐用例独立执行，不再按配置判断能否共享前端。GPS 多卫星接收继续共用 RF/DFE 底层函数，保留自身多星处理流程。
 - `retain_analysis=True` 仅额外保留本次实际 RF 热噪声；`core/evaluation.py::linear_components` 按需传播源真值与噪声，复用实际滤波器、NCO、抽取和码值尺度。FULLCHAIN 默认不调用此分析；精确分量功率仍需要线性滤波，不能直接从非线性输出拆分。
 - 线性分量绕过限幅及量化，固定真实接收权值后才评分；不参与求权。其相加结果与实际输出的差是联合非线性/量化残差，分量交叉项另列，不能称为独立热噪声。消融实验保留独立 ADC 重建核验。
 - 各实验的配置、统计窗口、输出字段和绘图保持原口径；共用分量传播，旧相位入口也调用公共前端/接收函数。调用 `evaluate_budget` 前需显式保留分析输入，不再事后重抽噪声。
@@ -467,13 +467,13 @@ print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assu
 
 需要自定义单点时，在 `build_cases()` 中增加具名条件并明确选择规则，最后统一展开种子；相位补偿条件在同处带入基准，基准先于补偿执行。`dfe_phase_deg` 和 `dfe_estimated_phase_deg` 按物理天线名配置；`compensate_dfe_phase=True` 才执行估计相位的逆旋转。相位误差和补偿都作用于整行复数样本。真实阵元增益则修改 `cfg.phone.antenna_model.true_state.amplitude_error_db`，它改变目标和各干扰在天线端的响应，不改变独立 RF 热噪声的生成强度。
 
-处理阶段固定在 [validation_support.py](../../experiments/interference/validation_support.py)：相同物理配置共享前端，随后分别执行接收和独立预算。独立评分逐个重建启用的干扰源，不要求场景同时包含 CW 与宽带；公共接收机仍仅使用完整 IQ 和配置的名义导向。输出的线性 SINR 不含联合非线性/量化残差，分量交叉项单列，跟踪 C/N₀ 缺测不画成零。
+处理阶段固定在 [validation_support.py](../../experiments/interference/validation_support.py)：每个用例独立生成前端并执行接收和独立预算，同一用例的各算法共用本次采样。独立评分逐个重建启用的干扰源，不要求场景同时包含 CW 与宽带；公共接收机仍仅使用完整 IQ 和配置的名义导向。输出的线性 SINR 不含联合非线性/量化残差，分量交叉项单列，跟踪 C/N₀ 缺测不画成零。
 
 本轮验证首先记录当前维护版的 20 ms、seed 42、默认四天线、CW＋宽带、12 跟踪历元数值，提取前端/接收函数后重算。场景、ADC、DFE 以及四种方法的权值、合并序列、捕获/跟踪序列化结果哈希全部一致。
 
 ### 2026-10-15 用例构造更新
 
-`validation_config.py` 的 `build_cases()` 一次完成系列/具名选择、相位基准配对和 seed 展开；每个最终用例的 `config` 已包含实际种子、时长及跟踪上限。运行器只按完整配置执行并复用相同物理前端，保存入口不再重建配置。加入 Blind Null 后默认是 36 个条件 × 3 个 seed × 4 种方法（432 行）；两种选择都为空时生成空批次，不再隐式运行全部系列。
+`validation_config.py` 的 `build_cases()` 一次完成系列/具名选择、相位基准配对和 seed 展开；每个最终用例的 `config` 已包含实际种子、时长及跟踪上限。运行器按每个用例的完整配置独立执行，保存入口不再重建配置。加入 Blind Null 后默认是 36 个条件 × 3 个 seed × 4 种方法（432 行）；两种选择都为空时生成空批次，不再隐式运行全部系列。
 
 `ValidationSettings` 只保留统计去边、输出目录和绘图开关；直接调用运行器的自定义脚本需先准备完整用例。输出行与指标字段不变；清单的 `actual_receiver_configs[条件名][seed]` 路径保留，`cases` 中的 `base_config` 改为逐 seed 的 `receiver_configs`，便于追溯实际执行参数。
 
@@ -489,9 +489,17 @@ print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assu
 
 ### 2026-10-15 验证运行器简化
 
-`run_validation()` 负责物理分组、调用组内处理和汇总核验；`_run_physical_group()` 只返回结果行，避免上一组波形和基准分支被局部变量带入下一组。相位注入/逆补偿系数供完整 IQ 与分量共用，仍执行两步乘法；同一条件的 DFE 恢复误差不再逐方法重复计算。
+此前版本的 `run_validation()` 负责物理分组、调用组内处理和汇总核验（后续独立执行方案已取消物理分组）；`_run_physical_group()` 只返回结果行，避免上一组波形和基准分支被局部变量带入下一组。相位注入/逆补偿系数供完整 IQ 与分量共用，仍执行两步乘法；同一条件的 DFE 恢复误差不再逐方法重复计算。
 
 专项 `python -m pytest tests/test_validation.py -q`：29 passed，新增跨组数组弱引用释放、DFE 范数调用次数和 35° 两步相位逐位一致性检查。沿用上节四方法、两 seed、12 ms 的 224 行条件，完整摘要、配置及核验报告与改前严格一致；本地对照文件为 `results/interference/validation_blind_null/short_comparison.pickle` 和 `group_refactor.pickle`。未测量峰值内存或耗时降幅，未重跑完整默认批次或全套核心测试。
+
+### 2026-10-15 逐用例独立执行
+
+当前 `run_validation()` 按输入顺序调用 `_run_case()`，每个用例的完整配置都独立经过信号生成、天线、RF/ADC/DFE、相位处理、接收及评估；已删除 `_physical_key()` 和跨用例前端复用。同一用例的四种算法共用本次采样，基准与补偿用例用相同种子分别生成数据。默认 108 个用例对应 108 次前端、432 行方法结果；不再按物理分组调整行序。
+
+基准缓存只供评分后比较，按 `(条件名, seed)` 隔离，仅保存 DFE 样本、各方法合并序列和权值，最后消费者结束后释放；不保存 RF 波形，也不把参考数据作为其他用例的接收输入。
+
+专项 `python -m pytest tests/test_validation.py -q`：30 passed，覆盖独立前端及完整配置、名义参数和非零估计时延、不同 seed 配对、多个消费者与数组释放。沿用四方法、seed 42/43、12 ms、相位/方向/增益条件，56 个用例分别运行 56 次前端；按条件名/seed/方法对照，224 行、完整配置和核验报告与复用版严格一致。本地证据为 `results/interference/validation_blind_null/group_refactor.pickle` 与 `independent_cases.pickle`；未重跑完整默认批次或全套核心测试，未测量耗时增幅。
 
 ### 2026-10-15 绘图使用更新
 

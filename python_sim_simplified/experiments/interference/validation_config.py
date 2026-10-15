@@ -16,7 +16,7 @@ from experiments.interference.validation_support import ValidationCase, Validati
 ANTENNAS = ("TL", "BR")
 MODES = ("single", "egc", "mvdr", "blind_null")
 SEEDS = (42, 43, 44)
-# 每个 seed 对应一次噪声实现；相同物理条件复用同一份采样做公平比较。
+# 每个用例独立生成采样；配对条件保持相同 seed 和物理配置，以复现相同噪声。
 DURATION_MS = 100
 # 功率统计首尾各舍弃此时长，避开滤波瞬态；不裁掉送入捕获跟踪的数据。
 POWER_TRIM_MS = 10
