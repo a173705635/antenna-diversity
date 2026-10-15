@@ -8,7 +8,7 @@
 core/          天线、GNSS、RF/DFE、捕获跟踪与定位；interference/ 放干扰场景与盲零陷
 experiments/   interference/ 的通用验证入口与四个既有实验，以及 GPS/录波入口和 paths.py
 configs/       通用定位实验的冻结权重等配置
-tests/         当前功能测试；本地冻结对照以 local_evidence 单独标记
+tests/         当前功能测试与测试数据，仅本地保留；冻结对照以 local_evidence 单独标记
 tools/         frozen_version.py 校验与恢复原始冻结版
 docs/          interference/ 为当前说明；spoofing/、multipath/ 为历史报告
 results/       本地输出；已有历史目录与来源清单保留原样
@@ -78,6 +78,10 @@ python tools/frozen_version.py --restore results/restored_original
 日常实验记录参数、种子和 `source_sha256`。仅当需要冻结当前源码时，将脚本顶部 `FREEZE_SOURCE` 改为 `True`；运行结果不会默认生成源码副本。
 
 ## 验证
+
+当前 `tests/`、`test/` 目录和测试脚本已加入忽略规则，只在本地维护，不提交或推送。新克隆的仓库不包含这些测试文件；以下命令需要本地具备 `tests/`。`pytest.ini` 与测试依赖继续保留，供本地验证使用；历史报告中的冻结测试副本保持原样。
+
+本机现有测试已保留。其他已克隆副本若需要保留其测试，应在首次拉取本次取消跟踪提交前另存 `tests/`，因为 Git 会在那些副本中移除原已跟踪且未修改的测试文件。
 
 ```powershell
 python -m pytest -q

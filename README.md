@@ -23,8 +23,9 @@ cd F:\antenna_diversity
 python -m pip install -r python_sim_simplified/requirements.txt
 cd python_sim_simplified
 python -m experiments.interference.full_chain
-python -m pytest -q
 ```
+
+当前测试文件仅在本地保留，不随克隆或拉取分发。本地具备 `python_sim_simplified/tests/` 时，可在精简版目录运行 `python -m pytest -q`；用法见 [本地验证说明](python_sim_simplified/README.md#验证)。
 
 ## 本地备份与历史资料
 

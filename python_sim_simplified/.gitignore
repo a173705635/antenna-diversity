@@ -1,4 +1,12 @@
 results/
 archive/
+
+# Current tests remain local and are not published with the maintained code.
+/tests/
+/test/
+test_*.py
+*_test.py
+conftest.py
+
 docs/spoofing/history/
 _tmp_anti_spoofing_word/
