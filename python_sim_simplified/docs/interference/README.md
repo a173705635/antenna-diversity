@@ -495,11 +495,17 @@ print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assu
 
 ### 2026-10-15 逐用例独立执行
 
-当前 `run_validation()` 按输入顺序调用 `_run_case()`，每个用例的完整配置都独立经过信号生成、天线、RF/ADC/DFE、相位处理、接收及评估；已删除 `_physical_key()` 和跨用例前端复用。同一用例的四种算法共用本次采样，基准与补偿用例用相同种子分别生成数据。默认 108 个用例对应 108 次前端、432 行方法结果；不再按物理分组调整行序。
+当前 `run_validation()` 按输入顺序调用 `run_case()` 执行信号生成、天线、RF/ADC/DFE、相位处理及接收，再调用 `evaluate_case()` 做分量分析、指标与配对比较；已删除 `_physical_key()` 和跨用例前端复用。同一用例的四种算法共用本次采样，基准与补偿用例用相同种子分别生成数据。默认 108 个用例对应 108 次前端、432 行方法结果；不再按物理分组调整行序。
 
 基准缓存只供评分后比较，按 `(条件名, seed)` 隔离，仅保存 DFE 样本、各方法合并序列和权值，最后消费者结束后释放；不保存 RF 波形，也不把参考数据作为其他用例的接收输入。
 
 专项 `python -m pytest tests/test_validation.py -q`：30 passed，覆盖独立前端及完整配置、名义参数和非零估计时延、不同 seed 配对、多个消费者与数组释放。沿用四方法、seed 42/43、12 ms、相位/方向/增益条件，56 个用例分别运行 56 次前端；按条件名/seed/方法对照，224 行、完整配置和核验报告与复用版严格一致。本地证据为 `results/interference/validation_blind_null/group_refactor.pickle` 与 `independent_cases.pickle`；未重跑完整默认批次或全套核心测试，未测量耗时增幅。
+
+### 2026-10-15 接收与评估分离
+
+同一 `validation_support.py` 内，`run_case(case)` 只执行实际前端、两步相位处理和接收，保留本次噪声但不调用分量分析；`evaluate_case()` 读取接收结果计算分量、指标和基准配对，合并原 `_score()`，不重跑实际链。批次循环评估后立即释放 `result`，仅配对必需的数据按既有规则保留。
+
+专项 `python -m pytest tests/test_validation.py -q`：32 passed，覆盖接收不调用评估、评估不重跑或修改接收结果，以及原数组释放检查。沿用上节四方法、两 seed、12 ms 的 224 行条件，完整配置、数值、输出顺序和核验报告均严格一致；本地对照为 `results/interference/validation_blind_null/independent_cases.pickle` 与 `separate_evaluation.pickle`。未重跑完整默认批次或全套核心测试。
 
 ### 2026-10-15 绘图使用更新
 
