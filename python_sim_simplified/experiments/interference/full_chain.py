@@ -15,7 +15,6 @@ from core.plotting import (
     plot_detailed_results,
     plot_tracking,
 )
-from core.multipath.plotting import plot_multipath_results
 from core.presets import default_config, parametric_config
 from core.provenance import source_hashes, freeze_source
 from core.serialization import serializable
@@ -38,7 +37,6 @@ def save_results_figures(results, output_dir):
             **plot_detailed_results(results),
             "tracking": plot_tracking(results),
             "cn0": plot_cn0(results),
-            **plot_multipath_results(results),
         }
 
     for old_path in directory.glob("*.png"):

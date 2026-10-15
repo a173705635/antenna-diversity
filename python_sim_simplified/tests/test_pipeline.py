@@ -6,7 +6,7 @@ from core.metrics import (
     acquisition_code_bias_chips,
     tracking_code_bias_chips,
 )
-from core.pipeline import run_end_to_end
+from core.pipeline import run_end_to_end, run_frontend, run_receiver
 from core.presets import default_config
 
 
@@ -26,8 +26,6 @@ def test_pipeline_runs_four_branches_and_tracks_an_antijam_branch():
         "dfe_channels",
         "dfe_info",
         "branches",
-        "multipath_detection",
-        "multipath_evaluation",
         "metrics",
     }
     assert set(results["branches"]) == {
@@ -61,34 +59,6 @@ def test_known_combiners_use_assumed_target_but_blind_null_does_not():
     ]
 
 
-def test_pipeline_detects_before_appending_multipath_lcmv_branch():
-    cfg = default_config()
-    cfg.enable_multipath_research = True
-    cfg.signal.duration_ms = 30
-    cfg.tracking.max_epochs = 20
-
-    results = run_end_to_end(cfg)
-
-    detection = results["multipath_detection"]
-    assert detection["pilot_mode"] in {"single", "egc", "mvdr", "blind_null"}
-    assert detection["status"] in {"detected", "no_multipath_detected"}
-    assert results["branches"]["multipath_lcmv"]["combining"]["mode"] == "multipath_lcmv"
-
-
-def test_pipeline_reports_no_pilot_and_uses_mvdr_fallback():
-    cfg = default_config()
-    cfg.enable_multipath_research = True
-    cfg.signal.duration_ms = 12
-    cfg.tracking.max_epochs = 5
-    cfg.acquisition.threshold = 1e9
-
-    results = run_end_to_end(cfg)
-
-    assert results["multipath_detection"]["status"] == "no_pilot_acquisition"
-    combining = results["branches"]["multipath_lcmv"]["combining"]
-    assert combining["suppression_status"] == "no_multipath_detected"
-
-
 def test_code_bias_helpers_use_direct_path_and_tracking_epoch_time():
     fs_hz = 4.092e6
     truth = {
@@ -111,46 +81,38 @@ def test_code_bias_helpers_use_direct_path_and_tracking_epoch_time():
     )
 
 
-def test_pipeline_metrics_include_multipath_gain_and_code_bias():
+def test_pipeline_metrics_include_code_bias():
     cfg = default_config()
-    cfg.enable_multipath_research = True
     cfg.signal.duration_ms = 20
     cfg.tracking.max_epochs = 10
 
     results = run_end_to_end(cfg)
 
-    assert set(results["multipath_evaluation"]) >= {
-        "detected_count", "missed_count", "false_alarm_count", "matches"
-    }
     for record in results["metrics"]:
-        assert len(record["multipath_direction_gains"]) == 1
-        assert np.isfinite(record["worst_multipath_gain"])
         assert np.isfinite(record["acquisition_code_bias_chips"])
         if record["tracking"]:
             assert np.isfinite(record["tracking_code_bias_rms_chips"])
             assert np.isfinite(record["tracking_code_bias_rms_m"])
 
 
-def test_resolvable_multipath_lcmv_reduces_echo_gain_and_code_bias():
+def test_frontend_and_receiver_reproduce_complete_chain():
     cfg = default_config()
-    cfg.enable_multipath_research = True
-    cfg.interferers = []
-    cfg.signal.power_dbm = -95.0
-    cfg.signal.duration_ms = 30
-    cfg.signal.multipath_paths[0].relative_power_db = -3.0
-    cfg.multipath_detection.detection_threshold_db = 3.0
-    cfg.tracking.max_epochs = 20
-
-    results = run_end_to_end(cfg)
-    records = {record["mode"]: record for record in results["metrics"]}
-
-    assert results["multipath_detection"]["candidates"][0][
-        "spatial_status"
-    ] == "resolvable"
-    assert records["multipath_lcmv"]["worst_multipath_gain"] < 1e-6
-    assert records["multipath_lcmv"]["worst_multipath_gain"] < records["egc"][
-        "worst_multipath_gain"
-    ]
-    assert records["multipath_lcmv"]["tracking_code_bias_rms_chips"] < records[
-        "egc"
-    ]["tracking_code_bias_rms_chips"]
+    cfg.signal.duration_ms = 12
+    cfg.tracking.max_epochs = 8
+    complete = run_end_to_end(cfg)
+    frontend = run_frontend(cfg)
+    branches = run_receiver(
+        frontend["dfe_channels"], frontend["truth"], cfg,
+        frontend["dfe_info"]["fs_out_hz"],
+    )
+    assert frontend["branches"] == {}
+    assert frontend["metrics"] == []
+    for name in ("scene_input_v", "adc_codes", "dfe_channels"):
+        np.testing.assert_array_equal(frontend[name], complete[name])
+    assert set(branches) == set(cfg.diversity.modes)
+    for mode in cfg.diversity.modes:
+        expected, actual = complete["branches"][mode], branches[mode]
+        np.testing.assert_array_equal(actual["combined"], expected["combined"])
+        np.testing.assert_array_equal(actual["combining"]["weights"], expected["combining"]["weights"])
+        assert actual["acquisition"]["metric"] == expected["acquisition"]["metric"]
+        assert actual["tracking"]["status"] == expected["tracking"]["status"]

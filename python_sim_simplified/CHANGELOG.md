@@ -2,6 +2,35 @@
 
 记录每次修改、实验迭代和验证的目的、实际改动、默认行为、实验条件、验证结果、结论与限制，不等到上库时才补。新记录放在最前面，旧记录及其条件保留；同一迭代的失败、修正和复验归入同一条记录。详细研究说明复用各方向既有文档，并在记录中链接，不另建重复报告。每条记录与对应修改一起提交；提交编号可通过本文件的 Git 历史查询。此前提交保留在原有 Git 历史中。
 
+## 2026-10-14～15 通用验证框架
+
+- 目的：按用户选择，将日常可改条件集中在短 Python 配置文件，运行、独立评分、配对核验和绘图长期共用；不继续为每轮条件变化新建实验脚本。
+- 修改后代码位置：维护根目录为 `F:\antenna_diversity\python_sim_simplified\`；日常修改 `experiments\interference\validation_config.py`，固定运行入口为 `experiments\interference\validation.py`，共享实验处理位于 `experiments\interference\validation_support.py`，公共接收阶段位于 `core\pipeline.py`。以上相对路径均以该维护根目录为起点。
+- 实际改动：新增 `experiments/interference/validation_config.py`（日常条件）、`validation.py`（固定入口）、`validation_support.py`（共享实验运行/独立预算/核验/绘图）；`core/pipeline.py` 提取 `run_frontend` 与 `run_receiver`，原 `run_end_to_end` 继续组合这两阶段。具名条件支持单点、相位/方位/阵元增益扫描、两至四天线、真实/名义参数分离、自动纳入参考条件，以及各启用干扰源的独立功率预算。增加 `tests/test_validation.py` 并补充 pipeline 阶段对照。保留已有抗干扰收口修改、四个旧实验及历史记录。
+- 默认行为：新入口默认 TL/BR，42/43/44 三个 seed，100 ms，功率统计两端各去掉 10 ms，0/30/60/90/120/180°，无干扰/单 CW，基准/未补/准确补偿，SINGLE/EGC/MVDR；36 条具名条件、324 行方法结果。旧完整接收入口默认值不变。`SELECTED_CASES` 可只选某一补偿条件，自动纳入其基准；真实方向与名义方向分别编辑。
+- 改动前数值基准：20 ms、seed 42、默认四天线和 CW＋宽带，跟踪上限 12 历元，记录场景/ADC/DFE、四个方法的权值、合并序列、捕获及跟踪哈希，供本轮提取公共阶段后逐项比较。首次检查脚本使用 JSON 序列化复数数组失败，改用数组字节和 pickle 序列化后基准记录成功；这是检查脚本问题，没有修改仿真算法。
+- 修正与复验：检查实现时修正 NumPy 布尔值可能掩盖核验失败、理论 10log10(N) 前提不足、参考条件顺序依赖、补偿字段导致 CSV 列不一致、不同扫描因素混轴，以及无 SINGLE 接收分支时仍需计算物理参考评分的问题。双方 C/N₀ 缺测标为未评价，单侧缺测或有限样本数变化拒绝配对通过；整段 DFE、合并输出与权值也参与闭环核验。保存图 QA 后拆出每个干扰源的抑制图，功率/SINR 使用线性比显示抵消，保留 CSV 中的 dB 数值；缺测子图保留实际横轴并明确无估计。
+- 实际测试：Coder 报告公共阶段相关 20 项测试通过。Main 执行 `python -B -m pytest -p no:cacheprovider -q tests/test_validation.py --basetemp=results/_pytest_validation_finish`：16 passed；随后全套 `python -B -m pytest -p no:cacheprovider -q --basetemp=results/_pytest_validation_framework_final`：**159 passed、2 deselected，207.97 s**。最后仅调整绘图和注释后执行 `python -B -m pytest -p no:cacheprovider -q tests/test_validation.py --basetemp=results/_pytest_validation_plot_final`：**17 passed，25.22 s**。新旧相位入口的 0/90/180°、seed 42、20 ms、无干扰/单 CW 共 54 行对照通过；测试覆盖仅 CW、仅宽带、两者同时及无干扰、四天线反序、仅运行 MVDR、真实/名义条件的前端复用、负核验与导出失败状态保存。
+- 已核验结果：提取阶段前后所有基准哈希一致。初次默认批次 324 行、450 个逐行/配对/理论检查通过；DFE、合并输出、权值恢复最大相对误差分别为 `1.0552e-16`、`8.7018e-16`、0，无干扰 EGC 热噪声收益 2.99863～3.00730 dB。方向/增益示例使用 seed 42、20 ms、trim 2 ms、真实方位 30/40/50°、BR 增益 0/6.020599913279624 dB，共 30 行通过；Main 从几何坐标独立复算 EGC 目标功率比，与数据最大绝对差 `2.22e-16`。结果分别在 `results/interference/validation/`、`results/interference/validation_examples/`；绘图调整后正在用最终源码刷新这两批结果。
+- 最终输出复核：上述两批已用最终源码重新完成，分别为 324 行/450 项检查和 30 行/30 项检查，全部通过；分别保存 4 张和 8 张图，两个 manifest 的 47 个源码哈希均与当前文件一致。已查看默认批次的目标功率/SINR、接收指标、独立干扰抑制图，缺测明确标注，未改变信号强度或 NF。450 项是逐行、理论及配对检查数，不是独立实验数。
+- 说明与限制：用法及具体条件见 [抗干扰说明](docs/interference/README.md#2026-10-14-通用验证框架)，设计见 [现有计划](REFACTOR_PLAN.md)。自动运行使用 `MPLBACKEND=Agg`；默认 `SHOW_PLOTS=True` 保留桌面弹图，未实际验证 GUI 交互。没有新增自动估相、宽带时延对齐或接收算法。子 Agent 的独立审查因额度限制中断，由 Main 接手剩余检查和修改；未把中断的审查写成通过。未提交、推送或合并。
+- 上库复核（基准 `156b994`）：本次按用户要求，将抗干扰收口、通用验证框架及位置说明一并整理上库；上条“未提交、推送或合并”是实现阶段的状态记录。最终执行 `python -B -m pytest -p no:cacheprovider -q --basetemp=results/_pytest_upload_interference_final`：**159 passed、2 deselected，171.71 s**。独立只读审查新框架的物理前端缓存、真实/名义参数、整通道相位、独立评分、参考关系、缺测状态与导出，未发现实质阻塞。Main 重新核对两个保存批次各 47 个源码哈希与核验通过状态，并核对 271 个备份文件哈希；理想/参数化两组 20 ms 抗干扰完整输出与清理前基线一致，全部 74 个维护源码/测试文件语法解析通过，当前 README 的 45 个本地链接有效。没有重跑完整研究批次；归档、结果和缓存均排除提交，暂存差异与远端状态另作提交前检查。
+
+## 2026-10-14 备份并收口为抗干扰维护代码
+
+- 目的：按用户要求先冻结当前精简版，再移除抗欺骗与多径相关实现，使后续抗干扰修改只涉及当前维护链路。
+- 修改后代码位置：当前维护代码位于 `F:\antenna_diversity\python_sim_simplified\`，本次直接在这个目录内完成清理；公共源码在其 `core\`，四个抗干扰实验在其 `experiments\interference\`，后续开发继续修改这些位置。
+- 归档源码位置：清理前完整精简版源码位于 `F:\antenna_diversity\python_sim_simplified\archive\pre_interference_only_2026-10-14_156b994\python_sim_simplified\`；备份清单 `FREEZE_MANIFEST.json` 位于其上一级 `pre_interference_only_2026-10-14_156b994\`。
+- 本地备份：起始工作区干净，Git HEAD 为 `156b994bacc9fed03b38ae8b5b4b927e3e5bae11`；`archive/pre_interference_only_2026-10-14_156b994/` 保存精简版全部已跟踪文件及根目录协作规则、状态和导航，共 **271 个文件**，每个文件的 SHA256 记录在 `FREEZE_MANIFEST.json` 并逐项核验。不复制大型结果数据；既有归档和结果保持本地身份，备份不提交、不推送。
+- 实际清理：删除 `core/spoofing/`、`core/multipath/`、`experiments/spoofing/`、`experiments/multipath/`、`tools/spoofing/` 及专用测试，共 **85 个专用源码/入口/工具文件、89 个专用测试文件**；维护源码文件数由 127 减为 42。公共配置、信号生成、链路编排、结果类型、指标、绘图与 GPS 场景移除多径字段和分支。移除仅由已删除工具使用的历史源码定位映射、专用输出路径常量和 `track(loss_quality=...)` 自定义回调；四个抗干扰实验同步去掉相关引用。通用天线、RF/DFE、GNSS L1/L5、捕获跟踪、标准失锁重捕、导航/定位和录波接收继续保留。
+- 行为与说明：`full_chain` 仍比较 SINGLE、EGC、MVDR、Blind Null，没有重新开启回波/检测/多径 LCMV 的开关；旧配置或脚本中被删除的字段不再受支持，恢复对应研究需使用冻结源码。当前 README、协作规则和项目状态同步抗干扰范围；历史报告、结果、旧 CHANGELOG 条件和来源哈希不追改。本次清理没有新增研究性能结论。
+- 清理前验证：`python -B -m pytest -p no:cacheprovider -q --basetemp=results/_pytest_interference_cleanup_baseline` 为 **606 passed、25 deselected，229.42 s**。另用 `python -B -` 运行理想/参数化天线各 20 ms、跟踪上限 10 历元的完整抗干扰链，保存场景、ADC、DFE、合并、捕获、跟踪、真值及指标的数值指纹至备份内 `INTERFERENCE_BASELINE.json`；仅排除配置结构和有意删除的多径键。
+- 失败、修正与复验：新的移除契约测试先在旧实现上复现失败，清理后针对性测试 **48 passed**，首轮完整回归 **136 passed、2 deselected**。独立审查发现被删的抗欺骗命名测试文件中有公共 PLL 测试，将四项收敛/斜率/阶跃测试及辅助函数迁入既有 `test_receiver.py`；自定义质量回调的唯一生产调用者已删除，去掉该接口，标准失锁判据与计数不变。修正后跟踪相关测试 **12 passed**，复审无剩余实质问题。首次 GPS 对照更早的 2026-09-16 冻结版两频段均不一致；该版本跨越既有模型更新，改用本次清理前快照作为相同版本基准，没有修改定位算法或旧证据强迫相等。子解释器补 `-B`，清除本次快照内生成的三处字节码缓存，271 个原文件哈希仍全部一致。
+- 最终测试：`python -m pytest -q` 为 **141 passed、2 deselected，161.44 s**；`python -m pytest -m local_evidence -q tests/test_frozen_equivalence.py` 对清理前版本的 GPS L1CA/L5Q 完整接收及定位数值比较为 **2 passed，90.24 s**。Main 另执行 `python -B -m pytest -p no:cacheprovider -q tests/test_receiver.py tests/test_autonomous_tracking.py tests/test_tracking_replica.py tests/test_core_layout.py --basetemp=results/_pytest_cleanup_main_verify`，为 **15 passed，2.30 s**，覆盖公共环路、自主失锁重捕和移除后的包边界。
+- Main 独立验证：用 `python -B -` 将最终理想/参数化抗干扰输出与清理前 `INTERFERENCE_BASELINE.json` 对照，两组场景、ADC、DFE、权值/合并、捕获、跟踪、真值及指标逐项完全一致（仅排除有意删除的多径键和配置结构）；另用独立解释器比较清理前/后的 GPS L1CA/L5Q 双 PRN 20 ms 场景数组及信号设置，也完全一致。42 个维护模块逐个解析和导入成功；删除目录不再存在，无已删除包/字段/模式/回调的运行引用；当前导航 54 个本地链接有效。`git diff --check` 通过，271 项备份哈希全部匹配，归档与结果仍被忽略；历史抗欺骗、多径报告无差异。
+- 结论与限制：保留链路在上述对照条件下数值不变，不据此推广新的抗干扰性能结论。历史抗欺骗/多径实验未重跑，历史结果没有覆盖或追改；测试输出只写本地临时测试目录，未重新生成现有研究批次。实施边界见 [重构计划](REFACTOR_PLAN.md#2026-10-14-interference-only-maintained-code)，当前接收链说明见 [抗干扰文档](docs/interference/README.md)。本轮未提交或推送，全部改动留在工作区。
+- 路径说明补充：仅补充本条记录的当前维护代码和归档源码绝对路径，核对两处目录及其源码子目录存在，`git diff --check -- python_sim_simplified/CHANGELOG.md` 通过；没有修改代码，未重跑测试或仿真。
+
 ## 2026-10-14 相位验证入口中文注释完善
 
 - 目的与实际改动：只补充 `experiments/interference/channel_phase_validation.py` 的中文注释和函数说明；解释输入输出、矩阵维度、码值/功率单位、整行相位旋转与逆补偿、线性 RF/DFE 分量重建、共轭合并与 `wᴴRw` 功率关系、配对判据、C/N₀ 缺测和绘图统计。明显的赋值和循环不逐行重复说明；没有改算法、参数、控制流程或增加保护分支。

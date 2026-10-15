@@ -59,8 +59,7 @@ def satellite_setup():
 
 
 def build_scene(satellites, duration_ms, *, code_bandwidth_hz=None,
-                fs_rf_hz=None, decimation=None, signal_kind='L1CA',
-                multipath_by_prn=None, multipath_start_ms=None):
+                fs_rf_hz=None, decimation=None, signal_kind='L1CA'):
     """Sum clean PRNs at one antenna; RF noise and quantization happen afterwards."""
     cfg = default_config()
     if signal_kind not in ('L1CA', 'L5Q'):
@@ -83,12 +82,8 @@ def build_scene(satellites, duration_ms, *, code_bandwidth_hz=None,
     cfg.phone.phase_centers_m['TL'] = (0., 0., 0.)
     cfg.phone.assumed_phase_centers_m['TL'] = (0., 0., 0.)
     cfg.interferers = []
-    cfg.signal.multipath_paths = []
-    cfg.multipath_detection.enable = False
-    cfg.multipath_suppression.enable = False
     scene = np.zeros((1, round(duration_ms*.001*cfg.signal.fs_rf_hz)), dtype=complex)
     for satellite in satellites:
-        cfg.signal.multipath_paths = list((multipath_by_prn or {}).get(satellite['prn'], ()))
         cfg.signal.prn = satellite['prn']
         cfg.signal.doppler_hz = satellite['doppler_hz']*cfg.signal.carrier_hz/1575.42e6
         # Full delay retains the transmitted NH epoch; L1 periodic lookup is unchanged.
@@ -96,13 +91,6 @@ def build_scene(satellites, duration_ms, *, code_bandwidth_hz=None,
         cfg.signal.code_delay_chips = delay if signal_kind == 'L5Q' else delay % 1023.
         cfg.signal.initial_phase_rad = float((-2*np.pi*satellite['range_at_zero_m']/cfg.signal.wavelength_m) % (2*np.pi))
         component, truth = generate_scenario(cfg)
-        if multipath_start_ms is not None and truth['multipath_paths']:
-            if not 0 <= multipath_start_ms < duration_ms-10:
-                raise ValueError('multipath onset must leave a full 10 ms ramp')
-            progress = np.clip((truth['time_s']-multipath_start_ms*.001)/.01, 0., 1.)
-            off = .5*(1+np.cos(np.pi*progress))
-            for path in truth['multipath_paths']:
-                component -= off[None, :]*path['component']
         scene += component
         del component, truth
     return scene, cfg

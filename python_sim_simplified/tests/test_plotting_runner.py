@@ -17,7 +17,6 @@ from core.plotting import (
     _spherical_response_coordinates,
     plot_detailed_results, plot_results,
 )
-from core.multipath.plotting import plot_multipath_results
 from core.presets import default_config
 from experiments.interference.full_chain import save_results_figures
 
@@ -47,7 +46,6 @@ def test_plot_results_returns_seven_independent_figures():
 
 def test_detailed_results_put_combined_output_spectra_in_one_figure():
     cfg = default_config()
-    cfg.enable_multipath_research = True
     cfg.signal.duration_ms = 20
     cfg.tracking.max_epochs = 10
     results = run_end_to_end(cfg)
@@ -66,7 +64,7 @@ def test_detailed_results_put_combined_output_spectra_in_one_figure():
     }
 
     assert set(figures) == expected
-    assert len(figures) == 25
+    assert len(figures) == 21
     for name in cfg.phone.active_antennas:
         assert len(figures[f"detailed_rf_dfe_{name}"].axes) == 3
     combined_figure = figures["detailed_combined_spectra"]
@@ -102,7 +100,6 @@ def test_detailed_combined_spectra_use_absolute_scale_and_mark_frequencies():
 
 def test_detailed_spatial_and_acquisition_figures_keep_diagnostics_separate():
     cfg = default_config()
-    cfg.enable_multipath_research = True
     cfg.signal.duration_ms = 20
     cfg.tracking.max_epochs = 10
     results = run_end_to_end(cfg)
@@ -112,12 +109,11 @@ def test_detailed_spatial_and_acquisition_figures_keep_diagnostics_separate():
         spatial = figures[f"detailed_array_response_{mode}"]
         spatial_axis = next(axis for axis in spatial.axes if axis.images)
         assert spatial_axis.images[0].get_clim() == (-60.0, 0.0)
-        assert len(spatial_axis.lines) == 4
+        assert len(spatial_axis.lines) == 3
         assert {
             "Target",
             "CW 1",
             "Wideband 2",
-            "Multipath 1",
         } <= {line.get_label() for line in spatial_axis.lines}
 
         surface = figures[f"detailed_array_response_3d_{mode}"]
@@ -157,9 +153,8 @@ def test_detailed_spatial_and_acquisition_figures_keep_diagnostics_separate():
         plt.close(figure)
 
 
-def test_save_results_figures_keeps_existing_and_adds_multipath_outputs(tmp_path):
+def test_save_results_figures_keeps_interference_outputs(tmp_path):
     cfg = default_config()
-    cfg.enable_multipath_research = True
     cfg.signal.duration_ms = 20
     cfg.tracking.max_epochs = 10
     cfg.plot.show = False
@@ -173,18 +168,13 @@ def test_save_results_figures_keeps_existing_and_adds_multipath_outputs(tmp_path
         "detailed_rf_dfe_TL",
         "detailed_combined_spectra",
         "detailed_array_response_blind_null",
-        "detailed_array_response_multipath_lcmv",
         "detailed_array_response_3d_mvdr",
         "detailed_array_response_3d_blind_null",
         "detailed_array_response_spherical_mvdr",
         "detailed_array_response_spherical_blind_null",
         "detailed_acquisition_egc",
-        "detailed_acquisition_multipath_lcmv",
         "tracking",
         "cn0",
-        "multipath_delay_profile",
-        "multipath_correlation_comparison",
-        "multipath_tracking_bias",
     }
     assert not stale_overview.exists()
     assert all(
@@ -333,30 +323,6 @@ def test_spherical_isotropic_response_still_forms_unit_sphere(monkeypatch):
         np.testing.assert_allclose(radius[np.isfinite(radius)], 1., atol=1e-15)
     assert np.all(np.isfinite(surfaces[0]) | np.isfinite(surfaces[1]))
     plt.close(figure)
-
-
-def test_detected_path_gets_an_independent_angle_figure():
-    cfg = default_config()
-    cfg.enable_multipath_research = True
-    cfg.interferers = []
-    cfg.signal.power_dbm = -95.0
-    cfg.signal.duration_ms = 30
-    cfg.signal.multipath_paths[0].relative_power_db = -3.0
-    cfg.multipath_detection.detection_threshold_db = 3.0
-    cfg.tracking.max_epochs = 20
-    results = run_end_to_end(cfg)
-
-    figures = plot_multipath_results(results)
-
-    assert set(figures) >= {
-        "multipath_delay_profile",
-        "multipath_angle_path_1",
-        "multipath_correlation_comparison",
-        "multipath_tracking_bias",
-    }
-    assert all(figure.axes for figure in figures.values())
-    for figure in figures.values():
-        plt.close(figure)
 
 
 def test_direct_runner_does_not_show_on_noninteractive_backend(tmp_path):

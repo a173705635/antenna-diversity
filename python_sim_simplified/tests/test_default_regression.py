@@ -10,9 +10,6 @@ def test_legacy_sample_rate_preserves_receiver_contract_with_physical_rf_noise()
     # Exact acquisition/CN0 snapshots describe the obsolete unfiltered RF noise model.
     cfg.signal.fs_rf_hz = 16.368e6
     cfg.dfe.decimation = 4
-    cfg.signal.multipath_paths = []
-    cfg.multipath_detection.enable = False
-    cfg.multipath_suppression.enable = False
     results = run_end_to_end(cfg)
 
     assert results["scene_input_v"].shape == (4, 1_636_800)
@@ -48,27 +45,24 @@ def test_legacy_sample_rate_preserves_receiver_contract_with_physical_rf_noise()
             assert np.isfinite(record["final_cn0_db_hz"])
 
 
-def test_default_multipath_pipeline_contract():
+def test_default_interference_pipeline_contract():
     cfg = default_config()
     results = run_end_to_end(cfg)
 
-    assert cfg.enable_multipath_research is False
-    assert len(cfg.signal.multipath_paths) == 1
-    assert cfg.signal.multipath_paths[0].enable
-    assert cfg.multipath_detection.enable
-    assert cfg.multipath_suppression.enable
+    assert not hasattr(cfg, "enable_multipath_research")
+    assert not hasattr(cfg.signal, "multipath_paths")
     assert set(results["branches"]) == {
         "single",
         "egc",
         "mvdr",
         "blind_null",
     }
-    assert results["multipath_detection"]["status"] == "multipath_research_disabled"
-    assert results["multipath_evaluation"] is None
-    assert results["truth"]["multipath_paths"] == []
+    assert "multipath_detection" not in results
+    assert "multipath_evaluation" not in results
+    assert "multipath_paths" not in results["truth"]
     for branch in results["branches"].values():
         assert np.all(np.isfinite(branch["combined"]))
     for record in results["metrics"]:
         assert np.isfinite(record["acquisition_metric"])
-        assert np.isfinite(record["worst_multipath_gain"])
+        assert "worst_multipath_gain" not in record
         assert np.isfinite(record["acquisition_code_bias_chips"])

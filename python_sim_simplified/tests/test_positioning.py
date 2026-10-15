@@ -61,7 +61,7 @@ def test_multisatellite_source_matches_geometry_and_sums_before_rf():
     second, _ = build_scene(satellites[1:2], duration_ms=10)
     np.testing.assert_allclose(signal, first+second, atol=1e-18)
     assert signal.shape == (1, 330000)
-    assert not config.interferers and not config.signal.multipath_paths
+    assert not config.interferers
     for satellite in satellites:
         distance = np.linalg.norm(satellite['position_m']-reference)
         assert abs(distance+75000.-satellite['range_at_zero_m']) < 1e-7

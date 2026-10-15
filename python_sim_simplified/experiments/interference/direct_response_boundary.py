@@ -88,7 +88,7 @@ def _scale_diagnostics(stages: AntennaDiagnostics, coefficients: np.ndarray) -> 
 def generate_direct_scenario(cfg, responses: DirectResponses) -> tuple[np.ndarray, ScenarioTruth]:
     """Apply independent non-geometric source voltages to an ideal scene.
 
-    The caller supplies the ideal antenna configuration with multipath off.
+    The caller supplies the ideal antenna configuration.
     Interferer coefficients follow the enabled-interferer order; this experiment
     uses both default CW and wideband sources for the fixed budget audit.
     """
@@ -135,8 +135,6 @@ def build_config(seed, duration_ms, antennas):
     cfg = default_config()
     cfg.random_seed = seed
     cfg.signal.duration_ms = cfg.tracking.max_epochs = duration_ms
-    cfg.signal.multipath_paths = []
-    cfg.enable_multipath_research = False
     cfg.phone.active_antennas = antennas
     cfg.phone.channel_delay_ns = TRUE_CHANNEL_DELAY_NS.copy()
     cfg.phone.estimated_channel_delay_ns = ESTIMATED_CHANNEL_DELAY_NS.copy()

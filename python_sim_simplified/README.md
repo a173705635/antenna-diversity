@@ -1,208 +1,81 @@
-# GNSS 仿真与实验
+# GNSS 抗干扰仿真与实验
 
-日常只需要看 `core/` 和 `experiments/`。公共算法只有一份维护位置，每个实验有独立入口。历史研究代码冻结在 `archive/pre_refactor_2026-09-16/`，不参与当前导入与测试收集。
+日常只需要看 `core/` 和 `experiments/`：公共接收算法集中维护，每个实验有独立入口。2026-10-14 已移除抗欺骗、多径专用算法、实验、诊断工具、测试，以及公共配置和接收链中的多径接口。保留通用 GPS L1/L5 定位、真实录波接收和现有抗干扰研究。
 
-每次修改、实验迭代和验证的改动、默认行为与结果统一记录在 [开发迭代与验证记录](CHANGELOG.md)，不等到上库时才补。
+每次修改及实际验证统一记录在 [CHANGELOG](CHANGELOG.md)。抗干扰的建模前提、实验条件和已有结果见 [详细说明](docs/interference/README.md)。
 
 ```text
-core/          共享物理模型、RF/DFE、捕获跟踪与定位；interference/、spoofing/、multipath/ 放各方向专用算法
-experiments/   共享 GPS/录波入口与 paths.py；interference/、spoofing/、multipath/ 放各方向实验
-docs/          按方向存放当前报告；spoofing/history/ 是本地忽略的历史 Markdown
-configs/       冻结权重等实验配置
-tests/        当前功能与新旧版本数值对照测试
-tools/        frozen_version.py 校验与恢复；spoofing/ 放抗欺骗诊断工具
-results/       按 interference/、spoofing/、multipath/ 存放已归类输出；共享及未归类旧数据留在本层
-archive/       历史代码、报告与验证证据，仅在本地保留
+core/          天线、GNSS、RF/DFE、捕获跟踪与定位；interference/ 放干扰场景与盲零陷
+experiments/   interference/ 的通用验证入口与四个既有实验，以及 GPS/录波入口和 paths.py
+configs/       通用定位实验的冻结权重等配置
+tests/         当前功能测试；本地冻结对照以 local_evidence 单独标记
+tools/         frozen_version.py 校验与恢复原始冻结版
+docs/          interference/ 为当前说明；spoofing/、multipath/ 为历史报告
+results/       本地输出；已有历史目录与来源清单保留原样
+archive/       本地冻结源码，不参与维护、导入或默认测试
 ```
 
 ## 运行入口
 
-2026-09-17 更新：后续多径研究排除直达波与回波同方向、以及仅一路存在多径的场景。`sdcp_multipath` 当前为 13 类场景 × 3 组噪声（39 条测试）：10 类双路不同方向回波场景及 3 类无多径控制。强弱、时延、反射相位、方向、启动/中途进入的对比均保留；重复参数场景已合并。两路相位影响由天线空间响应产生，并非强制相同。历史 16 类/48 条、14 类/42 条结果保留原样；旧同名场景可能只对 B 加多径，应以各次 `plan.json` 的 `channels` 为准，不可混作新场景结果。
+在本目录运行下列命令，无需命令行参数。输入、输出、种子、时长和绘图设置固定在各脚本顶部，修改条件直接编辑这些常量。生成型实验重跑只重建自己的固定输出目录。
 
-在 `python_sim_simplified` 目录执行下列命令，不需要命令行参数。输入、输出和实验参数都固定在对应脚本顶部；要换条件时直接修改这些常量。生成型实验重复运行会先删除并重建自己的固定输出目录，不影响其他实验目录。
+| 实验 | 命令 | 固定输出 |
+|---|---|---|
+| 通用条件验证：整通道相位、方向、阵元增益 | `python -m experiments.interference.validation` | `results/interference/validation/` |
+| 完整接收链及绘图 | `python -m experiments.interference.full_chain` | `results/interference/full_chain/` |
+| 噪声标定、天线配对消融与独立功率预算 | `python -m experiments.interference.antenna_ablation` | `results/interference/antenna_ablation/` |
+| 目标/CW/宽带响应直接赋值，已知/未知目标相位扫描 | `python -m experiments.interference.direct_response_boundary` | `results/interference/direct_response_boundary/` |
+| 理想双天线整通道相位误差、准确补偿与单 CW 对照 | `python -m experiments.interference.channel_phase_validation` | `results/interference/channel_phase_validation/` |
+| GPS L1 仿真码/载波浮点定位 | `python -m experiments.gps_spp` | `results/gps_spp/` |
+| GPS L1/L5 仿真定位与冻结权重对照 | `python -m experiments.gps_l1_l5` | `results/gps_l1_l5/` |
+| 真实录波 GPS L1 码定位 | `python -m experiments.recorded_iq` | `results/recorded_iq/` |
 
-| 实验 | 命令 |
-|---|---|
-| 完整 RF→DFE→合并→捕获→跟踪及绘图 | `python -m experiments.interference.full_chain` |
-| RF 噪声标定、天线单因素配对消融与独立功率预算 | `python -m experiments.interference.antenna_ablation` |
-| 目标/CW/宽带响应直接赋值，已知/未知目标相位配对扫描 | `python -m experiments.interference.direct_response_boundary` |
-| 理想双天线整通道相位误差、准确补偿与单 CW 配对验证 | `python -m experiments.interference.channel_phase_validation` |
-| 无定位 SDCP 基线：仿真、绘图与独立核验一次完成 | `python -m experiments.multipath.sdcp_baseline` |
-| SDCP 多径：标定、测试、独立复算及绘图一次完成 | `python -m experiments.multipath.sdcp_multipath` |
-| 最新单源接收机，比较三/四天线 | `python -m experiments.spoofing.single_source` |
-| 单源停发逐历元诊断与历史导航核验 | `python -m experiments.spoofing.single_source_diagnosis` |
-| 单源受约束历史延长：26条保存观测重放 | `python -m experiments.spoofing.single_source_history_study` |
-| 单源方向证据与接收 PLL 开发样本试验 | `python -m experiments.spoofing.single_source_suppression_study` |
-| 单源方向证据独立统计模型（仅合成 prompt） | `python -m experiments.spoofing.source_evidence_model` |
-| 单源波束有效复响应只读 RF 审计 | `python -m experiments.spoofing.single_source_complex_response_audit` |
-| 单源码/载波 float 离线研究（20窗或全历史） | `python -m experiments.spoofing.single_source_float_window_study` |
-| 单源 float 长缓存与测量域故障核验 | `python -m experiments.spoofing.single_source_float_validation` |
-| 单源 float 有条件短时 CV 离线桥接 | `python -m experiments.spoofing.single_source_cv_bridge` |
-| 单源五块子空间历史的离线抑制响应 | `python -m experiments.spoofing.single_source_subspace_history` |
-| 单源五块波束历史：既存 RF 重放与离线后处理 | `python -m experiments.spoofing.single_source_beam_history_rf` |
-| 单源实际输出窗口的因果非相干方向证据诊断 | `python -m experiments.spoofing.single_source_evidence_history` |
-| 单源保存 prompt 的 5 ms 相干/非相干能量分解 | `python -m experiments.spoofing.single_source_coherence_diagnosis` |
-| 单源固定 100 ms 相干支持的导航重放 | `python -m experiments.spoofing.single_source_coherent_navigation` |
-| 单源固定相干候选向困难 4 s 仿真 IQ 迁移 | `python -m experiments.spoofing.single_source_coherent_transfer` |
-| 单源固定相干支持的离线全历史 float | `python -m experiments.spoofing.single_source_coherent_float` |
-| 单源相干支持下代码/相位混合权重诊断 | `python -m experiments.spoofing.single_source_code_blend` |
-| 单星载波阶跃/漂移下的固定混合权重诊断 | `python -m experiments.spoofing.single_source_carrier_fault` |
-| 新种子八秒三场景相干支持仿真 RF | `python -m experiments.spoofing.single_source_long_coherent` |
-| 单星相位拟合排除的保存观测诊断 | `python -m experiments.spoofing.single_source_phase_exclusion` |
-| 固定一秒长锚相位桥接的保存观测诊断 | `python -m experiments.spoofing.single_source_long_phase_replay` |
-| 固定五度近邻假源的八秒配对仿真 RF | `python -m experiments.spoofing.single_source_close_angle` |
-| 当前块波束投影配五块因果原始触发历史 | `python -m experiments.spoofing.single_source_temporal_trigger` |
-| 五度假源零分贝功率压力测试 | `python -m experiments.spoofing.single_source_spoof_power` |
-| 已保存 IQ 的启动码率与 5 ms prompt 相干性机制诊断 | `python -m experiments.spoofing.single_source_template_coherence` |
-| 启动载波辅助码率与 5 ms 波束的完整接收重放 | `python -m experiments.spoofing.single_source_aided_coherent_rf` |
-| 同种子 −5 dB 假源的默认/辅助波束配对压力测试 | `python -m experiments.spoofing.single_source_spoof_power_minus_five` |
-| 保存 IQ 的辅助波束 1/5/10/20 ms prompt 长度机制诊断 | `python -m experiments.spoofing.single_source_beam_coherence_lengths` |
-| 固定辅助 10 ms 波束的三场景完整接收重放 | `python -m experiments.spoofing.single_source_aided_ten_ms_rf` |
-| 数据位边界时移的 5/10 ms 配对重放 | `python -m experiments.spoofing.single_source_nav_bit_epoch_shift` |
-| 同位置起点、速度阶跃的假源接管 | `python -m experiments.spoofing.single_source_ramp_takeover` |
-| 保存弱攻击 IQ 的波束流内存映射等价核验 | `python -m experiments.spoofing.single_source_stream_storage` |
-| 二十秒同位置速度阶跃的弱攻击/无攻击配对 | `python -m experiments.spoofing.single_source_ramp_takeover_long` |
-| 二十秒同种子配对的真信号撤除负控 | `python -m experiments.spoofing.single_source_long_absent` |
-| 二十秒同轨迹仅假源功率 −5 dB 配对压力 | `python -m experiments.spoofing.single_source_ramp_low_power` |
-| 保存 IQ 的启动相对幅度 steering 离线诊断 | `python -m experiments.spoofing.single_source_startup_amplitude` |
-| 三组旧强无攻击 IQ 的启动幅度模型完整接收对照 | `python -m experiments.spoofing.single_source_startup_amplitude_rf` |
-| 二十秒 −4 dB 过渡功率的幅度模型配对接收与环路诊断 | `python -m experiments.spoofing.single_source_ramp_transition` |
-| 既存 IQ 的可选提前截断三场景完整接收等价核验 | `python -m experiments.spoofing.single_source_early_truncation` |
-| 既存 −5 dB 弱攻击／撤真 IQ 的幅度模型关开完整接收对照 | `python -m experiments.spoofing.single_source_low_power_amplitude_rf` |
-| 统一投影阈值 3/2 的固定同 IQ 完整接收短筛（第四十五阶段） | `python -m experiments.spoofing.single_source_projection_threshold` |
-| 旧 8 s、100 m 撤真 IQ 的阈值 3/2 历史回归（第四十六阶段） | `python -m experiments.spoofing.single_source_projection_regression` |
-| 第四十八阶段固定名义偏航 ±2° 敏感性压力测试（复用第47阶段 20 s IQ） | `python -B -m experiments.spoofing.single_source_nominal_yaw` |
-| 第四十八阶段中断恢复与两模式独立评分 | `python -B -m tools.spoofing.resume_nominal_yaw` |
-| 三新种子四情形的阈值 3/2 长批配对验证（第四十七阶段已完成） | `python -B -m tools.spoofing.resume_projection_long` |
-| GPS L1 仿真定位 | `python -m experiments.gps_spp` |
-| GPS L1/L5 仿真定位与冻结权重对照 | `python -m experiments.gps_l1_l5` |
-| 真实录波 GPS L1 码定位 | `python -m experiments.recorded_iq` |
+也可以在 PyCharm 直接运行 `experiments/interference/full_chain.py`，或执行 `python experiments/interference/full_chain.py`；入口会定位当前精简版根目录。
 
-`full_chain` 支持干扰与多径联合演示，入口归入 `interference/`；当前多径研究开关默认关闭，只运行干扰与四个常规合并分支。将 `core/config.py` 中的 `ENABLE_MULTIPATH_RESEARCH = True` 后，默认配置恢复回波生成、检测、评估、多径 LCMV 分支和专用绘图；也可对单次配置设置 `cfg.enable_multipath_research = True`。原有回波参数和检测/抑制子开关保持可编辑。直接运行脚本时使用 `python experiments/interference/full_chain.py`；其他方向入口同样可从项目根目录用上表模块命令运行。新生成的方向输出分别写到 `results/<方向>/<实验名>/`，重跑只重建该实验自己的目录。既有冻结结果仅移动目录，文件内容和旧源码哈希不变；历史源码哈希与当前布局不匹配时，严格历史重放会拒绝把当前源码冒充为原版本。`docs/spoofing/history/` 仅本地保存，不纳入版本库。
+`full_chain` 默认启用合成参数化天线，包含 CW 和 2 MHz 带限复高斯噪声干扰，比较 SINGLE、EGC、MVDR、Blind Null。公共 `default_config()` 仍为理想各向同性模型。回波生成、SDCP 检测、多径 LCMV 和抗欺骗接收机已删除，配置中也没有重新开启这些方向的开关。
 
-单源实验的顶部常量默认用同一份四路录波分别选择三/四天线、24 星、45 dB-Hz、2 秒、0.3 秒引入攻击。设置 `ATTACKED = False` 运行正常对照，修改 `ANTENNAS` 增减天线配置，设置 `CASE` 使用 JSON 配置，设置 `INPUT` 回放已有 `samples.npy`、`observations.npz`、`metadata.json`。`SAVE_IQ = True` 才额外保存新生成的 RF。
+### 通用条件验证
 
-单源合成研究的接收机直接使用由生成几何给出的理想名义卫星方向、卫星坐标和粗伪距辅助；真实轨迹误差标签仅用于事后评分，未把逐观测真伪标签或假源方向交给接收机。当前理想 steering／固定姿态未覆盖动态姿态误差、手持转动、阵列相位中心与方向图误差或实际星历解码；通道幅相扰动和启动校准不能替代这些验证。第47阶段仍只检验这组模型条件；第48阶段已分离真实导向与接收机名义导向，完成固定 ±2° 偏航敏感性对照，但尚未验证动态姿态或硬件误差。
+日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。已有参数的单点验证或单因素扫描共用这一入口，不需要再复制接收流程。
 
-单源停发诊断只读 `mechanism-four` 保存的跟踪观测；历史延长研究重放其 26 条 selected 记录，并由顶部 `RUN_NEW_RF` 控制固定计划的新 RF 生成（当前设为 `True`）。105 ms 候选只用于研究调用，接收机默认 25 ms 不变。两项研究的结果、核验与局限见 [单源历史研究报告](docs/spoofing/SINGLE_SOURCE_HISTORY_REPORT.md)。
+配置中的 `build_settings()` 设置种子、时长、统计窗口、条件选择、输出位置及是否弹图；`build_cases()` 返回具名条件，各条件持有独立的 `SimulationConfig`。目标真实方向使用 `cfg.signal.true_direction`，合并器假设方向使用 `cfg.signal.assumed_direction`，两者分别修改。天线组合使用 `cfg.phone.active_antennas`，第一根是 SINGLE 的参考通道；逐通道相位按天线名字典赋值。
 
-单源 suppression 入口由顶部 `PHASE` 选择 `split`、`pll` 或 `pll25`，目前为 `pll25`。`split` 只写 `results/spoofing/single_source_suppression_study/` 根目录自身文件；后两者分别写 `pll/`、`pll25/`，并依赖根目录 `split` 阶段已核验的 `tracking.npz`、`navigation.npz` 和 `summary.json` 作同 RF 基线。重跑 `split` 会更新这些基线文件，应按各 PLL 阶段保存的 SHA-256 核对其来源。独立统计模型写 `evidence_model/`，不读 RF 或上述基线。复响应审计写 `response_audit/`，仅读同一份旧 RF 和 split 前端缓存，不运行接收跟踪或导航。float 研究入口由顶部 `MODE=history/window` 选择全历史递推或 20 历元滑窗，分别写 `float_history/` 和 `float_window/`；长缓存与故障入口写 `float_validation/`；条件 CV 入口读取已保存的 float 位置写 `cv_bridge/`，预测与实测状态严格分开。这些研究入口均不向接收机发布位置。各阶段结果与限制见 [单源方向证据研究报告](docs/spoofing/SINGLE_SOURCE_SUPPRESSION_REPORT.md)。
+运行顺序为：场景/RF/DFE → 整通道相位与补偿 → 合并/捕获/跟踪 → 独立分量预算与核验 → 保存与绘图。公共阶段在 `core/pipeline.py`，实验条件、评分和图在 `validation_support.py`。真实方向或增益改变时重新生成对应前端；仅名义导向或 DFE 后相位变化的条件共享物理前端。
 
-五块波束历史入口顶部 `MODE=combined` 默认对弱攻击和真信号撤除两份既存 2 s RF，各运行一次五块波束加 `(0.15, 1.)` 接收 PLL 的三天线组合，写入 `beam_history_rf/combined/`。`MODE=backend` 只读 `beam_history_rf/` 已保存的默认及五块跟踪，运行原全历史 float 和有条件 CV 方法；`MODE=rf` 重放一次弱攻击 RF（默认与五块各一次）并保存跟踪、导航及逐历元诊断。若组合 RF 输出已存在、只需重建摘要，可使用 `MODE=combined_finalize`，不会重跑 RF。各模式均不覆盖既有 suppression、float 或 CV 结果。历史平均只用于研究候选；实际接收机默认仍为一块权重。
+相位补偿量由用户配置，作用于整个 DFE 复数序列。它不代表自动估相或宽带时延对齐。天线增益作用在接收机热噪声产生前，不能用 DFE 整通道缩放代替。热噪声收益、含干扰的线性 SINR、接收机跟踪 C/N₀ 分别输出；失捕与缺测保留原状态。具体参数示例和本轮验证记录见 [抗干扰说明](docs/interference/README.md)。
 
-方向证据历史入口已固定重放弱攻击、真信号撤除及无攻击控制各一份既存 RF，使用原一块波束及 `(0.15, 1.)` 接收 PLL。它仅从接收机实际输出窗口保存的复 prompt 诊断 20/50/100 ms 非相干方向证据，逐项核对原 20 ms split 能量；历史候选不进入导航。trace 只覆盖实际输出窗口，不能视作所有星、所有时刻的完整逐毫秒跟踪记录。已保存结果在 `single_source_suppression_study/evidence_history/`；弱攻击稳态 ≥6 星支持历元在原/20/50/100 ms 下为 18/18/9/3，真信号撤除后滞留的早期 ≥6 星支持随长窗增加，详见[单源方向证据研究报告](docs/spoofing/SINGLE_SOURCE_SUPPRESSION_REPORT.md)第十四阶段。
-
-五毫秒能量分解入口仅读上述三组 trace，按实际样本区间和残余空间维数汇总相干集中度，不重放 RF 或改接收机导航。撤除组稳态没有可评估的五毫秒组；中位数不能解释为检测或导航收益。组表和来源摘要保存在 `single_source_suppression_study/coherence_diagnosis/`，见同一报告第十五阶段。
-
-固定 100 ms 相干导航入口只读取上述已保存跟踪与 5 ms 组表，以完整、同弧且当时已可用的组计算一个候选 support，再独立重放三路导航。弱攻击样本的相干路发布升至 171/171，但已发布误差最大为 11.777 m；撤除组早期支持滞留延长。沿用数值门限 3 不代表已校准相干统计量的虚警率，详见同一报告第十六阶段。
-
-固定参数迁移入口将既存 `116921_weak_30_24_4` 四秒仿真 IQ 选三天线重放一次，再复用上述 20 ms 能量、5 ms 分组和 100 ms 支持构造。相干路发布 371/371，但 30 次已发布误差达到 20 m，最大 26.209 m；连续发布不等于满足精度边界。它是已知困难样本，且没有同 seed 无攻击/撤除对照，见同一报告第十七阶段。
-
-相干 float 入口只读上述保存观测，对原/100 ms 相干支持各自从空历史调用原全历史 float 模型。4 s 相干路 369/369 个观测时刻可观，最大离线拟合误差 3.417 m，但第十七阶段导航仍有 30 次 ≥20 m 已发布错误；float 与导航状态不同，形式标准差和可观性都不是完整性保证，见同一报告第十八阶段。
-
-代码/相位混合权重入口固定比较原 `0.1` 与单一候选 `0`，只改变相位预测存在且码分离合格时的混合。四组保存观测的发布集合不变，4 s 候选最大误差从 26.209 降至 1.269 m、≥20 m 次数从 30 降至 0；但起点 bias 保留，实际发布段未触发相位缺失或隔离恢复，码分离、初始化和恢复仍使用 fresh code，见同一报告第十九阶段。
-
-单星载波故障入口只读上述 4 s 跟踪，对 PRN 14 弧 0 在观测 2 s 后分别注入一周阶跃或 0.5 m/s 漂移。阶跃触发一次相位拒绝，使已有偏差的 fresh-code 位置重新进入发布；权重 0 路此后相对无故障基线持续偏移 5.105 m。载波同时参与历史平滑和相位预测，结果不能归因于单一路径，见同一报告第二十阶段。
-
-新种子八秒入口已串行生成四通道弱攻击、无攻击和真信号撤除仿真 IQ，核对攻击前样本逐点相等，再用前三通道独立重放原支持、相干支持原混合、相干支持零混合三路。弱攻击三路发布 15/771、771/771、771/771，零混合路最大已发布误差 2.694 m；撤除组后段无可评价的跟踪观测，不能据停发推断长期安全。生成前保存可核验源码快照与计划；整个离线 Python 流程远慢于实时，见同一报告第二十一阶段。
-
-单星相位拟合排除入口只读上述保存观测和 PRN 14 故障结果。默认导航保持关闭；候选只在最近完整相位拟合均失败、且全部过门的单星排除候选指向同一 PRN 时采用相位位移。九组重放仅 PRN 14 一周阶跃的一个历元触发排除，故障窗口最大已发布误差由关路 3.957 m 降至开路 1.263 m；漂移和其余七组逐字段不变，不能据此宣称一般故障安全，见同一报告第二十二阶段。
-
-固定一秒长锚入口在上述单星短桥上增加默认关闭的候选：仅当候选自身有实际相隔一秒的已发布锚点、长完整载波拟合失败且单星排除唯一时，用长锚位移覆盖短预测；缺点位、弧变化、歧义或排星冲突都保留短桥。九组重放中仅 PRN 14 阶跃/漂移采用长桥；漂移相对无故障轨迹的最大水平偏移由 0.663 降至 0.131 m，阶跃却由 0.003 增至 0.034 m。长锚会引用候选自身带偏差的历史位置，详见同一报告第二十三阶段。
-
-五度零分贝压力入口与已保存的 +10 dB 输入只改变每颗假 PRN 的相对功率，弱攻击/真信号撤除两份 IQ 分别独立运行历史触发关/开前端，无攻击控制复用冻结缓存。这一功率点两场景均无历史单独触发块；弱攻击原支持路虽全发布却有 746/771 次 ≥20 m 错误，真信号撤除组相干短桥稳态发布 82 次且全部 ≥50 m。0 dB 假观测可以获准，+10 dB 撤除组停发不能证明长期安全；具体恢复机制和来源见同一报告第二十六阶段。
-
-模板相干性诊断只读上述 0 dB 两份及共享控制 IQ，逐 20 ms 比较原/启动载波辅助码率与 1/5 ms prompt 四种拟合。前五块未测；攻击前十个可测块及控制组四变体均不触发，辅助码率配 5 ms 在弱攻击和撤除组攻击后各 385/385 块过门。事后几何审计显示假方向强衰减也伴随真星方向增益损失；该阶段未把新权重用于接收跟踪或导航，块级结果不能单独推断定位恢复，见同一报告第二十七阶段。
-
-完整接收重放入口把该固定组合权重实际用于波束、跟踪和导航，每场景只重跑一次候选 RF，默认路由旧缓存核对。0 dB 弱攻击相干短桥仍发布 771/771 次，但最大误差从 2.715 小升至 2.732 m；原支持路由 771 降至 14 次发布。真信号撤除相干路由旧 95 次降至早期 9 次、稳态无一颗有限码观测，原来 82 次 ≥50 m 错误发布消失，是该固定样本的停发而非真信号认证。共享控制两路导航与旧缓存一致。统计门限、初始锚点和固定轨迹限制见同一报告第二十八阶段；候选尚未接入默认接收机。
-
-−5 dB 配对入口沿用同种子、5°、8 s，仅降低每颗假 PRN 相对功率；弱攻击与真信号撤除各生成一份新 IQ，并分别运行原波束与辅助 5 ms 波束，共四次 RF。两新场景攻击后各仅 2/385 块触发候选抑制。弱攻击原支持候选仍有 253 次 ≥20 m 已发布错误，少 21 次发布；相干短桥两路都 771/771 发布但候选误差小升。撤除组原路已无稳态有限码观测，候选导航完全相同，没有新增安全收益。共享控制仅复用已审缓存；固定突然接管及未校准门限的边界见同一报告第二十九阶段。
-
-辅助波束 prompt 长度入口只读取上述 −5 dB 两份及共享控制已保存 IQ，固定启动载波辅助码率与原 20 ms 块，对每颗 PRN 比较独立的 1/5/10/20 ms 复数和；三组各 395 个可测块的离线诊断已完成。攻击后弱/撤除组 10 ms 各 385/385 块过门，20 ms 仅 343/345 块，控制各长度均不触发；弱组 10 ms 最小分数只比门限 3 高 0.0399，真星方向也有投影损失。它没有重跑完整接收前端或导航，数值门限 3 在不同长度不代表相同虚警率，位边界几何不等于实际数据位翻转。详见同一报告第三十阶段。
-
-辅助 10 ms 完整接收入口固定上述三份 IQ、启动载波辅助码率及原导航配置，只把波束内同 PRN 复 prompt 组由 5 延至 10 ms；100 ms 相干支持仍由输出 trace 的 5 ms 组计算。三条旧 5 ms 路仅读冻结缓存并逐字段重放核验，新路各跑一次完整 RF。−5 dB 弱攻击与撤除组攻击后虽各 385/385 块触发，弱攻击原支持路发布由 750 降至 14 次，相干短桥仍 771/771 次但共同历元最大水平误差由 2.709 升至 2.799 m，稳态合格星中位数由 21 降至 11；撤除组原本无稳态观测，没有新增可证安全收益。共享无攻击控制导航 68 个保存字段与 5 ms 路逐数组相同。完整统计、来源哈希和限制见同一报告第三十一阶段；候选未接入默认接收机。
-
-数据位边界时移入口固定同种子三场景，仅将真/假信号共同的数据位 epoch 从 0 移到 +5 ms，再在每份新 IQ 上分别运行既定辅助 5/10 ms 波束并独立核对全块拟合。三份新 IQ 与六次完整 RF 已完成：−5 dB 弱攻击的 10 ms 攻击后过门块由旧时移 385/385 变为 **326/385**，撤除组由 385/385 变为 **334/385**；新时移弱攻击相干短桥两长度都 771/771 次发布，但 10 ms 原支持只发布 7 次，稳态合格星中位由 21 降至 11。撤除组两长度后段均无有限码观测，不能推断新增安全。跨时移首次位置也变化，绝对误差不可直接归因于波束；来源与同历元对照见同一报告第三十二阶段。
-
-同位置起点的速度阶跃入口固定 0 dB、5°、8 s 假源，从攻击起点与真位置重合改为相对东移 3 m/s；它只保证参考几何的起点位置连续，空间方向、幅度和速度并不无缝。弱攻击与撤真各生成新 IQ，并由原 1 ms 波束和辅助 5 ms 波束独立接收，共四次完整 RF；无攻击控制引用已审缓存。弱攻击短桥两路在实际攻击观测均发布 769/769 次，最大水平误差由原波束 **10.290** 降至辅助 5 ms 的 **2.755 m**，同一初锚后运动增量最大误差由 **8.244** 降至 **0.127 m**，但稳态质量星中位数 **20→11**。撤真组原波束稳态每历元至少四颗有限且质量合格的假源观测，辅助波束后段完全失观测；短桥早期发布分别至可用 **0.73/0.38 s**，假源位移 ≥20 m 的 102 个实际观测时刻均不发布。这是本固定样本的停发，不能称为真星认证或长期拖引安全；最后假位移仅 23.04 m。第三十三阶段保存了按观测时刻的实际攻击、末一秒与假位移尾段评分、四变体拟合和来源哈希。
-
-波束流存储核验为 `frontend` 增加可选 `stream_memmap_path`；未指定时保留原内存数组。指定时只将同样的 `complex128` C 顺序波束流写入磁盘映射并在接收前刷新，不改投影、跟踪或导航算法。对第三十三阶段已保存的 8 s 弱攻击 IQ 单独重放辅助 5 ms 路径，跟踪 17、trace 10、history 8、groups 17、support 5、导航 68 个字段与冻结内存路径逐数组相同；约 **6.285 GB** 临时流文件在结果保存后删除。该实验验证数值等价，不是运行速度或内存峰值基准。
-
-二十秒速度阶跃入口沿用第三十三阶段固定 seed/角度/功率/轨迹参数，只延长仿真时长；新弱攻击 IQ 运行原 1 ms 与辅助 5 ms 前端，新无攻击控制 IQ 只运行辅助 5 ms，共三次 RF，均用已核等价的磁盘映射流。每份输入单独保存并核攻击前配对，全 1000 块拟合独立核实际投影；导航仍走原支持/码混合 0.1 与相干短桥/码混合 0。三次接收及导航均已完成并通过独立来源、全块拟合与导航复核，结果见同一报告第三十五阶段。
-
-弱攻击实际攻击观测 **1969** 次：原 1 ms 波束的相干短桥发布 **1969** 次，最大误差 **19.777 m**、末一秒误差中位 **19.263 m**；辅助 5 ms 波束发布 **1956** 次，最大误差 **7.463 m**、末一秒中位 **7.436 m**。辅助路在观测 **11.16–11.28 s** 缺 13 次发布，随后第十次孤立恢复确认以新码位置重锚，真值误差由缺口前约 **0.912 m** 跳至恢复时约 **7.39 m**，不能称无间断保护。原支持路发布 **263→5** 次；原波束有 **57** 次 ≥20 m 错误发布，而辅助路失去 258 次原支持发布。无攻击辅助短桥 **1969/1969** 次发布、最大误差 **0.847 m**。最后观测时刻假轨迹东偏 **59.04 m**，假偏 ≥50 m 的 **302** 个实际观测时刻两条短桥都发布且均无 ≥20 m 错误；这是第三十五阶段当时的固定样本结论，撤真后补见第三十八阶段。新二十秒 IQ 不要求与旧八秒 IQ 前缀相同；控制的假偏时段仅是反事实时间分层。
-
-未发布相位状态入口只在可选 `phase_state_continuity=True` 时，让已初始化、非隔离且相位拟合有效、但被原输出门挡下的位置参与后续短 lag；默认路径保持原样，长 1 s 锚仍只用已发布位置。第三十六阶段已从七组保存观测独立回放原短桥与该单因素候选，没有重跑 RF。20 s 弱攻击辅助波束短桥按实际攻击观测发布由 **1956→1965/1969**，最大误差 **7.463→0.977 m**，但最初四次输出门缺口仍在；20 s 无攻击控制逐字段无变化。8 s 撤真原波束则由 **42→95** 次发布，新增 **53** 个仅靠假源的早期位置，最大误差 **5.161 m**；旧 100 m 突变撤真负控的 **82** 次 ≥50 m 错误完全未修。内部续接改善这一个弱攻击缺口，却扩大另一撤真组的假源发布，不能作为安全改进推广；完整同历元、来源和限制见同一报告第三十六阶段。
-
-五块投影资格门入口仅在相位状态续接开启且传入 `phase_state_eligible` 时生效：截至每个输出可用时刻，最近五个**已完整结束**的真实 20 ms 波束块都须保留 `M−1≥2` 维，才允许写入 `output_gate` 内部位置；未发布锚到当前历元的资格也必须连续为真。`None` 与第三十六阶段逐字段一致，False 历元仍可使用已发布锚。第三十七阶段在同七组缓存重放：20 s 弱攻击辅助路保留 **1965/1969** 次发布、最大 **0.977 m**，但四次门控缺口仍在；8 s 撤真原波束把第36阶段新增的 **53** 次仅假源发布全部去掉，回到原路 **42** 次。旧 100 m 突变撤真的 **82** 次 ≥50 m 错误仍存在。固定门只限制内部状态使用，没有认证观测或校准虚警率，完整来源和三路对照见同一报告第三十七阶段。
-
-二十秒撤真负控入口只新增同种子、同几何、同噪声模型的 `0 dB`、`5°` 真信号撤除 IQ，与第三十五阶段弱攻击/控制在攻击前 IQ 及非采样几何逐值配对；仅跑辅助 5 ms 完整前端，再独立重放已发布短桥、开放内部状态和五块门控三路。攻击后 **985/985** 个可测块过方向门，但稳态 **1951** 个输出历元没有一颗有限码观测；三路位置逐值相同，实际攻击观测仅早期 **7/1969** 次发布、最大水平误差 **0.875 m**，末次可用时刻 **0.38 s**。末一秒 **0/101** 次发布，假轨迹东偏 ≥20/30/50 m 的 **1302/969/302** 个观测时刻均无发布。这是固定配对样本的停发，不是持续导航或真星认证；没有运行二十秒撤真原 1 ms 前端，旧 100 m 突变撤真负控的 **82** 次 ≥50 m 错误亦未修。来源和图见同一报告第三十八阶段。
-
-同轨迹 −5 dB 压力入口只把上述 20 s、5° 速度阶跃假源的每颗 PRN 相对功率由 0 降至 −5 dB，弱攻击与撤真各新生成一份 IQ、各运行一次辅助 5 ms 完整前端，再独立重放三路短桥；无攻击仍引用历史控制。两新场景攻击后仅 **27/985、34/985** 块过门，离线 `would` 投影的假方向空间功率保留中位数均为 **1**，不代表持续抑制。弱攻击三路短桥均 **1969/1969** 次发布、最大水平误差 **1.700 m**，但同份 IQ 的原支持导航有 **8** 次 ≥20 m 错误、最大 **27.749 m**；0 dB 开放/门控短桥与 −5 dB 的共同发布历元最大误差反由 **0.977 升至 1.700 m**。撤真三路只早期 **8/1969** 次发布，稳态无有限码观测，末一秒及假位移≥20/30/50 m 时均无发布。停发不是认证，也未测试 −5 dB 的 20 s 原 1 ms 前端。完整跨功率同历元、空间真值审计和来源哈希见同一报告第三十九阶段；后续幅度修正的离线机制结果见第四十阶段。
-
-启动相对幅度诊断读取上述五份 20 s IQ 与三个既存 2 s 强无攻击 IQ，用前 100 ms 校准复 prompt 估计三通道相对幅度，仅离线重算后续波束拟合和假定权重。三个无攻击输入的可测块过门由 **94/95/95 降至 0/0/0**，−5 dB 弱攻击/撤真由 **27/34 降至 18/25**；弱假源的空间功率保留中位仍为 **1**。原 IQ 接收、跟踪和导航均未重跑，不能据此推断定位或安全收益。输入、prompt、复响应与来源哈希见同一报告第四十阶段。
-
-完整接收对照在上述三个既存 **2 s 无攻击** IQ 上各运行幅度模型关/开两路，实际波束触发同为 **94/95/95→0/0/0**。统一评价段每组每路导航均发布 **171/171** 次；相干短桥最大水平误差为 **0.923→0.344、0.798→1.140、1.449→0.976 m**，第二组退步。原支持路径评价段最大误差分别 **0.575→0.575、0.718→0.781、0.618→1.088 m**；第三组整段最大值 **0.652→2.532 m**。主要差别与各自初始位置锚有关；这些两秒固定姿态合成结果不是硬件毫米精度或欺骗安全证据。第四十一阶段当时尚未对攻击组运行启用后的完整接收；幅度选项默认仍关闭，后续攻击组见第四十二阶段。
-
-过渡功率入口在同种子、同几何的 **20 s、5°、−4 dB** 弱攻击与真信号撤除 IQ 上，各将启动幅度模型关/开运行一次辅助 5 ms 完整前端，共四次 RF；输入与旧 0/−5 dB 逐样点插值核对。攻击后弱/撤真块过方向门由 **563→532/985、604→582/985**；弱攻击相干短桥实际攻击观测发布 **1968→1969/1969** 次，最大水平误差 **0.921→0.882 m**，但锚后真实运动增量最大误差 **0.181→0.259 m**。撤真短桥两路仅早期 **7/1969** 次发布，末一秒及假位移≥20/30/50 m 段均停发；这不等于真星认证或持续导航。旧 100 m 突变撤真负控的 **82** 次 ≥50 m 错误来自第26阶段原 1 ms 波束旧短桥；第28阶段在同一份 IQ 上另跑辅助 5 ms 波束，稳态已失观测停发，不能跨版本归因。旁路 `loops.npz` 保存实际接受的跟踪段，包含稳定期和被截断的坏尾，不能把其每个历元视为合格观测。具体同历元、日志、来源与局限见报告第四十二阶段。
-
-提前截断入口仅读第42阶段弱攻击关幅度、撤真开幅度两份 **20 s** IQ 和第41阶段 H0 `114001` 开幅度 **2 s** IQ，分别以默认关闭的可选 `fast_truncation=True` 重跑完整前端。三路 tracking、trace、能量、支持与导航科学数组均与同输入历史基线逐数组一致；第42阶段两路已接受环路日志也一致，H0 没有旧日志可比。三次快速前端墙钟分别为 **1066.327/1580.418/83.321 s**，没有同机同次旧路径完整 RF 计时，不能据此给出加速倍数。旧 `track` 对整份输入的有限值检查及未来相关无效反例仍限制任意输入等价结论；来源、工作量下界和测试见报告第四十三阶段。
-
-低功率幅度模型入口固定读取第39阶段两份 **20 s、5°、−5 dB** 弱攻击／撤真 IQ，各用幅度模型关/开和快速截断运行一次辅助 5 ms 完整接收，共四次 RF。关路科学数组与同输入基线一致，开路波束拟合与第40阶段离线计算核对；攻击后过门块数分别为 **27→18/985**、**34→25/985**。弱攻击五块资格门短桥在实际攻击观测时刻两路均 **1969/1969** 次发布，最大水平误差 **1.700→1.599 m**，但原支持路 ≥20 m 错误发布 **8→21** 次。撤真短桥关/开均只早期发布 **8/1969** 次，观测时刻 `≥0.5 s` 与末一秒零发布；后段达不到四颗有限码观测，不等于持续导航或真星认证。旧 100 m 突变负控的 82 次错误属于第26阶段原 1 ms 组合，本轮未在该旧 IQ 上运行新的幅度开启组合。来源、哈希、测试与后验诊断见报告第四十四阶段。
-
-统一投影阈值入口保留默认门 **3**，仅比较候选门 **2**；波束、时间触发、五块历史和 basis 共用该门，导航支持门及规则不变。runner 从 IQ 独立以 SVD 重算拟合并核实际波束流；旧第44阶段源码 stub 的三处计算连接及默认完整前端逐数组对照通过。第45阶段同一新种子四情形、每情形两门共用一份 IQ 的 **8 次 2 s RF** 短筛已完成并满足预设五块资格门短桥规则：两组 H0 科学数组逐字段相等；−5 dB 弱攻击在观测时刻 `≥0.3 s` 两路均 **169/169** 次发布，最大误差 **0.672→0.668 m**，但原支持路发布 **14→18** 次、最大误差 **1.110→6.008 m**；撤真短桥仅早期 **8/169** 次发布，`≥0.5 s` 无有限码观测或发布。此 2 s 假位移最大仅 **5.04 m**，不能证明 ≥20 m 远端表现；后续旧 IQ 回归见第四十六阶段，第四十七阶段 **24/24 次 20 s RF** 已完成，阈值 2 未升为默认。判据、运行前修订、哈希及局限见报告第四十五阶段。
-
-历史回归入口只读取第26阶段既存 **8 s、0 dB、100 m 突变撤真** IQ，在当前幅度模型开启／载波辅助 5 ms 组合下分别运行阈值 3/2，共两次 RF。两路八个科学文件全部字段及 dtype 相等，攻击后均 **385/385** 块投影；按观测时刻 `≥0.3 s`，五块门控短桥均仅早期发布 **7/769** 次、最大误差 **2.664 m**，原支持路均 **2/769** 次，`≥0.5 s` 的 **749** 个机会无有限码观测或发布。预先修订的历史硬条件通过，但这是同一旧 IQ 的失观测停发，不是阈值 2 收益、持续导航或真星认证；第26阶段旧 82 次严重错误来自原 1 ms 波束旧短桥，不能归因于当前组合。第四十七阶段 **24/24 次 20 s RF** 已完成，默认门仍为 3；来源与限制见报告第四十六阶段。
-
-第四十七阶段按冻结种子 `2026100402/03/04` 完成四情形同 IQ 阈值 3/2 的 **24/24 次 20 s RF**，进程退出码为 **0**。12 个配对中 **11 个通过**原筛选，唯一失败是 `2026100402/weak`：短桥最大误差 **0.914264228880336→0.922031182574893 m**，违反预定相对判据。三组弱攻击短桥在两门下均全 **1969** 次发布；门 3 的最大误差依次为 **0.914/1.952/2.594 m**，门 2 为 **0.922/1.693/0.737 m**。全部撤真组均仅早期发布 **8** 次后停发，不能称为持续导航。候选门 2 总体 **no-go**，默认门仍为 **3**。Main 与 Reviewer 已完成全批来源、文件哈希和导航独立复算审计；旧六路前端耗时为 `null`，原逐样本波束流不可重审。[总摘要](results/spoofing/single_source_suppression_study/projection_threshold_long/summary.json) SHA-256 为 `47a73e338bf086f8c0418f31c3db07081dea299129775be54b45d22d206e5a86`。本批不能代表硬件或商用验证。详见报告第四十七阶段。
-
-第四十八阶段复用其中种子 `2026100404` 的三场景 IQ，对接收机名义方向固定施加 ±2° 偏航，完成 **6/6** 路 RF；其中 **5/6** 路两模式导航完整，`weak/−2°` 原支持求解失败，短桥独立完成评分。严格短桥压力判据 **4/6 通过、总体失败**，失败方向为 `h0_drop/−2°` 与 `weak/+2°`。撤真两方向短桥各仅早期发布 **8** 次，`≥0.5 s` 后零发布；不能称持续导航。默认门仍为 **3**。Main 与 Reviewer 已完成全批来源、输出和评分核对；[恢复摘要](results/spoofing/single_source_suppression_study/nominal_yaw/recovery_summary.json) SHA-256 为 `b9c0b5b3887353716520cfb5df73995c74b4ef3e7ef39b7c869c81d8780e5724`，完整判据与限制见报告第四十八阶段。
-
-开启多径研究开关后，SDCP 基线运行 `python -m experiments.multipath.sdcp_baseline`，自动生成数据、绘图并独立核验；全部检查通过后写入 `verification.json`。开关关闭时入口直接退出，保留已有输出。
-
-开启多径研究开关后，SDCP 多径运行 `python -m experiments.multipath.sdcp_multipath`。同一脚本中，`run_simulation()` 负责生成与首次判决，`verify_and_plot()` 从保存的 NCO 独立复算并绘图，`main()` 按顺序调用；无需再运行单独的 verify 脚本。开关关闭时入口直接退出，保留已有输出。已移除相邻两个 200 ms 窗口均值做差的检测方案及其输出；保留绝对 SDCP 残差的 200 ms 均值判据。核验阶段保留独立 NCO 重建和原有判据，不通过删除失败场景提高结果。
-
-当前双路多径实验的方法、逐场景结果与限制见 [SDCP 多径验证报告](docs/multipath/SDCP_MULTIPATH_REPORT.md)。
-
-`full_chain` 默认包含 CW 和宽带干扰；开启多径研究开关后才加入回波和多径 LCMV，成为联合场景。历史联合实验结果不因当前默认值变化而改变。其文件与运行说明见 [抗干扰目录入口](docs/interference/README.md)。
-
-历史固定阶段的 replay/resume 工具仍检查旧结果中的源码字节与清单键。当前文件位置通过显式目录映射定位，但移动后的源码导入和来源清单已经变化，因此不能直接视为旧冻结版本；校验不一致时会拒绝运行。需要复现旧阶段时使用该阶段的 `source_snapshot.zip`／冻结源码，不能修改旧 SHA-256 让当前代码通过。新的独立生成实验使用当前目录和源码哈希。
+GPS 仿真定位的 `DURATION_MS` 至少为 210 ms 才包含当前首个定位时刻，不保证定位成功。真实录波输入固定为 `results/real_gnss_hackrf/first40s.int8`，需在本地具备录波且实际解出健康星历；记录需长于 1.01 s 才存在当前定位时刻。
 
 ## 修改核心
 
-| 内容 | 主要文件 |
+| 职责 | 主要文件 |
 |---|---|
-| 配置、手机几何、天线 | `core/config.py`、`presets.py`、`antenna.py` |
-| 信号、RF、DFE | `core/gnss.py`、`rf.py`、`dfe.py` |
-| 捕获、跟踪、重捕 | `core/acquisition.py`、`tracking.py`、`autonomous_tracking.py` |
-| 公共分集与联合编排 | `core/diversity.py`、`core/pipeline.py` |
-| 干扰专用场景与盲置零 | `core/interference/` 下的 `scene.py`、`interference.py`、`combining.py` |
-| 多径专用场景、检测与合并 | `core/multipath/` 下的 `scene.py`、`multipath.py`、`combining.py` |
-| SDCP 与相位弧 | `core/multipath/` 下的 `sdcp_observation.py`、`sdcp.py`、`sdcp_arc.py`、`sdcp_self_check.py` |
-| 最新单源接收机 | `core/spoofing/single_source.py`；平滑与载波预测分别在 `mechanism_smoothing.py`、`mechanism_phase.py` |
-| 单源场景、阵列捕获与空间投影 | `core/spoofing/` 下的 `single_source_scene.py`、`recovery_geometry.py`、`array_acquisition.py`、`array_processing.py` |
-| 仿真定位与真实录波 | `core/gps_simulation.py`、`positioning.py`、`recorded_receiver.py`、`gps_*.py` |
+| 配置与合成预设 | [config.py](core/config.py)、[presets.py](core/presets.py) |
+| 天线响应、几何、极化、互耦与通道时延 | [antenna.py](core/antenna.py)、[channel_delay.py](core/channel_delay.py) |
+| GNSS 场景、RF 与 DFE | [gnss.py](core/gnss.py)、[rf.py](core/rf.py)、[dfe.py](core/dfe.py) |
+| 捕获、跟踪与重捕 | [acquisition.py](core/acquisition.py)、[tracking.py](core/tracking.py)、[autonomous_tracking.py](core/autonomous_tracking.py) |
+| 公共分集合并与完整链路 | [diversity.py](core/diversity.py)、[pipeline.py](core/pipeline.py) |
+| 干扰生成、场景响应与盲零陷 | [core/interference/](core/interference/) |
+| 结果结构、指标与绘图 | [models.py](core/models.py)、[metrics.py](core/metrics.py)、[plotting.py](core/plotting.py) |
+| 仿真定位与真实接收 | [gps_simulation.py](core/gps_simulation.py)、[positioning.py](core/positioning.py)、[recorded_receiver.py](core/recorded_receiver.py)、`gps_*.py` |
+| 来源哈希和显式源码冻结 | [provenance.py](core/provenance.py) |
 
-`core` 不导入实验入口或历史脚本。只服务一个实验的参数和统计留在实验内；有意保留的不同研究方法不强行合并。此次调整不修正既有算法局限，不改变门限或数值模型。
+`core` 不导入实验入口或历史脚本。实验独有的参数、独立评分与统计留在实验脚本；公共接收链只包含当前维护方向所需接口。天线参数仍是合成研究假设，不能作为真实手机规格或标定结果。
 
-公共层按实际职责保留接收基础和联合接口：`config.py`、`models.py` 是统一配置与结果结构，`pipeline.py` 编排跨方向链路，`metrics.py` 汇总分支比较，`plotting.py` 绘制公共接收阶段。多径专用图在 `core/multipath/plotting.py`；历史抗欺骗运动结果汇总在 [docs/spoofing/motion_summary.json](docs/spoofing/motion_summary.json)，不是运行配置。冻结源码和历史结果中的旧路径保持原样，不作为当前模块导入入口。
+## 本地备份与历史报告
 
-## 版本与归档
+本次清理前的版本在 `archive/pre_interference_only_2026-10-14_156b994/`，包含 271 个文件，保留根目录相对路径；`FREEZE_MANIFEST.json` 记录每个文件 SHA256 和起始 Git 提交。恢复时按清单将文件复制回对应位置，再配合原数据运行；不要在冻结目录直接运行会写结果的实验。
 
-日常运行记录 `source_sha256`、实验参数和种子，不再复制源码，不使用旧的逐轮源码缓存。需要把当前源码一并保存时，将生成脚本顶部的 `FREEZE_SOURCE` 改为 `True`。
+历史报告保留：[单源抗欺骗报告](docs/spoofing/SINGLE_SOURCE_SUPPRESSION_REPORT.md)、[SDCP 多径报告](docs/multipath/SDCP_MULTIPATH_REPORT.md)、[无定位 SDCP 基线](docs/multipath/SDCP_NO_POSITIONING_REPORT.md)。其中入口、代码路径、默认配置和实验结论对应当时版本；当前代码不能直接执行这些实验。旧来源哈希不改写，严格复现需使用当时 `source_snapshot.zip`、本地冻结版或 Git 历史及原始数据。
 
-未冻结源码的 SDCP 实验只能在源码哈希仍匹配时通过源码核验；代码已改就不能把当前实现冒充当时版本。正式要长期复现的结果请显式冻结。
-
-原版共 584 个文件按字节冻结，包含当时未提交的文档生成脚本，详见 `archive/pre_refactor_2026-09-16/FREEZE_MANIFEST.json`。2026-10-12 按方向移动了 37 个研究结果目录，保留文件内容及原来源清单；共享录波和未归类结果仍留在 `results/` 根层。旧 Markdown 放在本地忽略的 `docs/spoofing/history/`，旧 `.py` 入口的源码位于冻结目录。原 `validation/` 已按此前用户要求删除；仓库 `docs/reports/data/` 的冻结证据保持原位。
-
-`archive/` 已被 Git 忽略，只保留在本地，不随克隆或拉取分发，也不继续上库维护。下面的校验/恢复工具仅用于拥有本地冻结版的机器；已提交的历史源码仍可从 Git 历史取得，未提交文件则仅存在于本地冻结版。
+`archive/` 和 `results/` 被 Git 忽略，仅本地保存，不随克隆或拉取分发，不继续上库维护。旧的 `archive/pre_refactor_2026-09-16/` 仍保留；以下工具只校验/恢复这一原始冻结版，不操作本次备份：
 
 ```powershell
 python tools/frozen_version.py
 python tools/frozen_version.py --restore results/restored_original
 ```
 
-恢复命令只恢复当时源码、配置、测试、报告和日志。历史实验引用的既有 RF 数据、results、validation 及外部资料仍需按原报告放到相应路径；不要直接在冻结目录运行会写结果的旧脚本。历史报告原文索引见冻结版 `README.md`。
+日常实验记录参数、种子和 `source_sha256`。仅当需要冻结当前源码时，将脚本顶部 `FREEZE_SOURCE` 改为 `True`；运行结果不会默认生成源码副本。
 
 ## 验证
 
@@ -210,24 +83,4 @@ python tools/frozen_version.py --restore results/restored_original
 python -m pytest -q
 ```
 
-默认只收集当前 `tests/`，并排除 `local_evidence` 测试，不依赖本地归档和研究结果。不会收集 results/validation/archive 中的测试副本。完整原版测试保留在本地冻结目录；当前测试针对本次迁移范围，测试数量不能和原版全部研究专题直接比较。
-
-有本地冻结源码和原始研究观测时，额外执行 `python -m pytest -m local_evidence -q`。显式运行会要求这些输入实际存在，不会静默跳过缺失证据。
-
-验证结果和已知限制见 `REFACTOR_VALIDATION.md`。这次重构改善组织和复现方式，不代表三天线可靠导航问题已经解决。
-
-当前双路多径代码的执行顺序、变量和输出说明见 [代码讲解](docs/multipath/SDCP_MULTIPATH_CODE_GUIDE.md)。
-
-## 修改记录时长
-
-SDCP 基线和多径均在各自脚本顶部修改 `DURATION_MS`；观测终点取记录结束前 10 ms，尾段取记录最后 400 ms 与有效观测的交集。事件时刻（回波 600 ms、中断 600～750 ms 等）不自动提前。
-
-- baseline：至少 30 ms；缺少有效样本的区域统计以 `status=not_evaluated` 和 `null` 表示，未观察到中断恢复时写明原因。短记录没有足够拟合样本时不输出伪造的幅度、斜率。
-- multipath：默认窗口设置至少需要 429 ms；更短时在清理旧输出前报出时长要求。事件未进入观测范围时 `detected=null`；`full_post_event_window=false` 表示尚无完整事件后窗口。700 ms 可运行，但不覆盖 600 ms 回波进入后的完整 200 ms 窗口。
-- GPS L1/L5 仿真定位：至少 210 ms 才包含 200 ms 的首个定位时刻；此下限只保证存在观测时刻，不保证定位成功。
-- 实测录波定位：记录需长于 1.01 s 才存在当前配置下的定位时刻；仍必须实际解出健康星历，代码不会用默认星历代替。
-- 单源抗欺骗：生成记录需长于 170 ms；无攻击后观测时评估状态为未评估、最长失效时长为 null。未初始化与无攻击后数据分别记录，不解释为零误差。
-
-时长检查只针对已经发现的观测窗口约束；不改变物理事件或接收算法来制造有效结果。新统计字段由当前运行产生，历史结果和源码哈希不追改。
-
-多径场景采用完整参数名，例如 `mp_t600ms_p-6dB_d0p3chip_phi90_az110_el15`。`t` 为进入毫秒数，`p` 为相对功率 dB，`d` 为时延 chip（小数点写作 p），`phi` 为反射系数相位度，`az/el` 为回波方向角度。新运行的输出文件使用新名；既有运行和冻结证据保留原名，当前报告使用带来源映射的 renamed view，不将改名当成新实验。
+默认只收集当前 `tests/`，排除 `local_evidence`，不依赖本地归档或研究数据，也不收集归档和结果中的测试副本。本地具备本次清理前冻结源码时，额外执行 `python -m pytest -m local_evidence -q`，在独立解释器中对照 GPS L1/L5 数值。本次删除了已退出维护方向的测试，测试数量减少不是原有研究重新通过的证据；实际清理验证见 CHANGELOG。旧重构过程记录在 `REFACTOR_PLAN.md` 与 `REFACTOR_VALIDATION.md`，按日期区分历史范围。

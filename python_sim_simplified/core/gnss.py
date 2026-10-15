@@ -8,7 +8,6 @@ from .channel_delay import apply_channel_delays, delay_phase
 from .code_replica import bandlimited_code_replica, _sample_code
 from .config import PhoneConfig, SimulationConfig
 from .interference.scene import _interferer_scene
-from .multipath.scene import _multipath_scene
 from .models import ScenarioTruth
 
 
@@ -172,21 +171,7 @@ def generate_scenario(
         for interferer in cfg.interferers
         if interferer.enable
     ]
-    multipath_scenes = [
-        _multipath_scene(
-            path,
-            cfg,
-            antenna_model,
-            desired_waveform,
-            time_s,
-            true_delays_s,
-        )
-        for path in cfg.signal.multipath_paths
-        if cfg.enable_multipath_research and path.enable
-    ]
     scene = desired_component.copy()
-    for path in multipath_scenes:
-        scene += path.truth["component"]
     for interferer in interferer_scenes:
         scene += interferer.component
 
@@ -209,7 +194,6 @@ def generate_scenario(
         "interferer_components": [
             interferer.component for interferer in interferer_scenes
         ],
-        "multipath_paths": [path.truth for path in multipath_scenes],
         "active_antennas": cfg.phone.active_antennas,
         "positions_m": desired_true_stages["positions_m"],
         "channel_delay_true_ns": true_delays_s * 1e9,
@@ -233,9 +217,6 @@ def generate_scenario(
             "desired_assumed": desired_assumed_stages,
             "interferers": [
                 interferer.diagnostics for interferer in interferer_scenes
-            ],
-            "multipath_paths": [
-                path.diagnostics for path in multipath_scenes
             ],
         },
     }

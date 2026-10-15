@@ -1,6 +1,8 @@
 # 文档导航
 
-当前维护入口：[实验与共享代码目录](../python_sim_simplified/README.md)、[抗干扰联合链路](../python_sim_simplified/docs/interference/README.md)、[单源抗欺骗研究](../python_sim_simplified/docs/spoofing/SINGLE_SOURCE_SUPPRESSION_REPORT.md)、[双路 SDCP 多径研究](../python_sim_simplified/docs/multipath/SDCP_MULTIPATH_REPORT.md)。
+当前维护入口：[实验与共享代码目录](../python_sim_simplified/README.md)、[抗干扰接收链与独立实验](../python_sim_simplified/docs/interference/README.md)。2026-10-14 起维护代码聚焦抗干扰，通用 GPS 定位和真实录波接收仍保留。
+
+历史报告：[单源抗欺骗研究](../python_sim_simplified/docs/spoofing/SINGLE_SOURCE_SUPPRESSION_REPORT.md)、[双路 SDCP 多径研究](../python_sim_simplified/docs/multipath/SDCP_MULTIPATH_REPORT.md)。这些方向的专用代码已从当前版本移除，复现需要对应冻结源码，报告中的命令不是当前入口。
 
 历史抗欺骗：[GPSPATRON公开原理启发的2–4天线本地实现](reports/2026-09-14-gpspatron-spatial-diversity.md)，包含公式、独立标定、配对统计、RF链路、输出保护和负面边界；区分本地模型与商业产品能力。
 

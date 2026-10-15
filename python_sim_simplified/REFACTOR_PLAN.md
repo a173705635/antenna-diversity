@@ -1,5 +1,150 @@
 # Core and experiments implementation plan
 
+## 2026-10-14：通用抗干扰验证框架设计（已实现）
+
+### 用户目标与本轮范围
+
+用户已选择“短 Python 条件文件＋固定运行器”：后续更换方向、增益、相位、天线组合或扫描点，主要修改条件，不再为每轮验证创建新的实验脚本，也不反复阅读复制的 RF/DFE/捕获/跟踪代码。本轮在当前抗干扰维护版上构建这一能力，保留现有中文注释、独立复算、结果输出与绘图；不恢复已删除的多径或抗欺骗接口。
+
+首次迁移以现有整通道相位验证为数值基准，并增加目标/干扰方向、阵元增益条件。通用运行不等于所有条件都必须恢复同一个基准；条件的物理层级与对应验证判据分别明确。
+
+### 固定文件职责
+
+- `experiments/interference/validation_config.py`：唯一日常编辑位置。使用现有 `SimulationConfig` 及具名条件对象，直接配置目标真实/名义方向、干扰列表、天线模型真实/假设状态、逐通道参数；集中设置种子、时长、方法、条件选择和单因素扫描。不使用 JSON/YAML、点分字段路径或反射式覆盖器。
+- `experiments/interference/validation.py`：固定运行入口，支持模块运行和直接运行；只连接条件、运行、保存、绘图及核验结果，不包含另一份接收算法。
+- `experiments/interference/validation_support.py`：固定的条件类型、共享运行/评分/核验/绘图函数。放在实验层而非公共物理模型层，避免 `core` 依赖实验或将研究评分塞进公共接收机。配置和入口都依赖此模块，避免循环导入。
+
+上述文件一次建立，后续增加已有参数的条件只修改配置。已有四个实验入口与历史结果先保留，不一次性重写 RF 噪声标定、全量天线消融或源级响应实验；新框架不是简单调度这些旧脚本，而是提取并复用相位验证中的实际处理阶段。必要时只做小范围公共接收阶段提取，保持原 `run_end_to_end` 默认行为。
+
+### 条件与扫描的使用约定
+
+- 一份完整基础 `SimulationConfig` 加具名条件表，条件从基础配置独立复制；前一个条件的改动不能污染下一个条件。
+- 普通常量和现有 dataclass 字段承担物理配置。真实方向与名义方向分别设置，不能因为修改真实角度就默默假定接收机也知道新方向。
+- DFE 后的整通道相位作为独立实验参数：`dfe_phase_deg`、`dfe_estimated_phase_deg` 使用物理天线名字典；逆旋转作用于整个样本序列，估计值是用户提供的校准量，不是自动估相。配置明确是否补偿，不修改名义导向进行第二次补偿。
+- 一次可以选择一个条件或一组条件；扫描默认只改变一个具名因素，例如目标方位、指定阵元增益或指定通道相位。多个条件分别列出，不隐式做全部参数笛卡尔积。
+- 任意两至四根天线组合均沿用现有模型；SINGLE 参考按组合第一根明确标记。噪声收益理论使用实际天线数，且只在理想等增益、正确对齐、独立等功率噪声前提下启用。
+- 条件可指向具名 `reference_case`，供配对核验使用；执行所选条件时，必要的参考条件也显式记录在输出中。改变真实方向/增益等物理输入的普通条件不自动套用相位闭环的逐样本相等要求。
+
+### 必须区分的物理层级
+
+1. 天线增益/相位：作用在入射信号的阵列响应中，使用天线真实/假设状态；可随方向变化，不能解释成接收机热噪声一同被旋转。
+2. RF 增益、NF 与逐通道幅相：沿用现有 RF 模型，作用位置在限幅/ADC 前；不将其与 DFE 后相位注入混为一项。
+3. DFE 后通道实验：首次迁移只处理已有的静态相位模型，对完整通道样本共同旋转，包括目标、干扰、热噪声和已有前端残差；不在本轮新增 DFE 后增益校准算法。
+4. 通道时延：沿用真实序列时延与估计窄带导向相位的既有区别；新框架不声称实现码包络自动对齐或宽带波束形成。
+
+### 固定处理流程与复用边界
+
+构造条件 → 生成场景/RF/DFE → 应用显式 DFE 通道误差与补偿 → 合并/捕获/跟踪 → 固定权值独立重建与投影分量 → 汇总/核验 → 保存与绘图。
+
+- 纯 DFE 相位或接收假设变化的配对条件复用相同前端输入；真实方向、阵元增益等改变物理场景时重新生成相应前端。相同 seed、通道名和噪声配置保持噪声配对身份，不为取得收益调整功率、NF 或捕获门限。
+- 接收复用公共算法，不读取事后分离的真目标/干扰/热噪声分量。研究专用控制与指标留在实验支持模块。
+- 独立线性预算按启用干扰列表逐项核算，不固定假定同时存在 CW 和宽带，也不把非线性/量化残差或交叉项称为热噪声。
+- 所有条件共有的功率、目标增益、各干扰剩余功率、带内线性 SINR、捕获及跟踪指标自动输出。热噪声收益和实际跟踪 C/N₀ 分开；无跟踪估计保留缺测身份。
+- 核验分为公共数学一致性、适用条件下的理想噪声收益、明确选用的相位配对闭环。接收失败是研究结果；核验不适用或失败必须有状态与理由，不能静默记为通过。
+
+### 保存、图和历史身份
+
+统一运行将实际条件、种子、扫描因素、参考关系、来源哈希、逐条件指标和核验结果写入自身输出目录；不默认复制源码或 IQ。方向/增益/相位扫描图使用实际扫描字段与单位，方法及不同指标分开显示，保存并按开关弹出。仅刷新本次明确选择的输出，不删除历史实验目录，不追改旧结果或来源哈希。
+
+### 验收与限制
+
+- 在同条件下对照旧相位入口的前端、权值、分量功率、捕获/跟踪和闭环状态；0°、90°、180°使用独立手推与样本核对。
+- 增加真实/名义方向分离、阵元增益电压/功率比例、任意天线顺序、单点/单因素扫描、条件隔离、可用 C/N₀ 缺测拒绝、输出隔离的测试。
+- 完整默认回归、独立只读审查及保存图检查完成后，更新既有抗干扰说明和 CHANGELOG；不能使用历史“606 项”等清理前计数冒充当前测试结果。
+- 不加防御兜底、插件注册、GUI、新依赖或未出现需求的包装层；不承诺新算法/新物理模型仅改参数即可完成。
+
+用户已确认设计并要求继续实现，按下面的范围直接实施、验证，不再重复确认计划。本轮不提交、推送或合并 Git。
+
+完成情况：三个固定模块已实现，公共阶段提取保持基准数值；全套回归 159 passed、2 deselected，最终绘图调整后专项 17 passed。实际命令、失败修正、实验条件与证据见 `CHANGELOG.md` 的 2026-10-14～15 记录。独立子 Agent 审查被额度限制中断，后续由 Main 接手检查与实现。以下是本轮的具体实施记录，未将原先计划的逐项 RED 流程当作已执行证据。
+
+### 通用验证框架 Implementation Plan
+
+> 一个 Coder 负责实现，Reviewer 只读审查，Main 维护说明并验证最终结果；以下勾选项记录实际完成情况。
+
+**Goal:** 日常只修改一个短 Python 条件文件，即可运行单条件、方向/增益扫描或已有相位闭环，不为每个条件新增脚本。
+
+**Architecture:** 沿用现有物理模型与接收算法，拆出可复用的前端和接收阶段；实验支持层承接条件、独立预算、核验与图。用户条件文件依赖支持层，固定入口依赖两者，`core` 不依赖实验。旧入口保留其既有条件与数据身份。
+
+**Tech Stack:** 当前 Python、NumPy、SciPy、matplotlib、pytest；不增加依赖。
+
+**Spec:** 本文件上方“通用抗干扰验证框架设计”，用户已确认。
+
+**Global Constraints:** 只修改 `python_sim_simplified/`；保留所有已有收口改动和历史记录，不恢复抗欺骗/多径；不加防御兜底、插件或 GUI；不重写旧结果/来源清单；不提交、推送或合并 Git。
+
+**Review Focus:**
+
+- 真实场景与名义导向混用、错误缓存前端：改变真实方向/增益必须影响数据，纯名义方向变化不能影响同种子 IQ。
+- 多条件共享可变配置：运行一组条件后不得污染基础配置或其他条件。
+- 通道名字/顺序及热噪声基准：二至四天线重排仍对应正确物理通道，理论收益仅在明确前提下评价。
+- 缺测/失捕与核验通过混淆：基准可用、比较组缺失必须拒绝，双方失捕不能伪造 C/N₀。
+- 结果目录和来源身份：单次运行不能刷新其他实验或历史数据，配置实际值和参考关系必须可追溯。
+
+#### Task 1：提取前端与分支接收，保持默认链路数值
+
+**Files:** 修改 `core/pipeline.py`、`tests/test_pipeline.py`；不修改物理算法文件。
+
+**Interfaces:** `run_frontend(cfg, *, scene=None) -> SimulationResults` 返回场景、ADC、DFE、元数据以及尚为空的 branches/metrics；`run_receiver(dfe_channels, truth, cfg, fs_out_hz) -> dict[str, BranchResult]` 复用现有分支函数；`run_end_to_end` 连接两阶段并生成原有指标。
+
+- [x] 增加可复用阶段测试，覆盖 SINGLE/EGC/MVDR/Blind Null；Main 另外保存改动前数据哈希，再与提取后的四分支数据逐项比较。
+- [x] 将已有代码按阶段提取，数值处理不变，复用同一份前端记录。
+- [x] 公共阶段相关测试及最终默认回归通过，基准哈希一致。
+
+#### Task 2：统一条件、单因素扫描和独立预算
+
+**Files:** 新增 `experiments/interference/validation_support.py`、`validation_config.py`、`tests/test_validation.py`；如共享现有相位助手，只改 `channel_phase_validation.py` 的相应依赖，不复制另一份接收算法。
+
+**Interfaces:** 支持层定义 `ValidationCase` 与 `ValidationSettings`；配置层提供 `build_settings() -> ValidationSettings`、`build_cases() -> list[ValidationCase]`；支持层提供 `run_validation(settings, cases) -> dict`，结果含条件清单、rows 与 verification。
+
+`ValidationCase` 的显式接口包括 `name`、`config: SimulationConfig`、`scene_label`、`series_label`、`scan_label`、`scan_value`、`scan_unit`、`dfe_phase_deg`、`dfe_estimated_phase_deg`、`compensate_dfe_phase`、`reference_case`、`checks`。图的标签仅用于显示，不使用字符串路径修改配置。`ValidationSettings` 包括 `seeds`、`duration_ms`、`power_trim_ms`、`selected_cases`、`output_dir`、`show_plots`。
+
+- [x] 测试整行 90° 的 `1j*X` 旋转、逆旋转、真实/名义参数分离、6.020599913 dB 的电压/功率比例、条件隔离和参考条件选择。
+- [x] 实现上述默认相位网格，以及可选方向/阵元增益示例；配置字段直接赋值，不做反射式修改或隐式笛卡尔积。
+- [x] 区分真实物理输入和接收假设，名义导向改变复用 IQ；真实增益改变重新生成前端，已用实际输入数组检查。
+- [x] 逐个重放启用的干扰及同 seed 热噪声，分列残差、交叉项、线性 SINR 与跟踪 C/N₀。
+- [x] 公共功率恒等式、适用前提下的理想收益及相位配对闭环通过；不适用/缺测保留状态，负测试能够拒绝篡改和单侧缺测。
+- [x] 默认回归覆盖旧相位/消融/响应实验；新测试覆盖四类干扰组合、四天线反序及仅运行 MVDR。
+
+#### Task 3：固定入口、输出、图和数值验收
+
+**Files:** 新增 `experiments/interference/validation.py`；完善 `validation_support.py`、`tests/test_validation.py`；Main 更新 `README.md`、`docs/interference/README.md`、`CHANGELOG.md` 及本节状态。
+
+**Interfaces:** 固定入口 `main()` 读取当前 `build_settings()/build_cases()`，运行 Task 2 的 `run_validation`；支持层 `plot_validation(rows, settings) -> list[Path]` 使用实际扫描标签/单位；配置与最终判据保存到 manifest/summary/verification。
+
+- [x] 固定模块入口实际运行，直接路径的导入启动检查通过；短记录测试覆盖 JSON/CSV/图、输出目录隔离、混合配对字段和失败核验保存。
+- [x] 按真实因素/单位分图。热噪声/目标/SINR 用线性比保留抵消细节，各干扰抑制单独显示；缺测坐标轴不伪装成零值。默认启用弹图，自动验证仅检查 Agg 保存图。
+- [x] 同条件旧/新相位入口在 0/90/180°、seed 42、两个场景共 54 行数值对照通过；不修改旧清单。
+- [x] 默认相位批次与短方向/增益示例实际运行；Main 用独立几何公式核对目标功率比，最大绝对差 2.22e-16。
+- [x] 实际默认回归及专项通过，Main 检查静态图和差异；来源核对随最终输出更新记录。
+- [x] 更新已有 README、抗干扰说明与 CHANGELOG，没有另建实施报告或源码副本。
+
+**Ownership and handoff:** 一个 Coder 顺序完成 Task 1–3 的源码与测试；Main 维护文档并处理已有工作区重叠；Reviewer 只读审查数值保持、物理分层、验证与输出边界。用户已授权实施；本轮使用当前工作区，不提交或推送。
+
+## 2026-10-14: interference-only maintained code
+
+**User scope:** back up the current maintained code, then remove anti-spoofing and multipath implementation so subsequent interference research does not modify those directions. This supersedes the active three-direction layout below; earlier plans and research evidence remain historical.
+
+**Backup:** `archive/pre_interference_only_2026-10-14_156b994/` contains 271 tracked files from the simplified project plus repository instructions/navigation at Git HEAD `156b994bacc9fed03b38ae8b5b4b927e3e5bae11`. `FREEZE_MANIFEST.json` records their SHA256 hashes. Archive and existing result data stay local. The snapshot is the rollback reference; restoring source means copying its root-relative files back, not editing archived implementations.
+
+**Boundaries:** retain common antenna, channel-delay, GNSS L1/L5, RF/DFE, acquisition/tracking, navigation/positioning and recorded-IQ functionality; retain all current interference algorithms and experiment parameters. Remove dedicated spoofing/multipath modules, entries, tools and tests. Remove multipath configuration, scene generation, detection/suppression orchestration, metrics, plot overlays and optional GPS scene inputs from shared code. Do not add compatibility wrappers, fallback branches or new dependencies. Historical reports remain available as historical material; their experiments require frozen source. Existing result bytes and prior archives are untouched. Work in the authorized existing checkout; no commit or push is requested.
+
+### Task 1: implementation and tests (one Coder)
+
+- [x] First update existing layout/contract tests to require interference-only imports and outputs; run them before runtime edits to establish the expected failure.
+- [x] Remove `core/spoofing/`, `core/multipath/`, `experiments/spoofing/`, `experiments/multipath/`, `tools/spoofing/` and exclusively dedicated tests. Classify tests by actual imports and behavior, not filenames alone.
+- [x] Update `config.py`, `presets.py`, `gnss.py`, `pipeline.py`, `models.py`, `metrics.py`, `plotting.py`, `gps_simulation.py`, `provenance.py`, `experiments/paths.py` and the four interference entries. Retain generic callers and applicable tests. Delete unused dedicated historical source mappings only after checking remaining consumers.
+- [x] Run affected tests, then the retained default suite. Source import and reference scans must contain no dependency on removed directions.
+
+### Task 2: current documentation and validation (Main)
+
+- [x] Verify the byte-exact local backup before deletion; capture default suite baseline and ideal/parametric interference numerical fingerprints before runtime edits.
+- [x] Update current project instructions, READMEs and status/navigation for interference-only development; keep historical reports and prior CHANGELOG entries unchanged.
+- [x] Compare retained scene, ADC, DFE, combining, acquisition, tracking, truth and metrics against both pre-cleanup fingerprints, excluding intentionally removed multipath fields and configuration schema.
+- [x] Independently review the final diff, fix substantive findings and reverify; verify all snapshot hashes and archive/results ignore rules. Record actual outcomes and limitations in CHANGELOG.
+
+**Interface audit:** Task 1 owns runtime source/tests; Task 2 owns documentation. Both share the public entry names and removed-directory list above; documentation must follow the final retained contract. Numerical preservation applies to interference-only scenes, not historical echo scenes. Old multi-direction instructions below are historical and cannot require deleted APIs. The cleanup does not establish new performance claims.
+
+**Review ruling:** preserve common PLL convergence/slope/step tests from a deleted spoofing-named test file by moving them into the existing receiver tests. The optional `track(loss_quality=...)` callback had exactly one production consumer, the deleted spoofing receiver; remove that unused hook and its specialized tests. Keep standard causal loss detection used by autonomous tracking. GPS numerical equivalence must compare this cleanup against its verified 2026-10-14 snapshot, not the older 2026-09-16 physical-model version; never change old evidence or algorithms to force agreement.
+
 ## 2026-10-12: approved research-direction layout
 
 **Goal:** share the common receiver code, separate interference/spoofing/multipath algorithms and experiments, and update their consumers and documentation together.

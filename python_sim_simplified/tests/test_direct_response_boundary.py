@@ -24,8 +24,6 @@ def response(gain=None, phase=None):
 def test_unity_response_matches_ideal_scene_and_truth():
     cfg = default_config()
     cfg.signal.duration_ms = 2
-    cfg.enable_multipath_research = False
-    cfg.signal.multipath_paths = []
     original, original_truth = generate_scenario(cfg)
     scene, truth = generate_direct_scenario(cfg, DirectResponses(
         SourceResponse(), SourceResponse(),
@@ -44,8 +42,6 @@ def test_unity_response_matches_ideal_scene_and_truth():
 def test_independent_source_coefficients_and_assumed_target_only():
     cfg = default_config()
     cfg.signal.duration_ms = 2
-    cfg.enable_multipath_research = False
-    cfg.signal.multipath_paths = []
     cfg.phone.active_antennas = ('BR', 'TL', 'TR')
     original, base = generate_scenario(cfg)
     responses = DirectResponses(
@@ -83,8 +79,6 @@ def test_two_and_four_antenna_orders_follow_names():
     for antennas in (('BR', 'TL'), ('BR', 'BL', 'TR', 'TL')):
         cfg = default_config()
         cfg.signal.duration_ms = 1
-        cfg.enable_multipath_research = False
-        cfg.signal.multipath_paths = []
         cfg.phone.active_antennas = antennas
         _, base = generate_scenario(cfg)
         _, truth = generate_direct_scenario(cfg, responses)
@@ -96,8 +90,6 @@ def test_two_and_four_antenna_orders_follow_names():
 def test_diagnostics_scale_once_but_hardware_stage_does_not():
     cfg = default_config()
     cfg.signal.duration_ms = 1
-    cfg.enable_multipath_research = False
-    cfg.signal.multipath_paths = []
     _, base = generate_scenario(cfg)
     responses = DirectResponses(
         response({'TR': 6.020599913279624}),
@@ -117,8 +109,6 @@ def test_diagnostics_scale_once_but_hardware_stage_does_not():
 def test_true_delay_changes_samples_while_estimated_delay_changes_steering_only():
     cfg = default_config()
     cfg.signal.duration_ms = 2
-    cfg.enable_multipath_research = False
-    cfg.signal.multipath_paths = []
     responses = DirectResponses(SourceResponse(), SourceResponse(),
                                 (SourceResponse(), SourceResponse()))
     baseline, base_truth = generate_direct_scenario(cfg, responses)
@@ -141,8 +131,6 @@ def test_true_delay_changes_samples_while_estimated_delay_changes_steering_only(
 def test_source_voltage_applies_once_with_nonzero_hardware_delay():
     cfg = default_config()
     cfg.signal.duration_ms = 2
-    cfg.signal.multipath_paths = []
-    cfg.enable_multipath_research = False
     _, undelayed = generate_scenario(cfg)
     cfg.phone.channel_delay_ns['TR'] = 1000
     cfg.phone.estimated_channel_delay_ns['TR'] = 50
@@ -170,8 +158,6 @@ def test_source_voltage_applies_once_with_nonzero_hardware_delay():
 def test_paired_assumptions_share_rf_dfe_and_blind_null_but_change_known_weights():
     cfg = default_config()
     cfg.signal.duration_ms = cfg.tracking.max_epochs = 8
-    cfg.signal.multipath_paths = []
-    cfg.enable_multipath_research = False
     cfg.phone.active_antennas = ('TL', 'TR')
     known, mismatch = build_responses(90, perturbed_antenna='TR')
     known_scene = generate_direct_scenario(cfg, known)

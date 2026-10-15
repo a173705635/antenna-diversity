@@ -66,9 +66,6 @@ def build_config(seed, duration_ms, antennas, scene):
     cfg.signal.duration_ms = duration_ms
     # 跟踪每历元为 1 ms；上限随记录时长设置，实际可用历元可能更少。
     cfg.tracking.max_epochs = duration_ms
-    # 清空回波并关闭多径研究，避免把多径失配与通道相位误差混在一起。
-    cfg.signal.multipath_paths = []
-    cfg.enable_multipath_research = False
     cfg.phone.active_antennas = antennas
     cfg.diversity.modes = MODES
     # 默认干扰列表的第一个是 CW；无干扰是独立控制组，不是事后忽略干扰功率。

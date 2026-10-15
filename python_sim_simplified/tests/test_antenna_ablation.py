@@ -23,8 +23,6 @@ def test_cases_change_one_antenna_feature_without_changing_rf_or_receiver():
         assert cfg.diversity.blind_null.detection_threshold_db == 6.0
         assert cfg.signal.fs_rf_hz == 33e6
         assert [source.power_dbm for source in cfg.interferers] == [-90.0, -90.0]
-        assert not cfg.enable_multipath_research
-        assert not cfg.signal.multipath_paths
         if case != 'full_parametric':
             assert cfg.phone.antenna_model.true_state == cfg.phone.antenna_model.assumed_state
     full = study.build_case('full_parametric', 'blockage_active', 42, 100, CORNER_NAMES)

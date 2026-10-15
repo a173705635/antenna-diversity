@@ -8,7 +8,6 @@ import numpy as np
 
 CORNER_NAMES = ("TL", "TR", "BL", "BR")
 SPEED_OF_LIGHT_MPS = 299_792_458.0
-ENABLE_MULTIPATH_RESEARCH = False
 
 
 @dataclass
@@ -123,7 +122,6 @@ class SignalConfig:
     assumed_polarization: WavePolarization = field(
         default_factory=WavePolarization
     )
-    multipath_paths: list["MultipathPath"] = field(default_factory=list)
     # Optional ideal-lowpass source; None preserves the legacy sampled chips.
     code_bandwidth_hz: float | None = None
 
@@ -173,17 +171,6 @@ class WidebandInterferer:
 
 
 Interferer = CWInterferer | WidebandInterferer
-
-
-@dataclass
-class MultipathPath:
-    direction: Direction
-    enable: bool = True
-    relative_power_db: float = -6.0
-    excess_delay_chips: float = 0.5
-    reflection_phase_rad: float = 0.0
-    doppler_offset_hz: float = 0.0
-    polarization: WavePolarization = field(default_factory=WavePolarization)
 
 
 @dataclass
@@ -239,23 +226,6 @@ class DiversityConfig:
 
 
 @dataclass
-class MultipathDetectionConfig:
-    enable: bool = True
-    max_excess_delay_chips: float = 3.0
-    delay_step_chips: float = 0.25
-    detection_threshold_db: float = 6.0
-    azimuth_step_deg: float = 5.0
-    elevation_step_deg: float = 5.0
-
-
-@dataclass
-class MultipathSuppressionConfig:
-    enable: bool = True
-    diagonal_loading_factor: float = 1e-2
-    max_steering_correlation: float = 0.95
-
-
-@dataclass
 class AcquisitionConfig:
     doppler_bins_hz: np.ndarray = field(
         default_factory=lambda: np.arange(-5_000.0, 5_000.1, 250.0)
@@ -307,12 +277,9 @@ class SimulationConfig:
     rf: RFConfig
     dfe: DFEConfig
     diversity: DiversityConfig
-    multipath_detection: MultipathDetectionConfig
-    multipath_suppression: MultipathSuppressionConfig
     acquisition: AcquisitionConfig
     tracking: TrackingConfig
     plot: PlotConfig
-    enable_multipath_research: bool = field(default_factory=lambda: ENABLE_MULTIPATH_RESEARCH)
 
 
 # Ready-to-run configuration factories are defined in presets.py.

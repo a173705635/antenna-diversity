@@ -85,7 +85,6 @@ def compute_metrics(results: SimulationResults) -> list[MetricRecord]:
         else:
             final_doppler = pll_rms = dll_rms = mean_prompt = None
             tracking_bias_rms = tracking_bias_rms_m = None
-        multipath_gains = branch["combining"]["multipath_direction_gains"]
         records.append(
             {
                 "mode": mode,
@@ -100,8 +99,6 @@ def compute_metrics(results: SimulationResults) -> list[MetricRecord]:
                 "dll_rms": dll_rms,
                 "mean_prompt_magnitude": mean_prompt,
                 "final_cn0_db_hz": _final_cn0(tracking),
-                "multipath_direction_gains": multipath_gains,
-                "worst_multipath_gain": max(multipath_gains, default=0.0),
                 "acquisition_code_bias_chips": acquisition_code_bias_chips(
                     acquisition,
                     results["truth"],

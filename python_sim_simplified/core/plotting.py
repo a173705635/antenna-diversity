@@ -10,7 +10,7 @@ from .config import CWInterferer, WidebandInterferer
 from .metrics import circular_chip_error, tracking_code_bias_chips
 
 
-MODE_ORDER = ("single", "egc", "mvdr", "blind_null", "multipath_lcmv")
+MODE_ORDER = ("single", "egc", "mvdr", "blind_null")
 SPHERICAL_RESPONSE_FLOOR_DB = -40.0
 
 
@@ -182,14 +182,6 @@ def plot_array_response(results):
                 color="red",
                 linestyle=":",
                 label=f"{kind} {index}",
-            )
-    for index, path in enumerate(cfg.signal.multipath_paths, start=1):
-        if cfg.enable_multipath_research and path.enable:
-            axis.axvline(
-                path.direction.azimuth_deg,
-                color="blue",
-                linestyle="--",
-                label=f"Multipath {index}",
             )
     axis.set(
         title=f"Spatial response at elevation {cfg.signal.true_direction.elevation_deg:.1f}°",
@@ -402,9 +394,6 @@ def _array_response_directions(cfg):
             else:
                 kind, marker, color = "Wideband", "D", "magenta"
             directions.append((interferer.direction, f"{kind} {index}", marker, color))
-    for index, path in enumerate(cfg.signal.multipath_paths, start=1):
-        if cfg.enable_multipath_research and path.enable:
-            directions.append((path.direction, f"Multipath {index}", "o", "deepskyblue"))
     return directions
 
 

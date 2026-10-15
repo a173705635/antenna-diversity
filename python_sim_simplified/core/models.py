@@ -4,7 +4,7 @@ from typing import NotRequired, TypedDict
 
 import numpy as np
 
-from .config import Direction, SimulationConfig
+from .config import SimulationConfig
 
 
 class AntennaDiagnostics(TypedDict):
@@ -26,57 +26,6 @@ class AntennaModelDiagnostics(TypedDict):
     desired_true: AntennaDiagnostics
     desired_assumed: AntennaDiagnostics
     interferers: list[AntennaDiagnostics]
-    multipath_paths: list[AntennaDiagnostics]
-
-
-class MultipathTruth(TypedDict):
-    component: np.ndarray
-    steering_true: np.ndarray
-    delay_phase_true: np.ndarray
-    excess_delay_chips: float
-    excess_delay_s: float
-    relative_power_db: float
-    reflection_phase_rad: float
-    doppler_offset_hz: float
-    direction: Direction
-
-
-class MultipathCandidate(TypedDict):
-    excess_delay_chips: float
-    residual_power: float
-    detection_score_db: float
-    direction: Direction
-    steering_estimated: np.ndarray
-    steering_correlation_with_los: float
-    spatial_status: str
-    azimuths_deg: np.ndarray
-    elevations_deg: np.ndarray
-    angle_power: np.ndarray
-
-
-class MultipathDetectionResult(TypedDict):
-    status: str
-    pilot_mode: str | None
-    delay_axis_chips: np.ndarray
-    correlation_vectors: np.ndarray
-    raw_power: np.ndarray
-    residual_power: np.ndarray
-    threshold_power: float
-    candidates: list[MultipathCandidate]
-
-
-class MultipathMatch(TypedDict):
-    detected_index: int
-    truth_index: int
-    delay_error_chips: float
-    direction_error_deg: float
-
-
-class MultipathEvaluation(TypedDict):
-    detected_count: int
-    missed_count: int
-    false_alarm_count: int
-    matches: list[MultipathMatch]
 
 
 class ScenarioTruth(TypedDict):
@@ -92,7 +41,6 @@ class ScenarioTruth(TypedDict):
     desired_open_circuit_response_assumed: np.ndarray
     interferer_steering_effective: list[np.ndarray]
     interferer_components: list[np.ndarray]
-    multipath_paths: list[MultipathTruth]
     active_antennas: tuple[str, ...]
     positions_m: np.ndarray
     channel_delay_true_ns: np.ndarray
@@ -174,15 +122,9 @@ class CombiningInfo(TypedDict):
     estimated_interference_response: NotRequired[complex]
     constraint_matrix: NotRequired[np.ndarray]
     constraint_response: NotRequired[np.ndarray]
-    multipath_constraint_steerings: NotRequired[list[np.ndarray]]
-    multipath_constraint_responses: NotRequired[list[complex]]
-    suppression_status: NotRequired[str]
-    rejected_constraint_indices: NotRequired[list[int]]
     target_direction_gain: NotRequired[float]
     interferer_direction_gains: NotRequired[list[float]]
     worst_interferer_gain: NotRequired[float]
-    multipath_direction_gains: NotRequired[list[float]]
-    worst_multipath_gain: NotRequired[float]
 
 
 class AcquisitionResult(TypedDict):
@@ -253,8 +195,6 @@ class MetricRecord(TypedDict):
     dll_rms: float | None
     mean_prompt_magnitude: float | None
     final_cn0_db_hz: float | None
-    multipath_direction_gains: list[float]
-    worst_multipath_gain: float
     acquisition_code_bias_chips: float
     tracking_code_bias_rms_chips: float | None
     tracking_code_bias_rms_m: float | None
@@ -269,6 +209,4 @@ class SimulationResults(TypedDict):
     dfe_channels: np.ndarray
     dfe_info: DFEInfo
     branches: dict[str, BranchResult]
-    multipath_detection: MultipathDetectionResult
-    multipath_evaluation: MultipathEvaluation | None
     metrics: list[MetricRecord]

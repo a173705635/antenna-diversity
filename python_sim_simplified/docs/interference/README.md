@@ -1,4 +1,4 @@
-# 抗干扰与联合接收链实验
+# 抗干扰接收链实验
 
 在 `python_sim_simplified/` 目录运行：
 
@@ -8,9 +8,9 @@ python -m experiments.interference.full_chain
 
 入口为 [full_chain.py](../../experiments/interference/full_chain.py)，输出为 `results/interference/full_chain/`。时长和绘图选项位于入口顶部，信号与阵列条件在 [presets.py](../../core/presets.py) 中。
 
-当前默认配置包含 CW 和带限噪声干扰，比较 SINGLE、EGC、MVDR、Blind Null。`core/config.py` 的 `ENABLE_MULTIPATH_RESEARCH = False` 默认关闭回波生成、检测、评估、多径 LCMV 与专用绘图；原有回波参数和检测/抑制子开关保留。将常量改为 `True` 可恢复默认联合场景，也可在单次配置中设置 `cfg.enable_multipath_research = True`。历史联合场景结果仍按当时配置解读。
+当前默认配置包含 CW 和带限噪声干扰，比较 SINGLE、EGC、MVDR、Blind Null。2026-10-14 已移除抗欺骗与多径专用代码，以及公共链路中的回波配置、生成、检测、评估、LCMV 和专用绘图接口；没有通过开关重新启用的路径。历史联合场景结果仍按当时配置解读，复现需使用对应冻结源码。
 
-专用算法在 [interference/](../../core/interference/)：`interference.py` 生成带限噪声，`scene.py` 合成干扰到各天线的响应，`combining.py` 计算盲零陷。共享的天线、RF/DFE、捕获、跟踪、协方差合并及链路编排位于 `core/`；多径专用算法位于 `core/multipath/`。
+专用算法在 [interference/](../../core/interference/)：`interference.py` 生成带限噪声，`scene.py` 合成干扰到各天线的响应，`combining.py` 计算盲零陷。共享的天线、RF/DFE、捕获、跟踪、协方差合并及链路编排位于 `core/`。
 
 重跑入口只重建它自己的输出目录。已冻结的历史数据和来源清单保留原内容。
 
@@ -424,3 +424,38 @@ print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assu
 准确补偿后的 DFE 数据、合并输出相对基准最大误差分别为 `1.06e-16`、`8.70e-16`；权值逐值一致。捕获峰比最大绝对差 `1.07e-14`，可用跟踪 C/N₀ 最大差 `7.11e-14 dB-Hz`；CW 抑制最大差 `7.11e-15 dB`。这说明本轮闭环恢复到了浮点舍入精度。
 
 结论只适用于本轮模型：**整通道恒定相位误差在准确逆补偿后恢复基准；补偿正确性与不同合并算法的抗干扰能力是两回事。** 没有实现自动相位估计、相位漂移、频率相关误差或整序列时延对齐；没有验证 RF/ADC 前误差或真实手机方向图/校准能力。三种 seed 与固定姿态/功率/方向不足以推断一般可靠性。主链路默认配置未修改，历史研究批次未重跑；未提交、推送或合并 Git。
+
+## 2026-10-14 通用验证框架
+
+日常入口为 `python -m experiments.interference.validation`，直接执行 `experiments/interference/validation.py` 也使用相同配置。只需编辑 [validation_config.py](../../experiments/interference/validation_config.py)，原有各实验入口和历史结果继续保留其独立身份。
+
+常用修改位置：
+
+| 目的 | 配置位置 |
+|---|---|
+| 选择两至四根天线、改变顺序 | `ANTENNAS`；第一根是 SINGLE 参考 |
+| 选择合并方法 | `MODES` |
+| 修改噪声重复次数、时长和统计去边 | `SEEDS`、`DURATION_MS`、`POWER_TRIM_MS`；统计窗口应在记录内部 |
+| 扫描整通道相位 | `SELECTED_SERIES = ("phase",)`、`PHASE_ANTENNA`、`PHASE_SCAN_DEG` |
+| 扫描目标真实方位角 | `SELECTED_SERIES = ("direction",)`、`TARGET_AZIMUTH_SCAN_DEG` |
+| 扫描阵元真实增益 | `SELECTED_SERIES = ("gain",)`、`ELEMENT_GAIN_ANTENNA`、`ELEMENT_GAIN_SCAN_DB` |
+| 设置卫星真实/名义方向及干扰方向 | `TARGET_TRUE_DIRECTION`、`TARGET_ASSUMED_DIRECTION`、`JAMMER_DIRECTION`；角度单位为度 |
+| 只跑指定条件 | `SELECTED_CASES`；例如 `("single_cw/phase_90/calibrated",)`，运行时自动加入其参考条件 |
+| 显示/保存图 | `SHOW_PLOTS`、`OUTPUT_DIR` |
+| 更改其他模型参数 | 同一文件内 `_base_config()` 直接赋值现有 `SimulationConfig` 字段 |
+
+例如，把 `SELECTED_SERIES` 改成 `("direction",)`、`TARGET_AZIMUTH_SCAN_DEG` 改成 `(20, 30, 40)`，就运行这三个真实方位角。名义方向保持配置值，表示研究导向失配；若要研究已知方向，应在方向条件构造处同时明确赋值 `cfg.signal.assumed_direction`。多个系列分别扫描，不交叉展开为全部参数组合。每个条件独立复制基础配置，改一个条件不会污染其他条件。
+
+需要自定义单点时，在 `build_cases()` 中用 `ValidationCase(name="my_case", config=cfg, ...)` 增加具名条件。`dfe_phase_deg` 和 `dfe_estimated_phase_deg` 按物理天线名配置；`compensate_dfe_phase=True` 才执行估计相位的逆旋转。相位误差和补偿都作用于整行复数样本。真实阵元增益则修改 `cfg.phone.antenna_model.true_state.amplitude_error_db`，它改变目标和各干扰在天线端的响应，不改变独立 RF 热噪声的生成强度。
+
+处理阶段固定在 [validation_support.py](../../experiments/interference/validation_support.py)：相同物理配置共享前端，随后分别执行接收和独立预算。独立评分逐个重建启用的干扰源，不要求场景同时包含 CW 与宽带；公共接收机仍仅使用完整 IQ 和配置的名义导向。输出的线性 SINR 不含联合非线性/量化残差，分量交叉项单列，跟踪 C/N₀ 缺测不画成零。
+
+本轮验证首先记录当前维护版的 20 ms、seed 42、默认四天线、CW＋宽带、12 跟踪历元数值，提取前端/接收函数后重算。场景、ADC、DFE 以及四种方法的权值、合并序列、捕获/跟踪序列化结果哈希全部一致。
+
+### 实际验证与结论（2026-10-15 完成）
+
+- 默认批次：运行 `python -u -B -m experiments.interference.validation`，TL/BR、seed 42/43/44、100 ms、两端各去除 10 ms，6 个相位点、无干扰/单 CW、基准/未补/准确补偿。324 行方法结果、450 项逐行/理论/配对检查全部通过；这些检查不是 450 次独立实验。输出在 `results/interference/validation/`，包括 summary JSON/CSV、verification、manifest，以及 thermal_gain、target_interference、receiver、suppression_0 四张 PNG。
+- 准确整通道补偿后，DFE 和合并输出相对参考的最大误差分别为 `1.0552e-16`、`8.7018e-16`，权值误差为 0。无干扰基准 EGC 热噪声收益 2.99863～3.00730 dB，符合双天线约 3 dB 的预期。基准和补偿曲线重叠是恢复成功，并非漏画。该结论以外部提供准确相位为前提，不代表已实现自动相位估计。
+- 方向/增益示例：选择 `("direction", "gain")`，seed 42、20 ms、trim 2 ms，真实方位 30/40/50°，BR 增益 0/6.020599913279624 dB，名义参数保持不变。30 行、30 项检查全部通过，输出 `results/interference/validation_examples/`，两种因素分别绘图，共 8 张 PNG。独立用阵元坐标复算 EGC 目标功率比：方向扫描约为 1、0.937691、0.775836；增益扫描为 1、2.25，与输出最大绝对差 `2.22e-16`。真实增益变化不是估计参数自动跟随，更不是自动校准。
+- 读图注意：目标输出功率变大不等于 SINR 改善，权值同时可能放大噪声；应结合热噪声收益、干扰抑制和捕获结果判断。跟踪 C/N₀ 缺测显示缺测，不以零代替，也不能仅凭剩余成功跟踪点评价捕获可靠性。预算中的线性 SINR 不含非线性/量化残差。
+- 回归：完整测试 159 passed、2 deselected；最终绘图/注释调整后针对测试 17 passed。新旧相位入口 54 行数值对照通过。最终两批 manifest 的 47 个源码哈希均与当前源码一致。自动验证使用 `MPLBACKEND=Agg`；保存图已检查，桌面弹图交互未实测。信号强度、NF 及接收算法未为获得结论而修改。

@@ -5,8 +5,6 @@ import shutil
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT/'results'
 INTERFERENCE_RESULTS = RESULTS/'interference'
-MULTIPATH_RESULTS = RESULTS/'multipath'
-SPOOFING_RESULTS = RESULTS/'spoofing'
 
 
 def reset_output(output):

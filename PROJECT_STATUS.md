@@ -1,5 +1,9 @@
 # GNSS 天线分集与空域抗干扰仿真——项目状态
 
+**当前开发范围（2026-10-14）：抗干扰。** 已按用户要求备份当前精简版，并移除抗欺骗、多径专用代码和公共链路中的多径接口；保留通用接收链、GPS L1/L5 定位与真实录波接收。当前入口和实现边界见 [精简版说明](python_sim_simplified/README.md)，持续改动及实际验证见 [CHANGELOG](python_sim_simplified/CHANGELOG.md)。清理前版本仅在本地 `python_sim_simplified/archive/pre_interference_only_2026-10-14_156b994/` 保存。
+
+以下为历史阶段记录，其中“当前”“下一步”、测试数量和结论均对应当时版本，不覆盖上述开发范围；原报告、数据和来源哈希保留历史条件，不因本次代码清理追改。
+
 2026-09-14 首阶段开始实现：[RF／IMU 契约首版](docs/reports/2026-09-14-sensor-contract.md)。新增独立 `sensor_contract.py` 和旧数据回放审计；IQ 批次、IMU、载波观测结构检查及证据缺口显式化。19 项针对性测试、完整回归 216 项通过（1 条既有 C/N0 警告）；48 条 RF 记录在 36 个布局批次中与原重建一致，605 项冻结归档哈希不变。未接入默认导航，未完成流式故障闭环或 IMU 融合；W1 后续仍需扩展其他观测与事件契约。
 
 2026-09-14 grilling 补充决策：B 首次发布限定为受控试用；攻击前已有可信状态时连续 10 s 为首阶段续航目标，30/60 s 为扩展检查；正常初始化后 NORMAL＋DEGRADED 总可用率目标 ≥99%，每小时误触发限制仍独立保留。已更新[设计](docs/superpowers/specs/2026-09-14-commercial-antispoofing-design.md)并拆分[首阶段数据契约与同步标定工作包](docs/superpowers/specs/2026-09-14-commercial-antispoofing-stage1-plan.md)。这些是已接受的研发目标，非已测性能；工作包尚未实现。

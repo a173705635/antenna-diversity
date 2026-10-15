@@ -63,8 +63,6 @@ def build_case(case_name, context, seed, duration_ms, antennas):
     cfg.signal.duration_ms = cfg.tracking.max_epochs = duration_ms
     cfg.signal.true_direction = deepcopy(CONTEXTS[context])
     cfg.signal.assumed_direction = deepcopy(CONTEXTS[context])
-    cfg.signal.multipath_paths = []
-    cfg.enable_multipath_research = False
     cfg.phone.active_antennas = antennas
     if case_name == 'ideal':
         return cfg
