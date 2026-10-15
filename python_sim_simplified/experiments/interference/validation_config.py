@@ -60,11 +60,15 @@ def _base_config(scene: str):
 
 
 def build_cases() -> list[ValidationCase]:
-    """按选择构造并准备最终执行条件；每个 seed 拥有独立配置。"""
+    """选择具名条件或系列，并按 seed 顺序生成独立的最终配置。"""
     cases = []
+    known_names = set()
+    selected_names = set(SELECTED_CASES)
+    phase_series = not SELECTED_CASES and "phase" in SELECTED_SERIES
+    direction_series = not SELECTED_CASES and "direction" in SELECTED_SERIES
+    gain_series = not SELECTED_CASES and "gain" in SELECTED_SERIES
     for scene in SCENES:
         base = _base_config(scene)
-        by_series = {"phase": [], "direction": [], "gain": []}
         for phase in PHASE_SCAN_DEG:
             # 每个横轴点放三组：无误差基准、注入但不补偿、注入后准确逆补偿。
             # baseline 不注入 phase，只把相同基准画到各扫描点用于配对比较。
@@ -72,78 +76,67 @@ def build_cases() -> list[ValidationCase]:
             common = dict(scene_label=scene, scan_label="DFE channel phase",
                           scan_value=phase, scan_unit="deg")
             ideal_checks = ("ideal_noise",) if scene == "noise_only" else ()
-            by_series["phase"].append(ValidationCase(
+            baseline = ValidationCase(
                 f"{prefix}/baseline", deepcopy(base), series_label="baseline",
                 checks=ideal_checks, **common,
-            ))
-            by_series["phase"].append(ValidationCase(
+            )
+            uncalibrated = ValidationCase(
                 f"{prefix}/uncalibrated", deepcopy(base), series_label="uncalibrated",
                 dfe_phase_deg={PHASE_ANTENNA: phase}, **common,
-            ))
-            by_series["phase"].append(ValidationCase(
+            )
+            calibrated = ValidationCase(
                 f"{prefix}/calibrated", deepcopy(base), series_label="calibrated",
                 # 这里故意令估计相位等于真实相位，验证补偿闭环，不是自动估相。
                 dfe_phase_deg={PHASE_ANTENNA: phase},
                 dfe_estimated_phase_deg={PHASE_ANTENNA: phase},
                 compensate_dfe_phase=True, reference_case=f"{prefix}/baseline",
                 checks=("phase_pair",), **common,
-            ))
+            )
+            known_names.update((baseline.name, uncalibrated.name, calibrated.name))
+            # 选准确补偿时先加入同扫描点的基准；重复点名不会重复生成条件。
+            if phase_series or baseline.name in selected_names or calibrated.name in selected_names:
+                cases.append(baseline)
+            if phase_series or uncalibrated.name in selected_names:
+                cases.append(uncalibrated)
+            if phase_series or calibrated.name in selected_names:
+                cases.append(calibrated)
         for azimuth in TARGET_AZIMUTH_SCAN_DEG:
             # 只改真实方向，不改名义导向，研究接收机方向假设不准的影响。
             cfg = deepcopy(base)
             cfg.signal.true_direction = Direction(azimuth, cfg.signal.true_direction.elevation_deg)
-            by_series["direction"].append(ValidationCase(
+            direction = ValidationCase(
                 f"{scene}/direction_{azimuth}", cfg, scene_label=scene,
                 series_label="true direction", scan_label="target true azimuth",
                 scan_value=azimuth, scan_unit="deg",
-            ))
+            )
+            known_names.add(direction.name)
+            if direction_series or direction.name in selected_names:
+                cases.append(direction)
         for gain_db in ELEMENT_GAIN_SCAN_DB:
             # dB 增益作用于阵元响应，6.02 dB 约为电压两倍；名义增益保持不变。
             cfg = deepcopy(base)
             cfg.phone.antenna_model.true_state.amplitude_error_db[ELEMENT_GAIN_ANTENNA] = gain_db
-            by_series["gain"].append(ValidationCase(
+            gain = ValidationCase(
                 f"{scene}/gain_{gain_db}", cfg, scene_label=scene,
                 series_label="true element gain", scan_label=f"{ELEMENT_GAIN_ANTENNA} gain",
                 scan_value=gain_db, scan_unit="dB",
-            ))
-        for series, candidates in by_series.items():
-            if SELECTED_CASES or series in SELECTED_SERIES:
-                cases.extend(candidates)
-    return prepare_cases(cases, seeds=SEEDS, duration_ms=DURATION_MS,
-                         selected_cases=SELECTED_CASES)
+            )
+            known_names.add(gain.name)
+            if gain_series or gain.name in selected_names:
+                cases.append(gain)
 
-
-def prepare_cases(
-    candidates: list[ValidationCase], *, seeds: tuple[int, ...], duration_ms: int,
-    selected_cases: tuple[str, ...] = (),
-) -> list[ValidationCase]:
-    """选择条件及其参考，并按给定 seed 顺序展开为可直接执行的配置。"""
-    by_name = {case.name: case for case in candidates}
-    # 显式名字必须对应候选；直接索引也保留拼写错误的即时反馈。
-    selected = {by_name[name].name for name in selected_cases} if selected_cases else set(by_name)
-
-    ordered = []
-    visited = set()
-
-    def visit(case: ValidationCase) -> None:
-        if case.name in visited:
-            return
-        if case.reference_case is not None:
-            visit(by_name[case.reference_case])
-        visited.add(case.name)
-        ordered.append(case)
-
-    for candidate in candidates:
-        if candidate.name in selected:
-            visit(candidate)
+    # 具名选择中的拼写错误必须立即显式报出，不能变成空批次。
+    for name in SELECTED_CASES:
+        if name not in known_names:
+            raise KeyError(name)
 
     prepared = []
-    for seed in seeds:
-        for candidate in ordered:
+    for seed in SEEDS:
+        for candidate in cases:
             case = deepcopy(candidate)
             case.config.random_seed = seed
-            case.config.signal.duration_ms = duration_ms
-            case.config.tracking.max_epochs = duration_ms
+            case.config.signal.duration_ms = DURATION_MS
+            case.config.tracking.max_epochs = DURATION_MS
             prepared.append(case)
     return prepared
 

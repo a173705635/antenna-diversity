@@ -465,7 +465,7 @@ print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assu
 
 例如，把 `SELECTED_SERIES` 改成 `("direction",)`、`TARGET_AZIMUTH_SCAN_DEG` 改成 `(20, 30, 40)`，就运行这三个真实方位角。名义方向保持配置值，表示研究导向失配；若要研究已知方向，应在方向条件构造处同时明确赋值 `cfg.signal.assumed_direction`。多个系列分别扫描，不交叉展开为全部参数组合。每个条件独立复制基础配置，改一个条件不会污染其他条件。
 
-需要自定义单点时，在 `build_cases()` 的候选列表中增加 `ValidationCase(name="my_case", config=cfg, ...)`，统一交给 `prepare_cases()` 完成选择、参考排序及种子展开。`dfe_phase_deg` 和 `dfe_estimated_phase_deg` 按物理天线名配置；`compensate_dfe_phase=True` 才执行估计相位的逆旋转。相位误差和补偿都作用于整行复数样本。真实阵元增益则修改 `cfg.phone.antenna_model.true_state.amplitude_error_db`，它改变目标和各干扰在天线端的响应，不改变独立 RF 热噪声的生成强度。
+需要自定义单点时，在 `build_cases()` 中增加具名条件并明确选择规则，最后统一展开种子；相位补偿条件在同处带入基准，基准先于补偿执行。`dfe_phase_deg` 和 `dfe_estimated_phase_deg` 按物理天线名配置；`compensate_dfe_phase=True` 才执行估计相位的逆旋转。相位误差和补偿都作用于整行复数样本。真实阵元增益则修改 `cfg.phone.antenna_model.true_state.amplitude_error_db`，它改变目标和各干扰在天线端的响应，不改变独立 RF 热噪声的生成强度。
 
 处理阶段固定在 [validation_support.py](../../experiments/interference/validation_support.py)：相同物理配置共享前端，随后分别执行接收和独立预算。独立评分逐个重建启用的干扰源，不要求场景同时包含 CW 与宽带；公共接收机仍仅使用完整 IQ 和配置的名义导向。输出的线性 SINR 不含联合非线性/量化残差，分量交叉项单列，跟踪 C/N₀ 缺测不画成零。
 
@@ -473,11 +473,13 @@ print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assu
 
 ### 2026-10-15 用例构造更新
 
-`validation_config.py` 一次完成系列/具名选择、参考依赖和 seed 展开；每个最终用例的 `config` 已包含实际种子、时长及跟踪上限。运行器只按完整配置执行并复用相同物理前端，保存入口不再重建配置。默认仍是 36 个条件 × 3 个 seed × 3 种方法；两种选择都为空时生成空批次，不再隐式运行全部系列。
+`validation_config.py` 的 `build_cases()` 一次完成系列/具名选择、相位基准配对和 seed 展开；每个最终用例的 `config` 已包含实际种子、时长及跟踪上限。运行器只按完整配置执行并复用相同物理前端，保存入口不再重建配置。默认仍是 36 个条件 × 3 个 seed × 3 种方法；两种选择都为空时生成空批次，不再隐式运行全部系列。
 
 `ValidationSettings` 只保留统计去边、输出目录和绘图开关；直接调用运行器的自定义脚本需先准备完整用例。输出行与指标字段不变；清单的 `actual_receiver_configs[条件名][seed]` 路径保留，`cases` 中的 `base_config` 改为逐 seed 的 `receiver_configs`，便于追溯实际执行参数。
 
 本轮改前/改后对照：TL/BR、SINGLE/EGC/MVDR、seed 42/43、12 ms、两端各去除 1 ms，无干扰/单 CW，扫描相位 0/90/180°、目标方位 30/40/50°和 BR 增益 0/6.020599913279624 dB；168 行全部字段及完整核验报告严格一致。对照命令为 `$env:PYTHONPATH="."; python -B tests/case_refactor_probe.py`，本地证据在 `results/interference/case_refactor/`；未重跑完整历史批次。完整回归 `python -B -m pytest -p no:cacheprovider -q --basetemp=results/_pytest_case_refactor_final`：167 passed、2 deselected。
+
+后续简化将选择、基准配对和种子展开全部放入 `build_cases()`，删除 `prepare_cases()` 和递归遍历。专项测试 25 passed；对照提交 `efd8a1d`，全部 46 个具名条件的单选、8 种系列组合及混合/重复选择共 57 组的完整配置和顺序一致，以上 168 行对照再次严格通过。本次未重跑全套核心测试。
 
 ### 2026-10-15 绘图使用更新
 
