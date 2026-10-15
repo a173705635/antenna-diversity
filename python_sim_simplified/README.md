@@ -38,7 +38,7 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。已有参数的单点验证或单因素扫描共用这一入口，不需要再复制接收流程。
 
-配置中的 `build_settings()` 设置种子、时长、统计窗口、条件选择、输出位置及是否弹图；`build_cases()` 返回具名条件，各条件持有独立的 `SimulationConfig`。目标真实方向使用 `cfg.signal.true_direction`，合并器假设方向使用 `cfg.signal.assumed_direction`，两者分别修改。天线组合使用 `cfg.phone.active_antennas`，第一根是 SINGLE 的参考通道；逐通道相位按天线名字典赋值。
+配置中的 `build_cases()` 一次完成条件选择、参考依赖和种子展开，返回已写入种子、时长的独立用例；`build_settings()` 只设置统计窗口、输出位置及是否弹图。运行器直接执行用例，保存端直接记录实际配置。目标真实方向使用 `cfg.signal.true_direction`，合并器假设方向使用 `cfg.signal.assumed_direction`，两者分别修改。天线组合使用 `cfg.phone.active_antennas`，第一根是 SINGLE 的参考通道；逐通道相位按天线名字典赋值。
 
 运行顺序为：用例配置 → 信号源与天线响应 → RF → ADC → DFE → 合并/捕获/跟踪 → 评估与绘图。公共链路在 `core/pipeline.py`，共用分量分析在 `core/evaluation.py`，实验条件、统计与图留在实验层。真实方向或增益改变时重新生成前端；仅名义导向或 DFE 后相位变化的条件共享物理前端。
 

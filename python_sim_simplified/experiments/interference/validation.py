@@ -47,19 +47,10 @@ def main() -> dict:
     summary = run_validation(settings, cases)
     # 当前批次完成后刷新本入口的专用输出，避免换扫描因素后残留旧图。
     reset_output(settings.output_dir)
-    selected_names = {item["name"] for item in summary["cases"]}
     actual_configs = {}
-    # case 中是基础配置；清单另存每个 seed 实际使用的时长和跟踪上限。
+    # 条件已包含实际执行的 seed、时长和跟踪上限，直接保存原配置。
     for case in cases:
-        if case.name not in selected_names:
-            continue
-        actual_configs[case.name] = {}
-        for seed in settings.seeds:
-            cfg = asdict(case.config)
-            cfg["random_seed"] = seed
-            cfg["signal"]["duration_ms"] = settings.duration_ms
-            cfg["tracking"]["max_epochs"] = settings.duration_ms
-            actual_configs[case.name][str(seed)] = cfg
+        actual_configs.setdefault(case.name, {})[str(case.config.random_seed)] = asdict(case.config)
     manifest = {
         # 清单用于追溯参数与代码版本，不是下一次仿真的配置输入。
         "settings": asdict(settings),

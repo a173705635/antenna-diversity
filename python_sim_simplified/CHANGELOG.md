@@ -2,6 +2,12 @@
 
 只记录实际改动、重要行为变化、最终验证和必要限制；实验细节见对应说明。以下路径除注明外均相对于 `python_sim_simplified/`，测试数字为各次修改当时的结果。
 
+## 2026-10-15 用例集中构造
+
+- `experiments/interference/validation_config.py` 统一完成选择、参考依赖及 seed/时长展开；运行器直接执行完整用例，保存入口直接记录实际配置，保留物理前端复用和评价口径。
+- `ValidationSettings` 仅保留统计与输出设置；`cases.base_config` 改为逐 seed 的 `receiver_configs`，清单 `actual_receiver_configs` 路径保留。两种选择都为空时不再隐式运行全部系列。
+- 完整回归 **167 passed、2 deselected**；168 行结果全部字段与完整核验报告和改前严格一致。条件与兼容性见[用例构造说明](docs/interference/README.md#2026-10-15-用例构造更新)。
+
 ## 2026-10-15 统一前端与按需分量评估
 
 - 沿用 FULLCHAIN 的公共链路，旧相位入口也改用 `core/pipeline.py`；三份分量分析统一到 `core/evaluation.py`，实际接收与分析复用 `core/dfe.py` 的线性处理，实验保留各自配置和评分口径。

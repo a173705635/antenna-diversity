@@ -4,7 +4,6 @@
 目标、各干扰及热噪声的分离真值仅用于接收后的固定权值评分。
 """
 
-from copy import deepcopy
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 import json
@@ -45,11 +44,8 @@ class ValidationCase:
 
 @dataclass
 class ValidationSettings:
-    """整个批次的公共运行设置；时长和去边单位为 ms，空选择表示所有候选条件。"""
-    seeds: tuple[int, ...] = (42, 43, 44)
-    duration_ms: int = 100
+    """整个批次的统计与输出设置；功率去边单位为 ms。"""
     power_trim_ms: int = 10
-    selected_cases: tuple[str, ...] = ()
     output_dir: Path = Path("results/interference/validation")
     show_plots: bool = True
 
@@ -239,7 +235,7 @@ def _ideal_noise_applicability(case: ValidationCase) -> str | None:
     return None
 
 
-def verify_validation(rows: list[dict], cases: dict[str, ValidationCase]) -> dict:
+def verify_validation(rows: list[dict], cases: dict[tuple[str, int], ValidationCase]) -> dict:
     """区分通过、失败、不适用；双方 C/N₀ 缺测时只核对状态，不伪造数值。"""
     checks = {}
     # 第一层：每行检查线性合并恒等式；满足理想前提才检查 N 路热噪声收益。
@@ -250,7 +246,7 @@ def verify_validation(rows: list[dict], cases: dict[str, ValidationCase]) -> dic
         checks[key] = {"status": "passed" if direct and quadratic else "failed",
                        "passed": direct and quadratic,
                        "reason": "fixed-weight direct and covariance identity"}
-        case = cases[row["case"]]
+        case = cases[row["case"], row["seed"]]
         if "ideal_noise" in case.checks and row["mode"] == "egc":
             reason = _ideal_noise_applicability(case)
             if reason is not None:
@@ -268,7 +264,7 @@ def verify_validation(rows: list[dict], cases: dict[str, ValidationCase]) -> dic
     indexed = {(row["case"], row["seed"], row["mode"]): row for row in rows}
     # 第二层：同 seed、同方法与无误差基准配对，避免噪声差异混入补偿误差。
     for row in rows:
-        case = cases[row["case"]]
+        case = cases[row["case"], row["seed"]]
         if "phase_pair" not in case.checks:
             continue
         reference = indexed[case.reference_case, row["seed"], row["mode"]]
@@ -317,46 +313,15 @@ def verify_validation(rows: list[dict], cases: dict[str, ValidationCase]) -> dic
 
 
 def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) -> dict:
-    """逐物理组运行，自动纳入参考条件；大数组只保留到本组比较结束。"""
-    by_name = {case.name: case for case in cases}
-    selected = set(settings.selected_cases or by_name)
-    pending = list(selected)
-    # 用户只选补偿条件时，递归带入其基准；随后仍按候选顺序整理输出。
-    while pending:
-        reference = by_name[pending.pop()].reference_case
-        if reference is not None and reference not in selected:
-            selected.add(reference)
-            pending.append(reference)
-    chosen = [case for case in cases if case.name in selected]
-    # 不同 seed 分组；同 seed 的方向真值/增益变化也分组，名义假设变化共享 IQ。
+    """直接执行已准备的条件；同物理条件复用前端，大数组只保留到本组结束。"""
+    # seed、真实方向和增益属于物理键；仅名义假设变化可共享 IQ。
     grouped = {}
-    for seed in settings.seeds:
-        for case in chosen:
-            cfg = deepcopy(case.config)
-            cfg.random_seed = seed
-            cfg.signal.duration_ms = settings.duration_ms
-            cfg.tracking.max_epochs = settings.duration_ms
-            key = _physical_key(cfg)
-            grouped.setdefault(key, []).append((case, cfg, seed))
+    for case in cases:
+        cfg = case.config
+        key = _physical_key(cfg)
+        grouped.setdefault(key, []).append((case, cfg, cfg.random_seed))
     rows = []
     for group_index, group in enumerate(grouped.values(), start=1):
-        group_by_name = {case.name: (case, cfg, seed) for case, cfg, seed in group}
-        ordered = []
-        visited = set()
-
-        def visit(item):
-            # 先运行参考，再运行依赖它的条件，配置列表顺序不影响闭环判据。
-            case = item[0]
-            if case.name in visited:
-                return
-            if case.reference_case in group_by_name:
-                visit(group_by_name[case.reference_case])
-            visited.add(case.name)
-            ordered.append(item)
-
-        for item in group:
-            visit(item)
-        group = ordered
         _, front_cfg, _ = group[0]
         print(f"Frontend {group_index}/{len(grouped)}: seed={front_cfg.random_seed}, "
               f"conditions={len(group)}", flush=True)
@@ -438,16 +403,21 @@ def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) ->
                     reference_data.pop(case.reference_case, None)
             rows.extend(case_rows)
         del frontend, components
-    return {"cases": [{"name": case.name, "reference_case": case.reference_case,
-                       "scene_label": case.scene_label, "series_label": case.series_label,
-                       "scan_label": case.scan_label, "scan_value": case.scan_value,
-                       "scan_unit": case.scan_unit, "base_config": asdict(case.config),
-                       "dfe_phase_deg": case.dfe_phase_deg,
-                       "dfe_estimated_phase_deg": case.dfe_estimated_phase_deg,
-                       "compensate_dfe_phase": case.compensate_dfe_phase,
-                       "checks": case.checks}
-                      for case in chosen],
-            "rows": rows, "verification": verify_validation(rows, by_name)}
+    case_summaries = {}
+    for case in cases:
+        summary = case_summaries.setdefault(case.name, {
+            "name": case.name, "reference_case": case.reference_case,
+            "scene_label": case.scene_label, "series_label": case.series_label,
+            "scan_label": case.scan_label, "scan_value": case.scan_value,
+            "scan_unit": case.scan_unit, "receiver_configs": {},
+            "dfe_phase_deg": case.dfe_phase_deg,
+            "dfe_estimated_phase_deg": case.dfe_estimated_phase_deg,
+            "compensate_dfe_phase": case.compensate_dfe_phase, "checks": case.checks,
+        })
+        summary["receiver_configs"][str(case.config.random_seed)] = asdict(case.config)
+    by_identity = {(case.name, case.config.random_seed): case for case in cases}
+    return {"cases": list(case_summaries.values()), "rows": rows,
+            "verification": verify_validation(rows, by_identity)}
 
 
 def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path]:

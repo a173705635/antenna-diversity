@@ -60,10 +60,11 @@ def _base_config(scene: str):
 
 
 def build_cases() -> list[ValidationCase]:
-    """构造候选条件，不执行仿真；实际运行哪些由 build_settings 选择。"""
+    """按选择构造并准备最终执行条件；每个 seed 拥有独立配置。"""
     cases = []
     for scene in SCENES:
         base = _base_config(scene)
+        by_series = {"phase": [], "direction": [], "gain": []}
         for phase in PHASE_SCAN_DEG:
             # 每个横轴点放三组：无误差基准、注入但不补偿、注入后准确逆补偿。
             # baseline 不注入 phase，只把相同基准画到各扫描点用于配对比较。
@@ -71,15 +72,15 @@ def build_cases() -> list[ValidationCase]:
             common = dict(scene_label=scene, scan_label="DFE channel phase",
                           scan_value=phase, scan_unit="deg")
             ideal_checks = ("ideal_noise",) if scene == "noise_only" else ()
-            cases.append(ValidationCase(
+            by_series["phase"].append(ValidationCase(
                 f"{prefix}/baseline", deepcopy(base), series_label="baseline",
                 checks=ideal_checks, **common,
             ))
-            cases.append(ValidationCase(
+            by_series["phase"].append(ValidationCase(
                 f"{prefix}/uncalibrated", deepcopy(base), series_label="uncalibrated",
                 dfe_phase_deg={PHASE_ANTENNA: phase}, **common,
             ))
-            cases.append(ValidationCase(
+            by_series["phase"].append(ValidationCase(
                 f"{prefix}/calibrated", deepcopy(base), series_label="calibrated",
                 # 这里故意令估计相位等于真实相位，验证补偿闭环，不是自动估相。
                 dfe_phase_deg={PHASE_ANTENNA: phase},
@@ -91,7 +92,7 @@ def build_cases() -> list[ValidationCase]:
             # 只改真实方向，不改名义导向，研究接收机方向假设不准的影响。
             cfg = deepcopy(base)
             cfg.signal.true_direction = Direction(azimuth, cfg.signal.true_direction.elevation_deg)
-            cases.append(ValidationCase(
+            by_series["direction"].append(ValidationCase(
                 f"{scene}/direction_{azimuth}", cfg, scene_label=scene,
                 series_label="true direction", scan_label="target true azimuth",
                 scan_value=azimuth, scan_unit="deg",
@@ -100,30 +101,55 @@ def build_cases() -> list[ValidationCase]:
             # dB 增益作用于阵元响应，6.02 dB 约为电压两倍；名义增益保持不变。
             cfg = deepcopy(base)
             cfg.phone.antenna_model.true_state.amplitude_error_db[ELEMENT_GAIN_ANTENNA] = gain_db
-            cases.append(ValidationCase(
+            by_series["gain"].append(ValidationCase(
                 f"{scene}/gain_{gain_db}", cfg, scene_label=scene,
                 series_label="true element gain", scan_label=f"{ELEMENT_GAIN_ANTENNA} gain",
                 scan_value=gain_db, scan_unit="dB",
             ))
-    return cases
+        for series, candidates in by_series.items():
+            if SELECTED_CASES or series in SELECTED_SERIES:
+                cases.extend(candidates)
+    return prepare_cases(cases, seeds=SEEDS, duration_ms=DURATION_MS,
+                         selected_cases=SELECTED_CASES)
+
+
+def prepare_cases(
+    candidates: list[ValidationCase], *, seeds: tuple[int, ...], duration_ms: int,
+    selected_cases: tuple[str, ...] = (),
+) -> list[ValidationCase]:
+    """选择条件及其参考，并按给定 seed 顺序展开为可直接执行的配置。"""
+    by_name = {case.name: case for case in candidates}
+    # 显式名字必须对应候选；直接索引也保留拼写错误的即时反馈。
+    selected = {by_name[name].name for name in selected_cases} if selected_cases else set(by_name)
+
+    ordered = []
+    visited = set()
+
+    def visit(case: ValidationCase) -> None:
+        if case.name in visited:
+            return
+        if case.reference_case is not None:
+            visit(by_name[case.reference_case])
+        visited.add(case.name)
+        ordered.append(case)
+
+    for candidate in candidates:
+        if candidate.name in selected:
+            visit(candidate)
+
+    prepared = []
+    for seed in seeds:
+        for candidate in ordered:
+            case = deepcopy(candidate)
+            case.config.random_seed = seed
+            case.config.signal.duration_ms = duration_ms
+            case.config.tracking.max_epochs = duration_ms
+            prepared.append(case)
+    return prepared
 
 
 def build_settings() -> ValidationSettings:
-    """生成运行控制；显式 SELECTED_CASES 优先于按系列生成的条件列表。"""
-    selected = []
-    for scene in SCENES:
-        if "phase" in SELECTED_SERIES:
-            for phase in PHASE_SCAN_DEG:
-                selected.extend(f"{scene}/phase_{phase}/{series}"
-                                for series in ("baseline", "uncalibrated", "calibrated"))
-        if "direction" in SELECTED_SERIES:
-            selected.extend(f"{scene}/direction_{azimuth}"
-                            for azimuth in TARGET_AZIMUTH_SCAN_DEG)
-        if "gain" in SELECTED_SERIES:
-            selected.extend(f"{scene}/gain_{gain_db}"
-                            for gain_db in ELEMENT_GAIN_SCAN_DB)
+    """生成仅用于统计、保存与绘图的批次设置。"""
     return ValidationSettings(
-        seeds=SEEDS, duration_ms=DURATION_MS, power_trim_ms=POWER_TRIM_MS,
-        selected_cases=SELECTED_CASES or tuple(selected),
-        output_dir=OUTPUT_DIR, show_plots=SHOW_PLOTS,
+        power_trim_ms=POWER_TRIM_MS, output_dir=OUTPUT_DIR, show_plots=SHOW_PLOTS,
     )
