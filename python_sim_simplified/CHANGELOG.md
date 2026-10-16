@@ -2,6 +2,12 @@
 
 只记录实际改动、重要行为变化、最终验证和必要限制；实验细节见对应说明。以下路径除注明外均相对于 `python_sim_simplified/`，测试数字为各次修改当时的结果。
 
+## 2026-10-16 精简相位中心阅读汇总
+
+- PCO `case_summary.csv` 单种子保留15列，多种子增加两项SNR差值的95%置信区间，共19列；条件说明按实际保存的各天线真实/估计XYZ偏移生成，中文CSV使用UTF-8 BOM。保留残余位置/相位、理论损失、SNR差值、输出相位、捕获、跟踪和核验状态；完整诊断与数值仍在 `summary.json` 和逐次数据中。
+- 已将 `results/interference/phase_center_noise_only_smoke/case_summary.csv` 的48行从47列重新导出为15列；672个保留字段逐项一致，其余5个结果文件SHA256不变，原manifest仍记录原实验来源。本轮仅改展示，未重跑正式仿真，不改变原结论。读表说明见 [抗干扰文档](docs/interference/README.md#运行与结果表)。
+- 验证：`python -B -m pytest -p no:cacheprovider -q tests/test_phase_center_validation.py`：7 passed；`python -B -m pytest -p no:cacheprovider -q`：231 passed、2 deselected（232.60 s），使用单线程BLAS及Agg绘图后端。覆盖单/多种子列、条件区分、缺测保留及完整数据不变。
+
 ## 2026-10-16 精简互耦阅读汇总
 
 - 互耦`case_summary.csv`固定保留17列条件、对照和性能指标，移出逐天线幅相/功率、合并响应及捕获诊断列；`summary.csv`和`summary.json`继续保留明细，已有历史结果不重写。README补充读表说明。

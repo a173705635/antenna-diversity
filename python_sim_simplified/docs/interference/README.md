@@ -54,9 +54,13 @@ $env:MPLBACKEND='Agg'
 python -u -B -c 'from experiments.interference import validation_config as config; from experiments.interference import validation; config.SEEDS=(42,); config.EXPERIMENT_TYPE="phase_center_offset"; config.INTERFERENCE_RESULTS_DIR=config.INTERFERENCE_RESULTS_DIR/"smoke"; validation.main()'
 ```
 
-优先看 `case_summary.csv`：每行一个PC条件及方法，包含各天线真实/名义xyz偏移mm、残余视线投影mm、相对相位deg、目标响应幅度dB及相位deg、捕获峰值比和跟踪C/N₀。`snr_delta_vs_pc001_mean_db` 是相对同算法无偏移基准的变化；`snr_delta_vs_accurate_calibration_mean_db` 是PC006/010/011/012相对同真实位置PC009的变化；`snr_gain_vs_same_condition_single_mean_db` 是相对同工况SINGLE的分集收益。负差值表示变差；`ideal_strict_egc_loss_db` 则用正值表示理论损失。参考用例名称单独列出，未设置的对照留空。
+优先看 `case_summary.csv`：每行一个PC条件及方法，单seed主表保留15列：case/mode/seeds、条件说明、残余相对投影mm及相位deg、严格EGC理论损失、相对PC001的SNR变化、相对同工况SINGLE的SNR收益、输出目标相位、捕获峰峰比和正确次数、TRK C/N₀和有效次数、核验状态。`condition_xyz_mm` 合并显示每根天线的真实/估计XYZ偏移（单位mm，说明文字舍入到0.001 mm），不是残余误差，能区分无偏移与共同偏移。
 
-CI为逐seed配对差值均值的Student-t 95%区间，只有一个seed时留空，不伪装成零不确定度。`summary.csv`/`summary.json`保留逐seed指标，`verification.json`保存数值核验，`manifest.json`保存实际参数及源码哈希。SNR使用线性目标/热噪声分量独立复算，TRK C/N₀为真实接收链估计，两者不混用；默认不输出图片。
+`snr_delta_vs_pc001_mean_db` 的对照为同算法无偏移基准，`snr_gain_vs_same_condition_single_mean_db` 的对照为同PC条件的SINGLE。负差值表示变差；`ideal_strict_egc_loss_db` 用正值表示理论损失，仅严格EGC有值；`true_response_phase_deg_mean` 为输出目标相位，不是通道间相位差；`status` 为数值核验状态，不代表性能达标。绝对SNR、相对准确标定的差值、参考名称、完整XYZ坐标、逐天线投影及复算误差仍在summary.json，不再铺满主表。
+
+CI为逐seed配对差值均值的Student-t 95%区间。全为单seed时主表隐藏CI列，有多seed时增加上述两类SNR指标的上下界4列，共19列；混合批次中的单seed行仍留空。`summary.csv`/`summary.json`保留逐seed指标及完整统计，`verification.json`保存数值核验，`manifest.json`保存实际参数及源码哈希。SNR使用线性目标/热噪声分量独立复算，TRK C/N₀为真实接收链估计，两者不混用；默认不输出图片。CSV使用UTF-8 BOM以便Excel识别中文，程序读取可用utf-8-sig。
+
+2026-10-16已用现存JSON重新导出 `results/interference/phase_center_noise_only_smoke/case_summary.csv`，48行从47列缩到15列，没有重新运行研究仿真。其余5份原始结果/核验/清单文件哈希保持不变，旧manifest仍描述原仿真代码，不冒充本次导出版本；完整字段可从summary.json恢复。专项覆盖正常保存、共同偏移条件区分、多seed区间、缺测和不修改完整统计。
 
 ### 本轮实际结果
 

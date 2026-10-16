@@ -42,6 +42,40 @@ def _write_json(output_path: Path, content: object) -> None:
                                allow_nan=False), encoding="utf-8")
 
 
+def phase_center_summary_records(cases: list[dict]) -> list[dict]:
+    """只生成PCO主表视图，不修改完整统计；可用于重导出现存JSON结果。"""
+    columns = (
+        "residual_relative_los_mm", "residual_relative_phase_deg",
+        "ideal_strict_egc_loss_db", "snr_delta_vs_pc001_mean_db",
+        "snr_gain_vs_same_condition_single_mean_db", "true_response_phase_deg_mean",
+        "acquisition_peak_ratio_mean", "acquisition_correct_count",
+        "tracking_cn0_mean_db_hz", "tracking_cn0_valid_seed_count", "status",
+    )
+    # 单seed没有可估计的均值置信区间；混合批次仍统一保留列，单seed行留空。
+    if any(case["seeds"] > 1 for case in cases):
+        columns += tuple(f"{metric}_ci95_{bound}_db"
+                         for metric in ("snr_delta_vs_pc001", "snr_gain_vs_same_condition_single")
+                         for bound in ("lower", "upper"))
+    records = []
+    for case in cases:
+        descriptions = []
+        for antenna in case["antennas"].split(","):
+            vectors = []
+            for state, label in (("true", "真实"), ("assumed", "估计")):
+                # 条件从已保存的实际坐标读取，不按PC编号写死；仅说明文字舍入。
+                values = [round(case[f"{antenna}_{state}_offset_xyz_mm_{axis}_mm"], 3)
+                          for axis in "xyz"]
+                xyz = ",".join(f"{value + 0.0:g}" for value in values)
+                vectors.append(f"{label}({xyz})")
+            descriptions.append(f"{antenna}: " + "/".join(vectors))
+        records.append({
+            "case": case["case"], "mode": case["mode"], "seeds": case["seeds"],
+            "condition_xyz_mm": "; ".join(descriptions),
+            **{key: case[key] for key in columns},
+        })
+    return records
+
+
 def save_results(settings: ValidationSettings, summary: dict) -> None:
     """刷新本批次输出，保存执行配置、结果行和验收证据供追溯。"""
     # 仿真完成后才刷新本入口的专用输出，避免换扫描因素后残留旧图。
@@ -139,15 +173,10 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
             writer.writeheader()
             writer.writerows(model_records)
     if "phase_center" in summary:
-        # 逐PC/方法一行；逐seed原始行仍在summary.csv与summary.json。
-        omitted_columns = {
-            "tracking_success_count", "tracking_cn0_missing_count",
-            "max_manifold_abs_error", "max_weight_relative_error", "max_snr_theory_error_db",
-        }
-        records = [{key: value for key, value in case.items() if key not in omitted_columns}
-                   for case in summary["phase_center"]["cases"].values()]
+        # 日常只看精简主表；完整统计、坐标和核验信息仍保留在JSON。
+        records = phase_center_summary_records(list(summary["phase_center"]["cases"].values()))
         with (settings.output_dir / "case_summary.csv").open(
-            "w", newline="", encoding="utf-8"
+            "w", newline="", encoding="utf-8-sig"
         ) as stream:
             writer = csv.DictWriter(stream, fieldnames=list(records[0]))
             writer.writeheader()
