@@ -220,6 +220,8 @@ def plot_summary(rows, output_dir, phases=PHASE_ERRORS_DEG):
                 for mode in modes:
                     axis.plot(phases, series(case, mode, key),
                               marker='o', color=colors[mode], label=mode)
+                if key in ('thermal_oracle_prompt_cn0_db_hz', 'tracking_cn0_late_median_db_hz'):
+                    axis.ticklabel_format(axis='y', style='plain', useOffset=False)
                 if key == 'acquisition_metric':
                     axis.axhline(AcquisitionConfig().threshold, color='black',
                                  linestyle=':', label='acquisition threshold')

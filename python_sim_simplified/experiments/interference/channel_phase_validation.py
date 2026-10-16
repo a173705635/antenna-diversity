@@ -507,6 +507,7 @@ def plot_summary(rows, output_dir, phases):
                                   'Where available, calibrated matches baseline',
                                   fontsize=7, transform=axis.transAxes)
                         if metric == 'tracking_cn0_late_median_db_hz':
+                            axis.ticklabel_format(axis='y', style='plain', useOffset=False)
                             axis.text(0.02, 0.09,
                                       'Gaps / no curve = no finite tracking estimate',
                                       fontsize=7, transform=axis.transAxes)

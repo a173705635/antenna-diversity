@@ -279,6 +279,8 @@ def plot_cn0(results):
         xlabel="Epoch (ms)",
         ylabel="C/N0 (dB-Hz)",
     )
+    # C/N₀直接显示实际数值，避免倍率和偏移量影响读数。
+    axis.ticklabel_format(axis="y", style="plain", useOffset=False)
     axis.grid(True, alpha=0.3)
     if axis.lines:
         axis.legend()

@@ -915,6 +915,7 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                                 axis.axhline(threshold, color="#888888", linestyle="-.",
                                              label=f"threshold {threshold:g}")
                         if metric == "tracking_cn0_late_median_db_hz":
+                            axis.ticklabel_format(axis="y", style="plain", useOffset=False)
                             measured = [row[metric] for row in factor_rows
                                         if row["scene"] == scene and row["mode"] == mode
                                         and row[metric] is not None]
