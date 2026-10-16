@@ -44,7 +44,12 @@ def save_results_figures(results, output_dir):
 
     figure_paths = {}
     for name, figure in figures.items():
-        figure_path = output_dir / f"{name}.png"
+        # 返回键沿用绘图接口；落盘名称补上实验和指标，便于单独查看图片。
+        metric_name = {
+            "tracking": "tracking_loop_diagnostics",
+            "cn0": "tracking_cn0_db_hz",
+        }.get(name, name)
+        figure_path = output_dir / f"full_chain__{metric_name}.png"
         figure.savefig(figure_path, dpi=150)
         figure_paths[name] = figure_path.resolve()
         if not results["config"].plot.show_flag:

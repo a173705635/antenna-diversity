@@ -517,7 +517,12 @@ def plot_summary(rows, output_dir, phases):
                     axis.grid(alpha=0.3)
                     if not (metric == 'cw_suppression_db' and scene == 'noise_only'):
                         axis.legend(fontsize=7, ncol=2)
-        figure_path = output_dir / f'{filename}.png'
+        metric_name = {
+            'thermal_gain': 'thermal_snr_ratio',
+            'target_and_cw': 'target_power_retention_and_cw_suppression',
+            'receiver': 'acquisition_peak_ratio_and_tracking_cn0',
+        }[filename]
+        figure_path = output_dir / f'channel_phase_validation__dfe_phase_deg__{metric_name}.png'
         # 先保存，再按设置显示；Agg 是无 GUI 后端，不调用阻塞式弹窗。
         fig.savefig(figure_path, dpi=150)
         figure_paths.append(figure_path)

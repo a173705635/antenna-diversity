@@ -227,7 +227,12 @@ def plot_summary(rows, output_dir, phases=PHASE_ERRORS_DEG):
                          xlabel='Injected target phase (deg)', ylabel=ylabel)
                 axis.grid(alpha=0.3)
                 axis.legend(fontsize=8)
-        figure_path = output_dir / f'{filename}.png'
+        metric_name = {
+            'acquisition_metric': 'acquisition_peak_ratio',
+            'target_and_interference': 'target_gain_and_cw_wideband_suppression',
+            'cn0_oracle_receiver': 'thermal_oracle_and_tracking_cn0',
+        }[filename]
+        figure_path = output_dir / f'direct_response_boundary__target_phase_deg__{metric_name}.png'
         fig.savefig(figure_path, dpi=150)
         figure_paths.append(figure_path)
         if not SHOW_PLOTS_FLAG:

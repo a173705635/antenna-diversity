@@ -15,7 +15,8 @@ from experiments.interference.validation_support import ValidationCase, Validati
 
 
 # 常用编辑区：天线顺序第一根是 SINGLE 参考；可用任意两至四根物理天线。
-BATCH = "phase_center_noise_only"  # 亦可选 "mutual_coupling"、"legacy"、"pattern_gain_first44"。
+# 选择实验类型后，输出固定写入 results/interference/<实验类型>/。
+EXPERIMENT_TYPE = "phase_center_offset"  # 可选 "antenna_gain"、"mutual_coupling"、"phase_direction_gain"。
 ANTENNAS = ("TL", "BR")
 MODES = ("single", "egc", "mvdr", "blind_null")
 SEEDS = tuple(range(42, 43))
@@ -23,22 +24,18 @@ SEEDS = tuple(range(42, 43))
 DURATION_MS = 100
 # 功率统计首尾各舍弃此时长，避开滤波瞬态；不裁掉送入捕获跟踪的数据。
 EVALUATION_EDGE_TRIM_MS = 10
-GENERATE_PLOTS_FLAG = True  # 旧批次生成图片开关；互耦批次在 build_settings 中单独关闭。
+GENERATE_PLOTS_FLAG = True  # 增益、相位/方向/增益实验的图片开关。
 SHOW_PLOTS_FLAG = True  # 仅在生成图片时决定是否同时弹窗。
-OUTPUT_DIR = INTERFERENCE_RESULTS_DIR / "pattern_gain_first44"
 WORKERS = 4  # 首批 TC 互相独立；Windows 上按进程并行、逐条记录进度。
-# 互耦批次独立于上面的旧批次编辑区；不改旧 SEEDS/图片/路径设置。
+# 互耦实验独立使用以下种子、时长和并行数。
 COUPLING_SEEDS = tuple(range(42, 72))
 COUPLING_DURATION_MS = 100
 COUPLING_WORKERS = 4
-COUPLING_OUTPUT_DIR = INTERFERENCE_RESULTS_DIR / "mutual_coupling"
-# 每次成功生成数据后刷新此目录；需要保留不同实验时修改目录名。
 
-# 固定相位中心偏移：单独控制种子/时长/输出，默认不弹图。
+# 固定相位中心偏移：单独控制种子、时长和并行数，默认不弹图。
 PHASE_CENTER_SEEDS = tuple(range(42, 72))
 PHASE_CENTER_DURATION_MS = 100
 PHASE_CENTER_WORKERS = 4
-PHASE_CENTER_OUTPUT_DIR = INTERFERENCE_RESULTS_DIR / "phase_center_noise_only"
 
 # 单因素扫描；PHASE_ANTENNA 按物理名字定位，不使用固定行号。
 PHASE_ANTENNA = "BR"
@@ -251,8 +248,8 @@ def _phase_center_cases() -> list[ValidationCase]:
     return cases
 
 
-def _legacy_cases() -> list[ValidationCase]:
-    """按具名条件或系列构造 legacy 用例，并展开各 seed 的独立配置。"""
+def _phase_direction_gain_cases() -> list[ValidationCase]:
+    """按具名条件或系列构造相位、方向和增益用例，并展开各 seed 的独立配置。"""
     cases = []
     known_case_names = set()
     selected_case_names = set(SELECTED_CASES)
@@ -337,34 +334,35 @@ def _legacy_cases() -> list[ValidationCase]:
 
 
 def build_cases() -> list[ValidationCase]:
-    """按批次选择对应的用例构造函数。"""
-    if BATCH == "pattern_gain_first44":
+    """按实验类型选择对应的用例构造函数。"""
+    if EXPERIMENT_TYPE == "antenna_gain":
         return _pattern_gain_cases()
-    if BATCH == "mutual_coupling":
+    if EXPERIMENT_TYPE == "mutual_coupling":
         return _coupling_cases()
-    if BATCH == "phase_center_noise_only":
+    if EXPERIMENT_TYPE == "phase_center_offset":
         return _phase_center_cases()
-    if BATCH == "legacy":
-        return _legacy_cases()
-    raise ValueError(f"Unknown batch: {BATCH}")
+    if EXPERIMENT_TYPE == "phase_direction_gain":
+        return _phase_direction_gain_cases()
+    raise ValueError(f"Unknown experiment type: {EXPERIMENT_TYPE}")
 
 
 def build_settings() -> ValidationSettings:
-    """生成仅用于统计、保存与绘图的批次设置。"""
-    if BATCH == "mutual_coupling":
+    """生成统计、保存与绘图设置；输出目录随实验类型自动切换。"""
+    output_dir = INTERFERENCE_RESULTS_DIR / EXPERIMENT_TYPE
+    if EXPERIMENT_TYPE == "mutual_coupling":
         return ValidationSettings(
             evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS,
-            output_dir=COUPLING_OUTPUT_DIR, show_plots_flag=False,
+            output_dir=output_dir, show_plots_flag=False,
             workers=COUPLING_WORKERS, generate_plots_flag=False,
         )
-    if BATCH == "phase_center_noise_only":
+    if EXPERIMENT_TYPE == "phase_center_offset":
         return ValidationSettings(
             evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS,
-            output_dir=PHASE_CENTER_OUTPUT_DIR, show_plots_flag=False,
+            output_dir=output_dir, show_plots_flag=False,
             workers=PHASE_CENTER_WORKERS, generate_plots_flag=False,
         )
     return ValidationSettings(
-        evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS, output_dir=OUTPUT_DIR, show_plots_flag=SHOW_PLOTS_FLAG,
-        workers=WORKERS if BATCH == "pattern_gain_first44" else 1,
+        evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS, output_dir=output_dir, show_plots_flag=SHOW_PLOTS_FLAG,
+        workers=WORKERS if EXPERIMENT_TYPE == "antenna_gain" else 1,
         generate_plots_flag=GENERATE_PLOTS_FLAG,
     )

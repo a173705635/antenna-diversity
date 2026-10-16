@@ -2,6 +2,28 @@
 
 只记录实际改动、重要行为变化、最终验证和必要限制；实验细节见对应说明。以下路径除注明外均相对于 `python_sim_simplified/`，测试数字为各次修改当时的结果。
 
+## 2026-10-16 精简用例汇总表
+
+- 三类 `case_summary.csv` 删除冗余/诊断列：增益保留gain、删除attenuation及可推导的gain_error；统一删除跟踪流程完成数、C/N₀缺测数和详细复算误差，互耦另删固定level与捕获容差列。保留条件、对照、性能、有效种子数、捕获统计及核验状态。
+- 完整诊断仍在 `summary.json`、逐次数据和核验文件中；3项输出专项通过，验证精简CSV与完整JSON同时正确。已有结果文件未重写，后续保存生效。
+
+## 2026-10-16 修复多毫秒相干捕获的重复真峰判定
+
+- L1多毫秒相干仍使用完整块FFT相关，但码相位搜索及主峰邻域排除限定到1 ms主码周期，避免重复真峰令峰峰比约为1；捕获总览图横轴同步按搜索数组宽度显示。未改积分配置、门限或跟踪算法；L5及1 ms路径保持原行为。
+- 新增11项本地回归，修复前8失败/3通过，修复后 `python -B -m pytest -p no:cacheprovider -q tests/test_acquisition_period.py tests/test_receiver.py tests/test_l5.py`：21 passed；完整 `python -B -m pytest -p no:cacheprovider -q`：226 passed、2 deselected（231.11 s）。同输入1 ms所有返回字段与HEAD旧实现完全一致，4×5复现峰峰比由1恢复为192.143。
+- 实际40 ms、seed 42、TL/BR、−128.5 dBm、4×5链路无干扰时四算法均捕获跟踪；默认单CW下MVDR/Blind Null成功，峰峰比23.314/23.051，SINGLE/EGC仍失败。内存验证不覆盖旧结果；不承诺解决长相干的频率残差、数据位翻转损失。[详细条件与结论](docs/interference/README.md#多毫秒相干捕获修复2026-10-16)。
+
+## 2026-10-16 图片文件名标明实验与指标
+
+- 通用验证图采用“实验__扫描因素及单位__指标__算法.png”，替换 `factor_1` 等序号；干扰抑制图使用实际干扰源名。独立实验图增加实验前缀并明确指标，归一后同名标签使用稳定摘要区分。
+- 只改变新保存的图片名称，绘图内容、返回键和数据字段不变；历史图片不迁移。绘图专项 20 项通过，另补测独立 FULLCHAIN 入口、保存键及标签冲突 3 项通过；未重跑正式实验批次。
+
+## 2026-10-16 按实验类型统一输出目录
+
+- `BATCH` 改为 `EXPERIMENT_TYPE`，四种选项为 `antenna_gain`、`mutual_coupling`、`phase_center_offset`、`phase_direction_gain`；原 legacy 构造函数同步改名。各实验参数和计算规则不变。
+- 删除三个独立输出目录配置，`build_settings()` 按当前实验类型生成 `results/interference/<EXPERIMENT_TYPE>/`；同进程切换也会更新路径。旧选择器和路径覆盖方式需迁移，历史结果不移动；README 与复现命令已同步。
+- 分发、目录切换、独立参数及四类实验相关 65 项测试通过，未重跑正式实验批次。
+
 ## 2026-10-16 统一用例批次分发
 
 - 将 legacy 构造逻辑原样提取为 `_legacy_cases()`，`build_cases()` 仅按四种批次分发；未知批次显式报错，不再落入 legacy。选择、基准配对、扫描和种子展开不变。

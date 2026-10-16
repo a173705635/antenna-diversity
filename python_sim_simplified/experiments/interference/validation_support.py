@@ -6,8 +6,11 @@
 
 from dataclasses import asdict, dataclass, field
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from collections import Counter
+import hashlib
 import json
 from pathlib import Path
+import re
 
 import numpy as np
 from scipy.stats import t as student_t
@@ -748,6 +751,21 @@ def gain_plot_rows(rows: list[dict]) -> list[dict]:
     return [row for row in prepared if row["scan_label"] != "TL / BR gain"] + swap_rows
 
 
+def _filename_label(value: str) -> str:
+    """保留可读标签，替换斜杠等不适合文件名的字符。"""
+    return re.sub(r"[^\w]+", "_", value.casefold()).strip("_")
+
+
+def _distinct_plot_names(base_names: dict) -> dict:
+    """标签归一后同名时，仅给冲突项追加原始标签的稳定摘要。"""
+    counts = Counter(base_names.values())
+    return {
+        label: (base if counts[base] == 1 else
+                f"{base}_{hashlib.sha256(str(label).encode('utf-8')).hexdigest()[:8]}")
+        for label, base in base_names.items()
+    }
+
+
 def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path]:
     """从结果行绘图并返回 PNG 路径；不重新仿真，也不修改原始结果。
 
@@ -757,13 +775,32 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
     import matplotlib.pyplot as plt
 
     # 只转换具备逐天线增益记录的原子批次；旧相位/方向扫描保持原横轴。
-    gain_batch_flag = all(
+    gain_batch_flag = bool(rows) and all(
         row["case"].startswith("TC-") and "input_gain_db_by_antenna" in row
         for row in rows
     )
     if gain_batch_flag:
+        experiment_name = "antenna_gain"
+    elif rows and all(row["case"].startswith("MC-") for row in rows):
+        experiment_name = "mutual_coupling"
+    elif rows and all(row["case"].startswith("PC-") for row in rows):
+        experiment_name = "phase_center_offset"
+    elif rows and all(any(marker in row["case"] for marker in
+                          ("/phase_", "/direction_", "/gain_")) for row in rows):
+        experiment_name = "phase_direction_gain"
+    else:
+        experiment_name = "validation"
+    if gain_batch_flag:
         rows = gain_plot_rows(rows)
     factors = list(dict.fromkeys((row["scan_label"], row["scan_unit"]) for row in rows))
+    factor_filename_parts = {}
+    for factor_label, factor_unit in factors:
+        scan_label_name = _filename_label(factor_label)
+        scan_unit_name = _filename_label(factor_unit)
+        if scan_unit_name and not scan_label_name.endswith(f"_{scan_unit_name}"):
+            scan_label_name += f"_{scan_unit_name}"
+        factor_filename_parts[(factor_label, factor_unit)] = scan_label_name
+    factor_names = _distinct_plot_names(factor_filename_parts)
     figure_paths = []
     for factor_label, factor_unit in factors:
         factor_rows = [row for row in rows
@@ -772,14 +809,15 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
             source for row in factor_rows for source in row["interferer_suppression_db"]
         ))
         figures = [
-            ("thermal_gain", (("thermal_snr_gain_db", "Thermal SNR gain vs SINGLE (dB)"),)),
-            ("target_gain", (("target_gain_db", "Target power gain vs SINGLE (dB)"),)),
-            ("sinr", (("linear_in_band_sinr_db", "C / (I + N) (dB)"),)),
-            ("acquisition", (("acquisition_metric", "Acquisition peak ratio"),)),
-            ("cn0", (("tracking_cn0_late_median_db_hz", "Late tracking C/N0 (dB-Hz)"),)),
+            ("thermal_snr_gain", (("thermal_snr_gain_db", "Thermal SNR gain vs SINGLE (dB)"),)),
+            ("target_power_gain", (("target_gain_db", "Target power gain vs SINGLE (dB)"),)),
+            ("linear_in_band_sinr", (("linear_in_band_sinr_db", "C / (I + N) (dB)"),)),
+            ("acquisition_peak_ratio", (("acquisition_metric", "Acquisition peak ratio"),)),
+            ("tracking_cn0_late_median", (("tracking_cn0_late_median_db_hz", "Late tracking C/N0 (dB-Hz)"),)),
         ]
         # 各干扰源独立成图，避免长标签和过多行把目标/接收指标挤在一起。
-        figures.extend((f"suppression_{index}", ((f"suppression:{source}",
+        source_names = _distinct_plot_names({source: _filename_label(source) for source in sources})
+        figures.extend((f"interferer_suppression_{source_names[source]}", ((f"suppression:{source}",
                          f"Source {index}: suppression (dB)"),))
                        for index, source in enumerate(sources))
         scenes = list(dict.fromkeys(row["scene"] for row in factor_rows))
@@ -790,7 +828,7 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                             for filename, metrics in figures for mode in modes]
         for filename, metrics, figure_mode in separate_figures:
             figure_scenes = scenes
-            if filename.startswith("suppression_"):
+            if filename.startswith("interferer_suppression_"):
                 source = metrics[0][0].removeprefix("suppression:")
                 figure_scenes = [scene for scene in scenes if any(
                     row["scene"] == scene and source in row["interferer_suppression_db"]
@@ -798,7 +836,7 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
             fig, axes = plt.subplots(1, len(figure_scenes),
                                      figsize=(6 * len(figure_scenes), 4.8),
                                      squeeze=False, constrained_layout=True)
-            if filename.startswith("suppression_"):
+            if filename.startswith("interferer_suppression_"):
                 fig.suptitle(source, fontsize=11)
             for metric_index, (metric, ylabel) in enumerate(metrics):
                 for mode_index, mode in enumerate([figure_mode]):
@@ -889,9 +927,10 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                                 axis.set_yticks([])
                         axis.grid(alpha=0.3)
                         axis.legend(fontsize=9, loc="upper left", bbox_to_anchor=(1.01, 1))
-            # 序号避免自定义标签中的斜杠或不同单位导致路径/文件名冲突。
-            suffix = "" if len(factors) == 1 else f"_factor_{factors.index((factor_label, factor_unit)) + 1}"
-            figure_path = settings.output_dir / f"{filename}_{figure_mode}{suffix}.png"
+            figure_path = settings.output_dir / (
+                f"{experiment_name}__{factor_names[(factor_label, factor_unit)]}"
+                f"__{filename}__{_filename_label(figure_mode)}.png"
+            )
             fig.savefig(figure_path, dpi=150)
             figure_paths.append(figure_path)
             if not settings.show_plots_flag:

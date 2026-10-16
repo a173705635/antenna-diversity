@@ -34,7 +34,10 @@ def acquire(
             raise ValueError('L5 acquisition needs one extra millisecond')
         code_spectrum = np.conj(np.fft.fft(np.pad(local_code, (0, coherent_samples))))
         n = np.arange(2*coherent_samples)
-    search_power = np.zeros((len(cfg.doppler_bins_hz), coherent_samples))
+    # 主码周期为1 ms；多毫秒相干积分仍在完整块上进行FFT相关。
+    # 只保留一个周期的码延迟，避免把重复的真实相关峰误判为次峰。
+    code_search_samples = samples_per_ms
+    search_power = np.zeros((len(cfg.doppler_bins_hz), code_search_samples))
 
     for row, doppler_hz in enumerate(cfg.doppler_bins_hz):
         wipeoff = np.exp(-1j * 2.0 * np.pi * doppler_hz * n / fs_hz)
@@ -44,16 +47,16 @@ def acquire(
             correlation = np.fft.ifft(
                 np.fft.fft(block * wipeoff) * code_spectrum
             )
-            search_power[row] += np.abs(correlation[:coherent_samples]) ** 2
+            search_power[row] += np.abs(correlation[:code_search_samples]) ** 2
 
     best_row, best_code = np.unravel_index(
         np.argmax(search_power), search_power.shape
     )
     peak = search_power[best_row, best_code]
     row_without_peak = search_power[best_row].copy()
-    indices = np.arange(coherent_samples)
+    indices = np.arange(code_search_samples)
     distance = np.abs(indices - best_code)
-    circular_distance = np.minimum(distance, coherent_samples - distance)
+    circular_distance = np.minimum(distance, code_search_samples - distance)
     exclusion_samples = max(
         1, round(cfg.exclusion_chips * fs_hz / code_rate_hz)
     )

@@ -463,7 +463,12 @@ def plot_summary(groups, output_dir):
                 axis.set_ylabel(ylabel)
                 axis.grid(alpha=0.25)
                 axis.legend(ncol=2, fontsize=8)
-        figure_path = output_dir / f'{filename}.png'
+        metric_name = {
+            'interference_suppression': 'cw_and_wideband_suppression',
+            'target_noise_gain': 'target_and_thermal_output_gain',
+            'acquisition_metric': 'acquisition_peak_ratio',
+        }.get(filename, filename)
+        figure_path = output_dir / f'antenna_ablation__{metric_name}.png'
         fig.savefig(figure_path, dpi=150)
         figure_paths.append(figure_path)
         if not SHOW_PLOTS_FLAG:
@@ -490,7 +495,7 @@ def plot_summary(groups, output_dir):
         axis.set_xticks(range(len(CASES)), CASES, rotation=55, ha='right')
         axis.set_title(context + ' — correct acquisition count')
     fig.colorbar(image, ax=axes.ravel().tolist(), label='Correct acquisition rate')
-    figure_path = output_dir / 'correct_acquisition_rate.png'
+    figure_path = output_dir / 'antenna_ablation__correct_acquisition_rate.png'
     fig.savefig(figure_path, dpi=150)
     figure_paths.append(figure_path)
     if not SHOW_PLOTS_FLAG:

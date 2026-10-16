@@ -23,7 +23,7 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 | 实验 | 命令 | 固定输出 |
 |---|---|---|
-| 通用条件验证：当前默认无干扰相位中心偏移（16条件×3算法×30 seed） | `python -m experiments.interference.validation` | `results/interference/phase_center_noise_only/` |
+| 通用条件验证：当前默认无干扰相位中心偏移（16条件×3算法×30 seed） | `python -m experiments.interference.validation` | `results/interference/phase_center_offset/` |
 | 完整接收链及绘图 | `python -m experiments.interference.full_chain` | `results/interference/full_chain/` |
 | 噪声模型核验、天线配对消融与独立功率预算 | `python -m experiments.interference.antenna_ablation` | `results/interference/antenna_ablation/` |
 | 目标/CW/宽带响应直接赋值，已知/未知目标相位扫描 | `python -m experiments.interference.direct_response_boundary` | `results/interference/direct_response_boundary/` |
@@ -38,9 +38,9 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 ### 通用条件验证
 
-日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。已有参数的单点验证或单因素扫描共用这一入口，不需要再复制接收流程。legacy批次比较 SINGLE、EGC、MVDR 和 Blind Null（`blind_null`）。
+日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。已有参数的单点验证或单因素扫描共用这一入口，不需要再复制接收流程。`phase_direction_gain` 实验比较 SINGLE、EGC、MVDR 和 Blind Null（`blind_null`）。
 
-当前 `BATCH="phase_center_noise_only"` 使用专用 `PHASE_CENTER_*` 配置，比较SINGLE、严格等幅EGC及MVDR；默认100 ms、seed 42～71，共1440次链路运行，只保存数据、不弹图。条件与实际结果见[相位中心说明](docs/interference/README.md#无干扰相位中心偏移验证2026-10-16)。切换 `BATCH="mutual_coupling"` 可复现互耦批次，仍使用独立 `COUPLING_*` 配置和输出目录；`legacy`、`pattern_gain_first44` 保留原有入口和设置。
+当前 `EXPERIMENT_TYPE="phase_center_offset"` 使用 `PHASE_CENTER_*` 种子、时长和并行配置，比较SINGLE、严格等幅EGC及MVDR；默认100 ms、seed 42～71，共1440次链路运行，只保存数据、不弹图。也可选择 `mutual_coupling`、`antenna_gain`、`phase_direction_gain`；输出统一为 `results/interference/<EXPERIMENT_TYPE>/`，各实验参数独立保留。已有历史结果不移动，条件与结果见[相位中心说明](docs/interference/README.md#无干扰相位中心偏移验证2026-10-16)。
 
 配置中的 `build_cases()` 一次完成条件选择、相位基准配对和种子展开，返回已写入种子、时长的独立用例；`build_settings()` 只设置统计窗口、输出位置及是否弹图。运行器直接执行用例，保存端直接记录实际配置。目标真实方向使用 `cfg.signal.true_direction`，合并器假设方向使用 `cfg.signal.assumed_direction`，两者分别修改。天线组合使用 `cfg.phone.active_antennas`，第一根是 SINGLE 的参考通道；逐通道相位按天线名字典赋值。
 

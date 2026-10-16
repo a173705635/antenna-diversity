@@ -1,5 +1,17 @@
 # 抗干扰接收链实验
 
+## 多毫秒相干捕获修复（2026-10-16）
+
+L1 C/A主码每1 ms重复。原实现将整个相干块的相关延迟作为搜索范围，4 ms相干时四个重复真峰参与峰峰比，排除一个峰后其他真峰被当作次峰，使峰峰比约为1。现保留完整相干块的FFT相关，仅保存一个1 ms主码周期的搜索结果，并在该周期上循环排除主峰邻域；捕获总览图横轴同步取实际搜索数组长度。`coherent_samples`仍表示完整相干积分长度，不再表示码相位搜索宽度。1 ms路径和L5的1 ms/NH处理保持原行为，不改门限、实验配置或跟踪积分。
+
+配置 `coherent_ms=4, noncoherent_ms=5` 表示4 ms相干、5个块非相干功率累加，共需要20 ms输入；`noncoherent_ms`历史名称实际表示块数。长相干仍受频率残差和块内数据位翻转影响，本修复不消除这些物理限制，也不保证任意场景捕获成功。
+
+验证：本地新增11项测试，覆盖1/2/4 ms、码周期两端及中间延迟、完整相干功率增益、非相干块间反相和绘图横轴。修复前8项失败、3项通过，修复后与receiver/L5专项共21项通过，完整回归见CHANGELOG。另在内存加载HEAD旧实现，对同一固定噪声输入比较：1 ms全部返回字段逐项完全一致；4×5峰峰比由1.000恢复为192.143（该单元输入强度不作为真实接收性能结论）。
+
+实际RF→DFE→接收链以seed 42、TL/BR、L1输入−128.5 dBm、40 ms数据、4×5捕获、最多20个跟踪历元执行。无干扰时SINGLE/EGC/MVDR/Blind Null峰峰比分别为23.551/38.232/38.246/23.551，均捕获1500 Hz、码相位885采样点并完成跟踪。保留默认首个CW（−90 dBm、方向80°/10°）时，MVDR/Blind Null分别为23.314/23.051并捕获跟踪；SINGLE/EGC仍约1而失败，属于该干扰场景的接收结果，不是重复真峰问题。搜索图为41×6600，实际相干积分长度26400采样点。验证在内存执行，未覆盖既有实验结果。
+
+新保存的验证图按“实验类型__扫描因素及单位__指标__算法.png”命名，例如 `antenna_gain__tl_gain_db__thermal_snr_gain__single.png`；干扰抑制图标明干扰源，独立实验图加实验前缀。下文历史记录中的旧文件名及已有图片保持原样。
+
 ## 无干扰相位中心偏移验证（2026-10-16）
 
 本轮只评估固定相位中心偏移PCO，不评估方向相关PCV、动态移动、码包络时延或定位精度。真实位置用 `phone.phase_centers_m`，接收机名义位置用 `phone.assumed_phase_centers_m`；各自独立，不能修改真实位置后自动同步名义位置。
@@ -33,13 +45,13 @@
 
 ### 运行与结果表
 
-在python_sim_simplified目录执行 `python -m experiments.interference.validation`。默认 `BATCH="phase_center_noise_only"`；种子、时长、并行数和结果目录分别由validation_config.py顶部的 `PHASE_CENTER_SEEDS`、`PHASE_CENTER_DURATION_MS`、`PHASE_CENTER_WORKERS`、`PHASE_CENTER_OUTPUT_DIR` 控制。正式默认30个seed；下面命令只复现本轮单seed验证，输出到不同目录，不覆盖互耦或增益结果：
+在python_sim_simplified目录执行 `python -m experiments.interference.validation`。默认 `EXPERIMENT_TYPE="phase_center_offset"`；种子、时长、并行数由 `PHASE_CENTER_SEEDS`、`PHASE_CENTER_DURATION_MS`、`PHASE_CENTER_WORKERS` 控制，输出自动为 `results/interference/phase_center_offset/`。下面命令复现单seed验证，写入 `results/interference/smoke/phase_center_offset/`，历史结果保留原位置：
 
 ```powershell
 $env:OPENBLAS_NUM_THREADS='1'
 $env:OMP_NUM_THREADS='1'
 $env:MPLBACKEND='Agg'
-python -u -B -c 'from experiments.interference import validation_config as config; from experiments.interference import validation; config.PHASE_CENTER_SEEDS=(42,); config.PHASE_CENTER_OUTPUT_DIR=config.INTERFERENCE_RESULTS_DIR/"phase_center_noise_only_smoke"; validation.main()'
+python -u -B -c 'from experiments.interference import validation_config as config; from experiments.interference import validation; config.PHASE_CENTER_SEEDS=(42,); config.EXPERIMENT_TYPE="phase_center_offset"; config.INTERFERENCE_RESULTS_DIR=config.INTERFERENCE_RESULTS_DIR/"smoke"; validation.main()'
 ```
 
 优先看 `case_summary.csv`：每行一个PC条件及方法，包含各天线真实/名义xyz偏移mm、残余视线投影mm、相对相位deg、目标响应幅度dB及相位deg、捕获峰值比和跟踪C/N₀。`snr_delta_vs_pc001_mean_db` 是相对同算法无偏移基准的变化；`snr_delta_vs_accurate_calibration_mean_db` 是PC006/010/011/012相对同真实位置PC009的变化；`snr_gain_vs_same_condition_single_mean_db` 是相对同工况SINGLE的分集收益。负差值表示变差；`ideal_strict_egc_loss_db` 则用正值表示理论损失。参考用例名称单独列出，未设置的对照留空。
@@ -167,7 +179,7 @@ TRK C/N₀不是上述分量SNR：例如严格EGC的PC001/PC002/PC009后段估�
 
 ### 运行互耦批次
 
-仍使用 `python -m experiments.interference.validation`。在validation_config.py中选择 `BATCH="mutual_coupling"`；互耦专用设置为 `COUPLING_SEEDS`、`COUPLING_DURATION_MS`、`COUPLING_WORKERS`、`COUPLING_OUTPUT_DIR`，默认30 seed、100 ms、4进程，输出 `results/interference/mutual_coupling/`。它不使用旧批次的SEEDS/OUTPUT_DIR，避免覆盖增益结果；切回legacy或pattern_gain_first44仍使用原有设置。互耦批次默认不生成或弹出图片。
+仍使用 `python -m experiments.interference.validation`。选择 `EXPERIMENT_TYPE="mutual_coupling"`，专用参数为 `COUPLING_SEEDS`、`COUPLING_DURATION_MS`、`COUPLING_WORKERS`，默认30 seed、100 ms、4进程；输出自动为 `results/interference/mutual_coupling/`，默认不生成或弹出图片。
 
 优先阅读 `model_checks.csv`（7行模型检查）和 `case_summary.csv`（48行接收条件汇总）；`summary.csv`记录逐seed指标，`summary.json`、`verification.json`保留独立复算与失败原因，`manifest.json`记录实际配置。接收机权值仍只来自实际DFE数据和名义响应，真值与分量仅用于接收完成后的评分。
 
@@ -182,25 +194,25 @@ TRK C/N₀不是上述分量SNR：例如严格EGC的PC001/PC002/PC009后段估�
 
 本轮名义响应失配的EGC/MVDR损失仅约0.002～0.024 dB（相对同物理条件的准确已知响应）。这只说明当前方向、对称互耦和失配幅度下影响较小，不能推断其他方向、非对称互耦或实际硬件也如此。单seed结果不作统计显著性结论。DFE分量功率采用数字码值平方，不标为瓦特；捕获峰值比仍为无量纲。
 
-复现本轮单seed验证（在python_sim_simplified目录，不改配置文件）：
+复现本轮单seed验证（在python_sim_simplified目录，不改配置文件；新输出为 `results/interference/smoke/mutual_coupling/`）：
 
 ```powershell
 $env:OPENBLAS_NUM_THREADS='1'
 $env:OMP_NUM_THREADS='1'
 $env:MPLBACKEND='Agg'
-python -u -B -c 'from experiments.interference import validation_config as config; from experiments.interference import validation; config.COUPLING_SEEDS=(42,); config.COUPLING_OUTPUT_DIR=config.INTERFERENCE_RESULTS_DIR/"mutual_coupling_smoke"; validation.main()'
+python -u -B -c 'from experiments.interference import validation_config as config; from experiments.interference import validation; config.COUPLING_SEEDS=(42,); config.EXPERIMENT_TYPE="mutual_coupling"; config.INTERFERENCE_RESULTS_DIR=config.INTERFERENCE_RESULTS_DIR/"smoke"; validation.main()'
 ```
 
 专项验证：`python -m pytest tests/test_coupling_validation.py -q`，7 passed。完整回归结果见CHANGELOG本轮记录。测试只保留本地，不强制加入版本库。
 
 ## 用例汇总表字段
 
-case_summary.csv每行一个条件及算法，n为seed数；新增字段如下：
+case_summary.csv每行一个条件及算法，保留条件参数、对照、性能和核验状态；`n` 或 `seeds` 为seed数。重复可推导字段和详细复算误差不再导出，诊断详情仍在summary.json和verification.json。
 
-- `TL_gain_db`、`BR_gain_db`及对应`*_attenuation_db`：本条各阵元注入增益/衰减，按实际天线名称生成列，衰减=−增益。例如增益−6 dB即衰减6 dB；不是包含几何、极化等因素后的总有效增益。
+- `TL_gain_db`、`BR_gain_db`：本条各阵元注入增益，按实际天线名称生成列；负值即衰减，不另列attenuation。它不是包含几何、极化等因素后的总有效增益。
 - `acquisition_peak_ratio_mean`：所有seed捕获峰值比的算术均值，包含未过门限样本，无量纲，不转dB。
 - `tracking_cn0_mean_db_hz`：每seed已有“跟踪后段C/N₀中位数”的跨有效seed算术均值，单位dB-Hz；不是全历元混合平均或线性功率平均。无有效估计时留空。
-- `tracking_cn0_valid_seed_count`：有后段C/N₀估计的seed数，配合原missing_count阅读，不能把仅成功样本均值当作整体接收性能。
+- `tracking_cn0_valid_seed_count`：有后段C/N₀估计的seed数，与总seed数一起判断缺测情况；不再重复列出missing_count，不能把有效样本均值当作整体接收性能。
 
 保存流程专项8项通过，包含短链实际输出校验。此次未重跑正式批次；当前CSV被占用无法覆盖，旧文件未改动，关闭表格后可从已有summary.json导出，无须重新生成信号。
 
@@ -247,7 +259,7 @@ case_summary.csv每行一个条件及算法，n为seed数；新增字段如下�
 
 无干扰方向图研究见 [天线方向图增益验证用例](antenna_pattern_validation_cases.md)：20 个分类下共 **425 条独立用例 TC-001～TC-425**，每条固定参数、一个被测方法、明确对照和判据。TC-001～044已执行，余下381条未执行，不将扫描组记作一条用例。
 
-首批执行入口仍为 `python -m experiments.interference.validation`。`validation_config.py` 的 `BATCH="pattern_gain_first44"` 固定运行 TC-001～044，默认100 ms、seed 42～71、4个进程；输出 `results/interference/pattern_gain_first44/`。`progress.jsonl` 是逐次完成记录，`summary.csv` 是逐seed数据，`case_summary.csv` 是44条汇总结论，完整统计和判据在 `summary.json` / `verification.json`。切回旧实验用 `BATCH="legacy"`，并自行设置 `SEEDS`、`OUTPUT_DIR` 等公共参数。运行中不要再次启动同输出目录的批次。
+增益验证入口为 `python -m experiments.interference.validation`，选择 `EXPERIMENT_TYPE="antenna_gain"`，新输出自动为 `results/interference/antenna_gain/`。历史首批44条及后来扩展的50条记录保留在 `results/interference/pattern_gain_first44/`；其参数和结论按下文对应记录解读。`progress.jsonl` 记录逐次完成进度，`summary.csv` 保存逐seed数据，`case_summary.csv` 保存逐用例汇总。切换相位/方向/增益扫描用 `EXPERIMENT_TYPE="phase_direction_gain"`，按需设置 `SEEDS` 等参数，输出目录随选择自动切换。运行中不要再次启动同输出目录的实验。
 
 `egc` 保持旧幅度匹配实现，新增 `egc_strict` 才是等幅相位对齐；首批每条仅运行文档指定的一种方法。SINGLE的输出有单位响应归一，天线增益传递通过合并前的逐通道线性分量功率单独验证。TC编号是离散类别，因此本批图只画散点、不连成连续扫描曲线。
 
@@ -741,17 +753,17 @@ print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assu
 | 选择合并方法 | `MODES`；默认 `single`、`egc`、`mvdr`、`blind_null` |
 | 修改噪声重复次数、时长和统计去边 | `SEEDS`、`DURATION_MS`、`EVALUATION_EDGE_TRIM_MS`；统计窗口应在记录内部 |
 | 扫描整通道相位 | `SELECTED_SERIES = ("phase",)`、`PHASE_ANTENNA`、`PHASE_SCAN_DEG` |
-| 选择相位用例 | `BATCH = "legacy"` 的相位系列包含基准、未补偿、准确补偿三组；单独运行用 `SELECTED_CASES` 指定完整名称，准确补偿自动带基准 |
+| 选择相位用例 | `EXPERIMENT_TYPE = "phase_direction_gain"` 的相位系列包含基准、未补偿、准确补偿三组；单独运行用 `SELECTED_CASES` 指定完整名称，准确补偿自动带基准 |
 | 扫描目标真实方位角 | `SELECTED_SERIES = ("direction",)`、`TARGET_AZIMUTH_SCAN_DEG` |
 | 扫描阵元真实增益 | `SELECTED_SERIES = ("gain",)`、`ELEMENT_GAIN_ANTENNA`、`ELEMENT_GAIN_SCAN_DB` |
 | 设置卫星真实/名义方向及干扰方向 | `TARGET_TRUE_DIRECTION`、`TARGET_ASSUMED_DIRECTION`、`JAMMER_DIRECTION`；角度单位为度 |
 | 只跑指定条件 | `SELECTED_CASES`；例如 `("single_cw/phase_90/calibrated",)`，构造用例时自动加入其参考条件 |
-| 显示/保存图 | `SHOW_PLOTS_FLAG`、`OUTPUT_DIR` |
+| 显示/保存图 | `GENERATE_PLOTS_FLAG`、`SHOW_PLOTS_FLAG`（互耦和相位中心实验独立关闭）；目录按实验类型自动生成 |
 | 更改其他模型参数 | 同一文件内 `_base_config()` 直接赋值现有 `SimulationConfig` 字段 |
 
 例如，把 `SELECTED_SERIES` 改成 `("direction",)`、`TARGET_AZIMUTH_SCAN_DEG` 改成 `(20, 30, 40)`，就运行这三个真实方位角。名义方向保持配置值，表示研究导向失配；若要研究已知方向，应在方向条件构造处同时明确赋值 `cfg.signal.assumed_direction`。多个系列分别扫描，不交叉展开为全部参数组合。每个条件独立复制基础配置，改一个条件不会污染其他条件。
 
-需要自定义 legacy 单点时，在 `_legacy_cases()` 中增加具名条件并明确选择规则，最后统一展开种子；相位补偿条件在同处带入基准，基准先于补偿执行。`dfe_phase_deg` 和 `dfe_estimated_phase_deg` 按物理天线名配置；`compensate_dfe_phase_flag=True` 才执行估计相位的逆旋转。相位误差和补偿都作用于整行复数样本。真实阵元增益则修改 `cfg.phone.antenna_model.true_state.amplitude_error_db`，它改变目标和各干扰在天线端的响应，不改变独立 RF 热噪声的生成强度。
+需要自定义相位/方向/增益单点时，在 `_phase_direction_gain_cases()` 中增加具名条件并明确选择规则，最后统一展开种子；相位补偿条件在同处带入基准，基准先于补偿执行。`dfe_phase_deg` 和 `dfe_estimated_phase_deg` 按物理天线名配置；`compensate_dfe_phase_flag=True` 才执行估计相位的逆旋转。相位误差和补偿都作用于整行复数样本。真实阵元增益则修改 `cfg.phone.antenna_model.true_state.amplitude_error_db`，它改变目标和各干扰在天线端的响应，不改变独立 RF 热噪声的生成强度。
 
 处理阶段固定在 [validation_support.py](../../experiments/interference/validation_support.py)：每个用例独立生成前端并执行接收和独立预算，同一用例的各算法共用本次采样。独立评分逐个重建启用的干扰源，不要求场景同时包含 CW 与宽带；公共接收机仍仅使用完整 IQ 和配置的名义导向。输出的线性 SINR 不含联合非线性/量化残差，分量交叉项单列，跟踪 C/N₀ 缺测不画成零。
 

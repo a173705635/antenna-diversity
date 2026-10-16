@@ -61,7 +61,7 @@ def main():
     for axis in axes:
         axis.grid(alpha=.3)
         axis.legend()
-    fig.savefig(output_dir/'position_error.png', dpi=160)
+    fig.savefig(output_dir/'gps_spp__position_and_clock_error.png', dpi=160)
     plt.close(fig)
 
 

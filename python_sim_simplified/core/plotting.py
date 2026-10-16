@@ -217,7 +217,7 @@ def plot_acquisition(results):
             aspect="auto",
             extent=(
                 0,
-                acquisition["coherent_samples"] - 1,
+                acquisition["search_power"].shape[1] - 1,
                 acquisition["doppler_bins_hz"][0],
                 acquisition["doppler_bins_hz"][-1],
             ),

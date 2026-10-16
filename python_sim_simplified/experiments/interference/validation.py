@@ -76,18 +76,13 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
         records = []
         for tc, result in summary["pattern_gain"]["cases"].items():
             observations = [row for row in rows if row["case"] == tc]
-            # 按物理天线名输出本条注入增益；衰减为增益的相反数。
+            # 按物理天线名输出本条注入增益。
             antenna_gains = dict(zip(
                 observations[0]["antennas"].split(","),
                 observations[0]["input_gain_db_by_antenna"]
             ))
-            antenna_columns = {
-                column: value
-                for antenna, gain in antenna_gains.items()
-                for column, value in (
-                    (f"{antenna}_gain_db", gain), (f"{antenna}_attenuation_db", -gain)
-                )
-            }
+            antenna_columns = {f"{antenna}_gain_db": gain
+                               for antenna, gain in antenna_gains.items()}
             cn0_statistics = result["tracking_cn0_observed_db_hz"]
             records.append({
                 "tc": tc, "mode": result["mode"], "n": result["seeds"],
@@ -105,15 +100,9 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
                 "status": result["status"],
                 "expected_gain_db": result["expected_gain_db"],
                 "measured_gain_mean_db": result["measured_gain_db"]["mean"],
-                "gain_error_mean_db": result["gain_error_db"]["mean"],
                 "expected_absolute_change_db": result["expected_absolute_change_db"],
                 "absolute_snr_change_mean_db": result["absolute_snr_change_mean_db"],
-                "input_target_change_max_error_db": result["input_target_change_max_error_db"],
-                "input_thermal_change_max_error_db": result["input_thermal_change_max_error_db"],
-                "weight_max_relative_error": result["weight_max_relative_error"],
                 "acquisition_success_count": result["acquisition_success_count"],
-                "tracking_success_count": result["tracking_success_count"],
-                "tracking_cn0_missing_count": result["tracking_cn0_missing_count"],
             })
         with (settings.output_dir / "case_summary.csv").open(
             "w", newline="", encoding="utf-8"
@@ -123,7 +112,15 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
             writer.writerows({key: json.dumps(value) if isinstance(value, (list, dict)) else value
                              for key, value in record.items()} for record in records)
     if "mutual_coupling" in summary:
-        records = list(summary["mutual_coupling"]["cases"].values())
+        # 浏览用汇总只保留条件与性能；独立核验误差留在 summary.json。
+        omitted_columns = {
+            "level", "tracking_success_count", "tracking_cn0_missing_count",
+            "manifold_max_abs_error", "weight_max_relative_error",
+            "thermal_snr_theory_max_error_db", "acquisition_code_tolerance_chips",
+            "acquisition_doppler_half_bin_hz",
+        }
+        records = [{key: value for key, value in case.items() if key not in omitted_columns}
+                   for case in summary["mutual_coupling"]["cases"].values()]
         with (settings.output_dir / "case_summary.csv").open(
             "w", newline="", encoding="utf-8"
         ) as stream:
@@ -140,7 +137,12 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
             writer.writerows(model_records)
     if "phase_center" in summary:
         # 逐PC/方法一行；逐seed原始行仍在summary.csv与summary.json。
-        records = list(summary["phase_center"]["cases"].values())
+        omitted_columns = {
+            "tracking_success_count", "tracking_cn0_missing_count",
+            "max_manifold_abs_error", "max_weight_relative_error", "max_snr_theory_error_db",
+        }
+        records = [{key: value for key, value in case.items() if key not in omitted_columns}
+                   for case in summary["phase_center"]["cases"].values()]
         with (settings.output_dir / "case_summary.csv").open(
             "w", newline="", encoding="utf-8"
         ) as stream:
