@@ -22,6 +22,9 @@ from core.pipeline import run_frontend, run_receiver
 from experiments.interference.coupling_support import (
     coupling_row_fields, model_checks, summarize_coupling,
 )
+from experiments.interference.phase_center_support import (
+    phase_center_row_fields, summarize_phase_center,
+)
 from experiments.paths import reset_output
 
 
@@ -259,6 +262,9 @@ def evaluate_case(
         if "mutual_coupling" in case.checks:
             row.update(coupling_row_fields(case, frontend, channels, components,
                                            window, weights))
+        if "phase_center_noise_only" in case.checks:
+            row.update(phase_center_row_fields(case, frontend, channels, components,
+                                               window, weights))
         rows.append(row)
     # 即使仅运行 MVDR，也以第一根物理天线计算 SINGLE 的指标参考。
     _, reference_info = combine_known(
@@ -691,6 +697,11 @@ def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) ->
             verification["passed_flag"] and coupling["passed_flag"]
             and all(check["passed_flag"] for check in model.values())
         )
+    if any("phase_center_noise_only" in case.checks for case in cases):
+        phase_center = summarize_phase_center(rows)
+        summary["phase_center"] = phase_center
+        verification["checks"].update(phase_center["checks"])
+        verification["passed_flag"] = verification["passed_flag"] and phase_center["passed_flag"]
     return summary
 
 

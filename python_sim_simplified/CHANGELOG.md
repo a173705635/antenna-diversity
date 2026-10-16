@@ -2,6 +2,13 @@
 
 只记录实际改动、重要行为变化、最终验证和必要限制；实验细节见对应说明。以下路径除注明外均相对于 `python_sim_simplified/`，测试数字为各次修改当时的结果。
 
+## 2026-10-16 无干扰相位中心偏移验证
+
+- 复用validation入口，新增PC-001～016共16条件×SINGLE/严格EGC/MVDR三方法，真实/名义位置独立；增加几何投影、严格EGC理论损失、独立权值/SNR复算及同物理输入配对。只修改实验层，不改核心算法；保留原互耦和增益批次。
+- 默认BATCH改为phase_center_noise_only，PHASE_CENTER_*配置为100 ms、seed 42～71、4进程，正式目录results/interference/phase_center_noise_only/，不生成或弹出图片。汇总表记录逐天线偏移、输出相位、三类明确对照的SNR差值和CI、捕获峰值比及TRK C/N₀；单seed CI留空。
+- 实际运行seed 42全部48条链路，156项核验通过，48条正确捕获；结果在results/interference/phase_center_noise_only_smoke/，正式30seed未运行。严格EGC沿来波相对偏移1/5/10/20 mm损失0.001184/0.029626/0.118910/0.482335 dB；共同偏移不损失SNR但改变输出相位。准确标定恢复合并，100 ms单次TRK C/N₀不用于判定微小SNR排序。
+- 专项 `python -B -m pytest tests/test_phase_center_validation.py -q`：6 passed；完整回归 `python -B -m pytest -p no:cacheprovider -q`：204 passed、2 deselected（262.61 s）。独立复查48条投影、严格EGC响应及配对输入通过，源码哈希与结果清单一致。仅限固定L1、理想天线、无互耦和无干扰，不扩展为PCV、码时延、定位或抗干扰结论。[条件、运行方法与结果](docs/interference/README.md#无干扰相位中心偏移验证2026-10-16)。
+
 ## 2026-10-16 加入互耦独立验证批次
 
 - 复用validation入口，新增coupling_support集中处理7条模型检查、独立响应/权重复算和48条链路用例评分；未修改生产天线、RF或合并算法。用例使用固定MC编号和具名对照，检查名义参数变化前后实际DFE输入一致。

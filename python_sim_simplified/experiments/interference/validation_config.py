@@ -6,6 +6,8 @@
 
 from copy import deepcopy
 
+import numpy as np
+
 from core.config import CouplingPath, Direction
 from core.presets import default_config
 from experiments.paths import INTERFERENCE_RESULTS_DIR
@@ -13,7 +15,7 @@ from experiments.interference.validation_support import ValidationCase, Validati
 
 
 # 常用编辑区：天线顺序第一根是 SINGLE 参考；可用任意两至四根物理天线。
-BATCH = "mutual_coupling"  # "legacy" 和 "pattern_gain_first44" 仍可单独选择。
+BATCH = "phase_center_noise_only"  # 亦可选 "mutual_coupling"、"legacy"、"pattern_gain_first44"。
 ANTENNAS = ("TL", "BR")
 MODES = ("single", "egc", "mvdr", "blind_null")
 SEEDS = tuple(range(42, 43))
@@ -31,6 +33,12 @@ COUPLING_DURATION_MS = 100
 COUPLING_WORKERS = 4
 COUPLING_OUTPUT_DIR = INTERFERENCE_RESULTS_DIR / "mutual_coupling"
 # 每次成功生成数据后刷新此目录；需要保留不同实验时修改目录名。
+
+# 固定相位中心偏移：单独控制种子/时长/输出，默认不弹图。
+PHASE_CENTER_SEEDS = tuple(range(42, 72))
+PHASE_CENTER_DURATION_MS = 100
+PHASE_CENTER_WORKERS = 4
+PHASE_CENTER_OUTPUT_DIR = INTERFERENCE_RESULTS_DIR / "phase_center_noise_only"
 
 # 单因素扫描；PHASE_ANTENNA 按物理名字定位，不使用固定行号。
 PHASE_ANTENNA = "BR"
@@ -184,12 +192,73 @@ def _coupling_cases() -> list[ValidationCase]:
     return cases
 
 
+def _phase_center_cases() -> list[ValidationCase]:
+    """16个真实/名义位置条件，按同一seed展开SINGLE、严格EGC、MVDR。"""
+    direction = Direction(30.0, 60.0)
+    azimuth = np.deg2rad(direction.azimuth_deg)
+    elevation = np.deg2rad(direction.elevation_deg)
+    line_of_sight = np.array([np.cos(elevation) * np.cos(azimuth),
+                              np.cos(elevation) * np.sin(azimuth), np.sin(elevation)])
+    transverse = np.array([-np.sin(azimuth), np.cos(azimuth), 0.0])
+    along = lambda millimetres: tuple(millimetres * line_of_sight)
+    across = lambda millimetres: tuple(millimetres * transverse)
+    # 每个向量单位mm；未列出的阵元位置保持Mate70角点预设。
+    conditions = (
+        ("PC-001", {}, {}),
+        ("PC-002", {"TL": along(10), "BR": along(10)}, {}),
+        ("PC-003", {"BR": across(10)}, {}),
+        ("PC-004", {"BR": along(1)}, {}),
+        ("PC-005", {"BR": along(5)}, {}),
+        ("PC-006", {"BR": along(10)}, {}),
+        ("PC-007", {"BR": along(20)}, {}),
+        ("PC-008", {"BR": along(-10)}, {}),
+        ("PC-009", {"BR": along(10)}, {"BR": along(10)}),
+        ("PC-010", {"BR": along(10)}, {"BR": along(5)}),
+        ("PC-011", {"BR": along(10)}, {"BR": along(15)}),
+        ("PC-012", {"BR": along(10)}, {"BR": along(-10)}),
+        ("PC-013", {"TL": along(-5), "BR": along(5)}, {}),
+        ("PC-014", {"BR": (10, 0, 0)}, {}),
+        ("PC-015", {"BR": (0, 10, 0)}, {}),
+        ("PC-016", {"BR": (0, 0, 10)}, {}),
+    )
+    cases = []
+    for seed in PHASE_CENTER_SEEDS:
+        for case_id, true_offsets_mm, assumed_offsets_mm in conditions:
+            for mode in ("single", "egc_strict", "mvdr"):
+                cfg = default_config()
+                cfg.random_seed = seed
+                cfg.signal.duration_ms = PHASE_CENTER_DURATION_MS
+                cfg.tracking.max_epochs = PHASE_CENTER_DURATION_MS
+                cfg.phone.active_antennas = ("TL", "BR")
+                cfg.interferers = []
+                cfg.signal.true_direction = deepcopy(direction)
+                cfg.signal.assumed_direction = deepcopy(direction)
+                cfg.diversity.modes = (mode,)
+                for antenna, offset_mm in true_offsets_mm.items():
+                    origin_m = np.asarray(cfg.phone.phase_centers_m[antenna])
+                    cfg.phone.phase_centers_m[antenna] = tuple(origin_m + np.asarray(offset_mm) * 1e-3)
+                for antenna, offset_mm in assumed_offsets_mm.items():
+                    origin_m = np.asarray(cfg.phone.assumed_phase_centers_m[antenna])
+                    cfg.phone.assumed_phase_centers_m[antenna] = tuple(origin_m + np.asarray(offset_mm) * 1e-3)
+                cases.append(ValidationCase(
+                    name=f"{case_id}-{mode}", config=cfg,
+                    scene_label="noise_only", series_label=mode,
+                    scan_label="phase center condition", scan_value=int(case_id[3:]),
+                    scan_unit="PC", reference_case=(None if case_id == "PC-001"
+                                                     else f"PC-001-{mode}"),
+                    checks=("phase_center_noise_only",),
+                ))
+    return cases
+
+
 def build_cases() -> list[ValidationCase]:
     """选择具名条件或系列，并按 seed 顺序生成独立的最终配置。"""
     if BATCH == "pattern_gain_first44":
         return _pattern_gain_cases()
     if BATCH == "mutual_coupling":
         return _coupling_cases()
+    if BATCH == "phase_center_noise_only":
+        return _phase_center_cases()
     cases = []
     known_case_names = set()
     selected_case_names = set(SELECTED_CASES)
@@ -280,6 +349,12 @@ def build_settings() -> ValidationSettings:
             evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS,
             output_dir=COUPLING_OUTPUT_DIR, show_plots_flag=False,
             workers=COUPLING_WORKERS, generate_plots_flag=False,
+        )
+    if BATCH == "phase_center_noise_only":
+        return ValidationSettings(
+            evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS,
+            output_dir=PHASE_CENTER_OUTPUT_DIR, show_plots_flag=False,
+            workers=PHASE_CENTER_WORKERS, generate_plots_flag=False,
         )
     return ValidationSettings(
         evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS, output_dir=OUTPUT_DIR, show_plots_flag=SHOW_PLOTS_FLAG,

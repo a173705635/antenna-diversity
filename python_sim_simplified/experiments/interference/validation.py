@@ -138,6 +138,16 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
             writer = csv.DictWriter(stream, fieldnames=list(model_records[0]))
             writer.writeheader()
             writer.writerows(model_records)
+    if "phase_center" in summary:
+        # 逐PC/方法一行；逐seed原始行仍在summary.csv与summary.json。
+        records = list(summary["phase_center"]["cases"].values())
+        with (settings.output_dir / "case_summary.csv").open(
+            "w", newline="", encoding="utf-8"
+        ) as stream:
+            writer = csv.DictWriter(stream, fieldnames=list(records[0]))
+            writer.writeheader()
+            writer.writerows({key: json.dumps(value) if isinstance(value, (list, dict)) else value
+                             for key, value in record.items()} for record in records)
 
 
 def main() -> dict:
