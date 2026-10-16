@@ -251,14 +251,8 @@ def _phase_center_cases() -> list[ValidationCase]:
     return cases
 
 
-def build_cases() -> list[ValidationCase]:
-    """选择具名条件或系列，并按 seed 顺序生成独立的最终配置。"""
-    if BATCH == "pattern_gain_first44":
-        return _pattern_gain_cases()
-    if BATCH == "mutual_coupling":
-        return _coupling_cases()
-    if BATCH == "phase_center_noise_only":
-        return _phase_center_cases()
+def _legacy_cases() -> list[ValidationCase]:
+    """按具名条件或系列构造 legacy 用例，并展开各 seed 的独立配置。"""
     cases = []
     known_case_names = set()
     selected_case_names = set(SELECTED_CASES)
@@ -340,6 +334,19 @@ def build_cases() -> list[ValidationCase]:
             case.config.tracking.max_epochs = DURATION_MS
             seeded_cases.append(case)
     return seeded_cases
+
+
+def build_cases() -> list[ValidationCase]:
+    """按批次选择对应的用例构造函数。"""
+    if BATCH == "pattern_gain_first44":
+        return _pattern_gain_cases()
+    if BATCH == "mutual_coupling":
+        return _coupling_cases()
+    if BATCH == "phase_center_noise_only":
+        return _phase_center_cases()
+    if BATCH == "legacy":
+        return _legacy_cases()
+    raise ValueError(f"Unknown batch: {BATCH}")
 
 
 def build_settings() -> ValidationSettings:

@@ -751,7 +751,7 @@ print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assu
 
 例如，把 `SELECTED_SERIES` 改成 `("direction",)`、`TARGET_AZIMUTH_SCAN_DEG` 改成 `(20, 30, 40)`，就运行这三个真实方位角。名义方向保持配置值，表示研究导向失配；若要研究已知方向，应在方向条件构造处同时明确赋值 `cfg.signal.assumed_direction`。多个系列分别扫描，不交叉展开为全部参数组合。每个条件独立复制基础配置，改一个条件不会污染其他条件。
 
-需要自定义单点时，在 `build_cases()` 中增加具名条件并明确选择规则，最后统一展开种子；相位补偿条件在同处带入基准，基准先于补偿执行。`dfe_phase_deg` 和 `dfe_estimated_phase_deg` 按物理天线名配置；`compensate_dfe_phase_flag=True` 才执行估计相位的逆旋转。相位误差和补偿都作用于整行复数样本。真实阵元增益则修改 `cfg.phone.antenna_model.true_state.amplitude_error_db`，它改变目标和各干扰在天线端的响应，不改变独立 RF 热噪声的生成强度。
+需要自定义 legacy 单点时，在 `_legacy_cases()` 中增加具名条件并明确选择规则，最后统一展开种子；相位补偿条件在同处带入基准，基准先于补偿执行。`dfe_phase_deg` 和 `dfe_estimated_phase_deg` 按物理天线名配置；`compensate_dfe_phase_flag=True` 才执行估计相位的逆旋转。相位误差和补偿都作用于整行复数样本。真实阵元增益则修改 `cfg.phone.antenna_model.true_state.amplitude_error_db`，它改变目标和各干扰在天线端的响应，不改变独立 RF 热噪声的生成强度。
 
 处理阶段固定在 [validation_support.py](../../experiments/interference/validation_support.py)：每个用例独立生成前端并执行接收和独立预算，同一用例的各算法共用本次采样。独立评分逐个重建启用的干扰源，不要求场景同时包含 CW 与宽带；公共接收机仍仅使用完整 IQ 和配置的名义导向。输出的线性 SINR 不含联合非线性/量化残差，分量交叉项单列，跟踪 C/N₀ 缺测不画成零。
 
