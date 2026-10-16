@@ -30,7 +30,7 @@ def acquire(
     if signal_kind == 'L5Q':
         # Linear 1-ms correlations inside 2-ms windows. At the correct delay,
         # integration starts on a primary-code/NH boundary, avoiding sign loss.
-        if len(x) < (cfg.noncoherent_ms+1)*coherent_samples:
+        if len(x) < (cfg.noncoherent_count+1)*coherent_samples:
             raise ValueError('L5 acquisition needs one extra millisecond')
         code_spectrum = np.conj(np.fft.fft(np.pad(local_code, (0, coherent_samples))))
         n = np.arange(2*coherent_samples)
@@ -41,7 +41,7 @@ def acquire(
 
     for row, doppler_hz in enumerate(cfg.doppler_bins_hz):
         wipeoff = np.exp(-1j * 2.0 * np.pi * doppler_hz * n / fs_hz)
-        for block_index in range(cfg.noncoherent_ms):
+        for block_index in range(cfg.noncoherent_count):
             first = block_index * coherent_samples
             block = x[first : first + len(n)]
             correlation = np.fft.ifft(
@@ -78,4 +78,6 @@ def acquire(
         "search_power": search_power,
         "samples_per_ms": samples_per_ms,
         "coherent_samples": coherent_samples,
+        # 相对本次输入的结束位置（不含该样本）；L5包含额外读取的1 ms。
+        "input_end_sample": (cfg.noncoherent_count - 1) * coherent_samples + len(n),
     }

@@ -231,7 +231,7 @@ class AcquisitionConfig:
         default_factory=lambda: np.arange(-5_000.0, 5_000.1, 250.0)
     )
     coherent_ms: int = 1
-    noncoherent_ms: int = 4
+    noncoherent_count: int = 4  # 非相干功率累加的相干块数
     exclusion_chips: float = 1.0
     threshold: float = 2.5
 
@@ -243,7 +243,6 @@ class TrackingConfig:
     # sign transitions from PLL/FLL errors, retaining a half-cycle ambiguity.
     carrier_discriminator: str = "atan2"
     coherent_ms: int = 1
-    acquisition_ms: int = 4
     early_late_spacing_chips: float = 0.5
     fll_assist_epochs: int = 5
     fll_gain: float = 0.5

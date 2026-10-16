@@ -185,7 +185,8 @@ def track(
     """Track residual carrier and C/A-code phase after acquisition."""
 
     samples_per_epoch = round(fs_hz * cfg.coherent_ms * 1e-3)
-    acquisition_samples = round(cfg.acquisition_ms * 1e-3 * fs_hz)
+    # 跟踪从捕获实际用完的数据之后开始，并对齐主码周期边界。
+    acquisition_samples = acquisition["input_end_sample"]
     samples_per_ms = round(fs_hz * 1e-3)
     first_epoch = int(acquisition["code_phase_samples"])
     while first_epoch < acquisition_samples:

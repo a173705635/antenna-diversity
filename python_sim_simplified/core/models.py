@@ -142,6 +142,7 @@ class AcquisitionResult(TypedDict):
     search_power: np.ndarray
     samples_per_ms: int
     coherent_samples: int
+    input_end_sample: int  # 捕获已使用输入的右开端点，相对本次捕获输入
 
 
 class TrackingInitialization(TypedDict):

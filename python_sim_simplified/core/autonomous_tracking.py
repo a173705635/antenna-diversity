@@ -3,17 +3,14 @@
 Acquisition consumes complete windows before tracking starts. No outage truth
 or scheduled return time is accepted. Sample times exclude compute latency.
 """
-from dataclasses import replace
-
 from .acquisition import acquire
 from .tracking import track
 
 
 def receive(x, fs_hz, prn, code_rate_hz, carrier_hz, acquisition_cfg, tracking_cfg,
             *, loss_confirm_epochs=5, loss_settle_epochs=100):
-    window=round(fs_hz*.001*acquisition_cfg.coherent_ms*acquisition_cfg.noncoherent_ms)
+    window=round(fs_hz*.001)*acquisition_cfg.coherent_ms*acquisition_cfg.noncoherent_count
     epoch_samples=round(fs_hz*.001*tracking_cfg.coherent_ms)
-    cfg=replace(tracking_cfg, acquisition_ms=acquisition_cfg.coherent_ms*acquisition_cfg.noncoherent_ms)
     cursor=0;events=[];segments=[]
     while cursor+window+2*epoch_samples <= len(x):
         acq=acquire(x[cursor:cursor+window],fs_hz,prn,code_rate_hz,acquisition_cfg)
@@ -22,7 +19,7 @@ def receive(x, fs_hz, prn, code_rate_hz, carrier_hz, acquisition_cfg, tracking_c
         if not acq['success_flag']:
             cursor+=window
             continue
-        h=track(x[cursor:],fs_hz,prn,acq,cfg,carrier_hz,code_rate_hz,
+        h=track(x[cursor:],fs_hz,prn,acq,tracking_cfg,carrier_hz,code_rate_hz,
                 loss_confirm_epochs=loss_confirm_epochs,loss_settle_epochs=loss_settle_epochs)
         if not h['success_flag']:
             events.append(dict(kind='tracking_failure',start_sample=cursor,status=h['status']))
