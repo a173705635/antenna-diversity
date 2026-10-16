@@ -112,14 +112,17 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
             writer.writerows({key: json.dumps(value) if isinstance(value, (list, dict)) else value
                              for key, value in record.items()} for record in records)
     if "mutual_coupling" in summary:
-        # 浏览用汇总只保留条件与性能；独立核验误差留在 summary.json。
-        omitted_columns = {
-            "level", "tracking_success_count", "tracking_cn0_missing_count",
-            "manifold_max_abs_error", "weight_max_relative_error",
-            "thermal_snr_theory_max_error_db", "acquisition_code_tolerance_chips",
-            "acquisition_doppler_half_bin_hz",
-        }
-        records = [{key: value for key, value in case.items() if key not in omitted_columns}
+        # 显式列出阅读所需字段；逐天线响应、功率和核验细节保留在JSON中。
+        summary_columns = (
+            "case", "mode", "antennas", "seeds",
+            "true_coupling_db", "true_coupling_phase_deg",
+            "assumed_coupling_db", "assumed_coupling_phase_deg",
+            "no_coupling_reference", "known_response_reference",
+            "thermal_snr_mean_db", "snr_delta_vs_no_coupling_mean_db",
+            "snr_delta_vs_known_response_mean_db", "acquisition_correct_count",
+            "tracking_cn0_mean_db_hz", "tracking_cn0_valid_seed_count", "status",
+        )
+        records = [{key: case[key] for key in summary_columns}
                    for case in summary["mutual_coupling"]["cases"].values()]
         with (settings.output_dir / "case_summary.csv").open(
             "w", newline="", encoding="utf-8"

@@ -45,13 +45,13 @@ L1 C/A主码每1 ms重复。原实现将整个相干块的相关延迟作为搜�
 
 ### 运行与结果表
 
-在python_sim_simplified目录执行 `python -m experiments.interference.validation`。默认 `EXPERIMENT_TYPE="phase_center_offset"`；种子、时长、并行数由 `PHASE_CENTER_SEEDS`、`PHASE_CENTER_DURATION_MS`、`PHASE_CENTER_WORKERS` 控制，输出自动为 `results/interference/phase_center_offset/`。下面命令复现单seed验证，写入 `results/interference/smoke/phase_center_offset/`，历史结果保留原位置：
+在python_sim_simplified目录执行 `python -m experiments.interference.validation`。默认 `EXPERIMENT_TYPE="phase_center_offset"`；种子、时长、并行数由 `SEEDS`、`PHASE_CENTER_DURATION_MS`、`PHASE_CENTER_WORKERS` 控制，输出自动为 `results/interference/phase_center_offset/`。下面命令复现单seed验证，写入 `results/interference/smoke/phase_center_offset/`，历史结果保留原位置：
 
 ```powershell
 $env:OPENBLAS_NUM_THREADS='1'
 $env:OMP_NUM_THREADS='1'
 $env:MPLBACKEND='Agg'
-python -u -B -c 'from experiments.interference import validation_config as config; from experiments.interference import validation; config.PHASE_CENTER_SEEDS=(42,); config.EXPERIMENT_TYPE="phase_center_offset"; config.INTERFERENCE_RESULTS_DIR=config.INTERFERENCE_RESULTS_DIR/"smoke"; validation.main()'
+python -u -B -c 'from experiments.interference import validation_config as config; from experiments.interference import validation; config.SEEDS=(42,); config.EXPERIMENT_TYPE="phase_center_offset"; config.INTERFERENCE_RESULTS_DIR=config.INTERFERENCE_RESULTS_DIR/"smoke"; validation.main()'
 ```
 
 优先看 `case_summary.csv`：每行一个PC条件及方法，包含各天线真实/名义xyz偏移mm、残余视线投影mm、相对相位deg、目标响应幅度dB及相位deg、捕获峰值比和跟踪C/N₀。`snr_delta_vs_pc001_mean_db` 是相对同算法无偏移基准的变化；`snr_delta_vs_accurate_calibration_mean_db` 是PC006/010/011/012相对同真实位置PC009的变化；`snr_gain_vs_same_condition_single_mean_db` 是相对同工况SINGLE的分集收益。负差值表示变差；`ideal_strict_egc_loss_db` 则用正值表示理论损失。参考用例名称单独列出，未设置的对照留空。
@@ -179,9 +179,11 @@ TRK C/N₀不是上述分量SNR：例如严格EGC的PC001/PC002/PC009后段估�
 
 ### 运行互耦批次
 
-仍使用 `python -m experiments.interference.validation`。选择 `EXPERIMENT_TYPE="mutual_coupling"`，专用参数为 `COUPLING_SEEDS`、`COUPLING_DURATION_MS`、`COUPLING_WORKERS`，默认30 seed、100 ms、4进程；输出自动为 `results/interference/mutual_coupling/`，默认不生成或弹出图片。
+仍使用 `python -m experiments.interference.validation`。选择 `EXPERIMENT_TYPE="mutual_coupling"`，共用种子 `SEEDS`，专用参数为 `COUPLING_DURATION_MS`、`COUPLING_WORKERS`，默认30 seed、100 ms、4进程；输出自动为 `results/interference/mutual_coupling/`，默认不生成或弹出图片。
 
 优先阅读 `model_checks.csv`（7行模型检查）和 `case_summary.csv`（48行接收条件汇总）；`summary.csv`记录逐seed指标，`summary.json`、`verification.json`保留独立复算与失败原因，`manifest.json`记录实际配置。接收机权值仍只来自实际DFE数据和名义响应，真值与分量仅用于接收完成后的评分。
+
+`case_summary.csv`保留17列：条件、对照、热噪声SNR及变化量、正确捕获数、C/N₀及有效种子数、核验状态；逐天线幅相、功率和复算细节留在`summary.json`。SNR变化正值表示改善，负值表示恶化；正确捕获数除以`seeds`得到比例，C/N₀仅统计有效种子，`status`表示核验通过而非性能达标。
 
 
 ### 本轮实际验证（2026-10-16）
@@ -200,7 +202,7 @@ TRK C/N₀不是上述分量SNR：例如严格EGC的PC001/PC002/PC009后段估�
 $env:OPENBLAS_NUM_THREADS='1'
 $env:OMP_NUM_THREADS='1'
 $env:MPLBACKEND='Agg'
-python -u -B -c 'from experiments.interference import validation_config as config; from experiments.interference import validation; config.COUPLING_SEEDS=(42,); config.EXPERIMENT_TYPE="mutual_coupling"; config.INTERFERENCE_RESULTS_DIR=config.INTERFERENCE_RESULTS_DIR/"smoke"; validation.main()'
+python -u -B -c 'from experiments.interference import validation_config as config; from experiments.interference import validation; config.SEEDS=(42,); config.EXPERIMENT_TYPE="mutual_coupling"; config.INTERFERENCE_RESULTS_DIR=config.INTERFERENCE_RESULTS_DIR/"smoke"; validation.main()'
 ```
 
 专项验证：`python -m pytest tests/test_coupling_validation.py -q`，7 passed。完整回归结果见CHANGELOG本轮记录。测试只保留本地，不强制加入版本库。

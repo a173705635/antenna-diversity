@@ -19,7 +19,7 @@ from experiments.interference.validation_support import ValidationCase, Validati
 EXPERIMENT_TYPE = "phase_center_offset"  # 可选 "antenna_gain"、"mutual_coupling"、"phase_direction_gain"。
 ANTENNAS = ("TL", "BR")
 MODES = ("single", "egc", "mvdr", "blind_null")
-SEEDS = tuple(range(42, 43))
+SEEDS = tuple(range(42, 72))  # 所有实验共用；单次运行设为 (42,)。
 # 每个用例独立生成采样；配对条件保持相同 seed 和物理配置，以复现相同噪声。
 DURATION_MS = 100
 # 功率统计首尾各舍弃此时长，避开滤波瞬态；不裁掉送入捕获跟踪的数据。
@@ -27,13 +27,11 @@ EVALUATION_EDGE_TRIM_MS = 10
 GENERATE_PLOTS_FLAG = True  # 增益、相位/方向/增益实验的图片开关。
 SHOW_PLOTS_FLAG = True  # 仅在生成图片时决定是否同时弹窗。
 WORKERS = 4  # 首批 TC 互相独立；Windows 上按进程并行、逐条记录进度。
-# 互耦实验独立使用以下种子、时长和并行数。
-COUPLING_SEEDS = tuple(range(42, 72))
+# 互耦实验独立设置时长和并行数。
 COUPLING_DURATION_MS = 100
 COUPLING_WORKERS = 4
 
-# 固定相位中心偏移：单独控制种子、时长和并行数，默认不弹图。
-PHASE_CENTER_SEEDS = tuple(range(42, 72))
+# 固定相位中心偏移：单独控制时长和并行数，默认不弹图。
 PHASE_CENTER_DURATION_MS = 100
 PHASE_CENTER_WORKERS = 4
 
@@ -173,7 +171,7 @@ def _coupling_cases() -> list[ValidationCase]:
     )
     modes = ("single", "egc", "egc_strict", "mvdr")
     cases = []
-    for seed in COUPLING_SEEDS:
+    for seed in SEEDS:
         for case_id, true_db, true_phase, assumed_db, assumed_phase in conditions:
             for mode in modes:
                 cfg = _coupling_config(seed, COUPLING_DURATION_MS,
@@ -219,7 +217,7 @@ def _phase_center_cases() -> list[ValidationCase]:
         ("PC-016", {"BR": (0, 0, 10)}, {}),
     )
     cases = []
-    for seed in PHASE_CENTER_SEEDS:
+    for seed in SEEDS:
         for case_id, true_offsets_mm, assumed_offsets_mm in conditions:
             for mode in ("single", "egc_strict", "mvdr"):
                 cfg = default_config()
