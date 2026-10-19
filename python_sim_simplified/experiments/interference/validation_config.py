@@ -16,8 +16,8 @@ from experiments.interference.validation_support import ValidationCase, Validati
 
 # 所有实验共用种子、时长、并行数和统计去边；绘图开关按实验区分。
 # 选择实验类型后，输出固定写入 results/interference/<实验类型>/。
-EXPERIMENT_TYPE = "phase_center_offset"  # 可选 "antenna_gain"、"mutual_coupling"、"phase_direction_gain"。
-SEEDS = tuple(range(42, 72))  # 所有实验共用；单次运行设为 (42,)。
+EXPERIMENT_TYPE = "phase_direction_gain"  # 可选 "antenna_gain"、"mutual_coupling"、"phase_direction_gain"。
+SEEDS = tuple(range(42, 43))  # 所有实验共用；单次运行设为 (42,)。
 # 每个用例独立生成采样；配对条件保持相同 seed 和物理配置，以复现相同噪声。
 # 功率统计首尾各舍弃此时长，避开滤波瞬态；不裁掉送入捕获跟踪的数据。
 EVALUATION_EDGE_TRIM_MS = 10
@@ -29,7 +29,7 @@ GENERATE_PLOTS_FLAG = True
 SHOW_PLOTS_FLAG = True
 # 所有条件共用激活天线和方法；第一根是 SINGLE 参考，第二根用于双阵元条件。
 ACTIVE_ANTENNAS = ("TL", "BR")
-MODES = ("single", "mrc", "mvdr", "blind_null")
+MODES = ("single", "blind_null")
 
 # 单因素扫描；PHASE_ANTENNA 按物理名字定位，不使用固定行号。
 PHASE_ANTENNA = "BR"
@@ -209,7 +209,7 @@ def _phase_direction_gain_cases() -> list[ValidationCase]:
                 cases.extend((baseline_case, uncalibrated_case, calibrated_case))
         if "direction" in SELECTED_SERIES:
             for azimuth_deg in TARGET_AZIMUTH_SCAN_DEG:
-                # 只改真实方向，不改名义导向，研究接收机方向假设不准的影响。
+                # 扫描真实入射方向；名义方向保持固定，仅供诊断与显式对照。
                 case_cfg = deepcopy(base_cfg)
                 case_cfg.signal.true_direction = Direction(azimuth_deg, case_cfg.signal.true_direction.elevation_deg)
                 direction_case = ValidationCase(

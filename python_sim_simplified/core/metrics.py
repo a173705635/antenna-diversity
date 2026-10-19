@@ -61,6 +61,15 @@ def compute_metrics(results: SimulationResults) -> list[MetricRecord]:
     for mode, branch_result in results["branches"].items():
         acquisition = branch_result["acquisition"]
         tracking = branch_result["tracking"]
+        # 方向增益仅在事后用真值评分，不回写实际接收分支的求权信息。
+        weights = branch_result["combining_info"]["weights"]
+        target_direction_gain = float(abs(np.vdot(
+            weights, results["truth"]["desired_steering_true"],
+        )))
+        interferer_gains = [
+            float(abs(np.vdot(weights, steering)))
+            for steering in results["truth"]["interferer_steering_effective"]
+        ]
         tracked_flag = bool(tracking["success_flag"])
         if tracked_flag:
             window = slice(max(0, tracking["prompt"].size - 10), None)
@@ -91,8 +100,8 @@ def compute_metrics(results: SimulationResults) -> list[MetricRecord]:
                 "acquired_flag": bool(acquisition["success_flag"]),
                 "acquisition_metric": float(acquisition["metric"]),
                 "acquired_doppler_hz": float(acquisition["doppler_hz"]),
-                "target_direction_gain": branch_result["combining_info"]["target_direction_gain"],
-                "worst_interferer_gain": branch_result["combining_info"]["worst_interferer_gain"],
+                "target_direction_gain": target_direction_gain,
+                "worst_interferer_gain": max(interferer_gains, default=0.0),
                 "tracking_flag": tracked_flag,
                 "final_doppler_hz": final_doppler,
                 "pll_rms_rad": pll_rms,

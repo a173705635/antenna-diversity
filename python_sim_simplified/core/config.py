@@ -220,7 +220,7 @@ class BlindNullConfig:
 
 @dataclass
 class DiversityConfig:
-    modes: tuple[str, ...] = ("single", "mrc", "mvdr", "blind_null")
+    modes: tuple[str, ...] = ("single", "blind_null")
     diagonal_loading_factor: float = 1e-2
     blind_null: BlindNullConfig = field(default_factory=BlindNullConfig)
 

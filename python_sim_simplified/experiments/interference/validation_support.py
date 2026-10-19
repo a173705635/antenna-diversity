@@ -1,6 +1,6 @@
 """通用抗干扰验证：逐条件前端 → 接收 → 独立核验/绘图。
 
-合并器根据完整 DFE 数据和配置的名义导向求权。
+实际接收的 SINGLE 和 Blind Null 根据 DFE 通道采样求权，不依赖名义目标响应。
 分量准备和固定权值的分量功率评估暂时停用。
 """
 
@@ -357,7 +357,7 @@ def run_case(case: ValidationCase) -> dict:
     truth["interferer_steering_effective"] = [
         steering * factors for steering in truth["interferer_steering_effective"]
     ]
-    branches = run_receiver(receiver_samples, truth, case_cfg, frontend["dfe_info"]["fs_out_hz"])
+    branches = run_receiver(receiver_samples, case_cfg, frontend["dfe_info"]["fs_out_hz"])
     return {
         "frontend": frontend, "receiver_samples": receiver_samples, "branches": branches,
         # "injection_factors": injection_factors,  # 分量重放暂停。

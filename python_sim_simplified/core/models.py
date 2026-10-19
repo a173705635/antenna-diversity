@@ -102,8 +102,8 @@ class CombiningInfo(TypedDict):
     mode: str
     weights: np.ndarray
     weights_are_fixed_flag: bool
-    sample_covariance: np.ndarray
-    condition_number: float
+    sample_covariance: NotRequired[np.ndarray]
+    condition_number: NotRequired[float]
     covariance_snapshots: NotRequired[int]
     constraint_steering: NotRequired[np.ndarray]
     desired_response: NotRequired[complex]
@@ -123,9 +123,6 @@ class CombiningInfo(TypedDict):
     estimated_interference_response: NotRequired[complex]
     constraint_matrix: NotRequired[np.ndarray]
     constraint_response: NotRequired[np.ndarray]
-    target_direction_gain: NotRequired[float]
-    interferer_direction_gains: NotRequired[list[float]]
-    worst_interferer_gain: NotRequired[float]
 
 
 class AcquisitionResult(TypedDict):

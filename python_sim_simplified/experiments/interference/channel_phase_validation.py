@@ -22,7 +22,7 @@ import numpy as np
 
 # from core.evaluation import linear_components  # 分量回放暂停。
 from core.metrics import circular_chip_error
-from core.pipeline import run_frontend, run_receiver
+from core.pipeline import run_frontend, run_receiver, run_known_response_comparison
 from core.presets import default_config
 from core.provenance import source_hashes
 from core.serialization import serializable
@@ -45,7 +45,9 @@ SHOW_PLOTS_FLAG = True
 SCENES = ('noise_only', 'single_cw')
 # 分别表示无误差、有误差未补偿、同样误差准确补偿。
 CASES = ('baseline', 'uncalibrated', 'calibrated')
-MODES = ('single', 'mrc', 'mvdr')
+MODES = ('single', 'blind_null')
+# 显式对照默认关闭；EGC 相位暂取配置中的名义响应，并非自动估计。
+KNOWN_RESPONSE_COMPARISON_MODES = ()
 # 两路等幅目标同相叠加、各路热噪声独立且等功率时，理论 SNR 收益为 3.0103 dB。
 # 这里只用于双天线基准核验，不是有干扰时 MVDR 必须达到的收益。
 # THEORETICAL_MRC_GAIN_DB = 10.0 * np.log10(2.0)  # 分量 SNR 核验暂停。
@@ -178,8 +180,8 @@ def _score_branch(channels, branch_result, cfg, fs_out_hz, evaluation_edge_trim_
 
 
 def _paired_rows(seed, scene, phase_deg, cfg, truth, baseline, dfe_info,
-                 baseline_branches, evaluation_edge_trim_ms):
-    """构造同一相位点三组×三种方法的九行结果，与同一份基准配对。"""
+                 baseline_branches, evaluation_edge_trim_ms, *, receiver_role='actual'):
+    """按实际或显式对照分支构造三组配对结果，不混用两类基准。"""
     channels_by_case = _case_channels(baseline, cfg.phone.active_antennas, phase_deg)
     baseline_norm = np.linalg.norm(baseline)
     # 矩阵的整体相对误差核验全部通道和样本；浮点逆旋转允许舍入误差。
@@ -188,11 +190,27 @@ def _paired_rows(seed, scene, phase_deg, cfg, truth, baseline, dfe_info,
     )
     # 基准接收已在外层算过一次；只对未补偿/补偿两组重新求权并接收。
     case_branches = {'baseline': baseline_branches}
-    case_branches.update({
-        case: run_receiver(channels, truth, cfg, dfe_info['fs_out_hz'])
-        for case, channels in channels_by_case.items()
-        if case != 'baseline'
-    })
+    if receiver_role == 'actual':
+        case_branches.update({
+            case: run_receiver(channels, cfg, dfe_info['fs_out_hz'])
+            for case, channels in channels_by_case.items()
+            if case != 'baseline'
+        })
+    else:
+        # 暂用名义响应的预设相位；此输入将来可替换为独立估相模块输出。
+        assumed_target_response = truth['desired_steering_assumed']
+        phase_estimates_deg = np.rad2deg(np.angle(assumed_target_response))
+        case_branches.update({
+            case: run_known_response_comparison(
+                channels, cfg, dfe_info['fs_out_hz'],
+                phase_estimates_deg=phase_estimates_deg,
+                assumed_target_response=assumed_target_response,
+                modes=KNOWN_RESPONSE_COMPARISON_MODES,
+            )
+            for case, channels in channels_by_case.items()
+            if case != 'baseline'
+        })
+    modes = tuple(baseline_branches)
     rows = []
     for case in CASES:
         # 分量相位旋转与评分暂停。
@@ -212,11 +230,11 @@ def _paired_rows(seed, scene, phase_deg, cfg, truth, baseline, dfe_info,
             mode: _score_branch(channels_by_case[case],
                                 case_branches[case][mode], cfg,
                                 dfe_info['fs_out_hz'], evaluation_edge_trim_ms)
-            for mode in MODES
+            for mode in modes
         }
         # 分量 SINGLE 参考比较暂停。
         # reference = scored['single']
-        for mode in MODES:
+        for mode in modes:
             row = scored[mode]
             # thermal_gain_db = _db_ratio(
             #     row['target_power'] / row['thermal_power'],
@@ -227,18 +245,18 @@ def _paired_rows(seed, scene, phase_deg, cfg, truth, baseline, dfe_info,
             baseline_output_samples = baseline_branch_result['combined_samples']
             baseline_weights = baseline_branch_result['combining_info']['weights']
             current_weights = current_branch_result['combining_info']['weights']
-            # 所有输出/权值恢复误差均与该方法自身的无误差基准比较，而非与 MRC 比。
+            # 所有输出/权值恢复误差均与该方法自身的无误差基准比较。
             row.update({
                 'seed': seed, 'scene': scene, 'phase_error_deg': phase_deg,
-                'case': case, 'mode': mode,
+                'case': case, 'mode': mode, 'receiver_role': receiver_role,
+                'phase_estimate_source': (
+                    'preset_assumed_target_response_phase' if mode == 'egc' else None
+                ),
                 # 不含 case，使同一条件的 baseline 和 calibrated 能用同一键配对。
-                'paired_key': f'{seed}:{scene}:{phase_deg}:{mode}',
+                'paired_key': f'{seed}:{scene}:{phase_deg}:{receiver_role}:{mode}',
                 'antennas': ','.join(cfg.phone.active_antennas),
                 'perturbed_antenna': PERTURBED_ANTENNA,
                 'acquisition_threshold': cfg.acquisition.threshold,
-                'steering_unchanged_flag': bool(np.array_equal(
-                    current_branch_result['combining_info']['constraint_steering'],
-                    truth['desired_steering_assumed'])),
                 # 分量收益、抑制比和白噪声理论误差暂时停用。
                 # 'target_output_gain_db': _db_ratio(
                 #     row['target_power'], reference['target_power']
@@ -271,6 +289,11 @@ def _paired_rows(seed, scene, phase_deg, cfg, truth, baseline, dfe_info,
                     np.linalg.norm(baseline_weights)
                 ) if case == 'calibrated' else None,
             })
+            if mode == 'mvdr':
+                row['steering_unchanged_flag'] = bool(np.array_equal(
+                    current_branch_result['combining_info']['constraint_steering'],
+                    truth['desired_steering_assumed'],
+                ))
             rows.append(row)
     return rows
 
@@ -357,8 +380,7 @@ def verify_rows(rows):
     checks = {
         'complete_case_mode_grid_flag': len(rows) == len({
             (row['seed'], row['scene'], row['phase_error_deg']) for row in rows
-        }) * len(CASES) * len(MODES),
-        'steering_unchanged_flag': all(row['steering_unchanged_flag'] for row in rows),
+        }) * len(CASES) * (len(MODES) + len(KNOWN_RESPONSE_COMPARISON_MODES)),
         'direct_combining_flag': all(row['combined_direct_max_abs_error'] < 1e-8 for row in rows),
         'covariance_quadratic_flag': all(row['quadratic_power_relative_error'] < 1e-10
                                     for row in rows),
@@ -387,6 +409,11 @@ def verify_rows(rows):
         ),
         'paired_tracking_cn0_flag': within('tracking_cn0_abs_error_db_hz', 1e-7),
     }
+    if any('steering_unchanged_flag' in row for row in rows):
+        checks['steering_unchanged_flag'] = all(
+            row['steering_unchanged_flag'] for row in rows
+            if 'steering_unchanged_flag' in row
+        )
     return {'passed_flag': all(checks.values()), 'checks': checks,
             'paired_comparisons': paired,
             # 'white_noise_mrc_errors_db': white_noise_errors,
@@ -420,12 +447,27 @@ def run_sweep(seeds=SEEDS, duration_ms=DURATION_MS, phases=PHASE_ERRORS_DEG,
             # components = {'target': shared['target'], 'cw': cw,
             #               'thermal': shared['thermal']}
             # 缓存各方法基准接收，后续相位点共享它们，只重复保存配对结果行。
-            baseline_branches = run_receiver(baseline, truth, cfg, dfe_info['fs_out_hz'])
+            baseline_branches = run_receiver(baseline, cfg, dfe_info['fs_out_hz'])
+            if KNOWN_RESPONSE_COMPARISON_MODES:
+                assumed_target_response = truth['desired_steering_assumed']
+                phase_estimates_deg = np.rad2deg(np.angle(assumed_target_response))
+                baseline_comparison_branches = run_known_response_comparison(
+                    baseline, cfg, dfe_info['fs_out_hz'],
+                    phase_estimates_deg=phase_estimates_deg,
+                    assumed_target_response=assumed_target_response,
+                    modes=KNOWN_RESPONSE_COMPARISON_MODES,
+                )
             for phase_deg in phases:
                 rows.extend(_paired_rows(
                     seed, scene, phase_deg, cfg, truth, baseline, dfe_info,
                     baseline_branches, evaluation_edge_trim_ms,
                 ))
+                if KNOWN_RESPONSE_COMPARISON_MODES:
+                    rows.extend(_paired_rows(
+                        seed, scene, phase_deg, cfg, truth, baseline, dfe_info,
+                        baseline_comparison_branches, evaluation_edge_trim_ms,
+                        receiver_role='known_response_comparison',
+                    ))
                 print(seed, scene, phase_deg, 'complete', flush=True)
     return rows, verify_rows(rows)
 
@@ -437,20 +479,26 @@ def plot_summary(rows, output_dir, phases):
     colors = {'baseline': '#333333', 'uncalibrated': '#d95f02',
               'calibrated': '#1f77b4'}
     styles = {'baseline': '-', 'uncalibrated': '--', 'calibrated': ':'}
+    role_modes = tuple(dict.fromkeys(
+        (row['receiver_role'], row['mode']) for row in rows
+    ))
+    mode_labels = {'single': 'actual SINGLE', 'blind_null': 'actual Blind Null',
+                   'egc': 'preset phase EGC', 'mvdr': 'known response MVDR'}
 
-    def values(scene, case, mode, key):
+    def values(scene, case, receiver_role, mode, key):
         """每个相位点聚合可用 seed；缺测用 NaN 断开曲线，不补成零。"""
         result = []
         for phase in phases:
             items = [row[key] for row in rows if row['scene'] == scene
                      and row['case'] == case and row['mode'] == mode
+                     and row['receiver_role'] == receiver_role
                      and row['phase_error_deg'] == phase and row[key] is not None]
             # if key == 'thermal_snr_gain_db':
             #     items = [10.0 ** (value / 10.0) for value in items]
             result.append(float(np.mean(items)) if items else np.nan)
         return result
 
-    # 分量热噪声收益与目标/CW 图暂时停用，仅绘制实际接收指标。
+    # 分量热噪声收益与目标/CW 图暂时停用；显式对照独占带角色标签的子图。
     figures = (
         # ('thermal_gain', (('thermal_snr_gain_db', 'Linear thermal SNR ratio'),)),
         # ('target_and_cw', (
@@ -465,24 +513,24 @@ def plot_summary(rows, output_dir, phases):
     figure_paths = []
     for filename, metrics in figures:
         # 列是场景，行按“指标→方法”排列；每个坐标轴只有三组配对曲线。
-        fig, axes = plt.subplots(len(metrics) * len(MODES), len(SCENES),
-                                 figsize=(12, 3.5 * len(metrics) * len(MODES)),
+        fig, axes = plt.subplots(len(metrics) * len(role_modes), len(SCENES),
+                                 figsize=(12, 3.5 * len(metrics) * len(role_modes)),
                                  squeeze=False, constrained_layout=True)
         # if filename == 'thermal_gain':
         #     fig.suptitle('Linear thermal SNR ratio vs paired SINGLE '
         #                  '(baseline 2 ≈ 3.01 dB)')
         for metric_index, (metric, ylabel) in enumerate(metrics):
-            for mode_index, mode in enumerate(MODES):
+            for mode_index, (receiver_role, mode) in enumerate(role_modes):
                 for scene_index, scene in enumerate(SCENES):
                     # 将指标编号和方法编号映射到二维子图的行号。
-                    axis = axes[metric_index * len(MODES) + mode_index, scene_index]
+                    axis = axes[metric_index * len(role_modes) + mode_index, scene_index]
                     # CW 分量图分支暂停。
                     # if metric == 'cw_suppression_db' and scene == 'noise_only':
                     #     axis.text(0.5, 0.5, 'No CW in this scene',
                     #               ha='center', va='center', transform=axis.transAxes)
                     # else:
                     for case in CASES:
-                        axis.plot(phases, values(scene, case, mode, metric),
+                        axis.plot(phases, values(scene, case, receiver_role, mode, metric),
                                   color=colors[case], linestyle=styles[case],
                                   marker='o', markersize=3, label=case)
                     if metric == 'acquisition_metric':
@@ -497,7 +545,7 @@ def plot_summary(rows, output_dir, phases):
                         axis.text(0.02, 0.09,
                                   'Gaps / no curve = no finite tracking estimate',
                                   fontsize=7, transform=axis.transAxes)
-                    axis.set(title=f'{scene} / {mode}',
+                    axis.set(title=f'{scene} / {mode_labels[mode]}',
                              xlabel='DFE phase error (deg)', ylabel=ylabel)
                     # 空跟踪图也保留相同相位轴，防止自动坐标范围被误读成新实验条件。
                     axis.set_xlim(phases[0], phases[-1])
@@ -529,13 +577,15 @@ def main():
         'seeds': SEEDS, 'duration_ms': DURATION_MS, 'phases_deg': PHASE_ERRORS_DEG,
         'evaluation_edge_trim_ms': EVALUATION_EDGE_TRIM_MS, 'antennas': ANTENNAS,
         'perturbed_antenna': PERTURBED_ANTENNA,
+        'known_response_comparison_modes': KNOWN_RESPONSE_COMPARISON_MODES,
+        'egc_phase_estimate_source': 'preset_assumed_target_response_phase',
         'injection_stage': 'DFE output',
         'injection_definition': (
             'Constant, frequency-independent complex gain on the entire perturbed '
             'DFE channel including target, CW, thermal noise, and pre-existing '
             'nonlinear/quantization residual; not RF/ADC hardware, pattern or delay.'
         ),
-        'estimated_phase_equals_true_flag': True,
+        'dfe_compensation_phase_equals_injected_flag': True,
         'reference_antenna_unchanged': ANTENNAS[0],
         'metric_definitions': {
             # 分量功率口径暂时停用。

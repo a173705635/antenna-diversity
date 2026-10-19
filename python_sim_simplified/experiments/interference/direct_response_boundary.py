@@ -18,10 +18,11 @@ import numpy as np
 from core.config import AcquisitionConfig, CORNER_NAMES
 from core.gnss import generate_scenario
 from core.models import AntennaDiagnostics, ScenarioTruth
+from core.pipeline import run_end_to_end, run_known_response_comparison
 from core.presets import default_config
 from core.provenance import source_hashes
 from core.serialization import serializable
-from experiments.interference.antenna_ablation import run_case
+from experiments.interference.antenna_ablation import score_case_branches
 from experiments.paths import INTERFERENCE_RESULTS_DIR, reset_output
 
 
@@ -33,6 +34,8 @@ PHASE_ERRORS_DEG = (0, 20, 40, 60, 90, 120, 180)
 PERTURBED_ANTENNA = ANTENNAS[1]
 SHOW_PLOTS_FLAG = True
 EVALUATION_EDGE_TRIM_MS = 10
+# 显式对照默认关闭；EGC 相位暂取已配置名义响应，并非自动估计。
+KNOWN_RESPONSE_COMPARISON_MODES = ()
 
 # Edit each source's complete four-corner voltage gain and phase independently.
 DESIRED_GAIN_DB = {name: 0.0 for name in CORNER_NAMES}
@@ -171,8 +174,25 @@ def run_sweep(seeds=SEEDS, duration_ms=DURATION_MS, phases=PHASE_ERRORS_DEG,
             for name, response in (('known_response', known),
                                    ('unmodeled_phase', mismatch)):
                 scene = generate_direct_scenario(cfg, response)
-                case_rows = run_case(cfg, name, 'direct_response', evaluation_edge_trim_ms,
-                                     scene=scene)
+                results = run_end_to_end(cfg, scene=scene)
+                case_rows = score_case_branches(
+                    results, results['branches'], name, 'direct_response',
+                    evaluation_edge_trim_ms, receiver_role='actual',
+                )
+                if KNOWN_RESPONSE_COMPARISON_MODES:
+                    assumed_target_response = scene[1]['desired_steering_assumed']
+                    phase_estimates_deg = np.rad2deg(np.angle(assumed_target_response))
+                    comparison_branches = run_known_response_comparison(
+                        results['dfe_channels'], cfg, results['dfe_info']['fs_out_hz'],
+                        phase_estimates_deg=phase_estimates_deg,
+                        assumed_target_response=assumed_target_response,
+                        modes=KNOWN_RESPONSE_COMPARISON_MODES,
+                    )
+                    case_rows.extend(score_case_branches(
+                        results, comparison_branches, name, 'direct_response',
+                        evaluation_edge_trim_ms, receiver_role='known_response_comparison',
+                        phase_estimate_source='preset_assumed_target_response_phase',
+                    ))
                 for row in case_rows:
                     row['phase_error_deg'] = phase
                     row['antennas'] = ','.join(antennas)
@@ -186,8 +206,11 @@ def plot_summary(rows, output_dir, phases=PHASE_ERRORS_DEG):
 
     modes = tuple(dict.fromkeys(row['mode'] for row in rows))
     case_names = ('known_response', 'unmodeled_phase')
-    colors = {'single': '#555555', 'mrc': '#1f77b4',
-              'mvdr': '#d95f02', 'blind_null': '#2ca02c'}
+    colors = {'single': '#555555', 'blind_null': '#2ca02c',
+              'egc': '#1f77b4', 'mvdr': '#d95f02'}
+    labels = {'single': 'SINGLE (actual)', 'blind_null': 'Blind Null (actual)',
+              'egc': 'EGC (preset phase comparison)',
+              'mvdr': 'MVDR (known response comparison)'}
     def series(case, mode, key):
         values = []
         for phase in phases:
@@ -222,7 +245,7 @@ def plot_summary(rows, output_dir, phases=PHASE_ERRORS_DEG):
                 axis = axes[index, case_index]
                 for mode in modes:
                     axis.plot(phases, series(case, mode, key),
-                              marker='o', color=colors[mode], label=mode)
+                              marker='o', color=colors[mode], label=labels[mode])
                 if key == 'tracking_cn0_late_median_db_hz':
                     axis.ticklabel_format(axis='y', style='plain', useOffset=False)
                 if key == 'acquisition_metric':
@@ -253,6 +276,8 @@ def main():
     manifest = {
         'seeds': SEEDS, 'duration_ms': DURATION_MS, 'phases_deg': PHASE_ERRORS_DEG,
         'antennas': ANTENNAS, 'perturbed_antenna': PERTURBED_ANTENNA,
+        'known_response_comparison_modes': KNOWN_RESPONSE_COMPARISON_MODES,
+        'egc_phase_estimate_source': 'preset_assumed_target_response_phase',
         'evaluation_edge_trim_ms': EVALUATION_EDGE_TRIM_MS,
         'receiver_config_by_seed': {
             str(seed): asdict(build_config(seed, DURATION_MS, ANTENNAS))

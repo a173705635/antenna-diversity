@@ -5,7 +5,7 @@ import numpy as np
 from .acquisition import acquire
 from .config import SimulationConfig
 from .dfe import process_dfe
-from .diversity import combine_known
+from .diversity import combine_egc, combine_mvdr, combine_single
 from .interference.combining import combine_blind_null
 from .gnss import generate_scenario
 from .metrics import compute_metrics
@@ -24,59 +24,35 @@ from .tracking import track
 def _run_branch(
     mode: str,
     dfe_channels: np.ndarray,
-    truth: ScenarioTruth,
     cfg: SimulationConfig,
     fs_out_hz: float,
 ) -> BranchResult:
-    """一组固定权值处理完整 DFE 序列；结果含合并码值和接收状态。"""
-    if mode == "blind_null":
+    """运行不读取目标响应的实际接收分支。"""
+    if mode == "single":
+        combined_samples, combining_info = combine_single(dfe_channels)
+    elif mode == "blind_null":
         combined_samples, combining_info = combine_blind_null(
             dfe_channels,
             cfg.diversity.blind_null,
         )
     else:
-        combined_samples, combining_info = combine_known(
-            dfe_channels,
-            truth["desired_steering_assumed"],
-            mode,
-            cfg.diversity.diagonal_loading_factor,
-        )
+        raise ValueError(f"Unsupported actual receiver mode: {mode}")
 
     return _finish_branch(
         combined_samples,
         combining_info,
-        truth,
         cfg,
         fs_out_hz,
-        dfe_channels.shape[1],
     )
 
 
 def _finish_branch(
     combined_samples: np.ndarray,
     combining_info: CombiningInfo,
-    truth: ScenarioTruth,
     cfg: SimulationConfig,
     fs_out_hz: float,
-    covariance_snapshots: int,
 ) -> BranchResult:
-    """接收一维合并复采样和求权信息，补齐指标并完成捕获跟踪。"""
-    weights = combining_info["weights"]
-    interferer_gains = [
-        float(abs(np.vdot(weights, steering)))
-        for steering in truth["interferer_steering_effective"]
-    ]
-    combining_info.update(
-        {
-            "target_direction_gain": float(
-                abs(np.vdot(weights, truth["desired_steering_true"]))
-            ),
-            "interferer_direction_gains": interferer_gains,
-            "worst_interferer_gain": max(interferer_gains, default=0.0),
-            "covariance_snapshots": covariance_snapshots,
-            "weights_are_fixed_flag": True,
-        }
-    )
+    """以一维合并复采样完成捕获跟踪；求权信息不混入真值评分。"""
     acquisition = acquire(
         combined_samples,
         fs_out_hz,
@@ -123,7 +99,7 @@ def run_end_to_end(
 
     results = run_frontend(cfg, scene=scene, retain_analysis_flag=retain_analysis_flag)
     results["branches"] = run_receiver(
-        results["dfe_channels"], results["truth"], results["config"],
+        results["dfe_channels"], results["config"],
         results["dfe_info"]["fs_out_hz"],
     )
     results["metrics"] = compute_metrics(results)
@@ -179,21 +155,48 @@ def run_frontend(
 
 def run_receiver(
     dfe_channels: np.ndarray,
-    truth: ScenarioTruth,
     cfg: SimulationConfig,
     fs_out_hz: float,
 ) -> dict[str, BranchResult]:
-    """对同一份 [通道, DFE采样] 复数码值执行配置中的各合并接收分支。
+    """只运行 SINGLE 和 Blind Null 的实际接收；其他模式显式报错。
 
-    fs_out_hz 决定捕获和跟踪的采样时间；合并导向来自配置给出的名义阵列响应。
+    输入是 [通道, DFE采样] 复数码值；不传入目标真值或名义响应。
     """
     return {
         mode: _run_branch(
             mode,
             dfe_channels,
-            truth,
             cfg,
             fs_out_hz,
         )
         for mode in cfg.diversity.modes
     }
+
+
+def run_known_response_comparison(
+    dfe_channels: np.ndarray,
+    cfg: SimulationConfig,
+    fs_out_hz: float,
+    *,
+    phase_estimates_deg: np.ndarray,
+    assumed_target_response: np.ndarray,
+    modes: tuple[str, ...],
+) -> dict[str, BranchResult]:
+    """显式对照入口：EGC 只读外部相位估计，MVDR 读取名义目标复响应。"""
+    comparison_branches = {}
+    for mode in modes:
+        if mode == "egc":
+            combined_samples, combining_info = combine_egc(
+                dfe_channels, phase_estimates_deg,
+            )
+        elif mode == "mvdr":
+            combined_samples, combining_info = combine_mvdr(
+                dfe_channels, assumed_target_response,
+                cfg.diversity.diagonal_loading_factor,
+            )
+        else:
+            raise ValueError(f"Unsupported known-response comparison mode: {mode}")
+        comparison_branches[mode] = _finish_branch(
+            combined_samples, combining_info, cfg, fs_out_hz,
+        )
+    return comparison_branches

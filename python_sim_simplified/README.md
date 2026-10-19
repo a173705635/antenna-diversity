@@ -27,7 +27,7 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 | 实验 | 命令 | 固定输出 |
 |---|---|---|
-| 通用条件验证：当前默认无干扰相位中心偏移（16条件×4算法×30 seed） | `python -m experiments.interference.validation` | `results/interference/phase_center_offset/` |
+| 通用条件验证：实验类型与 seed 在 `validation_config.py` 选择 | `python -m experiments.interference.validation` | `results/interference/<EXPERIMENT_TYPE>/` |
 | 完整接收链及绘图 | `python -m experiments.interference.full_chain` | `results/interference/full_chain/` |
 | 天线配对消融与捕获跟踪比较 | `python -m experiments.interference.antenna_ablation` | `results/interference/antenna_ablation/` |
 | 目标/CW/宽带响应直接赋值，已知/未知目标相位扫描 | `python -m experiments.interference.direct_response_boundary` | `results/interference/direct_response_boundary/` |
@@ -38,13 +38,13 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 也可以在 PyCharm 直接运行 `experiments/interference/full_chain.py`，或执行 `python experiments/interference/full_chain.py`；入口会定位当前精简版根目录。
 
-`full_chain` 默认启用合成参数化天线，包含 CW 和 2 MHz 带限复高斯噪声干扰，比较 SINGLE、MRC、MVDR、Blind Null。公共 `default_config()` 仍为理想各向同性模型。回波生成、SDCP 检测、多径 LCMV 和抗欺骗接收机已删除，配置中也没有重新开启这些方向的开关。
+`full_chain` 默认启用合成参数化天线，包含 CW 和 2 MHz 带限复高斯噪声干扰，只运行 SINGLE 和 Blind Null；两者求权都不读取目标幅相。公共 `default_config()` 仍为理想各向同性模型。回波生成、SDCP 检测、多径 LCMV 和抗欺骗接收机已删除，配置中也没有重新开启这些方向的开关。
 
 ### 通用条件验证
 
-日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。四类实验共用 `MODES`、`ACTIVE_ANTENNAS`、`SEEDS`、`DURATION_MS`、`WORKERS` 与统计去边；默认算法为 SINGLE、MRC、MVDR 和 Blind Null（`blind_null`），绘图开关仍按实验选择。
+日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。四类实验共用 `MODES`、`ACTIVE_ANTENNAS`、`SEEDS`、`DURATION_MS`、`WORKERS` 与统计去边；默认算法为 SINGLE 和 Blind Null（`blind_null`）。
 
-当前 `EXPERIMENT_TYPE="phase_center_offset"` 有16个物理条件；默认100 ms、seed 42～71、4进程，共480次独立前端、1920行算法结果，只保存数据、不弹图。也可选择 `mutual_coupling`（12条件，MC-001～012）、`antenna_gain`（21条件，TC-001～021）、`phase_direction_gain`；每个条件运行 `MODES` 中的方法，输出统一为 `results/interference/<EXPERIMENT_TYPE>/`。已有历史结果不移动，旧实验条件与结果见[相位中心说明](docs/interference/README.md#无干扰相位中心偏移验证2026-10-16)。
+`EXPERIMENT_TYPE` 可选 `phase_direction_gain`、`phase_center_offset`（16条件）、`mutual_coupling`（12条件，MC-001～012）或 `antenna_gain`（21条件，TC-001～021）；每个条件运行 `MODES` 中的方法，输出统一为 `results/interference/<EXPERIMENT_TYPE>/`。已有历史结果不移动，旧实验条件与结果见[相位中心说明](docs/interference/README.md#无干扰相位中心偏移验证2026-10-16)。
 
 相位/方向/增益实验通过 `SELECTED_SERIES`、`SCENES` 和各扫描元组设置范围；每个相位点固定生成基准、未补偿、准确补偿三组。`_base_config()` 集中设置共享配置，四个构造函数只描述条件差异，`build_cases()` 统一展开种子；`build_settings()` 设置统计窗口、输出目录、并行数和绘图。各用例独立调度，结果按原用例顺序保存。顶部 `TARGET_TRUE_DIRECTION`、`TARGET_ASSUMED_DIRECTION` 分别设置真实与名义目标方向；`ACTIVE_ANTENNAS` 的第一根是 SINGLE 参考，增益、互耦和位置偏移条件作用于前两根，额外激活阵元保留基础配置。
 
@@ -56,7 +56,9 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 接收分支返回 `combined_samples`（合并采样）和 `combining_info`（权值等算法信息）；通用验证的 `receiver_samples` 是相位处理后实际送入接收机的多通道采样。
 
-MRC 使用原 `egc` 的幅度匹配权值 `w=a/(aᴴa)`，在各通道噪声独立且等功率时最大化输出 SNR；旧 `egc_strict` 的等幅权值已删除，旧模式名不再可用。相位补偿量由用户配置，作用于整个 DFE 复数序列。它不代表自动估相或宽带时延对齐。天线增益作用在接收机热噪声产生前，不能用 DFE 整通道缩放代替。接收机跟踪 C/N₀ 保留，失捕与缺测不填零。具体参数示例和历史验证记录见 [抗干扰说明](docs/interference/README.md)。
+SINGLE 直接取第一根激活天线，不按目标响应归一化。MRC 已移除；EGC 使用显式输入的相位，权值为 `exp(jφ)/N`，各路等幅且不依赖目标强度。EGC 和 MVDR 只供显式对照，前者目前使用预设相位、后者使用已知目标响应，均不代表已实现自动估相。现有 DFE 通道误差补偿与 EGC 的目标相对相位对齐是不同环节；天线增益仍作用于热噪声产生之前。接收机跟踪 C/N₀ 缺测不填零，实验条件见 [抗干扰说明](docs/interference/README.md)。
+
+需要对照时，在 `channel_phase_validation.py` 或 `direct_response_boundary.py` 顶部将 `KNOWN_RESPONSE_COMPARISON_MODES` 从 `()` 改为 `("egc", "mvdr")`；EGC 暂用名义响应的相位，结果表记录对照角色和相位来源，图中标明对照身份。
 
 GPS 仿真定位的 `DURATION_MS` 至少为 210 ms 才包含当前首个定位时刻，不保证定位成功。真实录波输入固定为 `results/real_gnss_hackrf/first40s.int8`，需在本地具备录波且实际解出健康星历；记录需长于 1.01 s 才存在当前定位时刻。
 

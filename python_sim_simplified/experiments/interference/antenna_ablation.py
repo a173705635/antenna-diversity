@@ -258,7 +258,7 @@ def _power(samples, interval):
 #         assert budgets[mode]['reconstruction_max_abs_error'] < 1e-8
 #     return budgets
 
-def evaluate_output(results, evaluation_edge_trim_ms):
+def evaluate_output(results, evaluation_edge_trim_ms, branches=None):
     """只用实际 DFE 样本复核固定权值合并和协方差功率。"""
     fs_out_hz = results['dfe_info']['fs_out_hz']
     edge_trim_samples = round(evaluation_edge_trim_ms * 1e-3 * fs_out_hz)
@@ -266,7 +266,8 @@ def evaluate_output(results, evaluation_edge_trim_ms):
     channels = results['dfe_channels'][:, interval]
     covariance = channels @ channels.conj().T / channels.shape[1]
     budgets = {}
-    for mode, branch_result in results['branches'].items():
+    branches = results['branches'] if branches is None else branches
+    for mode, branch_result in branches.items():
         weights = branch_result['combining_info']['weights']
         output_samples = branch_result['combined_samples'][interval]
         actual_power = _power(output_samples, slice(None))
@@ -297,14 +298,14 @@ def _db_ratio(numerator, denominator):
     return float(10.0 * np.log10(numerator / denominator))
 
 
-def run_case(cfg, case_name, context, evaluation_edge_trim_ms, *, scene=None):
-    """运行完整接收并复核实际固定权值输出。"""
-    # results = run_end_to_end(cfg, scene=scene, retain_analysis_flag=True)
-    results = run_end_to_end(cfg, scene=scene)
-    budgets = evaluate_output(results, evaluation_edge_trim_ms)
+def score_case_branches(results, branches, case_name, context, evaluation_edge_trim_ms,
+                        *, receiver_role, phase_estimate_source=None):
+    """对已完成的一组实际或显式对照分支复算输出，标明接收角色。"""
+    cfg = results['config']
+    budgets = evaluate_output(results, evaluation_edge_trim_ms, branches)
     # single = budgets['single']  # 分量相对 SINGLE 收益暂停。
     rows = []
-    for mode, branch_result in results['branches'].items():
+    for mode, branch_result in branches.items():
         budget = budgets[mode]
         acquisition = branch_result['acquisition']
         tracking = branch_result['tracking']
@@ -322,7 +323,9 @@ def run_case(cfg, case_name, context, evaluation_edge_trim_ms, *, scene=None):
             finite = np.array([])
         rows.append({
             'context': context, 'case': case_name, 'seed': cfg.random_seed,
-            'mode': mode, **budget,
+            'mode': mode, 'receiver_role': receiver_role,
+            'phase_estimate_source': phase_estimate_source if mode == 'egc' else None,
+            **budget,
             # 分量功率、收益及抑制比输出暂停。
             # 'target_output_gain_db': _db_ratio(budget['target_power'], single['target_power']),
             # 'noise_output_gain_db': _db_ratio(budget['thermal_power'], single['thermal_power']),
@@ -346,6 +349,16 @@ def run_case(cfg, case_name, context, evaluation_edge_trim_ms, *, scene=None):
             'tracking_cn0_late_finite_count': int(finite.size),
         })
     return rows
+
+
+def run_case(cfg, case_name, context, evaluation_edge_trim_ms, *, scene=None):
+    """运行完整实际接收并复核固定权值输出。"""
+    # results = run_end_to_end(cfg, scene=scene, retain_analysis_flag=True)
+    results = run_end_to_end(cfg, scene=scene)
+    return score_case_branches(
+        results, results['branches'], case_name, context, evaluation_edge_trim_ms,
+        receiver_role='actual',
+    )
 
 
 # 分量热噪声诊断暂停，正式入口不再执行额外 RF/DFE 仿真。
@@ -436,9 +449,10 @@ def summarize(rows):
         for key in paired_keys:
             row['paired_ideal_delta_' + key] = row[key] - ideal[key]
     groups = []
+    modes = tuple(dict.fromkeys(row['mode'] for row in rows))
     for context in CONTEXTS:
         for case in CASES:
-            for mode in ('single', 'mrc', 'mvdr', 'blind_null'):
+            for mode in modes:
                 members = [row for row in rows if (row['context'], row['case'], row['mode'])
                            == (context, case, mode)]
                 group = {'context': context, 'case': case, 'mode': mode,
@@ -478,8 +492,8 @@ def plot_summary(groups, output_dir):
         #                        'Thermal output gain vs SINGLE (dB)'))),
         ('acquisition_metric', (('acquisition_metric_mean', 'Acquisition peak ratio'),)),
     )
-    colors = {'single': '#555555', 'mrc': '#1f77b4',
-              'mvdr': '#d95f02', 'blind_null': '#2ca02c'}
+    colors = {'single': '#555555', 'blind_null': '#2ca02c'}
+    modes = tuple(dict.fromkeys(group['mode'] for group in groups))
     figure_paths = []
     contexts = tuple(CONTEXTS)
     for filename, metrics in specs:
@@ -490,7 +504,8 @@ def plot_summary(groups, output_dir):
         for metric_index, (key, ylabel) in enumerate(metrics):
             for context_index, context in enumerate(contexts):
                 axis = axes[metric_index, context_index]
-                for mode, color in colors.items():
+                for mode in modes:
+                    color = colors[mode]
                     subset = {group['case']: group for group in groups
                               if group['context'] == context and group['mode'] == mode}
                     values = [subset[case][key] for case in CASES]
@@ -521,16 +536,16 @@ def plot_summary(groups, output_dir):
         counts = np.array([[
             next(group for group in groups if (group['context'], group['case'], group['mode'])
                  == (context, case, mode))['correct_acquisition_count']
-            for case in CASES] for mode in colors])
+            for case in CASES] for mode in modes])
         image = axis.imshow(counts / len(SEEDS), vmin=0, vmax=1,
                             cmap='YlGnBu', aspect='auto')
-        for row in range(len(colors)):
+        for row in range(len(modes)):
             for column in range(len(CASES)):
                 axis.text(column, row, f'{counts[row, column]}/{len(SEEDS)}',
                           ha='center', va='center', fontsize=8,
                           color='white' if counts[row, column] / len(SEEDS) > 0.55
                           else 'black')
-        axis.set_yticks(range(len(colors)), tuple(colors))
+        axis.set_yticks(range(len(modes)), modes)
         axis.set_xticks(range(len(CASES)), CASES, rotation=55, ha='right')
         axis.set_title(context + ' — correct acquisition count')
     fig.colorbar(image, ax=axes.ravel().tolist(), label='Correct acquisition rate')
