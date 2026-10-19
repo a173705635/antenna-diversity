@@ -131,7 +131,7 @@ def generate_scenario(
         antenna_model,
         cfg.signal.assumed_direction,
         cfg.signal.assumed_polarization,
-        estimated_flag=True,
+        use_assumed_state_flag=True,
     )
     desired_component = apply_channel_delays(
         desired_true_base[:, None] * desired_waveform[None, :],

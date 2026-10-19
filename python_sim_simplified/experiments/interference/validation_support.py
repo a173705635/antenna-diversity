@@ -75,7 +75,7 @@ def apply_dfe_phase(
 #     model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
 #     antenna_steering, _ = antenna_response(
 #         model, cfg.signal.assumed_direction, cfg.signal.assumed_polarization,
-#         estimated_flag=True,
+#         use_assumed_state_flag=True,
 #     )
 #     delays_s = 1e-9 * np.array([
 #         cfg.phone.estimated_channel_delay_ns[name]

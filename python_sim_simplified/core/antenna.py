@@ -1,4 +1,4 @@
-"""Readable composition of the complete phone antenna response."""
+"""天线复响应：几何相位、方向图与极化、阵元误差与遮挡、互耦、通道幅相。"""
 
 from dataclasses import dataclass
 
@@ -42,43 +42,45 @@ class AntennaModel:
 
 
 def direction_vector(direction: Direction) -> np.ndarray:
-    azimuth, elevation = np.deg2rad(
+    azimuth_rad, elevation_rad = np.deg2rad(
         [direction.azimuth_deg, direction.elevation_deg]
     )
     return np.array(
         [
-            np.cos(elevation) * np.cos(azimuth),
-            np.cos(elevation) * np.sin(azimuth),
-            np.sin(elevation),
+            np.cos(elevation_rad) * np.cos(azimuth_rad),
+            np.cos(elevation_rad) * np.sin(azimuth_rad),
+            np.sin(elevation_rad),
         ]
     )
 
 
 def jones_vector(polarization: WavePolarization) -> np.ndarray:
+    """按 [方位, 仰角] 分量构造单位范数的复 Jones 矢量。"""
     if polarization.kind == "rhcp":
-        vector = np.array([1.0, -1.0j])
+        polarization_vector = np.array([1.0, -1.0j])
     elif polarization.kind == "lhcp":
-        vector = np.array([1.0, 1.0j])
+        polarization_vector = np.array([1.0, 1.0j])
     elif polarization.kind == "linear":
-        tilt = np.deg2rad(polarization.tilt_deg)
-        vector = np.array([np.cos(tilt), np.sin(tilt)], dtype=complex)
+        tilt_rad = np.deg2rad(polarization.tilt_deg)
+        polarization_vector = np.array([np.cos(tilt_rad), np.sin(tilt_rad)], dtype=complex)
     else:
-        vector = np.array(
+        polarization_vector = np.array(
             [
                 complex(polarization.az_real, polarization.az_imag),
                 complex(polarization.el_real, polarization.el_imag),
             ]
         )
-    return vector / np.linalg.norm(vector)
+    return polarization_vector / np.linalg.norm(polarization_vector)
 
 
 def rotation_matrix_ypr(orientation: ElementOrientation) -> np.ndarray:
-    yaw, pitch, roll = np.deg2rad(
+    """将阵元局部列向量转换到手机坐标；Rz @ Ry @ Rx 依次施加 roll、pitch、yaw。"""
+    yaw_rad, pitch_rad, roll_rad = np.deg2rad(
         [orientation.yaw_deg, orientation.pitch_deg, orientation.roll_deg]
     )
-    cz, sz = np.cos(yaw), np.sin(yaw)
-    cy, sy = np.cos(pitch), np.sin(pitch)
-    cx, sx = np.cos(roll), np.sin(roll)
+    cz, sz = np.cos(yaw_rad), np.sin(yaw_rad)
+    cy, sy = np.cos(pitch_rad), np.sin(pitch_rad)
+    cx, sx = np.cos(roll_rad), np.sin(roll_rad)
     rz = np.array([[cz, -sz, 0.0], [sz, cz, 0.0], [0.0, 0.0, 1.0]])
     ry = np.array([[cy, 0.0, sy], [0.0, 1.0, 0.0], [-sy, 0.0, cy]])
     rx = np.array([[1.0, 0.0, 0.0], [0.0, cx, -sx], [0.0, sx, cx]])
@@ -86,20 +88,21 @@ def rotation_matrix_ypr(orientation: ElementOrientation) -> np.ndarray:
 
 
 def spherical_frame(azimuth_deg: float, elevation_deg: float):
-    azimuth, elevation = np.deg2rad([azimuth_deg, elevation_deg])
+    """返回该方向的径向、方位和仰角单位基向量，使用输入角所在坐标系。"""
+    azimuth_rad, elevation_rad = np.deg2rad([azimuth_deg, elevation_deg])
     radial = np.array(
         [
-            np.cos(elevation) * np.cos(azimuth),
-            np.cos(elevation) * np.sin(azimuth),
-            np.sin(elevation),
+            np.cos(elevation_rad) * np.cos(azimuth_rad),
+            np.cos(elevation_rad) * np.sin(azimuth_rad),
+            np.sin(elevation_rad),
         ]
     )
-    azimuth_basis = np.array([-np.sin(azimuth), np.cos(azimuth), 0.0])
+    azimuth_basis = np.array([-np.sin(azimuth_rad), np.cos(azimuth_rad), 0.0])
     elevation_basis = np.array(
         [
-            -np.sin(elevation) * np.cos(azimuth),
-            -np.sin(elevation) * np.sin(azimuth),
-            np.cos(elevation),
+            -np.sin(elevation_rad) * np.cos(azimuth_rad),
+            -np.sin(elevation_rad) * np.sin(azimuth_rad),
+            np.cos(elevation_rad),
         ]
     )
     return radial, azimuth_basis, elevation_basis
@@ -108,119 +111,146 @@ def spherical_frame(azimuth_deg: float, elevation_deg: float):
 def wave_in_element_frame(
     direction: Direction,
     polarization: WavePolarization,
-    rotation: np.ndarray,
+    element_to_phone_rotation: np.ndarray,
 ) -> tuple[LocalDirection, np.ndarray]:
-    unit_phone, az_phone, el_phone = spherical_frame(
+    """把入射方向及复 Jones 场从手机坐标投影到阵元局部球面基。"""
+    incident_direction_phone, azimuth_basis_phone, elevation_basis_phone = spherical_frame(
         direction.azimuth_deg, direction.elevation_deg
     )
     jones_phone = jones_vector(polarization)
-    field_phone = jones_phone[0] * az_phone + jones_phone[1] * el_phone
-    unit_local = rotation.T @ unit_phone
-    field_local = rotation.T @ field_phone
-    local_azimuth = np.rad2deg(np.arctan2(unit_local[1], unit_local[0])) % 360.0
-    local_elevation = np.rad2deg(np.arcsin(np.clip(unit_local[2], -1.0, 1.0)))
-    _, az_local, el_local = spherical_frame(local_azimuth, local_elevation)
+    electric_field_phone = jones_phone[0] * azimuth_basis_phone + jones_phone[1] * elevation_basis_phone
+    # element_to_phone_rotation 的转置将手机坐标转换回阵元局部坐标。
+    incident_direction_local = element_to_phone_rotation.T @ incident_direction_phone
+    electric_field_local = element_to_phone_rotation.T @ electric_field_phone
+    local_azimuth_deg = np.rad2deg(np.arctan2(incident_direction_local[1], incident_direction_local[0])) % 360.0
+    local_elevation_deg = np.rad2deg(np.arcsin(np.clip(incident_direction_local[2], -1.0, 1.0)))
+    _, azimuth_basis_local, elevation_basis_local = spherical_frame(local_azimuth_deg, local_elevation_deg)
+    # vdot 对基向量取共轭；此处基向量为实值，仍按复内积统一计算。
     local_jones = np.array(
-        [np.vdot(az_local, field_local), np.vdot(el_local, field_local)]
+        [np.vdot(azimuth_basis_local, electric_field_local), np.vdot(elevation_basis_local, electric_field_local)]
     )
     local_jones /= np.linalg.norm(local_jones)
-    return LocalDirection(local_azimuth, local_elevation), local_jones
+    return LocalDirection(local_azimuth_deg, local_elevation_deg), local_jones
 
 
 def parametric_height(
-    parameters: ParametricPattern,
+    pattern_parameters: ParametricPattern,
     local_elevation_deg: float,
     local_azimuth_deg: float = 0.0,
 ) -> np.ndarray:
+    """返回无量纲接收 Jones 系数 [h_az, h_el]；不表示几何高度或米制有效高度。"""
     front_power = max(np.sin(np.deg2rad(local_elevation_deg)), 0.0) ** (
-        parameters.cosine_exponent
+        pattern_parameters.cosine_exponent
     )
     relative_db = -np.inf if front_power == 0.0 else 10.0 * np.log10(front_power)
-    gain_db = parameters.peak_gain_db + max(
+    gain_db = pattern_parameters.peak_gain_db + max(
         relative_db,
-        parameters.back_lobe_gain_db - parameters.peak_gain_db,
+        pattern_parameters.back_lobe_gain_db - pattern_parameters.peak_gain_db,
     )
-    azimuth_offset = np.deg2rad(local_azimuth_deg - parameters.azimuth_peak_deg)
+    azimuth_offset_rad = np.deg2rad(local_azimuth_deg - pattern_parameters.azimuth_peak_deg)
     zenith_factor = np.cos(np.deg2rad(local_elevation_deg)) ** 2
-    gain_db -= parameters.azimuth_attenuation_db * zenith_factor * (
-        1.0 - np.cos(azimuth_offset)
+    gain_db -= pattern_parameters.azimuth_attenuation_db * zenith_factor * (
+        1.0 - np.cos(azimuth_offset_rad)
     ) / 2.0
-    nominal = jones_vector(parameters.nominal_polarization)
-    orthogonal = np.array([-np.conj(nominal[1]), np.conj(nominal[0])])
-    cross = 10.0 ** (-parameters.cross_polar_discrimination_db / 20.0)
-    mixture = nominal + cross * np.exp(
-        1j * np.deg2rad(parameters.cross_phase_deg)
-    ) * orthogonal
-    return 10.0 ** (gain_db / 20.0) * mixture / np.linalg.norm(mixture)
+    nominal_polarization_vector = jones_vector(pattern_parameters.nominal_polarization)
+    orthogonal_polarization_vector = np.array([-np.conj(nominal_polarization_vector[1]), np.conj(nominal_polarization_vector[0])])
+    cross_polar_amplitude_ratio = 10.0 ** (-pattern_parameters.cross_polar_discrimination_db / 20.0)
+    mixed_polarization_vector = nominal_polarization_vector + cross_polar_amplitude_ratio * np.exp(
+        1j * np.deg2rad(pattern_parameters.cross_phase_deg)
+    ) * orthogonal_polarization_vector
+    return 10.0 ** (gain_db / 20.0) * mixed_polarization_vector / np.linalg.norm(mixed_polarization_vector)
 
 
 def attenuation_voltage(
-    state: AntennaState,
-    names: tuple[str, ...],
+    antenna_state: AntennaState,
+    active_antenna_names: tuple[str, ...],
     direction: Direction,
 ) -> np.ndarray:
+    """按遮挡区域给出每阵元的无量纲复响应系数，并非实际端口电压。"""
     direction_unit = direction_vector(direction)
-    attenuation_db = np.zeros(len(names))
-    phase_shift_deg = np.zeros(len(names))
-    for region in state.attenuation_regions:
-        center = direction_vector(
-            Direction(region.center_azimuth_deg, region.center_elevation_deg)
+    attenuation_db = np.zeros(len(active_antenna_names))
+    phase_shift_deg = np.zeros(len(active_antenna_names))
+    for attenuation_region in antenna_state.attenuation_regions:
+        region_center_direction = direction_vector(
+            Direction(attenuation_region.center_azimuth_deg, attenuation_region.center_elevation_deg)
         )
-        separation = np.rad2deg(
-            np.arccos(np.clip(np.dot(direction_unit, center), -1.0, 1.0))
+        separation_deg = np.rad2deg(
+            np.arccos(np.clip(np.dot(direction_unit, region_center_direction), -1.0, 1.0))
         )
-        if region.transition_width_deg == 0.0:
-            fraction = float(separation <= region.radius_deg)
+        if attenuation_region.transition_width_deg == 0.0:
+            attenuation_fraction = float(separation_deg <= attenuation_region.radius_deg)
         else:
-            inner = region.radius_deg - region.transition_width_deg / 2.0
-            outer = region.radius_deg + region.transition_width_deg / 2.0
-            if separation <= inner:
-                fraction = 1.0
-            elif separation >= outer:
-                fraction = 0.0
+            transition_inner_radius_deg = (
+                attenuation_region.radius_deg - attenuation_region.transition_width_deg / 2.0
+            )
+            transition_outer_radius_deg = (
+                attenuation_region.radius_deg + attenuation_region.transition_width_deg / 2.0
+            )
+            if separation_deg <= transition_inner_radius_deg:
+                attenuation_fraction = 1.0
+            elif separation_deg >= transition_outer_radius_deg:
+                attenuation_fraction = 0.0
             else:
-                phase = np.pi * (separation - inner) / region.transition_width_deg
-                fraction = 0.5 * (1.0 + np.cos(phase))
-        selected = region.elements or names
-        for index, name in enumerate(names):
-            if name in selected:
-                attenuation_db[index] += fraction * region.attenuation_db
-                phase_shift_deg[index] += fraction * region.phase_shift_deg
+                transition_phase_rad = (
+                    np.pi * (separation_deg - transition_inner_radius_deg)
+                    / attenuation_region.transition_width_deg
+                )
+                attenuation_fraction = 0.5 * (1.0 + np.cos(transition_phase_rad))
+        affected_antenna_names = attenuation_region.elements or active_antenna_names
+        for antenna_index, antenna_name in enumerate(active_antenna_names):
+            if antenna_name in affected_antenna_names:
+                attenuation_db[antenna_index] += attenuation_fraction * attenuation_region.attenuation_db
+                phase_shift_deg[antenna_index] += attenuation_fraction * attenuation_region.phase_shift_deg
     return 10.0 ** (-attenuation_db / 20.0) * np.exp(
         1j * np.deg2rad(phase_shift_deg)
     )
 
 
-def coupling_matrix(state: AntennaState, names: tuple[str, ...]) -> np.ndarray:
-    matrix = np.eye(len(names), dtype=complex)
-    indices = {name: index for index, name in enumerate(names)}
-    for path in state.coupling_paths:
-        if path.source in indices and path.receiver in indices:
-            matrix[indices[path.receiver], indices[path.source]] = 10.0 ** (
-                path.magnitude_db / 20.0
-            ) * np.exp(1j * np.deg2rad(path.phase_deg))
-    return matrix
+def coupling_matrix(
+    antenna_state: AntennaState, active_antenna_names: tuple[str, ...],
+) -> np.ndarray:
+    """互耦矩阵的行是接收端口、列是来源端口；dB 按电压比用 20 换算。"""
+    coupling_coefficients = np.eye(len(active_antenna_names), dtype=complex)
+    antenna_index_by_name = {
+        antenna_name: antenna_index
+        for antenna_index, antenna_name in enumerate(active_antenna_names)
+    }
+    for coupling_path in antenna_state.coupling_paths:
+        if coupling_path.source in antenna_index_by_name and coupling_path.receiver in antenna_index_by_name:
+            coupling_coefficients[
+                antenna_index_by_name[coupling_path.receiver],
+                antenna_index_by_name[coupling_path.source],
+            ] = 10.0 ** (
+                coupling_path.magnitude_db / 20.0
+            ) * np.exp(1j * np.deg2rad(coupling_path.phase_deg))
+    return coupling_coefficients
 
 
-def channel_response(phone: PhoneConfig, estimated_flag: bool = False) -> np.ndarray:
-    amplitude = (
-        phone.estimated_channel_amplitude_error_db
-        if estimated_flag
-        else phone.channel_amplitude_error_db
+def channel_response(phone_cfg: PhoneConfig, use_assumed_state_flag: bool = False) -> np.ndarray:
+    """返回各接收通道的复幅相系数，按真实或名义误差表选择。"""
+    channel_amplitude_error_db = (
+        phone_cfg.estimated_channel_amplitude_error_db
+        if use_assumed_state_flag
+        else phone_cfg.channel_amplitude_error_db
     )
-    phase = (
-        phone.estimated_channel_phase_error_deg
-        if estimated_flag
-        else phone.channel_phase_error_deg
+    channel_phase_error_deg = (
+        phone_cfg.estimated_channel_phase_error_deg
+        if use_assumed_state_flag
+        else phone_cfg.channel_phase_error_deg
     )
-    amplitude_db = np.array([amplitude[name] for name in phone.active_antennas])
-    phase_deg = np.array([phase[name] for name in phone.active_antennas])
+    amplitude_db = np.array([
+        channel_amplitude_error_db[antenna_name] for antenna_name in phone_cfg.active_antennas
+    ])
+    phase_deg = np.array([
+        channel_phase_error_deg[antenna_name] for antenna_name in phone_cfg.active_antennas
+    ])
     return 10.0 ** (amplitude_db / 20.0) * np.exp(1j * np.deg2rad(phase_deg))
 
 
-def build_antenna_model(phone: PhoneConfig, carrier_hz: float) -> AntennaModel:
-    true_state = phone.antenna_model.true_state
-    assumed_state = phone.antenna_model.assumed_state
+def build_antenna_model(phone_cfg: PhoneConfig, carrier_hz: float) -> AntennaModel:
+    """加载真实/名义实测方向图并预计算通道系数，供同一载波频率复用。"""
+    true_state = phone_cfg.antenna_model.true_state
+    assumed_state = phone_cfg.antenna_model.assumed_state
     true_measured = (
         load_measured_pattern(true_state.measured_pattern_csv_path, carrier_hz)
         if true_state.pattern_kind == "measured"
@@ -234,120 +264,151 @@ def build_antenna_model(phone: PhoneConfig, carrier_hz: float) -> AntennaModel:
         else None
     )
     return AntennaModel(
-        active_antennas=phone.active_antennas,
+        active_antennas=phone_cfg.active_antennas,
         carrier_hz=carrier_hz,
-        true_positions_m=phone.phase_centers_m,
-        assumed_positions_m=phone.assumed_phase_centers_m,
+        true_positions_m=phone_cfg.phase_centers_m,
+        assumed_positions_m=phone_cfg.assumed_phase_centers_m,
         true_state=true_state,
         assumed_state=assumed_state,
-        true_channel_response=channel_response(phone, estimated_flag=False),
-        assumed_channel_response=channel_response(phone, estimated_flag=True),
+        true_channel_response=channel_response(phone_cfg, use_assumed_state_flag=False),
+        assumed_channel_response=channel_response(phone_cfg, use_assumed_state_flag=True),
         true_measured=true_measured,
         assumed_measured=assumed_measured,
     )
 
 
-def antenna_response(
-    model: AntennaModel,
+def _element_pattern_and_pcv(
+    active_antenna_names: tuple[str, ...],
+    antenna_state: AntennaState,
+    measured_patterns: dict[str, MeasuredGrid] | None,
     direction: Direction,
     polarization: WavePolarization,
-    estimated_flag: bool = False,
-) -> tuple[np.ndarray, AntennaDiagnostics]:
-    names = model.active_antennas
-    state = (
-        model.assumed_state
-        if estimated_flag
-        else model.true_state
-    )
-    position_map = (
-        model.assumed_positions_m
-        if estimated_flag
-        else model.true_positions_m
-    )
-    measured = model.assumed_measured if estimated_flag else model.true_measured
-    positions = np.array([position_map[name] for name in names])
-    spatial = np.exp(
-        -1j
-        * 2.0
-        * np.pi
-        * model.carrier_hz
-        / SPEED_OF_LIGHT_MPS
-        * (positions @ direction_vector(direction))
-    )
-
-    pattern_voltage = []
+) -> tuple[np.ndarray, np.ndarray]:
+    """逐阵元计算无量纲极化复响应与 PCV 路径长度（mm）。"""
+    pattern_polarization_response = []
     pcv_path_length_mm = []
-    for name in names:
-        if state.pattern_kind == "ideal":
-            voltage = 1.0 + 0.0j
+    for antenna_name in active_antenna_names:
+        if antenna_state.pattern_kind == "ideal":
+            polarization_response = 1.0 + 0.0j
             pcv_mm = 0.0
         else:
             local_direction, local_jones = wave_in_element_frame(
                 direction,
                 polarization,
-                rotation_matrix_ypr(state.orientations[name]),
+                rotation_matrix_ypr(antenna_state.orientations[antenna_name]),
             )
-            if state.pattern_kind == "parametric":
-                parameters = state.parametric_patterns[name]
-                height = parametric_height(
-                    parameters,
+            if antenna_state.pattern_kind == "parametric":
+                pattern_parameters = antenna_state.parametric_patterns[antenna_name]
+                element_jones_response = parametric_height(
+                    pattern_parameters,
                     local_direction.elevation_deg,
                     local_direction.azimuth_deg,
                 )
                 local_azimuth_rad = np.deg2rad(local_direction.azimuth_deg)
-                horizontal = np.cos(np.deg2rad(local_direction.elevation_deg))
-                ux = horizontal * np.cos(local_azimuth_rad)
-                uy = horizontal * np.sin(local_azimuth_rad)
-                qx, qy, qxy = parameters.phase_variation_mm
+                horizontal_direction_magnitude = np.cos(np.deg2rad(local_direction.elevation_deg))
+                ux = horizontal_direction_magnitude * np.cos(local_azimuth_rad)
+                uy = horizontal_direction_magnitude * np.sin(local_azimuth_rad)
+                # ux/uy 是阵元局部方向余弦；三个毫米系数给出随方向变化的附加路径。
+                qx, qy, qxy = pattern_parameters.phase_variation_mm
                 pcv_mm = qx * ux**2 + qy * uy**2 + qxy * ux * uy
             else:
-                height = interpolate_measured(
-                    measured[name],
+                element_jones_response = interpolate_measured(
+                    measured_patterns[antenna_name],
                     local_direction.azimuth_deg,
                     local_direction.elevation_deg,
                 )
-                pcv_mm = 0.0  # Measured complex heights already include phase.
-            voltage = np.vdot(height, local_jones)
-        pattern_voltage.append(voltage)
+                # 实测复方向图已含相位，不再另叠 PCV 路径相位。
+                pcv_mm = 0.0
+            # vdot 对阵元 Jones 响应取共轭，再与入射场的局部 Jones 矢量投影。
+            polarization_response = np.vdot(element_jones_response, local_jones)
+        pattern_polarization_response.append(polarization_response)
         pcv_path_length_mm.append(pcv_mm)
-    pattern_voltage = np.asarray(pattern_voltage)
-    pcv_path_length_mm = np.asarray(pcv_path_length_mm)
+    return np.asarray(pattern_polarization_response), np.asarray(pcv_path_length_mm)
+
+
+def antenna_response(
+    antenna_model: AntennaModel,
+    direction: Direction,
+    polarization: WavePolarization,
+    use_assumed_state_flag: bool = False,
+) -> tuple[np.ndarray, AntennaDiagnostics]:
+    """返回各阵元的复响应系数及分阶段诊断；不是时间采样序列。"""
+    active_antenna_names = antenna_model.active_antennas
+    antenna_state = (
+        antenna_model.assumed_state if use_assumed_state_flag else antenna_model.true_state
+    )
+    phase_center_positions_by_antenna_m = (
+        antenna_model.assumed_positions_m if use_assumed_state_flag else antenna_model.true_positions_m
+    )
+    measured_patterns = (
+        antenna_model.assumed_measured if use_assumed_state_flag else antenna_model.true_measured
+    )
+    channel_response_factors = (
+        antenna_model.assumed_channel_response
+        if use_assumed_state_flag
+        else antenna_model.true_channel_response
+    )
+
+    # 阵元相位中心和入射方向确定几何相位。
+    phase_center_positions_m = np.array([
+        phase_center_positions_by_antenna_m[antenna_name]
+        for antenna_name in active_antenna_names
+    ])
+    spatial_phase_response = np.exp(
+        -1j
+        * 2.0
+        * np.pi
+        * antenna_model.carrier_hz
+        / SPEED_OF_LIGHT_MPS
+        * (phase_center_positions_m @ direction_vector(direction))
+    )
+
+    pattern_polarization_response, pcv_path_length_mm = _element_pattern_and_pcv(
+        active_antenna_names, antenna_state, measured_patterns, direction, polarization,
+    )
+    # PCV 路径由毫米转米；正附加路径按接收相位约定产生负相位。
     pcv_response = np.exp(
-        -1j * 2.0 * np.pi * model.carrier_hz / SPEED_OF_LIGHT_MPS
+        -1j * 2.0 * np.pi * antenna_model.carrier_hz / SPEED_OF_LIGHT_MPS
         * pcv_path_length_mm * 1e-3
     )
 
-    if (set(state.amplitude_error_db) | set(state.phase_error_deg)) - set(position_map):
+    if (
+        set(antenna_state.amplitude_error_db) | set(antenna_state.phase_error_deg)
+    ) - set(phase_center_positions_by_antenna_m):
         raise ValueError('antenna error maps contain unknown element names')
-    amplitude_db = np.array([state.amplitude_error_db.get(name, 0.) for name in names])
-    phase_deg = np.array([state.phase_error_deg.get(name, 0.) for name in names])
+    amplitude_db = np.array([
+        antenna_state.amplitude_error_db.get(antenna_name, 0.)
+        for antenna_name in active_antenna_names
+    ])
+    phase_deg = np.array([
+        antenna_state.phase_error_deg.get(antenna_name, 0.)
+        for antenna_name in active_antenna_names
+    ])
     if not np.all(np.isfinite(amplitude_db)) or not np.all(np.isfinite(phase_deg)):
         raise ValueError('antenna amplitude/phase errors must be finite')
     with np.errstate(over='raise', invalid='raise'):
-        element_error = 10.**(amplitude_db/20.) * np.exp(1j*np.deg2rad(phase_deg))
+        element_error_response = 10.**(amplitude_db/20.) * np.exp(1j*np.deg2rad(phase_deg))
 
-    blockage = attenuation_voltage(state, names, direction)
-    open_circuit = spatial * pattern_voltage * pcv_response * element_error * blockage
-    coupling = coupling_matrix(state, names)
-    coupled = coupling @ open_circuit
-    channel = (
-        model.assumed_channel_response
-        if estimated_flag
-        else model.true_channel_response
+    blockage_response = attenuation_voltage(antenna_state, active_antenna_names, direction)
+    open_circuit_response = (
+        spatial_phase_response * pattern_polarization_response * pcv_response
+        * element_error_response * blockage_response
     )
-    effective = channel * coupled
+    coupling_coefficients = coupling_matrix(antenna_state, active_antenna_names)
+    coupled_response = coupling_coefficients @ open_circuit_response
+    effective_response = channel_response_factors * coupled_response
     diagnostics: AntennaDiagnostics = {
-        "positions_m": positions,
-        "spatial_phase": spatial,
-        "pattern_polarization_voltage": pattern_voltage,
+        "positions_m": phase_center_positions_m,
+        "spatial_phase": spatial_phase_response,
+        "pattern_polarization_voltage": pattern_polarization_response,
         "pcv_path_length_mm": pcv_path_length_mm,
         "pcv_response": pcv_response,
-        "element_error_response": element_error,
-        "blockage_voltage": blockage,
-        "open_circuit_response": open_circuit,
-        "coupling_matrix": coupling,
-        "coupled_response": coupled,
-        "channel_response": channel,
-        "effective_manifold": effective,
+        "element_error_response": element_error_response,
+        "blockage_voltage": blockage_response,
+        "open_circuit_response": open_circuit_response,
+        "coupling_matrix": coupling_coefficients,
+        "coupled_response": coupled_response,
+        "channel_response": channel_response_factors,
+        "effective_manifold": effective_response,
     }
-    return effective, diagnostics
+    return effective_response, diagnostics
