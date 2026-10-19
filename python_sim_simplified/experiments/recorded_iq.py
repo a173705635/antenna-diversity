@@ -37,24 +37,38 @@ def main():
         raise ValueError('Recorded positioning is not evaluated: observations start at 1 s with a 10 ms end margin; use more than 1.01 s. Decoded ephemerides are also required.')
     output_dir = reset_output(OUTPUT_DIR)
     if FREEZE_SOURCE_FLAG:freeze_source(output_dir)
-    dcfg=DFEConfig(decimation=2,output_bits=0)
-    acfg=AcquisitionConfig(doppler_bins_hz=np.arange(-10000.,10000.1,250.))
-    tcfg=TrackingConfig(carrier_discriminator='costas',max_epochs=round(DURATION_S*1000))
-    bb,info=prepare_recording(IQ_PATH,output_dir/'baseband.c128',start_sample=round(START_S*SAMPLE_RATE_HZ),
-        sample_count=round(DURATION_S*SAMPLE_RATE_HZ),fs_hz=SAMPLE_RATE_HZ,if_hz=IF_HZ,dfe_config=dcfg)
-    fs=info['fs_out_hz'];channels={};acquisitions=[]
+    dfe_cfg=DFEConfig(decimation=2,output_bits=0)
+    acquisition_cfg=AcquisitionConfig(doppler_bins_hz=np.arange(-10000.,10000.1,250.))
+    tracking_cfg=TrackingConfig(carrier_discriminator='costas',max_epochs=round(DURATION_S*1000))
+    baseband_samples,dfe_info=prepare_recording(
+        IQ_PATH,output_dir/'baseband.c128',start_sample=round(START_S*SAMPLE_RATE_HZ),
+        sample_count=round(DURATION_S*SAMPLE_RATE_HZ),fs_hz=SAMPLE_RATE_HZ,
+        if_hz=IF_HZ,dfe_config=dfe_cfg,
+    )
+    fs_out_hz=dfe_info['fs_out_hz']
+    tracking_histories_by_prn={}
+    acquisitions=[]
     _json_write(output_dir/'manifest.json',{'input':str(IQ_PATH),'start_s':START_S,'duration_s':DURATION_S,
-        'sample_rate_hz':SAMPLE_RATE_HZ,'if_hz':IF_HZ,'prns':PRNS,'dfe':info,'tracking':asdict(tcfg),
-        'acquisition':asdict(acfg),'source_sha256':source_hashes()})
-    for row in receive_channels(bb[0],fs,PRNS,acfg,tcfg):
-        print('PRN',row['prn'],'acquired',row['acquisition']['success_flag'],flush=True)
-        acquisitions.append({'prn':row['prn'],'acquisition':row['acquisition']})
-        h=row.get('history')
-        if h and h['success_flag']:
-            channels[row['prn']]=h
-            np.savez_compressed(output_dir/f"prn{row['prn']:02d}.npz",**{k:v for k,v in h.items() if isinstance(v,np.ndarray)})
+        'sample_rate_hz':SAMPLE_RATE_HZ,'if_hz':IF_HZ,'prns':PRNS,'dfe':dfe_info,
+        'tracking':asdict(tracking_cfg),'acquisition':asdict(acquisition_cfg),
+        'source_sha256':source_hashes()})
+    for channel_result in receive_channels(
+        baseband_samples[0],fs_out_hz,PRNS,acquisition_cfg,tracking_cfg,
+    ):
+        print('PRN',channel_result['prn'],'acquired',
+              channel_result['acquisition']['success_flag'],flush=True)
+        acquisitions.append({'prn':channel_result['prn'],
+                             'acquisition':channel_result['acquisition']})
+        tracking_history=channel_result.get('history')
+        if tracking_history and tracking_history['success_flag']:
+            tracking_histories_by_prn[channel_result['prn']]=tracking_history
+            np.savez_compressed(
+                output_dir/f"prn{channel_result['prn']:02d}.npz",
+                **{key:value for key,value in tracking_history.items()
+                   if isinstance(value,np.ndarray)},
+            )
     _json_write(output_dir/'acquisition.json',acquisitions)
-    solution=position_channels(channels,fs,np.arange(1.,DURATION_S-.01,.1))
+    solution=position_channels(tracking_histories_by_prn,fs_out_hz,np.arange(1.,DURATION_S-.01,.1))
     _json_write(output_dir/'position.json',solution)
     print(solution['status'],'positions',sum(e['status']=='position' for e in solution['epochs']),flush=True)
 

@@ -206,9 +206,9 @@ def _power(samples, interval):
 #
 #     budgets = {}
 #     for mode, branch in results['branches'].items():
-#         weights = branch['combining']['weights']
+#         weights = branch['combining_info']['weights']
 #         direct = weights.conj() @ channels
-#         actual = branch['combined'][interval]
+#         actual = branch['combined_samples'][interval]
 #         separated = {
 #             name: weights.conj() @ value[:, interval]
 #             for name, value in components.items()
@@ -266,10 +266,10 @@ def evaluate_output(results, evaluation_edge_trim_ms):
     channels = results['dfe_channels'][:, interval]
     covariance = channels @ channels.conj().T / channels.shape[1]
     budgets = {}
-    for mode, branch in results['branches'].items():
-        weights = branch['combining']['weights']
-        actual = branch['combined'][interval]
-        actual_power = _power(actual, slice(None))
+    for mode, branch_result in results['branches'].items():
+        weights = branch_result['combining_info']['weights']
+        output_samples = branch_result['combined_samples'][interval]
+        actual_power = _power(output_samples, slice(None))
         quadratic_power = float(np.vdot(weights, covariance @ weights).real)
         true = results['truth']['desired_steering_true']
         assumed = results['truth']['desired_steering_assumed']
@@ -284,7 +284,7 @@ def evaluate_output(results, evaluation_edge_trim_ms):
             'true_assumed_correlation': float(abs(np.vdot(true, assumed)) /
                 np.sqrt(np.vdot(true, true).real * np.vdot(assumed, assumed).real)),
             'combined_max_abs_error': float(np.max(np.abs(
-                actual - weights.conj() @ channels
+                output_samples - weights.conj() @ channels
             ))),
             'quadratic_power_relative_error': abs(actual_power - quadratic_power) / actual_power,
         }
@@ -304,10 +304,10 @@ def run_case(cfg, case_name, context, evaluation_edge_trim_ms, *, scene=None):
     budgets = evaluate_output(results, evaluation_edge_trim_ms)
     # single = budgets['single']  # 分量相对 SINGLE 收益暂停。
     rows = []
-    for mode, branch in results['branches'].items():
+    for mode, branch_result in results['branches'].items():
         budget = budgets[mode]
-        acquisition = branch['acquisition']
-        tracking = branch['tracking']
+        acquisition = branch_result['acquisition']
+        tracking = branch_result['tracking']
         code_estimate = acquisition['code_phase_samples'] * (
             cfg.signal.code_rate_hz / results['dfe_info']['fs_out_hz']
         )

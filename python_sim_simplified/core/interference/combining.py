@@ -30,7 +30,7 @@ def combine_blind_null(
     interference_vector /= np.linalg.norm(interference_vector)
     reference = np.eye(channels.shape[0], dtype=complex)[:, cfg.reference_channel]
 
-    info: CombiningInfo = {
+    combining_info: CombiningInfo = {
         "mode": "blind_null",
         "sample_covariance": covariance,
         "condition_number": np.linalg.cond(covariance),
@@ -45,7 +45,7 @@ def combine_blind_null(
         "weights_are_fixed_flag": True,
     }
     if score_db < cfg.detection_threshold_db:
-        info.update(
+        combining_info.update(
             {
                 "weights": reference,
                 "weight_norm": 1.0,
@@ -54,7 +54,7 @@ def combine_blind_null(
                 "reference_projection_power": 1.0,
             }
         )
-        return channels[cfg.reference_channel].copy(), info
+        return channels[cfg.reference_channel].copy(), combining_info
 
     projector = np.eye(channels.shape[0], dtype=complex) - np.outer(
         interference_vector, interference_vector.conj()
@@ -62,7 +62,7 @@ def combine_blind_null(
     projected_reference = projector @ reference
     gamma = np.vdot(reference, projected_reference).real
     weights = projected_reference / gamma
-    info.update(
+    combining_info.update(
         {
             "weights": weights,
             "weight_norm": np.linalg.norm(weights),
@@ -74,4 +74,4 @@ def combine_blind_null(
             ),
         }
     )
-    return weights.conj() @ channels, info
+    return weights.conj() @ channels, combining_info

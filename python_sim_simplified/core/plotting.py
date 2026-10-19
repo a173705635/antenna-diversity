@@ -129,7 +129,7 @@ def plot_combined_spectra(results):
     for mode in MODE_ORDER:
         if mode in results["branches"]:
             frequency, power = _spectrum(
-                results["branches"][mode]["combined"],
+                results["branches"][mode]["combined_samples"],
                 results["dfe_info"]["fs_out_hz"],
             )
             axis.plot(frequency / 1e6, power, label=mode.upper())
@@ -164,7 +164,7 @@ def plot_array_response(results):
     figure, axis = plt.subplots(figsize=(9, 5))
     for mode in MODE_ORDER:
         if mode in results["branches"]:
-            weights = results["branches"][mode]["combining"]["weights"]
+            weights = results["branches"][mode]["combining_info"]["weights"]
             response = np.abs(weights.conj() @ manifolds)
             response_db = 20.0 * np.log10(response / np.max(response))
             axis.plot(azimuths, response_db, label=mode.upper())
@@ -254,9 +254,9 @@ def plot_tracking(results):
     )
     for axis, (field, ylabel) in zip(axes.flat, labels):
         for mode in MODE_ORDER:
-            branch = results["branches"].get(mode)
-            if branch and branch["tracking"]["success_flag"]:
-                values = branch["tracking"][field]
+            branch_result = results["branches"].get(mode)
+            if branch_result and branch_result["tracking"]["success_flag"]:
+                values = branch_result["tracking"][field]
                 axis.plot(np.arange(values.size) + 1, values, label=mode.upper())
         axis.set(xlabel="Epoch (ms)", ylabel=ylabel)
         axis.grid(True, alpha=0.3)
@@ -270,9 +270,9 @@ def plot_tracking(results):
 def plot_cn0(results):
     figure, axis = plt.subplots(figsize=(9, 5))
     for mode in MODE_ORDER:
-        branch = results["branches"].get(mode)
-        if branch and branch["tracking"]["success_flag"]:
-            values = branch["tracking"]["cn0_db_hz"]
+        branch_result = results["branches"].get(mode)
+        if branch_result and branch_result["tracking"]["success_flag"]:
+            values = branch_result["tracking"]["cn0_db_hz"]
             axis.plot(np.arange(values.size) + 1, values, label=mode.upper())
     axis.set(
         title="Tracking C/N0",
@@ -327,11 +327,11 @@ def _plot_detailed_combined(results):
     modes = _ordered_modes(results)
     n_fft = min(
         65_536,
-        *(results["branches"][mode]["combined"].size for mode in modes),
+        *(results["branches"][mode]["combined_samples"].size for mode in modes),
     )
     spectra = {
         mode: _absolute_spectrum(
-            results["branches"][mode]["combined"],
+            results["branches"][mode]["combined_samples"],
             results["dfe_info"]["fs_out_hz"],
             n_fft,
         )
@@ -437,7 +437,7 @@ def _plot_array_response_spherical(results, mode, azimuths, elevations, response
     color_scale = plt.Normalize(vmin=SPHERICAL_RESPONSE_FLOOR_DB, vmax=0.0)
     color_map = plt.get_cmap("RdYlBu_r")
     model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
-    weights = results["branches"][mode]["combining"]["weights"]
+    weights = results["branches"][mode]["combining_info"]["weights"]
     directions = _array_response_directions(cfg)
     # Aim the first camera at the first enabled interferer, then show its antipode.
     view_azimuth = 25.0 + next(
@@ -554,7 +554,7 @@ def _plot_array_response_3d(
     """Upper-hemisphere response at the model carrier; dB floor is display-only."""
     cfg = results["config"]
     model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
-    weights = results["branches"][mode]["combining"]["weights"]
+    weights = results["branches"][mode]["combining_info"]["weights"]
     azimuth_grid, elevation_grid = np.meshgrid(azimuths, elevations)
     figure = plt.figure(figsize=(11, 7))
     axis = figure.add_subplot(111, projection="3d", computed_zorder=False)
@@ -628,7 +628,7 @@ def _plot_detailed_array_response(results):
 
     figures = {}
     for mode in _ordered_modes(results):
-        weights = results["branches"][mode]["combining"]["weights"]
+        weights = results["branches"][mode]["combining_info"]["weights"]
         sphere_response = np.abs(
             np.tensordot(weights.conj(), manifolds, axes=(0, 0))
         )

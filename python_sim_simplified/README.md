@@ -54,6 +54,8 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 运行顺序为：用例配置 → 信号源与天线响应 → RF → ADC → DFE → 合并/捕获/跟踪 → 评估与绘图。公共链路在 `core/pipeline.py`，实验条件、统计与图留在实验层。每个用例按自己的完整配置独立生成前端并执行接收；同一用例启用的方法共用同一份采样，基准与补偿用例使用相同种子分别执行。`validation_support.py` 中的 `run_case()` 执行接收，`evaluate_case()` 统计实际输出、捕获跟踪及轻量核验指标；[validation_plotting.py](experiments/interference/validation_plotting.py) 绘制捕获与跟踪图。
 
+接收分支返回 `combined_samples`（合并采样）和 `combining_info`（权值等算法信息）；通用验证的 `receiver_samples` 是相位处理后实际送入接收机的多通道采样。
+
 MRC 使用原 `egc` 的幅度匹配权值 `w=a/(aᴴa)`，在各通道噪声独立且等功率时最大化输出 SNR；旧 `egc_strict` 的等幅权值已删除，旧模式名不再可用。相位补偿量由用户配置，作用于整个 DFE 复数序列。它不代表自动估相或宽带时延对齐。天线增益作用在接收机热噪声产生前，不能用 DFE 整通道缩放代替。接收机跟踪 C/N₀ 保留，失捕与缺测不填零。具体参数示例和历史验证记录见 [抗干扰说明](docs/interference/README.md)。
 
 GPS 仿真定位的 `DURATION_MS` 至少为 210 ms 才包含当前首个定位时刻，不保证定位成功。真实录波输入固定为 `results/real_gnss_hackrf/first40s.int8`，需在本地具备录波且实际解出健康星历；记录需长于 1.01 s 才存在当前定位时刻。

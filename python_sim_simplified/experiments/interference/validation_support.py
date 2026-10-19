@@ -101,7 +101,7 @@ def evaluate_case(
     case_cfg = case.config
     seed = case_cfg.random_seed
     frontend = result["frontend"]
-    channels = result["channels"]
+    receiver_samples = result["receiver_samples"]
     branches = result["branches"]
     # 分量准备暂停；真实 DFE 与接收仍由 run_case 完整执行。
     # components = linear_components(frontend)
@@ -116,10 +116,10 @@ def evaluate_case(
     #     }
     fs_out_hz = frontend["dfe_info"]["fs_out_hz"]
     edge_trim_samples = round(settings.evaluation_edge_trim_ms * 1e-3 * fs_out_hz)
-    window = slice(edge_trim_samples, channels.shape[1] - edge_trim_samples)
+    evaluation_window = slice(edge_trim_samples, receiver_samples.shape[1] - edge_trim_samples)
     # 只裁指标窗口；捕获跟踪已使用完整序列。R 为各通道零时延样本协方差。
-    samples = channels[:, window]
-    covariance = samples @ samples.conj().T / samples.shape[1]
+    evaluation_samples = receiver_samples[:, evaluation_window]
+    covariance = evaluation_samples @ evaluation_samples.conj().T / evaluation_samples.shape[1]
     pattern_fields = {}
     if settings.experiment_type == "antenna_gain":
         # 注入增益是物理条件；分量输出收益暂时停用。
@@ -128,20 +128,20 @@ def evaluate_case(
         pattern_fields = {"input_gain_db_by_antenna": list(gain_db)}
     # 公共指标：每种方法复用同一前端采样与接收机实际权值。
     rows = []
-    for mode, branch in branches.items():
-        weights = branch["combining"]["weights"]
-        output = branch["combined"][window]
+    for mode, branch_result in branches.items():
+        weights = branch_result["combining_info"]["weights"]
+        output_samples = branch_result["combined_samples"][evaluation_window]
         # 分量投影、功率、交叉项及量化残差暂时停用。
         # projected = {
-        #     name: weights.conj() @ values[:, window]
+        #     name: weights.conj() @ values[:, evaluation_window]
         #     for name, values in components.items()
         # }
         # powers = {name: _power(values) for name, values in projected.items()}
         # interference = {name: power for name, power in powers.items()
         #                 if name not in ("target", "thermal")}
         # linear_sum = sum(projected.values())
-        acquisition = branch["acquisition"]
-        tracking = branch["tracking"]
+        acquisition = branch_result["acquisition"]
+        tracking = branch_result["tracking"]
         cn0 = tracking["cn0_db_hz"] if tracking["success_flag"] else np.array([])
         # 取跟踪后半段的有限 C/N₀ 中位数；缺测保存 None，不伪造成 0 dB-Hz。
         finite = cn0[len(cn0) // 2:]
@@ -155,9 +155,9 @@ def evaluate_case(
         # 单频点没有网格间隔，频率正确要求搜索频点恰等于真值。
         doppler_tolerance_hz = (float(np.diff(case_cfg.acquisition.doppler_bins_hz)[0] / 2)
                                 if len(case_cfg.acquisition.doppler_bins_hz) > 1 else 0.0)
-        quadratic = float(np.vdot(weights, covariance @ weights).real)
+        covariance_output_power = float(np.vdot(weights, covariance @ weights).real)
         # 两条独立路径：实际合并序列均方，和输入协方差二次型 wᴴRw。
-        actual = _power(output)
+        output_power = _power(output_samples)
         row = {
             "case": case.name, "seed": seed, "scene": case.scene_label,
             "series": case.series_label, "scan_label": case.scan_label,
@@ -168,9 +168,9 @@ def evaluate_case(
             # "target_power": powers["target"], "thermal_power": powers["thermal"],
             # "interferer_powers": [{"source": name, "power": power}
             #                       for name, power in interference.items()],
-            # "joint_nonlinear_quantization_residual_power": _power(output - linear_sum),
+            # "joint_nonlinear_quantization_residual_power": _power(output_samples - linear_sum),
             # "linear_component_cross_power": _power(linear_sum) - sum(powers.values()),
-            "actual_power": actual,
+            "actual_power": output_power,
             # "linear_in_band_sinr_db": float(10 * np.log10(
             #     powers["target"] / (powers["thermal"] + sum(interference.values()))
             # )),
@@ -178,9 +178,9 @@ def evaluate_case(
             "weight_real_imag": [[float(value.real), float(value.imag)] for value in weights],
             "weight_norm_squared": float(np.vdot(weights, weights).real),
             "combined_direct_max_abs_error": float(np.max(np.abs(
-                output - weights.conj() @ samples
+                output_samples - weights.conj() @ evaluation_samples
             ))),
-            "quadratic_power_relative_error": abs(actual - quadratic) / actual,
+            "quadratic_power_relative_error": abs(output_power - covariance_output_power) / output_power,
             "acquisition_metric": float(acquisition["metric"]),
             "acquisition_threshold": case_cfg.acquisition.threshold,
             "acquired_flag": bool(acquisition["success_flag"]),
@@ -210,12 +210,12 @@ def evaluate_case(
         rows.append(row)
     # 分量收益暂停；不再额外执行 SINGLE 参考合并。
     # _, reference_info = combine_known(
-    #     channels, frontend["truth"]["desired_steering_assumed"], "single",
+    #     receiver_samples, frontend["truth"]["desired_steering_assumed"], "single",
     #     case_cfg.diversity.diagonal_loading_factor,
     # )
     # reference_weights = reference_info["weights"]
-    # reference_target = _power(reference_weights.conj() @ components["target"][:, window])
-    # reference_thermal = _power(reference_weights.conj() @ components["thermal"][:, window])
+    # reference_target = _power(reference_weights.conj() @ components["target"][:, evaluation_window])
+    # reference_thermal = _power(reference_weights.conj() @ components["thermal"][:, evaluation_window])
     # for row in rows:
     #     row["target_output_gain_db"] = float(10 * np.log10(
     #         row["target_power"] / reference_target
@@ -226,7 +226,7 @@ def evaluate_case(
     #     ))
     #     row["interferer_suppression_db"] = {
     #         item["source"]: float(10 * np.log10(
-    #             _power(reference_weights.conj() @ components[item["source"]][:, window])
+    #             _power(reference_weights.conj() @ components[item["source"]][:, evaluation_window])
     #             / item["power"]
     #         )) for item in row["interferer_powers"]
     #     }
@@ -329,7 +329,7 @@ def verify_validation(rows: list[dict]) -> dict:
 
 
 def run_case(case: ValidationCase) -> dict:
-    """用本条件运行前端、相位处理与接收，返回本次评估需要的数据引用。"""
+    """返回前端结果、相位处理后送接收机的 [天线, 时间] 采样及各分支。"""
     case_cfg = case.config
     antennas = case_cfg.phone.active_antennas
     # frontend = run_frontend(case_cfg, retain_analysis_flag=True)  # 分量重放暂停。
@@ -338,13 +338,13 @@ def run_case(case: ValidationCase) -> dict:
     injection_factors = np.exp(1j * np.deg2rad([
         case.dfe_phase_deg.get(name, 0.0) for name in antennas
     ]))[:, None]
-    channels = frontend["dfe_channels"] * injection_factors
+    receiver_samples = frontend["dfe_channels"] * injection_factors
     correction_factors = None
     if case.compensate_dfe_phase_flag:
         correction_factors = np.exp(1j * np.deg2rad([
             -case.dfe_estimated_phase_deg.get(name, 0.0) for name in antennas
         ]))[:, None]
-        channels = channels * correction_factors
+        receiver_samples = receiver_samples * correction_factors
     factors = np.exp(1j * np.deg2rad([
         case.dfe_phase_deg.get(name, 0.0) -
         (case.dfe_estimated_phase_deg.get(name, 0.0)
@@ -357,9 +357,9 @@ def run_case(case: ValidationCase) -> dict:
     truth["interferer_steering_effective"] = [
         steering * factors for steering in truth["interferer_steering_effective"]
     ]
-    branches = run_receiver(channels, truth, case_cfg, frontend["dfe_info"]["fs_out_hz"])
+    branches = run_receiver(receiver_samples, truth, case_cfg, frontend["dfe_info"]["fs_out_hz"])
     return {
-        "frontend": frontend, "channels": channels, "branches": branches,
+        "frontend": frontend, "receiver_samples": receiver_samples, "branches": branches,
         # "injection_factors": injection_factors,  # 分量重放暂停。
         # "correction_factors": correction_factors,
     }

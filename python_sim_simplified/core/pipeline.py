@@ -30,12 +30,12 @@ def _run_branch(
 ) -> BranchResult:
     """一组固定权值处理完整 DFE 序列；结果含合并码值和接收状态。"""
     if mode == "blind_null":
-        combined, combining = combine_blind_null(
+        combined_samples, combining_info = combine_blind_null(
             dfe_channels,
             cfg.diversity.blind_null,
         )
     else:
-        combined, combining = combine_known(
+        combined_samples, combining_info = combine_known(
             dfe_channels,
             truth["desired_steering_assumed"],
             mode,
@@ -43,8 +43,8 @@ def _run_branch(
         )
 
     return _finish_branch(
-        combined,
-        combining,
+        combined_samples,
+        combining_info,
         truth,
         cfg,
         fs_out_hz,
@@ -53,20 +53,20 @@ def _run_branch(
 
 
 def _finish_branch(
-    combined: np.ndarray,
-    combining: CombiningInfo,
+    combined_samples: np.ndarray,
+    combining_info: CombiningInfo,
     truth: ScenarioTruth,
     cfg: SimulationConfig,
     fs_out_hz: float,
     covariance_snapshots: int,
 ) -> BranchResult:
-
-    weights = combining["weights"]
+    """接收一维合并复采样和求权信息，补齐指标并完成捕获跟踪。"""
+    weights = combining_info["weights"]
     interferer_gains = [
         float(abs(np.vdot(weights, steering)))
         for steering in truth["interferer_steering_effective"]
     ]
-    combining.update(
+    combining_info.update(
         {
             "target_direction_gain": float(
                 abs(np.vdot(weights, truth["desired_steering_true"]))
@@ -78,7 +78,7 @@ def _finish_branch(
         }
     )
     acquisition = acquire(
-        combined,
+        combined_samples,
         fs_out_hz,
         cfg.signal.prn,
         cfg.signal.code_rate_hz,
@@ -86,7 +86,7 @@ def _finish_branch(
     )
     if acquisition["success_flag"]:
         tracking = track(
-            combined,
+            combined_samples,
             fs_out_hz,
             cfg.signal.prn,
             acquisition,
@@ -101,8 +101,8 @@ def _finish_branch(
             "prompt": np.array([], dtype=complex),
         }
     return {
-        "combined": combined,
-        "combining": combining,
+        "combined_samples": combined_samples,
+        "combining_info": combining_info,
         "acquisition": acquisition,
         "tracking": tracking,
     }

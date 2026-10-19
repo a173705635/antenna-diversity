@@ -28,13 +28,13 @@ def prepare_recording(iq_path, cache_path, *, start_sample, sample_count,
     cache_path = Path(cache_path)
     if cache_path.exists():
         raise ValueError('refusing to overwrite an existing DFE cache')
-    filter_coefficients, info = design_decimator(
+    filter_coefficients, dfe_info = design_decimator(
         fs_hz, dfe_config.decimation, dfe_config.cutoff_hz, dfe_config.num_taps
     )
-    delay = info['group_delay_input_samples']
+    delay = dfe_info['group_delay_input_samples']
     count = len(range(delay, sample_count, dfe_config.decimation))
     cache_path.parent.mkdir(parents=True, exist_ok=True)
-    out = np.memmap(cache_path, dtype='<c16', mode='w+', shape=(1, count))
+    baseband_samples = np.memmap(cache_path, dtype='<c16', mode='w+', shape=(1, count))
     digest = hashlib.sha256()
     sum_i = sum_q = sum_power = 0.
     rails = 0
@@ -60,11 +60,11 @@ def prepare_recording(iq_path, cache_path, *, start_sample, sample_count,
 
     index = 0
     for block in process_dfe_blocks(blocks(), dfe_config, fs_hz, if_hz):
-        out[:, index:index + block.shape[1]] = block
+        baseband_samples[:, index:index + block.shape[1]] = block
         index += block.shape[1]
     assert index == count
-    out.flush()
-    info.update({
+    baseband_samples.flush()
+    dfe_info.update({
         'if_hz': if_hz if dfe_config.nco_frequency_hz is None else dfe_config.nco_frequency_hz,
         'output_bits': dfe_config.output_bits,
         'output_length': count,
@@ -79,13 +79,13 @@ def prepare_recording(iq_path, cache_path, *, start_sample, sample_count,
             'rail_fraction': rails / sample_count,
         },
     })
-    return out, info
+    return baseband_samples, dfe_info
 
 
-def receive_channels(baseband, fs_hz, prns, acquisition_config, tracking_config, *, acquisition_only_flag=False):
+def receive_channels(baseband_samples, fs_hz, prns, acquisition_config, tracking_config, *, acquisition_only_flag=False):
     """Yield independent GPS L1 channels from one common baseband stream."""
     for prn in prns:
-        acquisition_result = acquire(baseband, fs_hz, prn, 1.023e6, acquisition_config)
+        acquisition_result = acquire(baseband_samples, fs_hz, prn, 1.023e6, acquisition_config)
         row = {
             'prn': prn,
             'acquisition': {key: value for key, value in acquisition_result.items()
@@ -93,14 +93,14 @@ def receive_channels(baseband, fs_hz, prns, acquisition_config, tracking_config,
         }
         if acquisition_result['success_flag'] and not acquisition_only_flag:
             row['history'] = track(
-                baseband, fs_hz, prn, acquisition_result, tracking_config,
+                baseband_samples, fs_hz, prn, acquisition_result, tracking_config,
                 1575.42e6, 1.023e6,
             )
         yield row
 
 
-def position_channels(channels, fs_hz, times_s, *, common_travel_s=.075):
-    """Offline GPS code PVT, using broadcast data decoded from these channels.
+def position_channels(tracking_histories_by_prn, fs_hz, times_s, *, common_travel_s=.075):
+    """Offline GPS code PVT, using broadcast data decoded from tracking histories.
 
     This is retrospective processing of one continuous arc; ephemeris decoded
     near its end can be used earlier. No receiver reference position is input.
@@ -111,7 +111,7 @@ def position_channels(channels, fs_hz, times_s, *, common_travel_s=.075):
     usable = {}
     navigation = {}
     carriers = {}
-    for prn, tracking_history in channels.items():
+    for prn, tracking_history in tracking_histories_by_prn.items():
         nav = decode_lnav(tracking_history, fs_hz)
         navigation[prn] = nav
         eph = nav['ephemeris']
@@ -130,7 +130,7 @@ def position_channels(channels, fs_hz, times_s, *, common_travel_s=.075):
         ephemerides = []
         txs = []
         for prn, (eph, tx) in usable.items():
-            tracking_history = channels[prn]
+            tracking_history = tracking_histories_by_prn[prn]
             i = np.searchsorted(tracking_history['epoch_start_samples'] / fs_hz, t, side='right') - 1
             if i < 0 or not np.isfinite(tx[k]):
                 continue

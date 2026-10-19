@@ -178,8 +178,9 @@ class TrackingResult(TypedDict):
 
 
 class BranchResult(TypedDict):
-    combined: np.ndarray
-    combining: CombiningInfo
+    # 合并输出为一维接收机复采样；求权信息另存，供复算和绘图读取。
+    combined_samples: np.ndarray
+    combining_info: CombiningInfo
     acquisition: AcquisitionResult
     tracking: TrackingResult
 

@@ -33,8 +33,8 @@ def combine_known(
     else:
         raise ValueError(f"Unsupported known combining mode: {mode}")
 
-    combined = weights.conj() @ channels
-    info: CombiningInfo = {
+    combined_samples = weights.conj() @ channels
+    combining_info: CombiningInfo = {
         "mode": mode,
         "weights": weights,
         "constraint_steering": desired,
@@ -46,4 +46,4 @@ def combine_known(
         "condition_number": np.linalg.cond(loaded),
         "weights_are_fixed_flag": True,
     }
-    return combined, info
+    return combined_samples, combining_info

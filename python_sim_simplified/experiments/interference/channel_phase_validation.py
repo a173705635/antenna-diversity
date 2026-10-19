@@ -107,28 +107,28 @@ def _power(values):
 #     return float(10.0 * np.log10(numerator / denominator))
 
 
-def _score_branch(channels, branch, cfg, fs_out_hz, evaluation_edge_trim_ms):
+def _score_branch(channels, branch_result, cfg, fs_out_hz, evaluation_edge_trim_ms):
     """以实际 DFE 输入和固定权值核验合并输出，汇总接收指标。"""
-    combined = branch['combined']
-    combining = branch['combining']
-    acquisition = branch['acquisition']
-    tracking = branch['tracking']
-    weights = combining['weights']
+    combined_samples = branch_result['combined_samples']
+    combining_info = branch_result['combining_info']
+    acquisition = branch_result['acquisition']
+    tracking = branch_result['tracking']
+    weights = combining_info['weights']
     # 两端各去掉 evaluation_edge_trim_ms，降低滤波/补零边缘影响；所有分量采用相同窗口。
     edge_trim_samples = round(evaluation_edge_trim_ms * 1e-3 * fs_out_hz)
-    window = slice(edge_trim_samples, channels.shape[1] - edge_trim_samples)
-    input_window = channels[:, window]
-    output_window = combined[window]
+    evaluation_window = slice(edge_trim_samples, channels.shape[1] - edge_trim_samples)
+    input_window = channels[:, evaluation_window]
+    output_window = combined_samples[evaluation_window]
     # 分量投影暂停；输出恒等式仍独立于实际接收结果复算。
     # separated = {
-    #     name: weights.conj() @ samples[:, window]
+    #     name: weights.conj() @ samples[:, evaluation_window]
     #     for name, samples in components.items()
     # }
     # 从统计窗口独立计算 R=XXᴴ/N。其对应输出功率应等于 wᴴRw。
     # 这里核验固定权值的功率恒等式，不重新用裁剪窗口训练权值。
     covariance = input_window @ input_window.conj().T / input_window.shape[1]
     direct = weights.conj() @ input_window
-    quadratic = float(np.vdot(weights, covariance @ weights).real)
+    covariance_output_power = float(np.vdot(weights, covariance @ weights).real)
     actual_power = _power(output_window)
     # linear_sum = sum(separated.values())
     # residual = output_window - linear_sum
@@ -162,7 +162,7 @@ def _score_branch(channels, branch, cfg, fs_out_hz, evaluation_edge_trim_ms):
         # 独立等功率白噪声下，输出噪声功率与 ||w||² 成正比。
         'weight_norm_squared': float(np.vdot(weights, weights).real),
         'combined_direct_max_abs_error': float(np.max(np.abs(output_window - direct))),
-        'quadratic_power_relative_error': abs(actual_power - quadratic) / actual_power,
+        'quadratic_power_relative_error': abs(actual_power - covariance_output_power) / actual_power,
         'acquisition_metric': float(acquisition['metric']),
         'acquired_flag': bool(acquisition['success_flag']),
         'acquired_code_error_chips': code_error,
@@ -222,11 +222,11 @@ def _paired_rows(seed, scene, phase_deg, cfg, truth, baseline, dfe_info,
             #     row['target_power'] / row['thermal_power'],
             #     reference['target_power'] / reference['thermal_power'],
             # )
-            baseline_branch = case_branches['baseline'][mode]
-            current_branch = case_branches[case][mode]
-            baseline_output = baseline_branch['combined']
-            baseline_weights = baseline_branch['combining']['weights']
-            current_weights = current_branch['combining']['weights']
+            baseline_branch_result = case_branches['baseline'][mode]
+            current_branch_result = case_branches[case][mode]
+            baseline_output_samples = baseline_branch_result['combined_samples']
+            baseline_weights = baseline_branch_result['combining_info']['weights']
+            current_weights = current_branch_result['combining_info']['weights']
             # 所有输出/权值恢复误差均与该方法自身的无误差基准比较，而非与 MRC 比。
             row.update({
                 'seed': seed, 'scene': scene, 'phase_error_deg': phase_deg,
@@ -237,7 +237,7 @@ def _paired_rows(seed, scene, phase_deg, cfg, truth, baseline, dfe_info,
                 'perturbed_antenna': PERTURBED_ANTENNA,
                 'acquisition_threshold': cfg.acquisition.threshold,
                 'steering_unchanged_flag': bool(np.array_equal(
-                    current_branch['combining']['constraint_steering'],
+                    current_branch_result['combining_info']['constraint_steering'],
                     truth['desired_steering_assumed'])),
                 # 分量收益、抑制比和白噪声理论误差暂时停用。
                 # 'target_output_gain_db': _db_ratio(
@@ -263,8 +263,8 @@ def _paired_rows(seed, scene, phase_deg, cfg, truth, baseline, dfe_info,
                 # ),
                 'dfe_compensation_relative_error': compensated_error if case == 'calibrated' else None,
                 'calibrated_output_relative_error': float(
-                    np.linalg.norm(current_branch['combined'] - baseline_output) /
-                    np.linalg.norm(baseline_output)
+                    np.linalg.norm(current_branch_result['combined_samples'] - baseline_output_samples) /
+                    np.linalg.norm(baseline_output_samples)
                 ) if case == 'calibrated' else None,
                 'calibrated_weight_relative_error': float(
                     np.linalg.norm(current_weights - baseline_weights) /

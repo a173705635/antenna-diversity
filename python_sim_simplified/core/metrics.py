@@ -58,9 +58,9 @@ def _final_cn0(tracking: TrackingResult) -> float | None:
 
 def compute_metrics(results: SimulationResults) -> list[MetricRecord]:
     records: list[MetricRecord] = []
-    for mode, branch in results["branches"].items():
-        acquisition = branch["acquisition"]
-        tracking = branch["tracking"]
+    for mode, branch_result in results["branches"].items():
+        acquisition = branch_result["acquisition"]
+        tracking = branch_result["tracking"]
         tracked_flag = bool(tracking["success_flag"])
         if tracked_flag:
             window = slice(max(0, tracking["prompt"].size - 10), None)
@@ -91,8 +91,8 @@ def compute_metrics(results: SimulationResults) -> list[MetricRecord]:
                 "acquired_flag": bool(acquisition["success_flag"]),
                 "acquisition_metric": float(acquisition["metric"]),
                 "acquired_doppler_hz": float(acquisition["doppler_hz"]),
-                "target_direction_gain": branch["combining"]["target_direction_gain"],
-                "worst_interferer_gain": branch["combining"]["worst_interferer_gain"],
+                "target_direction_gain": branch_result["combining_info"]["target_direction_gain"],
+                "worst_interferer_gain": branch_result["combining_info"]["worst_interferer_gain"],
                 "tracking_flag": tracked_flag,
                 "final_doppler_hz": final_doppler,
                 "pll_rms_rad": pll_rms,
