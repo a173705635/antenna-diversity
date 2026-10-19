@@ -147,8 +147,6 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
                 "status": result["status"],
                 "expected_gain_db": result["expected_gain_db"],
                 "measured_gain_mean_db": result["measured_gain_db"]["mean"],
-                "expected_absolute_change_db": result["expected_absolute_change_db"],
-                "absolute_snr_change_mean_db": result["absolute_snr_change_mean_db"],
                 "acquisition_success_count": result["acquisition_success_count"],
             })
         with (settings.output_dir / "case_summary.csv").open(

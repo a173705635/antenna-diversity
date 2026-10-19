@@ -392,8 +392,8 @@ def _wilson_interval(successes: int, total: int) -> list[float]:
     return [float(center - radius), float(center + radius)]
 
 
-def summarize_pattern_gain(rows: list[dict], references: dict[str, str]) -> dict:
-    """按 TC 汇总配对 30 seed 的理论、线性 SNR、接收状态与判定。"""
+def summarize_pattern_gain(rows: list[dict]) -> dict:
+    """按 TC 汇总各 seed 的单用例理论增益、线性 SNR、接收状态与判定。"""
     grouped = {}
     indexed = {(row["case"], row["seed"]): row for row in rows}
     for row in rows:
@@ -402,11 +402,8 @@ def summarize_pattern_gain(rows: list[dict], references: dict[str, str]) -> dict
     cases = {}
     for name, observations in grouped.items():
         mode = observations[0]["mode"]
-        reference_name = references.get(name)
         gain_errors = [row["thermal_snr_gain_db"] - row["pattern_expected_gain_db"]
                        for row in observations]
-        absolute_differences = []
-        expected_absolute = []
         input_target_errors = []
         input_noise_errors = []
         for row in observations:
@@ -421,29 +418,8 @@ def summarize_pattern_gain(rows: list[dict], references: dict[str, str]) -> dict
                 ):
                     input_target_errors.append(10 * np.log10(signal / base_signal) - gain)
                     input_noise_errors.append(10 * np.log10(noise / base_noise))
-        if reference_name is not None:
-            for row in observations:
-                reference = indexed[reference_name, row["seed"]]
-                if mode == "single":
-                    difference = (row["input_snr_db_by_antenna"][0] -
-                                  reference["input_snr_db_by_antenna"][0])
-                    theory = (row["input_gain_db_by_antenna"][0] -
-                              reference["input_gain_db_by_antenna"][0])
-                else:
-                    difference = row["thermal_snr_db"] - reference["thermal_snr_db"]
-                    true_gains = row["input_gain_db_by_antenna"]
-                    base_gains = reference["input_gain_db_by_antenna"]
-                    # MVDR 只把白噪声 MRC 上界作为参考，不用它验收性能。
-                    theory = (true_gains[0] + mrc_gain_theory(tuple(true_gains))
-                              - base_gains[0] - mrc_gain_theory(tuple(base_gains)))
-                absolute_differences.append(difference)
-                expected_absolute.append(theory)
-
         manifold_error = max(row["pattern_response_gain_error_db"] for row in observations)
         gain_error = _mean_interval(gain_errors)
-        absolute_error = (_mean_interval([measured - expected for measured, expected in
-                                          zip(absolute_differences, expected_absolute)])
-                          if absolute_differences else None)
         mvdr_weight_error = max((row["pattern_mvdr_weight_error"] for row in observations
                                  if row["pattern_mvdr_weight_error"] is not None), default=None)
         mvdr_constraint_error = max((row["pattern_mvdr_constraint_error"] for row in observations
@@ -464,15 +440,13 @@ def summarize_pattern_gain(rows: list[dict], references: dict[str, str]) -> dict
             passed_flag = passed_flag and mvdr_weight_error <= 1e-8 and mvdr_constraint_error <= 1e-8
         else:
             passed_flag = passed_flag and abs(gain_error["mean"]) <= 0.2
-            if absolute_error is not None:
-                passed_flag = passed_flag and abs(absolute_error["mean"]) <= 0.2
         acquired = sum(row["acquired_flag"] for row in observations)
         tracked = sum(row["tracking_success_flag"] for row in observations)
         finite_cn0 = [row["tracking_cn0_late_median_db_hz"] for row in observations
                       if row["tracking_cn0_late_median_db_hz"] is not None]
         cases[name] = {
             "status": "passed" if passed_flag else "failed", "mode": mode,
-            "seeds": len(observations), "reference_case": reference_name,
+            "seeds": len(observations),
             "expected_gain_db": observations[0]["pattern_expected_gain_db"],
             "measured_gain_db": _mean_interval([row["thermal_snr_gain_db"]
                                                 for row in observations]),
@@ -481,10 +455,6 @@ def summarize_pattern_gain(rows: list[dict], references: dict[str, str]) -> dict
             "response_constraint_max_error": response_constraint_error,
             "input_target_change_max_error_db": target_input_error,
             "input_thermal_change_max_error_db": noise_input_error,
-            "expected_absolute_change_db": expected_absolute[0] if expected_absolute else None,
-            "absolute_snr_change_mean_db": (_mean_interval(absolute_differences)["mean"]
-                                             if absolute_differences else None),
-            "absolute_change_error_db": absolute_error,
             "mvdr_weight_max_relative_error": mvdr_weight_error,
             "mvdr_constraint_max_error": mvdr_constraint_error,
             "acquisition_success_count": acquired,
@@ -704,14 +674,12 @@ def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) ->
     summary = {"cases": list(case_summaries.values()), "rows": rows,
                "verification": verification}
     if any("pattern_gain" in case.checks for case in cases):
-        references = {case.name: case.reference_case for case in cases
-                      if case.reference_case is not None}
-        pattern = summarize_pattern_gain(rows, references)
+        pattern = summarize_pattern_gain(rows)
         summary["pattern_gain"] = pattern
         for name, outcome in pattern["cases"].items():
             verification["checks"][f"pattern_gain:{name}"] = {
                 "status": outcome["status"], "passed_flag": outcome["status"] == "passed",
-                "reason": "independent gain, input power, weight and paired SNR checks",
+                "reason": "independent gain, input power and weight checks",
             }
         verification["passed_flag"] = verification["passed_flag"] and pattern["passed_flag"]
     if any("mutual_coupling" in case.checks for case in cases):

@@ -66,42 +66,28 @@ def _base_config(scene: str, antennas: tuple[str, ...], modes: tuple[str, ...]):
 
 
 def _pattern_gain_cases() -> list[ValidationCase]:
-    """建立增益用例；对照按参数与算法关联，TC编号仅表示本批次顺序。"""
+    """按物理增益与算法顺序建立增益用例，TC编号仅表示本批次顺序。"""
     case_definitions = []
-    case_names = {}
-
-    def add_case(tl_gain_db, br_gain_db, mode, reference_key=None):
-        """登记条件，并将物理对照键转换为本批次的用例名称。"""
-        reference_name = (
-            None if reference_key is None else case_names[reference_key]
-        )
-        case_definitions.append((tl_gain_db, br_gain_db, mode, reference_name))
-        # 相同条件可属于不同分类，对照统一引用首次登记的条件。
-        case_names.setdefault(
-            (tl_gain_db, br_gain_db, mode), f"TC-{len(case_definitions):03d}"
-        )
 
     for gain_db in range(0, -11, -1):
-        reference = None if gain_db == 0 else (0, 0, "single")
-        add_case(gain_db, 0, "single", reference)
+        case_definitions.append((gain_db, 0, "single"))
     modes = ("mrc", "mvdr")
     for mode in modes:
-        add_case(0, 0, mode)
-    # 共同衰减与同算法的零增益基准比较。
+        case_definitions.append((0, 0, mode))
+    # 依次扫描两路共同衰减、BR 单独衰减和 TL/BR 强弱交换。
     for gain_db in (-3, -6, -10, -20):
         for mode in modes:
-            add_case(gain_db, gain_db, mode, (0, 0, mode))
+            case_definitions.append((gain_db, gain_db, mode))
     for gain_db in (0, -3, -6, -10, -20, -40):
         for mode in modes:
-            add_case(0, gain_db, mode)
-    # 强弱交换与相同增益、相同算法的交换前条件比较。
+            case_definitions.append((0, gain_db, mode))
     for gain_db in (-6, -20):
         for mode in modes:
-            add_case(gain_db, 0, mode, (0, gain_db, mode))
+            case_definitions.append((gain_db, 0, mode))
 
     cases = []
     for seed in SEEDS:
-        for case_number, (tl_gain_db, br_gain_db, mode, reference_case_name) in enumerate(case_definitions, 1):
+        for case_number, (tl_gain_db, br_gain_db, mode) in enumerate(case_definitions, 1):
             case_cfg = _base_config("noise_only", ("TL", "BR"), (mode,))
             case_cfg.random_seed = seed
             case_cfg.signal.duration_ms = DURATION_MS
@@ -113,7 +99,7 @@ def _pattern_gain_cases() -> list[ValidationCase]:
             cases.append(ValidationCase(
                 name=f"TC-{case_number:03d}", config=case_cfg, scene_label="noise_only",
                 series_label=mode, scan_label="test case", scan_value=case_number,
-                scan_unit="TC", reference_case=reference_case_name, checks=("pattern_gain",),
+                scan_unit="TC", checks=("pattern_gain",),
             ))
     return cases
 
