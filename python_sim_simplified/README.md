@@ -2,7 +2,7 @@
 
 日常只需要看 `core/` 和 `experiments/`：公共接收算法集中维护，每个实验有独立入口。2026-10-14 已移除抗欺骗、多径专用算法、实验、诊断工具、测试，以及公共配置和接收链中的多径接口。保留通用 GPS L1/L5 定位、真实录波接收和现有抗干扰研究。
 
-分集实验的日常摘要不展开RF/ADC/DFE、捕获积分、跟踪环路等接收机设计配置，完整配置保留在`manifest.json`；通用验证的`summary.json`通过`receiver_config_file`指向该文件。CSV不再重复捕获门限和判定容差，JSON明细仍保留这些判据供复算与重绘。
+分集实验的日常摘要不展开RF/ADC/DFE、捕获积分、跟踪环路等接收机设计配置，完整配置保留在`manifest.json`；通用验证的`summary.json`通过`receiver_config_file`指向该文件。CSV不再重复捕获门限和判定容差，捕获误差与性能指标保留在结果明细中。
 
 每次修改及实际验证统一记录在 [CHANGELOG](CHANGELOG.md)。抗干扰的建模前提、实验条件和已有结果见 [详细说明](docs/interference/README.md)。
 
@@ -46,11 +46,11 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 相位/方向/增益实验通过 `SELECTED_SERIES`、`SCENES` 和各扫描元组设置范围；每个相位点固定生成基准、未补偿、准确补偿三组。`_base_config()` 集中设置共享配置，四个构造函数只描述条件差异，`build_cases()` 统一展开种子；`build_settings()` 设置统计窗口、输出目录、并行数和绘图。各用例独立调度，结果按原用例顺序保存。顶部 `TARGET_TRUE_DIRECTION`、`TARGET_ASSUMED_DIRECTION` 分别设置真实与名义目标方向；`ACTIVE_ANTENNAS` 的第一根是 SINGLE 参考，增益、互耦和位置偏移条件作用于前两根，额外激活阵元保留基础配置。
 
-增益、互耦与相位中心汇总按“条件＋算法”统计，不再计算跨用例 SNR 差值；保留单用例性能、相对同一采样 SINGLE 的合并收益，以及只改变名义模型时的物理输入一致性核验。`scan_label`、`scan_unit` 用于真实扫描的图轴与文件名，离散条件不再填写 TC/MC/PC 伪单位。
+增益、互耦与相位中心汇总按“条件＋算法”统计单用例性能及相对同一采样 SINGLE 的合并收益，保留均值、样本标准差、成功次数和缺测数。`scan_label`、`scan_unit` 用于真实扫描的图轴与文件名，离散条件不再填写 TC/MC/PC 伪单位。
 
-专项评估由 `EXPERIMENT_TYPE` 统一选择，`case.checks` 只保留 `ideal_noise`（理想噪声理论）；相位用例不再设置 `reference_case`，也不再缓存基准数据或自动核对补偿恢复误差。
+专项统计由 `EXPERIMENT_TYPE` 选择；日常核验保留实际合并输出与功率的独立复算，以及 `case.checks` 中适用的 `ideal_noise` 理论检查。模型、权值公式和跨用例物理输入一致性检查放在本地测试，日常不再输出详细模型诊断、专项验收状态或置信区间；核验通过不代表捕获跟踪成功。
 
-运行顺序为：用例配置 → 信号源与天线响应 → RF → ADC → DFE → 合并/捕获/跟踪 → 评估与绘图。公共链路在 `core/pipeline.py`，共用分量分析在 `core/evaluation.py`，实验条件、统计与图留在实验层。每个用例按自己的完整配置独立生成前端并执行接收；同一用例启用的方法共用同一份采样，基准与补偿用例使用相同种子分别执行。`validation_support.py` 中的 `run_case()` 执行接收，`evaluate_case()` 负责本次接收的分量分析、指标计算和专项复算；[validation_plotting.py](experiments/interference/validation_plotting.py) 绘制结果图。
+运行顺序为：用例配置 → 信号源与天线响应 → RF → ADC → DFE → 合并/捕获/跟踪 → 评估与绘图。公共链路在 `core/pipeline.py`，共用分量分析在 `core/evaluation.py`，实验条件、统计与图留在实验层。每个用例按自己的完整配置独立生成前端并执行接收；同一用例启用的方法共用同一份采样，基准与补偿用例使用相同种子分别执行。`validation_support.py` 中的 `run_case()` 执行接收，`evaluate_case()` 计算分量功率、核心性能及轻量核验指标；[validation_plotting.py](experiments/interference/validation_plotting.py) 绘制结果图。
 
 MRC 使用原 `egc` 的幅度匹配权值 `w=a/(aᴴa)`，在各通道噪声独立且等功率时最大化输出 SNR；旧 `egc_strict` 的等幅权值已删除，旧模式名不再可用。相位补偿量由用户配置，作用于整个 DFE 复数序列。它不代表自动估相或宽带时延对齐。天线增益作用在接收机热噪声产生前，不能用 DFE 整通道缩放代替。热噪声收益、含干扰的线性 SINR、接收机跟踪 C/N₀ 分别输出；失捕与缺测保留原状态。具体参数示例和历史验证记录见 [抗干扰说明](docs/interference/README.md)。
 

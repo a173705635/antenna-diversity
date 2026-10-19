@@ -44,18 +44,13 @@ def _write_json(output_path: Path, content: object) -> None:
 
 
 def phase_center_summary_records(cases: list[dict]) -> list[dict]:
-    """只生成PCO主表视图，不修改完整统计；可用于重导出现存JSON结果。"""
+    """从当前 PCO 统计生成主表视图，不修改完整统计。"""
     columns = (
         "residual_relative_los_mm", "residual_relative_phase_deg",
-        "thermal_snr_mean_db", "snr_gain_vs_same_condition_single_mean_db",
         "true_response_phase_deg_mean",
-        "acquisition_peak_ratio_mean", "acquisition_correct_count",
-        "tracking_cn0_mean_db_hz", "tracking_cn0_valid_seed_count", "status",
+        "acquisition_threshold_pass_count", "acquisition_correct_count",
+        "tracking_success_count", "tracking_cn0_missing_count",
     )
-    # 单seed没有可估计的均值置信区间；混合批次仍统一保留列，单seed行留空。
-    if any(case["seeds"] > 1 for case in cases):
-        columns += ("snr_gain_vs_same_condition_single_ci95_lower_db",
-                    "snr_gain_vs_same_condition_single_ci95_upper_db")
     records = []
     for case in cases:
         descriptions = []
@@ -72,12 +67,21 @@ def phase_center_summary_records(cases: list[dict]) -> list[dict]:
             "case": case["case"], "mode": case["mode"], "seeds": case["seeds"],
             "condition_xyz_mm": "; ".join(descriptions),
             **{key: case[key] for key in columns},
+            "thermal_snr_mean_db": case["thermal_snr_db"]["mean"],
+            "thermal_snr_std_db": case["thermal_snr_db"]["std"],
+            "snr_gain_vs_same_condition_single_mean_db": case["thermal_snr_gain_db"]["mean"],
+            "snr_gain_vs_same_condition_single_std_db": case["thermal_snr_gain_db"]["std"],
+            "acquisition_peak_ratio_mean": case["acquisition_peak_ratio"]["mean"],
+            "acquisition_peak_ratio_std": case["acquisition_peak_ratio"]["std"],
+            "tracking_cn0_mean_db_hz": case["tracking_cn0_db_hz"]["mean"],
+            "tracking_cn0_std_db_hz": case["tracking_cn0_db_hz"]["std"],
+            "tracking_cn0_valid_seed_count": case["tracking_cn0_db_hz"]["valid_count"],
         })
     return records
 
 
 def save_results(settings: ValidationSettings, summary: dict) -> None:
-    """刷新本批次输出，保存执行配置、结果行和验收证据供追溯。"""
+    """刷新本批次输出，保存执行配置、结果行和公共核验证据。"""
     # 仿真完成后才刷新本入口的专用输出，避免换扫描因素后残留旧图。
     if settings.workers == 1:
         reset_output(settings.output_dir)
@@ -107,10 +111,7 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
     rows = summary["rows"]
     with (settings.output_dir / "summary.csv").open("w", newline="", encoding="utf-8") as stream:
         # 不同实验条件可有不同指标列；按所有行的字段并集写出。
-        hidden_config_columns = {
-            "acquisition_threshold", "acquisition_code_tolerance_chips",
-            "acquisition_doppler_half_bin_hz",
-        }
+        hidden_config_columns = {"acquisition_threshold"}
         columns = list(dict.fromkeys(key for row in rows for key in row
                                     if key not in hidden_config_columns))
         writer = csv.DictWriter(stream, fieldnames=columns)
@@ -131,24 +132,24 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
             ))
             antenna_columns = {f"{antenna}_gain_db": gain
                                for antenna, gain in antenna_gains.items()}
-            cn0_statistics = result["tracking_cn0_observed_db_hz"]
             records.append({
                 "tc": tc, "mode": result["mode"], "n": result["seeds"],
                 **antenna_columns,
-                # 捕获峰值比对所有seed取均值，不剔除低于门限的样本。
-                "acquisition_peak_ratio_mean": float(np.mean([
-                    row["acquisition_metric"] for row in observations
-                ])),
-                "tracking_cn0_mean_db_hz": (
-                    cn0_statistics["mean"] if cn0_statistics is not None else None
-                ),
-                "tracking_cn0_valid_seed_count": (
-                    result["seeds"] - result["tracking_cn0_missing_count"]
-                ),
-                "status": result["status"],
-                "expected_gain_db": result["expected_gain_db"],
-                "measured_gain_mean_db": result["measured_gain_db"]["mean"],
+                "acquisition_peak_ratio_mean": result["acquisition_peak_ratio"]["mean"],
+                "acquisition_peak_ratio_std": result["acquisition_peak_ratio"]["std"],
+                "tracking_cn0_mean_db_hz": result["tracking_cn0_observed_db_hz"]["mean"],
+                "tracking_cn0_std_db_hz": result["tracking_cn0_observed_db_hz"]["std"],
+                "tracking_cn0_valid_seed_count": result["tracking_cn0_observed_db_hz"]["valid_count"],
+                "tracking_cn0_missing_count": result["tracking_cn0_missing_count"],
+                "measured_gain_mean_db": result["thermal_snr_gain_db"]["mean"],
+                "measured_gain_std_db": result["thermal_snr_gain_db"]["std"],
+                "target_output_gain_mean_db": result["target_output_gain_db"]["mean"],
+                "target_output_gain_std_db": result["target_output_gain_db"]["std"],
+                "thermal_snr_mean_db": result["thermal_snr_db"]["mean"],
+                "thermal_snr_std_db": result["thermal_snr_db"]["std"],
                 "acquisition_success_count": result["acquisition_success_count"],
+                "acquisition_correct_count": result["acquisition_correct_count"],
+                "tracking_success_count": result["tracking_success_count"],
             })
         with (settings.output_dir / "case_summary.csv").open(
             "w", newline="", encoding="utf-8"
@@ -158,16 +159,26 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
             writer.writerows({key: json.dumps(value) if isinstance(value, (list, dict)) else value
                              for key, value in record.items()} for record in records)
     if "mutual_coupling" in summary:
-        # 显式列出阅读所需字段；逐天线响应、功率和核验细节保留在JSON中。
-        summary_columns = (
-            "case", "mode", "antennas", "seeds",
-            "true_coupling_db", "true_coupling_phase_deg",
-            "assumed_coupling_db", "assumed_coupling_phase_deg",
-            "thermal_snr_mean_db", "acquisition_correct_count",
-            "tracking_cn0_mean_db_hz", "tracking_cn0_valid_seed_count", "status",
-        )
-        records = [{key: case[key] for key in summary_columns}
-                   for case in summary["mutual_coupling"]["cases"].values()]
+        records = []
+        for case in summary["mutual_coupling"]["cases"].values():
+            record = {key: case[key] for key in (
+                "case", "mode", "antennas", "seeds", "true_coupling_db",
+                "true_coupling_phase_deg", "assumed_coupling_db", "assumed_coupling_phase_deg",
+                "acquisition_threshold_pass_count", "acquisition_correct_count",
+                "tracking_success_count", "tracking_cn0_missing_count",
+            )}
+            record.update({
+                "thermal_snr_mean_db": case["thermal_snr_db"]["mean"],
+                "thermal_snr_std_db": case["thermal_snr_db"]["std"],
+                "thermal_snr_gain_mean_db": case["thermal_snr_gain_db"]["mean"],
+                "thermal_snr_gain_std_db": case["thermal_snr_gain_db"]["std"],
+                "acquisition_peak_ratio_mean": case["acquisition_peak_ratio"]["mean"],
+                "acquisition_peak_ratio_std": case["acquisition_peak_ratio"]["std"],
+                "tracking_cn0_mean_db_hz": case["tracking_cn0_db_hz"]["mean"],
+                "tracking_cn0_std_db_hz": case["tracking_cn0_db_hz"]["std"],
+                "tracking_cn0_valid_seed_count": case["tracking_cn0_db_hz"]["valid_count"],
+            })
+            records.append(record)
         with (settings.output_dir / "case_summary.csv").open(
             "w", newline="", encoding="utf-8"
         ) as stream:
@@ -175,13 +186,6 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
             writer.writeheader()
             writer.writerows({key: json.dumps(value) if isinstance(value, (list, dict)) else value
                              for key, value in record.items()} for record in records)
-        with (settings.output_dir / "model_checks.csv").open(
-            "w", newline="", encoding="utf-8"
-        ) as stream:
-            model_records = list(summary["model_checks"].values())
-            writer = csv.DictWriter(stream, fieldnames=list(model_records[0]))
-            writer.writeheader()
-            writer.writerows(model_records)
     if "phase_center" in summary:
         # 日常只看精简主表；完整统计、坐标和核验信息仍保留在JSON。
         records = phase_center_summary_records(list(summary["phase_center"]["cases"].values()))

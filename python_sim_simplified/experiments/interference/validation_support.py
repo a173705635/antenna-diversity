@@ -6,12 +6,10 @@
 
 from dataclasses import asdict, dataclass, field
 from concurrent.futures import ProcessPoolExecutor, as_completed
-import hashlib
 import json
 from pathlib import Path
 
 import numpy as np
-from scipy.stats import t as student_t
 
 from core.antenna import antenna_response, build_antenna_model
 from core.channel_delay import delay_phase
@@ -21,7 +19,7 @@ from core.diversity import combine_known
 from core.metrics import circular_chip_error
 from core.pipeline import run_frontend, run_receiver
 from experiments.interference.coupling_support import (
-    coupling_row_fields, independent_weights, model_checks, summarize_coupling,
+    coupling_row_fields, sample_statistics, summarize_coupling,
 )
 from experiments.interference.phase_center_support import (
     phase_center_row_fields, summarize_phase_center,
@@ -95,39 +93,6 @@ def _power(values: np.ndarray) -> float:
     return float(np.mean(np.abs(values) ** 2))
 
 
-def _pattern_gain_row_fields(
-    case_cfg: SimulationConfig, frontend: dict, channels: np.ndarray,
-    mode: str, weights: np.ndarray, powers: dict[str, float],
-    input_fields: dict,
-) -> dict:
-    """复算增益用例的固定权值、名义约束和输入端 SNR；不参与接收求权。"""
-    fields = dict(input_fields)
-    fields["thermal_snr_db"] = float(10 * np.log10(powers["target"] / powers["thermal"]))
-    fields["thermal_snr_gain_vs_best_db"] = (
-        fields["thermal_snr_db"] - input_fields["best_single_snr_db"]
-    )
-    desired = frontend["truth"]["desired_steering_assumed"]
-    expected_weights, constraint = independent_weights(channels, desired, mode,
-                                                       case_cfg.diversity)
-    if mode == "single":
-        fields["pattern_expected_gain_db"] = 0.0
-    elif mode == "mrc":
-        # 名义与真实方向可不同：以独立 MRC 权值和真实响应计算相对首通道理论收益。
-        actual_steering = frontend["truth"]["desired_steering_true"]
-        gain_ratio = (abs(np.vdot(expected_weights, actual_steering)) ** 2 /
-                      (np.vdot(expected_weights, expected_weights).real *
-                       abs(actual_steering[0]) ** 2))
-        fields["pattern_expected_gain_db"] = float(10 * np.log10(gain_ratio))
-    else:
-        fields["pattern_expected_gain_db"] = None
-    constraint_error = abs(np.vdot(weights, constraint) - 1)
-    fields["pattern_weight_formula_error"] = float(
-        np.linalg.norm(weights - expected_weights) / np.linalg.norm(expected_weights)
-    )
-    fields["pattern_weight_constraint_error"] = float(constraint_error)
-    return fields
-
-
 def evaluate_case(
     case: ValidationCase, result: dict, settings: ValidationSettings,
 ) -> list[dict]:
@@ -156,25 +121,10 @@ def evaluate_case(
     covariance = samples @ samples.conj().T / samples.shape[1]
     pattern_fields = {}
     if settings.experiment_type == "antenna_gain":
-        # I0 输入端逐通道物理功率：SINGLE 的单位响应归一不能代替天线端功率。
-        target_input = [_power(values) for values in components["target"][:, window]]
-        thermal_input = [_power(values) for values in components["thermal"][:, window]]
-        input_snr = [float(10 * np.log10(signal / noise))
-                     for signal, noise in zip(target_input, thermal_input)]
+        # 注入增益是物理条件；输出收益由下方实际分量功率计算。
         gain_db = tuple(case_cfg.phone.antenna_model.true_state.amplitude_error_db.get(name, 0.0)
                         for name in case_cfg.phone.active_antennas)
-        physical_gain_db = 10 * np.log10(
-            np.abs(frontend["truth"]["desired_steering_true"]) ** 2
-        )
-        pattern_fields = {
-            "input_gain_db_by_antenna": list(gain_db),
-            "input_target_power_by_antenna": target_input,
-            "input_thermal_power_by_antenna": thermal_input,
-            "input_snr_db_by_antenna": input_snr,
-            "best_single_antenna": case_cfg.phone.active_antennas[int(np.argmax(input_snr))],
-            "best_single_snr_db": max(input_snr),
-            "pattern_response_gain_error_db": float(np.max(np.abs(physical_gain_db - gain_db))),
-        }
+        pattern_fields = {"input_gain_db_by_antenna": list(gain_db)}
     # 公共指标：每种方法复用同一前端采样，以接收机实际固定权值投影分量。
     rows = []
     for mode, branch in branches.items():
@@ -197,6 +147,13 @@ def evaluate_case(
         finite = finite[np.isfinite(finite)]
         code_estimate = (acquisition["code_phase_samples"]
                          * case_cfg.signal.code_rate_hz / fs_out_hz)
+        code_error_chips = float(circular_chip_error(
+            code_estimate, case_cfg.signal.code_delay_chips,
+        ))
+        doppler_error_hz = float(acquisition["doppler_hz"] - case_cfg.signal.doppler_hz)
+        # 单频点没有网格间隔，频率正确要求搜索频点恰等于真值。
+        doppler_tolerance_hz = (float(np.diff(case_cfg.acquisition.doppler_bins_hz)[0] / 2)
+                                if len(case_cfg.acquisition.doppler_bins_hz) > 1 else 0.0)
         quadratic = float(np.vdot(weights, covariance @ weights).real)
         # 两条独立路径：实际合并序列均方，和输入协方差二次型 wᴴRw。
         actual = _power(output)
@@ -218,6 +175,7 @@ def evaluate_case(
                 # 这里是线性分量预算，不把联合量化残差冒充独立热噪声。
                 powers["target"] / (powers["thermal"] + sum(interference.values()))
             )),
+            "thermal_snr_db": float(10 * np.log10(powers["target"] / powers["thermal"])),
             "weight_real_imag": [[float(value.real), float(value.imag)] for value in weights],
             "weight_norm_squared": float(np.vdot(weights, weights).real),
             "combined_direct_max_abs_error": float(np.max(np.abs(
@@ -227,27 +185,29 @@ def evaluate_case(
             "acquisition_metric": float(acquisition["metric"]),
             "acquisition_threshold": case_cfg.acquisition.threshold,
             "acquired_flag": bool(acquisition["success_flag"]),
-            "acquired_code_error_chips": float(circular_chip_error(
-                code_estimate, case_cfg.signal.code_delay_chips,
-            )),
-            "acquired_doppler_error_hz": float(
-                acquisition["doppler_hz"] - case_cfg.signal.doppler_hz
+            "acquired_code_error_chips": code_error_chips,
+            "acquired_doppler_error_hz": doppler_error_hz,
+            "acquisition_correct_flag": bool(
+                acquisition["success_flag"]
+                and abs(code_error_chips) <= 0.5
+                and abs(doppler_error_hz) <= doppler_tolerance_hz
             ),
             "tracking_success_flag": bool(tracking["success_flag"]),
             "tracking_status": tracking["status"],
             "tracking_cn0_late_median_db_hz": float(np.median(finite)) if finite.size else None,
             "tracking_cn0_late_finite_count": int(finite.size),
         }
-        # 专项复算只写入对应批次的附加字段。
+        # 专项字段只记录实验条件和目标真实响应。
         if pattern_fields:
-            row.update(_pattern_gain_row_fields(case_cfg, frontend, channels, mode,
-                                                weights, powers, pattern_fields))
+            row.update(pattern_fields)
         if settings.experiment_type == "mutual_coupling":
-            row.update(coupling_row_fields(case, frontend, channels, components,
-                                           window, weights, mode))
+            row.update(coupling_row_fields(
+                case, frontend["truth"]["desired_steering_true"], weights,
+            ))
         if settings.experiment_type == "phase_center_offset":
-            row.update(phase_center_row_fields(case, frontend, channels, components,
-                                               window, weights, mode))
+            row.update(phase_center_row_fields(
+                case, frontend["truth"]["desired_steering_true"], weights,
+            ))
         rows.append(row)
     # SINGLE 公共参照：即使仅运行 MVDR，也用第一根物理天线计算相对收益。
     _, reference_info = combine_known(
@@ -261,15 +221,10 @@ def evaluate_case(
         row["target_output_gain_db"] = float(10 * np.log10(
             row["target_power"] / reference_target
         ))
-        row["target_response_gain"] = float(np.sqrt(
-            row["target_power"] / reference_target
-        ))
         row["thermal_snr_gain_db"] = float(10 * np.log10(
             (row["target_power"] / row["thermal_power"])
             / (reference_target / reference_thermal)
         ))
-        row["thermal_snr_ratio"] = float(10 ** (row["thermal_snr_gain_db"] / 10))
-        row["target_power_retention"] = row["target_power"] / reference_target
         row["interferer_suppression_db"] = {
             # 参考干扰功率 / 合并后干扰功率：正值表示压制，负值表示放大。
             item["source"]: float(10 * np.log10(
@@ -312,97 +267,39 @@ def _ideal_noise_applicability(case: ValidationCase) -> str | None:
     return None
 
 
-def _mean_interval(values: list[float]) -> dict:
-    """样本均值、样本标准差及双侧 t-95% 均值区间；单次试验不估计区间。"""
-    samples = np.asarray(values, dtype=float)
-    mean = float(np.mean(samples))
-    if len(samples) == 1:
-        return {"mean": mean, "std": None, "ci95": None}
-    sample_std = float(np.std(samples, ddof=1))
-    half_width = float(student_t.ppf(0.975, len(samples) - 1) * sample_std
-                       / np.sqrt(len(samples)))
-    return {"mean": mean, "std": sample_std,
-            "ci95": [mean - half_width, mean + half_width]}
-
-
-def _wilson_interval(successes: int, total: int) -> list[float]:
-    """二项比例 Wilson 95% 区间；不将失捕或失锁样本删除。"""
-    z = 1.959963984540054
-    proportion = successes / total
-    denominator = 1 + z * z / total
-    center = (proportion + z * z / (2 * total)) / denominator
-    radius = z * np.sqrt(proportion * (1 - proportion) / total +
-                         z * z / (4 * total * total)) / denominator
-    return [float(center - radius), float(center + radius)]
-
-
 def summarize_pattern_gain(rows: list[dict]) -> dict:
-    """按物理 TC 和方法分别汇总 seed，避免算法间混行。"""
+    """按物理 TC 和方法汇总注入增益、实测收益及接收统计。"""
     grouped = {}
-    indexed = {(row["case"], row["mode"], row["seed"]): row for row in rows}
     for row in rows:
         grouped.setdefault((row["case"], row["mode"]), []).append(row)
 
     cases = {}
     for (case_id, mode), observations in grouped.items():
         name = f"{case_id}-{mode}"
-        gain_errors = ([row["thermal_snr_gain_db"] - row["pattern_expected_gain_db"]
-                        for row in observations] if mode in ("single", "mrc") else [])
-        input_target_errors = []
-        input_noise_errors = []
-        for row in observations:
-            input_baseline = indexed.get(("TC-001", mode, row["seed"]))
-            if input_baseline is not None:
-                for gain, signal, base_signal, noise, base_noise in zip(
-                    row["input_gain_db_by_antenna"],
-                    row["input_target_power_by_antenna"],
-                    input_baseline["input_target_power_by_antenna"],
-                    row["input_thermal_power_by_antenna"],
-                    input_baseline["input_thermal_power_by_antenna"],
-                ):
-                    input_target_errors.append(10 * np.log10(signal / base_signal) - gain)
-                    input_noise_errors.append(10 * np.log10(noise / base_noise))
-        manifold_error = max(row["pattern_response_gain_error_db"] for row in observations)
-        gain_error = _mean_interval(gain_errors) if gain_errors else None
-        weight_error = max(row["pattern_weight_formula_error"] for row in observations)
-        weight_constraint_error = max(row["pattern_weight_constraint_error"]
-                                      for row in observations)
-        target_input_error = (max(abs(error) for error in input_target_errors)
-                              if input_target_errors else None)
-        noise_input_error = (max(abs(error) for error in input_noise_errors)
-                             if input_noise_errors else None)
-        # MVDR 有求权/响应硬判据，性能与等噪声 MRC 只报告不强求相等。
-        passed_flag = (manifold_error <= 1e-8 and weight_error <= 1e-8
-                  and weight_constraint_error <= 1e-8
-                  and target_input_error is not None and target_input_error <= 1e-8
-                  and noise_input_error is not None and noise_input_error <= 1e-8)
-        if mode in ("single", "mrc"):
-            passed_flag = passed_flag and abs(gain_error["mean"]) <= 0.2
         acquired = sum(row["acquired_flag"] for row in observations)
+        correct = sum(row["acquisition_correct_flag"] for row in observations)
         tracked = sum(row["tracking_success_flag"] for row in observations)
         finite_cn0 = [row["tracking_cn0_late_median_db_hz"] for row in observations
                       if row["tracking_cn0_late_median_db_hz"] is not None]
         cases[name] = {
-            "case": case_id, "status": "passed" if passed_flag else "failed", "mode": mode,
-            "seeds": len(observations),
-            "expected_gain_db": observations[0]["pattern_expected_gain_db"],
-            "measured_gain_db": _mean_interval([row["thermal_snr_gain_db"]
-                                                for row in observations]),
-            "gain_error_db": gain_error, "response_gain_max_error_db": manifold_error,
-            "weight_max_relative_error": weight_error,
-            "weight_constraint_max_error": weight_constraint_error,
-            "input_target_change_max_error_db": target_input_error,
-            "input_thermal_change_max_error_db": noise_input_error,
+            "case": case_id, "mode": mode, "seeds": len(observations),
+            "antennas": observations[0]["antennas"],
+            "input_gain_db_by_antenna": observations[0]["input_gain_db_by_antenna"],
+            "target_output_gain_db": sample_statistics(
+                [row["target_output_gain_db"] for row in observations]),
+            "thermal_snr_gain_db": sample_statistics(
+                [row["thermal_snr_gain_db"] for row in observations]),
+            "thermal_snr_db": sample_statistics(
+                [row["thermal_snr_db"] for row in observations]),
+            "acquisition_peak_ratio": sample_statistics(
+                [row["acquisition_metric"] for row in observations]),
             "acquisition_success_count": acquired,
-            "acquisition_success_wilson95": _wilson_interval(acquired, len(observations)),
+            "acquisition_correct_count": correct,
             "tracking_success_count": tracked,
-            "tracking_success_wilson95": _wilson_interval(tracked, len(observations)),
             "tracking_cn0_missing_count": len(observations) - len(finite_cn0),
-            "tracking_cn0_observed_db_hz": (_mean_interval(finite_cn0)
-                                             if finite_cn0 else None),
+            "tracking_cn0_observed_db_hz": sample_statistics(finite_cn0),
         }
-    return {"passed_flag": all(item["status"] == "passed" for item in cases.values()),
-            "cases": cases}
+    return {"cases": cases}
 
 
 def verify_validation(rows: list[dict], cases: dict[tuple[str, int], ValidationCase]) -> dict:
@@ -525,29 +422,9 @@ def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) ->
     summary = {"cases": list(case_summaries.values()), "rows": rows,
                "verification": verification}
     if cases and settings.experiment_type == "antenna_gain":
-        pattern = summarize_pattern_gain(rows)
-        summary["pattern_gain"] = pattern
-        for name, outcome in pattern["cases"].items():
-            verification["checks"][f"pattern_gain:{name}"] = {
-                "status": outcome["status"], "passed_flag": outcome["status"] == "passed",
-                "reason": "independent gain, input power and weight checks",
-            }
-        verification["passed_flag"] = verification["passed_flag"] and pattern["passed_flag"]
+        summary["pattern_gain"] = summarize_pattern_gain(rows)
     if cases and settings.experiment_type == "mutual_coupling":
-        model = model_checks()
-        coupling = summarize_coupling(rows)
-        summary["model_checks"] = model
-        summary["mutual_coupling"] = coupling
-        verification["checks"].update({f"coupling_model:{name}": check
-                                       for name, check in model.items()})
-        verification["checks"].update(coupling["checks"])
-        verification["passed_flag"] = (
-            verification["passed_flag"] and coupling["passed_flag"]
-            and all(check["passed_flag"] for check in model.values())
-        )
+        summary["mutual_coupling"] = summarize_coupling(rows)
     if cases and settings.experiment_type == "phase_center_offset":
-        phase_center = summarize_phase_center(rows)
-        summary["phase_center"] = phase_center
-        verification["checks"].update(phase_center["checks"])
-        verification["passed_flag"] = verification["passed_flag"] and phase_center["passed_flag"]
+        summary["phase_center"] = summarize_phase_center(rows)
     return summary

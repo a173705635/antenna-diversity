@@ -172,8 +172,7 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                                     observations = [row["interferer_suppression_db"].get(
                                         metric.removeprefix("suppression:")) for row in matching]
                                 elif metric == "target_gain_db":
-                                    observations = [10 * np.log10(row["target_power_retention"])
-                                                    for row in matching]
+                                    observations = [row["target_output_gain_db"] for row in matching]
                                 else:
                                     observations = [row.get(metric) for row in matching]
                                 available = [value for value in observations if value is not None]
