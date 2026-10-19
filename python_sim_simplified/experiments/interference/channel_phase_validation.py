@@ -583,9 +583,11 @@ def main():
         encoding='utf-8',
     )
     with (output_dir / 'summary.csv').open('w', newline='', encoding='utf-8') as stream:
-        writer = csv.DictWriter(stream, fieldnames=rows[0].keys())
+        # 固定捕获门限留在JSON供复算和重绘，日常表格只展示条件与结果。
+        columns = [key for key in rows[0] if key != 'acquisition_threshold']
+        writer = csv.DictWriter(stream, fieldnames=columns)
         writer.writeheader()
-        writer.writerows(rows)
+        writer.writerows({key: row[key] for key in columns} for row in rows)
     plot_summary(rows, output_dir, PHASE_ERRORS_DEG)
     # 失败也先保存结果/图，便于定位问题；非零退出防止把“跑完”误当成“通过”。
     if not verification['passed_flag']:

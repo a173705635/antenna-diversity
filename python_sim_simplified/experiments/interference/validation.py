@@ -82,10 +82,15 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
     if settings.workers == 1:
         reset_output(settings.output_dir)
     # 并行批次已在启动时刷新专用目录；保留逐条件 progress.jsonl。
+    # 日常摘要只展示实验条件；完整底层配置只在manifest中保存一次。
+    case_conditions = []
+    for case in summary["cases"]:
+        condition = {key: value for key, value in case.items() if key != "receiver_configs"}
+        case_conditions.append(condition)
     manifest = {
         # 清单用于追溯参数与代码版本，不是下一次仿真的配置输入。
         "settings": asdict(settings),
-        "cases": summary["cases"],
+        "cases": case_conditions,
         # run_validation 已按条件和 seed 保存实际执行配置，直接复用。
         "actual_receiver_configs": {
             case["name"]: case["receiver_configs"] for case in summary["cases"]
@@ -95,16 +100,23 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
     }
     _write_json(settings.output_dir / "manifest.json", manifest)
     # summary 用于看数值/后续重绘；verification 用于逐项查看判据及失败原因。
-    _write_json(settings.output_dir / "summary.json", summary)
+    _write_json(settings.output_dir / "summary.json", {
+        **summary, "cases": case_conditions, "receiver_config_file": "manifest.json",
+    })
     _write_json(settings.output_dir / "verification.json", summary["verification"])
     rows = summary["rows"]
     with (settings.output_dir / "summary.csv").open("w", newline="", encoding="utf-8") as stream:
         # 配对条件比普通条件多恢复误差列；普通条件对应单元格留空。
-        columns = list(dict.fromkeys(key for row in rows for key in row))
+        hidden_config_columns = {
+            "acquisition_threshold", "acquisition_code_tolerance_chips",
+            "acquisition_doppler_half_bin_hz",
+        }
+        columns = list(dict.fromkeys(key for row in rows for key in row
+                                    if key not in hidden_config_columns))
         writer = csv.DictWriter(stream, fieldnames=columns)
         writer.writeheader()
         writer.writerows({key: json.dumps(value) if isinstance(value, (list, dict)) else value
-                         for key, value in row.items()} for row in rows)
+                         for key, value in row.items() if key in columns} for row in rows)
     if "pattern_gain" in summary:
         # 一行一个 TC：跨seed汇总与逐seed原始行分开，便于直接筛选。
         records = []

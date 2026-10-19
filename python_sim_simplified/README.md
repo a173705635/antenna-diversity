@@ -2,6 +2,8 @@
 
 日常只需要看 `core/` 和 `experiments/`：公共接收算法集中维护，每个实验有独立入口。2026-10-14 已移除抗欺骗、多径专用算法、实验、诊断工具、测试，以及公共配置和接收链中的多径接口。保留通用 GPS L1/L5 定位、真实录波接收和现有抗干扰研究。
 
+分集实验的日常摘要不展开RF/ADC/DFE、捕获积分、跟踪环路等接收机设计配置，完整配置保留在`manifest.json`；通用验证的`summary.json`通过`receiver_config_file`指向该文件。CSV不再重复捕获门限和判定容差，JSON明细仍保留这些判据供复算与重绘。
+
 每次修改及实际验证统一记录在 [CHANGELOG](CHANGELOG.md)。抗干扰的建模前提、实验条件和已有结果见 [详细说明](docs/interference/README.md)。
 
 ```text
