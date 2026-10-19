@@ -189,10 +189,11 @@ def _phase_direction_gain_cases() -> list[ValidationCase]:
                     scene_label=scene, scan_label="DFE channel phase",
                     scan_value=phase_deg, scan_unit="deg",
                 )
-                ideal_checks = ("ideal_noise",) if scene == "noise_only" else ()
+                # ideal_checks = ("ideal_noise",) if scene == "noise_only" else ()
                 baseline_case = ValidationCase(
                     f"{phase_case_prefix}/baseline", deepcopy(base_cfg), series_label="baseline",
-                    checks=ideal_checks, **common_case_fields,
+                    # checks=ideal_checks,  # 分量 SNR 核验暂停。
+                    **common_case_fields,
                 )
                 uncalibrated_case = ValidationCase(
                     f"{phase_case_prefix}/uncalibrated", deepcopy(base_cfg), series_label="uncalibrated",

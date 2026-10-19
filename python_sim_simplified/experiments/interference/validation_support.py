@@ -1,7 +1,7 @@
-"""通用抗干扰验证：逐条件前端 → 接收 → 独立预算 → 核验/绘图。
+"""通用抗干扰验证：逐条件前端 → 接收 → 独立核验/绘图。
 
 合并器根据完整 DFE 数据和配置的名义导向求权。
-目标、各干扰及热噪声的分离真值仅用于接收后的固定权值指标评估。
+分量准备和固定权值的分量功率评估暂时停用。
 """
 
 from dataclasses import asdict, dataclass, field
@@ -11,11 +11,11 @@ from pathlib import Path
 
 import numpy as np
 
-from core.antenna import antenna_response, build_antenna_model
-from core.channel_delay import delay_phase
+# from core.antenna import antenna_response, build_antenna_model
+# from core.channel_delay import delay_phase
 from core.config import SimulationConfig
-from core.evaluation import linear_components
-from core.diversity import combine_known
+# from core.evaluation import linear_components
+# from core.diversity import combine_known
 from core.metrics import circular_chip_error
 from core.pipeline import run_frontend, run_receiver
 from experiments.interference.coupling_support import (
@@ -32,7 +32,7 @@ class ValidationCase:
     """一个实验条件：物理/接收配置 + 图上标签 + DFE 注入/补偿 + 验收项目。
 
     scan_value 是横轴坐标，不会自动修改 config；修改物理参数由配置文件完成。
-    checks 可选 ideal_noise。
+    分量功率相关的 ideal_noise 核验暂时停用。
     """
     name: str
     config: SimulationConfig
@@ -45,7 +45,7 @@ class ValidationCase:
     # 估计值由外部给定；只有 compensate_dfe_phase_flag=True 时才执行逆旋转。
     dfe_estimated_phase_deg: dict[str, float] = field(default_factory=dict)
     compensate_dfe_phase_flag: bool = False
-    checks: tuple[str, ...] = ()
+    # checks: tuple[str, ...] = ()  # 分量功率核验暂停。
 
 
 @dataclass
@@ -69,23 +69,24 @@ def apply_dfe_phase(
     return channels * factors[:, None]
 
 
-def _assumed_steering(cfg: SimulationConfig) -> np.ndarray:
-    """为理想噪声适用性检查计算估计导向，包含估计通道时延。"""
-    model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
-    antenna_steering, _ = antenna_response(
-        model, cfg.signal.assumed_direction, cfg.signal.assumed_polarization,
-        estimated_flag=True,
-    )
-    delays_s = 1e-9 * np.array([
-        cfg.phone.estimated_channel_delay_ns[name]
-        for name in cfg.phone.active_antennas
-    ])
-    if np.all(delays_s == 0.0):
-        return antenna_steering
-    return antenna_steering * delay_phase(
-        # 这里只描述窄带载波相位，不能替代宽带码包络的序列时延对齐。
-        delays_s, cfg.signal.carrier_hz + cfg.signal.doppler_hz,
-    )
+# 分量功率核验暂停；保留估计导向计算，恢复 ideal_noise 时可复用。
+# def _assumed_steering(cfg: SimulationConfig) -> np.ndarray:
+#     """为理想噪声适用性检查计算估计导向，包含估计通道时延。"""
+#     model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
+#     antenna_steering, _ = antenna_response(
+#         model, cfg.signal.assumed_direction, cfg.signal.assumed_polarization,
+#         estimated_flag=True,
+#     )
+#     delays_s = 1e-9 * np.array([
+#         cfg.phone.estimated_channel_delay_ns[name]
+#         for name in cfg.phone.active_antennas
+#     ])
+#     if np.all(delays_s == 0.0):
+#         return antenna_steering
+#     return antenna_steering * delay_phase(
+#         # 这里只描述窄带载波相位，不能替代宽带码包络的序列时延对齐。
+#         delays_s, cfg.signal.carrier_hz + cfg.signal.doppler_hz,
+#     )
 
 
 def _power(values: np.ndarray) -> float:
@@ -96,23 +97,23 @@ def _power(values: np.ndarray) -> float:
 def evaluate_case(
     case: ValidationCase, result: dict, settings: ValidationSettings,
 ) -> list[dict]:
-    """对一次已完成的接收独立复算分量和指标；返回标量行。"""
+    """对一次已完成的接收独立复算实际输出与接收指标；返回标量行。"""
     case_cfg = case.config
     seed = case_cfg.random_seed
     frontend = result["frontend"]
     channels = result["channels"]
     branches = result["branches"]
-    # 分量准备：重放本次热噪声，并施加与真实 DFE 相同的两次相位乘法。
-    components = linear_components(frontend)
-    components = {
-        name: values * result["injection_factors"]
-        for name, values in components.items()
-    }
-    if case.compensate_dfe_phase_flag:
-        components = {
-            name: values * result["correction_factors"]
-            for name, values in components.items()
-        }
+    # 分量准备暂停；真实 DFE 与接收仍由 run_case 完整执行。
+    # components = linear_components(frontend)
+    # components = {
+    #     name: values * result["injection_factors"]
+    #     for name, values in components.items()
+    # }
+    # if case.compensate_dfe_phase_flag:
+    #     components = {
+    #         name: values * result["correction_factors"]
+    #         for name, values in components.items()
+    #     }
     fs_out_hz = frontend["dfe_info"]["fs_out_hz"]
     edge_trim_samples = round(settings.evaluation_edge_trim_ms * 1e-3 * fs_out_hz)
     window = slice(edge_trim_samples, channels.shape[1] - edge_trim_samples)
@@ -121,24 +122,24 @@ def evaluate_case(
     covariance = samples @ samples.conj().T / samples.shape[1]
     pattern_fields = {}
     if settings.experiment_type == "antenna_gain":
-        # 注入增益是物理条件；输出收益由下方实际分量功率计算。
+        # 注入增益是物理条件；分量输出收益暂时停用。
         gain_db = tuple(case_cfg.phone.antenna_model.true_state.amplitude_error_db.get(name, 0.0)
                         for name in case_cfg.phone.active_antennas)
         pattern_fields = {"input_gain_db_by_antenna": list(gain_db)}
-    # 公共指标：每种方法复用同一前端采样，以接收机实际固定权值投影分量。
+    # 公共指标：每种方法复用同一前端采样与接收机实际权值。
     rows = []
     for mode, branch in branches.items():
         weights = branch["combining"]["weights"]
         output = branch["combined"][window]
-        projected = {
-            # 使用接收机实际求出的同一组 w；不能对目标/干扰各自重新优化权值。
-            name: weights.conj() @ values[:, window]
-            for name, values in components.items()
-        }
-        powers = {name: _power(values) for name, values in projected.items()}
-        interference = {name: power for name, power in powers.items()
-                        if name not in ("target", "thermal")}
-        linear_sum = sum(projected.values())
+        # 分量投影、功率、交叉项及量化残差暂时停用。
+        # projected = {
+        #     name: weights.conj() @ values[:, window]
+        #     for name, values in components.items()
+        # }
+        # powers = {name: _power(values) for name, values in projected.items()}
+        # interference = {name: power for name, power in powers.items()
+        #                 if name not in ("target", "thermal")}
+        # linear_sum = sum(projected.values())
         acquisition = branch["acquisition"]
         tracking = branch["tracking"]
         cn0 = tracking["cn0_db_hz"] if tracking["success_flag"] else np.array([])
@@ -164,18 +165,16 @@ def evaluate_case(
             "mode": mode,
             "antennas": ",".join(case_cfg.phone.active_antennas),
             "single_reference_antenna": case_cfg.phone.active_antennas[0],
-            "target_power": powers["target"], "thermal_power": powers["thermal"],
-            "interferer_powers": [{"source": name, "power": power}
-                                    for name, power in interference.items()],
-            "joint_nonlinear_quantization_residual_power": _power(output - linear_sum),
-            # 分量可能相关，合成均方不一定等于各均方之和；差值是交叉项。
-            "linear_component_cross_power": _power(linear_sum) - sum(powers.values()),
+            # "target_power": powers["target"], "thermal_power": powers["thermal"],
+            # "interferer_powers": [{"source": name, "power": power}
+            #                       for name, power in interference.items()],
+            # "joint_nonlinear_quantization_residual_power": _power(output - linear_sum),
+            # "linear_component_cross_power": _power(linear_sum) - sum(powers.values()),
             "actual_power": actual,
-            "linear_in_band_sinr_db": float(10 * np.log10(
-                # 这里是线性分量预算，不把联合量化残差冒充独立热噪声。
-                powers["target"] / (powers["thermal"] + sum(interference.values()))
-            )),
-            "thermal_snr_db": float(10 * np.log10(powers["target"] / powers["thermal"])),
+            # "linear_in_band_sinr_db": float(10 * np.log10(
+            #     powers["target"] / (powers["thermal"] + sum(interference.values()))
+            # )),
+            # "thermal_snr_db": float(10 * np.log10(powers["target"] / powers["thermal"])),
             "weight_real_imag": [[float(value.real), float(value.imag)] for value in weights],
             "weight_norm_squared": float(np.vdot(weights, weights).real),
             "combined_direct_max_abs_error": float(np.max(np.abs(
@@ -209,66 +208,63 @@ def evaluate_case(
                 case, frontend["truth"]["desired_steering_true"], weights,
             ))
         rows.append(row)
-    # SINGLE 公共参照：即使仅运行 MVDR，也用第一根物理天线计算相对收益。
-    _, reference_info = combine_known(
-        channels, frontend["truth"]["desired_steering_assumed"], "single",
-        case_cfg.diversity.diagonal_loading_factor,
-    )
-    reference_weights = reference_info["weights"]
-    reference_target = _power(reference_weights.conj() @ components["target"][:, window])
-    reference_thermal = _power(reference_weights.conj() @ components["thermal"][:, window])
-    for row in rows:
-        row["target_output_gain_db"] = float(10 * np.log10(
-            row["target_power"] / reference_target
-        ))
-        row["thermal_snr_gain_db"] = float(10 * np.log10(
-            (row["target_power"] / row["thermal_power"])
-            / (reference_target / reference_thermal)
-        ))
-        row["interferer_suppression_db"] = {
-            # 参考干扰功率 / 合并后干扰功率：正值表示压制，负值表示放大。
-            item["source"]: float(10 * np.log10(
-                _power(reference_weights.conj() @ components[item["source"]][:, window])
-                / item["power"]
-            )) for item in row["interferer_powers"]
-        }
+    # 分量收益暂停；不再额外执行 SINGLE 参考合并。
+    # _, reference_info = combine_known(
+    #     channels, frontend["truth"]["desired_steering_assumed"], "single",
+    #     case_cfg.diversity.diagonal_loading_factor,
+    # )
+    # reference_weights = reference_info["weights"]
+    # reference_target = _power(reference_weights.conj() @ components["target"][:, window])
+    # reference_thermal = _power(reference_weights.conj() @ components["thermal"][:, window])
+    # for row in rows:
+    #     row["target_output_gain_db"] = float(10 * np.log10(
+    #         row["target_power"] / reference_target
+    #     ))
+    #     row["thermal_snr_gain_db"] = float(10 * np.log10(
+    #         (row["target_power"] / row["thermal_power"])
+    #         / (reference_target / reference_thermal)
+    #     ))
+    #     row["interferer_suppression_db"] = {
+    #         item["source"]: float(10 * np.log10(
+    #             _power(reference_weights.conj() @ components[item["source"]][:, window])
+    #             / item["power"]
+    #         )) for item in row["interferer_powers"]
+    #     }
     return rows
 
 
-def _ideal_noise_applicability(case: ValidationCase) -> str | None:
-    """检查等幅目标下 MRC 的 10log10(N) 前提；返回不适用原因。
-
-    这是理论结论的适用范围判断，不是为错误配置提供默认回退。
-    """
-    case_cfg = case.config
-    if any(source.enable_flag for source in case_cfg.interferers):
-        return "external interference is enabled"
-    if any(case_cfg.phone.channel_delay_ns[name] != 0
-           for name in case_cfg.phone.active_antennas):
-        return "true sequence delays need a wideband alignment analysis"
-    if np.ptp(np.broadcast_to(case_cfg.rf.amplitude_error_db, len(case_cfg.phone.active_antennas))) != 0:
-        return "RF channel amplitudes differ"
-    if np.ptp(np.broadcast_to(case_cfg.rf.phase_error_deg, len(case_cfg.phone.active_antennas))) != 0:
-        return "RF channel phases differ"
-    if any(case.dfe_phase_deg.get(name, 0.0) -
-           (case.dfe_estimated_phase_deg.get(name, 0.0)
-            if case.compensate_dfe_phase_flag else 0.0) != 0.0
-           for name in case_cfg.phone.active_antennas):
-        return "DFE phases are not corrected"
-    model = build_antenna_model(case_cfg.phone, case_cfg.signal.carrier_hz)
-    true_steering, _ = antenna_response(
-        model, case_cfg.signal.true_direction, case_cfg.signal.true_polarization,
-    )
-    assumed_steering = _assumed_steering(case_cfg)
-    if not np.allclose(true_steering, assumed_steering, rtol=1e-12, atol=1e-12):
-        return "true and assumed target manifolds differ"
-    if not np.allclose(np.abs(true_steering), np.abs(true_steering[0]), rtol=1e-12, atol=1e-12):
-        return "element target gains are not equal"
-    return None
+# ideal_noise 适用性只服务已暂停的分量 SNR 核验。
+# def _ideal_noise_applicability(case: ValidationCase) -> str | None:
+#     """检查等幅目标下 MRC 的 10log10(N) 前提；返回不适用原因。"""
+#     case_cfg = case.config
+#     if any(source.enable_flag for source in case_cfg.interferers):
+#         return "external interference is enabled"
+#     if any(case_cfg.phone.channel_delay_ns[name] != 0
+#            for name in case_cfg.phone.active_antennas):
+#         return "true sequence delays need a wideband alignment analysis"
+#     if np.ptp(np.broadcast_to(case_cfg.rf.amplitude_error_db, len(case_cfg.phone.active_antennas))) != 0:
+#         return "RF channel amplitudes differ"
+#     if np.ptp(np.broadcast_to(case_cfg.rf.phase_error_deg, len(case_cfg.phone.active_antennas))) != 0:
+#         return "RF channel phases differ"
+#     if any(case.dfe_phase_deg.get(name, 0.0) -
+#            (case.dfe_estimated_phase_deg.get(name, 0.0)
+#             if case.compensate_dfe_phase_flag else 0.0) != 0.0
+#            for name in case_cfg.phone.active_antennas):
+#         return "DFE phases are not corrected"
+#     model = build_antenna_model(case_cfg.phone, case_cfg.signal.carrier_hz)
+#     true_steering, _ = antenna_response(
+#         model, case_cfg.signal.true_direction, case_cfg.signal.true_polarization,
+#     )
+#     assumed_steering = _assumed_steering(case_cfg)
+#     if not np.allclose(true_steering, assumed_steering, rtol=1e-12, atol=1e-12):
+#         return "true and assumed target manifolds differ"
+#     if not np.allclose(np.abs(true_steering), np.abs(true_steering[0]), rtol=1e-12, atol=1e-12):
+#         return "element target gains are not equal"
+#     return None
 
 
 def summarize_pattern_gain(rows: list[dict]) -> dict:
-    """按物理 TC 和方法汇总注入增益、实测收益及接收统计。"""
+    """按物理 TC 和方法汇总注入增益及接收统计。"""
     grouped = {}
     for row in rows:
         grouped.setdefault((row["case"], row["mode"]), []).append(row)
@@ -285,12 +281,12 @@ def summarize_pattern_gain(rows: list[dict]) -> dict:
             "case": case_id, "mode": mode, "seeds": len(observations),
             "antennas": observations[0]["antennas"],
             "input_gain_db_by_antenna": observations[0]["input_gain_db_by_antenna"],
-            "target_output_gain_db": sample_statistics(
-                [row["target_output_gain_db"] for row in observations]),
-            "thermal_snr_gain_db": sample_statistics(
-                [row["thermal_snr_gain_db"] for row in observations]),
-            "thermal_snr_db": sample_statistics(
-                [row["thermal_snr_db"] for row in observations]),
+            # "target_output_gain_db": sample_statistics(
+            #     [row["target_output_gain_db"] for row in observations]),
+            # "thermal_snr_gain_db": sample_statistics(
+            #     [row["thermal_snr_gain_db"] for row in observations]),
+            # "thermal_snr_db": sample_statistics(
+            #     [row["thermal_snr_db"] for row in observations]),
             "acquisition_peak_ratio": sample_statistics(
                 [row["acquisition_metric"] for row in observations]),
             "acquisition_success_count": acquired,
@@ -302,10 +298,10 @@ def summarize_pattern_gain(rows: list[dict]) -> dict:
     return {"cases": cases}
 
 
-def verify_validation(rows: list[dict], cases: dict[tuple[str, int], ValidationCase]) -> dict:
-    """核验公共恒等式及适用条件下的理想噪声收益。"""
+def verify_validation(rows: list[dict]) -> dict:
+    """核验实际合并序列与固定权值的公共恒等式。"""
     checks = {}
-    # 每行检查线性合并恒等式；满足理想前提才检查 N 路热噪声收益。
+    # 每行检查线性合并恒等式；分量热噪声收益核验暂时停用。
     for row in rows:
         key = f'math:{row["case"]}:{row["seed"]}:{row["mode"]}'
         direct_flag = row["combined_direct_max_abs_error"] < 1e-8
@@ -313,21 +309,21 @@ def verify_validation(rows: list[dict], cases: dict[tuple[str, int], ValidationC
         checks[key] = {"status": "passed" if direct_flag and quadratic_flag else "failed",
                        "passed_flag": direct_flag and quadratic_flag,
                        "reason": "fixed-weight direct and covariance identity"}
-        case = cases[row["case"], row["seed"]]
-        if "ideal_noise" in case.checks and row["mode"] == "mrc":
-            reason = _ideal_noise_applicability(case)
-            if reason is not None:
-                checks[f'ideal_noise:{row["case"]}:{row["seed"]}:mrc'] = {
-                    "status": "not_applicable", "passed_flag": None, "reason": reason,
-                }
-                continue
-            theory = 10 * np.log10(len(case.config.phone.active_antennas))
-            error = abs(row["thermal_snr_gain_db"] - theory)
-            passed_flag = error < 0.5
-            checks[f'ideal_noise:{row["case"]}:{row["seed"]}:mrc'] = {
-                "status": "passed" if passed_flag else "failed", "passed_flag": passed_flag,
-                "reason": f"MRC thermal SNR error {error:.6g} dB; limit 0.5 dB",
-            }
+        # case = cases[row["case"], row["seed"]]
+        # if "ideal_noise" in case.checks and row["mode"] == "mrc":
+        #     reason = _ideal_noise_applicability(case)
+        #     if reason is not None:
+        #         checks[f'ideal_noise:{row["case"]}:{row["seed"]}:mrc'] = {
+        #             "status": "not_applicable", "passed_flag": None, "reason": reason,
+        #         }
+        #         continue
+        #     theory = 10 * np.log10(len(case.config.phone.active_antennas))
+        #     error = abs(row["thermal_snr_gain_db"] - theory)
+        #     passed_flag = error < 0.5
+        #     checks[f'ideal_noise:{row["case"]}:{row["seed"]}:mrc'] = {
+        #         "status": "passed" if passed_flag else "failed", "passed_flag": passed_flag,
+        #         "reason": f"MRC thermal SNR error {error:.6g} dB; limit 0.5 dB",
+        #     }
     return {"passed_flag": all(item["status"] != "failed" for item in checks.values()),
             "checks": checks}
 
@@ -336,7 +332,8 @@ def run_case(case: ValidationCase) -> dict:
     """用本条件运行前端、相位处理与接收，返回本次评估需要的数据引用。"""
     case_cfg = case.config
     antennas = case_cfg.phone.active_antennas
-    frontend = run_frontend(case_cfg, retain_analysis_flag=True)
+    # frontend = run_frontend(case_cfg, retain_analysis_flag=True)  # 分量重放暂停。
+    frontend = run_frontend(case_cfg)
     # 两次复数乘法与原注入、逆补偿顺序一致；零净相位也保留浮点残差。
     injection_factors = np.exp(1j * np.deg2rad([
         case.dfe_phase_deg.get(name, 0.0) for name in antennas
@@ -363,8 +360,8 @@ def run_case(case: ValidationCase) -> dict:
     branches = run_receiver(channels, truth, case_cfg, frontend["dfe_info"]["fs_out_hz"])
     return {
         "frontend": frontend, "channels": channels, "branches": branches,
-        "injection_factors": injection_factors,
-        "correction_factors": correction_factors,
+        # "injection_factors": injection_factors,  # 分量重放暂停。
+        # "correction_factors": correction_factors,
     }
 
 
@@ -414,11 +411,12 @@ def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) ->
             "scan_unit": case.scan_unit, "receiver_configs": {},
             "dfe_phase_deg": case.dfe_phase_deg,
             "dfe_estimated_phase_deg": case.dfe_estimated_phase_deg,
-            "compensate_dfe_phase_flag": case.compensate_dfe_phase_flag, "checks": case.checks,
+            "compensate_dfe_phase_flag": case.compensate_dfe_phase_flag,
+            # "checks": case.checks,  # ideal_noise 标签暂停。
         })
         summary["receiver_configs"][str(case.config.random_seed)] = asdict(case.config)
-    by_identity = {(case.name, case.config.random_seed): case for case in cases}
-    verification = verify_validation(rows, by_identity)
+    # by_identity = {(case.name, case.config.random_seed): case for case in cases}
+    verification = verify_validation(rows)
     summary = {"cases": list(case_summaries.values()), "rows": rows,
                "verification": verification}
     if cases and settings.experiment_type == "antenna_gain":

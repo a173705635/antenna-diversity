@@ -90,7 +90,7 @@ def generate_direct_scenario(cfg, responses: DirectResponses) -> tuple[np.ndarra
 
     The caller supplies the ideal antenna configuration.
     Interferer coefficients follow the enabled-interferer order; this experiment
-    uses both default CW and wideband sources for the fixed budget audit.
+    uses both default CW and wideband sources in the physical scene.
     """
     _, truth = generate_scenario(cfg)
     antennas = cfg.phone.active_antennas
@@ -160,7 +160,7 @@ def build_responses(phase_error_deg, *, perturbed_antenna) -> tuple[DirectRespon
 
 def run_sweep(seeds=SEEDS, duration_ms=DURATION_MS, phases=PHASE_ERRORS_DEG,
               antennas=ANTENNAS, evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS):
-    """Run each paired case through the existing audited RF/DFE receiver."""
+    """逐条件生成真实场景并运行接收机。"""
     rows = []
     for seed in seeds:
         cfg = build_config(seed, duration_ms, antennas)
@@ -199,15 +199,18 @@ def plot_summary(rows, output_dir, phases=PHASE_ERRORS_DEG):
 
     figures = (
         ('acquisition_metric', (('acquisition_metric', 'Acquisition peak ratio'),)),
-        ('target_and_interference', (
-            ('target_output_gain_db', 'Target gain vs SINGLE (dB)'),
-            ('cw_suppression_db', 'CW suppression vs SINGLE (dB)'),
-            ('wideband_suppression_db', 'Wideband suppression vs SINGLE (dB)'),
-        )),
-        ('cn0_oracle_receiver', (
-            ('thermal_oracle_prompt_cn0_db_hz', 'Thermal-only oracle C/N0 (dB-Hz)'),
-            ('tracking_cn0_late_median_db_hz', 'Receiver late C/N0 (dB-Hz)'),
-        )),
+        # 分量目标收益、干扰抑制与 oracle C/N₀ 图暂时停用。
+        # ('target_and_interference', (
+        #     ('target_output_gain_db', 'Target gain vs SINGLE (dB)'),
+        #     ('cw_suppression_db', 'CW suppression vs SINGLE (dB)'),
+        #     ('wideband_suppression_db', 'Wideband suppression vs SINGLE (dB)'),
+        # )),
+        # ('cn0_oracle_receiver', (
+        #     ('thermal_oracle_prompt_cn0_db_hz', 'Thermal-only oracle C/N0 (dB-Hz)'),
+        #     ('tracking_cn0_late_median_db_hz', 'Receiver late C/N0 (dB-Hz)'),
+        # )),
+        ('tracking_cn0', (('tracking_cn0_late_median_db_hz',
+                          'Receiver late C/N0 (dB-Hz)'),)),
     )
     figure_paths = []
     for filename, metrics in figures:
@@ -220,7 +223,7 @@ def plot_summary(rows, output_dir, phases=PHASE_ERRORS_DEG):
                 for mode in modes:
                     axis.plot(phases, series(case, mode, key),
                               marker='o', color=colors[mode], label=mode)
-                if key in ('thermal_oracle_prompt_cn0_db_hz', 'tracking_cn0_late_median_db_hz'):
+                if key == 'tracking_cn0_late_median_db_hz':
                     axis.ticklabel_format(axis='y', style='plain', useOffset=False)
                 if key == 'acquisition_metric':
                     axis.axhline(AcquisitionConfig().threshold, color='black',
@@ -231,8 +234,9 @@ def plot_summary(rows, output_dir, phases=PHASE_ERRORS_DEG):
                 axis.legend(fontsize=8)
         metric_name = {
             'acquisition_metric': 'acquisition_peak_ratio',
-            'target_and_interference': 'target_gain_and_cw_wideband_suppression',
-            'cn0_oracle_receiver': 'thermal_oracle_and_tracking_cn0',
+            # 'target_and_interference': 'target_gain_and_cw_wideband_suppression',
+            # 'cn0_oracle_receiver': 'thermal_oracle_and_tracking_cn0',
+            'tracking_cn0': 'tracking_cn0',
         }[filename]
         figure_path = output_dir / f'direct_response_boundary__target_phase_deg__{metric_name}.png'
         fig.savefig(figure_path, dpi=150)
@@ -276,10 +280,11 @@ def main():
         'response_convention': RESPONSE_CONVENTION,
         'metric_definitions': {
             'acquisition_metric': 'Actual receiver peak ratio; dotted line is configured acquisition threshold.',
-            'target_output_gain_db': 'Post-hoc linear target power gain relative to same-case SINGLE.',
-            'cw_suppression_db': 'Post-hoc CW power reduction relative to same-case SINGLE.',
-            'wideband_suppression_db': 'Post-hoc wideband power reduction relative to same-case SINGLE.',
-            'thermal_oracle_prompt_cn0_db_hz': 'Post-hoc true-code/Doppler 1 ms projection of target versus thermal noise only; not receiver-observable.',
+            # 分量收益、抑制比与 oracle C/N₀ 定义暂时停用。
+            # 'target_output_gain_db': 'Post-hoc linear target power gain relative to same-case SINGLE.',
+            # 'cw_suppression_db': 'Post-hoc CW power reduction relative to same-case SINGLE.',
+            # 'wideband_suppression_db': 'Post-hoc wideband power reduction relative to same-case SINGLE.',
+            # 'thermal_oracle_prompt_cn0_db_hz': 'Post-hoc true-code/Doppler 1 ms projection of target versus thermal noise only; not receiver-observable.',
             'tracking_cn0_late_median_db_hz': 'Median finite receiver C/N0 over late half of tracking; absent when unavailable.',
         },
         'source_sha256': source_hashes(),

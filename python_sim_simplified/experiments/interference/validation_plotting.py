@@ -80,7 +80,7 @@ def _distinct_plot_names(base_names: dict) -> dict:
 def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path]:
     """从结果行绘图并返回 PNG 路径；不重新仿真，也不修改原始结果。
 
-    每因素、指标、方法独立窗口，场景横排；增益/SINR 为 dB，捕获保留比值。
+    每因素、指标、方法独立窗口，场景横排；捕获保留比值。
     同一横轴点跨 seed 按当前显示单位取均值，缺测 C/N₀ 保持断线而非补零。
     """
     import matplotlib.pyplot as plt
@@ -116,21 +116,22 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
     for factor_label, factor_unit in factors:
         factor_rows = [row for row in rows
                        if (row["scan_label"], row["scan_unit"]) == (factor_label, factor_unit)]
-        sources = list(dict.fromkeys(
-            source for row in factor_rows for source in row["interferer_suppression_db"]
-        ))
+        # 分量抑制比来源与绘图暂时停用。
+        # sources = list(dict.fromkeys(
+        #     source for row in factor_rows for source in row["interferer_suppression_db"]
+        # ))
         figures = [
-            ("thermal_snr_gain", (("thermal_snr_gain_db", "Thermal SNR gain vs SINGLE (dB)"),)),
-            ("target_power_gain", (("target_gain_db", "Target power gain vs SINGLE (dB)"),)),
-            ("linear_in_band_sinr", (("linear_in_band_sinr_db", "C / (I + N) (dB)"),)),
+            # ("thermal_snr_gain", (("thermal_snr_gain_db", "Thermal SNR gain vs SINGLE (dB)"),)),
+            # ("target_power_gain", (("target_gain_db", "Target power gain vs SINGLE (dB)"),)),
+            # ("linear_in_band_sinr", (("linear_in_band_sinr_db", "C / (I + N) (dB)"),)),
             ("acquisition_peak_ratio", (("acquisition_metric", "Acquisition peak ratio"),)),
             ("tracking_cn0_late_median", (("tracking_cn0_late_median_db_hz", "Late tracking C/N0 (dB-Hz)"),)),
         ]
         # 各干扰源独立成图，避免长标签和过多行把目标/接收指标挤在一起。
-        source_names = _distinct_plot_names({source: _filename_label(source) for source in sources})
-        figures.extend((f"interferer_suppression_{source_names[source]}", ((f"suppression:{source}",
-                         f"Source {index}: suppression (dB)"),))
-                       for index, source in enumerate(sources))
+        # source_names = _distinct_plot_names({source: _filename_label(source) for source in sources})
+        # figures.extend((f"interferer_suppression_{source_names[source]}", ((f"suppression:{source}",
+        #                  f"Source {index}: suppression (dB)"),))
+        #                for index, source in enumerate(sources))
         scenes = list(dict.fromkeys(row["scene"] for row in factor_rows))
         modes = list(dict.fromkeys(row["mode"] for row in factor_rows))
         series = list(dict.fromkeys(row["series"] for row in factor_rows))
@@ -139,16 +140,16 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                             for filename, metrics in figures for mode in modes]
         for filename, metrics, figure_mode in separate_figures:
             figure_scenes = scenes
-            if filename.startswith("interferer_suppression_"):
-                source = metrics[0][0].removeprefix("suppression:")
-                figure_scenes = [scene for scene in scenes if any(
-                    row["scene"] == scene and source in row["interferer_suppression_db"]
-                    for row in factor_rows)]
+            # if filename.startswith("interferer_suppression_"):
+            #     source = metrics[0][0].removeprefix("suppression:")
+            #     figure_scenes = [scene for scene in scenes if any(
+            #         row["scene"] == scene and source in row["interferer_suppression_db"]
+            #         for row in factor_rows)]
             fig, axes = plt.subplots(1, len(figure_scenes),
                                      figsize=(6 * len(figure_scenes), 4.8),
                                      squeeze=False, constrained_layout=True)
-            if filename.startswith("interferer_suppression_"):
-                fig.suptitle(source, fontsize=11)
+            # if filename.startswith("interferer_suppression_"):
+            #     fig.suptitle(source, fontsize=11)
             for metric_index, (metric, ylabel) in enumerate(metrics):
                 for mode_index, mode in enumerate([figure_mode]):
                     for scene_index, scene in enumerate(figure_scenes):
@@ -168,13 +169,13 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                             for point in points:
                                 matching = [row for row in selected
                                             if (row["scan_value"] if numeric_scan_flag else row["case"]) == point]
-                                if metric.startswith("suppression:"):
-                                    observations = [row["interferer_suppression_db"].get(
-                                        metric.removeprefix("suppression:")) for row in matching]
-                                elif metric == "target_gain_db":
-                                    observations = [row["target_output_gain_db"] for row in matching]
-                                else:
-                                    observations = [row.get(metric) for row in matching]
+                                # if metric.startswith("suppression:"):
+                                #     observations = [row["interferer_suppression_db"].get(
+                                #         metric.removeprefix("suppression:")) for row in matching]
+                                # elif metric == "target_gain_db":
+                                #     observations = [row["target_output_gain_db"] for row in matching]
+                                # else:
+                                observations = [row.get(metric) for row in matching]
                                 available = [value for value in observations if value is not None]
                                 # 这是跨 seed 的显示统计，不是把线性功率平均后再转 dB。
                                 values.append(float(np.mean(available)) if available else np.nan)
@@ -207,7 +208,7 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                         if gain_batch_flag:
                             seed_count = len({row["seed"] for row in displayed_rows})
                             title += f"\nMean across seeds (n={seed_count})"
-                            ylabel = ylabel.replace("vs SINGLE", f"vs SINGLE-{displayed_rows[0]['single_reference_antenna']}")
+                            # ylabel = ylabel.replace("vs SINGLE", f"vs SINGLE-{displayed_rows[0]['single_reference_antenna']}")
                             if metric == "tracking_cn0_late_median_db_hz":
                                 title += "; available estimates only"
                         axis.set(title=title, xlabel=xlabel, ylabel=ylabel)

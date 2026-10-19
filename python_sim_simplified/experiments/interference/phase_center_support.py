@@ -79,9 +79,10 @@ def summarize_phase_center(rows: list[dict]) -> dict:
                 [row["true_response_gain_db"] for row in observations]),
             "true_response_phase_deg_mean": float(np.angle(np.mean(np.exp(1j * np.deg2rad(
                 [row["true_response_phase_deg"] for row in observations]))), deg=True)),
-            "thermal_snr_db": sample_statistics([row["thermal_snr_db"] for row in observations]),
-            "thermal_snr_gain_db": sample_statistics(
-                [row["thermal_snr_gain_db"] for row in observations]),
+            # 分量功率收益统计暂时停用。
+            # "thermal_snr_db": sample_statistics([row["thermal_snr_db"] for row in observations]),
+            # "thermal_snr_gain_db": sample_statistics(
+            #     [row["thermal_snr_gain_db"] for row in observations]),
             "acquisition_peak_ratio": sample_statistics(
                 [row["acquisition_metric"] for row in observations]),
             "acquisition_threshold_pass_count": sum(row["acquired_flag"] for row in observations),

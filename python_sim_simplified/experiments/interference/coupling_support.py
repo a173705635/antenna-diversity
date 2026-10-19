@@ -29,7 +29,7 @@ def coupling_row_fields(case, true_steering: np.ndarray, weights: np.ndarray) ->
 
 
 def summarize_coupling(rows: list[dict]) -> dict:
-    """逐物理条件和方法汇总实测功率、捕获及跟踪。"""
+    """逐物理条件和方法汇总真实响应、捕获及跟踪。"""
     grouped = {}
     for row in rows:
         grouped.setdefault((row["case"], row["mode"]), []).append(row)
@@ -49,10 +49,11 @@ def summarize_coupling(rows: list[dict]) -> dict:
             "true_response_gain_db": sample_statistics(
                 [row["true_response_gain_db"] for row in observations]),
             "true_response_phase_deg_mean": float(np.angle(np.mean(np.exp(1j * phases)), deg=True)),
-            "thermal_snr_db": sample_statistics(
-                [row["thermal_snr_db"] for row in observations]),
-            "thermal_snr_gain_db": sample_statistics(
-                [row["thermal_snr_gain_db"] for row in observations]),
+            # 分量功率收益统计暂时停用。
+            # "thermal_snr_db": sample_statistics(
+            #     [row["thermal_snr_db"] for row in observations]),
+            # "thermal_snr_gain_db": sample_statistics(
+            #     [row["thermal_snr_gain_db"] for row in observations]),
             "acquisition_peak_ratio": sample_statistics(
                 [row["acquisition_metric"] for row in observations]),
             "acquisition_threshold_pass_count": sum(row["acquired_flag"] for row in observations),
