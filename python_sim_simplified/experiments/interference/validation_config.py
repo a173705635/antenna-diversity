@@ -14,7 +14,7 @@ from experiments.paths import INTERFERENCE_RESULTS_DIR
 from experiments.interference.validation_support import ValidationCase, ValidationSettings
 
 
-# 共用种子和统计去边；时长、绘图、并行数下方按实验分别说明。
+# 所有实验共用种子、时长、并行数和统计去边；绘图开关按实验区分。
 # 选择实验类型后，输出固定写入 results/interference/<实验类型>/。
 EXPERIMENT_TYPE = "phase_center_offset"  # 可选 "antenna_gain"、"mutual_coupling"、"phase_direction_gain"。
 SEEDS = tuple(range(42, 72))  # 所有实验共用；单次运行设为 (42,)。
@@ -22,23 +22,15 @@ SEEDS = tuple(range(42, 72))  # 所有实验共用；单次运行设为 (42,)。
 # 功率统计首尾各舍弃此时长，避开滤波瞬态；不裁掉送入捕获跟踪的数据。
 EVALUATION_EDGE_TRIM_MS = 10
 
-# 增益与相位/方向/增益实验共用运行设置；首批 TC 可并行执行。
+# 每个用例独立生成 DURATION_MS 毫秒采样；WORKERS 控制并行进程数。
 DURATION_MS = 100
+WORKERS = 4
 GENERATE_PLOTS_FLAG = True
 SHOW_PLOTS_FLAG = True
-WORKERS = 4
 # 相位/方向/增益扫描可选两至四根天线；第一根是 SINGLE 参考。
+# 增益、互耦、相位中心条件表固定 TL/BR，不使用下面的扫描天线设置。
 PHASE_DIRECTION_GAIN_ANTENNAS = ("TL", "BR")
 PHASE_DIRECTION_GAIN_MODES = ("single", "mrc", "mvdr", "blind_null")
-
-# 增益、互耦、相位中心条件表固定 TL/BR；不要通过扫描天线设置修改它们。
-# 互耦实验独立设置时长和并行数。
-COUPLING_DURATION_MS = 100
-COUPLING_WORKERS = 4
-
-# 固定相位中心偏移：单独控制时长和并行数，默认不弹图。
-PHASE_CENTER_DURATION_MS = 100
-PHASE_CENTER_WORKERS = 4
 
 # 单因素扫描；PHASE_ANTENNA 按物理名字定位，不使用固定行号。
 PHASE_ANTENNA = "BR"
@@ -147,8 +139,8 @@ def _coupling_config(
     """从干净默认配置生成物理和名义互耦独立的双天线、无干扰条件。"""
     cfg = default_config()
     cfg.random_seed = seed
-    cfg.signal.duration_ms = COUPLING_DURATION_MS
-    cfg.tracking.max_epochs = COUPLING_DURATION_MS
+    cfg.signal.duration_ms = DURATION_MS
+    cfg.tracking.max_epochs = DURATION_MS
     cfg.phone.active_antennas = ("TL", "BR")
     cfg.interferers = []
     cfg.signal.true_direction = Direction(30.0, 60.0)
@@ -226,8 +218,8 @@ def _phase_center_cases() -> list[ValidationCase]:
             for mode in ("single", "mvdr"):
                 cfg = default_config()
                 cfg.random_seed = seed
-                cfg.signal.duration_ms = PHASE_CENTER_DURATION_MS
-                cfg.tracking.max_epochs = PHASE_CENTER_DURATION_MS
+                cfg.signal.duration_ms = DURATION_MS
+                cfg.tracking.max_epochs = DURATION_MS
                 cfg.phone.active_antennas = ("TL", "BR")
                 cfg.interferers = []
                 cfg.signal.true_direction = deepcopy(direction)
@@ -350,23 +342,17 @@ def build_cases() -> list[ValidationCase]:
 
 
 def build_settings() -> ValidationSettings:
-    """共用统计窗口和输出推导；仅并行与绘图选项随实验类型变化。"""
-    if EXPERIMENT_TYPE == "mutual_coupling":
-        workers = COUPLING_WORKERS
-        generate_plots_flag = False
-        show_plots_flag = False
-    elif EXPERIMENT_TYPE == "phase_center_offset":
-        workers = PHASE_CENTER_WORKERS
+    """共用统计窗口、输出推导和并行数；仅绘图选项随实验类型变化。"""
+    if EXPERIMENT_TYPE in ("mutual_coupling", "phase_center_offset"):
         generate_plots_flag = False
         show_plots_flag = False
     else:
-        workers = WORKERS if EXPERIMENT_TYPE == "antenna_gain" else 1
         generate_plots_flag = GENERATE_PLOTS_FLAG
         show_plots_flag = SHOW_PLOTS_FLAG
     return ValidationSettings(
         evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS,
         output_dir=INTERFERENCE_RESULTS_DIR / EXPERIMENT_TYPE,
         show_plots_flag=show_plots_flag,
-        workers=workers,
+        workers=WORKERS,
         generate_plots_flag=generate_plots_flag,
     )

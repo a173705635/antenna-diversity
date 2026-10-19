@@ -2,11 +2,13 @@
 
 ## 当前维护版算法与入口（2026-10-19）
 
-旧 `egc` 的权值为 `w=a/(aᴴa)`，按等功率、独立通道噪声的 MRC 定义现命名为 `mrc`；原 `egc_strict` 是等幅相位对齐而非 MRC，已从当前源码、用例和验收列删除。当前 `full_chain` 与相位/方向/增益验证使用 SINGLE、MRC、MVDR、Blind Null；相位中心偏移为16条件×SINGLE/MVDR，共32条/seed，互耦12条件×SINGLE/MRC/MVDR，共36条/seed，天线增益为SINGLE 11条、MRC 13条、MVDR 13条，共37条/seed。共用种子 `SEEDS`；各批次的时长、并行与绘图设置见 [validation_config.py](../../experiments/interference/validation_config.py)。验证绘图函数现位于 [validation_plotting.py](../../experiments/interference/validation_plotting.py)，新输出方法标签、JSON键和图片名使用 `mrc`。
+旧 `egc` 的权值为 `w=a/(aᴴa)`，按等功率、独立通道噪声的 MRC 定义现命名为 `mrc`；原 `egc_strict` 是等幅相位对齐而非 MRC，已从当前源码、用例和验收列删除。当前 `full_chain` 与相位/方向/增益验证使用 SINGLE、MRC、MVDR、Blind Null；相位中心偏移为16条件×SINGLE/MVDR，共32条/seed，互耦12条件×SINGLE/MRC/MVDR，共36条/seed，天线增益为SINGLE 11条、MRC 13条、MVDR 13条，共37条/seed。四类验证实验共用 [validation_config.py](../../experiments/interference/validation_config.py) 顶部的 `SEEDS`、`DURATION_MS`、`WORKERS`；相位基准和补偿在同一任务内依次独立执行，不同任务并行。验证绘图函数现位于 [validation_plotting.py](../../experiments/interference/validation_plotting.py)，新输出方法标签、JSON键和图片名使用 `mrc`。
 
 增益用例的TC编号已重新连续生成，相位中心输出删除严格EGC理论损失字段；旧模式名不再接受，已有结果按原版本解释。
 
 数值回归以提交 `8c8b76c` 为基准，分别运行 `default_config()` 与 `parametric_config()`，仿真时长设为30 ms、最大跟踪历元设为30。两种预设共8个保留算法分支的权值、合并采样、捕获搜索功率和跟踪Prompt数组SHA256均一致，标量指标在 `egc` → `mrc` 名称对应后完全一致；未重跑完整研究批次。
+
+统一并行配置后的对照使用12 ms、首尾各去除1 ms、seed 42/43、相位90°，包含无干扰/单CW及基准/未补偿/准确补偿，比较SINGLE/MRC/MVDR/Blind Null。12个用例共48行结果及完整核验报告在1进程与4进程下完全一致，核验通过；四类实验在默认物理配置、seed 42/43下共282个用例的配置哈希与提交 `d263d3a` 一致。
 
 下文2026-10-14至16的实验条件、数值和文件名是对应旧源码的历史记录，不代表当前版重新执行的结果；复现应使用该记录对应冻结源码与数据。本轮算法正名未新增性能实验结论。
 
@@ -55,7 +57,7 @@ L1 C/A主码每1 ms重复。原实现将整个相干块的相关延迟作为搜�
 
 ### 运行与结果表
 
-在python_sim_simplified目录执行 `python -m experiments.interference.validation`。默认 `EXPERIMENT_TYPE="phase_center_offset"`；种子、时长、并行数由 `SEEDS`、`PHASE_CENTER_DURATION_MS`、`PHASE_CENTER_WORKERS` 控制，输出自动为 `results/interference/phase_center_offset/`。下面命令复现单seed验证，写入 `results/interference/smoke/phase_center_offset/`，历史结果保留原位置：
+当前在python_sim_simplified目录执行 `python -m experiments.interference.validation`，默认 `EXPERIMENT_TYPE="phase_center_offset"`；种子、时长、并行数统一由 `SEEDS`、`DURATION_MS`、`WORKERS` 控制，输出自动为 `results/interference/phase_center_offset/`。下面命令运行当前版本的单seed验证，写入 `results/interference/smoke/phase_center_offset/`；历史结果仍对应当时源码：
 
 ```powershell
 $env:OPENBLAS_NUM_THREADS='1'
@@ -193,7 +195,7 @@ TRK C/N₀不是上述分量SNR：例如严格EGC的PC001/PC002/PC009后段估�
 
 ### 运行互耦批次
 
-仍使用 `python -m experiments.interference.validation`。选择 `EXPERIMENT_TYPE="mutual_coupling"`，共用种子 `SEEDS`，专用参数为 `COUPLING_DURATION_MS`、`COUPLING_WORKERS`，默认30 seed、100 ms、4进程；输出自动为 `results/interference/mutual_coupling/`，默认不生成或弹出图片。
+当前使用 `python -m experiments.interference.validation`，选择 `EXPERIMENT_TYPE="mutual_coupling"`；共用 `SEEDS`、`DURATION_MS`、`WORKERS`，默认30 seed、100 ms、4进程，输出自动为 `results/interference/mutual_coupling/`，不生成或弹出图片。
 
 优先阅读 `model_checks.csv`（7行模型检查）和 `case_summary.csv`（48行接收条件汇总）；`summary.csv`记录逐seed指标，`summary.json`、`verification.json`保留独立复算与失败原因，`manifest.json`记录实际配置。接收机权值仍只来自实际DFE数据和名义响应，真值与分量仅用于接收完成后的评分。
 

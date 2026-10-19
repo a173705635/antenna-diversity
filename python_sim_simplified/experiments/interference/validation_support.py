@@ -616,43 +616,70 @@ def run_case(case: ValidationCase) -> dict:
     }
 
 
-def _run_evaluated_case(case: ValidationCase, evaluation_edge_trim_ms: int) -> list[dict]:
-    """进程内完成一个 TC 的前端、接收和评分，只向父进程返回标量。"""
-    result = run_case(case)
-    return evaluate_case(case, result, evaluation_edge_trim_ms, {}, {})
-
-
-def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) -> dict:
-    """按输入顺序独立运行各条件，仅跨条件保留相位配对的参考数组。"""
+def _run_evaluated_cases(
+    indexed_cases: list[tuple[int, ValidationCase]], evaluation_edge_trim_ms: int,
+) -> list[tuple[int, list[dict]]]:
+    """同进程运行相位基准及消费者；各用例独立跑前端，只返回索引与标量。"""
     remaining_reference_uses = {}
-    for case in cases:
+    for _, case in indexed_cases:
         if "phase_pair" in case.checks:
             key = (case.reference_case, case.config.random_seed)
             remaining_reference_uses[key] = remaining_reference_uses.get(key, 0) + 1
     reference_data = {}
+    evaluated = []
+    for index, case in indexed_cases:
+        result = run_case(case)
+        case_rows = evaluate_case(case, result, evaluation_edge_trim_ms,
+                                  remaining_reference_uses, reference_data)
+        evaluated.append((index, case_rows))
+        del result
+    return evaluated
+
+
+def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) -> dict:
+    """独立运行各条件并按输入顺序汇总，仅保留相位配对所需的参考数组。"""
     rows = []
     if settings.workers > 1:
-        # TC 相互独立；批次目录在开始时刷新，进度行在长任务中持续落盘。
+        # 只有 phase_pair 消费的大数组参考要留在同一进程；其他用例独立调度。
+        group_index_by_case = {}
+        grouped_cases = {}
+        for index, case in enumerate(cases):
+            group_index = index
+            if "phase_pair" in case.checks:
+                reference_key = (case.reference_case, case.config.random_seed)
+                # 基准按输入顺序先出现；缺失时由 evaluate_case 保留原有诊断。
+                group_index = group_index_by_case.get(reference_key, index)
+            group_index_by_case[(case.name, case.config.random_seed)] = group_index
+            grouped_cases.setdefault(group_index, []).append((index, case))
+        # 目录在开始时刷新；每个用例单独写一条标量进度，结果按输入索引复原。
         reset_output(settings.output_dir)
         ordered_results = [None] * len(cases)
+        completed_count = 0
         with (settings.output_dir / "progress.jsonl").open("w", encoding="utf-8") as progress:
             with ProcessPoolExecutor(max_workers=settings.workers) as executor:
-                futures = {executor.submit(_run_evaluated_case, case, settings.evaluation_edge_trim_ms): index
-                           for index, case in enumerate(cases)}
+                futures = [executor.submit(_run_evaluated_cases, indexed_cases,
+                                           settings.evaluation_edge_trim_ms)
+                           for indexed_cases in grouped_cases.values()]
                 for future in as_completed(futures):
-                    index = futures[future]
-                    case_rows = future.result()
-                    ordered_results[index] = case_rows
-                    case = cases[index]
-                    progress.write(json.dumps({"case": case.name,
-                                               "seed": case.config.random_seed,
-                                               "rows": case_rows}) + "\n")
-                    progress.flush()
-                    print(f"Completed {sum(item is not None for item in ordered_results)}"
-                          f"/{len(cases)}: seed={case.config.random_seed}, "
-                          f"condition={case.name}", flush=True)
+                    for index, case_rows in future.result():
+                        ordered_results[index] = case_rows
+                        case = cases[index]
+                        progress.write(json.dumps({"case": case.name,
+                                                   "seed": case.config.random_seed,
+                                                   "rows": case_rows}) + "\n")
+                        progress.flush()
+                        completed_count += 1
+                        print(f"Completed {completed_count}/{len(cases)}: "
+                              f"seed={case.config.random_seed}, "
+                              f"condition={case.name}", flush=True)
         rows = [row for case_rows in ordered_results for row in case_rows]
     else:
+        remaining_reference_uses = {}
+        for case in cases:
+            if "phase_pair" in case.checks:
+                key = (case.reference_case, case.config.random_seed)
+                remaining_reference_uses[key] = remaining_reference_uses.get(key, 0) + 1
+        reference_data = {}
         for case_index, case in enumerate(cases, start=1):
             print(f"Frontend {case_index}/{len(cases)}: seed={case.config.random_seed}, "
                   f"condition={case.name}", flush=True)

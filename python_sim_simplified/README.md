@@ -40,11 +40,11 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 ### 通用条件验证
 
-日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。已有参数的单点验证或单因素扫描共用这一入口。`phase_direction_gain` 实验比较 SINGLE、MRC、MVDR 和 Blind Null（`blind_null`）。共用 `SEEDS` 与统计去边；`DURATION_MS`、`WORKERS` 和绘图开关只用于增益及相位/方向/增益实验，互耦与相位中心各用自己的时长、并行配置。
+日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。四类实验共用 `SEEDS`、`DURATION_MS`、`WORKERS` 与统计去边；绘图开关仍按实验选择。`phase_direction_gain` 实验比较 SINGLE、MRC、MVDR 和 Blind Null（`blind_null`）。
 
-当前 `EXPERIMENT_TYPE="phase_center_offset"` 使用共用 `SEEDS` 及 `PHASE_CENTER_*` 时长和并行配置，比较 SINGLE 与 MVDR；默认100 ms、seed 42～71，共960次链路运行，只保存数据、不弹图。也可选择 `mutual_coupling`（36条/seed）、`antenna_gain`（37条/seed）、`phase_direction_gain`；输出统一为 `results/interference/<EXPERIMENT_TYPE>/`。已有历史结果不移动，旧实验条件与结果见[相位中心说明](docs/interference/README.md#无干扰相位中心偏移验证2026-10-16)。
+当前 `EXPERIMENT_TYPE="phase_center_offset"` 比较 SINGLE 与 MVDR；默认100 ms、seed 42～71、4进程，共960次链路运行，只保存数据、不弹图。也可选择 `mutual_coupling`（36条/seed）、`antenna_gain`（37条/seed）、`phase_direction_gain`；输出统一为 `results/interference/<EXPERIMENT_TYPE>/`。已有历史结果不移动，旧实验条件与结果见[相位中心说明](docs/interference/README.md#无干扰相位中心偏移验证2026-10-16)。
 
-配置中的 `build_cases()` 一次完成条件选择、相位基准配对和种子展开，返回已写入种子、时长的独立用例；`build_settings()` 统一设置统计窗口和输出目录，分支只选择并行数与绘图开关。运行器直接执行用例，保存端直接记录实际配置。目标真实方向使用 `cfg.signal.true_direction`，合并器假设方向使用 `cfg.signal.assumed_direction`，两者分别修改。天线组合使用 `cfg.phone.active_antennas`，第一根是 SINGLE 的参考通道；逐通道相位按天线名字典赋值。
+配置中的 `build_cases()` 一次完成条件选择、相位基准配对和种子展开，返回已写入种子、时长的独立用例；`build_settings()` 统一设置统计窗口、输出目录和并行数，分支只选择绘图开关。并行时，相位基准与补偿放在同一任务内依次执行，结果按原用例顺序保存。目标真实方向使用 `cfg.signal.true_direction`，合并器假设方向使用 `cfg.signal.assumed_direction`，两者分别修改。天线组合使用 `cfg.phone.active_antennas`，第一根是 SINGLE 的参考通道；逐通道相位按天线名字典赋值。
 
 运行顺序为：用例配置 → 信号源与天线响应 → RF → ADC → DFE → 合并/捕获/跟踪 → 评估与绘图。公共链路在 `core/pipeline.py`，共用分量分析在 `core/evaluation.py`，实验条件、统计与图留在实验层。每个用例按自己的完整配置独立生成前端并执行接收；同一用例启用的方法共用同一份采样，基准与补偿用例使用相同种子分别执行。`validation_support.py` 中的 `run_case()` 执行接收，`evaluate_case()` 负责分量分析、指标计算和基准比较；[validation_plotting.py](experiments/interference/validation_plotting.py) 绘制结果图。
 
