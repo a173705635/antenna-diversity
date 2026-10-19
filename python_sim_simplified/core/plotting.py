@@ -10,7 +10,7 @@ from .config import CWInterferer, WidebandInterferer
 from .metrics import circular_chip_error, tracking_code_bias_chips
 
 
-MODE_ORDER = ("single", "egc", "mvdr", "blind_null")
+MODE_ORDER = ("single", "mrc", "mvdr", "blind_null")
 SPHERICAL_RESPONSE_FLOOR_DB = -40.0
 
 

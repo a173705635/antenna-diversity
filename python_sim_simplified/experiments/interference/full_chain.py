@@ -5,9 +5,6 @@ import sys
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-
-from pathlib import Path
-
 from core.metrics import format_metrics
 from core.pipeline import run_end_to_end
 from core.plotting import (
@@ -25,12 +22,14 @@ ANTENNA_MODEL = "parametric"  # "ideal" or "parametric"; synthetic, not measured
 DURATION_MS = None
 SHOW_PLOTS_FLAG = True
 FREEZE_SOURCE_FLAG = False
+# 真正施加在天线端信号上的逐通道时延，单位 ns；按物理天线名配置。
+CHANNEL_DELAY_NS = {"BL": 0, "BR": 0, "TL": 0, "TR": 0}
 
 
-def save_results_figures(results, output_dir):
+def save_results_figures(results):
     import matplotlib.pyplot as plt
 
-    output_dir = Path(output_dir)
+    output_dir = Path(results["config"].plot.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     with plt.rc_context({"figure.max_open_warning": 0}):
         figures = {
@@ -66,25 +65,14 @@ def main():
     if DURATION_MS is not None:
         cfg.signal.duration_ms = cfg.tracking.max_epochs = DURATION_MS
     cfg.plot.show_flag = SHOW_PLOTS_FLAG
-    cfg.phone.channel_delay_ns = {
-        "BL": 0,
-        "BR": 0,
-        "TL": 0,
-        "TR": 0,
-    }
-    # cfg.phone.estimated_channel_delay_ns = {
-    #     "BL": 1,
-    #     "BR": 5,
-    #     "TL": 3,
-    #     "TR": 10,
-    # }
+    cfg.phone.channel_delay_ns = CHANNEL_DELAY_NS.copy()
 
     # Edit cfg here when studying frequency, antenna combinations, or phase.
     results = run_end_to_end(cfg)
     print(f"Antenna model: {cfg.phone.antenna_model.model_label}")
     print(format_metrics(results["metrics"]))
 
-    save_results_figures(results, cfg.plot.output_dir)
+    save_results_figures(results)
     (output_dir/'manifest.json').write_text(json.dumps(serializable({
         'config': asdict(cfg), 'source_sha256': source_hashes()}),
         default=str, indent=2, allow_nan=False), encoding='utf-8')

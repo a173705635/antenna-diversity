@@ -1,4 +1,4 @@
-"""Equivalent RF cascade, thermal noise, limiter, and complex ADC."""
+"""等效 RF 级联、热噪声、限幅与复数 ADC。"""
 
 import numpy as np
 from scipy.optimize import brentq
@@ -12,7 +12,7 @@ BOLTZMANN_J_PER_K = 1.380649e-23
 
 
 def design_rf_filter(fs_hz: float, bandwidth_hz: float, num_taps: int) -> np.ndarray:
-    """Unity-DC real lowpass, with odd num_taps and two-sided ENBW bandwidth_hz."""
+    """设计单位直流增益低通，返回奇数抽头 FIR；bandwidth_hz 是双边等效噪声带宽。"""
     if bandwidth_hz == fs_hz:
         return np.array([1.0])
 
@@ -27,7 +27,7 @@ def design_rf_filter(fs_hz: float, bandwidth_hz: float, num_taps: int) -> np.nda
 def filter_rf_input(
     samples: np.ndarray, coefficients: np.ndarray, fs_hz: float, if_hz: float
 ) -> np.ndarray:
-    """Band-limit 2-D sampled IF and compensate delay; record ends are zero-padded."""
+    """滤波 [通道, RF采样] 复数 IF 电压并补偿群延时；边界补零。"""
     delay = (len(coefficients) - 1) // 2
     sample_index = np.arange(samples.shape[-1])
     oscillator = np.exp(-2j * np.pi * if_hz * sample_index / fs_hz)
@@ -51,7 +51,7 @@ def generate_rf_noise(
     seed: int,
     coefficients: np.ndarray,
 ) -> np.ndarray:
-    """Stationary complex IF noise, with stable per-physical-channel I/Q streams."""
+    """按物理通道名生成稳定的独立 I/Q 热噪声，返回 [通道, RF采样] 伏特值。"""
     delay = (len(coefficients) - 1) // 2
     white_std_v = np.sqrt(noise_psd_w_per_hz * reference_impedance_ohm * fs_hz / 2.0)
     sample_index = np.arange(n_samples)
@@ -85,6 +85,11 @@ def process_rf(
     channel_ids: tuple[str, ...],
     retain_analysis_flag: bool = False,
 ) -> tuple[np.ndarray, RFInfo]:
+    """处理天线端复电压 [通道, RF采样]，返回同形状 ADC 码值与 RF 参数。
+
+    先滤波信号，再加入本次 RF 热噪声，最后施加总增益、通道误差、限幅及量化。
+    retain_analysis_flag 仅保存这次已用热噪声，供接收后的线性分量复算。
+    """
     if x_antenna_v.ndim != 2 or x_antenna_v.shape[0] == 0:
         raise ValueError('RF input must have shape (channels, samples)')
     amplitude_db = np.broadcast_to(np.asarray(cfg.amplitude_error_db, dtype=float),

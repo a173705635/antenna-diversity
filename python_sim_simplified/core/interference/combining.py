@@ -1,4 +1,4 @@
-"""Blind-null combining for interferers."""
+"""不依赖目标导向的盲零陷合并。"""
 
 import numpy as np
 
@@ -10,6 +10,11 @@ def combine_blind_null(
     channels: np.ndarray,
     cfg: BlindNullConfig,
 ) -> tuple[np.ndarray, CombiningInfo]:
+    """从 [通道, DFE采样] 估计相关矩阵并返回固定权值合并序列。
+
+    特征值比过门限时，投影掉最大相关模态并保持参考通道单位响应；
+    未过门限时直接使用参考通道。本分支不读取目标真值。
+    """
     snapshots = channels.shape[1]
     covariance = channels @ channels.conj().T / snapshots
     covariance = (covariance + covariance.conj().T) / 2.0

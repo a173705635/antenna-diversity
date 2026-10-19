@@ -1,4 +1,4 @@
-"""Interferer RF scene construction."""
+"""构造干扰源在各天线端的 RF 电压及方向响应。"""
 
 from dataclasses import dataclass
 
@@ -13,6 +13,7 @@ from .interference import generate_wideband_waveform
 
 @dataclass
 class _InterfererScene:
+    """单个干扰源的窄带响应、时域电压、载波延迟相位与天线诊断。"""
     response: np.ndarray
     component: np.ndarray
     delay_phase: np.ndarray
@@ -26,6 +27,12 @@ def _interferer_scene(
     time_s: np.ndarray,
     true_delays_s: np.ndarray,
 ) -> _InterfererScene:
+    """生成一个 CW 或宽带干扰源的 [通道, RF采样] 伏特分量。
+
+    time_s 是 RF 样本时刻，true_delays_s 是各通道真实时延；门控按毫秒换算
+    成 RF 样本边界。response 仅描述中心频率的空间相位，实际宽带序列由
+    apply_channel_delays 延迟，不能用中心频率相位替代码包络时延。
+    """
     response_base, diagnostics = antenna_response(
         antenna_model,
         interferer.direction,

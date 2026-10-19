@@ -1,4 +1,4 @@
-"""Common-NCO DDC, FIR decimation, and DFE output quantization."""
+"""共用 NCO 下变频、FIR 抽取与 DFE 输出量化。"""
 
 import numpy as np
 from scipy.signal import lfilter
@@ -12,6 +12,7 @@ def _round_half_away_from_zero(values: np.ndarray) -> np.ndarray:
 
 
 def design_decimator(fs_in_hz, decimation, cutoff_hz, num_taps):
+    """设计低通抽取 FIR，返回抽头和采样率/群延时信息（Hz、输入采样点）。"""
     delay = (num_taps - 1) // 2
     m = np.arange(-delay, delay + 1)
     h = (2.0 * cutoff_hz / fs_in_hz) * np.sinc(
@@ -30,7 +31,11 @@ def design_decimator(fs_in_hz, decimation, cutoff_hz, num_taps):
 
 
 def linear_dfe(adc_codes: np.ndarray, info: DFEInfo) -> np.ndarray:
-    """使用本次 DFE 参数处理真实 ADC 码值或线性未量化码值。"""
+    """按本次 NCO/FIR/抽取处理 [通道, 输入采样]，返回线性 DFE 复数序列。
+
+    可输入真实 ADC 码值或线性未量化码值；先按本次完整输入的采样序号混频，
+    FIR 后从群延时处开始抽取，此函数不做 DFE 输出量化。
+    """
     n = np.arange(adc_codes.shape[1])
     nco = np.exp(-1j * 2.0 * np.pi * info["if_hz"] * n / info["fs_in_hz"])
     mixed = adc_codes * nco[None, :]
@@ -44,6 +49,7 @@ def process_dfe(
     fs_in_hz: float,
     signal_if_hz: float,
 ) -> tuple[np.ndarray, DFEInfo]:
+    """处理 [通道, ADC采样] 复数码值，返回抽取/量化后的序列与采样信息。"""
     nco_frequency_hz = (
         signal_if_hz
         if cfg.nco_frequency_hz is None
@@ -94,10 +100,9 @@ def process_dfe(
 
 
 def process_dfe_blocks(blocks, cfg, fs_in_hz, signal_if_hz):
-    """Bounded-memory equivalent of process_dfe over contiguous input blocks.
+    """逐块处理连续的 [通道, ADC采样]，生成与整段 DFE 等价的输出块。
 
-    NCO, FIR state, group-delay removal and decimation phase are continuous.
-    A caller must start a new stream when the original capture has a gap.
+    NCO 相位、FIR 状态、群延时和抽取相位跨块连续；录波中断需开启新流。
     """
     h, info = design_decimator(fs_in_hz, cfg.decimation, cfg.cutoff_hz, cfg.num_taps)
     frequency = signal_if_hz if cfg.nco_frequency_hz is None else cfg.nco_frequency_hz

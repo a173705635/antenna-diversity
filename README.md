@@ -16,7 +16,7 @@
 | GPS L1/L5 仿真定位 | `python -m experiments.gps_l1_l5` |
 | 真实录波 GPS L1 码定位 | `python -m experiments.recorded_iq` |
 
-`full_chain` 默认包含 CW 与 2 MHz 带限复高斯噪声干扰，比较 SINGLE、EGC、MVDR、Blind Null。配置、代码阅读顺序及独立实验说明见 [精简版 README](python_sim_simplified/README.md) 和 [抗干扰说明](python_sim_simplified/docs/interference/README.md)。
+`full_chain` 默认包含 CW 与 2 MHz 带限复高斯噪声干扰，比较 SINGLE、MRC、MVDR、Blind Null。配置、代码阅读顺序及独立实验说明见 [精简版 README](python_sim_simplified/README.md) 和 [抗干扰说明](python_sim_simplified/docs/interference/README.md)。
 
 ```powershell
 cd F:\antenna_diversity

@@ -14,19 +14,24 @@ from experiments.paths import INTERFERENCE_RESULTS_DIR
 from experiments.interference.validation_support import ValidationCase, ValidationSettings
 
 
-# 常用编辑区：天线顺序第一根是 SINGLE 参考；可用任意两至四根物理天线。
+# 共用种子和统计去边；时长、绘图、并行数下方按实验分别说明。
 # 选择实验类型后，输出固定写入 results/interference/<实验类型>/。
 EXPERIMENT_TYPE = "phase_center_offset"  # 可选 "antenna_gain"、"mutual_coupling"、"phase_direction_gain"。
-ANTENNAS = ("TL", "BR")
-MODES = ("single", "egc", "mvdr", "blind_null")
 SEEDS = tuple(range(42, 72))  # 所有实验共用；单次运行设为 (42,)。
 # 每个用例独立生成采样；配对条件保持相同 seed 和物理配置，以复现相同噪声。
-DURATION_MS = 100
 # 功率统计首尾各舍弃此时长，避开滤波瞬态；不裁掉送入捕获跟踪的数据。
 EVALUATION_EDGE_TRIM_MS = 10
-GENERATE_PLOTS_FLAG = True  # 增益、相位/方向/增益实验的图片开关。
-SHOW_PLOTS_FLAG = True  # 仅在生成图片时决定是否同时弹窗。
-WORKERS = 4  # 首批 TC 互相独立；Windows 上按进程并行、逐条记录进度。
+
+# 增益与相位/方向/增益实验共用运行设置；首批 TC 可并行执行。
+DURATION_MS = 100
+GENERATE_PLOTS_FLAG = True
+SHOW_PLOTS_FLAG = True
+WORKERS = 4
+# 相位/方向/增益扫描可选两至四根天线；第一根是 SINGLE 参考。
+PHASE_DIRECTION_GAIN_ANTENNAS = ("TL", "BR")
+PHASE_DIRECTION_GAIN_MODES = ("single", "mrc", "mvdr", "blind_null")
+
+# 增益、互耦、相位中心条件表固定 TL/BR；不要通过扫描天线设置修改它们。
 # 互耦实验独立设置时长和并行数。
 COUPLING_DURATION_MS = 100
 COUPLING_WORKERS = 4
@@ -50,18 +55,19 @@ SCENES = ("noise_only", "single_cw")
 # 例：("single_cw/phase_90/calibrated",)
 SELECTED_CASES = ()
 
-# 基础物理方向与接收机名义假设可分别修改；扫描只覆盖下面标明的单因素。
+# 相位/方向/增益与增益实验共用基础目标方向；互耦/相位中心使用固定方向。
+# 真实方向与接收机名义假设可分别修改；扫描只覆盖下面标明的单因素。
 TARGET_TRUE_DIRECTION = Direction(30.0, 60.0)
 # Direction 的顺序为方位角、仰角，单位均为度；ASSUMED 是接收机知道的方向。
 TARGET_ASSUMED_DIRECTION = Direction(30.0, 60.0)
 JAMMER_DIRECTION = Direction(80.0, 10.0)
 
 
-def _base_config(scene: str):
-    """生成一个场景的基础接收配置；noise_only 去掉干扰，single_cw 保留首个 CW。"""
+def _base_config(scene: str, antennas: tuple[str, ...], modes: tuple[str, ...]):
+    """生成指定天线/方法的基础场景；noise_only 无干扰，single_cw 保留首个 CW。"""
     base_cfg = default_config()
-    base_cfg.phone.active_antennas = ANTENNAS
-    base_cfg.diversity.modes = MODES
+    base_cfg.phone.active_antennas = antennas
+    base_cfg.diversity.modes = modes
     base_cfg.interferers = [] if scene == "noise_only" else base_cfg.interferers[:1]
     base_cfg.signal.true_direction = deepcopy(TARGET_TRUE_DIRECTION)
     base_cfg.signal.assumed_direction = deepcopy(TARGET_ASSUMED_DIRECTION)
@@ -89,7 +95,7 @@ def _pattern_gain_cases() -> list[ValidationCase]:
     for gain_db in range(0, -11, -1):
         reference = None if gain_db == 0 else (0, 0, "single")
         add_case(gain_db, 0, "single", reference)
-    modes = ("egc", "egc_strict", "mvdr")
+    modes = ("mrc", "mvdr")
     for mode in modes:
         add_case(0, 0, mode)
     # 共同衰减与同算法的零增益基准比较。
@@ -107,11 +113,10 @@ def _pattern_gain_cases() -> list[ValidationCase]:
     cases = []
     for seed in SEEDS:
         for case_number, (tl_gain_db, br_gain_db, mode, reference_case_name) in enumerate(case_definitions, 1):
-            case_cfg = _base_config("noise_only")
+            case_cfg = _base_config("noise_only", ("TL", "BR"), (mode,))
             case_cfg.random_seed = seed
             case_cfg.signal.duration_ms = DURATION_MS
             case_cfg.tracking.max_epochs = DURATION_MS
-            case_cfg.diversity.modes = (mode,)
             # I0：只有真实/名义阵元电压增益同步改变，几何相位和热噪声不动。
             antenna_gains_db = {"TL": tl_gain_db, "BR": br_gain_db}
             case_cfg.phone.antenna_model.true_state.amplitude_error_db = antenna_gains_db.copy()
@@ -135,15 +140,15 @@ def _coupling_paths(magnitude_db: float | None, phase_deg: float | None) -> tupl
 
 
 def _coupling_config(
-    seed: int, duration_ms: int,
+    seed: int,
     true_db: float | None, true_phase_deg: float | None,
     assumed_db: float | None, assumed_phase_deg: float | None,
 ):
     """从干净默认配置生成物理和名义互耦独立的双天线、无干扰条件。"""
     cfg = default_config()
     cfg.random_seed = seed
-    cfg.signal.duration_ms = duration_ms
-    cfg.tracking.max_epochs = duration_ms
+    cfg.signal.duration_ms = COUPLING_DURATION_MS
+    cfg.tracking.max_epochs = COUPLING_DURATION_MS
     cfg.phone.active_antennas = ("TL", "BR")
     cfg.interferers = []
     cfg.signal.true_direction = Direction(30.0, 60.0)
@@ -154,7 +159,7 @@ def _coupling_config(
 
 
 def _coupling_cases() -> list[ValidationCase]:
-    """12 个物理/名义条件各运行四种合并方法，编号不随 seed 变化。"""
+    """12 个物理/名义条件各运行三种合并方法，编号不随 seed 变化。"""
     conditions = (
         ("MC-008", None, None, None, None),
         ("MC-009", -30.0, 0.0, -30.0, 0.0),
@@ -169,13 +174,12 @@ def _coupling_cases() -> list[ValidationCase]:
         ("MC-018", -10.0, 90.0, -10.0, 60.0),
         ("MC-019", -10.0, 90.0, -10.0, 120.0),
     )
-    modes = ("single", "egc", "egc_strict", "mvdr")
+    modes = ("single", "mrc", "mvdr")
     cases = []
     for seed in SEEDS:
         for case_id, true_db, true_phase, assumed_db, assumed_phase in conditions:
             for mode in modes:
-                cfg = _coupling_config(seed, COUPLING_DURATION_MS,
-                                       true_db, true_phase, assumed_db, assumed_phase)
+                cfg = _coupling_config(seed, true_db, true_phase, assumed_db, assumed_phase)
                 cfg.diversity.modes = (mode,)
                 reference = None if case_id == "MC-008" else f"MC-008-{mode}"
                 cases.append(ValidationCase(
@@ -188,7 +192,7 @@ def _coupling_cases() -> list[ValidationCase]:
 
 
 def _phase_center_cases() -> list[ValidationCase]:
-    """16个真实/名义位置条件，按同一seed展开SINGLE、严格EGC、MVDR。"""
+    """16个真实/名义位置条件，按同一seed展开SINGLE和MVDR。"""
     direction = Direction(30.0, 60.0)
     azimuth = np.deg2rad(direction.azimuth_deg)
     elevation = np.deg2rad(direction.elevation_deg)
@@ -219,7 +223,7 @@ def _phase_center_cases() -> list[ValidationCase]:
     cases = []
     for seed in SEEDS:
         for case_id, true_offsets_mm, assumed_offsets_mm in conditions:
-            for mode in ("single", "egc_strict", "mvdr"):
+            for mode in ("single", "mvdr"):
                 cfg = default_config()
                 cfg.random_seed = seed
                 cfg.signal.duration_ms = PHASE_CENTER_DURATION_MS
@@ -255,7 +259,8 @@ def _phase_direction_gain_cases() -> list[ValidationCase]:
     direction_series_flag = not SELECTED_CASES and "direction" in SELECTED_SERIES
     gain_series_flag = not SELECTED_CASES and "gain" in SELECTED_SERIES
     for scene in SCENES:
-        base_cfg = _base_config(scene)
+        base_cfg = _base_config(scene, PHASE_DIRECTION_GAIN_ANTENNAS,
+                                PHASE_DIRECTION_GAIN_MODES)
         for phase_deg in PHASE_SCAN_DEG:
             # 每个横轴点放三组：无误差基准、注入但不补偿、注入后准确逆补偿。
             # 基准用例不注入相位误差，只把相同基准画到各扫描点用于配对比较。
@@ -345,22 +350,23 @@ def build_cases() -> list[ValidationCase]:
 
 
 def build_settings() -> ValidationSettings:
-    """生成统计、保存与绘图设置；输出目录随实验类型自动切换。"""
-    output_dir = INTERFERENCE_RESULTS_DIR / EXPERIMENT_TYPE
+    """共用统计窗口和输出推导；仅并行与绘图选项随实验类型变化。"""
     if EXPERIMENT_TYPE == "mutual_coupling":
-        return ValidationSettings(
-            evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS,
-            output_dir=output_dir, show_plots_flag=False,
-            workers=COUPLING_WORKERS, generate_plots_flag=False,
-        )
-    if EXPERIMENT_TYPE == "phase_center_offset":
-        return ValidationSettings(
-            evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS,
-            output_dir=output_dir, show_plots_flag=False,
-            workers=PHASE_CENTER_WORKERS, generate_plots_flag=False,
-        )
+        workers = COUPLING_WORKERS
+        generate_plots_flag = False
+        show_plots_flag = False
+    elif EXPERIMENT_TYPE == "phase_center_offset":
+        workers = PHASE_CENTER_WORKERS
+        generate_plots_flag = False
+        show_plots_flag = False
+    else:
+        workers = WORKERS if EXPERIMENT_TYPE == "antenna_gain" else 1
+        generate_plots_flag = GENERATE_PLOTS_FLAG
+        show_plots_flag = SHOW_PLOTS_FLAG
     return ValidationSettings(
-        evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS, output_dir=output_dir, show_plots_flag=SHOW_PLOTS_FLAG,
-        workers=WORKERS if EXPERIMENT_TYPE == "antenna_gain" else 1,
-        generate_plots_flag=GENERATE_PLOTS_FLAG,
+        evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS,
+        output_dir=INTERFERENCE_RESULTS_DIR / EXPERIMENT_TYPE,
+        show_plots_flag=show_plots_flag,
+        workers=workers,
+        generate_plots_flag=generate_plots_flag,
     )

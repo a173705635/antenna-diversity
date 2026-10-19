@@ -1,4 +1,4 @@
-"""End-to-end RF → DFE → combining → acquisition → tracking chain."""
+"""实际接收链：天线端电压 → RF/ADC → DFE → 合并 → 捕获跟踪。"""
 
 import numpy as np
 
@@ -28,6 +28,7 @@ def _run_branch(
     cfg: SimulationConfig,
     fs_out_hz: float,
 ) -> BranchResult:
+    """一组固定权值处理完整 DFE 序列；结果含合并码值和接收状态。"""
     if mode == "blind_null":
         combined, combining = combine_blind_null(
             dfe_channels,
@@ -113,7 +114,12 @@ def run_end_to_end(
     scene: tuple[np.ndarray, ScenarioTruth] | None = None,
     retain_analysis_flag: bool = False,
 ) -> SimulationResults:
-    """运行完整真实链；仅在 retain_analysis_flag=True 时保留事后评分输入。"""
+    """运行完整真实链并返回各方法结果。
+
+    scene 为可选的天线端复电压 [通道, RF采样] 与真值；未给定时按 cfg 生成。
+    仅在 retain_analysis_flag=True 时保存本次热噪声供事后线性评分，
+    接收分支不会读取评分分量。
+    """
 
     results = run_frontend(cfg, scene=scene, retain_analysis_flag=retain_analysis_flag)
     results["branches"] = run_receiver(
@@ -130,7 +136,11 @@ def run_frontend(
     scene: tuple[np.ndarray, ScenarioTruth] | None = None,
     retain_analysis_flag: bool = False,
 ) -> SimulationResults:
-    """生成一次场景并完成 RF/DFE；默认不保留热噪声评分数组。"""
+    """生成一次场景并完成 RF/DFE，返回完整时间序列与各阶段信息。
+
+    输入天线端电压单位 V；RF 输出为复数 ADC 码值，DFE 输出为
+    [通道, 采样] 复数码值。默认不保留热噪声评分数组。
+    """
     cfg = default_config() if cfg is None else cfg
     scene_input_v, truth = generate_scenario(cfg) if scene is None else scene
     adc_codes, rf_info = process_rf(
@@ -173,7 +183,10 @@ def run_receiver(
     cfg: SimulationConfig,
     fs_out_hz: float,
 ) -> dict[str, BranchResult]:
-    """Run configured combining and receiver branches on supplied DFE samples."""
+    """对同一份 [通道, DFE采样] 复数码值执行配置中的各合并接收分支。
+
+    fs_out_hz 决定捕获和跟踪的采样时间；合并导向来自配置给出的名义阵列响应。
+    """
     return {
         mode: _run_branch(
             mode,

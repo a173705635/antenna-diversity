@@ -25,7 +25,7 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 | 实验 | 命令 | 固定输出 |
 |---|---|---|
-| 通用条件验证：当前默认无干扰相位中心偏移（16条件×3算法×30 seed） | `python -m experiments.interference.validation` | `results/interference/phase_center_offset/` |
+| 通用条件验证：当前默认无干扰相位中心偏移（16条件×2算法×30 seed） | `python -m experiments.interference.validation` | `results/interference/phase_center_offset/` |
 | 完整接收链及绘图 | `python -m experiments.interference.full_chain` | `results/interference/full_chain/` |
 | 噪声模型核验、天线配对消融与独立功率预算 | `python -m experiments.interference.antenna_ablation` | `results/interference/antenna_ablation/` |
 | 目标/CW/宽带响应直接赋值，已知/未知目标相位扫描 | `python -m experiments.interference.direct_response_boundary` | `results/interference/direct_response_boundary/` |
@@ -36,19 +36,19 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 也可以在 PyCharm 直接运行 `experiments/interference/full_chain.py`，或执行 `python experiments/interference/full_chain.py`；入口会定位当前精简版根目录。
 
-`full_chain` 默认启用合成参数化天线，包含 CW 和 2 MHz 带限复高斯噪声干扰，比较 SINGLE、EGC、MVDR、Blind Null。公共 `default_config()` 仍为理想各向同性模型。回波生成、SDCP 检测、多径 LCMV 和抗欺骗接收机已删除，配置中也没有重新开启这些方向的开关。
+`full_chain` 默认启用合成参数化天线，包含 CW 和 2 MHz 带限复高斯噪声干扰，比较 SINGLE、MRC、MVDR、Blind Null。公共 `default_config()` 仍为理想各向同性模型。回波生成、SDCP 检测、多径 LCMV 和抗欺骗接收机已删除，配置中也没有重新开启这些方向的开关。
 
 ### 通用条件验证
 
-日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。已有参数的单点验证或单因素扫描共用这一入口，不需要再复制接收流程。`phase_direction_gain` 实验比较 SINGLE、EGC、MVDR 和 Blind Null（`blind_null`）。
+日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。已有参数的单点验证或单因素扫描共用这一入口。`phase_direction_gain` 实验比较 SINGLE、MRC、MVDR 和 Blind Null（`blind_null`）。共用 `SEEDS` 与统计去边；`DURATION_MS`、`WORKERS` 和绘图开关只用于增益及相位/方向/增益实验，互耦与相位中心各用自己的时长、并行配置。
 
-当前 `EXPERIMENT_TYPE="phase_center_offset"` 使用 `PHASE_CENTER_*` 种子、时长和并行配置，比较SINGLE、严格等幅EGC及MVDR；默认100 ms、seed 42～71，共1440次链路运行，只保存数据、不弹图。也可选择 `mutual_coupling`、`antenna_gain`、`phase_direction_gain`；输出统一为 `results/interference/<EXPERIMENT_TYPE>/`，各实验参数独立保留。已有历史结果不移动，条件与结果见[相位中心说明](docs/interference/README.md#无干扰相位中心偏移验证2026-10-16)。
+当前 `EXPERIMENT_TYPE="phase_center_offset"` 使用共用 `SEEDS` 及 `PHASE_CENTER_*` 时长和并行配置，比较 SINGLE 与 MVDR；默认100 ms、seed 42～71，共960次链路运行，只保存数据、不弹图。也可选择 `mutual_coupling`（36条/seed）、`antenna_gain`（37条/seed）、`phase_direction_gain`；输出统一为 `results/interference/<EXPERIMENT_TYPE>/`。已有历史结果不移动，旧实验条件与结果见[相位中心说明](docs/interference/README.md#无干扰相位中心偏移验证2026-10-16)。
 
-配置中的 `build_cases()` 一次完成条件选择、相位基准配对和种子展开，返回已写入种子、时长的独立用例；`build_settings()` 只设置统计窗口、输出位置及是否弹图。运行器直接执行用例，保存端直接记录实际配置。目标真实方向使用 `cfg.signal.true_direction`，合并器假设方向使用 `cfg.signal.assumed_direction`，两者分别修改。天线组合使用 `cfg.phone.active_antennas`，第一根是 SINGLE 的参考通道；逐通道相位按天线名字典赋值。
+配置中的 `build_cases()` 一次完成条件选择、相位基准配对和种子展开，返回已写入种子、时长的独立用例；`build_settings()` 统一设置统计窗口和输出目录，分支只选择并行数与绘图开关。运行器直接执行用例，保存端直接记录实际配置。目标真实方向使用 `cfg.signal.true_direction`，合并器假设方向使用 `cfg.signal.assumed_direction`，两者分别修改。天线组合使用 `cfg.phone.active_antennas`，第一根是 SINGLE 的参考通道；逐通道相位按天线名字典赋值。
 
-运行顺序为：用例配置 → 信号源与天线响应 → RF → ADC → DFE → 合并/捕获/跟踪 → 评估与绘图。公共链路在 `core/pipeline.py`，共用分量分析在 `core/evaluation.py`，实验条件、统计与图留在实验层。每个用例按自己的完整配置独立生成前端并执行接收；同一用例的四种算法比较同一份采样，基准与补偿用例使用相同种子分别执行。`validation_support.py` 中的 `run_case()` 执行接收，`evaluate_case()` 负责分量分析、指标计算和基准比较。
+运行顺序为：用例配置 → 信号源与天线响应 → RF → ADC → DFE → 合并/捕获/跟踪 → 评估与绘图。公共链路在 `core/pipeline.py`，共用分量分析在 `core/evaluation.py`，实验条件、统计与图留在实验层。每个用例按自己的完整配置独立生成前端并执行接收；同一用例启用的方法共用同一份采样，基准与补偿用例使用相同种子分别执行。`validation_support.py` 中的 `run_case()` 执行接收，`evaluate_case()` 负责分量分析、指标计算和基准比较；[validation_plotting.py](experiments/interference/validation_plotting.py) 绘制结果图。
 
-相位补偿量由用户配置，作用于整个 DFE 复数序列。它不代表自动估相或宽带时延对齐。天线增益作用在接收机热噪声产生前，不能用 DFE 整通道缩放代替。热噪声收益、含干扰的线性 SINR、接收机跟踪 C/N₀ 分别输出；失捕与缺测保留原状态。具体参数示例和本轮验证记录见 [抗干扰说明](docs/interference/README.md)。
+MRC 使用原 `egc` 的幅度匹配权值 `w=a/(aᴴa)`，在各通道噪声独立且等功率时最大化输出 SNR；旧 `egc_strict` 的等幅权值已删除，旧模式名不再可用。相位补偿量由用户配置，作用于整个 DFE 复数序列。它不代表自动估相或宽带时延对齐。天线增益作用在接收机热噪声产生前，不能用 DFE 整通道缩放代替。热噪声收益、含干扰的线性 SINR、接收机跟踪 C/N₀ 分别输出；失捕与缺测保留原状态。具体参数示例和历史验证记录见 [抗干扰说明](docs/interference/README.md)。
 
 GPS 仿真定位的 `DURATION_MS` 至少为 210 ms 才包含当前首个定位时刻，不保证定位成功。真实录波输入固定为 `results/real_gnss_hackrf/first40s.int8`，需在本地具备录波且实际解出健康星历；记录需长于 1.01 s 才存在当前定位时刻。
 

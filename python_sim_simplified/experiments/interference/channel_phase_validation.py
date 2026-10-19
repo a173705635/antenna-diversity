@@ -45,10 +45,10 @@ SHOW_PLOTS_FLAG = True
 SCENES = ('noise_only', 'single_cw')
 # 分别表示无误差、有误差未补偿、同样误差准确补偿。
 CASES = ('baseline', 'uncalibrated', 'calibrated')
-MODES = ('single', 'egc', 'mvdr')
+MODES = ('single', 'mrc', 'mvdr')
 # 两路等幅目标同相叠加、各路热噪声独立且等功率时，理论 SNR 收益为 3.0103 dB。
 # 这里只用于双天线基准核验，不是有干扰时 MVDR 必须达到的收益。
-THEORETICAL_EGC_GAIN_DB = 10.0 * np.log10(2.0)
+THEORETICAL_MRC_GAIN_DB = 10.0 * np.log10(2.0)
 
 
 def build_config(seed, duration_ms, antennas, scene):
@@ -235,7 +235,7 @@ def _paired_rows(seed, scene, phase_deg, cfg, truth, baseline, dfe_info,
             baseline_output = baseline_branch['combined']
             baseline_weights = baseline_branch['combining']['weights']
             current_weights = current_branch['combining']['weights']
-            # 所有输出/权值恢复误差均与该方法自身的无误差基准比较，而非与 EGC 比。
+            # 所有输出/权值恢复误差均与该方法自身的无误差基准比较，而非与 MRC 比。
             row.update({
                 'seed': seed, 'scene': scene, 'phase_error_deg': phase_deg,
                 'case': case, 'mode': mode,
@@ -263,14 +263,14 @@ def _paired_rows(seed, scene, phase_deg, cfg, truth, baseline, dfe_info,
                 'cw_suppression_db': _db_ratio(
                     reference['cw_power'], row['cw_power']
                 ) if scene == 'single_cw' else None,
-                'egc_theoretical_white_noise_gain_db': (
-                    THEORETICAL_EGC_GAIN_DB if scene == 'noise_only' and mode == 'egc'
+                'mrc_theoretical_white_noise_gain_db': (
+                    THEORETICAL_MRC_GAIN_DB if scene == 'noise_only' and mode == 'mrc'
                     else None
                 ),
                 # 未补组也保留此差值便于查看；verify_rows 只用无误差基准检验 3 dB。
-                'egc_white_noise_gain_error_db': (
-                    thermal_gain_db - THEORETICAL_EGC_GAIN_DB
-                    if scene == 'noise_only' and mode == 'egc' else None
+                'mrc_white_noise_gain_error_db': (
+                    thermal_gain_db - THEORETICAL_MRC_GAIN_DB
+                    if scene == 'noise_only' and mode == 'mrc' else None
                 ),
                 'dfe_compensation_relative_error': compensated_error if case == 'calibrated' else None,
                 'calibrated_output_relative_error': float(
@@ -292,10 +292,10 @@ def verify_rows(rows):
     未补组失捕是研究结果，不是核验失败；基准本就失捕的补偿组也允许失捕。
     这里检查恢复关系，不要求所有方法具有相同抗干扰能力。
     """
-    # 3.0103 dB 前提是目标已正确对齐，所以只取 noise_only 的 baseline/EGC。
-    white_noise_errors = [row['egc_white_noise_gain_error_db'] for row in rows
+    # 3.0103 dB 前提是目标已正确对齐，所以只取 noise_only 的 baseline/MRC。
+    white_noise_errors = [row['mrc_white_noise_gain_error_db'] for row in rows
                           if row['scene'] == 'noise_only'
-                          and row['case'] == 'baseline' and row['mode'] == 'egc']
+                          and row['case'] == 'baseline' and row['mode'] == 'mrc']
     maximum_white_noise_error_db = max(abs(value) for value in white_noise_errors)
     # 相位点的基准数据相同，但仍按完整条件键保存，避免跨 seed/场景误配。
     baseline_by_key = {row['paired_key']: row for row in rows
@@ -379,7 +379,7 @@ def verify_rows(rows):
                                  for row in rows if row['case'] == 'calibrated'),
         'calibrated_weights_flag': all(row['calibrated_weight_relative_error'] < 1e-12
                                   for row in rows if row['case'] == 'calibrated'),
-        'white_noise_egc_flag': bool(maximum_white_noise_error_db < 0.5),
+        'white_noise_mrc_flag': bool(maximum_white_noise_error_db < 0.5),
         'paired_target_power_flag': within('target_power_relative_error', 1e-12),
         'paired_thermal_power_flag': within('thermal_power_relative_error', 1e-12),
         'paired_cw_power_flag': within('cw_power_relative_error', 1e-12),
@@ -400,11 +400,11 @@ def verify_rows(rows):
     }
     return {'passed_flag': all(checks.values()), 'checks': checks,
             'paired_comparisons': paired,
-            'white_noise_egc_errors_db': white_noise_errors,
-            'white_noise_egc_max_abs_error_db': maximum_white_noise_error_db,
+            'white_noise_mrc_errors_db': white_noise_errors,
+            'white_noise_mrc_max_abs_error_db': maximum_white_noise_error_db,
             'limits': {'relative_closure': 1e-12,
                        'quadratic_power_relative': 1e-10,
-                       'white_noise_egc_error_db': 0.5,
+                       'white_noise_mrc_error_db': 0.5,
                        'paired_metric_absolute': 1e-9,
                        'paired_tracking_cn0_db_hz': 1e-7}}
 
@@ -555,7 +555,7 @@ def main():
         'metric_definitions': {
             'linear_in_band_sinr_db': 'Post-hoc truth-linear sample-power C/(thermal+CW), excluding the separately reported nonlinear/quantization residual and cross terms; not actual quantized-output C/N0.',
             'thermal_snr_gain_db': 'Independently replayed target/thermal sample-power ratio versus same-case reference single.',
-            'thermal_gain_plot': 'Display each row as 10**(thermal_snr_gain_db/10), then average by phase/case/mode/scene; no clamp. Baseline EGC near 2 means 3.0103 dB.',
+            'thermal_gain_plot': 'Display each row as 10**(thermal_snr_gain_db/10), then average by phase/case/mode/scene; no clamp. Baseline MRC near 2 means 3.0103 dB.',
             'tracking_cn0_late_median_db_hz': 'Finite late-half receiver tracking estimate; null when unavailable. Plotted lines average available seed values only; missing estimates make gaps or no curve, never zeros.',
         },
         # asdict 展开完整配置；仅存顶部参数不足以复现 RF/DFE、功率和门限。

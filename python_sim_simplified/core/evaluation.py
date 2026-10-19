@@ -1,4 +1,4 @@
-"""接收完成后的线性分量评分输入；真值仅供评估使用。"""
+"""接收完成后的线性分量评分；源真值仅供评估使用。"""
 
 import numpy as np
 
@@ -10,8 +10,10 @@ from .rf import filter_rf_input
 def linear_components(frontend: SimulationResults) -> dict[str, np.ndarray]:
     """把天线端各源与本次 RF 热噪声映射到真实 DFE 码值尺度。
 
-    输入须由 retain_analysis_flag=True 的前端产生。分量不经过限幅和量化；
-    它们与实际输出的差值由实验层单独记作联合残差。
+    输入须由 retain_analysis_flag=True 的前端产生。返回目标、各干扰和热噪声
+    [通道, DFE采样] 复数码值；按本次 RF/DFE 参数和同一热噪声传播。
+    分量不经过限幅和量化，其和与实际输出的差值由实验层记作联合残差；
+    线性分量只用于固定权值功率预算，不反馈到接收链。
     """
     cfg = frontend["config"]
     truth = frontend["truth"]

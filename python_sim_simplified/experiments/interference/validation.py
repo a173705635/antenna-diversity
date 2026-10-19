@@ -20,8 +20,9 @@ from core.provenance import source_hashes
 from core.serialization import serializable
 from experiments.interference.validation_config import build_cases, build_settings
 from experiments.interference.validation_support import (
-    ValidationSettings, plot_validation, run_validation,
+    ValidationSettings, run_validation,
 )
+from experiments.interference.validation_plotting import plot_validation
 from experiments.paths import reset_output
 
 
@@ -46,7 +47,7 @@ def phase_center_summary_records(cases: list[dict]) -> list[dict]:
     """只生成PCO主表视图，不修改完整统计；可用于重导出现存JSON结果。"""
     columns = (
         "residual_relative_los_mm", "residual_relative_phase_deg",
-        "ideal_strict_egc_loss_db", "snr_delta_vs_pc001_mean_db",
+        "snr_delta_vs_pc001_mean_db",
         "snr_gain_vs_same_condition_single_mean_db", "true_response_phase_deg_mean",
         "acquisition_peak_ratio_mean", "acquisition_correct_count",
         "tracking_cn0_mean_db_hz", "tracking_cn0_valid_seed_count", "status",

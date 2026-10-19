@@ -150,7 +150,7 @@ def thermal_oracle_prompt_cn0(target, thermal, truth, fs_out_hz, edge_trim_sampl
                      np.mean(np.abs(noise_prompts) ** 2) * 0.001)
 
 
-def evaluate_budget(results, evaluation_edge_trim_ms=10):
+def evaluate_budget(results, evaluation_edge_trim_ms):
     """Recompute linear component powers in actual DFE-code units.
 
     Results must retain the RF noise from the actual frontend run.
@@ -263,7 +263,7 @@ def _db_ratio(numerator, denominator):
     return float(10.0 * np.log10(numerator / denominator))
 
 
-def run_case(cfg, case_name, context, evaluation_edge_trim_ms=10, *, scene=None):
+def run_case(cfg, case_name, context, evaluation_edge_trim_ms, *, scene=None):
     """Run one complete receiver, then audit its frozen combining weights."""
     results = run_end_to_end(cfg, scene=scene, retain_analysis_flag=True)
     budgets = evaluate_budget(results, evaluation_edge_trim_ms)
@@ -399,7 +399,7 @@ def summarize(rows):
     groups = []
     for context in CONTEXTS:
         for case in CASES:
-            for mode in ('single', 'egc', 'mvdr', 'blind_null'):
+            for mode in ('single', 'mrc', 'mvdr', 'blind_null'):
                 members = [row for row in rows if (row['context'], row['case'], row['mode'])
                            == (context, case, mode)]
                 group = {'context': context, 'case': case, 'mode': mode,
@@ -439,7 +439,7 @@ def plot_summary(groups, output_dir):
                                'Thermal output gain vs SINGLE (dB)'))),
         ('acquisition_metric', (('acquisition_metric_mean', 'Acquisition peak ratio'),)),
     )
-    colors = {'single': '#555555', 'egc': '#1f77b4',
+    colors = {'single': '#555555', 'mrc': '#1f77b4',
               'mvdr': '#d95f02', 'blind_null': '#2ca02c'}
     figure_paths = []
     contexts = tuple(CONTEXTS)

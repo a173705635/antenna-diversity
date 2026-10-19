@@ -6,11 +6,9 @@
 
 from dataclasses import asdict, dataclass, field
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from collections import Counter
 import hashlib
 import json
 from pathlib import Path
-import re
 
 import numpy as np
 from scipy.stats import t as student_t
@@ -56,20 +54,17 @@ class ValidationCase:
 @dataclass
 class ValidationSettings:
     """整个批次的统计与输出设置；功率去边单位为 ms。"""
-    evaluation_edge_trim_ms: int = 10
-    output_dir: Path = Path("results/interference/validation")
+    evaluation_edge_trim_ms: int
+    output_dir: Path
     show_plots_flag: bool = True
     workers: int = 1
     generate_plots_flag: bool = False
 
 
-def pattern_gain_theory(gain_db: tuple[float, ...], mode: str) -> float:
-    """独立白噪声下相对首阵元的理论合并 SNR 收益，单位 dB。"""
+def mrc_gain_theory(gain_db: tuple[float, ...]) -> float:
+    """等功率独立白噪声下，MRC 相对首阵元的理论 SNR 收益，单位 dB。"""
     voltage = 10.0 ** (np.asarray(gain_db, dtype=float) / 20.0)
-    if mode == "egc_strict":
-        snr_ratio = np.sum(voltage) ** 2 / (len(voltage) * voltage[0] ** 2)
-    else:
-        snr_ratio = np.sum(voltage ** 2) / voltage[0] ** 2
+    snr_ratio = np.sum(voltage ** 2) / voltage[0] ** 2
     return float(10.0 * np.log10(snr_ratio))
 
 
@@ -107,6 +102,46 @@ def _power(values: np.ndarray) -> float:
     return float(np.mean(np.abs(values) ** 2))
 
 
+def _pattern_gain_row_fields(
+    case_cfg: SimulationConfig, frontend: dict, channels: np.ndarray,
+    mode: str, weights: np.ndarray, powers: dict[str, float],
+    input_fields: dict,
+) -> dict:
+    """复算增益用例的固定权值、名义约束和输入端 SNR；不参与接收求权。"""
+    fields = dict(input_fields)
+    fields["thermal_snr_db"] = float(10 * np.log10(powers["target"] / powers["thermal"]))
+    fields["thermal_snr_gain_vs_best_db"] = (
+        fields["thermal_snr_db"] - input_fields["best_single_snr_db"]
+    )
+    if mode == "single":
+        fields["pattern_expected_gain_db"] = 0.0
+    desired = frontend["truth"]["desired_steering_assumed"]
+    if mode == "mvdr":
+        # MVDR 用特征分解独立复算，避免沿用接收分支的线性求解结果。
+        full_covariance = channels @ channels.conj().T / channels.shape[1]
+        loading = (case_cfg.diversity.diagonal_loading_factor
+                   * np.trace(full_covariance).real / channels.shape[0])
+        eigenvalues, eigenvectors = np.linalg.eigh(
+            full_covariance + loading * np.eye(channels.shape[0])
+        )
+        solved = eigenvectors @ ((eigenvectors.conj().T @ desired) / eigenvalues)
+        independent_weights = solved / np.vdot(desired, solved)
+    elif mode == "mrc":
+        independent_weights = desired / np.sum(np.abs(desired) ** 2)
+    else:
+        independent_weights = np.zeros_like(desired)
+        independent_weights[0] = 1.0 / np.conj(desired[0])
+    fields["pattern_weight_formula_error"] = float(
+        np.linalg.norm(weights - independent_weights) / np.linalg.norm(independent_weights)
+    )
+    fields["pattern_response_constraint_error"] = float(abs(np.vdot(weights, desired) - 1.0))
+    fields["pattern_mvdr_weight_error"] = (fields["pattern_weight_formula_error"]
+                                           if mode == "mvdr" else None)
+    fields["pattern_mvdr_constraint_error"] = (fields["pattern_response_constraint_error"]
+                                               if mode == "mvdr" else None)
+    return fields
+
+
 def evaluate_case(
     case: ValidationCase, result: dict, evaluation_edge_trim_ms: int,
     remaining_reference_uses: dict[tuple[str, int], int],
@@ -118,7 +153,7 @@ def evaluate_case(
     frontend = result["frontend"]
     channels = result["channels"]
     branches = result["branches"]
-    # 重放本次前端保存的热噪声；逐分量施加与实际 DFE 相同的两次相位乘法。
+    # 分量准备：重放本次热噪声，并施加与真实 DFE 相同的两次相位乘法。
     components = linear_components(frontend)
     components = {
         name: values * result["injection_factors"]
@@ -154,9 +189,10 @@ def evaluate_case(
             "input_snr_db_by_antenna": input_snr,
             "best_single_antenna": case_cfg.phone.active_antennas[int(np.argmax(input_snr))],
             "best_single_snr_db": max(input_snr),
-            "pattern_expected_gain_db": pattern_gain_theory(gain_db, "egc"),
+            "pattern_expected_gain_db": mrc_gain_theory(gain_db),
             "pattern_response_gain_error_db": float(np.max(np.abs(physical_gain_db - gain_db))),
         }
+    # 公共指标：每种方法复用同一前端采样，以接收机实际固定权值投影分量。
     rows = []
     for mode, branch in branches.items():
         weights = branch["combining"]["weights"]
@@ -219,49 +255,10 @@ def evaluate_case(
             "tracking_cn0_late_median_db_hz": float(np.median(finite)) if finite.size else None,
             "tracking_cn0_late_finite_count": int(finite.size),
         }
+        # 专项复算只写入对应批次的附加字段。
         if pattern_fields:
-            # 同一真实前端只把权值改变；MVDR 权值用独立特征分解复算。
-            row.update(pattern_fields)
-            row["thermal_snr_db"] = float(10 * np.log10(
-                powers["target"] / powers["thermal"]
-            ))
-            row["thermal_snr_gain_vs_best_db"] = (
-                row["thermal_snr_db"] - pattern_fields["best_single_snr_db"]
-            )
-            if mode == "egc_strict":
-                row["pattern_expected_gain_db"] = pattern_gain_theory(
-                    tuple(pattern_fields["input_gain_db_by_antenna"]), mode,
-                )
-            elif mode == "single":
-                row["pattern_expected_gain_db"] = 0.0
-            desired = frontend["truth"]["desired_steering_assumed"]
-            if mode == "mvdr":
-                full_covariance = channels @ channels.conj().T / channels.shape[1]
-                loading = (case_cfg.diversity.diagonal_loading_factor
-                           * np.trace(full_covariance).real / channels.shape[0])
-                eigenvalues, eigenvectors = np.linalg.eigh(
-                    full_covariance + loading * np.eye(channels.shape[0])
-                )
-                solved = eigenvectors @ ((eigenvectors.conj().T @ desired) / eigenvalues)
-                independent_weights = solved / np.vdot(desired, solved)
-            elif mode == "egc_strict":
-                independent_weights = (desired / np.abs(desired)) / np.sum(np.abs(desired))
-            elif mode == "egc":
-                independent_weights = desired / np.sum(np.abs(desired) ** 2)
-            else:
-                independent_weights = np.zeros_like(desired)
-                independent_weights[0] = 1.0 / np.conj(desired[0])
-            row["pattern_weight_formula_error"] = float(
-                np.linalg.norm(weights - independent_weights)
-                / np.linalg.norm(independent_weights)
-            )
-            row["pattern_response_constraint_error"] = float(
-                abs(np.vdot(weights, desired) - 1.0)
-            )
-            row["pattern_mvdr_weight_error"] = (row["pattern_weight_formula_error"]
-                                                if mode == "mvdr" else None)
-            row["pattern_mvdr_constraint_error"] = (row["pattern_response_constraint_error"]
-                                                    if mode == "mvdr" else None)
+            row.update(_pattern_gain_row_fields(case_cfg, frontend, channels, mode,
+                                                weights, powers, pattern_fields))
         if "mutual_coupling" in case.checks:
             row.update(coupling_row_fields(case, frontend, channels, components,
                                            window, weights))
@@ -269,7 +266,7 @@ def evaluate_case(
             row.update(phase_center_row_fields(case, frontend, channels, components,
                                                window, weights))
         rows.append(row)
-    # 即使仅运行 MVDR，也以第一根物理天线计算 SINGLE 的指标参考。
+    # SINGLE 公共参照：即使仅运行 MVDR，也用第一根物理天线计算相对收益。
     _, reference_info = combine_known(
         channels, frontend["truth"]["desired_steering_assumed"], "single",
         case_cfg.diversity.diagonal_loading_factor,
@@ -297,6 +294,7 @@ def evaluate_case(
                 / item["power"]
             )) for item in row["interferer_powers"]
         }
+    # 参考配对：缓存只保留后续相位比较所需的样本、合并序列与权值。
     case_key = (case.name, seed)
     if case_key in remaining_reference_uses:
         # 仅保留相位配对需要的 DFE 样本、合并序列与权值。
@@ -339,7 +337,7 @@ def evaluate_case(
 
 
 def _ideal_noise_applicability(case: ValidationCase) -> str | None:
-    """检查理想 EGC 的 10log10(N) 前提；返回不适用原因，None 表示可检查。
+    """检查等幅目标下 MRC 的 10log10(N) 前提；返回不适用原因。
 
     这是理论结论的适用范围判断，不是为错误配置提供默认回退。
     """
@@ -435,8 +433,9 @@ def summarize_pattern_gain(rows: list[dict], references: dict[str, str]) -> dict
                     difference = row["thermal_snr_db"] - reference["thermal_snr_db"]
                     true_gains = row["input_gain_db_by_antenna"]
                     base_gains = reference["input_gain_db_by_antenna"]
-                    theory = (true_gains[0] + pattern_gain_theory(tuple(true_gains), mode)
-                              - base_gains[0] - pattern_gain_theory(tuple(base_gains), mode))
+                    # MVDR 只把白噪声 MRC 上界作为参考，不用它验收性能。
+                    theory = (true_gains[0] + mrc_gain_theory(tuple(true_gains))
+                              - base_gains[0] - mrc_gain_theory(tuple(base_gains)))
                 absolute_differences.append(difference)
                 expected_absolute.append(theory)
 
@@ -456,7 +455,7 @@ def summarize_pattern_gain(rows: list[dict], references: dict[str, str]) -> dict
                               if input_target_errors else None)
         noise_input_error = (max(abs(error) for error in input_noise_errors)
                              if input_noise_errors else None)
-        # MVDR 有求权/响应硬判据，性能与理想白噪声 MATCHED 只报告不强求相等。
+        # MVDR 有求权/响应硬判据，性能与等噪声 MRC 只报告不强求相等。
         passed_flag = (manifold_error <= 1e-8 and weight_error <= 1e-8
                   and response_constraint_error <= 1e-8
                   and target_input_error is not None and target_input_error <= 1e-8
@@ -512,19 +511,19 @@ def verify_validation(rows: list[dict], cases: dict[tuple[str, int], ValidationC
                        "passed_flag": direct_flag and quadratic_flag,
                        "reason": "fixed-weight direct and covariance identity"}
         case = cases[row["case"], row["seed"]]
-        if "ideal_noise" in case.checks and row["mode"] == "egc":
+        if "ideal_noise" in case.checks and row["mode"] == "mrc":
             reason = _ideal_noise_applicability(case)
             if reason is not None:
-                checks[f'ideal_noise:{row["case"]}:{row["seed"]}:egc'] = {
+                checks[f'ideal_noise:{row["case"]}:{row["seed"]}:mrc'] = {
                     "status": "not_applicable", "passed_flag": None, "reason": reason,
                 }
                 continue
             theory = 10 * np.log10(len(case.config.phone.active_antennas))
             error = abs(row["thermal_snr_gain_db"] - theory)
             passed_flag = error < 0.5
-            checks[f'ideal_noise:{row["case"]}:{row["seed"]}:egc'] = {
+            checks[f'ideal_noise:{row["case"]}:{row["seed"]}:mrc'] = {
                 "status": "passed" if passed_flag else "failed", "passed_flag": passed_flag,
-                "reason": f"EGC thermal SNR error {error:.6g} dB; limit 0.5 dB",
+                "reason": f"MRC thermal SNR error {error:.6g} dB; limit 0.5 dB",
             }
     indexed = {(row["case"], row["seed"], row["mode"]): row for row in rows}
     # 第二层：同 seed、同方法与无误差基准配对，避免噪声差异混入补偿误差。
@@ -706,236 +705,3 @@ def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) ->
         verification["checks"].update(phase_center["checks"])
         verification["passed_flag"] = verification["passed_flag"] and phase_center["passed_flag"]
     return summary
-
-
-def gain_plot_rows(rows: list[dict]) -> list[dict]:
-    """将双天线增益批次转为物理横轴，仅复制绘图字段，不改原始记录。
-
-    零增益点同时作为共同衰减和BR衰减的基准；交换图补上交换前条件。
-    相同物理条件的重复用例按seed去重，避免统计时重复计入。
-    """
-    swapped_gains = {
-        row["input_gain_db_by_antenna"][0] for row in rows
-        if row["mode"] != "single" and row["input_gain_db_by_antenna"][1] == 0
-        and row["input_gain_db_by_antenna"][0] != 0
-    }
-    prepared = []
-    seen = set()
-    for row in rows:
-        tl_gain, br_gain = row["input_gain_db_by_antenna"]
-        axes = []
-        if row["mode"] == "single":
-            axes.append(("TL gain", tl_gain, row["case"]))
-        else:
-            if tl_gain == br_gain:
-                axes.append(("Common antenna gain", tl_gain, row["case"]))
-            if tl_gain == 0:
-                axes.append(("BR gain (TL = 0 dB)", br_gain, row["case"]))
-            if ((tl_gain in swapped_gains and br_gain == 0)
-                    or (tl_gain == 0 and br_gain in swapped_gains)):
-                axes.append(("TL / BR gain", None, f"{tl_gain:g} / {br_gain:g}"))
-        for label, value, name in axes:
-            key = (label, row.get("scene"), row["mode"], row.get("seed"),
-                   tl_gain, br_gain)
-            if key in seen:
-                continue
-            seen.add(key)
-            prepared.append(dict(row, scan_label=label, scan_unit="dB",
-                                 scan_value=value, case=name))
-    # 交换图按衰减深度成对排列：0/-6、-6/0、0/-20、-20/0。
-    swap_rows = [row for row in prepared if row["scan_label"] == "TL / BR gain"]
-    swap_rows.sort(key=lambda row: (
-        abs(sum(row["input_gain_db_by_antenna"])),
-        -row["input_gain_db_by_antenna"][0],
-    ))
-    return [row for row in prepared if row["scan_label"] != "TL / BR gain"] + swap_rows
-
-
-def _filename_label(value: str) -> str:
-    """保留可读标签，替换斜杠等不适合文件名的字符。"""
-    return re.sub(r"[^\w]+", "_", value.casefold()).strip("_")
-
-
-def _distinct_plot_names(base_names: dict) -> dict:
-    """标签归一后同名时，仅给冲突项追加原始标签的稳定摘要。"""
-    counts = Counter(base_names.values())
-    return {
-        label: (base if counts[base] == 1 else
-                f"{base}_{hashlib.sha256(str(label).encode('utf-8')).hexdigest()[:8]}")
-        for label, base in base_names.items()
-    }
-
-
-def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path]:
-    """从结果行绘图并返回 PNG 路径；不重新仿真，也不修改原始结果。
-
-    每因素、指标、方法独立窗口，场景横排；增益/SINR 为 dB，捕获保留比值。
-    同一横轴点跨 seed 按当前显示单位取均值，缺测 C/N₀ 保持断线而非补零。
-    """
-    import matplotlib.pyplot as plt
-
-    # 只转换具备逐天线增益记录的原子批次；旧相位/方向扫描保持原横轴。
-    gain_batch_flag = bool(rows) and all(
-        row["case"].startswith("TC-") and "input_gain_db_by_antenna" in row
-        for row in rows
-    )
-    if gain_batch_flag:
-        experiment_name = "antenna_gain"
-    elif rows and all(row["case"].startswith("MC-") for row in rows):
-        experiment_name = "mutual_coupling"
-    elif rows and all(row["case"].startswith("PC-") for row in rows):
-        experiment_name = "phase_center_offset"
-    elif rows and all(any(marker in row["case"] for marker in
-                          ("/phase_", "/direction_", "/gain_")) for row in rows):
-        experiment_name = "phase_direction_gain"
-    else:
-        experiment_name = "validation"
-    if gain_batch_flag:
-        rows = gain_plot_rows(rows)
-    factors = list(dict.fromkeys((row["scan_label"], row["scan_unit"]) for row in rows))
-    factor_filename_parts = {}
-    for factor_label, factor_unit in factors:
-        scan_label_name = _filename_label(factor_label)
-        scan_unit_name = _filename_label(factor_unit)
-        if scan_unit_name and not scan_label_name.endswith(f"_{scan_unit_name}"):
-            scan_label_name += f"_{scan_unit_name}"
-        factor_filename_parts[(factor_label, factor_unit)] = scan_label_name
-    factor_names = _distinct_plot_names(factor_filename_parts)
-    figure_paths = []
-    for factor_label, factor_unit in factors:
-        factor_rows = [row for row in rows
-                       if (row["scan_label"], row["scan_unit"]) == (factor_label, factor_unit)]
-        sources = list(dict.fromkeys(
-            source for row in factor_rows for source in row["interferer_suppression_db"]
-        ))
-        figures = [
-            ("thermal_snr_gain", (("thermal_snr_gain_db", "Thermal SNR gain vs SINGLE (dB)"),)),
-            ("target_power_gain", (("target_gain_db", "Target power gain vs SINGLE (dB)"),)),
-            ("linear_in_band_sinr", (("linear_in_band_sinr_db", "C / (I + N) (dB)"),)),
-            ("acquisition_peak_ratio", (("acquisition_metric", "Acquisition peak ratio"),)),
-            ("tracking_cn0_late_median", (("tracking_cn0_late_median_db_hz", "Late tracking C/N0 (dB-Hz)"),)),
-        ]
-        # 各干扰源独立成图，避免长标签和过多行把目标/接收指标挤在一起。
-        source_names = _distinct_plot_names({source: _filename_label(source) for source in sources})
-        figures.extend((f"interferer_suppression_{source_names[source]}", ((f"suppression:{source}",
-                         f"Source {index}: suppression (dB)"),))
-                       for index, source in enumerate(sources))
-        scenes = list(dict.fromkeys(row["scene"] for row in factor_rows))
-        modes = list(dict.fromkeys(row["mode"] for row in factor_rows))
-        series = list(dict.fromkeys(row["series"] for row in factor_rows))
-        # 每个指标、每种方法单独一个窗口，仅横排比较场景，不纵向堆叠。
-        separate_figures = [(filename, metrics, mode)
-                            for filename, metrics in figures for mode in modes]
-        for filename, metrics, figure_mode in separate_figures:
-            figure_scenes = scenes
-            if filename.startswith("interferer_suppression_"):
-                source = metrics[0][0].removeprefix("suppression:")
-                figure_scenes = [scene for scene in scenes if any(
-                    row["scene"] == scene and source in row["interferer_suppression_db"]
-                    for row in factor_rows)]
-            fig, axes = plt.subplots(1, len(figure_scenes),
-                                     figsize=(6 * len(figure_scenes), 4.8),
-                                     squeeze=False, constrained_layout=True)
-            if filename.startswith("interferer_suppression_"):
-                fig.suptitle(source, fontsize=11)
-            for metric_index, (metric, ylabel) in enumerate(metrics):
-                for mode_index, mode in enumerate([figure_mode]):
-                    for scene_index, scene in enumerate(figure_scenes):
-                        axis = axes[0, scene_index]
-                        plotted = []
-                        overlaps = []
-                        for series_index, label in enumerate(series):
-                            selected = [row for row in factor_rows if row["scene"] == scene
-                                        and row["mode"] == mode and row["series"] == label]
-                            if not selected:
-                                continue
-                            numeric_scan_flag = selected[0]["scan_value"] is not None
-                            points = (sorted({row["scan_value"] for row in selected})
-                                      if numeric_scan_flag else
-                                      list(dict.fromkeys(row["case"] for row in selected)))
-                            values = []
-                            for point in points:
-                                matching = [row for row in selected
-                                            if (row["scan_value"] if numeric_scan_flag else row["case"]) == point]
-                                if metric.startswith("suppression:"):
-                                    observations = [row["interferer_suppression_db"].get(
-                                        metric.removeprefix("suppression:")) for row in matching]
-                                elif metric == "target_gain_db":
-                                    observations = [10 * np.log10(row["target_power_retention"])
-                                                    for row in matching]
-                                else:
-                                    observations = [row.get(metric) for row in matching]
-                                available = [value for value in observations if value is not None]
-                                # 这是跨 seed 的显示统计，不是把线性功率平均后再转 dB。
-                                values.append(float(np.mean(available)) if available else np.nan)
-                            # 不偏移真实数据：嵌套空心标记、不同线型，并明确注明重合。
-                            for previous_label, previous_points, previous_values in plotted:
-                                # 只标整条曲线数值一致；局部交点不做人工错位。
-                                if points == previous_points and np.allclose(
-                                        values, previous_values, atol=1e-8, rtol=0, equal_nan=True
-                                ) and np.any(np.isfinite(values)):
-                                    overlaps.append(f"{previous_label} = {label}")
-                            plotted.append((label, points, values))
-                            # 物理数值扫描可连线；TC编号和强弱交换类别只画点。
-                            atomic_cases_flag = factor_unit == "TC" or not numeric_scan_flag
-                            axis.plot(points, values,
-                                      linestyle=("None" if atomic_cases_flag else
-                                                 ("-", "--", ":", "-.")[series_index % 4]),
-                                      marker=("o", "s", "x", "^")[series_index % 4],
-                                      markersize=(10, 7, 5, 8)[series_index % 4],
-                                      markerfacecolor="none", linewidth=1.6, label=label)
-                        if overlaps:
-                            axis.text(0.02, 0.98, "Overlapping (tolerance 1e-8):\n" + "\n".join(overlaps),
-                                      va="top", fontsize=9, transform=axis.transAxes,
-                                      bbox={"facecolor": "white", "alpha": 0.8, "edgecolor": "none"})
-                        xlabel = factor_label or "condition"
-                        if factor_unit:
-                            xlabel += f" ({factor_unit})"
-                        displayed_rows = [row for row in factor_rows
-                                          if row["scene"] == scene and row["mode"] == mode]
-                        title = f"{scene} / {mode}"
-                        if gain_batch_flag:
-                            seed_count = len({row["seed"] for row in displayed_rows})
-                            title += f"\nMean across seeds (n={seed_count})"
-                            ylabel = ylabel.replace("vs SINGLE", "vs SINGLE-TL")
-                            if metric == "tracking_cn0_late_median_db_hz":
-                                title += "; available estimates only"
-                        axis.set(title=title, xlabel=xlabel, ylabel=ylabel)
-                        scan_points = [row["scan_value"] for row in factor_rows
-                                       if row["scene"] == scene and row["mode"] == mode
-                                       and row["scan_value"] is not None]
-                        if scan_points:
-                            low, high = min(scan_points), max(scan_points)
-                            padding = (high - low) * 0.03 if high != low else 0.5
-                            axis.set_xlim(low - padding, high + padding)
-                        if metric == "acquisition_metric":
-                            thresholds = sorted({row["acquisition_threshold"] for row in factor_rows
-                                                 if row["scene"] == scene and row["mode"] == mode})
-                            for threshold in thresholds:
-                                axis.axhline(threshold, color="#888888", linestyle="-.",
-                                             label=f"threshold {threshold:g}")
-                        if metric == "tracking_cn0_late_median_db_hz":
-                            axis.ticklabel_format(axis="y", style="plain", useOffset=False)
-                            measured = [row[metric] for row in factor_rows
-                                        if row["scene"] == scene and row["mode"] == mode
-                                        and row[metric] is not None]
-                            if measured:
-                                axis.text(0.02, 0.02, "Gaps = no finite tracking estimate",
-                                          fontsize=7, transform=axis.transAxes)
-                            else:
-                                axis.text(0.5, 0.5, "No finite tracking estimate",
-                                          ha="center", transform=axis.transAxes)
-                                axis.set_yticks([])
-                        axis.grid(alpha=0.3)
-                        axis.legend(fontsize=9, loc="upper left", bbox_to_anchor=(1.01, 1))
-            figure_path = settings.output_dir / (
-                f"{experiment_name}__{factor_names[(factor_label, factor_unit)]}"
-                f"__{filename}__{_filename_label(figure_mode)}.png"
-            )
-            fig.savefig(figure_path, dpi=150)
-            figure_paths.append(figure_path)
-            if not settings.show_plots_flag:
-                plt.close(fig)
-    if settings.show_plots_flag and plt.get_backend().lower() != "agg":
-        plt.show()
-    return figure_paths

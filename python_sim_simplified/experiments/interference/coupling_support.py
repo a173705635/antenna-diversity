@@ -157,10 +157,8 @@ def coupling_row_fields(case, frontend, channels, components, window, weights) -
         eigenvalues, eigenvectors = np.linalg.eigh(sample_covariance + loading * np.eye(2))
         solved = eigenvectors @ ((eigenvectors.conj().T @ assumed) / eigenvalues)
         independent_weights = solved / np.vdot(assumed, solved)
-    elif case.series_label == "egc":
+    elif case.series_label == "mrc":
         independent_weights = assumed / np.vdot(assumed, assumed)
-    elif case.series_label == "egc_strict":
-        independent_weights = (assumed / np.abs(assumed)) / np.sum(np.abs(assumed))
     else:
         independent_weights = np.array([1 / np.conj(assumed[0]), 0j])
     true_paths = cfg.phone.antenna_model.true_state.coupling_paths

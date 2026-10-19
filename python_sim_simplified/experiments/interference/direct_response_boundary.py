@@ -186,7 +186,7 @@ def plot_summary(rows, output_dir, phases=PHASE_ERRORS_DEG):
 
     modes = tuple(dict.fromkeys(row['mode'] for row in rows))
     case_names = ('known_response', 'unmodeled_phase')
-    colors = {'single': '#555555', 'egc': '#1f77b4',
+    colors = {'single': '#555555', 'mrc': '#1f77b4',
               'mvdr': '#d95f02', 'blind_null': '#2ca02c'}
     def series(case, mode, key):
         values = []

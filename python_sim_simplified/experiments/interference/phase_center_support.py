@@ -35,11 +35,6 @@ def phase_center_geometry(cfg) -> dict:
     }
 
 
-def strict_egc_loss_db(residual_phase_deg: float) -> float:
-    """理想等幅独立白噪声下，双阵元严格EGC相对准确对齐的正损失dB。"""
-    return float(-10.0 * np.log10(np.cos(np.deg2rad(residual_phase_deg) / 2) ** 2))
-
-
 def phase_center_row_fields(case, frontend, channels, components, window, weights) -> dict:
     """复用独立源/噪声SNR核算，另核对位置投影与实际阵列响应。"""
     cfg = case.config
@@ -53,11 +48,6 @@ def phase_center_row_fields(case, frontend, channels, components, window, weight
         relative_response - geometry["residual_relative_phase_deg"])), deg=True)
     fields.update(geometry)
     fields["residual_phase_formula_error_deg"] = float(abs(difference))
-    fields["ideal_strict_egc_loss_db"] = strict_egc_loss_db(
-        geometry["residual_relative_phase_deg"])
-    fields["strict_egc_response_loss_error_db"] = (
-        fields["true_response_gain_db"] + fields["ideal_strict_egc_loss_db"]
-        if case.series_label == "egc_strict" else None)
     return fields
 
 
@@ -95,15 +85,11 @@ def summarize_phase_center(rows: list[dict]) -> dict:
                                   row["assumed_unit_constraint_error"],
                                   row["residual_phase_formula_error_deg"])
             snr_error = abs(row["thermal_snr_theory_error_db"])
-            response_error = (abs(row["true_response_gain_db"] +
-                                  row["ideal_strict_egc_loss_db"])
-                              if mode == "egc_strict" else 0.0)
-            passed_flag = bool(numerical_error <= 1e-8 and snr_error <= 1e-7
-                               and response_error <= 1e-8)
+            passed_flag = bool(numerical_error <= 1e-8 and snr_error <= 1e-7)
             checks[f"phase_center_math:{name}:{seed}"] = {
                 "status": "passed" if passed_flag else "failed", "passed_flag": passed_flag,
-                "reason": (f"independent geometry/weight/SNR/strict-EGC response errors "
-                           f"{numerical_error}, {snr_error}, {response_error} dB"),
+                "reason": (f"independent geometry/weight/SNR errors "
+                           f"{numerical_error}, {snr_error} dB"),
             }
             if baseline_name is not None:
                 snr_baseline.append(row["measured_thermal_snr_db"] -
@@ -133,7 +119,6 @@ def summarize_phase_center(rows: list[dict]) -> dict:
             "antennas": first["antennas"],
             "residual_relative_los_mm": first["residual_relative_los_mm"],
             "residual_relative_phase_deg": first["residual_relative_phase_deg"],
-            "ideal_strict_egc_loss_db": first["ideal_strict_egc_loss_db"] if mode == "egc_strict" else None,
             "true_response_gain_db_mean": float(np.mean([row["true_response_gain_db"]
                                                           for row in observations])),
             "true_response_phase_deg_mean": float(np.angle(np.mean(np.exp(1j * np.deg2rad(
