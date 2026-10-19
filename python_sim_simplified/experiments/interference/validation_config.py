@@ -27,10 +27,9 @@ DURATION_MS = 100
 WORKERS = 4
 GENERATE_PLOTS_FLAG = True
 SHOW_PLOTS_FLAG = True
-# 相位/方向/增益扫描可选两至四根天线；第一根是 SINGLE 参考。
-# 增益、互耦、相位中心条件表固定 TL/BR，不使用下面的扫描天线设置。
-PHASE_DIRECTION_GAIN_ANTENNAS = ("TL", "BR")
-PHASE_DIRECTION_GAIN_MODES = ("single", "mrc", "mvdr", "blind_null")
+# 所有条件共用激活天线和方法；第一根是 SINGLE 参考，第二根用于双阵元条件。
+ACTIVE_ANTENNAS = ("TL", "BR")
+MODES = ("single", "mrc", "mvdr", "blind_null")
 
 # 单因素扫描；PHASE_ANTENNA 按物理名字定位，不使用固定行号。
 PHASE_ANTENNA = "BR"
@@ -44,7 +43,7 @@ ELEMENT_GAIN_SCAN_DB = (0.0, 6.020599913279624)
 SELECTED_SERIES = ("phase",)
 SCENES = ("noise_only", "single_cw")
 
-# 相位/方向/增益与增益实验共用基础目标方向；互耦/相位中心使用固定方向。
+# 所有实验共用基础目标方向。
 # 真实方向与接收机名义假设可分别修改；扫描只覆盖下面标明的单因素。
 TARGET_TRUE_DIRECTION = Direction(30.0, 60.0)
 # Direction 的顺序为方位角、仰角，单位均为度；ASSUMED 是接收机知道的方向。
@@ -52,11 +51,14 @@ TARGET_ASSUMED_DIRECTION = Direction(30.0, 60.0)
 JAMMER_DIRECTION = Direction(80.0, 10.0)
 
 
-def _base_config(scene: str, antennas: tuple[str, ...], modes: tuple[str, ...]):
+def _base_config(scene: str):
     """生成指定天线/方法的基础场景；noise_only 无干扰，single_cw 保留首个 CW。"""
     base_cfg = default_config()
-    base_cfg.phone.active_antennas = antennas
-    base_cfg.diversity.modes = modes
+    base_cfg.phone.active_antennas = ACTIVE_ANTENNAS
+    base_cfg.diversity.modes = MODES
+    base_cfg.signal.duration_ms = DURATION_MS
+    # max_epochs 是跟踪历元上限，duration_ms 是输入时长；同数值保持原充分大上限。
+    base_cfg.tracking.max_epochs = DURATION_MS
     base_cfg.interferers = [] if scene == "noise_only" else base_cfg.interferers[:1]
     base_cfg.signal.true_direction = deepcopy(TARGET_TRUE_DIRECTION)
     base_cfg.signal.assumed_direction = deepcopy(TARGET_ASSUMED_DIRECTION)
@@ -66,41 +68,27 @@ def _base_config(scene: str, antennas: tuple[str, ...], modes: tuple[str, ...]):
 
 
 def _pattern_gain_cases() -> list[ValidationCase]:
-    """按物理增益与算法顺序建立增益用例，TC编号仅表示本批次顺序。"""
-    case_definitions = []
-
-    for gain_db in range(0, -11, -1):
-        case_definitions.append((gain_db, 0, "single"))
-    modes = ("mrc", "mvdr")
-    for mode in modes:
-        case_definitions.append((0, 0, mode))
-    # 依次扫描两路共同衰减、BR 单独衰减和 TL/BR 强弱交换。
+    """21 个唯一物理增益条件；所有方法共用同一条件的前端。"""
+    case_definitions = [(gain_db, 0) for gain_db in range(0, -11, -1)]
     for gain_db in (-3, -6, -10, -20):
-        for mode in modes:
-            case_definitions.append((gain_db, gain_db, mode))
-    for gain_db in (0, -3, -6, -10, -20, -40):
-        for mode in modes:
-            case_definitions.append((0, gain_db, mode))
-    for gain_db in (-6, -20):
-        for mode in modes:
-            case_definitions.append((gain_db, 0, mode))
+        case_definitions.append((gain_db, gain_db))
+    for gain_db in (-3, -6, -10, -20, -40):
+        case_definitions.append((0, gain_db))
+    case_definitions.append((-20, 0))
 
     cases = []
-    for seed in SEEDS:
-        for case_number, (tl_gain_db, br_gain_db, mode) in enumerate(case_definitions, 1):
-            case_cfg = _base_config("noise_only", ("TL", "BR"), (mode,))
-            case_cfg.random_seed = seed
-            case_cfg.signal.duration_ms = DURATION_MS
-            case_cfg.tracking.max_epochs = DURATION_MS
-            # I0：只有真实/名义阵元电压增益同步改变，几何相位和热噪声不动。
-            antenna_gains_db = {"TL": tl_gain_db, "BR": br_gain_db}
-            case_cfg.phone.antenna_model.true_state.amplitude_error_db = antenna_gains_db.copy()
-            case_cfg.phone.antenna_model.assumed_state.amplitude_error_db = antenna_gains_db.copy()
-            cases.append(ValidationCase(
-                name=f"TC-{case_number:03d}", config=case_cfg, scene_label="noise_only",
-                series_label=mode, scan_label="test case", scan_value=case_number,
-                scan_unit="TC", checks=("pattern_gain",),
-            ))
+    first, second = ACTIVE_ANTENNAS[:2]
+    for case_number, (first_gain_db, second_gain_db) in enumerate(case_definitions, 1):
+        case_cfg = _base_config("noise_only")
+        # 额外激活阵元保留预设增益，仅改变扫描的前两根。
+        for state in (case_cfg.phone.antenna_model.true_state,
+                      case_cfg.phone.antenna_model.assumed_state):
+            state.amplitude_error_db[first] = first_gain_db
+            state.amplitude_error_db[second] = second_gain_db
+        cases.append(ValidationCase(
+            name=f"TC-{case_number:03d}", config=case_cfg, scene_label="noise_only",
+            scan_label="gain condition", checks=("pattern_gain",),
+        ))
     return cases
 
 
@@ -109,66 +97,43 @@ def _coupling_paths(magnitude_db: float | None, phase_deg: float | None) -> tupl
     if magnitude_db is None:
         return ()
     return (
-        CouplingPath("TL", "BR", magnitude_db, phase_deg),
-        CouplingPath("BR", "TL", magnitude_db, phase_deg),
+        CouplingPath(ACTIVE_ANTENNAS[0], ACTIVE_ANTENNAS[1], magnitude_db, phase_deg),
+        CouplingPath(ACTIVE_ANTENNAS[1], ACTIVE_ANTENNAS[0], magnitude_db, phase_deg),
     )
-
-
-def _coupling_config(
-    seed: int,
-    true_db: float | None, true_phase_deg: float | None,
-    assumed_db: float | None, assumed_phase_deg: float | None,
-):
-    """从干净默认配置生成物理和名义互耦独立的双天线、无干扰条件。"""
-    cfg = default_config()
-    cfg.random_seed = seed
-    cfg.signal.duration_ms = DURATION_MS
-    cfg.tracking.max_epochs = DURATION_MS
-    cfg.phone.active_antennas = ("TL", "BR")
-    cfg.interferers = []
-    cfg.signal.true_direction = Direction(30.0, 60.0)
-    cfg.signal.assumed_direction = Direction(30.0, 60.0)
-    cfg.phone.antenna_model.true_state.coupling_paths = _coupling_paths(true_db, true_phase_deg)
-    cfg.phone.antenna_model.assumed_state.coupling_paths = _coupling_paths(assumed_db, assumed_phase_deg)
-    return cfg
 
 
 def _coupling_cases() -> list[ValidationCase]:
-    """12 个物理/名义条件各运行三种合并方法，编号不随 seed 变化。"""
+    """12 个物理/名义条件，各方法共用相同前端。"""
     conditions = (
-        ("MC-008", None, None, None, None),
-        ("MC-009", -30.0, 0.0, -30.0, 0.0),
-        ("MC-010", -20.0, 0.0, -20.0, 0.0),
-        ("MC-011", -10.0, 0.0, -10.0, 0.0),
-        ("MC-012", -10.0, 90.0, -10.0, 90.0),
-        ("MC-013", -10.0, 180.0, -10.0, 180.0),
-        ("MC-014", -10.0, 270.0, -10.0, 270.0),
-        ("MC-015", -10.0, 90.0, None, None),
-        ("MC-016", -10.0, 90.0, -13.0, 90.0),
-        ("MC-017", -10.0, 90.0, -7.0, 90.0),
-        ("MC-018", -10.0, 90.0, -10.0, 60.0),
-        ("MC-019", -10.0, 90.0, -10.0, 120.0),
+        (None, None, None, None),
+        (-30.0, 0.0, -30.0, 0.0),
+        (-20.0, 0.0, -20.0, 0.0),
+        (-10.0, 0.0, -10.0, 0.0),
+        (-10.0, 90.0, -10.0, 90.0),
+        (-10.0, 180.0, -10.0, 180.0),
+        (-10.0, 270.0, -10.0, 270.0),
+        (-10.0, 90.0, None, None),
+        (-10.0, 90.0, -13.0, 90.0),
+        (-10.0, 90.0, -7.0, 90.0),
+        (-10.0, 90.0, -10.0, 60.0),
+        (-10.0, 90.0, -10.0, 120.0),
     )
-    modes = ("single", "mrc", "mvdr")
     cases = []
-    for seed in SEEDS:
-        for case_id, true_db, true_phase, assumed_db, assumed_phase in conditions:
-            for mode in modes:
-                cfg = _coupling_config(seed, true_db, true_phase, assumed_db, assumed_phase)
-                cfg.diversity.modes = (mode,)
-                reference = None if case_id == "MC-008" else f"MC-008-{mode}"
-                cases.append(ValidationCase(
-                    name=f"{case_id}-{mode}", config=cfg,
-                    scene_label="noise_only", series_label=mode,
-                    scan_label="coupling condition", scan_value=int(case_id[3:]),
-                    scan_unit="MC", reference_case=reference, checks=("mutual_coupling",),
-                ))
+    for number, (true_db, true_phase, assumed_db, assumed_phase) in enumerate(conditions, 1):
+        cfg = _base_config("noise_only")
+        cfg.phone.antenna_model.true_state.coupling_paths = _coupling_paths(true_db, true_phase)
+        cfg.phone.antenna_model.assumed_state.coupling_paths = _coupling_paths(assumed_db, assumed_phase)
+        cases.append(ValidationCase(
+            name=f"MC-{number:03d}", config=cfg,
+            scene_label="noise_only", scan_label="coupling condition",
+            checks=("mutual_coupling",),
+        ))
     return cases
 
 
 def _phase_center_cases() -> list[ValidationCase]:
-    """16个真实/名义位置条件，按同一seed展开SINGLE和MVDR。"""
-    direction = Direction(30.0, 60.0)
+    """16个真实/名义位置条件；沿共用真实方向建立偏移。"""
+    direction = TARGET_TRUE_DIRECTION
     azimuth = np.deg2rad(direction.azimuth_deg)
     elevation = np.deg2rad(direction.elevation_deg)
     line_of_sight = np.array([np.cos(elevation) * np.cos(azimuth),
@@ -177,60 +142,46 @@ def _phase_center_cases() -> list[ValidationCase]:
     along = lambda millimetres: tuple(millimetres * line_of_sight)
     across = lambda millimetres: tuple(millimetres * transverse)
     # 每个向量单位mm；未列出的阵元位置保持Mate70角点预设。
+    first, second = ACTIVE_ANTENNAS[:2]
     conditions = (
         ("PC-001", {}, {}),
-        ("PC-002", {"TL": along(10), "BR": along(10)}, {}),
-        ("PC-003", {"BR": across(10)}, {}),
-        ("PC-004", {"BR": along(1)}, {}),
-        ("PC-005", {"BR": along(5)}, {}),
-        ("PC-006", {"BR": along(10)}, {}),
-        ("PC-007", {"BR": along(20)}, {}),
-        ("PC-008", {"BR": along(-10)}, {}),
-        ("PC-009", {"BR": along(10)}, {"BR": along(10)}),
-        ("PC-010", {"BR": along(10)}, {"BR": along(5)}),
-        ("PC-011", {"BR": along(10)}, {"BR": along(15)}),
-        ("PC-012", {"BR": along(10)}, {"BR": along(-10)}),
-        ("PC-013", {"TL": along(-5), "BR": along(5)}, {}),
-        ("PC-014", {"BR": (10, 0, 0)}, {}),
-        ("PC-015", {"BR": (0, 10, 0)}, {}),
-        ("PC-016", {"BR": (0, 0, 10)}, {}),
+        ("PC-002", {first: along(10), second: along(10)}, {}),
+        ("PC-003", {second: across(10)}, {}),
+        ("PC-004", {second: along(1)}, {}),
+        ("PC-005", {second: along(5)}, {}),
+        ("PC-006", {second: along(10)}, {}),
+        ("PC-007", {second: along(20)}, {}),
+        ("PC-008", {second: along(-10)}, {}),
+        ("PC-009", {second: along(10)}, {second: along(10)}),
+        ("PC-010", {second: along(10)}, {second: along(5)}),
+        ("PC-011", {second: along(10)}, {second: along(15)}),
+        ("PC-012", {second: along(10)}, {second: along(-10)}),
+        ("PC-013", {first: along(-5), second: along(5)}, {}),
+        ("PC-014", {second: (10, 0, 0)}, {}),
+        ("PC-015", {second: (0, 10, 0)}, {}),
+        ("PC-016", {second: (0, 0, 10)}, {}),
     )
     cases = []
-    for seed in SEEDS:
-        for case_id, true_offsets_mm, assumed_offsets_mm in conditions:
-            for mode in ("single", "mvdr"):
-                cfg = default_config()
-                cfg.random_seed = seed
-                cfg.signal.duration_ms = DURATION_MS
-                cfg.tracking.max_epochs = DURATION_MS
-                cfg.phone.active_antennas = ("TL", "BR")
-                cfg.interferers = []
-                cfg.signal.true_direction = deepcopy(direction)
-                cfg.signal.assumed_direction = deepcopy(direction)
-                cfg.diversity.modes = (mode,)
-                for antenna, offset_mm in true_offsets_mm.items():
-                    origin_m = np.asarray(cfg.phone.phase_centers_m[antenna])
-                    cfg.phone.phase_centers_m[antenna] = tuple(origin_m + np.asarray(offset_mm) * 1e-3)
-                for antenna, offset_mm in assumed_offsets_mm.items():
-                    origin_m = np.asarray(cfg.phone.assumed_phase_centers_m[antenna])
-                    cfg.phone.assumed_phase_centers_m[antenna] = tuple(origin_m + np.asarray(offset_mm) * 1e-3)
-                cases.append(ValidationCase(
-                    name=f"{case_id}-{mode}", config=cfg,
-                    scene_label="noise_only", series_label=mode,
-                    scan_label="phase center condition", scan_value=int(case_id[3:]),
-                    scan_unit="PC", reference_case=(None if case_id == "PC-001"
-                                                     else f"PC-001-{mode}"),
-                    checks=("phase_center_noise_only",),
-                ))
+    for case_id, true_offsets_mm, assumed_offsets_mm in conditions:
+        cfg = _base_config("noise_only")
+        for antenna, offset_mm in true_offsets_mm.items():
+            origin_m = np.asarray(cfg.phone.phase_centers_m[antenna])
+            cfg.phone.phase_centers_m[antenna] = tuple(origin_m + np.asarray(offset_mm) * 1e-3)
+        for antenna, offset_mm in assumed_offsets_mm.items():
+            origin_m = np.asarray(cfg.phone.assumed_phase_centers_m[antenna])
+            cfg.phone.assumed_phase_centers_m[antenna] = tuple(origin_m + np.asarray(offset_mm) * 1e-3)
+        cases.append(ValidationCase(
+            name=case_id, config=cfg, scene_label="noise_only",
+            scan_label="phase center condition", checks=("phase_center_noise_only",),
+        ))
     return cases
 
 
 def _phase_direction_gain_cases() -> list[ValidationCase]:
-    """按所选系列构造相位、方向和增益用例，并展开各 seed 的独立配置。"""
+    """按所选系列构造相位、方向和增益模板。"""
     cases = []
     for scene in SCENES:
-        base_cfg = _base_config(scene, PHASE_DIRECTION_GAIN_ANTENNAS,
-                                PHASE_DIRECTION_GAIN_MODES)
+        base_cfg = _base_config(scene)
         if "phase" in SELECTED_SERIES:
             for phase_deg in PHASE_SCAN_DEG:
                 # 每个横轴点固定三组；基准不注入误差，并先于对应补偿用例执行。
@@ -280,28 +231,27 @@ def _phase_direction_gain_cases() -> list[ValidationCase]:
                 )
                 cases.append(gain_case)
 
-    seeded_cases = []
-    for seed in SEEDS:
-        for case_template in cases:
-            case = deepcopy(case_template)
-            case.config.random_seed = seed
-            case.config.signal.duration_ms = DURATION_MS
-            case.config.tracking.max_epochs = DURATION_MS
-            seeded_cases.append(case)
-    return seeded_cases
+    return cases
 
 
 def build_cases() -> list[ValidationCase]:
     """按实验类型选择对应的用例构造函数。"""
-    if EXPERIMENT_TYPE == "antenna_gain":
-        return _pattern_gain_cases()
-    if EXPERIMENT_TYPE == "mutual_coupling":
-        return _coupling_cases()
-    if EXPERIMENT_TYPE == "phase_center_offset":
-        return _phase_center_cases()
-    if EXPERIMENT_TYPE == "phase_direction_gain":
-        return _phase_direction_gain_cases()
-    raise ValueError(f"Unknown experiment type: {EXPERIMENT_TYPE}")
+    builders = {
+        "antenna_gain": _pattern_gain_cases,
+        "mutual_coupling": _coupling_cases,
+        "phase_center_offset": _phase_center_cases,
+        "phase_direction_gain": _phase_direction_gain_cases,
+    }
+    if EXPERIMENT_TYPE not in builders:
+        raise ValueError(f"Unknown experiment type: {EXPERIMENT_TYPE}")
+    templates = builders[EXPERIMENT_TYPE]()
+    cases = []
+    for seed in SEEDS:
+        for template in templates:
+            case = deepcopy(template)
+            case.config.random_seed = seed
+            cases.append(case)
+    return cases
 
 
 def build_settings() -> ValidationSettings:

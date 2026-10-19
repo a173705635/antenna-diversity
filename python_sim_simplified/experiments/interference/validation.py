@@ -47,16 +47,15 @@ def phase_center_summary_records(cases: list[dict]) -> list[dict]:
     """只生成PCO主表视图，不修改完整统计；可用于重导出现存JSON结果。"""
     columns = (
         "residual_relative_los_mm", "residual_relative_phase_deg",
-        "snr_delta_vs_pc001_mean_db",
-        "snr_gain_vs_same_condition_single_mean_db", "true_response_phase_deg_mean",
+        "thermal_snr_mean_db", "snr_gain_vs_same_condition_single_mean_db",
+        "true_response_phase_deg_mean",
         "acquisition_peak_ratio_mean", "acquisition_correct_count",
         "tracking_cn0_mean_db_hz", "tracking_cn0_valid_seed_count", "status",
     )
     # 单seed没有可估计的均值置信区间；混合批次仍统一保留列，单seed行留空。
     if any(case["seeds"] > 1 for case in cases):
-        columns += tuple(f"{metric}_ci95_{bound}_db"
-                         for metric in ("snr_delta_vs_pc001", "snr_gain_vs_same_condition_single")
-                         for bound in ("lower", "upper"))
+        columns += ("snr_gain_vs_same_condition_single_ci95_lower_db",
+                    "snr_gain_vs_same_condition_single_ci95_upper_db")
     records = []
     for case in cases:
         descriptions = []
@@ -121,8 +120,10 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
     if "pattern_gain" in summary:
         # 一行一个 TC：跨seed汇总与逐seed原始行分开，便于直接筛选。
         records = []
-        for tc, result in summary["pattern_gain"]["cases"].items():
-            observations = [row for row in rows if row["case"] == tc]
+        for result in summary["pattern_gain"]["cases"].values():
+            tc = result["case"]
+            observations = [row for row in rows if row["case"] == tc
+                            and row["mode"] == result["mode"]]
             # 按物理天线名输出本条注入增益。
             antenna_gains = dict(zip(
                 observations[0]["antennas"].split(","),
@@ -162,9 +163,7 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
             "case", "mode", "antennas", "seeds",
             "true_coupling_db", "true_coupling_phase_deg",
             "assumed_coupling_db", "assumed_coupling_phase_deg",
-            "no_coupling_reference", "known_response_reference",
-            "thermal_snr_mean_db", "snr_delta_vs_no_coupling_mean_db",
-            "snr_delta_vs_known_response_mean_db", "acquisition_correct_count",
+            "thermal_snr_mean_db", "acquisition_correct_count",
             "tracking_cn0_mean_db_hz", "tracking_cn0_valid_seed_count", "status",
         )
         records = [{key: case[key] for key in summary_columns}

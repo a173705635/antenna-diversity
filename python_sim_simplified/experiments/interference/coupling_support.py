@@ -20,7 +20,7 @@ def _transfer(paths: tuple[CouplingPath, ...], receiver: str, source: str) -> co
 
 def independent_manifold(cfg, *, estimated_flag: bool,
                          include_coupling_flag: bool = True) -> np.ndarray:
-    """由阵元位置、方向和显式交叉相加独立计算双通道理想阵列导向。"""
+    """由位置、方向和显式交叉相加独立计算所有激活阵元的理想导向。"""
     names = cfg.phone.active_antennas
     direction = cfg.signal.assumed_direction if estimated_flag else cfg.signal.true_direction
     position_map = cfg.phone.assumed_phase_centers_m if estimated_flag else cfg.phone.phase_centers_m
@@ -47,6 +47,49 @@ def independent_manifold(cfg, *, estimated_flag: bool,
         * np.exp(1j * np.deg2rad(channel_phase[name]))
         for name, value in zip(names, coupled)
     ])
+
+
+def independent_weights(channels: np.ndarray, assumed: np.ndarray, mode: str, diversity) -> tuple[np.ndarray, np.ndarray]:
+    """独立复算固定求权；返回权值和接收机应满足的约束向量。
+
+    Blind Null 用相关矩阵 SVD 取最大模态，并按参考通道单位响应归一；
+    其约束不涉及名义目标方向。其余方法以名义目标响应为 1。
+    """
+    count = channels.shape[0]
+    if mode == "single":
+        weights = np.zeros(count, dtype=complex)
+        weights[0] = 1 / np.conj(assumed[0])
+        constraint = assumed
+    elif mode == "mrc":
+        weights = assumed / np.vdot(assumed, assumed)
+        constraint = assumed
+    elif mode == "mvdr":
+        covariance = channels @ channels.conj().T / channels.shape[1]
+        loading = diversity.diagonal_loading_factor * np.trace(covariance).real / count
+        eigenvalues, vectors = np.linalg.eigh(covariance + loading * np.eye(count))
+        solved = vectors @ ((vectors.conj().T @ assumed) / eigenvalues)
+        weights = solved / np.vdot(assumed, solved)
+        constraint = assumed
+    elif mode == "blind_null":
+        covariance = channels @ channels.conj().T / channels.shape[1]
+        covariance = (covariance + covariance.conj().T) / 2
+        scales = np.sqrt(np.diag(covariance).real)
+        correlation = covariance / np.outer(scales, scales)
+        correlation = (correlation + correlation.conj().T) / 2
+        vectors, singular_values, _ = np.linalg.svd(correlation)
+        score_db = 10 * np.log10(singular_values[0] / np.mean(singular_values[1:]))
+        reference = np.eye(count, dtype=complex)[:, diversity.blind_null.reference_channel]
+        if score_db < diversity.blind_null.detection_threshold_db:
+            weights = reference
+        else:
+            dominant = scales * vectors[:, 0]
+            dominant /= np.linalg.norm(dominant)
+            projected = reference - dominant * np.vdot(dominant, reference)
+            weights = projected / np.vdot(reference, projected).real
+        constraint = reference
+    else:
+        raise ValueError(f"Unknown validation mode: {mode}")
+    return weights, constraint
 
 
 def _check(name: str, error: float, limit: float, reason: str) -> dict:
@@ -117,12 +160,12 @@ def model_checks() -> dict[str, dict]:
                                         coefficient * standard_input[0] + standard_input[1]])
             error = max(error, float(np.max(np.abs((actual_matrix @ input_voltage)[::-1]
                                                    - standard_output))))
-        name = f"MC-{number:03d}"
+        name = f"MC-MODEL-{number:03d}"
         checks[name] = _check(name, error, 1e-10, "independent directed voltage mixing and antenna mapping")
     return checks
 
 
-def coupling_row_fields(case, frontend, channels, components, window, weights) -> dict:
+def coupling_row_fields(case, frontend, channels, components, window, weights, mode: str) -> dict:
     """以已知源波形和实测热噪声复算固定权值输出 SNR，不由输出功率反推源功率。"""
     cfg = case.config
     model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
@@ -150,17 +193,8 @@ def coupling_row_fields(case, frontend, channels, components, window, weights) -
     theoretical_noise = float(np.vdot(weights, noise_covariance @ weights).real)
     measured_target = float(np.mean(np.abs(weights.conj() @ target) ** 2))
     measured_noise = float(np.mean(np.abs(weights.conj() @ thermal) ** 2))
-    sample_covariance = channels @ channels.conj().T / channels.shape[1]
-    loading = (cfg.diversity.diagonal_loading_factor * np.trace(sample_covariance).real
-               / channels.shape[0])
-    if case.series_label == "mvdr":
-        eigenvalues, eigenvectors = np.linalg.eigh(sample_covariance + loading * np.eye(2))
-        solved = eigenvectors @ ((eigenvectors.conj().T @ assumed) / eigenvalues)
-        independent_weights = solved / np.vdot(assumed, solved)
-    elif case.series_label == "mrc":
-        independent_weights = assumed / np.vdot(assumed, assumed)
-    else:
-        independent_weights = np.array([1 / np.conj(assumed[0]), 0j])
+    expected_weights, constraint = independent_weights(channels, assumed, mode, cfg.diversity)
+    constraint_error = abs(np.vdot(weights, constraint) - 1)
     true_paths = cfg.phone.antenna_model.true_state.coupling_paths
     assumed_paths = cfg.phone.antenna_model.assumed_state.coupling_paths
     true_pre = independent_manifold(cfg, estimated_flag=False, include_coupling_flag=False)
@@ -194,9 +228,9 @@ def coupling_row_fields(case, frontend, channels, components, window, weights) -
         "thermal_snr_theory_error_db": float(snr_measured - snr_theory),
         "manifold_max_abs_error": float(max(np.max(np.abs(true - true_production)),
                                              np.max(np.abs(assumed - assumed_production)))),
-        "weight_relative_error": float(np.linalg.norm(weights - independent_weights)
-                                       / np.linalg.norm(independent_weights)),
-        "assumed_unit_constraint_error": float(abs(np.vdot(weights, assumed) - 1)),
+        "weight_relative_error": float(np.linalg.norm(weights - expected_weights)
+                                       / np.linalg.norm(expected_weights)),
+        "weight_constraint_error": float(constraint_error),
         "true_response_gain": float(abs(true_response)),
         "true_response_gain_db": float(20 * np.log10(abs(true_response))),
         "true_response_phase_deg": float(np.rad2deg(np.angle(true_response))),
@@ -206,35 +240,33 @@ def coupling_row_fields(case, frontend, channels, components, window, weights) -
 
 
 def summarize_coupling(rows: list[dict]) -> dict:
-    """按语义编号配对无互耦与已知响应条件，统计捕获、跟踪及独立数值判据。"""
+    """逐物理条件和方法统计；失配条件只比较同 seed 的物理 DFE。"""
     grouped = {}
-    indexed = {(row["case"], row["seed"]): row for row in rows}
+    indexed = {(row["case"], row["mode"], row["seed"]): row for row in rows}
     for row in rows:
-        grouped.setdefault(row["case"], []).append(row)
+        grouped.setdefault((row["case"], row["mode"]), []).append(row)
     cases = {}
     checks = {}
-    for name, observations in grouped.items():
+    for (case_id, mode), observations in grouped.items():
+        name = f"{case_id}-{mode}"
         first = observations[0]
-        case_id = name[:6]
-        mode = first["mode"]
-        paired_reference = f"MC-008-{mode}" if case_id != "MC-008" else None
-        known_reference = (f"MC-012-{mode}" if case_id in
-                           {"MC-015", "MC-016", "MC-017", "MC-018", "MC-019"} else None)
+        physical_reference = "MC-005" if case_id in {
+            "MC-008", "MC-009", "MC-010", "MC-011", "MC-012"} else None
         for row in observations:
             errors = (row["manifold_max_abs_error"], row["weight_relative_error"],
-                      row["assumed_unit_constraint_error"],
+                      row["weight_constraint_error"],
                       abs(row["thermal_snr_theory_error_db"]))
             passed_flag = bool(max(errors[:3]) <= 1e-8 and errors[3] <= 1e-7)
             checks[f'coupling_math:{name}:{row["seed"]}'] = {
                 "status": "passed" if passed_flag else "failed", "passed_flag": passed_flag,
                 "reason": f"manifold/weight/constraint/SNR errors {errors}; limits 1e-8/1e-7",
             }
-            if known_reference is not None:
-                reference = indexed[(known_reference, row["seed"])]
+            if physical_reference is not None:
+                reference = indexed[(physical_reference, mode, row["seed"])]
                 same_flag = row["physical_dfe_sha256"] == reference["physical_dfe_sha256"]
                 checks[f'coupling_physical_pair:{name}:{row["seed"]}'] = {
                     "status": "passed" if same_flag else "failed", "passed_flag": same_flag,
-                    "reason": "same-seed physical DFE SHA256 equals MC-012",
+                    "reason": "same-seed physical DFE SHA256 equals MC-005",
                 }
         finite = [row["tracking_cn0_late_median_db_hz"] for row in observations
                   if row["tracking_cn0_late_median_db_hz"] is not None]
@@ -248,27 +280,17 @@ def summarize_coupling(rows: list[dict]) -> dict:
                       and abs(row["acquired_doppler_error_hz"])
                       <= row["acquisition_doppler_half_bin_hz"] for row in observations)
         cases[name] = {
-            "case": name, "level": "link", "mode": mode, "seeds": len(observations),
+            "case": case_id, "level": "link", "mode": mode, "seeds": len(observations),
             "true_coupling_db": first["true_coupling_db"],
             "true_coupling_phase_deg": first["true_coupling_phase_deg"],
             "assumed_coupling_db": first["assumed_coupling_db"],
             "assumed_coupling_phase_deg": first["assumed_coupling_phase_deg"],
-            "no_coupling_reference": paired_reference,
-            "known_response_reference": known_reference,
             "antennas": first["antennas"],
             "true_response_gain_db_mean": float(np.mean(
                 [row["true_response_gain_db"] for row in observations])),
             "true_response_phase_deg_mean": float(np.rad2deg(np.angle(np.mean(
                 np.exp(1j * np.deg2rad([row["true_response_phase_deg"] for row in observations])))))),
             "thermal_snr_mean_db": float(np.mean([row["measured_thermal_snr_db"] for row in observations])),
-            "snr_delta_vs_no_coupling_mean_db": (
-                float(np.mean([row["measured_thermal_snr_db"]
-                               - indexed[(paired_reference, row["seed"])]["measured_thermal_snr_db"]
-                               for row in observations])) if paired_reference else None),
-            "snr_delta_vs_known_response_mean_db": (
-                float(np.mean([row["measured_thermal_snr_db"]
-                               - indexed[(known_reference, row["seed"])]["measured_thermal_snr_db"]
-                               for row in observations])) if known_reference else None),
             "acquisition_peak_ratio_mean": float(np.mean([row["acquisition_metric"] for row in observations])),
             "acquisition_threshold_pass_count": acquisition_pass,
             "acquisition_correct_count": correct,
@@ -293,7 +315,7 @@ def summarize_coupling(rows: list[dict]) -> dict:
             cases[name][f"{antenna}_input_thermal_power_mean"] = float(thermal_power_mean[index])
         passed_flag = all(checks[f'coupling_math:{name}:{row["seed"]}']["passed_flag"]
                           for row in observations)
-        if known_reference is not None:
+        if physical_reference is not None:
             passed_flag = passed_flag and all(
                 checks[f'coupling_physical_pair:{name}:{row["seed"]}']["passed_flag"]
                 for row in observations)

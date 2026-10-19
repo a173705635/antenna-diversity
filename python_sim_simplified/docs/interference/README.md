@@ -2,17 +2,23 @@
 
 ## 当前维护版算法与入口（2026-10-19）
 
-旧 `egc` 的权值为 `w=a/(aᴴa)`，按等功率、独立通道噪声的 MRC 定义现命名为 `mrc`；原 `egc_strict` 是等幅相位对齐而非 MRC，已从当前源码、用例和验收列删除。当前 `full_chain` 与相位/方向/增益验证使用 SINGLE、MRC、MVDR、Blind Null；相位中心偏移为16条件×SINGLE/MVDR，共32条/seed，互耦12条件×SINGLE/MRC/MVDR，共36条/seed，天线增益为SINGLE 11条、MRC 13条、MVDR 13条，共37条/seed。四类验证实验共用 [validation_config.py](../../experiments/interference/validation_config.py) 顶部的 `SEEDS`、`DURATION_MS`、`WORKERS`；相位基准和补偿在同一任务内依次独立执行，不同任务并行。验证绘图函数现位于 [validation_plotting.py](../../experiments/interference/validation_plotting.py)，新输出方法标签、JSON键和图片名使用 `mrc`。
+旧 `egc` 的权值为 `w=a/(aᴴa)`，按等功率、独立通道噪声的 MRC 定义现命名为 `mrc`；原 `egc_strict` 是等幅相位对齐而非 MRC，已从当前源码、用例和验收列删除。当前 `full_chain` 与四类验证默认使用 SINGLE、MRC、MVDR、Blind Null。验证共用 [validation_config.py](../../experiments/interference/validation_config.py) 顶部的 `MODES`、`ACTIVE_ANTENNAS`、`SEEDS`、`DURATION_MS`、`WORKERS` 及真实/名义目标方向；共享配置在 `_base_config()` 设置，`build_cases()` 统一展开种子。
 
-增益用例的TC编号已重新连续生成，相位中心输出删除严格EGC理论损失字段；旧模式名不再接受，已有结果按原版本解释。
+每个 seed 的增益、互耦、相位中心分别为21、12、16个物理条件，各自独立运行完整前端，条件内运行全部所选算法；默认四算法分别产生84、48、64行结果。增益去重后重编为TC-001～021，互耦旧MC-008～019改为MC-001～012，确定性模型检查另用MC-MODEL-001～007；用例名不再带算法，汇总按“条件＋算法”区分。当前默认相位中心实验30个seed共480次前端、1920行结果，旧结果仍按原编号和算法解释。
 
-天线增益实验已删除参考用例登记、跨用例 SNR 差值及其验收，相关字段从 `summary.json` 的 `pattern_gain` 汇总和 `case_summary.csv` 移除；单用例指标、相对 SINGLE 的合并增益及输入目标/热噪声功率核验保留。
+增益、互耦、相位中心已删除跨用例 SNR 差值和专用于差值的参考字段，JSON/CSV同步精简；单用例SNR、相对同一采样SINGLE的合并收益和独立复算保留。MC-008～012仍与MC-005核对真实DFE输入，PC-006/010～012仍与PC-009核对输入，确认只改名义模型不会改变真实信号；这些配对不计算收益。相位补偿实验的基准配对仍用于验证恢复结果。
+
+`ACTIVE_ANTENNAS` 第一根为SINGLE参考，增益、互耦及位置条件使用前两根，额外阵元保留基础参数。`scan_label`、`scan_unit` 保留真实角度/增益扫描的图轴与文件名用途，离散条件不再填写TC/MC/PC伪单位。权值复算共用同一函数：SINGLE/MRC/MVDR检查名义目标单位响应，Blind Null独立用SVD复核检测与投影并检查参考通道约束；增益实验只对SINGLE/MRC填写固定理论收益，MVDR/Blind Null按实际权值和输出评价。
+
+真实与名义方向可分别设置；MRC理论使用实际方向失配，相位中心残余距离/相位按两套完整坐标及各自方向计算，方向不同时也包含基础阵列几何的失配。
 
 数值回归以提交 `8c8b76c` 为基准，分别运行 `default_config()` 与 `parametric_config()`，仿真时长设为30 ms、最大跟踪历元设为30。两种预设共8个保留算法分支的权值、合并采样、捕获搜索功率和跟踪Prompt数组SHA256均一致，标量指标在 `egc` → `mrc` 名称对应后完全一致；未重跑完整研究批次。
 
 统一并行配置后的对照使用12 ms、首尾各去除1 ms、seed 42/43、相位90°，包含无干扰/单CW及基准/未补偿/准确补偿，比较SINGLE/MRC/MVDR/Blind Null。12个用例共48行结果及完整核验报告在1进程与4进程下完全一致，核验通过；四类实验在默认物理配置、seed 42/43下共282个用例的配置哈希与提交 `d263d3a` 一致。
 
 删除增益跨用例 SNR 对照后，以 `e5f654e` 为基准运行37条件×seed 42/43、12 ms、首尾各去除1 ms，共74条链路；除删除的参考与差值字段外，用例配置、逐条指标、汇总和核验状态完全一致，未重跑正式100 ms批次。
+
+统一配置与算法后的数值对照以 `80ffde1` 为基准，采用seed 42、12 ms、首尾各去除1 ms；四类实验全部条件参与，相位/方向/增益选全部系列、无干扰/单CW，相位90°，方向与增益扫描值用默认值。旧版169行中的167个唯一“物理配置＋算法”组合在新版260行中全部保留，接收功率、权值、SINR、捕获和跟踪指标逐项哈希一致，新增算法结果也通过独立核验；未重跑正式100 ms批次。
 
 下文2026-10-14至16的实验条件、数值和文件名是对应旧源码的历史记录，不代表当前版重新执行的结果；复现应使用该记录对应冻结源码与数据。本轮算法正名未新增性能实验结论。
 
@@ -771,8 +777,8 @@ print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assu
 
 | 目的 | 配置位置 |
 |---|---|
-| 选择两至四根天线、改变顺序 | `PHASE_DIRECTION_GAIN_ANTENNAS`；第一根是 SINGLE 参考 |
-| 选择合并方法 | `PHASE_DIRECTION_GAIN_MODES`；默认 `single`、`mrc`、`mvdr`、`blind_null` |
+| 选择两至四根天线、改变顺序 | `ACTIVE_ANTENNAS`；四类验证共用，第一根是 SINGLE 参考 |
+| 选择合并方法 | `MODES`；四类验证共用，默认 `single`、`mrc`、`mvdr`、`blind_null` |
 | 修改重复次数、时长、并行数和统计去边 | `SEEDS`、`DURATION_MS`、`WORKERS`、`EVALUATION_EDGE_TRIM_MS`；统计窗口应在记录内部 |
 | 扫描整通道相位 | `SELECTED_SERIES = ("phase",)`、`PHASE_ANTENNA`、`PHASE_SCAN_DEG` |
 | 相位用例组成 | 每个相位点固定包含基准、未补偿、准确补偿三组 |
@@ -785,7 +791,7 @@ print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assu
 
 例如，把 `SELECTED_SERIES` 改成 `("direction",)`、`TARGET_AZIMUTH_SCAN_DEG` 改成 `(20, 30, 40)`，就运行这三个真实方位角。名义方向保持配置值，表示研究导向失配；若要研究已知方向，应在方向条件构造处同时明确赋值 `cfg.signal.assumed_direction`。多个系列分别扫描，不交叉展开为全部参数组合。每个条件独立复制基础配置，改一个条件不会污染其他条件。
 
-`_phase_direction_gain_cases()` 只构造所选系列，最后统一展开种子；相位基准先于补偿执行。`dfe_phase_deg` 和 `dfe_estimated_phase_deg` 按物理天线名配置；`compensate_dfe_phase_flag=True` 才执行估计相位的逆旋转。相位误差和补偿都作用于整行复数样本。真实阵元增益则修改 `cfg.phone.antenna_model.true_state.amplitude_error_db`，它改变目标和各干扰在天线端的响应，不改变独立 RF 热噪声的生成强度。
+`_phase_direction_gain_cases()` 只构造所选系列，种子由 `build_cases()` 统一展开；相位基准先于补偿执行。`dfe_phase_deg` 和 `dfe_estimated_phase_deg` 按物理天线名配置；`compensate_dfe_phase_flag=True` 才执行估计相位的逆旋转。相位误差和补偿都作用于整行复数样本。真实阵元增益则修改 `cfg.phone.antenna_model.true_state.amplitude_error_db`，它改变目标和各干扰在天线端的响应，不改变独立 RF 热噪声的生成强度。
 
 处理阶段固定在 [validation_support.py](../../experiments/interference/validation_support.py)：每个用例独立生成前端并执行接收和独立预算，同一用例的各算法共用本次采样。独立评分逐个重建启用的干扰源，不要求场景同时包含 CW 与宽带；公共接收机仍仅使用完整 IQ 和配置的名义导向。输出的线性 SINR 不含联合非线性/量化残差，分量交叉项单列，跟踪 C/N₀ 缺测不画成零。
 

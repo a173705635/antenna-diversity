@@ -21,7 +21,7 @@ from core.diversity import combine_known
 from core.metrics import circular_chip_error
 from core.pipeline import run_frontend, run_receiver
 from experiments.interference.coupling_support import (
-    coupling_row_fields, model_checks, summarize_coupling,
+    coupling_row_fields, independent_weights, model_checks, summarize_coupling,
 )
 from experiments.interference.phase_center_support import (
     phase_center_row_fields, summarize_phase_center,
@@ -59,13 +59,6 @@ class ValidationSettings:
     show_plots_flag: bool = True
     workers: int = 1
     generate_plots_flag: bool = False
-
-
-def mrc_gain_theory(gain_db: tuple[float, ...]) -> float:
-    """等功率独立白噪声下，MRC 相对首阵元的理论 SNR 收益，单位 dB。"""
-    voltage = 10.0 ** (np.asarray(gain_db, dtype=float) / 20.0)
-    snr_ratio = np.sum(voltage ** 2) / voltage[0] ** 2
-    return float(10.0 * np.log10(snr_ratio))
 
 
 def apply_dfe_phase(
@@ -113,32 +106,25 @@ def _pattern_gain_row_fields(
     fields["thermal_snr_gain_vs_best_db"] = (
         fields["thermal_snr_db"] - input_fields["best_single_snr_db"]
     )
+    desired = frontend["truth"]["desired_steering_assumed"]
+    expected_weights, constraint = independent_weights(channels, desired, mode,
+                                                       case_cfg.diversity)
     if mode == "single":
         fields["pattern_expected_gain_db"] = 0.0
-    desired = frontend["truth"]["desired_steering_assumed"]
-    if mode == "mvdr":
-        # MVDR 用特征分解独立复算，避免沿用接收分支的线性求解结果。
-        full_covariance = channels @ channels.conj().T / channels.shape[1]
-        loading = (case_cfg.diversity.diagonal_loading_factor
-                   * np.trace(full_covariance).real / channels.shape[0])
-        eigenvalues, eigenvectors = np.linalg.eigh(
-            full_covariance + loading * np.eye(channels.shape[0])
-        )
-        solved = eigenvectors @ ((eigenvectors.conj().T @ desired) / eigenvalues)
-        independent_weights = solved / np.vdot(desired, solved)
     elif mode == "mrc":
-        independent_weights = desired / np.sum(np.abs(desired) ** 2)
+        # 名义与真实方向可不同：以独立 MRC 权值和真实响应计算相对首通道理论收益。
+        actual_steering = frontend["truth"]["desired_steering_true"]
+        gain_ratio = (abs(np.vdot(expected_weights, actual_steering)) ** 2 /
+                      (np.vdot(expected_weights, expected_weights).real *
+                       abs(actual_steering[0]) ** 2))
+        fields["pattern_expected_gain_db"] = float(10 * np.log10(gain_ratio))
     else:
-        independent_weights = np.zeros_like(desired)
-        independent_weights[0] = 1.0 / np.conj(desired[0])
+        fields["pattern_expected_gain_db"] = None
+    constraint_error = abs(np.vdot(weights, constraint) - 1)
     fields["pattern_weight_formula_error"] = float(
-        np.linalg.norm(weights - independent_weights) / np.linalg.norm(independent_weights)
+        np.linalg.norm(weights - expected_weights) / np.linalg.norm(expected_weights)
     )
-    fields["pattern_response_constraint_error"] = float(abs(np.vdot(weights, desired) - 1.0))
-    fields["pattern_mvdr_weight_error"] = (fields["pattern_weight_formula_error"]
-                                           if mode == "mvdr" else None)
-    fields["pattern_mvdr_constraint_error"] = (fields["pattern_response_constraint_error"]
-                                               if mode == "mvdr" else None)
+    fields["pattern_weight_constraint_error"] = float(constraint_error)
     return fields
 
 
@@ -177,7 +163,7 @@ def evaluate_case(
         thermal_input = [_power(values) for values in components["thermal"][:, window]]
         input_snr = [float(10 * np.log10(signal / noise))
                      for signal, noise in zip(target_input, thermal_input)]
-        gain_db = tuple(case_cfg.phone.antenna_model.true_state.amplitude_error_db[name]
+        gain_db = tuple(case_cfg.phone.antenna_model.true_state.amplitude_error_db.get(name, 0.0)
                         for name in case_cfg.phone.active_antennas)
         physical_gain_db = 10 * np.log10(
             np.abs(frontend["truth"]["desired_steering_true"]) ** 2
@@ -189,7 +175,6 @@ def evaluate_case(
             "input_snr_db_by_antenna": input_snr,
             "best_single_antenna": case_cfg.phone.active_antennas[int(np.argmax(input_snr))],
             "best_single_snr_db": max(input_snr),
-            "pattern_expected_gain_db": mrc_gain_theory(gain_db),
             "pattern_response_gain_error_db": float(np.max(np.abs(physical_gain_db - gain_db))),
         }
     # 公共指标：每种方法复用同一前端采样，以接收机实际固定权值投影分量。
@@ -261,10 +246,10 @@ def evaluate_case(
                                                 weights, powers, pattern_fields))
         if "mutual_coupling" in case.checks:
             row.update(coupling_row_fields(case, frontend, channels, components,
-                                           window, weights))
+                                           window, weights, mode))
         if "phase_center_noise_only" in case.checks:
             row.update(phase_center_row_fields(case, frontend, channels, components,
-                                               window, weights))
+                                               window, weights, mode))
         rows.append(row)
     # SINGLE 公共参照：即使仅运行 MVDR，也用第一根物理天线计算相对收益。
     _, reference_info = combine_known(
@@ -393,21 +378,21 @@ def _wilson_interval(successes: int, total: int) -> list[float]:
 
 
 def summarize_pattern_gain(rows: list[dict]) -> dict:
-    """按 TC 汇总各 seed 的单用例理论增益、线性 SNR、接收状态与判定。"""
+    """按物理 TC 和方法分别汇总 seed，避免算法间混行。"""
     grouped = {}
-    indexed = {(row["case"], row["seed"]): row for row in rows}
+    indexed = {(row["case"], row["mode"], row["seed"]): row for row in rows}
     for row in rows:
-        grouped.setdefault(row["case"], []).append(row)
+        grouped.setdefault((row["case"], row["mode"]), []).append(row)
 
     cases = {}
-    for name, observations in grouped.items():
-        mode = observations[0]["mode"]
-        gain_errors = [row["thermal_snr_gain_db"] - row["pattern_expected_gain_db"]
-                       for row in observations]
+    for (case_id, mode), observations in grouped.items():
+        name = f"{case_id}-{mode}"
+        gain_errors = ([row["thermal_snr_gain_db"] - row["pattern_expected_gain_db"]
+                        for row in observations] if mode in ("single", "mrc") else [])
         input_target_errors = []
         input_noise_errors = []
         for row in observations:
-            input_baseline = indexed.get(("TC-001", row["seed"]))
+            input_baseline = indexed.get(("TC-001", mode, row["seed"]))
             if input_baseline is not None:
                 for gain, signal, base_signal, noise, base_noise in zip(
                     row["input_gain_db_by_antenna"],
@@ -419,44 +404,36 @@ def summarize_pattern_gain(rows: list[dict]) -> dict:
                     input_target_errors.append(10 * np.log10(signal / base_signal) - gain)
                     input_noise_errors.append(10 * np.log10(noise / base_noise))
         manifold_error = max(row["pattern_response_gain_error_db"] for row in observations)
-        gain_error = _mean_interval(gain_errors)
-        mvdr_weight_error = max((row["pattern_mvdr_weight_error"] for row in observations
-                                 if row["pattern_mvdr_weight_error"] is not None), default=None)
-        mvdr_constraint_error = max((row["pattern_mvdr_constraint_error"] for row in observations
-                                     if row["pattern_mvdr_constraint_error"] is not None), default=None)
+        gain_error = _mean_interval(gain_errors) if gain_errors else None
         weight_error = max(row["pattern_weight_formula_error"] for row in observations)
-        response_constraint_error = max(row["pattern_response_constraint_error"]
-                                        for row in observations)
+        weight_constraint_error = max(row["pattern_weight_constraint_error"]
+                                      for row in observations)
         target_input_error = (max(abs(error) for error in input_target_errors)
                               if input_target_errors else None)
         noise_input_error = (max(abs(error) for error in input_noise_errors)
                              if input_noise_errors else None)
         # MVDR 有求权/响应硬判据，性能与等噪声 MRC 只报告不强求相等。
         passed_flag = (manifold_error <= 1e-8 and weight_error <= 1e-8
-                  and response_constraint_error <= 1e-8
+                  and weight_constraint_error <= 1e-8
                   and target_input_error is not None and target_input_error <= 1e-8
                   and noise_input_error is not None and noise_input_error <= 1e-8)
-        if mode == "mvdr":
-            passed_flag = passed_flag and mvdr_weight_error <= 1e-8 and mvdr_constraint_error <= 1e-8
-        else:
+        if mode in ("single", "mrc"):
             passed_flag = passed_flag and abs(gain_error["mean"]) <= 0.2
         acquired = sum(row["acquired_flag"] for row in observations)
         tracked = sum(row["tracking_success_flag"] for row in observations)
         finite_cn0 = [row["tracking_cn0_late_median_db_hz"] for row in observations
                       if row["tracking_cn0_late_median_db_hz"] is not None]
         cases[name] = {
-            "status": "passed" if passed_flag else "failed", "mode": mode,
+            "case": case_id, "status": "passed" if passed_flag else "failed", "mode": mode,
             "seeds": len(observations),
             "expected_gain_db": observations[0]["pattern_expected_gain_db"],
             "measured_gain_db": _mean_interval([row["thermal_snr_gain_db"]
                                                 for row in observations]),
             "gain_error_db": gain_error, "response_gain_max_error_db": manifold_error,
             "weight_max_relative_error": weight_error,
-            "response_constraint_max_error": response_constraint_error,
+            "weight_constraint_max_error": weight_constraint_error,
             "input_target_change_max_error_db": target_input_error,
             "input_thermal_change_max_error_db": noise_input_error,
-            "mvdr_weight_max_relative_error": mvdr_weight_error,
-            "mvdr_constraint_max_error": mvdr_constraint_error,
             "acquisition_success_count": acquired,
             "acquisition_success_wilson95": _wilson_interval(acquired, len(observations)),
             "tracking_success_count": tracked,

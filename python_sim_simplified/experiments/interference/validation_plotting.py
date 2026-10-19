@@ -11,46 +11,55 @@ from experiments.interference.validation_support import ValidationSettings
 
 
 def gain_plot_rows(rows: list[dict]) -> list[dict]:
-    """将双天线增益批次转为物理横轴，仅复制绘图字段，不改原始记录。
+    """将前两根阵元的增益条件转为物理横轴，仅复制绘图字段。
 
-    零增益点同时作为共同衰减和BR衰减的基准；交换图补上交换前条件。
-    相同物理条件的重复用例按seed去重，避免统计时重复计入。
+    零增益点同时作为共同衰减和第二阵元衰减的基准。
     """
-    swapped_gains = {
+    first_only_gains = {
         row["input_gain_db_by_antenna"][0] for row in rows
-        if row["mode"] != "single" and row["input_gain_db_by_antenna"][1] == 0
+        if row["input_gain_db_by_antenna"][1] == 0
         and row["input_gain_db_by_antenna"][0] != 0
     }
+    second_only_gains = {
+        row["input_gain_db_by_antenna"][1] for row in rows
+        if row["input_gain_db_by_antenna"][0] == 0
+        and row["input_gain_db_by_antenna"][1] != 0
+    }
+    swapped_gains = first_only_gains & second_only_gains
     prepared = []
     seen = set()
     for row in rows:
-        tl_gain, br_gain = row["input_gain_db_by_antenna"]
+        first_antenna, second_antenna = row["antennas"].split(",")[:2]
+        first_gain, second_gain = row["input_gain_db_by_antenna"][:2]
         axes = []
-        if row["mode"] == "single":
-            axes.append(("TL gain", tl_gain, row["case"]))
-        else:
-            if tl_gain == br_gain:
-                axes.append(("Common antenna gain", tl_gain, row["case"]))
-            if tl_gain == 0:
-                axes.append(("BR gain (TL = 0 dB)", br_gain, row["case"]))
-            if ((tl_gain in swapped_gains and br_gain == 0)
-                    or (tl_gain == 0 and br_gain in swapped_gains)):
-                axes.append(("TL / BR gain", None, f"{tl_gain:g} / {br_gain:g}"))
+        if second_gain == 0:
+            axes.append((f"{first_antenna} gain ({second_antenna} = 0 dB)",
+                         first_gain, row["case"]))
+        if first_gain == second_gain:
+            axes.append((f"{first_antenna}/{second_antenna} common gain",
+                         first_gain, row["case"]))
+        if first_gain == 0:
+            axes.append((f"{second_antenna} gain ({first_antenna} = 0 dB)",
+                         second_gain, row["case"]))
+        if ((first_gain in swapped_gains and second_gain == 0)
+                or (first_gain == 0 and second_gain in swapped_gains)):
+            axes.append((f"{first_antenna} / {second_antenna} gain", None,
+                         f"{first_gain:g} / {second_gain:g}"))
         for label, value, name in axes:
             key = (label, row.get("scene"), row["mode"], row.get("seed"),
-                   tl_gain, br_gain)
+                   first_gain, second_gain)
             if key in seen:
                 continue
             seen.add(key)
             prepared.append(dict(row, scan_label=label, scan_unit="dB",
                                  scan_value=value, case=name))
-    # 交换图按衰减深度成对排列：0/-6、-6/0、0/-20、-20/0。
-    swap_rows = [row for row in prepared if row["scan_label"] == "TL / BR gain"]
+    # 交换图只保留两个方向都存在的衰减值，并按衰减深度成对排列。
+    swap_rows = [row for row in prepared if " / " in row["scan_label"]]
     swap_rows.sort(key=lambda row: (
         abs(sum(row["input_gain_db_by_antenna"])),
         -row["input_gain_db_by_antenna"][0],
     ))
-    return [row for row in prepared if row["scan_label"] != "TL / BR gain"] + swap_rows
+    return [row for row in prepared if " / " not in row["scan_label"]] + swap_rows
 
 
 def _filename_label(value: str) -> str:
@@ -179,7 +188,7 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                                     overlaps.append(f"{previous_label} = {label}")
                             plotted.append((label, points, values))
                             # 物理数值扫描可连线；TC编号和强弱交换类别只画点。
-                            atomic_cases_flag = factor_unit == "TC" or not numeric_scan_flag
+                            atomic_cases_flag = not numeric_scan_flag
                             axis.plot(points, values,
                                       linestyle=("None" if atomic_cases_flag else
                                                  ("-", "--", ":", "-.")[series_index % 4]),
@@ -199,7 +208,7 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                         if gain_batch_flag:
                             seed_count = len({row["seed"] for row in displayed_rows})
                             title += f"\nMean across seeds (n={seed_count})"
-                            ylabel = ylabel.replace("vs SINGLE", "vs SINGLE-TL")
+                            ylabel = ylabel.replace("vs SINGLE", f"vs SINGLE-{displayed_rows[0]['single_reference_antenna']}")
                             if metric == "tracking_cn0_late_median_db_hz":
                                 title += "; available estimates only"
                         axis.set(title=title, xlabel=xlabel, ylabel=ylabel)

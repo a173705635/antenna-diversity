@@ -9,11 +9,21 @@ from experiments.interference.coupling_support import coupling_row_fields, indep
 
 
 def phase_center_geometry(cfg) -> dict:
-    """按真实/名义坐标分别投影；输出相对TL的残余距离mm和相位deg。"""
-    azimuth = np.deg2rad(cfg.signal.true_direction.azimuth_deg)
-    elevation = np.deg2rad(cfg.signal.true_direction.elevation_deg)
-    line_of_sight = np.array([np.cos(elevation) * np.cos(azimuth),
-                              np.cos(elevation) * np.sin(azimuth), np.sin(elevation)])
+    """真实和名义完整坐标各按其方向投影，复算第二阵元相对第一阵元的残余距离。"""
+    true_direction = cfg.signal.true_direction
+    assumed_direction = cfg.signal.assumed_direction
+    true_azimuth = np.deg2rad(true_direction.azimuth_deg)
+    true_elevation = np.deg2rad(true_direction.elevation_deg)
+    assumed_azimuth = np.deg2rad(assumed_direction.azimuth_deg)
+    assumed_elevation = np.deg2rad(assumed_direction.elevation_deg)
+    true_line_of_sight = np.array([
+        np.cos(true_elevation) * np.cos(true_azimuth),
+        np.cos(true_elevation) * np.sin(true_azimuth), np.sin(true_elevation),
+    ])
+    assumed_line_of_sight = np.array([
+        np.cos(assumed_elevation) * np.cos(assumed_azimuth),
+        np.cos(assumed_elevation) * np.sin(assumed_azimuth), np.sin(assumed_elevation),
+    ])
     origin = mate70_phase_centers()
     true_offsets = {}
     assumed_offsets = {}
@@ -23,8 +33,13 @@ def phase_center_geometry(cfg) -> dict:
         assumed_offset = (np.asarray(cfg.phone.assumed_phase_centers_m[name]) - origin[name]) * 1e3
         true_offsets[name] = true_offset.tolist()
         assumed_offsets[name] = assumed_offset.tolist()
-        residual_los[name] = float(np.dot(true_offset - assumed_offset, line_of_sight))
-    relative_mm = residual_los["BR"] - residual_los["TL"]
+        # 方位失配使预设位置也贡献残余相位，因此这里用完整坐标，而非只投影偏移。
+        residual_los[name] = float(1e3 * (
+            np.dot(cfg.phone.phase_centers_m[name], true_line_of_sight) -
+            np.dot(cfg.phone.assumed_phase_centers_m[name], assumed_line_of_sight)
+        ))
+    first, second = cfg.phone.active_antennas[:2]
+    relative_mm = residual_los[second] - residual_los[first]
     phase_deg = -360.0 * cfg.signal.carrier_hz / SPEED_OF_LIGHT_MPS * relative_mm * 1e-3
     return {
         "true_offset_xyz_mm_by_antenna": true_offsets,
@@ -35,15 +50,19 @@ def phase_center_geometry(cfg) -> dict:
     }
 
 
-def phase_center_row_fields(case, frontend, channels, components, window, weights) -> dict:
+def phase_center_row_fields(case, frontend, channels, components, window, weights, mode: str) -> dict:
     """复用独立源/噪声SNR核算，另核对位置投影与实际阵列响应。"""
     cfg = case.config
     # 无互耦、各路同RF且零通道时延，故源标量/热噪声协方差核算与互耦批次相同。
-    fields = coupling_row_fields(case, frontend, channels, components, window, weights)
+    fields = coupling_row_fields(case, frontend, channels, components, window, weights, mode)
     geometry = phase_center_geometry(cfg)
     true = independent_manifold(cfg, estimated_flag=False)
     assumed = independent_manifold(cfg, estimated_flag=True)
-    relative_response = np.angle((true[1] / true[0]) / (assumed[1] / assumed[0]), deg=True)
+    first, second = cfg.phone.active_antennas[:2]
+    true_by_name = dict(zip(cfg.phone.active_antennas, true))
+    assumed_by_name = dict(zip(cfg.phone.active_antennas, assumed))
+    relative_response = np.angle((true_by_name[second] / true_by_name[first]) /
+                                 (assumed_by_name[second] / assumed_by_name[first]), deg=True)
     difference = np.angle(np.exp(1j * np.deg2rad(
         relative_response - geometry["residual_relative_phase_deg"])), deg=True)
     fields.update(geometry)
@@ -62,27 +81,23 @@ def _paired_statistics(values: list[float]) -> dict:
 
 
 def summarize_phase_center(rows: list[dict]) -> dict:
-    """逐PC/方法统计，配对PC001与同真实位置的PC009准确标定。"""
-    indexed = {(row["case"], row["seed"]): row for row in rows}
+    """逐PC/方法统计；同物理位置的条件仅核验 DFE 一致性。"""
+    indexed = {(row["case"], row["mode"], row["seed"]): row for row in rows}
     grouped = {}
     for row in rows:
-        grouped.setdefault(row["case"], []).append(row)
+        grouped.setdefault((row["case"], row["mode"]), []).append(row)
     cases = {}
     checks = {}
-    for name, observations in grouped.items():
+    for (case_id, mode), observations in grouped.items():
+        name = f"{case_id}-{mode}"
         first = observations[0]
-        case_id = name[:6]
-        mode = first["mode"]
-        baseline_name = f"PC-001-{mode}" if case_id != "PC-001" else None
-        accurate_name = (f"PC-009-{mode}" if case_id in
+        physical_reference = ("PC-009" if case_id in
                          {"PC-006", "PC-010", "PC-011", "PC-012"} else None)
-        snr_baseline = []
-        snr_calibrated = []
-        snr_single = []
+        snr_gain = []
         for row in observations:
             seed = row["seed"]
             numerical_error = max(row["manifold_max_abs_error"], row["weight_relative_error"],
-                                  row["assumed_unit_constraint_error"],
+                                  row["weight_constraint_error"],
                                   row["residual_phase_formula_error_deg"])
             snr_error = abs(row["thermal_snr_theory_error_db"])
             passed_flag = bool(numerical_error <= 1e-8 and snr_error <= 1e-7)
@@ -91,20 +106,14 @@ def summarize_phase_center(rows: list[dict]) -> dict:
                 "reason": (f"independent geometry/weight/SNR errors "
                            f"{numerical_error}, {snr_error} dB"),
             }
-            if baseline_name is not None:
-                snr_baseline.append(row["measured_thermal_snr_db"] -
-                                    indexed[(baseline_name, seed)]["measured_thermal_snr_db"])
-            if accurate_name is not None:
-                reference = indexed[(accurate_name, seed)]
-                snr_calibrated.append(row["measured_thermal_snr_db"] -
-                                      reference["measured_thermal_snr_db"])
+            if physical_reference is not None:
+                reference = indexed[(physical_reference, mode, seed)]
                 same_flag = row["physical_dfe_sha256"] == reference["physical_dfe_sha256"]
                 checks[f"phase_center_physical_pair:{name}:{seed}"] = {
                     "status": "passed" if same_flag else "failed", "passed_flag": same_flag,
                     "reason": "same-seed physical DFE equals accurately calibrated PC-009",
                 }
-            single = indexed[(f"{case_id}-single", seed)]
-            snr_single.append(row["measured_thermal_snr_db"] - single["measured_thermal_snr_db"])
+            snr_gain.append(row["thermal_snr_gain_db"])
         finite_cn0 = [row["tracking_cn0_late_median_db_hz"] for row in observations
                       if row["tracking_cn0_late_median_db_hz"] is not None]
         correct_count = sum(row["acquired_flag"] and
@@ -112,10 +121,7 @@ def summarize_phase_center(rows: list[dict]) -> dict:
                             and abs(row["acquired_doppler_error_hz"]) <=
                             row["acquisition_doppler_half_bin_hz"] for row in observations)
         cases[name] = {
-            "case": name, "mode": mode, "seeds": len(observations),
-            "baseline_reference": baseline_name,
-            "accurate_reference": accurate_name,
-            "single_reference": f"{case_id}-single",
+            "case": case_id, "mode": mode, "seeds": len(observations),
             "antennas": first["antennas"],
             "residual_relative_los_mm": first["residual_relative_los_mm"],
             "residual_relative_phase_deg": first["residual_relative_phase_deg"],
@@ -138,12 +144,9 @@ def summarize_phase_center(rows: list[dict]) -> dict:
             "max_snr_theory_error_db": max(abs(row["thermal_snr_theory_error_db"])
                                            for row in observations),
         }
-        for label, values in (("snr_delta_vs_pc001", snr_baseline),
-                              ("snr_delta_vs_accurate_calibration", snr_calibrated),
-                              ("snr_gain_vs_same_condition_single", snr_single)):
-            statistics = (_paired_statistics(values) if values else
-                          {"mean_db": None, "ci95_lower_db": None, "ci95_upper_db": None})
-            cases[name].update({f"{label}_{key}": value for key, value in statistics.items()})
+        statistics = _paired_statistics(snr_gain)
+        cases[name].update({f"snr_gain_vs_same_condition_single_{key}": value
+                            for key, value in statistics.items()})
         for antenna in first["antennas"].split(","):
             for key in ("true_offset_xyz_mm_by_antenna", "assumed_offset_xyz_mm_by_antenna"):
                 for axis, value in zip("xyz", first[key][antenna]):
@@ -151,7 +154,7 @@ def summarize_phase_center(rows: list[dict]) -> dict:
             cases[name][f"{antenna}_residual_los_mm"] = first["residual_los_mm_by_antenna"][antenna]
         passed_flag = all(checks[f"phase_center_math:{name}:{row['seed']}"]["passed_flag"]
                           for row in observations)
-        if accurate_name is not None:
+        if physical_reference is not None:
             passed_flag = passed_flag and all(
                 checks[f"phase_center_physical_pair:{name}:{row['seed']}"]["passed_flag"]
                 for row in observations)
