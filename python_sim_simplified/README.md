@@ -44,7 +44,7 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 当前 `EXPERIMENT_TYPE="phase_center_offset"` 比较 SINGLE 与 MVDR；默认100 ms、seed 42～71、4进程，共960次链路运行，只保存数据、不弹图。也可选择 `mutual_coupling`（36条/seed）、`antenna_gain`（37条/seed）、`phase_direction_gain`；输出统一为 `results/interference/<EXPERIMENT_TYPE>/`。已有历史结果不移动，旧实验条件与结果见[相位中心说明](docs/interference/README.md#无干扰相位中心偏移验证2026-10-16)。
 
-配置中的 `build_cases()` 一次完成条件选择、相位基准配对和种子展开，返回已写入种子、时长的独立用例；`build_settings()` 统一设置统计窗口、输出目录和并行数，分支只选择绘图开关。并行时，相位基准与补偿放在同一任务内依次执行，结果按原用例顺序保存。目标真实方向使用 `cfg.signal.true_direction`，合并器假设方向使用 `cfg.signal.assumed_direction`，两者分别修改。天线组合使用 `cfg.phone.active_antennas`，第一根是 SINGLE 的参考通道；逐通道相位按天线名字典赋值。
+相位/方向/增益实验通过 `SELECTED_SERIES`、`SCENES` 和各扫描元组设置范围；每个相位点固定生成基准、未补偿、准确补偿三组。`build_cases()` 返回已写入种子、时长的独立用例；`build_settings()` 统一设置统计窗口、输出目录和并行数，分支只选择绘图开关。并行时，相位基准与补偿放在同一任务内依次执行，结果按原用例顺序保存。目标真实方向使用 `cfg.signal.true_direction`，合并器假设方向使用 `cfg.signal.assumed_direction`，两者分别修改。天线组合使用 `cfg.phone.active_antennas`，第一根是 SINGLE 的参考通道；逐通道相位按天线名字典赋值。
 
 运行顺序为：用例配置 → 信号源与天线响应 → RF → ADC → DFE → 合并/捕获/跟踪 → 评估与绘图。公共链路在 `core/pipeline.py`，共用分量分析在 `core/evaluation.py`，实验条件、统计与图留在实验层。每个用例按自己的完整配置独立生成前端并执行接收；同一用例启用的方法共用同一份采样，基准与补偿用例使用相同种子分别执行。`validation_support.py` 中的 `run_case()` 执行接收，`evaluate_case()` 负责分量分析、指标计算和基准比较；[validation_plotting.py](experiments/interference/validation_plotting.py) 绘制结果图。
 

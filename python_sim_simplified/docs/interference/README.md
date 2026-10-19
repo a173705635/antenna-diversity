@@ -763,25 +763,25 @@ print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assu
 
 日常入口为 `python -m experiments.interference.validation`，直接执行 `experiments/interference/validation.py` 也使用相同配置。只需编辑 [validation_config.py](../../experiments/interference/validation_config.py)，原有各实验入口和历史结果继续保留其独立身份。
 
-常用修改位置：
+当前相位/方向/增益实验的常用修改位置：
 
 | 目的 | 配置位置 |
 |---|---|
-| 选择两至四根天线、改变顺序 | `ANTENNAS`；第一根是 SINGLE 参考 |
-| 选择合并方法 | `MODES`；默认 `single`、`egc`、`mvdr`、`blind_null` |
-| 修改噪声重复次数、时长和统计去边 | `SEEDS`、`DURATION_MS`、`EVALUATION_EDGE_TRIM_MS`；统计窗口应在记录内部 |
+| 选择两至四根天线、改变顺序 | `PHASE_DIRECTION_GAIN_ANTENNAS`；第一根是 SINGLE 参考 |
+| 选择合并方法 | `PHASE_DIRECTION_GAIN_MODES`；默认 `single`、`mrc`、`mvdr`、`blind_null` |
+| 修改重复次数、时长、并行数和统计去边 | `SEEDS`、`DURATION_MS`、`WORKERS`、`EVALUATION_EDGE_TRIM_MS`；统计窗口应在记录内部 |
 | 扫描整通道相位 | `SELECTED_SERIES = ("phase",)`、`PHASE_ANTENNA`、`PHASE_SCAN_DEG` |
-| 选择相位用例 | `EXPERIMENT_TYPE = "phase_direction_gain"` 的相位系列包含基准、未补偿、准确补偿三组；单独运行用 `SELECTED_CASES` 指定完整名称，准确补偿自动带基准 |
+| 相位用例组成 | 每个相位点固定包含基准、未补偿、准确补偿三组 |
 | 扫描目标真实方位角 | `SELECTED_SERIES = ("direction",)`、`TARGET_AZIMUTH_SCAN_DEG` |
 | 扫描阵元真实增益 | `SELECTED_SERIES = ("gain",)`、`ELEMENT_GAIN_ANTENNA`、`ELEMENT_GAIN_SCAN_DB` |
 | 设置卫星真实/名义方向及干扰方向 | `TARGET_TRUE_DIRECTION`、`TARGET_ASSUMED_DIRECTION`、`JAMMER_DIRECTION`；角度单位为度 |
-| 只跑指定条件 | `SELECTED_CASES`；例如 `("single_cw/phase_90/calibrated",)`，构造用例时自动加入其参考条件 |
+| 缩小扫描范围 | 修改 `SCENES` 和对应扫描元组；只跑一个扫描点时保留一个值 |
 | 显示/保存图 | `GENERATE_PLOTS_FLAG`、`SHOW_PLOTS_FLAG`（互耦和相位中心实验独立关闭）；目录按实验类型自动生成 |
 | 更改其他模型参数 | 同一文件内 `_base_config()` 直接赋值现有 `SimulationConfig` 字段 |
 
 例如，把 `SELECTED_SERIES` 改成 `("direction",)`、`TARGET_AZIMUTH_SCAN_DEG` 改成 `(20, 30, 40)`，就运行这三个真实方位角。名义方向保持配置值，表示研究导向失配；若要研究已知方向，应在方向条件构造处同时明确赋值 `cfg.signal.assumed_direction`。多个系列分别扫描，不交叉展开为全部参数组合。每个条件独立复制基础配置，改一个条件不会污染其他条件。
 
-需要自定义相位/方向/增益单点时，在 `_phase_direction_gain_cases()` 中增加具名条件并明确选择规则，最后统一展开种子；相位补偿条件在同处带入基准，基准先于补偿执行。`dfe_phase_deg` 和 `dfe_estimated_phase_deg` 按物理天线名配置；`compensate_dfe_phase_flag=True` 才执行估计相位的逆旋转。相位误差和补偿都作用于整行复数样本。真实阵元增益则修改 `cfg.phone.antenna_model.true_state.amplitude_error_db`，它改变目标和各干扰在天线端的响应，不改变独立 RF 热噪声的生成强度。
+`_phase_direction_gain_cases()` 只构造所选系列，最后统一展开种子；相位基准先于补偿执行。`dfe_phase_deg` 和 `dfe_estimated_phase_deg` 按物理天线名配置；`compensate_dfe_phase_flag=True` 才执行估计相位的逆旋转。相位误差和补偿都作用于整行复数样本。真实阵元增益则修改 `cfg.phone.antenna_model.true_state.amplitude_error_db`，它改变目标和各干扰在天线端的响应，不改变独立 RF 热噪声的生成强度。
 
 处理阶段固定在 [validation_support.py](../../experiments/interference/validation_support.py)：每个用例独立生成前端并执行接收和独立预算，同一用例的各算法共用本次采样。独立评分逐个重建启用的干扰源，不要求场景同时包含 CW 与宽带；公共接收机仍仅使用完整 IQ 和配置的名义导向。输出的线性 SINR 不含联合非线性/量化残差，分量交叉项单列，跟踪 C/N₀ 缺测不画成零。
 

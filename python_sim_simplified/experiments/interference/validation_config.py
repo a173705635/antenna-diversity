@@ -43,9 +43,6 @@ ELEMENT_GAIN_SCAN_DB = (0.0, 6.020599913279624)
 # 可同时选择多个具名系列，但不会把不同因素做隐式笛卡尔积。
 SELECTED_SERIES = ("phase",)
 SCENES = ("noise_only", "single_cw")
-# 只跑具名条件时填名字，参考条件会自动加入；空元组使用上面的系列选择。
-# 例：("single_cw/phase_90/calibrated",)
-SELECTED_CASES = ()
 
 # 相位/方向/增益与增益实验共用基础目标方向；互耦/相位中心使用固定方向。
 # 真实方向与接收机名义假设可分别修改；扫描只覆盖下面标明的单因素。
@@ -243,79 +240,59 @@ def _phase_center_cases() -> list[ValidationCase]:
 
 
 def _phase_direction_gain_cases() -> list[ValidationCase]:
-    """按具名条件或系列构造相位、方向和增益用例，并展开各 seed 的独立配置。"""
+    """按所选系列构造相位、方向和增益用例，并展开各 seed 的独立配置。"""
     cases = []
-    known_case_names = set()
-    selected_case_names = set(SELECTED_CASES)
-    phase_series_flag = not SELECTED_CASES and "phase" in SELECTED_SERIES
-    direction_series_flag = not SELECTED_CASES and "direction" in SELECTED_SERIES
-    gain_series_flag = not SELECTED_CASES and "gain" in SELECTED_SERIES
     for scene in SCENES:
         base_cfg = _base_config(scene, PHASE_DIRECTION_GAIN_ANTENNAS,
                                 PHASE_DIRECTION_GAIN_MODES)
-        for phase_deg in PHASE_SCAN_DEG:
-            # 每个横轴点放三组：无误差基准、注入但不补偿、注入后准确逆补偿。
-            # 基准用例不注入相位误差，只把相同基准画到各扫描点用于配对比较。
-            phase_case_prefix = f"{scene}/phase_{phase_deg}"
-            common_case_fields = dict(
-                scene_label=scene, scan_label="DFE channel phase",
-                scan_value=phase_deg, scan_unit="deg",
-            )
-            ideal_checks = ("ideal_noise",) if scene == "noise_only" else ()
-            baseline_case = ValidationCase(
-                f"{phase_case_prefix}/baseline", deepcopy(base_cfg), series_label="baseline",
-                checks=ideal_checks, **common_case_fields,
-            )
-            uncalibrated_case = ValidationCase(
-                f"{phase_case_prefix}/uncalibrated", deepcopy(base_cfg), series_label="uncalibrated",
-                dfe_phase_deg={PHASE_ANTENNA: phase_deg}, **common_case_fields,
-            )
-            calibrated_case = ValidationCase(
-                f"{phase_case_prefix}/calibrated", deepcopy(base_cfg), series_label="calibrated",
-                # 这里故意令估计相位等于真实相位，验证补偿闭环，不是自动估相。
-                dfe_phase_deg={PHASE_ANTENNA: phase_deg},
-                dfe_estimated_phase_deg={PHASE_ANTENNA: phase_deg},
-                compensate_dfe_phase_flag=True, reference_case=f"{phase_case_prefix}/baseline",
-                checks=("phase_pair",), **common_case_fields,
-            )
-            known_case_names.update((baseline_case.name, uncalibrated_case.name, calibrated_case.name))
-            # 选准确补偿时先加入同扫描点的基准；重复点名不会重复生成条件。
-            if (phase_series_flag or baseline_case.name in selected_case_names
-                    or calibrated_case.name in selected_case_names):
-                cases.append(baseline_case)
-            if phase_series_flag or uncalibrated_case.name in selected_case_names:
-                cases.append(uncalibrated_case)
-            if phase_series_flag or calibrated_case.name in selected_case_names:
-                cases.append(calibrated_case)
-        for azimuth_deg in TARGET_AZIMUTH_SCAN_DEG:
-            # 只改真实方向，不改名义导向，研究接收机方向假设不准的影响。
-            case_cfg = deepcopy(base_cfg)
-            case_cfg.signal.true_direction = Direction(azimuth_deg, case_cfg.signal.true_direction.elevation_deg)
-            direction_case = ValidationCase(
-                f"{scene}/direction_{azimuth_deg}", case_cfg, scene_label=scene,
-                series_label="true direction", scan_label="target true azimuth",
-                scan_value=azimuth_deg, scan_unit="deg",
-            )
-            known_case_names.add(direction_case.name)
-            if direction_series_flag or direction_case.name in selected_case_names:
+        if "phase" in SELECTED_SERIES:
+            for phase_deg in PHASE_SCAN_DEG:
+                # 每个横轴点固定三组；基准不注入误差，并先于对应补偿用例执行。
+                phase_case_prefix = f"{scene}/phase_{phase_deg}"
+                common_case_fields = dict(
+                    scene_label=scene, scan_label="DFE channel phase",
+                    scan_value=phase_deg, scan_unit="deg",
+                )
+                ideal_checks = ("ideal_noise",) if scene == "noise_only" else ()
+                baseline_case = ValidationCase(
+                    f"{phase_case_prefix}/baseline", deepcopy(base_cfg), series_label="baseline",
+                    checks=ideal_checks, **common_case_fields,
+                )
+                uncalibrated_case = ValidationCase(
+                    f"{phase_case_prefix}/uncalibrated", deepcopy(base_cfg), series_label="uncalibrated",
+                    dfe_phase_deg={PHASE_ANTENNA: phase_deg}, **common_case_fields,
+                )
+                calibrated_case = ValidationCase(
+                    f"{phase_case_prefix}/calibrated", deepcopy(base_cfg), series_label="calibrated",
+                    # 这里故意令估计相位等于真实相位，验证补偿闭环，不是自动估相。
+                    dfe_phase_deg={PHASE_ANTENNA: phase_deg},
+                    dfe_estimated_phase_deg={PHASE_ANTENNA: phase_deg},
+                    compensate_dfe_phase_flag=True, reference_case=f"{phase_case_prefix}/baseline",
+                    checks=("phase_pair",), **common_case_fields,
+                )
+                cases.extend((baseline_case, uncalibrated_case, calibrated_case))
+        if "direction" in SELECTED_SERIES:
+            for azimuth_deg in TARGET_AZIMUTH_SCAN_DEG:
+                # 只改真实方向，不改名义导向，研究接收机方向假设不准的影响。
+                case_cfg = deepcopy(base_cfg)
+                case_cfg.signal.true_direction = Direction(azimuth_deg, case_cfg.signal.true_direction.elevation_deg)
+                direction_case = ValidationCase(
+                    f"{scene}/direction_{azimuth_deg}", case_cfg, scene_label=scene,
+                    series_label="true direction", scan_label="target true azimuth",
+                    scan_value=azimuth_deg, scan_unit="deg",
+                )
                 cases.append(direction_case)
-        for gain_db in ELEMENT_GAIN_SCAN_DB:
-            # dB 增益作用于阵元响应，6.02 dB 约为电压两倍；名义增益保持不变。
-            case_cfg = deepcopy(base_cfg)
-            case_cfg.phone.antenna_model.true_state.amplitude_error_db[ELEMENT_GAIN_ANTENNA] = gain_db
-            gain_case = ValidationCase(
-                f"{scene}/gain_{gain_db}", case_cfg, scene_label=scene,
-                series_label="true element gain", scan_label=f"{ELEMENT_GAIN_ANTENNA} gain",
-                scan_value=gain_db, scan_unit="dB",
-            )
-            known_case_names.add(gain_case.name)
-            if gain_series_flag or gain_case.name in selected_case_names:
+        if "gain" in SELECTED_SERIES:
+            for gain_db in ELEMENT_GAIN_SCAN_DB:
+                # dB 增益作用于阵元响应，6.02 dB 约为电压两倍；名义增益保持不变。
+                case_cfg = deepcopy(base_cfg)
+                case_cfg.phone.antenna_model.true_state.amplitude_error_db[ELEMENT_GAIN_ANTENNA] = gain_db
+                gain_case = ValidationCase(
+                    f"{scene}/gain_{gain_db}", case_cfg, scene_label=scene,
+                    series_label="true element gain", scan_label=f"{ELEMENT_GAIN_ANTENNA} gain",
+                    scan_value=gain_db, scan_unit="dB",
+                )
                 cases.append(gain_case)
-
-    # 具名选择中的拼写错误必须立即显式报出，不能变成空批次。
-    for name in SELECTED_CASES:
-        if name not in known_case_names:
-            raise KeyError(name)
 
     seeded_cases = []
     for seed in SEEDS:
