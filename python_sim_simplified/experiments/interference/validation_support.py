@@ -34,7 +34,7 @@ class ValidationCase:
     """一个实验条件：物理/接收配置 + 图上标签 + DFE 注入/补偿 + 验收项目。
 
     scan_value 是横轴坐标，不会自动修改 config；修改物理参数由配置文件完成。
-    reference_case 指向基准条件名，checks 可选 ideal_noise 或 phase_pair。
+    checks 可选 ideal_noise。
     """
     name: str
     config: SimulationConfig
@@ -47,15 +47,15 @@ class ValidationCase:
     # 估计值由外部给定；只有 compensate_dfe_phase_flag=True 时才执行逆旋转。
     dfe_estimated_phase_deg: dict[str, float] = field(default_factory=dict)
     compensate_dfe_phase_flag: bool = False
-    reference_case: str | None = None
     checks: tuple[str, ...] = ()
 
 
 @dataclass
 class ValidationSettings:
-    """整个批次的统计与输出设置；功率去边单位为 ms。"""
+    """整个批次的实验类型、统计与输出设置；功率去边单位为 ms。"""
     evaluation_edge_trim_ms: int
     output_dir: Path
+    experiment_type: str
     show_plots_flag: bool = True
     workers: int = 1
     generate_plots_flag: bool = False
@@ -129,11 +129,9 @@ def _pattern_gain_row_fields(
 
 
 def evaluate_case(
-    case: ValidationCase, result: dict, evaluation_edge_trim_ms: int,
-    remaining_reference_uses: dict[tuple[str, int], int],
-    reference_data: dict[tuple[str, int], tuple[np.ndarray, dict]],
+    case: ValidationCase, result: dict, settings: ValidationSettings,
 ) -> list[dict]:
-    """对一次已完成的接收独立复算分量、指标和相位配对；返回标量行。"""
+    """对一次已完成的接收独立复算分量和指标；返回标量行。"""
     case_cfg = case.config
     seed = case_cfg.random_seed
     frontend = result["frontend"]
@@ -151,13 +149,13 @@ def evaluate_case(
             for name, values in components.items()
         }
     fs_out_hz = frontend["dfe_info"]["fs_out_hz"]
-    edge_trim_samples = round(evaluation_edge_trim_ms * 1e-3 * fs_out_hz)
+    edge_trim_samples = round(settings.evaluation_edge_trim_ms * 1e-3 * fs_out_hz)
     window = slice(edge_trim_samples, channels.shape[1] - edge_trim_samples)
     # 只裁指标窗口；捕获跟踪已使用完整序列。R 为各通道零时延样本协方差。
     samples = channels[:, window]
     covariance = samples @ samples.conj().T / samples.shape[1]
     pattern_fields = {}
-    if "pattern_gain" in case.checks:
+    if settings.experiment_type == "antenna_gain":
         # I0 输入端逐通道物理功率：SINGLE 的单位响应归一不能代替天线端功率。
         target_input = [_power(values) for values in components["target"][:, window]]
         thermal_input = [_power(values) for values in components["thermal"][:, window]]
@@ -206,7 +204,7 @@ def evaluate_case(
             "case": case.name, "seed": seed, "scene": case.scene_label,
             "series": case.series_label, "scan_label": case.scan_label,
             "scan_value": case.scan_value, "scan_unit": case.scan_unit,
-            "reference_case": case.reference_case, "mode": mode,
+            "mode": mode,
             "antennas": ",".join(case_cfg.phone.active_antennas),
             "single_reference_antenna": case_cfg.phone.active_antennas[0],
             "target_power": powers["target"], "thermal_power": powers["thermal"],
@@ -244,10 +242,10 @@ def evaluate_case(
         if pattern_fields:
             row.update(_pattern_gain_row_fields(case_cfg, frontend, channels, mode,
                                                 weights, powers, pattern_fields))
-        if "mutual_coupling" in case.checks:
+        if settings.experiment_type == "mutual_coupling":
             row.update(coupling_row_fields(case, frontend, channels, components,
                                            window, weights, mode))
-        if "phase_center_noise_only" in case.checks:
+        if settings.experiment_type == "phase_center_offset":
             row.update(phase_center_row_fields(case, frontend, channels, components,
                                                window, weights, mode))
         rows.append(row)
@@ -279,45 +277,6 @@ def evaluate_case(
                 / item["power"]
             )) for item in row["interferer_powers"]
         }
-    # 参考配对：缓存只保留后续相位比较所需的样本、合并序列与权值。
-    case_key = (case.name, seed)
-    if case_key in remaining_reference_uses:
-        # 仅保留相位配对需要的 DFE 样本、合并序列与权值。
-        reference_data[case_key] = (channels, {
-            mode: (branch["combined"], branch["combining"]["weights"])
-            for mode, branch in branches.items()
-        })
-    if "phase_pair" in case.checks:
-        reference_key = (case.reference_case, seed)
-        reference = reference_data.get(reference_key)
-        if reference is None:
-            dfe_input_error = None
-        else:
-            baseline_channels, baseline_branches = reference
-            dfe_input_error = float(
-                np.linalg.norm(channels - baseline_channels)
-                / np.linalg.norm(baseline_channels)
-            )
-        for row in rows:
-            row["phase_reference_available_flag"] = reference is not None
-            row["dfe_input_relative_error"] = dfe_input_error
-            if reference is None:
-                row["combined_relative_error"] = None
-                row["weight_relative_error"] = None
-                continue
-            baseline_combined, baseline_weights = baseline_branches[row["mode"]]
-            current_branch = branches[row["mode"]]
-            row["combined_relative_error"] = float(
-                np.linalg.norm(current_branch["combined"] - baseline_combined)
-                / np.linalg.norm(baseline_combined)
-            )
-            row["weight_relative_error"] = float(
-                np.linalg.norm(current_branch["combining"]["weights"] - baseline_weights)
-                / np.linalg.norm(baseline_weights)
-            )
-        remaining_reference_uses[reference_key] -= 1
-        if remaining_reference_uses[reference_key] == 0:
-            reference_data.pop(reference_key, None)
     return rows
 
 
@@ -447,9 +406,9 @@ def summarize_pattern_gain(rows: list[dict]) -> dict:
 
 
 def verify_validation(rows: list[dict], cases: dict[tuple[str, int], ValidationCase]) -> dict:
-    """区分通过、失败、不适用；双方 C/N₀ 缺测时只核对状态，不伪造数值。"""
+    """核验公共恒等式及适用条件下的理想噪声收益。"""
     checks = {}
-    # 第一层：每行检查线性合并恒等式；满足理想前提才检查 N 路热噪声收益。
+    # 每行检查线性合并恒等式；满足理想前提才检查 N 路热噪声收益。
     for row in rows:
         key = f'math:{row["case"]}:{row["seed"]}:{row["mode"]}'
         direct_flag = row["combined_direct_max_abs_error"] < 1e-8
@@ -472,57 +431,6 @@ def verify_validation(rows: list[dict], cases: dict[tuple[str, int], ValidationC
                 "status": "passed" if passed_flag else "failed", "passed_flag": passed_flag,
                 "reason": f"MRC thermal SNR error {error:.6g} dB; limit 0.5 dB",
             }
-    indexed = {(row["case"], row["seed"], row["mode"]): row for row in rows}
-    # 第二层：同 seed、同方法与无误差基准配对，避免噪声差异混入补偿误差。
-    for row in rows:
-        case = cases[row["case"], row["seed"]]
-        if "phase_pair" not in case.checks:
-            continue
-        reference = indexed[case.reference_case, row["seed"], row["mode"]]
-        comparisons = {}
-        comparisons["physical_reference_available_flag"] = row["phase_reference_available_flag"]
-        for name in ("dfe_input_relative_error", "combined_relative_error",
-                     "weight_relative_error"):
-            comparisons[f"{name}_flag"] = row[name] is not None and row[name] < 1e-12
-        for name in ("target_power", "thermal_power", "actual_power"):
-            comparisons[f"{name}_flag"] = abs(row[name] - reference[name]) / reference[name] < 1e-12
-        comparisons["interferer_powers_flag"] = all(
-            current["source"] == baseline["source"] and
-            abs(current["power"] - baseline["power"]) / baseline["power"] < 1e-12
-            for current, baseline in zip(row["interferer_powers"], reference["interferer_powers"])
-        ) and len(row["interferer_powers"]) == len(reference["interferer_powers"])
-        comparisons["acquisition_metric_flag"] = abs(
-            row["acquisition_metric"] - reference["acquisition_metric"]
-        ) < 1e-9
-        for comparison_name, source_name in (
-            ("acquired_flag", "acquired_flag"),
-            ("tracking_success_flag", "tracking_success_flag"),
-            ("tracking_status_flag", "tracking_status"),
-            ("tracking_cn0_late_finite_count_flag", "tracking_cn0_late_finite_count"),
-        ):
-            comparisons[comparison_name] = row[source_name] == reference[source_name]
-        for name in ("acquired_code_error_chips", "acquired_doppler_error_hz"):
-            comparisons[f"{name}_flag"] = abs(row[name] - reference[name]) < 1e-9
-        current_cn0 = row["tracking_cn0_late_median_db_hz"]
-        baseline_cn0 = reference["tracking_cn0_late_median_db_hz"]
-        comparisons["cn0_availability_flag"] = (current_cn0 is None) == (baseline_cn0 is None)
-        if current_cn0 is None and baseline_cn0 is None:
-            # 两者都没跟踪估计只能说明状态一致，不能宣称 C/N₀ 数值验证通过。
-            cn0_status = "not_evaluated"
-            comparisons["cn0_value_flag"] = None
-        elif current_cn0 is None or baseline_cn0 is None:
-            cn0_status = "availability_mismatch"
-            comparisons["cn0_value_flag"] = False
-        else:
-            cn0_status = "evaluated"
-            comparisons["cn0_value_flag"] = abs(current_cn0 - baseline_cn0) < 1e-7
-        passed_flag = all(value is None or bool(value) for value in comparisons.values())
-        checks[f'phase_pair:{row["case"]}:{row["seed"]}:{row["mode"]}'] = {
-            "status": "passed" if passed_flag else "failed", "passed_flag": passed_flag,
-            "reason": "paired restored samples and receiver metrics",
-            "cn0_comparison": cn0_status,
-            "comparisons": comparisons,
-        }
     return {"passed_flag": all(item["status"] != "failed" for item in checks.values()),
             "checks": checks}
 
@@ -563,81 +471,47 @@ def run_case(case: ValidationCase) -> dict:
     }
 
 
-def _run_evaluated_cases(
-    indexed_cases: list[tuple[int, ValidationCase]], evaluation_edge_trim_ms: int,
-) -> list[tuple[int, list[dict]]]:
-    """同进程运行相位基准及消费者；各用例独立跑前端，只返回索引与标量。"""
-    remaining_reference_uses = {}
-    for _, case in indexed_cases:
-        if "phase_pair" in case.checks:
-            key = (case.reference_case, case.config.random_seed)
-            remaining_reference_uses[key] = remaining_reference_uses.get(key, 0) + 1
-    reference_data = {}
-    evaluated = []
-    for index, case in indexed_cases:
-        result = run_case(case)
-        case_rows = evaluate_case(case, result, evaluation_edge_trim_ms,
-                                  remaining_reference_uses, reference_data)
-        evaluated.append((index, case_rows))
-        del result
-    return evaluated
+def _run_evaluated_case(case: ValidationCase, settings: ValidationSettings) -> list[dict]:
+    """独立运行一个条件的前端、接收和指标复算，只返回标量行。"""
+    result = run_case(case)
+    return evaluate_case(case, result, settings)
 
 
 def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) -> dict:
-    """独立运行各条件并按输入顺序汇总，仅保留相位配对所需的参考数组。"""
+    """独立运行各条件并按输入顺序汇总。"""
     rows = []
     if settings.workers > 1:
-        # 只有 phase_pair 消费的大数组参考要留在同一进程；其他用例独立调度。
-        group_index_by_case = {}
-        grouped_cases = {}
-        for index, case in enumerate(cases):
-            group_index = index
-            if "phase_pair" in case.checks:
-                reference_key = (case.reference_case, case.config.random_seed)
-                # 基准按输入顺序先出现；缺失时由 evaluate_case 保留原有诊断。
-                group_index = group_index_by_case.get(reference_key, index)
-            group_index_by_case[(case.name, case.config.random_seed)] = group_index
-            grouped_cases.setdefault(group_index, []).append((index, case))
         # 目录在开始时刷新；每个用例单独写一条标量进度，结果按输入索引复原。
         reset_output(settings.output_dir)
         ordered_results = [None] * len(cases)
         completed_count = 0
         with (settings.output_dir / "progress.jsonl").open("w", encoding="utf-8") as progress:
             with ProcessPoolExecutor(max_workers=settings.workers) as executor:
-                futures = [executor.submit(_run_evaluated_cases, indexed_cases,
-                                           settings.evaluation_edge_trim_ms)
-                           for indexed_cases in grouped_cases.values()]
+                futures = {executor.submit(_run_evaluated_case, case, settings): index
+                           for index, case in enumerate(cases)}
                 for future in as_completed(futures):
-                    for index, case_rows in future.result():
-                        ordered_results[index] = case_rows
-                        case = cases[index]
-                        progress.write(json.dumps({"case": case.name,
-                                                   "seed": case.config.random_seed,
-                                                   "rows": case_rows}) + "\n")
-                        progress.flush()
-                        completed_count += 1
-                        print(f"Completed {completed_count}/{len(cases)}: "
-                              f"seed={case.config.random_seed}, "
-                              f"condition={case.name}", flush=True)
+                    index = futures[future]
+                    case_rows = future.result()
+                    ordered_results[index] = case_rows
+                    case = cases[index]
+                    progress.write(json.dumps({"case": case.name,
+                                               "seed": case.config.random_seed,
+                                               "rows": case_rows}) + "\n")
+                    progress.flush()
+                    completed_count += 1
+                    print(f"Completed {completed_count}/{len(cases)}: "
+                          f"seed={case.config.random_seed}, "
+                          f"condition={case.name}", flush=True)
         rows = [row for case_rows in ordered_results for row in case_rows]
     else:
-        remaining_reference_uses = {}
-        for case in cases:
-            if "phase_pair" in case.checks:
-                key = (case.reference_case, case.config.random_seed)
-                remaining_reference_uses[key] = remaining_reference_uses.get(key, 0) + 1
-        reference_data = {}
         for case_index, case in enumerate(cases, start=1):
             print(f"Frontend {case_index}/{len(cases)}: seed={case.config.random_seed}, "
                   f"condition={case.name}", flush=True)
-            result = run_case(case)
-            rows.extend(evaluate_case(case, result, settings.evaluation_edge_trim_ms,
-                                      remaining_reference_uses, reference_data))
-            del result
+            rows.extend(_run_evaluated_case(case, settings))
     case_summaries = {}
     for case in cases:
         summary = case_summaries.setdefault(case.name, {
-            "name": case.name, "reference_case": case.reference_case,
+            "name": case.name,
             "scene_label": case.scene_label, "series_label": case.series_label,
             "scan_label": case.scan_label, "scan_value": case.scan_value,
             "scan_unit": case.scan_unit, "receiver_configs": {},
@@ -650,7 +524,7 @@ def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) ->
     verification = verify_validation(rows, by_identity)
     summary = {"cases": list(case_summaries.values()), "rows": rows,
                "verification": verification}
-    if any("pattern_gain" in case.checks for case in cases):
+    if cases and settings.experiment_type == "antenna_gain":
         pattern = summarize_pattern_gain(rows)
         summary["pattern_gain"] = pattern
         for name, outcome in pattern["cases"].items():
@@ -659,7 +533,7 @@ def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) ->
                 "reason": "independent gain, input power and weight checks",
             }
         verification["passed_flag"] = verification["passed_flag"] and pattern["passed_flag"]
-    if any("mutual_coupling" in case.checks for case in cases):
+    if cases and settings.experiment_type == "mutual_coupling":
         model = model_checks()
         coupling = summarize_coupling(rows)
         summary["model_checks"] = model
@@ -671,7 +545,7 @@ def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) ->
             verification["passed_flag"] and coupling["passed_flag"]
             and all(check["passed_flag"] for check in model.values())
         )
-    if any("phase_center_noise_only" in case.checks for case in cases):
+    if cases and settings.experiment_type == "phase_center_offset":
         phase_center = summarize_phase_center(rows)
         summary["phase_center"] = phase_center
         verification["checks"].update(phase_center["checks"])

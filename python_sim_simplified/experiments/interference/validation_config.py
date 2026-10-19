@@ -87,7 +87,7 @@ def _pattern_gain_cases() -> list[ValidationCase]:
             state.amplitude_error_db[second] = second_gain_db
         cases.append(ValidationCase(
             name=f"TC-{case_number:03d}", config=case_cfg, scene_label="noise_only",
-            scan_label="gain condition", checks=("pattern_gain",),
+            scan_label="gain condition",
         ))
     return cases
 
@@ -126,7 +126,6 @@ def _coupling_cases() -> list[ValidationCase]:
         cases.append(ValidationCase(
             name=f"MC-{number:03d}", config=cfg,
             scene_label="noise_only", scan_label="coupling condition",
-            checks=("mutual_coupling",),
         ))
     return cases
 
@@ -172,7 +171,7 @@ def _phase_center_cases() -> list[ValidationCase]:
             cfg.phone.assumed_phase_centers_m[antenna] = tuple(origin_m + np.asarray(offset_mm) * 1e-3)
         cases.append(ValidationCase(
             name=case_id, config=cfg, scene_label="noise_only",
-            scan_label="phase center condition", checks=("phase_center_noise_only",),
+            scan_label="phase center condition",
         ))
     return cases
 
@@ -184,7 +183,7 @@ def _phase_direction_gain_cases() -> list[ValidationCase]:
         base_cfg = _base_config(scene)
         if "phase" in SELECTED_SERIES:
             for phase_deg in PHASE_SCAN_DEG:
-                # 每个横轴点固定三组；基准不注入误差，并先于对应补偿用例执行。
+                # 每个横轴点固定三组；各组使用独立完整配置。
                 phase_case_prefix = f"{scene}/phase_{phase_deg}"
                 common_case_fields = dict(
                     scene_label=scene, scan_label="DFE channel phase",
@@ -204,8 +203,7 @@ def _phase_direction_gain_cases() -> list[ValidationCase]:
                     # 这里故意令估计相位等于真实相位，验证补偿闭环，不是自动估相。
                     dfe_phase_deg={PHASE_ANTENNA: phase_deg},
                     dfe_estimated_phase_deg={PHASE_ANTENNA: phase_deg},
-                    compensate_dfe_phase_flag=True, reference_case=f"{phase_case_prefix}/baseline",
-                    checks=("phase_pair",), **common_case_fields,
+                    compensate_dfe_phase_flag=True, **common_case_fields,
                 )
                 cases.extend((baseline_case, uncalibrated_case, calibrated_case))
         if "direction" in SELECTED_SERIES:
@@ -265,6 +263,7 @@ def build_settings() -> ValidationSettings:
     return ValidationSettings(
         evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS,
         output_dir=INTERFERENCE_RESULTS_DIR / EXPERIMENT_TYPE,
+        experiment_type=EXPERIMENT_TYPE,
         show_plots_flag=show_plots_flag,
         workers=WORKERS,
         generate_plots_flag=generate_plots_flag,

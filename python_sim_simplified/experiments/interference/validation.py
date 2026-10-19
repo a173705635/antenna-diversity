@@ -106,7 +106,7 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
     _write_json(settings.output_dir / "verification.json", summary["verification"])
     rows = summary["rows"]
     with (settings.output_dir / "summary.csv").open("w", newline="", encoding="utf-8") as stream:
-        # 配对条件比普通条件多恢复误差列；普通条件对应单元格留空。
+        # 不同实验条件可有不同指标列；按所有行的字段并集写出。
         hidden_config_columns = {
             "acquisition_threshold", "acquisition_code_tolerance_chips",
             "acquisition_doppler_half_bin_hz",
