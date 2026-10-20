@@ -10,14 +10,25 @@ from .config import CWInterferer, WidebandInterferer
 from .metrics import circular_chip_error, tracking_code_bias_chips
 
 
-MODE_ORDER = ("single", "blind_null")
 SPHERICAL_RESPONSE_FLOOR_DB = -40.0
 
 
 def _ordered_modes(results):
-    standard = [mode for mode in MODE_ORDER if mode in results["branches"]]
-    extras = [mode for mode in results["branches"] if mode not in standard]
-    return standard + extras
+    return list(results["branches"])
+
+
+def _branch_label(results, mode):
+    branch_result = results["branches"][mode]
+    if branch_result["receiver_role"] == "actual":
+        return mode.upper()
+    if mode == "egc":
+        source = branch_result["phase_estimate_source"]
+        if source == "preset_assumed_target_response_phase":
+            return "EGC (preset phase)"
+        if source == "external_input":
+            return "EGC (external phase)"
+        return f"EGC ({source})"
+    return "MVDR (known response)"
 
 
 def _spectrum(x, fs_hz):
@@ -126,13 +137,12 @@ def plot_dfe_spectrum(results):
 
 def plot_combined_spectra(results):
     figure, axis = plt.subplots(figsize=(9, 5))
-    for mode in MODE_ORDER:
-        if mode in results["branches"]:
-            frequency, power = _spectrum(
-                results["branches"][mode]["combined_samples"],
-                results["dfe_info"]["fs_out_hz"],
-            )
-            axis.plot(frequency / 1e6, power, label=mode.upper())
+    for mode in _ordered_modes(results):
+        frequency, power = _spectrum(
+            results["branches"][mode]["combined_samples"],
+            results["dfe_info"]["fs_out_hz"],
+        )
+        axis.plot(frequency / 1e6, power, label=_branch_label(results, mode))
     axis.set(
         title="Spectra after antenna combining",
         xlabel="Frequency (MHz)",
@@ -162,12 +172,11 @@ def plot_array_response(results):
         ]
     )
     figure, axis = plt.subplots(figsize=(9, 5))
-    for mode in MODE_ORDER:
-        if mode in results["branches"]:
-            weights = results["branches"][mode]["combining_info"]["weights"]
-            response = np.abs(weights.conj() @ manifolds)
-            response_db = 20.0 * np.log10(response / np.max(response))
-            axis.plot(azimuths, response_db, label=mode.upper())
+    for mode in _ordered_modes(results):
+        weights = results["branches"][mode]["combining_info"]["weights"]
+        response = np.abs(weights.conj() @ manifolds)
+        response_db = 20.0 * np.log10(response / np.max(response))
+        axis.plot(azimuths, response_db, label=_branch_label(results, mode))
     axis.axvline(
         cfg.signal.true_direction.azimuth_deg,
         color="green",
@@ -197,7 +206,7 @@ def plot_array_response(results):
 
 
 def plot_acquisition(results):
-    modes = [mode for mode in MODE_ORDER if mode in results["branches"]]
+    modes = _ordered_modes(results)
     columns = min(3, len(modes))
     rows = int(np.ceil(len(modes) / columns))
     figure, axes = plt.subplots(
@@ -232,7 +241,7 @@ def plot_acquisition(results):
             markersize=9,
         )
         axis.set(
-            title=f"{mode.upper()}  metric={acquisition['metric']:.2f}",
+            title=f"{_branch_label(results, mode)}  metric={acquisition['metric']:.2f}",
             xlabel="Code phase (samples)",
             ylabel="Doppler (Hz)",
         )
@@ -253,11 +262,11 @@ def plot_tracking(results):
         ("dll_error", "DLL error"),
     )
     for axis, (field, ylabel) in zip(axes.flat, labels):
-        for mode in MODE_ORDER:
-            branch_result = results["branches"].get(mode)
-            if branch_result and branch_result["tracking"]["success_flag"]:
+        for mode in _ordered_modes(results):
+            branch_result = results["branches"][mode]
+            if branch_result["tracking"]["success_flag"]:
                 values = branch_result["tracking"][field]
-                axis.plot(np.arange(values.size) + 1, values, label=mode.upper())
+                axis.plot(np.arange(values.size) + 1, values, label=_branch_label(results, mode))
         axis.set(xlabel="Epoch (ms)", ylabel=ylabel)
         axis.grid(True, alpha=0.3)
         if axis.lines:
@@ -269,11 +278,11 @@ def plot_tracking(results):
 
 def plot_cn0(results):
     figure, axis = plt.subplots(figsize=(9, 5))
-    for mode in MODE_ORDER:
-        branch_result = results["branches"].get(mode)
-        if branch_result and branch_result["tracking"]["success_flag"]:
+    for mode in _ordered_modes(results):
+        branch_result = results["branches"][mode]
+        if branch_result["tracking"]["success_flag"]:
             values = branch_result["tracking"]["cn0_db_hz"]
-            axis.plot(np.arange(values.size) + 1, values, label=mode.upper())
+            axis.plot(np.arange(values.size) + 1, values, label=_branch_label(results, mode))
     axis.set(
         title="Tracking C/N0",
         xlabel="Epoch (ms)",
@@ -367,7 +376,7 @@ def _plot_detailed_combined(results):
         if legend_handles is None:
             legend_handles, legend_labels = axis.get_legend_handles_labels()
         axis.set(
-            title=mode.upper(),
+            title=_branch_label(results, mode),
             xlabel="Frequency (MHz)",
             ylabel="Magnitude (dB)",
             xlim=(frequency_mhz[0], frequency_mhz[-1]),
@@ -529,7 +538,7 @@ def _plot_array_response_spherical(results, mode, azimuths, elevations, response
         ticks=(-40, -30, -20, -10, 0),
     )
     figure.suptitle(
-        f"{mode.upper()} 3D gain: lower response dents INWARD\n"
+        f"{_branch_label(results, mode)} 3D gain: lower response dents INWARD\n"
         f"Display radius: 0 dB = outer sphere; {SPHERICAL_RESPONSE_FLOOR_DB:g} dB = centre",
         fontsize=16,
     )
@@ -590,7 +599,7 @@ def _plot_array_response_3d(
             zorder=10,
         )
     axis.set(
-        title=f"{mode.upper()} 3D array response",
+        title=f"{_branch_label(results, mode)} 3D array response",
         xlabel="Azimuth (deg)",
         ylabel="Elevation (deg)",
         zlabel="Normalized response (dB)",
@@ -669,7 +678,7 @@ def _plot_detailed_array_response(results):
                 zorder=11 if marker == "x" else 10,
             )
         axis.set(
-            title=f"{mode.upper()} array response",
+            title=f"{_branch_label(results, mode)} array response",
             xlabel="Azimuth (deg)",
             ylabel="Elevation (deg)",
         )
@@ -735,7 +744,7 @@ def _plot_detailed_acquisition(results):
             markeredgewidth=2,
         )
         axes[0].set(
-            title=f"{mode.upper()} search map",
+            title=f"{_branch_label(results, mode)} search map",
             xlabel="Code phase (chips)",
             ylabel="Doppler (Hz)",
         )
@@ -774,7 +783,7 @@ def _plot_detailed_acquisition(results):
         status = "PASS" if acquisition["success_flag"] else "FAIL"
         axes[1].set(
             title=(
-                f"{mode.upper()}: {status}, metric={acquisition['metric']:.2f}\n"
+                f"{_branch_label(results, mode)}: {status}, metric={acquisition['metric']:.2f}\n"
                 f"Doppler={acquisition['doppler_hz']:.0f} Hz, "
                 f"code={peak_chip:.2f} chips"
             ),
@@ -784,7 +793,7 @@ def _plot_detailed_acquisition(results):
         )
         axes[1].grid(True, alpha=0.3)
         axes[1].legend()
-        figure.suptitle(f"Detailed acquisition: {mode.upper()}")
+        figure.suptitle(f"Detailed acquisition: {_branch_label(results, mode)}")
         figure.tight_layout()
         figures[f"detailed_acquisition_{mode}"] = figure
     return figures

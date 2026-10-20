@@ -176,6 +176,8 @@ class TrackingResult(TypedDict):
 
 class BranchResult(TypedDict):
     # 合并输出为一维接收机复采样；求权信息另存，供复算和绘图读取。
+    receiver_role: str
+    phase_estimate_source: str | None
     combined_samples: np.ndarray
     combining_info: CombiningInfo
     acquisition: AcquisitionResult
@@ -184,6 +186,8 @@ class BranchResult(TypedDict):
 
 class MetricRecord(TypedDict):
     mode: str
+    receiver_role: str
+    phase_estimate_source: str | None
     acquired_flag: bool
     acquisition_metric: float
     acquired_doppler_hz: float

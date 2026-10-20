@@ -41,7 +41,7 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。各类实验共用 `MODES`、`ACTIVE_ANTENNAS`、`SEEDS`、`DURATION_MS`、`WORKERS` 与统计去边；默认算法为 SINGLE 和 Blind Null（`blind_null`），设为 `("single", "blind_null", "egc", "mvdr")` 可同时运行两个对照算法。
 
-`EXPERIMENT_TYPE` 可选 `phase_direction_gain`、`phase_center_offset`（16条件）、`mutual_coupling`（12条件，MC-001～012）、`antenna_gain`（21条件，TC-001～021）或 `direct_response`；输出统一为 `results/interference/<EXPERIMENT_TYPE>/`。已有历史结果不移动，旧实验条件与结果见[相位中心说明](docs/interference/README.md#无干扰相位中心偏移验证2026-10-16)。
+`EXPERIMENT_TYPE` 可选 `phase_direction_gain`、`phase_center_offset`（16条件）、`mutual_coupling`（12条件，MC-001～012）、`antenna_gain`（21条件，TC-001～021）；输出统一为 `results/interference/<EXPERIMENT_TYPE>/`。已有历史结果不移动，旧实验条件与结果见[相位中心说明](docs/interference/README.md#无干扰相位中心偏移验证2026-10-16)。
 
 相位/方向/增益实验通过 `SELECTED_SERIES`、`SCENES` 和各扫描元组设置范围；每个相位点固定生成基准、未补偿、准确补偿三组。`_base_config()` 集中设置共享配置，各构造函数只描述条件差异，`build_cases()` 统一展开种子；`build_settings()` 设置统计窗口、输出目录、并行数和绘图。各用例独立调度，结果按原用例顺序保存。顶部 `TARGET_TRUE_DIRECTION`、`TARGET_ASSUMED_DIRECTION` 分别设置真实与名义目标方向；`ACTIVE_ANTENNAS` 的第一根是 SINGLE 参考，增益、互耦和位置偏移条件作用于前两根，额外激活阵元保留基础配置。
 
@@ -51,11 +51,11 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 运行顺序为：用例配置 → 信号源与天线响应 → RF → ADC → DFE → 合并/捕获/跟踪 → 评估与绘图。公共链路在 `core/pipeline.py`，实验条件、统计与图留在实验层。每个用例按自己的完整配置独立生成前端并执行接收；同一用例启用的方法共用同一份采样，基准与补偿用例使用相同种子分别执行。`validation_support.py` 中的 `run_case()` 执行接收，`evaluate_case()` 统计实际输出、捕获跟踪及轻量核验指标；[validation_plotting.py](experiments/interference/validation_plotting.py) 绘制捕获与跟踪图。
 
-接收分支返回 `combined_samples`（合并采样）和 `combining_info`（权值等算法信息）；通用验证的 `receiver_samples` 是相位处理后实际送入接收机的多通道采样。
+完整 `MODES` 直接写入用例配置，`run_receiver()` 集中分派算法，结果统一放在 `branches`；各分支返回 `combined_samples`（合并采样）、`combining_info`（权值等信息）及算法角色、相位来源。通用验证的 `receiver_samples` 是相位处理后实际送入接收机的多通道采样。
 
 SINGLE 直接取第一根激活天线，不按目标响应归一化。MRC 已移除；EGC 使用显式输入的相位，权值为 `exp(jφ)/N`，各路等幅且不依赖目标强度。EGC 和 MVDR 只供显式对照，前者目前使用预设相位、后者使用已知目标响应，均不代表已实现自动估相。现有 DFE 通道误差补偿与 EGC 的目标相对相位对齐是不同环节；天线增益仍作用于热噪声产生之前。接收机跟踪 C/N₀ 缺测不填零，实验条件见 [抗干扰说明](docs/interference/README.md)。
 
-原通道相位入口已合入 `phase_direction_gain`；原直接响应入口改选 `direct_response`，在同一配置文件设置目标、CW、宽带源的独立幅相及通道时延，`DIRECT_PHASE_SCAN_DEG` 扫描目标附加相位。其 `known_response` 组将该相位提供给对照算法，`unmodeled_phase` 组保持原名义相位；源级赋值保留在 [direct_response_support.py](experiments/interference/direct_response_support.py)，不再单独运行。EGC 暂用名义响应相角，结果和图注明对照身份；通道相位实验不会把真实注入误差自动提供给 EGC。
+原通道相位入口已合入 `phase_direction_gain`。EGC 暂用名义响应相角，结果和图注明对照身份；通道相位实验不会把真实注入误差自动提供给 EGC。
 
 GPS 仿真定位的 `DURATION_MS` 至少为 210 ms 才包含当前首个定位时刻，不保证定位成功。真实录波输入固定为 `results/real_gnss_hackrf/first40s.int8`，需在本地具备录波且实际解出健康星历；记录需长于 1.01 s 才存在当前定位时刻。
 

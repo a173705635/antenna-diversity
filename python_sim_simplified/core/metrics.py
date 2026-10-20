@@ -97,6 +97,8 @@ def compute_metrics(results: SimulationResults) -> list[MetricRecord]:
         records.append(
             {
                 "mode": mode,
+                "receiver_role": branch_result["receiver_role"],
+                "phase_estimate_source": branch_result["phase_estimate_source"],
                 "acquired_flag": bool(acquisition["success_flag"]),
                 "acquisition_metric": float(acquisition["metric"]),
                 "acquired_doppler_hz": float(acquisition["doppler_hz"]),
@@ -121,17 +123,26 @@ def compute_metrics(results: SimulationResults) -> list[MetricRecord]:
 
 
 def format_metrics(records: list[MetricRecord]) -> str:
+    mode_labels = []
+    for record in records:
+        mode_label = record["mode"]
+        if record["receiver_role"] == "known_response_comparison":
+            source = (record["phase_estimate_source"] if mode_label == "egc"
+                      else "known_response")
+            mode_label += f" ({source})"
+        mode_labels.append(mode_label)
+    mode_width = max([10, *(len(label) for label in mode_labels)])
     header = (
-        f"{'Mode':>10} {'Acq':>6} {'Metric':>9} {'Tracking':>9} "
+        f"{'Mode':>{mode_width}} {'Acq':>6} {'Metric':>9} {'Tracking':>9} "
         f"{'Doppler':>10} {'C/N0':>9} {'CodeBias(m)':>12}"
     )
     lines = [header, "-" * len(header)]
-    for record in records:
+    for record, mode_label in zip(records, mode_labels):
         doppler = record["final_doppler_hz"]
         cn0 = record["final_cn0_db_hz"]
         code_bias_m = record["tracking_code_bias_rms_m"]
         lines.append(
-            f"{record['mode']:>10} {str(record['acquired_flag']):>6} "
+            f"{mode_label:>{mode_width}} {str(record['acquired_flag']):>6} "
             f"{record['acquisition_metric']:>9.3f} "
             f"{str(record['tracking_flag']):>9} "
             f"{doppler if doppler is not None else np.nan:>10.2f} "

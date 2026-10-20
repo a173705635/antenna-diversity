@@ -90,9 +90,7 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
         row["case"].startswith("TC-") and "input_gain_db_by_antenna" in row
         for row in rows
     )
-    if settings.experiment_type == "direct_response":
-        experiment_name = "direct_response"
-    elif gain_batch_flag:
+    if gain_batch_flag:
         experiment_name = "antenna_gain"
     elif rows and all(row["case"].startswith("MC-") for row in rows):
         experiment_name = "mutual_coupling"

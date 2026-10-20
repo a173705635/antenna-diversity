@@ -19,7 +19,6 @@ if __package__ in (None, ""):
 from core.provenance import source_hashes
 from core.serialization import serializable
 from experiments.interference.validation_config import build_cases, build_settings
-from experiments.interference.direct_response_support import RESPONSE_CONVENTION
 from experiments.interference.validation_support import (
     ValidationSettings, run_validation,
 )
@@ -106,9 +105,6 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
         },
         "dfe_phase_definition": "Whole DFE row including target, every enabled interferer, thermal noise and frontend residual; estimated phase is an externally supplied inverse rotation.",
         "egc_phase_estimate_source": "preset_assumed_target_response_phase",
-        "source_response_convention": (
-            RESPONSE_CONVENTION if settings.experiment_type == "direct_response" else None
-        ),
         "source_sha256": source_hashes(),
     }
     _write_json(settings.output_dir / "manifest.json", manifest)

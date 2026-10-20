@@ -21,36 +21,13 @@ from .rf import process_rf
 from .tracking import track
 
 
-def _run_branch(
-    mode: str,
-    dfe_channels: np.ndarray,
-    cfg: SimulationConfig,
-    fs_out_hz: float,
-) -> BranchResult:
-    """运行不读取目标响应的实际接收分支。"""
-    if mode == "single":
-        combined_samples, combining_info = combine_single(dfe_channels)
-    elif mode == "blind_null":
-        combined_samples, combining_info = combine_blind_null(
-            dfe_channels,
-            cfg.diversity.blind_null,
-        )
-    else:
-        raise ValueError(f"Unsupported actual receiver mode: {mode}")
-
-    return _finish_branch(
-        combined_samples,
-        combining_info,
-        cfg,
-        fs_out_hz,
-    )
-
-
 def _finish_branch(
     combined_samples: np.ndarray,
     combining_info: CombiningInfo,
     cfg: SimulationConfig,
     fs_out_hz: float,
+    receiver_role: str,
+    phase_estimate_source: str | None,
 ) -> BranchResult:
     """以一维合并复采样完成捕获跟踪；求权信息不混入真值评分。"""
     acquisition = acquire(
@@ -77,6 +54,8 @@ def _finish_branch(
             "prompt": np.array([], dtype=complex),
         }
     return {
+        "receiver_role": receiver_role,
+        "phase_estimate_source": phase_estimate_source,
         "combined_samples": combined_samples,
         "combining_info": combining_info,
         "acquisition": acquisition,
@@ -89,6 +68,9 @@ def run_end_to_end(
     *,
     scene: tuple[np.ndarray, ScenarioTruth] | None = None,
     retain_analysis_flag: bool = False,
+    phase_estimates_deg: np.ndarray | None = None,
+    assumed_target_response: np.ndarray | None = None,
+    phase_estimate_source: str = "external_input",
 ) -> SimulationResults:
     """运行完整真实链并返回各方法结果。
 
@@ -101,6 +83,9 @@ def run_end_to_end(
     results["branches"] = run_receiver(
         results["dfe_channels"], results["config"],
         results["dfe_info"]["fs_out_hz"],
+        phase_estimates_deg=phase_estimates_deg,
+        assumed_target_response=assumed_target_response,
+        phase_estimate_source=phase_estimate_source,
     )
     results["metrics"] = compute_metrics(results)
     return results
@@ -157,46 +142,41 @@ def run_receiver(
     dfe_channels: np.ndarray,
     cfg: SimulationConfig,
     fs_out_hz: float,
-) -> dict[str, BranchResult]:
-    """只运行 SINGLE 和 Blind Null 的实际接收；其他模式显式报错。
-
-    输入是 [通道, DFE采样] 复数码值；不传入目标真值或名义响应。
-    """
-    return {
-        mode: _run_branch(
-            mode,
-            dfe_channels,
-            cfg,
-            fs_out_hz,
-        )
-        for mode in cfg.diversity.modes
-    }
-
-
-def run_known_response_comparison(
-    dfe_channels: np.ndarray,
-    cfg: SimulationConfig,
-    fs_out_hz: float,
     *,
-    phase_estimates_deg: np.ndarray,
-    assumed_target_response: np.ndarray,
-    modes: tuple[str, ...],
+    phase_estimates_deg: np.ndarray | None = None,
+    assumed_target_response: np.ndarray | None = None,
+    phase_estimate_source: str = "external_input",
 ) -> dict[str, BranchResult]:
-    """显式对照入口：EGC 只读外部相位估计，MVDR 读取名义目标复响应。"""
-    comparison_branches = {}
-    for mode in modes:
-        if mode == "egc":
-            combined_samples, combining_info = combine_egc(
-                dfe_channels, phase_estimates_deg,
+    """按配置顺序运行所有模式；对照输入必须由调用方显式提供。
+
+    DFE 输入形状为 [通道, 时间采样]；EGC 只读相位估计（度），
+    MVDR 只读名义目标复响应，不从真值或配置隐式推断。
+    """
+    branches = {}
+    for mode in cfg.diversity.modes:
+        if mode == "single":
+            combined_samples, combining_info = combine_single(dfe_channels)
+        elif mode == "blind_null":
+            combined_samples, combining_info = combine_blind_null(
+                dfe_channels, cfg.diversity.blind_null,
             )
+        elif mode == "egc":
+            if phase_estimates_deg is None:
+                raise ValueError("EGC requires phase_estimates_deg")
+            combined_samples, combining_info = combine_egc(dfe_channels, phase_estimates_deg)
         elif mode == "mvdr":
+            if assumed_target_response is None:
+                raise ValueError("MVDR requires assumed_target_response")
             combined_samples, combining_info = combine_mvdr(
                 dfe_channels, assumed_target_response,
                 cfg.diversity.diagonal_loading_factor,
             )
         else:
-            raise ValueError(f"Unsupported known-response comparison mode: {mode}")
-        comparison_branches[mode] = _finish_branch(
-            combined_samples, combining_info, cfg, fs_out_hz,
+            raise ValueError(f"Unsupported receiver mode: {mode}")
+        receiver_role = ("actual" if mode in ("single", "blind_null")
+                         else "known_response_comparison")
+        branches[mode] = _finish_branch(
+            combined_samples, combining_info, cfg, fs_out_hz, receiver_role,
+            phase_estimate_source if mode == "egc" else None,
         )
-    return comparison_branches
+    return branches

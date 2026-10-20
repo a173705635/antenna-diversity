@@ -9,7 +9,7 @@
 | 实验 | 命令 |
 |---|---|
 | 完整 RF→DFE→合并→捕获→跟踪及绘图 | `python -m experiments.interference.full_chain` |
-| 通用验证：通道相位、方向、增益、互耦、相位中心及源级响应 | `python -m experiments.interference.validation` |
+| 通用验证：通道相位、方向、增益、互耦、相位中心 | `python -m experiments.interference.validation` |
 | GPS L1 码/载波浮点定位 | `python -m experiments.gps_spp` |
 | GPS L1/L5 仿真定位 | `python -m experiments.gps_l1_l5` |
 | 真实录波 GPS L1 码定位 | `python -m experiments.recorded_iq` |

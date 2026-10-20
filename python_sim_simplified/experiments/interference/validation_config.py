@@ -8,16 +8,15 @@ from copy import deepcopy
 
 import numpy as np
 
-from core.config import CORNER_NAMES, CouplingPath, Direction
+from core.config import CouplingPath, Direction
 from core.presets import default_config
 from experiments.paths import INTERFERENCE_RESULTS_DIR
-from experiments.interference.direct_response_support import DirectResponses, SourceResponse
 from experiments.interference.validation_support import ValidationCase, ValidationSettings
 
 
 # 所有实验共用种子、时长、并行数和统计去边；绘图开关按实验区分。
 # 选择实验类型后，输出固定写入 results/interference/<实验类型>/。
-EXPERIMENT_TYPE = "phase_direction_gain"  # 可选 "antenna_gain"、"mutual_coupling"、"phase_center_offset"、"direct_response"。
+EXPERIMENT_TYPE = "phase_direction_gain"  # 可选 "antenna_gain"、"mutual_coupling"、"phase_center_offset"。
 SEEDS = tuple(range(42, 43))  # 所有实验共用；单次运行设为 (42,)。
 # 每个用例独立生成采样；配对条件保持相同 seed 和物理配置，以复现相同噪声。
 # 功率统计首尾各舍弃此时长，避开滤波瞬态；不裁掉送入捕获跟踪的数据。
@@ -30,7 +29,7 @@ GENERATE_PLOTS_FLAG = True
 SHOW_PLOTS_FLAG = True
 # 所有条件共用激活天线和方法；第一根是 SINGLE 参考，第二根用于双阵元条件。
 ACTIVE_ANTENNAS = ("TL", "BR")
-MODES = ("single", "blind_null")  # 显式对照可加入 "egc"、"mvdr"，不混入实际接收配置。
+MODES = ("single", "blind_null")  # 可显式加入 "egc"、"mvdr"；顺序即运行与结果顺序。
 
 # 单因素扫描；PHASE_ANTENNA 按物理名字定位，不使用固定行号。
 PHASE_ANTENNA = "BR"
@@ -44,17 +43,6 @@ ELEMENT_GAIN_SCAN_DB = (0.0, 6.020599913279624)
 SELECTED_SERIES = ("phase",)
 SCENES = ("noise_only", "single_cw")
 
-# direct_response 的源系数作用于理想空间响应，不旋转热噪声；延迟仍走通用物理链。
-DIRECT_PHASE_SCAN_DEG = (0, 20, 40, 60, 90, 120, 180)
-DESIRED_GAIN_DB = {name: 0.0 for name in CORNER_NAMES}
-DESIRED_PHASE_DEG = {name: 0.0 for name in CORNER_NAMES}
-CW_GAIN_DB = {name: 0.0 for name in CORNER_NAMES}
-CW_PHASE_DEG = {name: 0.0 for name in CORNER_NAMES}
-WIDEBAND_GAIN_DB = {name: 0.0 for name in CORNER_NAMES}
-WIDEBAND_PHASE_DEG = {name: 0.0 for name in CORNER_NAMES}
-TRUE_CHANNEL_DELAY_NS = {name: 0.0 for name in CORNER_NAMES}
-ESTIMATED_CHANNEL_DELAY_NS = {name: 0.0 for name in CORNER_NAMES}
-
 # 所有实验共用基础目标方向。
 # 真实方向与接收机名义假设可分别修改；扫描只覆盖下面标明的单因素。
 TARGET_TRUE_DIRECTION = Direction(30.0, 60.0)
@@ -67,7 +55,7 @@ def _base_config(scene: str):
     """生成指定天线/方法的基础场景；noise_only 无干扰，single_cw 保留首个 CW。"""
     base_cfg = default_config()
     base_cfg.phone.active_antennas = ACTIVE_ANTENNAS
-    base_cfg.diversity.modes = tuple(mode for mode in MODES if mode in ("single", "blind_null"))
+    base_cfg.diversity.modes = MODES
     base_cfg.signal.duration_ms = DURATION_MS
     # max_epochs 是跟踪历元上限，duration_ms 是输入时长；同数值保持原充分大上限。
     base_cfg.tracking.max_epochs = DURATION_MS
@@ -248,37 +236,6 @@ def _phase_direction_gain_cases() -> list[ValidationCase]:
     return cases
 
 
-def _direct_response_cases() -> list[ValidationCase]:
-    """每个相位点分别建立名义已知和未建模两组源响应。"""
-    cases = []
-    for phase_deg in DIRECT_PHASE_SCAN_DEG:
-        target_phase_deg = DESIRED_PHASE_DEG.copy()
-        target_phase_deg[PHASE_ANTENNA] += phase_deg
-        desired_true = SourceResponse(DESIRED_GAIN_DB.copy(), target_phase_deg)
-        interferers_true = (
-            SourceResponse(CW_GAIN_DB.copy(), CW_PHASE_DEG.copy()),
-            SourceResponse(WIDEBAND_GAIN_DB.copy(), WIDEBAND_PHASE_DEG.copy()),
-        )
-        for group, assumed_phase_deg in (
-            ("known_response", target_phase_deg.copy()),
-            ("unmodeled_phase", DESIRED_PHASE_DEG.copy()),
-        ):
-            case_cfg = _base_config("direct_response")
-            case_cfg.phone.channel_delay_ns = TRUE_CHANNEL_DELAY_NS.copy()
-            case_cfg.phone.estimated_channel_delay_ns = ESTIMATED_CHANNEL_DELAY_NS.copy()
-            cases.append(ValidationCase(
-                name=f"direct_response/phase_{phase_deg}/{group}", config=case_cfg,
-                scene_label="direct_response", series_label=group,
-                scan_label="injected target phase", scan_value=phase_deg, scan_unit="deg",
-                source_responses=DirectResponses(
-                    deepcopy(desired_true),
-                    SourceResponse(DESIRED_GAIN_DB.copy(), assumed_phase_deg),
-                    deepcopy(interferers_true),
-                ),
-            ))
-    return cases
-
-
 def build_cases() -> list[ValidationCase]:
     """按实验类型选择对应的用例构造函数。"""
     unsupported_modes = set(MODES) - {"single", "blind_null", "egc", "mvdr"}
@@ -289,7 +246,6 @@ def build_cases() -> list[ValidationCase]:
         "mutual_coupling": _coupling_cases,
         "phase_center_offset": _phase_center_cases,
         "phase_direction_gain": _phase_direction_gain_cases,
-        "direct_response": _direct_response_cases,
     }
     if EXPERIMENT_TYPE not in builders:
         raise ValueError(f"Unknown experiment type: {EXPERIMENT_TYPE}")
@@ -299,7 +255,6 @@ def build_cases() -> list[ValidationCase]:
         for template in templates:
             case = deepcopy(template)
             case.config.random_seed = seed
-            case.comparison_modes = tuple(mode for mode in MODES if mode in ("egc", "mvdr"))
             cases.append(case)
     return cases
 

@@ -17,10 +17,7 @@ from core.config import SimulationConfig
 # from core.evaluation import linear_components
 # from core.diversity import combine_known
 from core.metrics import circular_chip_error
-from core.pipeline import run_frontend, run_known_response_comparison, run_receiver
-from experiments.interference.direct_response_support import (
-    DirectResponses, direct_response_row_fields, generate_direct_scenario,
-)
+from core.pipeline import run_frontend, run_receiver
 from experiments.interference.coupling_support import (
     coupling_row_fields, sample_statistics, summarize_coupling,
 )
@@ -48,8 +45,6 @@ class ValidationCase:
     # 估计值由外部给定；只有 compensate_dfe_phase_flag=True 时才执行逆旋转。
     dfe_estimated_phase_deg: dict[str, float] = field(default_factory=dict)
     compensate_dfe_phase_flag: bool = False
-    comparison_modes: tuple[str, ...] = ()
-    source_responses: DirectResponses | None = None
     # checks: tuple[str, ...] = ()  # 分量功率核验暂停。
 
 
@@ -108,7 +103,6 @@ def evaluate_case(
     frontend = result["frontend"]
     receiver_samples = result["receiver_samples"]
     branches = result["branches"]
-    comparison_branches = result["comparison_branches"]
     # 分量准备暂停；真实 DFE 与接收仍由 run_case 完整执行。
     # components = linear_components(frontend)
     # components = {
@@ -134,12 +128,7 @@ def evaluate_case(
         pattern_fields = {"input_gain_db_by_antenna": list(gain_db)}
     # 公共指标：每种方法复用同一前端采样与接收机实际权值。
     rows = []
-    branch_entries = (
-        [("actual", mode, branch_result) for mode, branch_result in branches.items()]
-        + [("known_response_comparison", mode, branch_result)
-           for mode, branch_result in comparison_branches.items()]
-    )
-    for receiver_role, mode, branch_result in branch_entries:
+    for mode, branch_result in branches.items():
         weights = branch_result["combining_info"]["weights"]
         output_samples = branch_result["combined_samples"][evaluation_window]
         # 分量投影、功率、交叉项及量化残差暂时停用。
@@ -174,10 +163,8 @@ def evaluate_case(
             "series": case.series_label, "scan_label": case.scan_label,
             "scan_value": case.scan_value, "scan_unit": case.scan_unit,
             "mode": mode,
-            "receiver_role": receiver_role,
-            "phase_estimate_source": (
-                "preset_assumed_target_response_phase" if mode == "egc" else None
-            ),
+            "receiver_role": branch_result["receiver_role"],
+            "phase_estimate_source": branch_result["phase_estimate_source"],
             "antennas": ",".join(case_cfg.phone.active_antennas),
             "single_reference_antenna": case_cfg.phone.active_antennas[0],
             # "target_power": powers["target"], "thermal_power": powers["thermal"],
@@ -222,8 +209,6 @@ def evaluate_case(
             row.update(phase_center_row_fields(
                 case, frontend["truth"]["desired_steering_true"], weights,
             ))
-        if settings.experiment_type == "direct_response":
-            row.update(direct_response_row_fields(frontend["truth"], weights))
         rows.append(row)
     # 分量收益暂停；不再额外执行 SINGLE 参考合并。
     # _, reference_info = combine_known(
@@ -352,9 +337,7 @@ def run_case(case: ValidationCase) -> dict:
     case_cfg = case.config
     antennas = case_cfg.phone.active_antennas
     # frontend = run_frontend(case_cfg, retain_analysis_flag=True)  # 分量重放暂停。
-    scene = (generate_direct_scenario(case_cfg, case.source_responses)
-             if case.source_responses is not None else None)
-    frontend = run_frontend(case_cfg, scene=scene)
+    frontend = run_frontend(case_cfg)
     # 两次复数乘法与原注入、逆补偿顺序一致；零净相位也保留浮点残差。
     injection_factors = np.exp(1j * np.deg2rad([
         case.dfe_phase_deg.get(name, 0.0) for name in antennas
@@ -365,21 +348,17 @@ def run_case(case: ValidationCase) -> dict:
             -case.dfe_estimated_phase_deg.get(name, 0.0) for name in antennas
         ]))[:, None]
         receiver_samples = receiver_samples * correction_factors
-    branches = run_receiver(receiver_samples, case_cfg, frontend["dfe_info"]["fs_out_hz"])
-    comparison_branches = {}
-    if case.comparison_modes:
-        # 相位仅来自配置的原始名义目标响应，不把 DFE 注入当作自动估相。
-        assumed_target_response = frontend["truth"]["desired_steering_assumed"]
-        phase_estimates_deg = np.rad2deg(np.angle(assumed_target_response))
-        comparison_branches = run_known_response_comparison(
-            receiver_samples, case_cfg, frontend["dfe_info"]["fs_out_hz"],
-            phase_estimates_deg=phase_estimates_deg,
-            assumed_target_response=assumed_target_response,
-            modes=case.comparison_modes,
-        )
+    # 对照输入仅取原始名义目标响应，不把 DFE 注入相位当作目标相位估计。
+    assumed_target_response = frontend["truth"]["desired_steering_assumed"]
+    phase_estimates_deg = np.rad2deg(np.angle(assumed_target_response))
+    branches = run_receiver(
+        receiver_samples, case_cfg, frontend["dfe_info"]["fs_out_hz"],
+        phase_estimates_deg=phase_estimates_deg,
+        assumed_target_response=assumed_target_response,
+        phase_estimate_source="preset_assumed_target_response_phase",
+    )
     return {
         "frontend": frontend, "receiver_samples": receiver_samples, "branches": branches,
-        "comparison_branches": comparison_branches,
         # "injection_factors": injection_factors,  # 分量重放暂停。
         # "correction_factors": correction_factors,
     }
@@ -432,8 +411,6 @@ def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) ->
             "dfe_phase_deg": case.dfe_phase_deg,
             "dfe_estimated_phase_deg": case.dfe_estimated_phase_deg,
             "compensate_dfe_phase_flag": case.compensate_dfe_phase_flag,
-            "comparison_modes": case.comparison_modes,
-            "source_responses": asdict(case.source_responses) if case.source_responses else None,
             # "checks": case.checks,  # ideal_noise 标签暂停。
         })
         summary["receiver_configs"][str(case.config.random_seed)] = asdict(case.config)

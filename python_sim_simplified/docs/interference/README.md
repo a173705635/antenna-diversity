@@ -2,17 +2,21 @@
 
 ## 当前维护版算法与入口（2026-10-19）
 
-当前实际接收默认只运行 SINGLE 和 Blind Null，求权不读取目标幅相；SINGLE 直接取第一根激活天线。MRC 已移除，EGC 改为显式输入相位、按 `exp(jφ)/N` 等幅合并，暂用预设相位，后续可接入估计结果；旧 `egc_strict` 按目标幅度和归一化的尺度不再沿用。EGC 与已知目标响应的 MVDR 通过独立对照入口执行，不加入默认接收分支；当前尚未实现自动相位识别校准。
+当前实际接收默认只运行 SINGLE 和 Blind Null，求权不读取目标幅相；SINGLE 直接取第一根激活天线。MRC 已移除，EGC 改为显式输入相位、按 `exp(jφ)/N` 等幅合并，暂用预设相位，后续可接入估计结果；旧 `egc_strict` 按目标幅度和归一化的尺度不再沿用。四种算法由 `run_receiver()` 按完整 `MODES` 集中分派、统一返回 `branches`，EGC/MVDR 仍标明对照角色，默认不启用；当前尚未实现自动相位识别校准。
 
-2026-10-20 起，EGC/MVDR 统一在 `validation_config.py` 的 `MODES` 中启用，例如 `("single", "blind_null", "egc", "mvdr")`；默认仍为前两种。原通道相位入口合入 `EXPERIMENT_TYPE="phase_direction_gain"`，原直接响应入口改为 `EXPERIMENT_TYPE="direct_response"`，后者的源级赋值保留在 `direct_response_support.py`；两个旧脚本不再作为运行入口，已有输出保留。
+2026-10-20 起，EGC/MVDR 统一在 `validation_config.py` 的 `MODES` 中启用，例如 `("single", "blind_null", "egc", "mvdr")`；默认仍为前两种。原通道相位入口合入 `EXPERIMENT_TYPE="phase_direction_gain"`；直接响应专用实验及源级赋值配置已移除，历史输出保留。
 
-EGC 相位输入暂取名义响应相角：通道相位实验不随DFE注入误差调整；直接响应实验的 `known_response` 明确给定扫描后的目标相位，`unmodeled_phase` 保持原预设。结果以 `receiver_role`、`phase_estimate_source` 及图中标题区分实际接收和预设对照；DFE 通道误差补偿与目标相对相位对齐分别处理。直接响应条件沿用源级幅相、真实/估计通道时延及已知/未建模两组，天线、种子、时长、并行数采用通用配置，因此新入口默认条件不等同于历史四天线扫描。
+EGC 相位输入暂取名义响应相角，不随DFE注入误差调整。结果以 `receiver_role`、`phase_estimate_source` 及图中标题区分实际接收和预设对照；DFE 通道误差补偿与目标相对相位对齐分别处理。
 
 合并入口的数值对照以 `8bfe529` 为基准：TL/BR、BR相位扰动、seed 42、12 ms、首尾各去除1 ms。通道相位取无干扰/单CW、0°/90°、基准/未补偿/准确补偿、四算法共48行；直接响应取0°/90°、已知/未建模、四算法共16行；原通用四类实验取36行默认算法结果。共100行的2196个保留字段完全一致；旧直接响应的输出误差和正确捕获字段映射为通用名称，正确捕获统一使用搜索网格容差。原相位恢复的详细配对字段退出日常输出，精确恢复与名义响应不随真实注入变化的检查保留在本地回归。未重跑正式100 ms研究批次。
 
+移除源级响应实验前，统一算法分派以 `a71d771` 为基准：同样使用 TL/BR、seed 42、12 ms、首尾各去除1 ms，五类实验均启用四算法。相位取90°、两个场景及三组条件；直接响应取0°/90°及两组条件；增益、互耦、相位中心各取前两个条件。64行完整结果一致，192份合并采样、权值及跟踪Prompt数组的SHA256一致；该轮改变配置与调用结构，不新增性能结论。
+
+移除源级响应实验后，以前述统一分派版本为基准，按相同条件核对保留的四类实验；固定 BLAS/OMP 单线程时，48行完整结果及144份合并采样、权值、跟踪Prompt数组的SHA256一致。未固定线程数时，合并采样可能存在浮点末位差异，独立复算误差不超过 `1e-14`；未重跑正式100 ms研究批次。
+
 验证共用 [validation_config.py](../../experiments/interference/validation_config.py) 顶部的 `MODES`、`ACTIVE_ANTENNAS`、`SEEDS`、`DURATION_MS`、`WORKERS` 及真实/名义目标方向；共享配置在 `_base_config()` 设置，`build_cases()` 统一展开种子。每个 seed 的增益、互耦、相位中心分别为21、12、16个物理条件，各自独立运行完整前端，默认两算法分别产生42、24、32行结果。当前增益编号TC-001～021，互耦编号MC-001～012，汇总按“条件＋算法”区分；下文旧结果按当时编号、算法和归一化方式解释。
 
-所有实验暂时注释事后分量准备、投影、预算及其核验、打印、结果字段和图表：包括通用验证、通道相位与直接响应实验。分量SNR/SINR、抑制比、相对SINGLE的分量收益、oracle C/N₀、交叉项及联合残差均不再输出；噪声预算专用实验也暂停。日常保留实际合并序列、协方差功率核验与捕获跟踪；相位仍在DFE输出注入，不代表天线端相位误差。
+所有实验暂时注释事后分量准备、投影、预算及其核验、打印、结果字段和图表。分量SNR/SINR、抑制比、相对SINGLE的分量收益、oracle C/N₀、交叉项及联合残差均不再输出；噪声预算专用实验也暂停。日常保留实际合并序列、协方差功率核验与捕获跟踪；相位仍在DFE输出注入，不代表天线端相位误差。
 
 `ACTIVE_ANTENNAS` 第一根为SINGLE所用通道，增益、互耦及位置条件使用前两根，额外阵元保留基础参数。`scan_label`、`scan_unit` 保留真实角度/增益扫描的图轴与文件名用途，离散条件不再填写TC/MC/PC伪单位。真实目标导向与实际权值计算的复响应、相位中心几何仍保留，它们不依赖分量重放。
 
@@ -462,7 +466,7 @@ assumed.parametric_patterns["TL"].phase_variation_mm = (0.0, 0.0, 0.0)
 
 ## 天线单因素配对消融（历史实验）
 
-2026-10-20 已移除 `experiments/interference/antenna_ablation.py` 及其专用配置、汇总和绘图，当前代码不再提供此入口；下列条件与结果属于历史版本，复现须使用原结果清单对应源码。直接响应实验仍需的评分逻辑已移入 `direct_response_boundary.py`。
+2026-10-20 已移除 `experiments/interference/antenna_ablation.py` 及其专用配置、汇总和绘图，当前代码不再提供此入口；下列条件与结果属于历史版本，复现须使用原结果清单对应源码。
 
 当时使用四天线、100 ms、噪声种子 42/43/44，不提高 GNSS 功率（−128.5 dBm），不改变捕获门限 2.5、盲干扰检测门限 6 dB，关闭多径。
 
@@ -529,7 +533,7 @@ assumed.parametric_patterns["TL"].phase_variation_mm = (0.0, 0.0, 0.0)
 python -B -m experiments.interference.direct_response_boundary
 ```
 
-本节记录当时的独立入口 `direct_response_boundary.py`（2026-10-20 已合入通用 validation），不改变 `full_chain` 的参数化方向图或默认运行方式。它使用理想天线基底，保留手机四角几何相位；目标、CW 和宽带干扰分别指定每个天线的非几何电压响应：
+本节仅记录历史实验：独立入口 `direct_response_boundary.py` 曾合入通用 validation，2026-10-20 已连同源级赋值配置移除；复现下列结果须使用原结果清单对应源码。当时使用理想天线基底，保留手机四角几何相位，目标、CW 和宽带干扰分别指定每个天线的非几何电压响应：
 
 ```text
 c_i(source) = 10^(gain_db_i/20) × exp(j × phase_deg_i × π/180)
