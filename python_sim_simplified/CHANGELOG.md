@@ -2,6 +2,13 @@
 
 只记录实际改动、重要行为变化、最终验证和必要限制；实验细节见对应说明。以下路径除注明外均相对于 `python_sim_simplified/`，测试数字为各次修改当时的结果。
 
+## 2026-10-20 统一 EGC/MVDR 验证入口
+
+- `validation_config.py` 的 `MODES` 统一选择 SINGLE、Blind Null、EGC、MVDR，默认仍为前两种；EGC/MVDR 分别作为预设相位、已知响应对照执行，结果与图明确标识，不读取真实注入相位冒充估计。
+- 删除独立入口 `channel_phase_validation.py`、`direct_response_boundary.py`：通道相位使用现有 `phase_direction_gain`；源级响应新增 `direct_response` 条件，复用统一运行、保存和绘图，独有的目标/CW/宽带幅相模型保留在 `experiments/interference/direct_response_support.py`。各用例仍独立执行完整接收链，参数集中到通用配置。
+- 新直接响应结果使用通用字段及捕获网格容差，输出到 `results/interference/direct_response/`；原相位恢复详细配对检查移至本地回归，旧结果保留。
+- 验证：完整回归242项通过、2项未选中；迁移前后100行、2196个保留字段完全一致，统一入口保存和绘图通过。未重跑正式100 ms研究批次；[验证条件](docs/interference/README.md#当前维护版算法与入口2026-10-19)。
+
 ## 2026-10-20 移除天线消融实验
 
 - 删除 `experiments/interference/antenna_ablation.py` 及其专用配置、汇总、绘图和本地测试；清理根目录与精简版 README 的入口，历史数据和实验结论保留历史标识。

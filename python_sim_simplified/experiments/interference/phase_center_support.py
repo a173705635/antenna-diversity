@@ -63,15 +63,17 @@ def summarize_phase_center(rows: list[dict]) -> dict:
     """逐物理条件和方法统计真实目标响应及接收性能。"""
     grouped = {}
     for row in rows:
-        grouped.setdefault((row["case"], row["mode"]), []).append(row)
+        grouped.setdefault((row["case"], row["receiver_role"], row["mode"]), []).append(row)
     cases = {}
-    for (case_id, mode), observations in grouped.items():
+    for (case_id, receiver_role, mode), observations in grouped.items():
         name = f"{case_id}-{mode}"
         first = observations[0]
         finite_cn0 = [row["tracking_cn0_late_median_db_hz"] for row in observations
                       if row["tracking_cn0_late_median_db_hz"] is not None]
         cases[name] = {
-            "case": case_id, "mode": mode, "seeds": len(observations),
+            "case": case_id, "mode": mode, "receiver_role": receiver_role,
+            "phase_estimate_source": first["phase_estimate_source"],
+            "seeds": len(observations),
             "antennas": first["antennas"],
             "residual_relative_los_mm": first["residual_relative_los_mm"],
             "residual_relative_phase_deg": first["residual_relative_phase_deg"],

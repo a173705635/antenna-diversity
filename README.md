@@ -9,13 +9,12 @@
 | 实验 | 命令 |
 |---|---|
 | 完整 RF→DFE→合并→捕获→跟踪及绘图 | `python -m experiments.interference.full_chain` |
-| 目标/CW/宽带响应直接赋值与相位扫描 | `python -m experiments.interference.direct_response_boundary` |
-| 理想双天线整通道相位误差与准确补偿 | `python -m experiments.interference.channel_phase_validation` |
+| 通用验证：通道相位、方向、增益、互耦、相位中心及源级响应 | `python -m experiments.interference.validation` |
 | GPS L1 码/载波浮点定位 | `python -m experiments.gps_spp` |
 | GPS L1/L5 仿真定位 | `python -m experiments.gps_l1_l5` |
 | 真实录波 GPS L1 码定位 | `python -m experiments.recorded_iq` |
 
-`full_chain` 默认包含 CW 与 2 MHz 带限复高斯噪声干扰，比较 SINGLE、Blind Null；EGC/MVDR 仅在指定实验中显式启用作对照。配置、代码阅读顺序及独立实验说明见 [精简版 README](python_sim_simplified/README.md) 和 [抗干扰说明](python_sim_simplified/docs/interference/README.md)。
+`full_chain` 默认包含 CW 与 2 MHz 带限复高斯噪声干扰，比较 SINGLE、Blind Null；EGC/MVDR 对照统一在 `validation_config.py` 的 `MODES` 中启用。配置、代码阅读顺序及实验说明见 [精简版 README](python_sim_simplified/README.md) 和 [抗干扰说明](python_sim_simplified/docs/interference/README.md)。
 
 ```powershell
 cd F:\antenna_diversity

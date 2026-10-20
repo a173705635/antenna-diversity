@@ -32,15 +32,17 @@ def summarize_coupling(rows: list[dict]) -> dict:
     """逐物理条件和方法汇总真实响应、捕获及跟踪。"""
     grouped = {}
     for row in rows:
-        grouped.setdefault((row["case"], row["mode"]), []).append(row)
+        grouped.setdefault((row["case"], row["receiver_role"], row["mode"]), []).append(row)
     cases = {}
-    for (case_id, mode), observations in grouped.items():
+    for (case_id, receiver_role, mode), observations in grouped.items():
         first = observations[0]
         cn0 = [row["tracking_cn0_late_median_db_hz"] for row in observations
                if row["tracking_cn0_late_median_db_hz"] is not None]
         phases = np.deg2rad([row["true_response_phase_deg"] for row in observations])
         cases[f"{case_id}-{mode}"] = {
             "case": case_id, "level": "link", "mode": mode,
+            "receiver_role": receiver_role,
+            "phase_estimate_source": first["phase_estimate_source"],
             "seeds": len(observations), "antennas": first["antennas"],
             "true_coupling_db": first["true_coupling_db"],
             "true_coupling_phase_deg": first["true_coupling_phase_deg"],

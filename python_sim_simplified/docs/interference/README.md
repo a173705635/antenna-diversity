@@ -4,7 +4,11 @@
 
 当前实际接收默认只运行 SINGLE 和 Blind Null，求权不读取目标幅相；SINGLE 直接取第一根激活天线。MRC 已移除，EGC 改为显式输入相位、按 `exp(jφ)/N` 等幅合并，暂用预设相位，后续可接入估计结果；旧 `egc_strict` 按目标幅度和归一化的尺度不再沿用。EGC 与已知目标响应的 MVDR 通过独立对照入口执行，不加入默认接收分支；当前尚未实现自动相位识别校准。
 
-通道相位和直接响应实验顶部的 `KNOWN_RESPONSE_COMPARISON_MODES = ()` 默认关闭对照，设为 `("egc", "mvdr")` 可启用。EGC 相位输入暂取名义响应相角：通道相位实验不随DFE注入误差调整；直接响应实验的 `known_response` 明确给定扫描后的目标相位，`unmodeled_phase` 保持原预设。结果以 `receiver_role`、`phase_estimate_source` 及图例区分实际接收和预设对照；DFE 通道误差补偿与目标相对相位对齐分别处理。
+2026-10-20 起，EGC/MVDR 统一在 `validation_config.py` 的 `MODES` 中启用，例如 `("single", "blind_null", "egc", "mvdr")`；默认仍为前两种。原通道相位入口合入 `EXPERIMENT_TYPE="phase_direction_gain"`，原直接响应入口改为 `EXPERIMENT_TYPE="direct_response"`，后者的源级赋值保留在 `direct_response_support.py`；两个旧脚本不再作为运行入口，已有输出保留。
+
+EGC 相位输入暂取名义响应相角：通道相位实验不随DFE注入误差调整；直接响应实验的 `known_response` 明确给定扫描后的目标相位，`unmodeled_phase` 保持原预设。结果以 `receiver_role`、`phase_estimate_source` 及图中标题区分实际接收和预设对照；DFE 通道误差补偿与目标相对相位对齐分别处理。直接响应条件沿用源级幅相、真实/估计通道时延及已知/未建模两组，天线、种子、时长、并行数采用通用配置，因此新入口默认条件不等同于历史四天线扫描。
+
+合并入口的数值对照以 `8bfe529` 为基准：TL/BR、BR相位扰动、seed 42、12 ms、首尾各去除1 ms。通道相位取无干扰/单CW、0°/90°、基准/未补偿/准确补偿、四算法共48行；直接响应取0°/90°、已知/未建模、四算法共16行；原通用四类实验取36行默认算法结果。共100行的2196个保留字段完全一致；旧直接响应的输出误差和正确捕获字段映射为通用名称，正确捕获统一使用搜索网格容差。原相位恢复的详细配对字段退出日常输出，精确恢复与名义响应不随真实注入变化的检查保留在本地回归。未重跑正式100 ms研究批次。
 
 验证共用 [validation_config.py](../../experiments/interference/validation_config.py) 顶部的 `MODES`、`ACTIVE_ANTENNAS`、`SEEDS`、`DURATION_MS`、`WORKERS` 及真实/名义目标方向；共享配置在 `_base_config()` 设置，`build_cases()` 统一展开种子。每个 seed 的增益、互耦、相位中心分别为21、12、16个物理条件，各自独立运行完整前端，默认两算法分别产生42、24、32行结果。当前增益编号TC-001～021，互耦编号MC-001～012，汇总按“条件＋算法”区分；下文旧结果按当时编号、算法和归一化方式解释。
 
@@ -525,7 +529,7 @@ assumed.parametric_patterns["TL"].phase_variation_mm = (0.0, 0.0, 0.0)
 python -B -m experiments.interference.direct_response_boundary
 ```
 
-[direct_response_boundary.py](../../experiments/interference/direct_response_boundary.py) 是独立实验入口，不改变 `full_chain` 的参数化方向图或默认运行方式。它使用理想天线基底，保留手机四角几何相位；目标、CW 和宽带干扰分别指定每个天线的非几何电压响应：
+本节记录当时的独立入口 `direct_response_boundary.py`（2026-10-20 已合入通用 validation），不改变 `full_chain` 的参数化方向图或默认运行方式。它使用理想天线基底，保留手机四角几何相位；目标、CW 和宽带干扰分别指定每个天线的非几何电压响应：
 
 ```text
 c_i(source) = 10^(gain_db_i/20) × exp(j × phase_deg_i × π/180)
@@ -704,7 +708,7 @@ print('matched_steering_error', np.max(abs(a - r['truth']['desired_steering_assu
 
 ### 本轮范围与实施约定
 
-本轮只验证恒定、频率无关的复数通道相位误差及其准确补偿。入口为 `experiments/interference/channel_phase_validation.py`；历史 `direct_response_boundary` 是目标源级响应变化实验，不作为本轮通道校准证据，也不覆盖其数据。
+本轮只验证恒定、频率无关的复数通道相位误差及其准确补偿。当时入口为 `experiments/interference/channel_phase_validation.py`（2026-10-20 已合入通用 validation）；历史 `direct_response_boundary` 是目标源级响应变化实验，不作为本轮通道校准证据，也不覆盖其数据。
 
 误差放在 **DFE 输出之后、天线合并之前**，对整行复数序列施加同一个相位旋转。目标、CW、热噪声以及已有前端量化残差共同旋转。此位置用于隔离相位补偿的线性数学闭环，不等同于在 RF 限幅/ADC 前注入误差，不验证硬件校准能力或真实手机天线。
 

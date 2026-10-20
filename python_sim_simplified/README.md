@@ -10,7 +10,7 @@
 
 ```text
 core/          天线、GNSS、RF/DFE、捕获跟踪与定位；interference/ 放干扰场景与盲零陷
-experiments/   interference/ 的通用验证、完整链路、直接响应和通道相位实验，以及 GPS/录波入口
+experiments/   interference/ 的通用验证与完整链路，以及 GPS/录波入口
 configs/       通用定位实验的冻结权重等配置
 tests/         当前功能测试与测试数据，仅本地保留；冻结对照以 local_evidence 单独标记
 tools/         frozen_version.py 校验与恢复原始冻结版
@@ -29,8 +29,6 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 |---|---|---|
 | 通用条件验证：实验类型与 seed 在 `validation_config.py` 选择 | `python -m experiments.interference.validation` | `results/interference/<EXPERIMENT_TYPE>/` |
 | 完整接收链及绘图 | `python -m experiments.interference.full_chain` | `results/interference/full_chain/` |
-| 目标/CW/宽带响应直接赋值，已知/未知目标相位扫描 | `python -m experiments.interference.direct_response_boundary` | `results/interference/direct_response_boundary/` |
-| 理想双天线整通道相位误差、准确补偿与单 CW 对照 | `python -m experiments.interference.channel_phase_validation` | `results/interference/channel_phase_validation/` |
 | GPS L1 仿真码/载波浮点定位 | `python -m experiments.gps_spp` | `results/gps_spp/` |
 | GPS L1/L5 仿真定位与冻结权重对照 | `python -m experiments.gps_l1_l5` | `results/gps_l1_l5/` |
 | 真实录波 GPS L1 码定位 | `python -m experiments.recorded_iq` | `results/recorded_iq/` |
@@ -41,11 +39,11 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 ### 通用条件验证
 
-日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。四类实验共用 `MODES`、`ACTIVE_ANTENNAS`、`SEEDS`、`DURATION_MS`、`WORKERS` 与统计去边；默认算法为 SINGLE 和 Blind Null（`blind_null`）。
+日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。各类实验共用 `MODES`、`ACTIVE_ANTENNAS`、`SEEDS`、`DURATION_MS`、`WORKERS` 与统计去边；默认算法为 SINGLE 和 Blind Null（`blind_null`），设为 `("single", "blind_null", "egc", "mvdr")` 可同时运行两个对照算法。
 
-`EXPERIMENT_TYPE` 可选 `phase_direction_gain`、`phase_center_offset`（16条件）、`mutual_coupling`（12条件，MC-001～012）或 `antenna_gain`（21条件，TC-001～021）；每个条件运行 `MODES` 中的方法，输出统一为 `results/interference/<EXPERIMENT_TYPE>/`。已有历史结果不移动，旧实验条件与结果见[相位中心说明](docs/interference/README.md#无干扰相位中心偏移验证2026-10-16)。
+`EXPERIMENT_TYPE` 可选 `phase_direction_gain`、`phase_center_offset`（16条件）、`mutual_coupling`（12条件，MC-001～012）、`antenna_gain`（21条件，TC-001～021）或 `direct_response`；输出统一为 `results/interference/<EXPERIMENT_TYPE>/`。已有历史结果不移动，旧实验条件与结果见[相位中心说明](docs/interference/README.md#无干扰相位中心偏移验证2026-10-16)。
 
-相位/方向/增益实验通过 `SELECTED_SERIES`、`SCENES` 和各扫描元组设置范围；每个相位点固定生成基准、未补偿、准确补偿三组。`_base_config()` 集中设置共享配置，四个构造函数只描述条件差异，`build_cases()` 统一展开种子；`build_settings()` 设置统计窗口、输出目录、并行数和绘图。各用例独立调度，结果按原用例顺序保存。顶部 `TARGET_TRUE_DIRECTION`、`TARGET_ASSUMED_DIRECTION` 分别设置真实与名义目标方向；`ACTIVE_ANTENNAS` 的第一根是 SINGLE 参考，增益、互耦和位置偏移条件作用于前两根，额外激活阵元保留基础配置。
+相位/方向/增益实验通过 `SELECTED_SERIES`、`SCENES` 和各扫描元组设置范围；每个相位点固定生成基准、未补偿、准确补偿三组。`_base_config()` 集中设置共享配置，各构造函数只描述条件差异，`build_cases()` 统一展开种子；`build_settings()` 设置统计窗口、输出目录、并行数和绘图。各用例独立调度，结果按原用例顺序保存。顶部 `TARGET_TRUE_DIRECTION`、`TARGET_ASSUMED_DIRECTION` 分别设置真实与名义目标方向；`ACTIVE_ANTENNAS` 的第一根是 SINGLE 参考，增益、互耦和位置偏移条件作用于前两根，额外激活阵元保留基础配置。
 
 增益、互耦与相位中心汇总按“条件＋算法”统计捕获跟踪，保留均值、样本标准差、成功次数和缺测数。`scan_label`、`scan_unit` 用于真实扫描的图轴与文件名，离散条件不再填写 TC/MC/PC 伪单位。
 
@@ -57,7 +55,7 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 SINGLE 直接取第一根激活天线，不按目标响应归一化。MRC 已移除；EGC 使用显式输入的相位，权值为 `exp(jφ)/N`，各路等幅且不依赖目标强度。EGC 和 MVDR 只供显式对照，前者目前使用预设相位、后者使用已知目标响应，均不代表已实现自动估相。现有 DFE 通道误差补偿与 EGC 的目标相对相位对齐是不同环节；天线增益仍作用于热噪声产生之前。接收机跟踪 C/N₀ 缺测不填零，实验条件见 [抗干扰说明](docs/interference/README.md)。
 
-需要对照时，在 `channel_phase_validation.py` 或 `direct_response_boundary.py` 顶部将 `KNOWN_RESPONSE_COMPARISON_MODES` 从 `()` 改为 `("egc", "mvdr")`；EGC 暂用名义响应的相位，结果表记录对照角色和相位来源，图中标明对照身份。
+原通道相位入口已合入 `phase_direction_gain`；原直接响应入口改选 `direct_response`，在同一配置文件设置目标、CW、宽带源的独立幅相及通道时延，`DIRECT_PHASE_SCAN_DEG` 扫描目标附加相位。其 `known_response` 组将该相位提供给对照算法，`unmodeled_phase` 组保持原名义相位；源级赋值保留在 [direct_response_support.py](experiments/interference/direct_response_support.py)，不再单独运行。EGC 暂用名义响应相角，结果和图注明对照身份；通道相位实验不会把真实注入误差自动提供给 EGC。
 
 GPS 仿真定位的 `DURATION_MS` 至少为 210 ms 才包含当前首个定位时刻，不保证定位成功。真实录波输入固定为 `results/real_gnss_hackrf/first40s.int8`，需在本地具备录波且实际解出健康星历；记录需长于 1.01 s 才存在当前定位时刻。
 

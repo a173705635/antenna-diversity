@@ -19,6 +19,7 @@ if __package__ in (None, ""):
 from core.provenance import source_hashes
 from core.serialization import serializable
 from experiments.interference.validation_config import build_cases, build_settings
+from experiments.interference.direct_response_support import RESPONSE_CONVENTION
 from experiments.interference.validation_support import (
     ValidationSettings, run_validation,
 )
@@ -64,7 +65,10 @@ def phase_center_summary_records(cases: list[dict]) -> list[dict]:
                 vectors.append(f"{label}({xyz})")
             descriptions.append(f"{antenna}: " + "/".join(vectors))
         records.append({
-            "case": case["case"], "mode": case["mode"], "seeds": case["seeds"],
+            "case": case["case"], "mode": case["mode"],
+            "receiver_role": case["receiver_role"],
+            "phase_estimate_source": case["phase_estimate_source"],
+            "seeds": case["seeds"],
             "condition_xyz_mm": "; ".join(descriptions),
             **{key: case[key] for key in columns},
             # 分量功率及相对 SINGLE 收益列暂时停用。
@@ -101,6 +105,10 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
             case["name"]: case["receiver_configs"] for case in summary["cases"]
         },
         "dfe_phase_definition": "Whole DFE row including target, every enabled interferer, thermal noise and frontend residual; estimated phase is an externally supplied inverse rotation.",
+        "egc_phase_estimate_source": "preset_assumed_target_response_phase",
+        "source_response_convention": (
+            RESPONSE_CONVENTION if settings.experiment_type == "direct_response" else None
+        ),
         "source_sha256": source_hashes(),
     }
     _write_json(settings.output_dir / "manifest.json", manifest)
@@ -134,7 +142,10 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
             antenna_columns = {f"{antenna}_gain_db": gain
                                for antenna, gain in antenna_gains.items()}
             records.append({
-                "tc": tc, "mode": result["mode"], "n": result["seeds"],
+                "tc": tc, "mode": result["mode"],
+                "receiver_role": result["receiver_role"],
+                "phase_estimate_source": result["phase_estimate_source"],
+                "n": result["seeds"],
                 **antenna_columns,
                 "acquisition_peak_ratio_mean": result["acquisition_peak_ratio"]["mean"],
                 "acquisition_peak_ratio_std": result["acquisition_peak_ratio"]["std"],
@@ -164,7 +175,8 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
         records = []
         for case in summary["mutual_coupling"]["cases"].values():
             record = {key: case[key] for key in (
-                "case", "mode", "antennas", "seeds", "true_coupling_db",
+                "case", "mode", "receiver_role", "phase_estimate_source",
+                "antennas", "seeds", "true_coupling_db",
                 "true_coupling_phase_deg", "assumed_coupling_db", "assumed_coupling_phase_deg",
                 "acquisition_threshold_pass_count", "acquisition_correct_count",
                 "tracking_success_count", "tracking_cn0_missing_count",

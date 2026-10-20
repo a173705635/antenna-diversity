@@ -90,7 +90,9 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
         row["case"].startswith("TC-") and "input_gain_db_by_antenna" in row
         for row in rows
     )
-    if gain_batch_flag:
+    if settings.experiment_type == "direct_response":
+        experiment_name = "direct_response"
+    elif gain_batch_flag:
         experiment_name = "antenna_gain"
     elif rows and all(row["case"].startswith("MC-") for row in rows):
         experiment_name = "mutual_coupling"
@@ -204,7 +206,11 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                             xlabel += f" ({factor_unit})"
                         displayed_rows = [row for row in factor_rows
                                           if row["scene"] == scene and row["mode"] == mode]
-                        title = f"{scene} / {mode}"
+                        mode_label = {
+                            "egc": "EGC (preset phase comparison)",
+                            "mvdr": "MVDR (known response comparison)",
+                        }.get(mode, f"{mode} (actual)")
+                        title = f"{scene} / {mode_label}"
                         if gain_batch_flag:
                             seed_count = len({row["seed"] for row in displayed_rows})
                             title += f"\nMean across seeds (n={seed_count})"
@@ -238,10 +244,13 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                                           ha="center", transform=axis.transAxes)
                                 axis.set_yticks([])
                         axis.grid(alpha=0.3)
-                        axis.legend(fontsize=9, loc="upper left", bbox_to_anchor=(1.01, 1))
+                        if axis.lines:
+                            axis.legend(fontsize=9, loc="upper left", bbox_to_anchor=(1.01, 1))
+            role_suffix = ("" if figure_mode in ("single", "blind_null")
+                           else "__known_response_comparison")
             figure_path = settings.output_dir / (
                 f"{experiment_name}__{factor_names[(factor_label, factor_unit)]}"
-                f"__{filename}__{_filename_label(figure_mode)}.png"
+                f"__{filename}__{_filename_label(figure_mode)}{role_suffix}.png"
             )
             fig.savefig(figure_path, dpi=150)
             figure_paths.append(figure_path)
