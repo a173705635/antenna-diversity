@@ -49,7 +49,7 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 专项统计由 `EXPERIMENT_TYPE` 选择；日常核验保留实际合并输出与功率的独立复算，依赖分量的理想噪声收益检查暂时停用。模型与权值公式检查放在本地测试；核验通过不代表捕获跟踪成功。
 
-运行顺序为：用例配置 → 信号源与天线响应 → RF → ADC → DFE → 合并/捕获/跟踪 → 评估与绘图。公共链路在 `core/pipeline.py`，实验条件、统计与图留在实验层。每个用例按自己的完整配置独立生成前端并执行接收；同一用例启用的方法共用同一份采样，基准与补偿用例使用相同种子分别执行。`validation_support.py` 中的 `run_case()` 执行接收，`evaluate_case()` 统计实际输出、捕获跟踪及轻量核验指标；[validation_plotting.py](experiments/interference/validation_plotting.py) 绘制捕获与跟踪图。
+运行顺序为：用例配置 → 信号生成 → 天线响应与通道时延 → RF → ADC → DFE → 合并/捕获/跟踪 → 评估与绘图。`core/pipeline.py` 的 `run_frontend()` 依次调用 `generate_signal_sources()`、`process_antenna()`、`process_rf()`（含 ADC）和 `process_dfe()`；各信号按自身来波方向经过天线后合成。每个用例按完整配置独立执行，同一用例启用的方法共用采样；基准与补偿用例使用相同种子分别执行。实验层 `run_case()` 执行接收，`evaluate_case()` 统计指标，[validation_plotting.py](experiments/interference/validation_plotting.py) 绘图。
 
 完整 `MODES` 直接写入用例配置，`run_receiver()` 集中分派算法，结果统一放在 `branches`；各分支返回 `combined_samples`（合并采样）、`combining_info`（权值等信息）及算法角色、相位来源。通用验证的 `receiver_samples` 是相位处理后实际送入接收机的多通道采样。
 
@@ -65,7 +65,7 @@ GPS 仿真定位的 `DURATION_MS` 至少为 210 ms 才包含当前首个定位�
 |---|---|
 | 配置与合成预设 | [config.py](core/config.py)、[presets.py](core/presets.py) |
 | 天线响应、几何、极化、互耦与通道时延 | [antenna.py](core/antenna.py)、[channel_delay.py](core/channel_delay.py) |
-| GNSS 场景、RF 与 DFE | [gnss.py](core/gnss.py)、[rf.py](core/rf.py)、[dfe.py](core/dfe.py) |
+| GNSS 信号生成、RF 与 DFE | [gnss.py](core/gnss.py)、[rf.py](core/rf.py)、[dfe.py](core/dfe.py) |
 | 捕获、跟踪与重捕 | [acquisition.py](core/acquisition.py)、[tracking.py](core/tracking.py)、[autonomous_tracking.py](core/autonomous_tracking.py) |
 | 公共分集合并与完整链路 | [diversity.py](core/diversity.py)、[pipeline.py](core/pipeline.py) |
 | 干扰生成、场景响应与盲零陷 | [core/interference/](core/interference/) |

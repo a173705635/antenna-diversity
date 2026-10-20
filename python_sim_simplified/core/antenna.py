@@ -4,12 +4,14 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from .channel_delay import apply_channel_delays, delay_phase
 from .config import (
     AntennaState,
     Direction,
     ElementOrientation,
     ParametricPattern,
     PhoneConfig,
+    SimulationConfig,
     SPEED_OF_LIGHT_MPS,
     WavePolarization,
 )
@@ -18,7 +20,7 @@ from .measured_pattern import (
     interpolate_measured,
     load_measured_pattern,
 )
-from .models import AntennaDiagnostics
+from .models import AntennaDiagnostics, ScenarioTruth, SignalSources
 
 
 @dataclass
@@ -412,3 +414,138 @@ def antenna_response(
         "effective_manifold": effective_response,
     }
     return effective_response, diagnostics
+
+
+def _channel_delays_s(phone: PhoneConfig, estimated_flag: bool) -> np.ndarray:
+    delay_map = (
+        phone.estimated_channel_delay_ns
+        if estimated_flag
+        else phone.channel_delay_ns
+    )
+    return 1e-9 * np.asarray(
+        [delay_map[name] for name in phone.active_antennas]
+    )
+
+
+def process_antenna(
+    signal_sources: SignalSources,
+    cfg: SimulationConfig,
+) -> tuple[np.ndarray, ScenarioTruth]:
+    """逐源施加方向响应、阵元幅相/互耦和通道时延，返回 RF 输入 [天线, 采样] 伏特及真值。"""
+    true_delays_s = _channel_delays_s(cfg.phone, estimated_flag=False)
+    estimated_delays_s = _channel_delays_s(cfg.phone, estimated_flag=True)
+    antenna_model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
+
+    desired_true_base, desired_true_stages = antenna_response(
+        antenna_model,
+        cfg.signal.true_direction,
+        cfg.signal.true_polarization,
+    )
+    desired_assumed_base, desired_assumed_stages = antenna_response(
+        antenna_model,
+        cfg.signal.assumed_direction,
+        cfg.signal.assumed_polarization,
+        use_assumed_state_flag=True,
+    )
+    desired_component = apply_channel_delays(
+        desired_true_base[:, None] * signal_sources["desired_waveform"][None, :],
+        true_delays_s,
+        cfg.signal.fs_rf_hz,
+        cfg.signal.carrier_hz,
+        cfg.signal.if_hz,
+    )
+    desired_rf_frequency_hz = cfg.signal.carrier_hz + cfg.signal.doppler_hz
+    desired_delay_phase_true = delay_phase(
+        true_delays_s,
+        desired_rf_frequency_hz,
+    )
+    desired_delay_phase_assumed = delay_phase(
+        estimated_delays_s,
+        desired_rf_frequency_hz,
+    )
+    desired_true = (
+        desired_true_base
+        if np.all(true_delays_s == 0.0)
+        else desired_true_base * desired_delay_phase_true
+    )
+    desired_assumed = (
+        desired_assumed_base
+        if np.all(estimated_delays_s == 0.0)
+        else desired_assumed_base * desired_delay_phase_assumed
+    )
+
+    # 每个入射源按自身方向过天线；宽带分量的实际序列仍用通道时延处理。
+    interferer_responses = []
+    interferer_components = []
+    interferer_delay_phases = []
+    interferer_diagnostics = []
+    for interferer_signal in signal_sources["interferers"]:
+        interferer = interferer_signal["interferer"]
+        response_base, diagnostics = antenna_response(
+            antenna_model,
+            interferer.direction,
+            interferer.polarization,
+        )
+        interferer_delay_phase = delay_phase(
+            true_delays_s,
+            cfg.signal.carrier_hz + interferer_signal["center_offset_hz"],
+        )
+        response = (
+            response_base
+            if np.all(true_delays_s == 0.0)
+            else response_base * interferer_delay_phase
+        )
+        component = apply_channel_delays(
+            response_base[:, None] * interferer_signal["waveform_v"][None, :],
+            true_delays_s,
+            cfg.signal.fs_rf_hz,
+            cfg.signal.carrier_hz,
+            cfg.signal.if_hz,
+        )
+        interferer_responses.append(response)
+        interferer_components.append(component)
+        interferer_delay_phases.append(interferer_delay_phase)
+        interferer_diagnostics.append(diagnostics)
+
+    scene = desired_component.copy()
+    for component in interferer_components:
+        scene += component
+
+    truth: ScenarioTruth = {
+        "time_s": signal_sources["time_s"],
+        "code": signal_sources["code"],
+        "desired_waveform": signal_sources["desired_waveform"],
+        "desired_component": desired_component,
+        "desired_steering_true": desired_true,
+        "desired_steering_assumed": desired_assumed,
+        "desired_open_circuit_response_true": desired_true_stages[
+            "open_circuit_response"
+        ],
+        "desired_open_circuit_response_assumed": desired_assumed_stages[
+            "open_circuit_response"
+        ],
+        "interferer_steering_effective": interferer_responses,
+        "interferer_components": interferer_components,
+        "active_antennas": cfg.phone.active_antennas,
+        "positions_m": desired_true_stages["positions_m"],
+        "channel_delay_true_ns": true_delays_s * 1e9,
+        "channel_delay_estimated_ns": estimated_delays_s * 1e9,
+        "channel_delay_true_samples": true_delays_s * cfg.signal.fs_rf_hz,
+        "channel_delay_estimated_samples": (
+            estimated_delays_s * cfg.signal.fs_rf_hz
+        ),
+        "desired_delay_phase_true": desired_delay_phase_true,
+        "desired_delay_phase_assumed": desired_delay_phase_assumed,
+        "interferer_delay_phases_true": interferer_delay_phases,
+        "doppler_hz": cfg.signal.doppler_hz,
+        "code_rate_hz": signal_sources["received_code_rate_hz"],
+        "code_delay_chips": cfg.signal.code_delay_chips,
+        "fs_rf_hz": cfg.signal.fs_rf_hz,
+        "if_hz": cfg.signal.if_hz,
+        "antenna_model_diagnostics": {
+            "desired_true": desired_true_stages,
+            "desired_assumed": desired_assumed_stages,
+            "interferers": interferer_diagnostics,
+        },
+    }
+    return scene, truth

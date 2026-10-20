@@ -1,14 +1,11 @@
-"""GPS L1 C/A code and RF-input scene generation."""
-
+"""GPS L1 C/A 码、目标波形与各入射源的一维参考电压生成。"""
 
 import numpy as np
 
-from .antenna import AntennaModel, antenna_response, build_antenna_model
-from .channel_delay import apply_channel_delays, delay_phase
 from .code_replica import bandlimited_code_replica, _sample_code
-from .config import PhoneConfig, SimulationConfig
-from .interference.scene import _interferer_scene
-from .models import ScenarioTruth
+from .config import SimulationConfig
+from .interference.interference import generate_interferer_signal
+from .models import SignalSources
 
 
 G2_TAPS = np.array(
@@ -21,13 +18,8 @@ G2_TAPS = np.array(
 )
 
 
-
-
-
-
 def ca_code(prn: int) -> np.ndarray:
     """Return one 1023-chip bipolar GPS L1 C/A sequence."""
-
     tap1, tap2 = G2_TAPS[prn - 1] - 1
     g1 = np.ones(10, dtype=np.uint8)
     g2 = np.ones(10, dtype=np.uint8)
@@ -43,22 +35,12 @@ def ca_code(prn: int) -> np.ndarray:
     return code
 
 
-def _channel_delays_s(phone: PhoneConfig, estimated_flag: bool) -> np.ndarray:
-    delay_map = (
-        phone.estimated_channel_delay_ns
-        if estimated_flag
-        else phone.channel_delay_ns
-    )
-    return 1e-9 * np.asarray(
-        [delay_map[name] for name in phone.active_antennas]
-    )
-
-
 def _desired_waveform(
     cfg: SimulationConfig,
     sample_index: np.ndarray,
     time_s: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray, float]:
+    """返回目标一维参考电压 (V)、码序列及含多普勒的接收码率 (chip/s)。"""
     received_code_rate_hz = cfg.signal.code_rate_hz * (
         1.0 + cfg.signal.doppler_hz / cfg.signal.carrier_hz
     )
@@ -101,123 +83,23 @@ def _desired_waveform(
     return signal_amplitude_v * sampled_code * carrier, code, received_code_rate_hz
 
 
-
-
-
-
-def generate_scenario(
-    cfg: SimulationConfig,
-) -> tuple[np.ndarray, ScenarioTruth]:
-    """Generate target and CW-interference voltages at the antenna ports."""
-
+def generate_signal_sources(cfg: SimulationConfig) -> SignalSources:
+    """生成目标及启用干扰的一维参考电压，尚未经过方向响应或通道时延。"""
     n_samples = round(cfg.signal.fs_rf_hz * cfg.signal.duration_ms * 1e-3)
-    true_delays_s = _channel_delays_s(cfg.phone, estimated_flag=False)
-    estimated_delays_s = _channel_delays_s(cfg.phone, estimated_flag=True)
     sample_index = np.arange(n_samples)
     time_s = sample_index / cfg.signal.fs_rf_hz
     desired_waveform, code, received_code_rate_hz = _desired_waveform(
-        cfg,
-        sample_index,
-        time_s,
+        cfg, sample_index, time_s,
     )
-
-    antenna_model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
-    desired_true_base, desired_true_stages = antenna_response(
-        antenna_model,
-        cfg.signal.true_direction,
-        cfg.signal.true_polarization,
-    )
-    desired_assumed_base, desired_assumed_stages = antenna_response(
-        antenna_model,
-        cfg.signal.assumed_direction,
-        cfg.signal.assumed_polarization,
-        use_assumed_state_flag=True,
-    )
-    desired_component = apply_channel_delays(
-        desired_true_base[:, None] * desired_waveform[None, :],
-        true_delays_s,
-        cfg.signal.fs_rf_hz,
-        cfg.signal.carrier_hz,
-        cfg.signal.if_hz,
-    )
-    desired_rf_frequency_hz = cfg.signal.carrier_hz + cfg.signal.doppler_hz
-    desired_delay_phase_true = delay_phase(
-        true_delays_s,
-        desired_rf_frequency_hz,
-    )
-    desired_delay_phase_assumed = delay_phase(
-        estimated_delays_s,
-        desired_rf_frequency_hz,
-    )
-    desired_true = (
-        desired_true_base
-        if np.all(true_delays_s == 0.0)
-        else desired_true_base * desired_delay_phase_true
-    )
-    desired_assumed = (
-        desired_assumed_base
-        if np.all(estimated_delays_s == 0.0)
-        else desired_assumed_base * desired_delay_phase_assumed
-    )
-
-    interferer_scenes = [
-        _interferer_scene(
-            interferer,
-            cfg,
-            antenna_model,
-            time_s,
-            true_delays_s,
-        )
+    interferers = [
+        generate_interferer_signal(interferer, cfg, time_s)
         for interferer in cfg.interferers
         if interferer.enable_flag
     ]
-    scene = desired_component.copy()
-    for interferer in interferer_scenes:
-        scene += interferer.component
-
-    truth: ScenarioTruth = {
+    return {
         "time_s": time_s,
         "code": code,
         "desired_waveform": desired_waveform,
-        "desired_component": desired_component,
-        "desired_steering_true": desired_true,
-        "desired_steering_assumed": desired_assumed,
-        "desired_open_circuit_response_true": desired_true_stages[
-            "open_circuit_response"
-        ],
-        "desired_open_circuit_response_assumed": desired_assumed_stages[
-            "open_circuit_response"
-        ],
-        "interferer_steering_effective": [
-            interferer.response for interferer in interferer_scenes
-        ],
-        "interferer_components": [
-            interferer.component for interferer in interferer_scenes
-        ],
-        "active_antennas": cfg.phone.active_antennas,
-        "positions_m": desired_true_stages["positions_m"],
-        "channel_delay_true_ns": true_delays_s * 1e9,
-        "channel_delay_estimated_ns": estimated_delays_s * 1e9,
-        "channel_delay_true_samples": true_delays_s * cfg.signal.fs_rf_hz,
-        "channel_delay_estimated_samples": (
-            estimated_delays_s * cfg.signal.fs_rf_hz
-        ),
-        "desired_delay_phase_true": desired_delay_phase_true,
-        "desired_delay_phase_assumed": desired_delay_phase_assumed,
-        "interferer_delay_phases_true": [
-            interferer.delay_phase for interferer in interferer_scenes
-        ],
-        "doppler_hz": cfg.signal.doppler_hz,
-        "code_rate_hz": received_code_rate_hz,
-        "code_delay_chips": cfg.signal.code_delay_chips,
-        "fs_rf_hz": cfg.signal.fs_rf_hz,
-        "if_hz": cfg.signal.if_hz,
-        "antenna_model_diagnostics": {
-            "desired_true": desired_true_stages,
-            "desired_assumed": desired_assumed_stages,
-            "interferers": [
-                interferer.diagnostics for interferer in interferer_scenes
-            ],
-        },
+        "received_code_rate_hz": received_code_rate_hz,
+        "interferers": interferers,
     }
-    return scene, truth

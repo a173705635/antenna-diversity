@@ -3,11 +3,12 @@
 import numpy as np
 
 from .acquisition import acquire
+from .antenna import process_antenna
 from .config import SimulationConfig
 from .dfe import process_dfe
 from .diversity import combine_egc, combine_mvdr, combine_single
 from .interference.combining import combine_blind_null
-from .gnss import generate_scenario
+from .gnss import generate_signal_sources
 from .metrics import compute_metrics
 from .models import (
     BranchResult,
@@ -103,7 +104,12 @@ def run_frontend(
     [通道, 采样] 复数码值。默认不保留热噪声评分数组。
     """
     cfg = default_config() if cfg is None else cfg
-    scene_input_v, truth = generate_scenario(cfg) if scene is None else scene
+    if scene is None:
+        signal_sources = generate_signal_sources(cfg)
+        scene_input_v, truth = process_antenna(signal_sources, cfg)
+        del signal_sources
+    else:
+        scene_input_v, truth = scene
     adc_codes, rf_info = process_rf(
         scene_input_v,
         cfg.rf,

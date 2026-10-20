@@ -6,7 +6,8 @@ Experiments choose finite positive rates/power, an odd FIR length and an occupie
 import numpy as np
 from scipy.signal import firwin, lfilter
 
-from ..config import WidebandInterferer
+from ..config import CWInterferer, Interferer, SimulationConfig, WidebandInterferer
+from ..models import InterfererSignal
 
 
 
@@ -45,3 +46,49 @@ def generate_wideband_waveform(
         / fs_hz
     )
     return amplitude_v * filtered * carrier
+
+
+def generate_interferer_signal(
+    interferer: Interferer,
+    cfg: SimulationConfig,
+    time_s: np.ndarray,
+) -> InterfererSignal:
+    """生成单个 CW/宽带干扰的一维参考电压，并按 RF 样本边界门控。"""
+    if isinstance(interferer, CWInterferer):
+        center_offset_hz = interferer.offset_hz
+        amplitude_v = np.sqrt(
+            10.0 ** ((interferer.power_dbm - 30.0) / 10.0)
+            * cfg.reference_impedance_ohm
+        )
+        waveform = amplitude_v * np.exp(
+            1j
+            * (
+                2.0
+                * np.pi
+                * (cfg.signal.if_hz + center_offset_hz)
+                * time_s
+                + interferer.initial_phase_rad
+            )
+        )
+    elif isinstance(interferer, WidebandInterferer):
+        center_offset_hz = interferer.center_offset_hz
+        waveform = generate_wideband_waveform(
+            interferer,
+            time_s.size,
+            cfg.signal.fs_rf_hz,
+            cfg.signal.if_hz,
+            cfg.reference_impedance_ohm,
+        )
+    first = round(interferer.start_ms * 1e-3 * cfg.signal.fs_rf_hz)
+    stop = (
+        time_s.size
+        if interferer.stop_ms is None
+        else round(interferer.stop_ms * 1e-3 * cfg.signal.fs_rf_hz)
+    )
+    gate = np.zeros(time_s.size)
+    gate[first:stop] = 1.0
+    return {
+        "interferer": interferer,
+        "waveform_v": waveform * gate,
+        "center_offset_hz": center_offset_hz,
+    }

@@ -4,7 +4,7 @@ from typing import NotRequired, TypedDict
 
 import numpy as np
 
-from .config import SimulationConfig
+from .config import Interferer, SimulationConfig
 
 
 class AntennaDiagnostics(TypedDict):
@@ -28,9 +28,23 @@ class AntennaModelDiagnostics(TypedDict):
     interferers: list[AntennaDiagnostics]
 
 
+class InterfererSignal(TypedDict):
+    """一个干扰源的配置与已门控一维参考电压，尚未经过天线。"""
+    interferer: Interferer
+    waveform_v: np.ndarray
+    center_offset_hz: float
+
+
+class SignalSources(TypedDict):
+    """目标及各干扰源的参考电压；waveform 均为一维时间采样。"""
+    time_s: np.ndarray
+    code: np.ndarray
+    desired_waveform: np.ndarray
+    received_code_rate_hz: float
+    interferers: list[InterfererSignal]
+
+
 class ScenarioTruth(TypedDict):
-    source_response_convention: NotRequired[str]
-    source_response_coefficients: NotRequired[dict[str, object]]
     time_s: np.ndarray
     code: np.ndarray
     desired_waveform: np.ndarray

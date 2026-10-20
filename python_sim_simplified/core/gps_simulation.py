@@ -8,9 +8,10 @@ ephemeris/TOW decoding when autonomous navigation becomes the experiment.
 import numpy as np
 
 from .acquisition import acquire
+from .antenna import process_antenna
 from .config import SPEED_OF_LIGHT_MPS
 from .dfe import process_dfe
-from .gnss import generate_scenario
+from .gnss import generate_signal_sources
 from .positioning import PositioningFailure
 from .positioning import code_pseudorange, solve_position
 from .presets import default_config
@@ -90,9 +91,10 @@ def build_scene(satellites, duration_ms, *, code_bandwidth_hz=None,
         delay = satellite['range_at_zero_m']/SPEED_OF_LIGHT_MPS*cfg.signal.code_rate_hz
         cfg.signal.code_delay_chips = delay if signal_kind == 'L5Q' else delay % 1023.
         cfg.signal.initial_phase_rad = float((-2*np.pi*satellite['range_at_zero_m']/cfg.signal.wavelength_m) % (2*np.pi))
-        component, truth = generate_scenario(cfg)
+        signal_sources = generate_signal_sources(cfg)
+        component, truth = process_antenna(signal_sources, cfg)
         scene += component
-        del component, truth
+        del signal_sources, component, truth
     return scene, cfg
 
 

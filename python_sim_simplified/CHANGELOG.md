@@ -2,6 +2,12 @@
 
 只记录实际改动、重要行为变化、最终验证和必要限制；实验细节见对应说明。以下路径除注明外均相对于 `python_sim_simplified/`，测试数字为各次修改当时的结果。
 
+## 2026-10-20 分离信号生成与天线处理
+
+- 主链显式执行 `generate_signal_sources()` → `process_antenna()` → RF/ADC → DFE；各源先独立生成，再按自身方向经过天线、互耦与通道时延后合成，噪声与量化位置不变。
+- GPS 仿真同步迁移，删除旧 `generate_scenario()` 和 `core/interference/scene.py`，保留外部 `scene=` 的 RF 输入语义；清理已删除源级响应实验遗留的类型字段，更新 README。
+- 验证：完整回归241项通过、2项未选中；六组场景的779份数组及其余输出字段与拆分前完全一致，未重跑正式100 ms研究批次。[对照条件](docs/interference/README.md#信号生成与天线处理2026-10-20)。
+
 ## 2026-10-20 移除源级响应实验
 
 - 删除 `direct_response_support.py`、`direct_response` 实验类型及专用测试，清理 `source_responses`、源级幅相配置和对应生成、评估、输出、绘图分支；保留其余四类验证与 EGC/MVDR，历史报告和结果不变。
