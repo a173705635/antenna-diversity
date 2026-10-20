@@ -9,14 +9,13 @@
 | 实验 | 命令 |
 |---|---|
 | 完整 RF→DFE→合并→捕获→跟踪及绘图 | `python -m experiments.interference.full_chain` |
-| 天线单因素消融、噪声标定和独立功率预算 | `python -m experiments.interference.antenna_ablation` |
 | 目标/CW/宽带响应直接赋值与相位扫描 | `python -m experiments.interference.direct_response_boundary` |
 | 理想双天线整通道相位误差与准确补偿 | `python -m experiments.interference.channel_phase_validation` |
 | GPS L1 码/载波浮点定位 | `python -m experiments.gps_spp` |
 | GPS L1/L5 仿真定位 | `python -m experiments.gps_l1_l5` |
 | 真实录波 GPS L1 码定位 | `python -m experiments.recorded_iq` |
 
-`full_chain` 默认包含 CW 与 2 MHz 带限复高斯噪声干扰，比较 SINGLE、MRC、MVDR、Blind Null。配置、代码阅读顺序及独立实验说明见 [精简版 README](python_sim_simplified/README.md) 和 [抗干扰说明](python_sim_simplified/docs/interference/README.md)。
+`full_chain` 默认包含 CW 与 2 MHz 带限复高斯噪声干扰，比较 SINGLE、Blind Null；EGC/MVDR 仅在指定实验中显式启用作对照。配置、代码阅读顺序及独立实验说明见 [精简版 README](python_sim_simplified/README.md) 和 [抗干扰说明](python_sim_simplified/docs/interference/README.md)。
 
 ```powershell
 cd F:\antenna_diversity

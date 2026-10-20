@@ -17,12 +17,12 @@ import numpy as np
 
 from core.config import AcquisitionConfig, CORNER_NAMES
 from core.gnss import generate_scenario
+from core.metrics import circular_chip_error
 from core.models import AntennaDiagnostics, ScenarioTruth
 from core.pipeline import run_end_to_end, run_known_response_comparison
 from core.presets import default_config
 from core.provenance import source_hashes
 from core.serialization import serializable
-from experiments.interference.antenna_ablation import score_case_branches
 from experiments.paths import INTERFERENCE_RESULTS_DIR, reset_output
 
 
@@ -159,6 +159,92 @@ def build_responses(phase_error_deg, *, perturbed_antenna) -> tuple[DirectRespon
         interferers,
     )
     return known, mismatch
+
+
+def _power(samples, interval):
+    """计算给定采样窗口内的平均复功率。"""
+    return float(np.mean(np.abs(samples[interval]) ** 2))
+
+
+def _db_ratio(numerator, denominator):
+    return float(10.0 * np.log10(numerator / denominator))
+
+
+def evaluate_output(results, evaluation_edge_trim_ms, branches=None):
+    """用同一段 DFE 采样复核实际或显式对照分支的合并功率。"""
+    fs_out_hz = results['dfe_info']['fs_out_hz']
+    edge_trim_samples = round(evaluation_edge_trim_ms * 1e-3 * fs_out_hz)
+    interval = slice(edge_trim_samples, results['dfe_channels'].shape[1] - edge_trim_samples)
+    channels = results['dfe_channels'][:, interval]
+    covariance = channels @ channels.conj().T / channels.shape[1]
+    budgets = {}
+    branches = results['branches'] if branches is None else branches
+    for mode, branch_result in branches.items():
+        weights = branch_result['combining_info']['weights']
+        output_samples = branch_result['combined_samples'][interval]
+        actual_power = _power(output_samples, slice(None))
+        quadratic_power = float(np.vdot(weights, covariance @ weights).real)
+        true = results['truth']['desired_steering_true']
+        assumed = results['truth']['desired_steering_assumed']
+        budgets[mode] = {
+            'actual_power': actual_power,
+            'weight_norm_squared': float(np.vdot(weights, weights).real),
+            'mean_input_target_antenna_gain_db': _db_ratio(
+                np.vdot(true, true).real, len(true)
+            ),
+            'target_gain': float(abs(np.vdot(weights, true))),
+            'assumed_target_gain': float(abs(np.vdot(weights, assumed))),
+            'true_assumed_correlation': float(abs(np.vdot(true, assumed)) /
+                np.sqrt(np.vdot(true, true).real * np.vdot(assumed, assumed).real)),
+            'combined_max_abs_error': float(np.max(np.abs(
+                output_samples - weights.conj() @ channels
+            ))),
+            'quadratic_power_relative_error': abs(actual_power - quadratic_power) / actual_power,
+        }
+        assert budgets[mode]['combined_max_abs_error'] < 1e-8
+        assert budgets[mode]['quadratic_power_relative_error'] < 1e-10
+    return budgets
+
+
+def score_case_branches(results, branches, case_name, context, evaluation_edge_trim_ms,
+                        *, receiver_role, phase_estimate_source=None):
+    """评分已完成的分支，保持实际接收与预设响应对照的角色标识。"""
+    cfg = results['config']
+    budgets = evaluate_output(results, evaluation_edge_trim_ms, branches)
+    rows = []
+    for mode, branch_result in branches.items():
+        budget = budgets[mode]
+        acquisition = branch_result['acquisition']
+        tracking = branch_result['tracking']
+        code_estimate = acquisition['code_phase_samples'] * (
+            cfg.signal.code_rate_hz / results['dfe_info']['fs_out_hz']
+        )
+        code_error = float(circular_chip_error(
+            code_estimate, cfg.signal.code_delay_chips
+        ))
+        doppler_error = float(acquisition['doppler_hz'] - cfg.signal.doppler_hz)
+        if tracking['success_flag']:
+            cn0 = tracking['cn0_db_hz'][len(tracking['cn0_db_hz']) // 2:]
+            finite = cn0[np.isfinite(cn0)]
+        else:
+            finite = np.array([])
+        rows.append({
+            'context': context, 'case': case_name, 'seed': cfg.random_seed,
+            'mode': mode, 'receiver_role': receiver_role,
+            'phase_estimate_source': phase_estimate_source if mode == 'egc' else None,
+            **budget,
+            'acquisition_metric': float(acquisition['metric']),
+            'acquired_flag': bool(acquisition['success_flag']),
+            'acquired_code_error_chips': code_error,
+            'acquired_doppler_error_hz': doppler_error,
+            'correct_acquisition_flag': bool(acquisition['success_flag'] and
+                                        abs(code_error) <= 0.5 and
+                                        abs(doppler_error) <= 125.0),
+            'tracking_success_flag': bool(tracking['success_flag']),
+            'tracking_cn0_late_median_db_hz': float(np.median(finite)) if finite.size else None,
+            'tracking_cn0_late_finite_count': int(finite.size),
+        })
+    return rows
 
 
 def run_sweep(seeds=SEEDS, duration_ms=DURATION_MS, phases=PHASE_ERRORS_DEG,

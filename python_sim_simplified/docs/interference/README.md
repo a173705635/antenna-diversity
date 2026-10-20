@@ -8,7 +8,7 @@
 
 验证共用 [validation_config.py](../../experiments/interference/validation_config.py) 顶部的 `MODES`、`ACTIVE_ANTENNAS`、`SEEDS`、`DURATION_MS`、`WORKERS` 及真实/名义目标方向；共享配置在 `_base_config()` 设置，`build_cases()` 统一展开种子。每个 seed 的增益、互耦、相位中心分别为21、12、16个物理条件，各自独立运行完整前端，默认两算法分别产生42、24、32行结果。当前增益编号TC-001～021，互耦编号MC-001～012，汇总按“条件＋算法”区分；下文旧结果按当时编号、算法和归一化方式解释。
 
-所有实验暂时注释事后分量准备、投影、预算及其核验、打印、结果字段和图表：包括通用验证、天线消融、通道相位与直接响应实验。分量SNR/SINR、抑制比、相对SINGLE的分量收益、oracle C/N₀、交叉项及联合残差均不再输出；噪声预算专用实验也暂停。日常保留实际合并序列、协方差功率核验与捕获跟踪；相位仍在DFE输出注入，不代表天线端相位误差。
+所有实验暂时注释事后分量准备、投影、预算及其核验、打印、结果字段和图表：包括通用验证、通道相位与直接响应实验。分量SNR/SINR、抑制比、相对SINGLE的分量收益、oracle C/N₀、交叉项及联合残差均不再输出；噪声预算专用实验也暂停。日常保留实际合并序列、协方差功率核验与捕获跟踪；相位仍在DFE输出注入，不代表天线端相位误差。
 
 `ACTIVE_ANTENNAS` 第一根为SINGLE所用通道，增益、互耦及位置条件使用前两根，额外阵元保留基础参数。`scan_label`、`scan_unit` 保留真实角度/增益扫描的图轴与文件名用途，离散条件不再填写TC/MC/PC伪单位。真实目标导向与实际权值计算的复响应、相位中心几何仍保留，它们不依赖分量重放。
 
@@ -456,13 +456,11 @@ assumed.parametric_patterns["TL"].phase_variation_mm = (0.0, 0.0, 0.0)
 
 跟踪估计使用原有 10 历元短窗口，有限样本和码匹配损失仍在，因此不强行校正为理论输入值。功率/密度核验使用零绝对容差和明确相对容差；测试还把再生噪声电压放大两倍，确认错误的四倍功率会使核验失败。
 
-## 天线单因素配对消融
+## 天线单因素配对消融（历史实验）
 
-```powershell
-python -m experiments.interference.antenna_ablation
-```
+2026-10-20 已移除 `experiments/interference/antenna_ablation.py` 及其专用配置、汇总和绘图，当前代码不再提供此入口；下列条件与结果属于历史版本，复现须使用原结果清单对应源码。直接响应实验仍需的评分逻辑已移入 `direct_response_boundary.py`。
 
-入口 [antenna_ablation.py](../../experiments/interference/antenna_ablation.py) 一次完成数据生成、独立复算、统计和绘图。顶部设置 `SEEDS`、`DURATION_MS`、`ANTENNAS`、`EVALUATION_EDGE_TRIM_MS` 和 `SHOW_PLOTS_FLAG`。默认四天线、100 ms、噪声种子 42/43/44，不提高 GNSS 功率（−128.5 dBm），不改变捕获门限 2.5、盲干扰检测门限 6 dB，关闭多径。
+当时使用四天线、100 ms、噪声种子 42/43/44，不提高 GNSS 功率（−128.5 dBm），不改变捕获门限 2.5、盲干扰检测门限 6 dB，关闭多径。
 
 有两个独立比较场景：默认 LOS 为方位 30°/仰角 60°；遮挡生效场景为 225°/20°。CW 和 2 MHz 宽带干扰均为 −90 dBm、方向 80°/10°。每个场景内部与同 seed 理想模型配对，不能把两个 LOS 之间的差异全部归因于遮挡。默认目标和干扰都不在遮挡区域内，因此不能用默认场景判断遮挡影响。
 
@@ -647,7 +645,7 @@ a_i(source) = a_ideal_geometry_i(source) × c_i(source) × channel_response_i
 
 本次结果只覆盖一个 seed、零额外相位的理想无干扰控制；不证明其他增益、时延、方向失配或任意配置下的等价，也未诊断用户未提供的具体运行。没有改算法，未重跑 pytest、消融、相位扫描或标定。
 
-实际执行为在 `python_sim_simplified/` 下用 `python -u -B -c '<Python 代码>'` 运行；以下是该内存诊断代码的排版展开，不另建脚本：
+当时在 `python_sim_simplified/` 下用 `python -u -B -c '<Python 代码>'` 运行；以下为历史诊断代码，依赖已移除的消融工具和旧接口，不能在当前维护版直接执行：
 
 ```python
 from dataclasses import replace

@@ -10,7 +10,7 @@
 
 ```text
 core/          天线、GNSS、RF/DFE、捕获跟踪与定位；interference/ 放干扰场景与盲零陷
-experiments/   interference/ 的通用验证入口与四个既有实验，以及 GPS/录波入口和 paths.py
+experiments/   interference/ 的通用验证、完整链路、直接响应和通道相位实验，以及 GPS/录波入口
 configs/       通用定位实验的冻结权重等配置
 tests/         当前功能测试与测试数据，仅本地保留；冻结对照以 local_evidence 单独标记
 tools/         frozen_version.py 校验与恢复原始冻结版
@@ -29,7 +29,6 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 |---|---|---|
 | 通用条件验证：实验类型与 seed 在 `validation_config.py` 选择 | `python -m experiments.interference.validation` | `results/interference/<EXPERIMENT_TYPE>/` |
 | 完整接收链及绘图 | `python -m experiments.interference.full_chain` | `results/interference/full_chain/` |
-| 天线配对消融与捕获跟踪比较 | `python -m experiments.interference.antenna_ablation` | `results/interference/antenna_ablation/` |
 | 目标/CW/宽带响应直接赋值，已知/未知目标相位扫描 | `python -m experiments.interference.direct_response_boundary` | `results/interference/direct_response_boundary/` |
 | 理想双天线整通道相位误差、准确补偿与单 CW 对照 | `python -m experiments.interference.channel_phase_validation` | `results/interference/channel_phase_validation/` |
 | GPS L1 仿真码/载波浮点定位 | `python -m experiments.gps_spp` | `results/gps_spp/` |
