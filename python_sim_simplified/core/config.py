@@ -242,8 +242,8 @@ class AcquisitionConfig:
     doppler_bins_hz: np.ndarray = field(
         default_factory=lambda: np.arange(-5_000.0, 5_000.1, 250.0)
     )
-    coherent_ms: int = 1
-    noncoherent_count: int = 4  # 非相干功率累加的相干块数
+    coherent_ms: int = 4
+    noncoherent_count: int = 5  # 非相干功率累加的相干块数；默认共使用20 ms输入
     exclusion_chips: float = 1.0
     threshold: float = 2.5
 

@@ -41,6 +41,8 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 `full_chain` 默认启用合成参数化天线，包含 CW 和 2 MHz 带限复高斯噪声干扰，只运行 SINGLE 和 Blind Null；两者求权都不读取目标幅相。公共 `default_config()` 仍为理想各向同性模型。回波生成、SDCP 检测、多径 LCMV 和抗欺骗接收机已删除，配置中也没有重新开启这些方向的开关。
 
+L1 默认捕获为4 ms相干×5次非相干累积，共20 ms；跟踪自动从捕获使用数据后的码边界开始，跟踪相干时长仍为1 ms。L5采用1 ms相干×5次累积，另需1 ms输入以处理NH码边界。
+
 ### 通用条件验证
 
 日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。各类实验共用 `MODES`、`ACTIVE_ANTENNAS`、`SEEDS`、`DURATION_MS`、`WORKERS` 与统计去边；验证默认运行 SINGLE、Blind Null、预设相位 EGC 和已知响应 MVDR，后两者标为对照。FULL CHAIN 仍只运行前两种方法。

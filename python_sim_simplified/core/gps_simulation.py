@@ -70,6 +70,8 @@ def build_scene(satellites, duration_ms, *, code_bandwidth_hz=None,
         raise ValueError('unsupported signal kind')
     cfg.signal.signal_kind = cfg.tracking.signal_kind = signal_kind
     if signal_kind == 'L5Q':
+        # NH码尚未同步，L5捕获仍用1 ms相干块；非相干次数继承公共配置。
+        cfg.acquisition.coherent_ms = 1
         cfg.signal.carrier_hz = 1176.45e6
         cfg.signal.code_rate_hz = 10.23e6
         cfg.dfe.decimation = 1
