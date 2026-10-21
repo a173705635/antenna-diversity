@@ -1,4 +1,4 @@
-"""等效 RF 级联、热噪声、限幅与复数 ADC。"""
+"""等效 RF 级联附加噪声、统一前端滤波、限幅与复数 ADC。"""
 
 import numpy as np
 from scipy.optimize import brentq
@@ -6,9 +6,9 @@ from scipy.signal import firwin, lfilter
 
 from .config import RFConfig
 from .models import RFInfo
-
-
-BOLTZMANN_J_PER_K = 1.380649e-23
+from .noise import (
+    BOLTZMANN_J_PER_K, NOISE_REFERENCE_TEMPERATURE_K, generate_complex_noise,
+)
 
 
 def design_rf_filter(fs_hz: float, bandwidth_hz: float, num_taps: int) -> np.ndarray:
@@ -41,41 +41,12 @@ def filter_rf_input(
     return output
 
 
-def generate_rf_noise(
-    n_samples: int,
-    noise_psd_w_per_hz: float,
-    reference_impedance_ohm: float,
-    fs_hz: float,
-    if_hz: float,
-    channel_ids: tuple[str, ...],
-    seed: int,
-    coefficients: np.ndarray,
-) -> np.ndarray:
-    """按物理通道名生成稳定的独立 I/Q 热噪声，返回 [通道, RF采样] 伏特值。"""
-    delay = (len(coefficients) - 1) // 2
-    white_std_v = np.sqrt(noise_psd_w_per_hz * reference_impedance_ohm * fs_hz / 2.0)
-    sample_index = np.arange(n_samples)
-    oscillator = np.exp(2j * np.pi * if_hz * sample_index / fs_hz)
-    output = np.empty((len(channel_ids), n_samples), dtype=complex)
-    for row, channel_id in enumerate(channel_ids):
-        identity = channel_id.encode('utf-8')
-        streams = []
-        for component_id in (0, 1):
-            sequence = np.random.SeedSequence([seed, len(identity), *identity, component_id])
-            rng = np.random.Generator(np.random.MT19937(sequence))
-            white = rng.standard_normal(n_samples + 2 * delay)
-            filtered = lfilter(coefficients, [1.0], white)
-            streams.append(filtered[2 * delay:2 * delay + n_samples])
-        output[row] = white_std_v * (streams[0] + 1j * streams[1]) * oscillator
-    return output
-
-
 def _round_half_away_from_zero(values: np.ndarray) -> np.ndarray:
     return np.sign(values) * np.floor(np.abs(values) + 0.5)
 
 
 def process_rf(
-    x_antenna_v: np.ndarray,
+    x_rf_input_v: np.ndarray,
     cfg: RFConfig,
     reference_impedance_ohm: float,
     seed: int,
@@ -85,17 +56,17 @@ def process_rf(
     channel_ids: tuple[str, ...],
     retain_analysis_flag: bool = False,
 ) -> tuple[np.ndarray, RFInfo]:
-    """处理天线端复电压 [通道, RF采样]，返回同形状 ADC 码值与 RF 参数。
+    """处理馈线后的 RF 输入 [通道, RF采样] 伏特，返回 ADC 码值与参数。
 
-    先滤波信号，再加入本次 RF 热噪声，最后施加总增益、通道误差、限幅及量化。
-    retain_analysis_flag 仅保存这次已用热噪声，供接收后的线性分量复算。
+    本级只添加 T0*(级联噪声因子-1) 的未滤波噪声；全部输入统一滤波一次，
+    再施加总增益、通道误差、限幅及量化。T0=290 K 是固定噪声参考温度。
     """
-    if x_antenna_v.ndim != 2 or x_antenna_v.shape[0] == 0:
+    if x_rf_input_v.ndim != 2 or x_rf_input_v.shape[0] == 0:
         raise ValueError('RF input must have shape (channels, samples)')
     amplitude_db = np.broadcast_to(np.asarray(cfg.amplitude_error_db, dtype=float),
-                                   (x_antenna_v.shape[0],))
+                                   (x_rf_input_v.shape[0],))
     phase_deg = np.broadcast_to(np.asarray(cfg.phase_error_deg, dtype=float),
-                               (x_antenna_v.shape[0],))
+                               (x_rf_input_v.shape[0],))
     if not np.all(np.isfinite(amplitude_db)) or not np.all(np.isfinite(phase_deg)):
         raise ValueError('RF amplitude/phase errors must be finite')
     with np.errstate(over='raise', invalid='raise'):
@@ -117,18 +88,20 @@ def process_rf(
     total_gain_linear = np.prod(gain_linear)
     coefficients = design_rf_filter(fs_hz, cfg.noise_bandwidth_hz, cfg.noise_filter_taps)
     measured_bandwidth_hz = fs_hz * np.sum(coefficients**2)
-    noise_psd_w_per_hz = BOLTZMANN_J_PER_K * cfg.temperature_k * cascade_noise_factor
-    input_noise_power_w = noise_psd_w_per_hz * measured_bandwidth_hz
-    noise_rms_v = np.sqrt(input_noise_power_w * reference_impedance_ohm)
-    filtered_signal = filter_rf_input(x_antenna_v, coefficients, fs_hz, if_hz)
-    noise = generate_rf_noise(
-        x_antenna_v.shape[1], noise_psd_w_per_hz, reference_impedance_ohm,
-        fs_hz, if_hz, channel_ids, seed, coefficients,
+    added_noise_temperature_k = float(
+        NOISE_REFERENCE_TEMPERATURE_K * (cascade_noise_factor - 1.0)
     )
-    # RF 滤后电压与本次热噪声相加，再经增益、通道误差、限幅和 ADC。
-    before_limit = (filtered_signal + noise) * np.sqrt(total_gain_linear)
-    retained_thermal_noise_v = noise if retain_analysis_flag else None
-    del filtered_signal, noise
+    added_noise_psd_w_per_hz = BOLTZMANN_J_PER_K * added_noise_temperature_k
+    added_noise_power_w = added_noise_psd_w_per_hz * measured_bandwidth_hz
+    added_noise_rms_v = np.sqrt(added_noise_power_w * reference_impedance_ohm)
+    added_noise_v = generate_complex_noise(
+        x_rf_input_v.shape[1], added_noise_temperature_k,
+        reference_impedance_ohm, fs_hz, channel_ids, seed, "rf",
+    )
+    filtered_input = filter_rf_input(x_rf_input_v + added_noise_v, coefficients, fs_hz, if_hz)
+    before_limit = filtered_input * np.sqrt(total_gain_linear)
+    retained_added_noise_v = added_noise_v if retain_analysis_flag else None
+    del filtered_input, added_noise_v
     if np.any(amplitude_db != 0.) or np.any(phase_deg != 0.):
         before_limit *= error_response[:, None]
     limit_v = cfg.adc_vpp / 2.0
@@ -162,22 +135,24 @@ def process_rf(
         "noise_bandwidth_hz": cfg.noise_bandwidth_hz,
         "measured_noise_bandwidth_hz": measured_bandwidth_hz,
         "group_delay_compensation_samples": (len(coefficients) - 1) // 2,
-        "noise_psd_w_per_hz": noise_psd_w_per_hz,
+        "noise_reference_temperature_k": NOISE_REFERENCE_TEMPERATURE_K,
+        "added_noise_temperature_k": added_noise_temperature_k,
+        "added_noise_psd_w_per_hz": added_noise_psd_w_per_hz,
         "total_gain_db": 10.0 * np.log10(total_gain_linear),
         "channel_total_gain_db": 10.0 * np.log10(total_gain_linear) + amplitude_db,
         "amplitude_error_db": amplitude_db.copy(),
         "phase_error_deg": phase_deg.copy(),
         "noise_figure_db": 10.0 * np.log10(cascade_noise_factor),
-        "input_noise_power_w": input_noise_power_w,
-        "input_noise_rms_v": noise_rms_v,
+        "added_noise_power_w": added_noise_power_w,
+        "added_noise_rms_v": added_noise_rms_v,
         "adc_lsb_v": lsb_v,
         "saturation_fraction": np.mean(saturated_flag, axis=1),
-        "input_rms_v": np.sqrt(np.mean(np.abs(x_antenna_v) ** 2, axis=1)),
+        "input_rms_v": np.sqrt(np.mean(np.abs(x_rf_input_v) ** 2, axis=1)),
         "adc_input_rms_v": np.sqrt(np.mean(np.abs(before_limit) ** 2, axis=1)),
         "adc_output_rms_code": np.sqrt(np.mean(np.abs(adc_codes) ** 2, axis=1)),
         "adc_bits": cfg.adc_bits,
         "adc_vpp": cfg.adc_vpp,
     }
     if retain_analysis_flag:
-        info["thermal_noise_v"] = retained_thermal_noise_v
+        info["added_noise_v"] = retained_added_noise_v
     return adc_codes, info

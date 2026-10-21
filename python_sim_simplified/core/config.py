@@ -142,6 +142,8 @@ class PhoneConfig:
     estimated_channel_phase_error_deg: dict[str, float]
     estimated_channel_delay_ns: dict[str, float]
     antenna_model: AntennaModelConfig
+    # 天线处理输出参考面的等效噪声温度，不是天线物理温度。
+    antenna_noise_temperature_k: float = 130.0
 
 
 @dataclass
@@ -181,8 +183,15 @@ class RFStage:
 
 
 @dataclass
-class RFConfig:
+class FeedlineConfig:
+    """匹配无源馈线：loss_db为功率损耗，temperature_k为物理温度。"""
+
+    loss_db: float = 1.0
     temperature_k: float = 290.0
+
+
+@dataclass
+class RFConfig:
     noise_bandwidth_hz: float = 8.184e6
     # Odd FIR length; noise_bandwidth_hz is total/two-sided IF ENBW.
     noise_filter_taps: int = 129
@@ -273,6 +282,7 @@ class SimulationConfig:
     signal: SignalConfig
     phone: PhoneConfig
     interferers: list[Interferer]
+    feedline: FeedlineConfig
     rf: RFConfig
     dfe: DFEConfig
     diversity: DiversityConfig

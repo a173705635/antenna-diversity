@@ -49,7 +49,9 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 专项统计由 `EXPERIMENT_TYPE` 选择；日常核验保留实际合并输出与功率的独立复算，依赖分量的理想噪声收益检查暂时停用。模型与权值公式检查放在本地测试；核验通过不代表捕获跟踪成功。
 
-运行顺序为：用例配置 → 信号生成 → 天线响应与通道时延 → RF → ADC → DFE → 合并/捕获/跟踪 → 评估与绘图。`core/pipeline.py` 的 `run_frontend()` 依次调用 `generate_signal_sources()`、`process_antenna()`、`process_rf()`（含 ADC）和 `process_dfe()`；各信号按自身来波方向经过天线后合成。每个用例按完整配置独立执行，同一用例启用的方法共用采样；基准与补偿用例使用相同种子分别执行。实验层 `run_case()` 执行接收，`evaluate_case()` 统计指标，[validation_plotting.py](experiments/interference/validation_plotting.py) 绘图。
+运行顺序为：用例配置 → 信号生成 → 天线响应与通道时延 → 天线噪声 → 馈线衰减及噪声 → RF 附加噪声与滤波 → ADC → DFE → 合并/捕获/跟踪 → 评估与绘图。`core/pipeline.py` 的 `run_frontend()` 直接列出这些阶段；各信号按自身来波方向经过天线后合成，再统一加入端口噪声。每个用例按完整配置独立执行，同一用例启用的方法共用采样；基准与补偿用例使用相同种子分别执行。实验层 `run_case()` 执行接收，`evaluate_case()` 统计指标，[validation_plotting.py](experiments/interference/validation_plotting.py) 绘图。
+
+噪声默认值为天线输出端130 K（`cfg.phone.antenna_noise_temperature_k`）、馈线损耗1 dB与物理温度290 K（`cfg.feedline.loss_db`、`temperature_k`）；RF 噪声由 `cfg.rf.stages` 的级联噪声系数确定。各阶段、各天线端口暂按独立噪声处理，共用一个总种子；馈线实际衰减信号1 dB，默认结果不再与旧噪声模型等同。[模型与参考面](docs/interference/README.md#三段接收噪声2026-10-21)。
 
 完整 `MODES` 直接写入用例配置，`run_receiver()` 集中分派算法，结果统一放在 `branches`；各分支返回 `combined_samples`（合并采样）、`combining_info`（权值等信息）及算法角色、相位来源。通用验证的 `receiver_samples` 是相位处理后实际送入接收机的多通道采样。
 
@@ -65,7 +67,7 @@ GPS 仿真定位的 `DURATION_MS` 至少为 210 ms 才包含当前首个定位�
 |---|---|
 | 配置与合成预设 | [config.py](core/config.py)、[presets.py](core/presets.py) |
 | 天线响应、几何、极化、互耦与通道时延 | [antenna.py](core/antenna.py)、[channel_delay.py](core/channel_delay.py) |
-| GNSS 信号生成、RF 与 DFE | [gnss.py](core/gnss.py)、[rf.py](core/rf.py)、[dfe.py](core/dfe.py) |
+| GNSS 信号生成、噪声、馈线、RF 与 DFE | [gnss.py](core/gnss.py)、[noise.py](core/noise.py)、[feedline.py](core/feedline.py)、[rf.py](core/rf.py)、[dfe.py](core/dfe.py) |
 | 捕获、跟踪与重捕 | [acquisition.py](core/acquisition.py)、[tracking.py](core/tracking.py)、[autonomous_tracking.py](core/autonomous_tracking.py) |
 | 公共分集合并与完整链路 | [diversity.py](core/diversity.py)、[pipeline.py](core/pipeline.py) |
 | 干扰生成、场景响应与盲零陷 | [core/interference/](core/interference/) |
@@ -73,7 +75,7 @@ GPS 仿真定位的 `DURATION_MS` 至少为 210 ms 才包含当前首个定位�
 | 仿真定位与真实接收 | [gps_simulation.py](core/gps_simulation.py)、[positioning.py](core/positioning.py)、[recorded_receiver.py](core/recorded_receiver.py)、`gps_*.py` |
 | 来源哈希和显式源码冻结 | [provenance.py](core/provenance.py) |
 
-当前实验不再保留事后分析专用的 RF 噪声副本，也不调用 `core.evaluation.linear_components()`；公共分析工具保留供本地独立测试。真实场景合成所需的目标和干扰信号仍正常生成。
+当前实验不保留事后分析专用的噪声副本，也不调用 `core.evaluation.linear_components()`；显式启用分析时才保留实际使用的三段噪声在 RF 输入端的合成采样，供本地独立测试。真实场景合成所需的目标和干扰信号仍正常生成。
 
 `core` 不导入实验入口或历史脚本。实验独有的参数、评分口径与统计留在实验脚本；公共接收链只包含当前维护方向所需接口。天线参数仍是合成研究假设，不能作为真实手机规格或标定结果。
 

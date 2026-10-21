@@ -73,7 +73,7 @@ class ScenarioTruth(TypedDict):
 
 
 class RFInfo(TypedDict):
-    thermal_noise_v: NotRequired[np.ndarray]
+    added_noise_v: NotRequired[np.ndarray]
     fs_hz: float
     if_hz: float
     channel_ids: tuple[str, ...]
@@ -81,14 +81,16 @@ class RFInfo(TypedDict):
     noise_bandwidth_hz: float
     measured_noise_bandwidth_hz: float
     group_delay_compensation_samples: int
-    noise_psd_w_per_hz: float
+    noise_reference_temperature_k: float
+    added_noise_temperature_k: float
+    added_noise_psd_w_per_hz: float
     total_gain_db: float
     channel_total_gain_db: np.ndarray
     amplitude_error_db: np.ndarray
     phase_error_deg: np.ndarray
     noise_figure_db: float
-    input_noise_power_w: float
-    input_noise_rms_v: float
+    added_noise_power_w: float
+    added_noise_rms_v: float
     adc_lsb_v: float
     saturation_fraction: np.ndarray
     input_rms_v: np.ndarray
@@ -223,6 +225,7 @@ class SimulationResults(TypedDict):
     config: SimulationConfig
     truth: ScenarioTruth
     scene_input_v: np.ndarray
+    noise_info: dict[str, float]
     adc_codes: np.ndarray
     rf_info: RFInfo
     dfe_channels: np.ndarray

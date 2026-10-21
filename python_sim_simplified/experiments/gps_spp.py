@@ -37,7 +37,9 @@ def main():
                 'clock_bias_truth_m': 75000., 'receiver_truth_ecef_m': receiver_reference()[0],
                 'satellite_clock_and_atmosphere': 'zero in source and solver',
                 'quality_screen': 'fixed >=200 ms; lock metric >=0.8 and abs PLL discriminator <pi/2',
-                'signal_config_last_prn': asdict(cfg.signal), 'rf_config': asdict(cfg.rf),
+                'signal_config_last_prn': asdict(cfg.signal),
+                'antenna_noise_temperature_k': cfg.phone.antenna_noise_temperature_k,
+                'feedline_config': asdict(cfg.feedline), 'rf_config': asdict(cfg.rf),
                 'dfe_config': asdict(cfg.dfe), 'tracking_config': asdict(cfg.tracking),
                 'source_sha256': hashes}
     (output_dir/'manifest.json').write_text(json.dumps(serializable(metadata), indent=2, allow_nan=False), encoding='utf-8')

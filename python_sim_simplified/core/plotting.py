@@ -122,7 +122,7 @@ def plot_rf_spectrum(results):
         results["scene_input_v"],
         results["config"].signal.fs_rf_hz,
         results["truth"]["active_antennas"],
-        "RF antenna-port spectra",
+        "Clean antenna-port source spectra",
     )
 
 
@@ -306,7 +306,7 @@ def _plot_detailed_rf_dfe(results):
             axes[0],
             results["scene_input_v"][index],
             cfg.signal.fs_rf_hz,
-            f"{name} antenna-port input",
+            f"{name} clean antenna-port sources",
             results,
             True,
         )

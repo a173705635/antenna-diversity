@@ -1,4 +1,4 @@
-"""实际接收链：天线端电压 → RF/ADC → DFE → 合并 → 捕获跟踪。"""
+"""实际接收链：干净天线端信号 → 端口噪声 → 馈线 → RF/ADC → DFE → 合并 → 捕获跟踪。"""
 
 import numpy as np
 
@@ -7,6 +7,7 @@ from .antenna import process_antenna
 from .config import SimulationConfig
 from .dfe import process_dfe
 from .diversity import combine_egc, combine_mvdr, combine_single
+from .feedline import process_feedline
 from .interference.combining import combine_blind_null
 from .gnss import generate_signal_sources
 from .metrics import compute_metrics
@@ -17,6 +18,7 @@ from .models import (
     SimulationResults,
     TrackingResult,
 )
+from .noise import add_antenna_noise
 from .presets import default_config
 from .rf import process_rf
 from .tracking import track
@@ -75,7 +77,7 @@ def run_end_to_end(
 ) -> SimulationResults:
     """运行完整真实链并返回各方法结果。
 
-    scene 为可选的天线端复电压 [通道, RF采样] 与真值；未给定时按 cfg 生成。
+    scene 为可选的干净天线端复电压 [通道, RF采样] 与真值；未给定时按 cfg 生成。
     仅在 retain_analysis_flag=True 时保存本次热噪声供事后线性评分，
     接收分支不会读取评分分量。
     """
@@ -100,7 +102,8 @@ def run_frontend(
 ) -> SimulationResults:
     """生成一次场景并完成 RF/DFE，返回完整时间序列与各阶段信息。
 
-    输入天线端电压单位 V；RF 输出为复数 ADC 码值，DFE 输出为
+    scene_input_v 保留未加三段噪声的天线端源电压；天线噪声、馈线和 RF
+    附加噪声依次处理。RF 输出为复数 ADC 码值，DFE 输出为
     [通道, 采样] 复数码值。默认不保留热噪声评分数组。
     """
     cfg = default_config() if cfg is None else cfg
@@ -110,8 +113,20 @@ def run_frontend(
         del signal_sources
     else:
         scene_input_v, truth = scene
+    antenna_output_v, antenna_noise_info = add_antenna_noise(
+        scene_input_v, cfg.phone.antenna_noise_temperature_k,
+        cfg.reference_impedance_ohm, cfg.signal.fs_rf_hz,
+        cfg.phone.active_antennas, cfg.random_seed,
+        retain_analysis_flag=retain_analysis_flag,
+    )
+    rf_input_v, feedline_info = process_feedline(
+        antenna_output_v, cfg.feedline, cfg.reference_impedance_ohm,
+        cfg.signal.fs_rf_hz, cfg.phone.active_antennas, cfg.random_seed,
+        retain_analysis_flag=retain_analysis_flag,
+    )
+    del antenna_output_v
     adc_codes, rf_info = process_rf(
-        scene_input_v,
+        rf_input_v,
         cfg.rf,
         cfg.reference_impedance_ohm,
         cfg.random_seed,
@@ -120,6 +135,7 @@ def run_frontend(
         channel_ids=cfg.phone.active_antennas,
         retain_analysis_flag=retain_analysis_flag,
     )
+    del rf_input_v
     dfe_channels, dfe_info = process_dfe(
         adc_codes,
         cfg.dfe,
@@ -130,6 +146,19 @@ def run_frontend(
         "config": cfg,
         "truth": truth,
         "scene_input_v": scene_input_v,
+        "noise_info": {
+            "antenna_at_rf_input_temperature_k": (
+                antenna_noise_info["temperature_k"] * feedline_info["power_transmission"]
+            ),
+            "feedline_added_temperature_k": feedline_info["added_noise_temperature_k"],
+            "rf_added_temperature_k": rf_info["added_noise_temperature_k"],
+            "total_rf_input_temperature_k": (
+                antenna_noise_info["temperature_k"] * feedline_info["power_transmission"]
+                + feedline_info["added_noise_temperature_k"]
+                + rf_info["added_noise_temperature_k"]
+            ),
+            "feedline_loss_db": feedline_info["loss_db"],
+        },
         "adc_codes": adc_codes,
         "rf_info": rf_info,
         "dfe_channels": dfe_channels,
@@ -139,7 +168,11 @@ def run_frontend(
     }
     if retain_analysis_flag:
         results["analysis_inputs"] = {
-            "thermal_noise_v": rf_info.pop("thermal_noise_v"),
+            "thermal_noise_v": (
+                antenna_noise_info.pop("added_noise_v") * feedline_info["voltage_transmission"]
+                + feedline_info.pop("added_noise_v")
+                + rf_info.pop("added_noise_v")
+            ),
         }
     return results
 

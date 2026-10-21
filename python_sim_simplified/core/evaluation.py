@@ -8,10 +8,10 @@ from .rf import filter_rf_input
 
 
 def linear_components(frontend: SimulationResults) -> dict[str, np.ndarray]:
-    """把天线端各源与本次 RF 热噪声映射到真实 DFE 码值尺度。
+    """把各干净源与三段总热噪声映射到真实 DFE 码值尺度。
 
     输入须由 retain_analysis_flag=True 的前端产生。返回目标、各干扰和热噪声
-    [通道, DFE采样] 复数码值；按本次 RF/DFE 参数和同一热噪声传播。
+    [通道, DFE采样] 复数码值；天线端源先经馈线衰减，噪声已合成于 RF 输入。
     分量不经过限幅和量化，其和与实际输出的差值由实验层记作联合残差；
     线性分量只用于固定权值功率预算，不反馈到接收链。
     """
@@ -25,16 +25,19 @@ def linear_components(frontend: SimulationResults) -> dict[str, np.ndarray]:
     adc_scale = gain[:, None] / rf_info["adc_lsb_v"]
     output_scale = dfe_info["output_scale"]
 
-    def replay(voltage: np.ndarray, *, already_filtered_flag: bool = False) -> np.ndarray:
-        # 源信号经 RF 滤波；热噪声在 RF 滤后节点生成，不能再次滤波。
-        filtered = voltage if already_filtered_flag else filter_rf_input(
+    def replay(voltage: np.ndarray) -> np.ndarray:
+        # 所有源和三段噪声在 RF 输入处汇合，统一滤波恰一次。
+        filtered = filter_rf_input(
             voltage, rf_info["filter_coefficients"], rf_info["fs_hz"], rf_info["if_hz"],
         )
         return linear_dfe(filtered * adc_scale, dfe_info) / output_scale
 
-    components = {"target": replay(truth["desired_component"])}
+    feedline_voltage_transmission = 10.0 ** (-cfg.feedline.loss_db / 20.0)
+    components = {"target": replay(truth["desired_component"] * feedline_voltage_transmission)}
     enabled = [source for source in cfg.interferers if source.enable_flag]
     for index, (source, voltage) in enumerate(zip(enabled, truth["interferer_components"])):
-        components[f"interferer_{index}_{type(source).__name__}"] = replay(voltage)
-    components["thermal"] = replay(thermal_noise_v, already_filtered_flag=True)
+        components[f"interferer_{index}_{type(source).__name__}"] = replay(
+            voltage * feedline_voltage_transmission,
+        )
+    components["thermal"] = replay(thermal_noise_v)
     return components
