@@ -38,6 +38,15 @@ TARGET_AZIMUTH_SCAN_DEG = (30, 40, 50)
 ELEMENT_GAIN_ANTENNA = "BR"
 ELEMENT_GAIN_SCAN_DB = (0.0, 6.020599913279624)
 
+# 互耦系数是复电压比；0 表示无互耦，不对应有限 dB 值。
+COUPLING_STRENGTH_SCAN_V_PER_V = (0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5)
+COUPLING_STRENGTH_PHASE_DEG = 0
+COUPLING_PHASE_STRENGTH_V_PER_V = 0.3
+COUPLING_PHASE_SCAN_DEG = (0, 45, 90, 135, 180, 225, 270, 315)
+
+# 两根天线各自沿目标来波视线移动；零点是两条曲线共用的物理基准。
+PHASE_CENTER_LOS_SCAN_MM = (-40, -20, -10, -5, 0, 5, 10, 20, 40)
+
 # 默认复现旧相位实验。改为 ("direction",) 或 ("gain",) 即单独运行示例；
 # 可同时选择多个具名系列，但不会把不同因素做隐式笛卡尔积。
 SELECTED_SERIES = ("phase",)
@@ -104,75 +113,56 @@ def _coupling_paths(magnitude_db: float | None, phase_deg: float | None) -> tupl
 
 
 def _coupling_cases() -> list[ValidationCase]:
-    """12 个物理/名义条件，各方法共用相同前端。"""
-    conditions = (
-        (None, None, None, None),
-        (-30.0, 0.0, -30.0, 0.0),
-        (-20.0, 0.0, -20.0, 0.0),
-        (-10.0, 0.0, -10.0, 0.0),
-        (-10.0, 90.0, -10.0, 90.0),
-        (-10.0, 180.0, -10.0, 180.0),
-        (-10.0, 270.0, -10.0, 270.0),
-        (-10.0, 90.0, None, None),
-        (-10.0, 90.0, -13.0, 90.0),
-        (-10.0, 90.0, -7.0, 90.0),
-        (-10.0, 90.0, -10.0, 60.0),
-        (-10.0, 90.0, -10.0, 120.0),
-    )
+    """固定名义无耦合，分别扫描真实耦合幅度和相位，共用交点。"""
     cases = []
-    for number, (true_db, true_phase, assumed_db, assumed_phase) in enumerate(conditions, 1):
-        cfg = _base_config("noise_only")
-        cfg.phone.antenna_model.true_state.coupling_paths = _coupling_paths(true_db, true_phase)
-        cfg.phone.antenna_model.assumed_state.coupling_paths = _coupling_paths(assumed_db, assumed_phase)
+    shared_point_flag = (COUPLING_PHASE_STRENGTH_V_PER_V in COUPLING_STRENGTH_SCAN_V_PER_V
+                         and COUPLING_STRENGTH_PHASE_DEG in COUPLING_PHASE_SCAN_DEG)
+    conditions = [
+        ("strength_phase" if shared_point_flag and strength == COUPLING_PHASE_STRENGTH_V_PER_V
+         else "strength",
+         strength, COUPLING_STRENGTH_PHASE_DEG, "coupling voltage ratio", strength, "V/V")
+        for strength in COUPLING_STRENGTH_SCAN_V_PER_V
+    ]
+    conditions.extend(
+        ("phase", COUPLING_PHASE_STRENGTH_V_PER_V, phase,
+         "coupling phase", phase, "deg")
+        for phase in COUPLING_PHASE_SCAN_DEG
+        if not (shared_point_flag and phase == COUPLING_STRENGTH_PHASE_DEG)
+    )
+    for number, (series, strength, phase, scan_label, scan_value, scan_unit) in enumerate(conditions, 1):
+        case_cfg = _base_config("noise_only")
+        # 真实双向路径使用相同复系数；接收机仍按无互耦名义模型工作。
+        true_db = 20 * np.log10(strength) if strength else None
+        case_cfg.phone.antenna_model.true_state.coupling_paths = _coupling_paths(true_db, phase)
+        case_cfg.phone.antenna_model.assumed_state.coupling_paths = ()
         cases.append(ValidationCase(
-            name=f"MC-{number:03d}", config=cfg,
-            scene_label="noise_only", scan_label="coupling condition",
+            name=f"MC-{number:03d}", config=case_cfg, scene_label="noise_only",
+            series_label=series, scan_label=scan_label,
+            scan_value=scan_value, scan_unit=scan_unit,
         ))
     return cases
 
 
 def _phase_center_cases() -> list[ValidationCase]:
-    """16个真实/名义位置条件；沿共用真实方向建立偏移。"""
+    """前两根天线分别沿真实来波视线移动，名义坐标始终固定。"""
     direction = TARGET_TRUE_DIRECTION
     azimuth = np.deg2rad(direction.azimuth_deg)
     elevation = np.deg2rad(direction.elevation_deg)
     line_of_sight = np.array([np.cos(elevation) * np.cos(azimuth),
                               np.cos(elevation) * np.sin(azimuth), np.sin(elevation)])
-    transverse = np.array([-np.sin(azimuth), np.cos(azimuth), 0.0])
-    along = lambda millimetres: tuple(millimetres * line_of_sight)
-    across = lambda millimetres: tuple(millimetres * transverse)
-    # 每个向量单位mm；未列出的阵元位置保持Mate70角点预设。
     first, second = ACTIVE_ANTENNAS[:2]
-    conditions = (
-        ("PC-001", {}, {}),
-        ("PC-002", {first: along(10), second: along(10)}, {}),
-        ("PC-003", {second: across(10)}, {}),
-        ("PC-004", {second: along(1)}, {}),
-        ("PC-005", {second: along(5)}, {}),
-        ("PC-006", {second: along(10)}, {}),
-        ("PC-007", {second: along(20)}, {}),
-        ("PC-008", {second: along(-10)}, {}),
-        ("PC-009", {second: along(10)}, {second: along(10)}),
-        ("PC-010", {second: along(10)}, {second: along(5)}),
-        ("PC-011", {second: along(10)}, {second: along(15)}),
-        ("PC-012", {second: along(10)}, {second: along(-10)}),
-        ("PC-013", {first: along(-5), second: along(5)}, {}),
-        ("PC-014", {second: (10, 0, 0)}, {}),
-        ("PC-015", {second: (0, 10, 0)}, {}),
-        ("PC-016", {second: (0, 0, 10)}, {}),
-    )
+    conditions = [("baseline", 0)]
+    conditions.extend((first, offset) for offset in PHASE_CENTER_LOS_SCAN_MM if offset != 0)
+    conditions.extend((second, offset) for offset in PHASE_CENTER_LOS_SCAN_MM if offset != 0)
     cases = []
-    for case_id, true_offsets_mm, assumed_offsets_mm in conditions:
-        cfg = _base_config("noise_only")
-        for antenna, offset_mm in true_offsets_mm.items():
-            origin_m = np.asarray(cfg.phone.phase_centers_m[antenna])
-            cfg.phone.phase_centers_m[antenna] = tuple(origin_m + np.asarray(offset_mm) * 1e-3)
-        for antenna, offset_mm in assumed_offsets_mm.items():
-            origin_m = np.asarray(cfg.phone.assumed_phase_centers_m[antenna])
-            cfg.phone.assumed_phase_centers_m[antenna] = tuple(origin_m + np.asarray(offset_mm) * 1e-3)
+    for number, (series, offset_mm) in enumerate(conditions, 1):
+        case_cfg = _base_config("noise_only")
+        if series != "baseline":
+            origin_m = np.asarray(case_cfg.phone.phase_centers_m[series])
+            case_cfg.phone.phase_centers_m[series] = tuple(origin_m + offset_mm * line_of_sight * 1e-3)
         cases.append(ValidationCase(
-            name=case_id, config=cfg, scene_label="noise_only",
-            scan_label="phase center condition",
+            name=f"PC-{number:03d}", config=case_cfg, scene_label="noise_only",
+            series_label=series, scan_label="LOS offset", scan_value=offset_mm, scan_unit="mm",
         ))
     return cases
 

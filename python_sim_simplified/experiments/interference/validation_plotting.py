@@ -206,127 +206,83 @@ def _antenna_gain(rows: list[dict], settings: ValidationSettings) -> list[Path]:
 
 
 def _mutual_coupling(rows: list[dict], settings: ValidationSettings) -> list[Path]:
-    """真实幅度、真实相位与固定真实条件下的名义失配分别比较。"""
+    """真实互耦电压比和相位分面扫描；共同交点在两面板复用。"""
     import matplotlib.pyplot as plt
 
     paths = []
     for scene in dict.fromkeys(row["scene"] for row in rows):
         scene_rows = [row for row in rows if row["scene"] == scene]
-        accurate = [row for row in scene_rows
-                    if row["true_coupling_db"] == row["assumed_coupling_db"]
-                    and row["true_coupling_phase_deg"] == row["assumed_coupling_phase_deg"]]
-        # 从实际条件选择幅度扫描的固定相位、相位扫描的固定幅度。
-        phases = [row["true_coupling_phase_deg"] for row in accurate
-                  if row["true_coupling_phase_deg"] is not None]
-        strength_phase = min(phases) if phases else None
-        strength = [row for row in accurate if row["true_coupling_db"] is None
-                    or row["true_coupling_phase_deg"] == strength_phase]
-        amplitude_phases = {}
-        for row in accurate:
-            if row["true_coupling_db"] is not None:
-                amplitude_phases.setdefault(row["true_coupling_db"], set()).add(
-                    row["true_coupling_phase_deg"])
-        phase_amplitude = (max(amplitude_phases, key=lambda amplitude:
-                               (len(amplitude_phases[amplitude]), amplitude))
-                           if amplitude_phases else None)
-        phase = [row for row in accurate if row["true_coupling_db"] == phase_amplitude
-                 and phase_amplitude is not None]
-        nominal_by_true = {}
-        for row in scene_rows:
-            true_key = (row["true_coupling_db"], row["true_coupling_phase_deg"])
-            nominal_by_true.setdefault(true_key, set()).add(
-                (row["assumed_coupling_db"], row["assumed_coupling_phase_deg"]))
-        mismatch_true = max(nominal_by_true, key=lambda key: len(nominal_by_true[key]))
-        mismatch = [row for row in scene_rows
-                    if (row["true_coupling_db"], row["true_coupling_phase_deg"]) == mismatch_true
-                    and mismatch_true[0] is not None]
-        groups = (("true_strength", strength), ("true_phase", phase),
-                  ("nominal_mismatch", mismatch))
-        for group_name, group_rows in groups:
-            if not group_rows:
-                continue
-            case_groups = _case_groups(group_rows)
-            identities = list(dict.fromkeys((group[0]["case"], group[0]["scene"])
-                                            for group in case_groups))
-            representative = {identity: next(group[0] for group in case_groups
-                                             if (group[0]["case"], group[0]["scene"]) == identity)
-                              for identity in identities}
-            if group_name == "true_strength":
-                identities.sort(key=lambda identity: (
-                    representative[identity]["true_coupling_db"] is not None,
-                    representative[identity]["true_coupling_db"] or -100))
-                labels = ["Off" if representative[key]["true_coupling_db"] is None else
-                          f"{representative[key]['true_coupling_db']:g} dB" for key in identities]
-            elif group_name == "nominal_mismatch":
-                labels = [("Off" if representative[key]["assumed_coupling_db"] is None else
-                           f"{representative[key]['assumed_coupling_db']:g} dB / "
-                           f"{representative[key]['assumed_coupling_phase_deg']:g}°")
-                          for key in identities]
-            fig, axes = plt.subplots(2, 1, figsize=(8, 7), constrained_layout=True)
-            for axis, metric in zip(axes, ("tracking_cn0_mean_db_hz", "acquisition_correct_flag")):
-                for mode_index, mode in enumerate(dict.fromkeys(row["mode"] for row in group_rows)):
-                    selected = [group for group in case_groups if group[0]["mode"] == mode]
-                    points = [((group[0]["true_coupling_phase_deg"] if group_name == "true_phase"
-                                else identities.index((group[0]["case"], group[0]["scene"]))),
-                               _mean_metric(group, metric)) for group in selected]
-                    _plot_points(axis, sorted(points), _mode_label(selected[0][0]), mode_index,
-                                 connect_flag=group_name == "true_phase")
-                if group_name != "true_phase":
-                    axis.set_xticks(range(len(labels)), labels,
-                                    rotation=20 if group_name == "nominal_mismatch" else 0)
-                _finish_axis(axis, {"true_strength": "True coupling",
-                                    "true_phase": "True phase (deg)",
-                                    "nominal_mismatch": "Nominal coupling"}[group_name], metric)
-            if group_name == "true_strength":
-                title = (f"Accurate nominal model; true phase {strength_phase:g}°"
-                         if strength_phase is not None else "No coupling")
-            elif group_name == "true_phase":
-                title = f"Accurate nominal model; true coupling {phase_amplitude:g} dB"
-            else:
-                title = f"True coupling {mismatch_true[0]:g} dB / {mismatch_true[1]:g}°"
-            fig.suptitle(f"{scene}: {title}")
+        groups = _case_groups(scene_rows)
+        modes = list(dict.fromkeys(row["mode"] for row in scene_rows))
+        strength_phases = [row["true_coupling_phase_deg"] for row in scene_rows
+                           if row["series"] in ("strength", "strength_phase")
+                           and row["true_coupling_phase_deg"] is not None]
+        phase_strengths_db = [row["true_coupling_db"] for row in scene_rows
+                              if row["series"] in ("phase", "strength_phase")]
+        strength_title = (f"Strength; true phase {strength_phases[0]:g}°"
+                          if strength_phases else "Strength; coupling off")
+        phase_title = (f"Phase; true voltage ratio {10 ** (phase_strengths_db[0] / 20):g} V/V"
+                       if phase_strengths_db else "Phase; no phase cases")
+        for metric_name, metric in (("tracking_cn0_mean", "tracking_cn0_mean_db_hz"),
+                                    ("acquisition_correct_rate", "acquisition_correct_flag")):
+            fig, axes = plt.subplots(1, 2, figsize=(12, 4.8), sharey=True,
+                                     constrained_layout=True)
+            for axis, series, xlabel, title in (
+                (axes[0], ("strength", "strength_phase"), "True coupling voltage ratio (V/V)",
+                 strength_title),
+                (axes[1], ("phase", "strength_phase"), "True coupling phase (deg)",
+                 phase_title),
+            ):
+                for mode_index, mode in enumerate(modes):
+                    selected = [group for group in groups
+                                if group[0]["mode"] == mode and group[0]["series"] in series]
+                    points = sorted((
+                        (group[0]["true_coupling_phase_deg"] if axis is axes[1]
+                         else group[0]["scan_value"]), _mean_metric(group, metric)
+                    ) for group in selected)
+                    if selected:
+                        _plot_points(axis, points, _mode_label(selected[0][0]), mode_index)
+                axis.set_title(title)
+                _finish_axis(axis, xlabel, metric)
+            # 0 是真实关闭的电压比，不映射成某个有限 dB 值。
+            if any(group[0]["series"] in ("strength", "strength_phase")
+                   and group[0]["scan_value"] == 0 for group in groups):
+                axes[0].annotate("Off", (0, 0), xycoords=("data", "axes fraction"),
+                                 xytext=(0, -34), textcoords="offset points", ha="center", fontsize=8)
+            fig.suptitle(f"{scene}: true symmetric coupling; Nom uncoupled")
             _save_figure(fig, settings,
-                         f"mutual_coupling__{_filename_label(scene)}__{group_name}", paths)
+                         f"mutual_coupling__{_filename_label(scene)}__{metric_name}", paths)
     return paths
 
 
 def _phase_center_offset(rows: list[dict], settings: ValidationSettings) -> list[Path]:
-    """总体几何条件只画独立散点；同一真实 XYZ 的名义校准单独成图。"""
+    """两根天线各自沿目标视线扫描，零偏移基准在两面板复用。"""
     import matplotlib.pyplot as plt
 
     paths = []
-    groups = _case_groups(rows)
-    true_keys = {}
-    for group in groups:
-        true_key = (group[0]["scene"], tuple((antenna, tuple(offset)) for antenna, offset in sorted(
-            group[0]["true_offset_xyz_mm_by_antenna"].items())))
-        true_keys.setdefault(true_key, []).append(group)
-    calibration_groups = [collection for collection in true_keys.values()
-                          if len({group[0]["case"] for group in collection}) > 1
-                          and len({tuple((antenna, tuple(offset)) for antenna, offset in sorted(
-                              group[0]["assumed_offset_xyz_mm_by_antenna"].items()))
-                                   for group in collection}) > 1]
-    plot_groups = [("geometry", [group for group in groups if group[0]["scene"] == scene])
-                   for scene in dict.fromkeys(group[0]["scene"] for group in groups)]
-    plot_groups.extend((f"calibration_{index}", collection)
-                       for index, collection in enumerate(calibration_groups, 1))
-    for group_name, selected_groups in plot_groups:
-        fig, axes = plt.subplots(2, 1, figsize=(8, 7), constrained_layout=True)
-        for axis, metric in zip(axes, ("tracking_cn0_mean_db_hz", "acquisition_correct_flag")):
-            for mode_index, mode in enumerate(dict.fromkeys(group[0]["mode"]
-                                                            for group in selected_groups)):
-                mode_groups = [group for group in selected_groups if group[0]["mode"] == mode]
-                points = [(group[0]["residual_relative_los_mm"],
-                           _mean_metric(group, metric)) for group in mode_groups]
-                # 同 x 可属于不同真实 XYZ；保留多个点，不连接成伪扫描。
-                _plot_points(axis, sorted(points), _mode_label(mode_groups[0][0]), mode_index,
-                             connect_flag=False)
-            _finish_axis(axis, "Residual relative LOS (mm)", metric)
-        scene = selected_groups[0][0]["scene"]
-        fig.suptitle(f"{scene}: one point per physical case" if group_name == "geometry" else
-                     f"{scene}: nominal calibration at fixed true XYZ")
-        _save_figure(fig, settings,
-                     f"phase_center_offset__{_filename_label(scene)}__{group_name}", paths)
+    for scene in dict.fromkeys(row["scene"] for row in rows):
+        scene_rows = [row for row in rows if row["scene"] == scene]
+        groups = _case_groups(scene_rows)
+        modes = list(dict.fromkeys(row["mode"] for row in scene_rows))
+        first, second = scene_rows[0]["antennas"].split(",")[:2]
+        for metric_name, metric in (("tracking_cn0_mean", "tracking_cn0_mean_db_hz"),
+                                    ("acquisition_correct_rate", "acquisition_correct_flag")):
+            fig, axes = plt.subplots(1, 2, figsize=(12, 4.8), sharey=True,
+                                     constrained_layout=True)
+            for axis, antenna, other in ((axes[0], first, second), (axes[1], second, first)):
+                for mode_index, mode in enumerate(modes):
+                    selected = [group for group in groups
+                                if group[0]["mode"] == mode
+                                and group[0]["series"] in ("baseline", antenna)]
+                    points = sorted((group[0]["scan_value"], _mean_metric(group, metric))
+                                    for group in selected)
+                    if selected:
+                        _plot_points(axis, points, _mode_label(selected[0][0]), mode_index)
+                axis.set_title(f"{antenna} LOS offset; {other} = 0 mm")
+                _finish_axis(axis, f"{antenna} true LOS offset (mm)", metric)
+            fig.suptitle(f"{scene}: one antenna moves at a time; Nom baseline")
+            _save_figure(fig, settings,
+                         f"phase_center_offset__{_filename_label(scene)}__{metric_name}", paths)
     return paths
 
 

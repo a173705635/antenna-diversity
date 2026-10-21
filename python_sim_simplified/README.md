@@ -47,13 +47,13 @@ L1 默认捕获为4 ms相干×5次非相干累积，共20 ms；跟踪自动从�
 
 日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。各类实验共用 `MODES`、`ACTIVE_ANTENNAS`、`SEEDS`、`DURATION_MS`、`WORKERS` 与统计去边；验证默认运行 SINGLE、Blind Null、预设相位 EGC 和已知响应 MVDR，后两者标为对照。FULL CHAIN 仍只运行前两种方法。
 
-`EXPERIMENT_TYPE` 可选 `phase_direction_gain`、`phase_center_offset`（16条件）、`mutual_coupling`（12条件，MC-001～012）、`antenna_gain`（17条件，TC-001～017）；输出统一为 `results/interference/<EXPERIMENT_TYPE>/`。增益实验删除四个双路共同衰减条件后，原 TC-016～021 的编号已改变；旧结果仍按原编号解读，详见[抗干扰说明](docs/interference/README.md)。
+`EXPERIMENT_TYPE` 可选 `phase_direction_gain`、`phase_center_offset`（17条件，PC-001～017）、`mutual_coupling`（14条件，MC-001～014）、`antenna_gain`（17条件，TC-001～017）；输出统一为 `results/interference/<EXPERIMENT_TYPE>/`。增益、互耦和相位中心的旧结果仍按各自原编号解读，详见[抗干扰说明](docs/interference/README.md)。
 
 相位/方向/增益实验通过 `SELECTED_SERIES`、`SCENES` 和各扫描元组设置范围；每个相位点固定生成基准、未补偿、准确补偿三组。`_base_config()` 集中设置共享配置，各构造函数只描述条件差异，`build_cases()` 统一展开种子；`build_settings()` 设置统计窗口、输出目录、并行数和绘图。各用例独立调度，结果按原用例顺序保存。顶部 `TARGET_TRUE_DIRECTION`、`TARGET_ASSUMED_DIRECTION` 分别设置真实与名义目标方向；`ACTIVE_ANTENNAS` 的第一根是 SINGLE 参考，增益、互耦和位置偏移条件作用于前两根，额外激活阵元保留基础配置。
 
 增益、互耦与相位中心汇总按“条件＋算法”统计捕获跟踪；日常表保留总 seed 数、成功次数、C/N₀ 均值、样本标准差和有效 seed 数，完整缺测统计在 JSON。`scan_label`、`scan_unit` 用于真实扫描的图轴与文件名，离散条件不再填写 TC/MC/PC 伪单位。
 
-验证图按实验目标组织：相位比较基准、未补偿和准确补偿；单路增益比较两根天线的衰减；互耦分真实强度、相位和名义失配；相位中心区分总体几何与固定真实位置的名义校准。增益、互耦、相位中心入口也使用顶部 `GENERATE_PLOTS_FLAG` 和 `SHOW_PLOTS_FLAG`；C/N₀ 缺测不补零。
+验证图按实验目标组织：相位比较基准、未补偿和准确补偿；单路增益比较两根天线的衰减；互耦在固定名义无耦合下分别扫描真实电压比与相位，相位中心在固定名义位置下分别扫描两根天线的视线偏移，两者均以双面板比较四方法。增益、互耦、相位中心入口也使用顶部 `GENERATE_PLOTS_FLAG` 和 `SHOW_PLOTS_FLAG`；C/N₀ 缺测不补零。
 
 专项统计由 `EXPERIMENT_TYPE` 选择；日常核验保留实际合并输出与功率的独立复算，依赖分量的理想噪声收益检查暂时停用。模型与权值公式检查放在本地测试；核验通过不代表捕获跟踪成功。
 

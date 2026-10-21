@@ -48,8 +48,8 @@ CSV_LABELS = {
     "acquired_doppler_error_hz": "ACQ Dop Err (Hz)",
     "tracking_success_flag": "TRK", "tracking_status": "TRK Status",
     "tracking_cn0_valid_count": "CN0 Epochs",
-    "condition_xyz_mm": "XYZ (mm)",
-    "true_coupling_db": "Cpl True (dB)",
+    "los_offset_mm": "LOS Offset (mm)",
+    "true_coupling_voltage_ratio": "Cpl True (V/V)",
     "true_coupling_phase_deg": "Cpl True (deg)",
     "assumed_coupling_db": "Cpl Nom (dB)",
     "assumed_coupling_phase_deg": "Cpl Nom (deg)",
@@ -96,33 +96,18 @@ def _csv_label(key: str) -> str:
     return key.replace(" gain (", " Gain (")
 
 
-def _phase_center_row_condition(row: dict) -> str:
-    """按物理天线名展示真实/名义 XYZ 偏移，单位 mm。"""
-    descriptions = []
-    for antenna in row["antennas"].split(","):
-        true_xyz = ",".join(
-            f"{round(value, 3) + 0.0:g}"
-            for value in row["true_offset_xyz_mm_by_antenna"][antenna]
-        )
-        assumed_xyz = ",".join(
-            f"{round(value, 3) + 0.0:g}"
-            for value in row["assumed_offset_xyz_mm_by_antenna"][antenna]
-        )
-        descriptions.append(f"{antenna}: 真实({true_xyz})/估计({assumed_xyz})")
-    return "; ".join(descriptions)
-
-
 def _condition_columns(row: dict, experiment_type: str) -> dict:
     """只提取日常表需要的物理条件；完整配置和诊断仍留在 JSON。"""
     if experiment_type == "antenna_gain":
         return {f"{antenna}_gain_db": gain for antenna, gain in zip(
             row["antennas"].split(","), row["input_gain_db_by_antenna"])}
     if experiment_type == "mutual_coupling":
-        return {key: row[key] for key in (
-            "true_coupling_db", "true_coupling_phase_deg",
-            "assumed_coupling_db", "assumed_coupling_phase_deg")}
+        return {"series": row["series"],
+                "true_coupling_voltage_ratio": (10 ** (row["true_coupling_db"] / 20)
+                                                if row["true_coupling_db"] is not None else 0),
+                "true_coupling_phase_deg": row["true_coupling_phase_deg"]}
     if experiment_type == "phase_center_offset":
-        return {"condition_xyz_mm": _phase_center_row_condition(row)}
+        return {"series": row["series"], "los_offset_mm": row["scan_value"]}
     conditions = {"scene": row["scene"], "series": row["series"]}
     if row["scan_value"] is not None:
         label = row["scan_label"]
@@ -132,22 +117,12 @@ def _condition_columns(row: dict, experiment_type: str) -> dict:
 
 
 def phase_center_summary_records(cases: list[dict]) -> list[dict]:
-    """从当前 PCO 统计生成主表视图，不修改完整统计。"""
+    """从当前 PCO 统计生成单因素主表，不修改完整统计。"""
     records = []
     for case in cases:
-        descriptions = []
-        for antenna in case["antennas"].split(","):
-            vectors = []
-            for state, label in (("true", "真实"), ("assumed", "估计")):
-                # 条件从已保存的实际坐标读取，不按PC编号写死；仅说明文字舍入。
-                values = [round(case[f"{antenna}_{state}_offset_xyz_mm_{axis}_mm"], 3)
-                          for axis in "xyz"]
-                xyz = ",".join(f"{value + 0.0:g}" for value in values)
-                vectors.append(f"{label}({xyz})")
-            descriptions.append(f"{antenna}: " + "/".join(vectors))
         records.append({
             "case": case["case"], "mode": case["mode"],
-            "condition_xyz_mm": "; ".join(descriptions),
+            "series": case["series"], "los_offset_mm": case["scan_value"],
             "seeds": case["seeds"],
             "acquisition_correct_count": case["acquisition_correct_count"],
             "tracking_success_count": case["tracking_success_count"],
@@ -243,9 +218,10 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
         for case in summary["mutual_coupling"]["cases"].values():
             record = {
                 "case": case["case"], "mode": case["mode"],
-                **{key: case[key] for key in (
-                    "true_coupling_db", "true_coupling_phase_deg",
-                    "assumed_coupling_db", "assumed_coupling_phase_deg")},
+                "series": case["series"],
+                "true_coupling_voltage_ratio": (10 ** (case["true_coupling_db"] / 20)
+                                                if case["true_coupling_db"] is not None else 0),
+                "true_coupling_phase_deg": case["true_coupling_phase_deg"],
                 "seeds": case["seeds"],
                 "acquisition_correct_count": case["acquisition_correct_count"],
                 "tracking_success_count": case["tracking_success_count"],

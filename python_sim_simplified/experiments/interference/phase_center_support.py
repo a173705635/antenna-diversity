@@ -72,6 +72,7 @@ def summarize_phase_center(rows: list[dict]) -> dict:
                       if row["tracking_cn0_mean_db_hz"] is not None]
         cases[name] = {
             "case": case_id, "mode": mode, "receiver_role": receiver_role,
+            "series": first["series"], "scan_value": first["scan_value"],
             "phase_estimate_source": first["phase_estimate_source"],
             "seeds": len(observations),
             "antennas": first["antennas"],
