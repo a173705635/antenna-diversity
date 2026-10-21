@@ -307,18 +307,13 @@ def _element_pattern_and_pcv(
 def antenna_transfer_matrix(
     antenna_state: AntennaState, active_antenna_names: tuple[str, ...],
 ) -> np.ndarray:
-    """返回 A=C D；D 是阵元固定剩余幅相及一次无源损耗。"""
-    amplitude_db = np.array([
-        antenna_state.amplitude_error_db.get(name, 0.0)
-        - antenna_state.passive_loss_db.get(name, 0.0)
+    """返回 A=C diag(sqrt(η))；只含互耦和阵元无源损耗，作用于源和输入噪声。"""
+    passive_loss_db = np.array([
+        antenna_state.passive_loss_db.get(name, 0.0)
         for name in active_antenna_names
     ])
-    phase_deg = np.array([
-        antenna_state.phase_error_deg.get(name, 0.0)
-        for name in active_antenna_names
-    ])
-    diagonal = 10.0 ** (amplitude_db / 20.0) * np.exp(1j * np.deg2rad(phase_deg))
-    return coupling_matrix(antenna_state, active_antenna_names) * diagonal[None, :]
+    voltage_transmission = 10.0 ** (-passive_loss_db / 20.0)
+    return coupling_matrix(antenna_state, active_antenna_names) * voltage_transmission[None, :]
 
 
 def antenna_response(
@@ -363,14 +358,26 @@ def antenna_response(
     )
 
     blockage_response = attenuation_voltage(antenna_state, active_antenna_names, direction)
+    # 幅相偏置属于每个离散来波的阵元响应，不是端口器件误差或损耗。
+    amplitude_error_db = np.array([
+        antenna_state.amplitude_error_db.get(name, 0.0)
+        for name in active_antenna_names
+    ])
+    phase_error_deg = np.array([
+        antenna_state.phase_error_deg.get(name, 0.0)
+        for name in active_antenna_names
+    ])
+    source_gain_phase_response = (
+        10.0 ** (amplitude_error_db / 20.0)
+        * np.exp(1j * np.deg2rad(phase_error_deg))
+    )
     open_circuit_response = (
         spatial_phase_response * pattern_polarization_response * pcv_response
-        * blockage_response
+        * blockage_response * source_gain_phase_response
     )
     coupling_coefficients = coupling_matrix(antenna_state, active_antenna_names)
     transfer_matrix = antenna_transfer_matrix(antenna_state, active_antenna_names)
     effective_response = transfer_matrix @ open_circuit_response
-    element_response = np.diag(transfer_matrix)
     coupled_response = effective_response
     diagnostics: AntennaDiagnostics = {
         "positions_m": phase_center_positions_m,
@@ -378,7 +385,7 @@ def antenna_response(
         "pattern_polarization_voltage": pattern_polarization_response,
         "pcv_path_length_mm": pcv_path_length_mm,
         "pcv_response": pcv_response,
-        "element_error_response": element_response,
+        "source_gain_phase_response": source_gain_phase_response,
         "blockage_voltage": blockage_response,
         "open_circuit_response": open_circuit_response,
         "coupling_matrix": coupling_coefficients,
@@ -483,7 +490,7 @@ def process_antenna(
     clean_input_v: np.ndarray, cfg: SimulationConfig, *,
     retain_analysis_flag: bool = False,
 ) -> tuple[np.ndarray, dict]:
-    """独立阵元130 K输入噪声与所有干净源共同经过一次 A=C D。"""
+    """独立阵元130 K输入噪声与所有干净源共同经过一次 A=C diag(sqrt(η))。"""
     state = cfg.phone.antenna_model.true_state
     transfer = antenna_transfer_matrix(state, cfg.phone.active_antennas)
     coupling = coupling_matrix(state, cfg.phone.active_antennas)

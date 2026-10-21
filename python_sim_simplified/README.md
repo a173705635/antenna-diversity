@@ -55,13 +55,13 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 专项统计由 `EXPERIMENT_TYPE` 选择；日常核验保留实际合并输出与功率的独立复算，依赖分量的理想噪声收益检查暂时停用。模型与权值公式检查放在本地测试；核验通过不代表捕获跟踪成功。
 
-运行顺序为：用例配置 → 各方向源生成并汇总为干净阵元输入 → 130 K独立输入噪声与所有源共经固定天线矩阵 → 阵元损耗噪声与馈线 → RF 附加噪声及滤波 → ADC → DFE → 合并/捕获/跟踪 → 评估与绘图。`core/pipeline.py` 的 `run_frontend()` 直接列出这些阶段；每个用例按完整配置独立执行，同一用例启用的方法共用采样。实验层 `run_case()` 执行接收，`evaluate_case()` 统计指标，[validation_plotting.py](experiments/interference/validation_plotting.py) 绘图。
+运行顺序为：用例配置 → 各方向源施加自身来波响应并汇总为干净阵元输入 → 130 K独立输入噪声与所有源共经固定天线矩阵 → 阵元损耗噪声与馈线 → RF 附加噪声及滤波 → ADC → DFE → 合并/捕获/跟踪 → 评估与绘图。外部 `scene=` 也应提供已含逐源来波响应的干净阵元输入，公共矩阵只施加无源损耗和互耦。`core/pipeline.py` 的 `run_frontend()` 直接列出这些阶段；每个用例按完整配置独立执行，同一用例启用的方法共用采样。实验层 `run_case()` 执行接收，`evaluate_case()` 统计指标，[validation_plotting.py](experiments/interference/validation_plotting.py) 绘图。
 
-默认独立阵元输入噪温为130 K（`cfg.phone.antenna_noise_temperature_k`）；阵元无源损耗默认0 dB、物理温度290 K（`AntennaState.passive_loss_db`、`temperature_k`）。馈线默认损耗1 dB、物理温度290 K，可按天线名覆盖损耗、载频总相位和传播时延；RF 附加噪声由级联噪声系数确定。独立噪声经天线矩阵后可跨通道相关；`noise_info` 给出 RF 输入载频中心的温度矩阵，不能当作整带采样协方差。[模型与参考面](docs/interference/README.md#接收噪声参考面与馈线2026-10-21)。
+默认独立阵元输入噪温为固定130 K（`cfg.phone.antenna_noise_temperature_k`），不随离散来波的方向图、遮挡或阵元幅相偏置改变；这些响应逐源施加。阵元无源损耗默认0 dB、物理温度290 K（`AntennaState.passive_loss_db`、`temperature_k`），其损耗与互耦仍作用于输入噪声。馈线默认损耗1 dB、物理温度290 K，可按天线名覆盖损耗、载频总相位和传播时延；RF 附加噪声由级联噪声系数确定。独立噪声经天线矩阵后可跨通道相关；`noise_info` 给出 RF 输入载频中心的温度矩阵，不能当作整带采样协方差。[模型与参考面](docs/interference/README.md#接收噪声参考面与馈线2026-10-21)。
 
 完整 `MODES` 直接写入用例配置，`run_receiver()` 集中分派算法，结果统一放在 `branches`；各分支返回 `combined_samples`（合并采样）、`combining_info`（权值等信息）及算法角色、相位来源。通用验证的 `receiver_samples` 是相位处理后实际送入接收机的多通道采样。
 
-SINGLE 直接取第一根激活天线，不按目标响应归一化。MRC 已移除；EGC 使用显式输入的相位，权值为 `exp(jφ)/N`，各路等幅且不依赖目标强度。EGC 和 MVDR 只供显式对照，前者目前使用预设相位、后者使用已知目标响应，均不代表已实现自动估相。现有 DFE 通道误差补偿与 EGC 的目标相对相位对齐是不同环节；阵元固定增益同时作用于源和130 K输入噪声。接收机跟踪 C/N₀ 缺测不填零，实验条件见 [抗干扰说明](docs/interference/README.md)。
+SINGLE 直接取第一根激活天线，不按目标响应归一化。MRC 已移除；EGC 使用显式输入的相位，权值为 `exp(jφ)/N`，各路等幅且不依赖目标强度。EGC 和 MVDR 只供显式对照，前者目前使用预设相位、后者使用已知目标响应，均不代表已实现自动估相。现有 DFE 通道误差补偿与 EGC 的目标相对相位对齐是不同环节；`AntennaState` 的幅相偏置只改变来波响应，器件通道误差由馈线和 RF 配置。接收机跟踪 C/N₀ 缺测不填零，实验条件见 [抗干扰说明](docs/interference/README.md)。
 
 原通道相位入口已合入 `phase_direction_gain`。EGC 暂用名义响应相角，结果和图注明对照身份；通道相位实验不会把真实注入误差自动提供给 EGC。
 

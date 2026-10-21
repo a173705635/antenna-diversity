@@ -13,7 +13,8 @@ def linear_components(frontend: SimulationResults) -> dict[str, np.ndarray]:
     """把各干净源与三段总热噪声映射到真实 DFE 码值尺度。
 
     输入须由 retain_analysis_flag=True 的前端产生。返回目标、各干扰和热噪声
-    [通道, DFE采样] 复数码值；阵元输入源先经 A 和 B，噪声已合成于 RF 输入。
+    [通道, DFE采样] 复数码值；各源输入已含自身来波幅相，随后经 A 和 B，
+    噪声已合成于 RF 输入。
     分量不经过限幅和量化，其和与实际输出的差值由实验层记作联合残差；
     线性分量只用于固定权值功率预算，不反馈到接收链。
     """

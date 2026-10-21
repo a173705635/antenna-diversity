@@ -85,7 +85,7 @@ class AntennaState:
     )
     attenuation_regions: tuple[AttenuationRegion, ...] = ()
     coupling_paths: tuple[CouplingPath, ...] = ()
-    # Residual element response, before coupling; absent names mean zero error.
+    # 每个离散来波的阵元幅相偏置；不作用于独立输入噪声，器件误差由馈线/RF配置。
     amplitude_error_db: dict[str, float] = field(default_factory=dict)
     phase_error_deg: dict[str, float] = field(default_factory=dict)
     # 阵元无源损耗在互耦前施加；物理温度只决定该损耗自身的热噪声。

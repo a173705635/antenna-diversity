@@ -102,7 +102,7 @@ def run_frontend(
 ) -> SimulationResults:
     """生成一次场景并完成 RF/DFE，返回完整时间序列与各阶段信息。
 
-    scene_input_v 保留未加噪声的阵元等效输入源电压；天线、馈线和 RF
+    scene_input_v 保留已施加逐源来波响应、未加噪声的阵元输入电压；天线、馈线和 RF
     噪声依次处理。RF 输出为复数 ADC 码值，DFE 输出为
     [通道, 采样] 复数码值。默认不保留热噪声评分数组。
     """

@@ -121,7 +121,7 @@ def main():
                 'weights': weights,
                 'weights_sha256': hashlib.sha256(WEIGHTS_PATH.read_bytes()).hexdigest(),
                 'phase_screen': '50 mm maximum postfit residual, not certified cycle-slip protection',
-                'noise_model': 'Independent 130 K element-input noise passes once through antenna A=C D; passive element and feedline loss noise, then RF-added noise; one RF input filter per band',
+                'noise_model': 'Fixed independent 130 K element-input noise passes once through antenna A=C diag(sqrt(eta)); source direction gain/phase acts on each wave only; passive element and feedline loss noise, then RF-added noise; one RF input filter per band',
                 'frequency_configs': {}}
     records = {seed: {} for seed in SEEDS}
     for kind in ['L1CA', 'L5Q']:

@@ -13,7 +13,7 @@ class AntennaDiagnostics(TypedDict):
     pattern_polarization_voltage: np.ndarray
     pcv_path_length_mm: np.ndarray
     pcv_response: np.ndarray
-    element_error_response: np.ndarray
+    source_gain_phase_response: np.ndarray
     blockage_voltage: np.ndarray
     open_circuit_response: np.ndarray
     coupling_matrix: np.ndarray

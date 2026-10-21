@@ -40,7 +40,7 @@ def main():
                 'signal_config_last_prn': asdict(cfg.signal),
                 'antenna_noise_temperature_k': cfg.phone.antenna_noise_temperature_k,
                 'antenna_model': asdict(cfg.phone.antenna_model),
-                'noise_model': '130 K independent element-input noise through A=C D; passive element/feedline loss noise and RF-added noise',
+                'noise_model': 'Fixed independent 130 K element-input noise through A=C diag(sqrt(eta)); source direction gain/phase acts on each wave only; passive element/feedline loss noise and RF-added noise',
                 'feedline_config': asdict(cfg.feedline), 'rf_config': asdict(cfg.rf),
                 'dfe_config': asdict(cfg.dfe), 'tracking_config': asdict(cfg.tracking),
                 'source_sha256': hashes}

@@ -59,7 +59,7 @@ def process_feedline(
     *,
     retain_analysis_flag: bool = False,
 ) -> tuple[np.ndarray, dict]:
-    """互耦前生成阵元损耗噪声，经 C 与天线输出合并，再过一次 B，最后加入馈线噪声。"""
+    """在阵元损耗后、互耦前生成损耗噪声，经 C、B 后加入馈线自身噪声。"""
     loss_db, phase_deg, _ = feedline_parameters(cfg, channel_ids)
     power_transmission = 10.0 ** (-loss_db / 10.0)
     voltage_transmission = np.sqrt(power_transmission)
