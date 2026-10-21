@@ -121,7 +121,7 @@ def main():
                 'weights': weights,
                 'weights_sha256': hashlib.sha256(WEIGHTS_PATH.read_bytes()).hexdigest(),
                 'phase_screen': '50 mm maximum postfit residual, not certified cycle-slip protection',
-                'noise_model': 'Independent antenna-port, feedline and RF-added complex white noise; one RF input filter per band',
+                'noise_model': 'Independent 130 K element-input noise passes once through antenna A=C D; passive element and feedline loss noise, then RF-added noise; one RF input filter per band',
                 'frequency_configs': {}}
     records = {seed: {} for seed in SEEDS}
     for kind in ['L1CA', 'L5Q']:
@@ -129,6 +129,7 @@ def main():
         scene, cfg = build_scene(satellites, DURATION_MS, signal_kind=kind)
         manifest['frequency_configs'][kind] = {'signal': asdict(cfg.signal),
                                              'antenna_noise_temperature_k': cfg.phone.antenna_noise_temperature_k,
+                                             'antenna_model': asdict(cfg.phone.antenna_model),
                                              'feedline': asdict(cfg.feedline), 'rf': asdict(cfg.rf),
                                              'dfe': asdict(cfg.dfe), 'tracking': asdict(cfg.tracking)}
         save('manifest.json', manifest)

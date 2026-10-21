@@ -12,7 +12,7 @@ from pathlib import Path
 import numpy as np
 
 # from core.antenna import antenna_response, build_antenna_model
-# from core.channel_delay import delay_phase
+# from core.feedline import feedline_response
 from core.config import SimulationConfig
 # from core.evaluation import linear_components
 # from core.diversity import combine_known
@@ -71,21 +71,16 @@ def apply_dfe_phase(
 
 # 分量功率核验暂停；保留估计导向计算，恢复 ideal_noise 时可复用。
 # def _assumed_steering(cfg: SimulationConfig) -> np.ndarray:
-#     """为理想噪声适用性检查计算估计导向，包含估计通道时延。"""
+#     """为理想噪声适用性检查计算RF输入目标导向，含名义馈线。"""
 #     model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
 #     antenna_steering, _ = antenna_response(
 #         model, cfg.signal.assumed_direction, cfg.signal.assumed_polarization,
 #         use_assumed_state_flag=True,
 #     )
-#     delays_s = 1e-9 * np.array([
-#         cfg.phone.estimated_channel_delay_ns[name]
-#         for name in cfg.phone.active_antennas
-#     ])
-#     if np.all(delays_s == 0.0):
-#         return antenna_steering
-#     return antenna_steering * delay_phase(
-#         # 这里只描述窄带载波相位，不能替代宽带码包络的序列时延对齐。
-#         delays_s, cfg.signal.carrier_hz + cfg.signal.doppler_hz,
+#     return antenna_steering * feedline_response(
+#         cfg.feedline, cfg.phone.active_antennas, cfg.signal.carrier_hz,
+#         cfg.signal.carrier_hz + cfg.signal.doppler_hz,
+#         use_assumed_state_flag=True,
 #     )
 
 
@@ -241,7 +236,7 @@ def evaluate_case(
 #     case_cfg = case.config
 #     if any(source.enable_flag for source in case_cfg.interferers):
 #         return "external interference is enabled"
-#     if any(case_cfg.phone.channel_delay_ns[name] != 0
+#     if any(case_cfg.feedline.delay_ns.get(name, 0.0) != 0
 #            for name in case_cfg.phone.active_antennas):
 #         return "true sequence delays need a wideband alignment analysis"
 #     if np.ptp(np.broadcast_to(case_cfg.rf.amplitude_error_db, len(case_cfg.phone.active_antennas))) != 0:

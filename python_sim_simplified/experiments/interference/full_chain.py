@@ -22,8 +22,9 @@ ANTENNA_MODEL = "parametric"  # "ideal" or "parametric"; synthetic, not measured
 DURATION_MS = None
 SHOW_PLOTS_FLAG = True
 FREEZE_SOURCE_FLAG = False
-# 真正施加在天线端信号上的逐通道时延，单位 ns；按物理天线名配置。
-CHANNEL_DELAY_NS = {"BL": 0, "BR": 0, "TL": 0, "TR": 0}
+# 馈线传播时延(ns)及载频总相位(deg)独立配置；仅时延不会自动改写载频相位。
+FEEDLINE_DELAY_NS = {"BL": 0, "BR": 0, "TL": 0, "TR": 0}
+FEEDLINE_PHASE_AT_CARRIER_DEG = {"BL": 0, "BR": 0, "TL": 0, "TR": 0}
 
 
 def save_results_figures(results):
@@ -65,7 +66,8 @@ def main():
     if DURATION_MS is not None:
         cfg.signal.duration_ms = cfg.tracking.max_epochs = DURATION_MS
     cfg.plot.show_flag = SHOW_PLOTS_FLAG
-    cfg.phone.channel_delay_ns = CHANNEL_DELAY_NS.copy()
+    cfg.feedline.delay_ns = FEEDLINE_DELAY_NS.copy()
+    cfg.feedline.phase_at_carrier_deg = FEEDLINE_PHASE_AT_CARRIER_DEG.copy()
 
     # Edit cfg here when studying frequency, antenna combinations, or phase.
     results = run_end_to_end(cfg)

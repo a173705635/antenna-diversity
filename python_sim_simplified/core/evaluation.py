@@ -3,6 +3,8 @@
 import numpy as np
 
 from .dfe import linear_dfe
+from .antenna import antenna_transfer_matrix
+from .feedline import apply_feedline_transfer
 from .models import SimulationResults
 from .rf import filter_rf_input
 
@@ -11,7 +13,7 @@ def linear_components(frontend: SimulationResults) -> dict[str, np.ndarray]:
     """把各干净源与三段总热噪声映射到真实 DFE 码值尺度。
 
     输入须由 retain_analysis_flag=True 的前端产生。返回目标、各干扰和热噪声
-    [通道, DFE采样] 复数码值；天线端源先经馈线衰减，噪声已合成于 RF 输入。
+    [通道, DFE采样] 复数码值；阵元输入源先经 A 和 B，噪声已合成于 RF 输入。
     分量不经过限幅和量化，其和与实际输出的差值由实验层记作联合残差；
     线性分量只用于固定权值功率预算，不反馈到接收链。
     """
@@ -32,12 +34,21 @@ def linear_components(frontend: SimulationResults) -> dict[str, np.ndarray]:
         )
         return linear_dfe(filtered * adc_scale, dfe_info) / output_scale
 
-    feedline_voltage_transmission = 10.0 ** (-cfg.feedline.loss_db / 20.0)
-    components = {"target": replay(truth["desired_component"] * feedline_voltage_transmission)}
+    transfer = antenna_transfer_matrix(
+        cfg.phone.antenna_model.true_state, cfg.phone.active_antennas,
+    )
+
+    def source_at_rf_input(input_component_v: np.ndarray) -> np.ndarray:
+        return apply_feedline_transfer(
+            transfer @ input_component_v, cfg.feedline, cfg.phone.active_antennas,
+            cfg.signal.fs_rf_hz, cfg.signal.if_hz,
+        )
+
+    components = {"target": replay(source_at_rf_input(truth["desired_input_component_v"]))}
     enabled = [source for source in cfg.interferers if source.enable_flag]
-    for index, (source, voltage) in enumerate(zip(enabled, truth["interferer_components"])):
+    for index, (source, voltage) in enumerate(zip(enabled, truth["interferer_input_components_v"])):
         components[f"interferer_{index}_{type(source).__name__}"] = replay(
-            voltage * feedline_voltage_transmission,
+            source_at_rf_input(voltage),
         )
     components["thermal"] = replay(thermal_noise_v)
     return components

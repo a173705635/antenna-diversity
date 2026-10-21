@@ -5,10 +5,12 @@ ephemeris/TOW decoding when autonomous navigation becomes the experiment.
 """
 
 
+from dataclasses import replace
+
 import numpy as np
 
 from .acquisition import acquire
-from .antenna import process_antenna
+from .antenna import build_antenna_input, process_antenna
 from .config import SPEED_OF_LIGHT_MPS
 from .dfe import process_dfe
 from .feedline import process_feedline
@@ -16,7 +18,6 @@ from .gnss import generate_signal_sources
 from .positioning import PositioningFailure
 from .positioning import code_pseudorange, solve_position
 from .presets import default_config
-from .noise import add_antenna_noise
 from .rf import process_rf
 from .tracking import track
 
@@ -63,7 +64,7 @@ def satellite_setup():
 
 def build_scene(satellites, duration_ms, *, code_bandwidth_hz=None,
                 fs_rf_hz=None, decimation=None, signal_kind='L1CA'):
-    """Sum clean PRNs at one antenna; RF noise and quantization happen afterwards."""
+    """在阵元等效输入参考面汇总各 PRN；公共天线与馈线稍后各处理一次。"""
     cfg = default_config()
     if signal_kind not in ('L1CA', 'L5Q'):
         raise ValueError('unsupported signal kind')
@@ -94,7 +95,7 @@ def build_scene(satellites, duration_ms, *, code_bandwidth_hz=None,
         cfg.signal.code_delay_chips = delay if signal_kind == 'L5Q' else delay % 1023.
         cfg.signal.initial_phase_rad = float((-2*np.pi*satellite['range_at_zero_m']/cfg.signal.wavelength_m) % (2*np.pi))
         signal_sources = generate_signal_sources(cfg)
-        component, truth = process_antenna(signal_sources, cfg)
+        component, truth = build_antenna_input(signal_sources, cfg)
         scene += component
         del signal_sources, component, truth
     return scene, cfg
@@ -102,13 +103,12 @@ def build_scene(satellites, duration_ms, *, code_bandwidth_hz=None,
 
 def run_record(seed, satellites, scene, cfg):
     """所有 PRN 干净源汇总后仅加一次三段噪声，再形成共享 DFE 流。"""
-    antenna_output_v, _ = add_antenna_noise(
-        scene, cfg.phone.antenna_noise_temperature_k, cfg.reference_impedance_ohm,
-        cfg.signal.fs_rf_hz, cfg.phone.active_antennas, seed,
-    )
+    record_cfg = replace(cfg, random_seed=seed)
+    antenna_output_v, antenna_info = process_antenna(scene, record_cfg)
     rf_input_v, _ = process_feedline(
-        antenna_output_v, cfg.feedline, cfg.reference_impedance_ohm,
-        cfg.signal.fs_rf_hz, cfg.phone.active_antennas, seed,
+        antenna_output_v, cfg.feedline, antenna_info,
+        cfg.reference_impedance_ohm, cfg.signal.fs_rf_hz, cfg.signal.if_hz,
+        cfg.phone.active_antennas, seed,
     )
     del antenna_output_v
     adc, rf_info = process_rf(

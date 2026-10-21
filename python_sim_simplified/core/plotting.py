@@ -7,6 +7,7 @@ import numpy as np
 
 from .antenna import antenna_response, build_antenna_model
 from .config import CWInterferer, WidebandInterferer
+from .feedline import feedline_response
 from .metrics import circular_chip_error, tracking_code_bias_chips
 
 
@@ -122,7 +123,7 @@ def plot_rf_spectrum(results):
         results["scene_input_v"],
         results["config"].signal.fs_rf_hz,
         results["truth"]["active_antennas"],
-        "Clean antenna-port source spectra",
+        "Clean element-input source spectra",
     )
 
 
@@ -159,9 +160,13 @@ def plot_array_response(results):
     cfg = results["config"]
     model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
     azimuths = np.linspace(0.0, 360.0, 181)
+    feedline_center = feedline_response(
+        cfg.feedline, cfg.phone.active_antennas,
+        cfg.signal.carrier_hz, cfg.signal.carrier_hz,
+    )
     manifolds = np.column_stack(
         [
-            antenna_response(
+            feedline_center * antenna_response(
                 model,
                 type(cfg.signal.true_direction)(
                     azimuth, cfg.signal.true_direction.elevation_deg
@@ -193,7 +198,7 @@ def plot_array_response(results):
                 label=f"{kind} {index}",
             )
     axis.set(
-        title=f"Spatial response at elevation {cfg.signal.true_direction.elevation_deg:.1f}°",
+        title=f"RF input spatial response at carrier center, elevation {cfg.signal.true_direction.elevation_deg:.1f}°",
         xlabel="Azimuth (deg)",
         ylabel="Normalized response (dB)",
         xlim=(0, 360),
@@ -306,7 +311,7 @@ def _plot_detailed_rf_dfe(results):
             axes[0],
             results["scene_input_v"][index],
             cfg.signal.fs_rf_hz,
-            f"{name} clean antenna-port sources",
+            f"{name} clean element-input sources",
             results,
             True,
         )
@@ -397,14 +402,16 @@ def _plot_detailed_combined(results):
 
 
 def _array_response_directions(cfg):
-    directions = [(cfg.signal.true_direction, "Target", "*", "limegreen")]
+    directions = [(cfg.signal.true_direction, cfg.signal.true_polarization,
+                   "Target", "*", "limegreen")]
     for index, interferer in enumerate(cfg.interferers, start=1):
         if interferer.enable_flag:
             if isinstance(interferer, CWInterferer):
                 kind, marker, color = "CW", "x", "red"
             else:
                 kind, marker, color = "Wideband", "D", "magenta"
-            directions.append((interferer.direction, f"{kind} {index}", marker, color))
+            directions.append((interferer.direction, interferer.polarization,
+                               f"{kind} {index}", marker, color))
     return directions
 
 
@@ -456,8 +463,11 @@ def _plot_array_response_spherical(results, mode, azimuths, elevations, response
     markers = []
     legend_handles = []
     legend_labels = []
-    for direction, label, marker, color in directions:
-        steering, _ = antenna_response(model, direction, cfg.signal.true_polarization)
+    feedline_center = feedline_response(cfg.feedline, cfg.phone.active_antennas,
+                                        cfg.signal.carrier_hz, cfg.signal.carrier_hz)
+    for direction, polarization, label, marker, color in directions:
+        steering, _ = antenna_response(model, direction, polarization)
+        steering *= feedline_center
         gain = abs(np.vdot(weights, steering)) / peak_response
         gain_db = 20.0 * np.log10(np.maximum(gain, np.finfo(float).tiny))
         legend_labels.append(_array_response_legend_label(direction, label, gain_db))
@@ -582,8 +592,11 @@ def _plot_array_response_3d(
         zorder=1,
     )
     legend_labels = []
-    for direction, label, marker, color in _array_response_directions(cfg):
-        steering, _ = antenna_response(model, direction, cfg.signal.true_polarization)
+    feedline_center = feedline_response(cfg.feedline, cfg.phone.active_antennas,
+                                        cfg.signal.carrier_hz, cfg.signal.carrier_hz)
+    for direction, polarization, label, marker, color in _array_response_directions(cfg):
+        steering, _ = antenna_response(model, direction, polarization)
+        steering *= feedline_center
         gain = abs(np.vdot(weights, steering)) / peak_response
         gain_db = 20.0 * np.log10(np.maximum(gain, np.finfo(float).tiny))
         legend_labels.append(_array_response_legend_label(direction, label, gain_db))
@@ -599,7 +612,7 @@ def _plot_array_response_3d(
             zorder=10,
         )
     axis.set(
-        title=f"{_branch_label(results, mode)} 3D array response",
+        title=f"{_branch_label(results, mode)} 3D RF-input response at carrier center",
         xlabel="Azimuth (deg)",
         ylabel="Elevation (deg)",
         zlabel="Normalized response (dB)",
@@ -627,9 +640,11 @@ def _plot_detailed_array_response(results):
         dtype=complex,
     )
     direction_type = type(cfg.signal.true_direction)
+    feedline_center = feedline_response(cfg.feedline, cfg.phone.active_antennas,
+                                        cfg.signal.carrier_hz, cfg.signal.carrier_hz)
     for elevation_index, elevation in enumerate(sphere_elevations):
         for azimuth_index, azimuth in enumerate(azimuths):
-            manifolds[:, elevation_index, azimuth_index] = antenna_response(
+            manifolds[:, elevation_index, azimuth_index] = feedline_center * antenna_response(
                 model,
                 direction_type(azimuth, elevation),
                 cfg.signal.true_polarization,
@@ -666,8 +681,9 @@ def _plot_detailed_array_response(results):
                 linewidths=1.0,
             )
         legend_labels = []
-        for direction, label, marker, color in _array_response_directions(cfg):
-            steering, _ = antenna_response(model, direction, cfg.signal.true_polarization)
+        for direction, polarization, label, marker, color in _array_response_directions(cfg):
+            steering, _ = antenna_response(model, direction, polarization)
+            steering *= feedline_center
             gain = abs(np.vdot(weights, steering)) / np.max(response)
             gain_db = 20.0 * np.log10(np.maximum(gain, np.finfo(float).tiny))
             legend_labels.append(_array_response_legend_label(direction, label, gain_db))
@@ -678,7 +694,7 @@ def _plot_detailed_array_response(results):
                 zorder=11 if marker == "x" else 10,
             )
         axis.set(
-            title=f"{_branch_label(results, mode)} array response",
+            title=f"{_branch_label(results, mode)} RF-input response at carrier center",
             xlabel="Azimuth (deg)",
             ylabel="Elevation (deg)",
         )

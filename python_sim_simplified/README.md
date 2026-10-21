@@ -49,13 +49,13 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 专项统计由 `EXPERIMENT_TYPE` 选择；日常核验保留实际合并输出与功率的独立复算，依赖分量的理想噪声收益检查暂时停用。模型与权值公式检查放在本地测试；核验通过不代表捕获跟踪成功。
 
-运行顺序为：用例配置 → 信号生成 → 天线响应与通道时延 → 天线噪声 → 馈线衰减及噪声 → RF 附加噪声与滤波 → ADC → DFE → 合并/捕获/跟踪 → 评估与绘图。`core/pipeline.py` 的 `run_frontend()` 直接列出这些阶段；各信号按自身来波方向经过天线后合成，再统一加入端口噪声。每个用例按完整配置独立执行，同一用例启用的方法共用采样；基准与补偿用例使用相同种子分别执行。实验层 `run_case()` 执行接收，`evaluate_case()` 统计指标，[validation_plotting.py](experiments/interference/validation_plotting.py) 绘图。
+运行顺序为：用例配置 → 各方向源生成并汇总为干净阵元输入 → 130 K独立输入噪声与所有源共经固定天线矩阵 → 阵元损耗噪声与馈线 → RF 附加噪声及滤波 → ADC → DFE → 合并/捕获/跟踪 → 评估与绘图。`core/pipeline.py` 的 `run_frontend()` 直接列出这些阶段；每个用例按完整配置独立执行，同一用例启用的方法共用采样。实验层 `run_case()` 执行接收，`evaluate_case()` 统计指标，[validation_plotting.py](experiments/interference/validation_plotting.py) 绘图。
 
-噪声默认值为天线输出端130 K（`cfg.phone.antenna_noise_temperature_k`）、馈线损耗1 dB与物理温度290 K（`cfg.feedline.loss_db`、`temperature_k`）；RF 噪声由 `cfg.rf.stages` 的级联噪声系数确定。各阶段、各天线端口暂按独立噪声处理，共用一个总种子；馈线实际衰减信号1 dB，默认结果不再与旧噪声模型等同。[模型与参考面](docs/interference/README.md#三段接收噪声2026-10-21)。
+默认独立阵元输入噪温为130 K（`cfg.phone.antenna_noise_temperature_k`）；阵元无源损耗默认0 dB、物理温度290 K（`AntennaState.passive_loss_db`、`temperature_k`）。馈线默认损耗1 dB、物理温度290 K，可按天线名覆盖损耗、载频总相位和传播时延；RF 附加噪声由级联噪声系数确定。独立噪声经天线矩阵后可跨通道相关；`noise_info` 给出 RF 输入载频中心的温度矩阵，不能当作整带采样协方差。[模型与参考面](docs/interference/README.md#接收噪声参考面与馈线2026-10-21)。
 
 完整 `MODES` 直接写入用例配置，`run_receiver()` 集中分派算法，结果统一放在 `branches`；各分支返回 `combined_samples`（合并采样）、`combining_info`（权值等信息）及算法角色、相位来源。通用验证的 `receiver_samples` 是相位处理后实际送入接收机的多通道采样。
 
-SINGLE 直接取第一根激活天线，不按目标响应归一化。MRC 已移除；EGC 使用显式输入的相位，权值为 `exp(jφ)/N`，各路等幅且不依赖目标强度。EGC 和 MVDR 只供显式对照，前者目前使用预设相位、后者使用已知目标响应，均不代表已实现自动估相。现有 DFE 通道误差补偿与 EGC 的目标相对相位对齐是不同环节；天线增益仍作用于热噪声产生之前。接收机跟踪 C/N₀ 缺测不填零，实验条件见 [抗干扰说明](docs/interference/README.md)。
+SINGLE 直接取第一根激活天线，不按目标响应归一化。MRC 已移除；EGC 使用显式输入的相位，权值为 `exp(jφ)/N`，各路等幅且不依赖目标强度。EGC 和 MVDR 只供显式对照，前者目前使用预设相位、后者使用已知目标响应，均不代表已实现自动估相。现有 DFE 通道误差补偿与 EGC 的目标相对相位对齐是不同环节；阵元固定增益同时作用于源和130 K输入噪声。接收机跟踪 C/N₀ 缺测不填零，实验条件见 [抗干扰说明](docs/interference/README.md)。
 
 原通道相位入口已合入 `phase_direction_gain`。EGC 暂用名义响应相角，结果和图注明对照身份；通道相位实验不会把真实注入误差自动提供给 EGC。
 
@@ -66,7 +66,7 @@ GPS 仿真定位的 `DURATION_MS` 至少为 210 ms 才包含当前首个定位�
 | 职责 | 主要文件 |
 |---|---|
 | 配置与合成预设 | [config.py](core/config.py)、[presets.py](core/presets.py) |
-| 天线响应、几何、极化、互耦与通道时延 | [antenna.py](core/antenna.py)、[channel_delay.py](core/channel_delay.py) |
+| 天线响应、几何、极化、阵元损耗与互耦 | [antenna.py](core/antenna.py) |
 | GNSS 信号生成、噪声、馈线、RF 与 DFE | [gnss.py](core/gnss.py)、[noise.py](core/noise.py)、[feedline.py](core/feedline.py)、[rf.py](core/rf.py)、[dfe.py](core/dfe.py) |
 | 捕获、跟踪与重捕 | [acquisition.py](core/acquisition.py)、[tracking.py](core/tracking.py)、[autonomous_tracking.py](core/autonomous_tracking.py) |
 | 公共分集合并与完整链路 | [diversity.py](core/diversity.py)、[pipeline.py](core/pipeline.py) |
@@ -75,7 +75,7 @@ GPS 仿真定位的 `DURATION_MS` 至少为 210 ms 才包含当前首个定位�
 | 仿真定位与真实接收 | [gps_simulation.py](core/gps_simulation.py)、[positioning.py](core/positioning.py)、[recorded_receiver.py](core/recorded_receiver.py)、`gps_*.py` |
 | 来源哈希和显式源码冻结 | [provenance.py](core/provenance.py) |
 
-当前实验不保留事后分析专用的噪声副本，也不调用 `core.evaluation.linear_components()`；显式启用分析时才保留实际使用的三段噪声在 RF 输入端的合成采样，供本地独立测试。真实场景合成所需的目标和干扰信号仍正常生成。
+当前实验不保留事后分析专用的噪声副本，也不调用 `core.evaluation.linear_components()`；显式启用分析时才保留实际各噪声源传播到 RF 输入端的合成采样，供本地独立测试。`scene_input_v` 和外部 `scene=` 为干净阵元等效输入源电压。
 
 `core` 不导入实验入口或历史脚本。实验独有的参数、评分口径与统计留在实验脚本；公共接收链只包含当前维护方向所需接口。天线参数仍是合成研究假设，不能作为真实手机规格或标定结果。
 

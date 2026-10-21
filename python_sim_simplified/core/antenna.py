@@ -1,10 +1,9 @@
-"""天线复响应：几何相位、方向图与极化、阵元误差与遮挡、互耦、通道幅相。"""
+"""方向源阵元输入及固定天线传递：几何、极化、方向图、阵元损耗和互耦。"""
 
 from dataclasses import dataclass
 
 import numpy as np
 
-from .channel_delay import apply_channel_delays, delay_phase
 from .config import (
     AntennaState,
     Direction,
@@ -15,6 +14,8 @@ from .config import (
     SPEED_OF_LIGHT_MPS,
     WavePolarization,
 )
+from .feedline import feedline_response
+from .noise import generate_complex_noise
 from .measured_pattern import (
     MeasuredGrid,
     interpolate_measured,
@@ -37,8 +38,6 @@ class AntennaModel:
     assumed_positions_m: dict[str, tuple[float, float, float]]
     true_state: AntennaState
     assumed_state: AntennaState
-    true_channel_response: np.ndarray
-    assumed_channel_response: np.ndarray
     true_measured: dict[str, MeasuredGrid] | None
     assumed_measured: dict[str, MeasuredGrid] | None
 
@@ -228,29 +227,8 @@ def coupling_matrix(
     return coupling_coefficients
 
 
-def channel_response(phone_cfg: PhoneConfig, use_assumed_state_flag: bool = False) -> np.ndarray:
-    """返回各接收通道的复幅相系数，按真实或名义误差表选择。"""
-    channel_amplitude_error_db = (
-        phone_cfg.estimated_channel_amplitude_error_db
-        if use_assumed_state_flag
-        else phone_cfg.channel_amplitude_error_db
-    )
-    channel_phase_error_deg = (
-        phone_cfg.estimated_channel_phase_error_deg
-        if use_assumed_state_flag
-        else phone_cfg.channel_phase_error_deg
-    )
-    amplitude_db = np.array([
-        channel_amplitude_error_db[antenna_name] for antenna_name in phone_cfg.active_antennas
-    ])
-    phase_deg = np.array([
-        channel_phase_error_deg[antenna_name] for antenna_name in phone_cfg.active_antennas
-    ])
-    return 10.0 ** (amplitude_db / 20.0) * np.exp(1j * np.deg2rad(phase_deg))
-
-
 def build_antenna_model(phone_cfg: PhoneConfig, carrier_hz: float) -> AntennaModel:
-    """加载真实/名义实测方向图并预计算通道系数，供同一载波频率复用。"""
+    """加载真实/名义实测方向图，供同一载波频率复用。"""
     true_state = phone_cfg.antenna_model.true_state
     assumed_state = phone_cfg.antenna_model.assumed_state
     true_measured = (
@@ -272,8 +250,6 @@ def build_antenna_model(phone_cfg: PhoneConfig, carrier_hz: float) -> AntennaMod
         assumed_positions_m=phone_cfg.assumed_phase_centers_m,
         true_state=true_state,
         assumed_state=assumed_state,
-        true_channel_response=channel_response(phone_cfg, use_assumed_state_flag=False),
-        assumed_channel_response=channel_response(phone_cfg, use_assumed_state_flag=True),
         true_measured=true_measured,
         assumed_measured=assumed_measured,
     )
@@ -328,6 +304,23 @@ def _element_pattern_and_pcv(
     return np.asarray(pattern_polarization_response), np.asarray(pcv_path_length_mm)
 
 
+def antenna_transfer_matrix(
+    antenna_state: AntennaState, active_antenna_names: tuple[str, ...],
+) -> np.ndarray:
+    """返回 A=C D；D 是阵元固定剩余幅相及一次无源损耗。"""
+    amplitude_db = np.array([
+        antenna_state.amplitude_error_db.get(name, 0.0)
+        - antenna_state.passive_loss_db.get(name, 0.0)
+        for name in active_antenna_names
+    ])
+    phase_deg = np.array([
+        antenna_state.phase_error_deg.get(name, 0.0)
+        for name in active_antenna_names
+    ])
+    diagonal = 10.0 ** (amplitude_db / 20.0) * np.exp(1j * np.deg2rad(phase_deg))
+    return coupling_matrix(antenna_state, active_antenna_names) * diagonal[None, :]
+
+
 def antenna_response(
     antenna_model: AntennaModel,
     direction: Direction,
@@ -344,11 +337,6 @@ def antenna_response(
     )
     measured_patterns = (
         antenna_model.assumed_measured if use_assumed_state_flag else antenna_model.true_measured
-    )
-    channel_response_factors = (
-        antenna_model.assumed_channel_response
-        if use_assumed_state_flag
-        else antenna_model.true_channel_response
     )
 
     # 阵元相位中心和入射方向确定几何相位。
@@ -374,66 +362,38 @@ def antenna_response(
         * pcv_path_length_mm * 1e-3
     )
 
-    if (
-        set(antenna_state.amplitude_error_db) | set(antenna_state.phase_error_deg)
-    ) - set(phase_center_positions_by_antenna_m):
-        raise ValueError('antenna error maps contain unknown element names')
-    amplitude_db = np.array([
-        antenna_state.amplitude_error_db.get(antenna_name, 0.)
-        for antenna_name in active_antenna_names
-    ])
-    phase_deg = np.array([
-        antenna_state.phase_error_deg.get(antenna_name, 0.)
-        for antenna_name in active_antenna_names
-    ])
-    if not np.all(np.isfinite(amplitude_db)) or not np.all(np.isfinite(phase_deg)):
-        raise ValueError('antenna amplitude/phase errors must be finite')
-    with np.errstate(over='raise', invalid='raise'):
-        element_error_response = 10.**(amplitude_db/20.) * np.exp(1j*np.deg2rad(phase_deg))
-
     blockage_response = attenuation_voltage(antenna_state, active_antenna_names, direction)
     open_circuit_response = (
         spatial_phase_response * pattern_polarization_response * pcv_response
-        * element_error_response * blockage_response
+        * blockage_response
     )
     coupling_coefficients = coupling_matrix(antenna_state, active_antenna_names)
-    coupled_response = coupling_coefficients @ open_circuit_response
-    effective_response = channel_response_factors * coupled_response
+    transfer_matrix = antenna_transfer_matrix(antenna_state, active_antenna_names)
+    effective_response = transfer_matrix @ open_circuit_response
+    element_response = np.diag(transfer_matrix)
+    coupled_response = effective_response
     diagnostics: AntennaDiagnostics = {
         "positions_m": phase_center_positions_m,
         "spatial_phase": spatial_phase_response,
         "pattern_polarization_voltage": pattern_polarization_response,
         "pcv_path_length_mm": pcv_path_length_mm,
         "pcv_response": pcv_response,
-        "element_error_response": element_error_response,
+        "element_error_response": element_response,
         "blockage_voltage": blockage_response,
         "open_circuit_response": open_circuit_response,
         "coupling_matrix": coupling_coefficients,
         "coupled_response": coupled_response,
-        "channel_response": channel_response_factors,
+        "antenna_transfer_matrix": transfer_matrix,
         "effective_manifold": effective_response,
     }
     return effective_response, diagnostics
 
 
-def _channel_delays_s(phone: PhoneConfig, estimated_flag: bool) -> np.ndarray:
-    delay_map = (
-        phone.estimated_channel_delay_ns
-        if estimated_flag
-        else phone.channel_delay_ns
-    )
-    return 1e-9 * np.asarray(
-        [delay_map[name] for name in phone.active_antennas]
-    )
-
-
-def process_antenna(
+def build_antenna_input(
     signal_sources: SignalSources,
     cfg: SimulationConfig,
 ) -> tuple[np.ndarray, ScenarioTruth]:
-    """逐源施加方向响应、阵元幅相/互耦和通道时延，返回 RF 输入 [天线, 采样] 伏特及真值。"""
-    true_delays_s = _channel_delays_s(cfg.phone, estimated_flag=False)
-    estimated_delays_s = _channel_delays_s(cfg.phone, estimated_flag=True)
+    """逐方向构造 b_q，并在阵元等效输入参考面汇总干净源。"""
     antenna_model = build_antenna_model(cfg.phone, cfg.signal.carrier_hz)
 
     desired_true_base, desired_true_stages = antenna_response(
@@ -447,37 +407,23 @@ def process_antenna(
         cfg.signal.assumed_polarization,
         use_assumed_state_flag=True,
     )
-    desired_component = apply_channel_delays(
-        desired_true_base[:, None] * signal_sources["desired_waveform"][None, :],
-        true_delays_s,
-        cfg.signal.fs_rf_hz,
-        cfg.signal.carrier_hz,
-        cfg.signal.if_hz,
+    desired_input_component_v = (
+        desired_true_stages["open_circuit_response"][:, None]
+        * signal_sources["desired_waveform"][None, :]
     )
     desired_rf_frequency_hz = cfg.signal.carrier_hz + cfg.signal.doppler_hz
-    desired_delay_phase_true = delay_phase(
-        true_delays_s,
+    desired_true = desired_true_base * feedline_response(
+        cfg.feedline, cfg.phone.active_antennas, cfg.signal.carrier_hz,
         desired_rf_frequency_hz,
     )
-    desired_delay_phase_assumed = delay_phase(
-        estimated_delays_s,
-        desired_rf_frequency_hz,
-    )
-    desired_true = (
-        desired_true_base
-        if np.all(true_delays_s == 0.0)
-        else desired_true_base * desired_delay_phase_true
-    )
-    desired_assumed = (
-        desired_assumed_base
-        if np.all(estimated_delays_s == 0.0)
-        else desired_assumed_base * desired_delay_phase_assumed
+    desired_assumed = desired_assumed_base * feedline_response(
+        cfg.feedline, cfg.phone.active_antennas, cfg.signal.carrier_hz,
+        desired_rf_frequency_hz, use_assumed_state_flag=True,
     )
 
     # 每个入射源按自身方向过天线；宽带分量的实际序列仍用通道时延处理。
     interferer_responses = []
     interferer_components = []
-    interferer_delay_phases = []
     interferer_diagnostics = []
     for interferer_signal in signal_sources["interferers"]:
         interferer = interferer_signal["interferer"]
@@ -486,28 +432,19 @@ def process_antenna(
             interferer.direction,
             interferer.polarization,
         )
-        interferer_delay_phase = delay_phase(
-            true_delays_s,
+        response = response_base * feedline_response(
+            cfg.feedline, cfg.phone.active_antennas, cfg.signal.carrier_hz,
             cfg.signal.carrier_hz + interferer_signal["center_offset_hz"],
         )
-        response = (
-            response_base
-            if np.all(true_delays_s == 0.0)
-            else response_base * interferer_delay_phase
-        )
-        component = apply_channel_delays(
-            response_base[:, None] * interferer_signal["waveform_v"][None, :],
-            true_delays_s,
-            cfg.signal.fs_rf_hz,
-            cfg.signal.carrier_hz,
-            cfg.signal.if_hz,
+        component = (
+            diagnostics["open_circuit_response"][:, None]
+            * interferer_signal["waveform_v"][None, :]
         )
         interferer_responses.append(response)
         interferer_components.append(component)
-        interferer_delay_phases.append(interferer_delay_phase)
         interferer_diagnostics.append(diagnostics)
 
-    scene = desired_component.copy()
+    scene = desired_input_component_v.copy()
     for component in interferer_components:
         scene += component
 
@@ -515,7 +452,7 @@ def process_antenna(
         "time_s": signal_sources["time_s"],
         "code": signal_sources["code"],
         "desired_waveform": signal_sources["desired_waveform"],
-        "desired_component": desired_component,
+        "desired_input_component_v": desired_input_component_v,
         "desired_steering_true": desired_true,
         "desired_steering_assumed": desired_assumed,
         "desired_open_circuit_response_true": desired_true_stages[
@@ -525,18 +462,9 @@ def process_antenna(
             "open_circuit_response"
         ],
         "interferer_steering_effective": interferer_responses,
-        "interferer_components": interferer_components,
+        "interferer_input_components_v": interferer_components,
         "active_antennas": cfg.phone.active_antennas,
         "positions_m": desired_true_stages["positions_m"],
-        "channel_delay_true_ns": true_delays_s * 1e9,
-        "channel_delay_estimated_ns": estimated_delays_s * 1e9,
-        "channel_delay_true_samples": true_delays_s * cfg.signal.fs_rf_hz,
-        "channel_delay_estimated_samples": (
-            estimated_delays_s * cfg.signal.fs_rf_hz
-        ),
-        "desired_delay_phase_true": desired_delay_phase_true,
-        "desired_delay_phase_assumed": desired_delay_phase_assumed,
-        "interferer_delay_phases_true": interferer_delay_phases,
         "doppler_hz": cfg.signal.doppler_hz,
         "code_rate_hz": signal_sources["received_code_rate_hz"],
         "code_delay_chips": cfg.signal.code_delay_chips,
@@ -549,3 +477,29 @@ def process_antenna(
         },
     }
     return scene, truth
+
+
+def process_antenna(
+    clean_input_v: np.ndarray, cfg: SimulationConfig, *,
+    retain_analysis_flag: bool = False,
+) -> tuple[np.ndarray, dict]:
+    """独立阵元130 K输入噪声与所有干净源共同经过一次 A=C D。"""
+    state = cfg.phone.antenna_model.true_state
+    transfer = antenna_transfer_matrix(state, cfg.phone.active_antennas)
+    coupling = coupling_matrix(state, cfg.phone.active_antennas)
+    element_transmission = np.array([
+        10.0 ** (-state.passive_loss_db.get(name, 0.0) / 10.0)
+        for name in cfg.phone.active_antennas
+    ])
+    input_noise_v = generate_complex_noise(
+        clean_input_v.shape[1], cfg.phone.antenna_noise_temperature_k,
+        cfg.reference_impedance_ohm, cfg.signal.fs_rf_hz,
+        cfg.phone.active_antennas, cfg.random_seed, "antenna_input",
+    )
+    info = {"input_temperature_k": cfg.phone.antenna_noise_temperature_k,
+            "transfer_matrix": transfer,
+            "coupling_matrix": coupling,
+            "element_loss_temperature_k": state.temperature_k * (1.0 - element_transmission)}
+    if retain_analysis_flag:
+        info["propagated_noise_v"] = transfer @ input_noise_v
+    return transfer @ (clean_input_v + input_noise_v), info

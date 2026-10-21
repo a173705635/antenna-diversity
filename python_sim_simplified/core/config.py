@@ -88,6 +88,9 @@ class AntennaState:
     # Residual element response, before coupling; absent names mean zero error.
     amplitude_error_db: dict[str, float] = field(default_factory=dict)
     phase_error_deg: dict[str, float] = field(default_factory=dict)
+    # 阵元无源损耗在互耦前施加；物理温度只决定该损耗自身的热噪声。
+    passive_loss_db: dict[str, float] = field(default_factory=dict)
+    temperature_k: float = 290.0
 
 
 @dataclass
@@ -135,14 +138,8 @@ class PhoneConfig:
     active_antennas: tuple[str, ...]
     phase_centers_m: dict[str, tuple[float, float, float]]
     assumed_phase_centers_m: dict[str, tuple[float, float, float]]
-    channel_amplitude_error_db: dict[str, float]
-    channel_phase_error_deg: dict[str, float]
-    channel_delay_ns: dict[str, float]
-    estimated_channel_amplitude_error_db: dict[str, float]
-    estimated_channel_phase_error_deg: dict[str, float]
-    estimated_channel_delay_ns: dict[str, float]
     antenna_model: AntennaModelConfig
-    # 天线处理输出参考面的等效噪声温度，不是天线物理温度。
+    # 独立阵元等效输入噪声温度，在固定阵元响应和互耦之前加入。
     antenna_noise_temperature_k: float = 130.0
 
 
@@ -184,10 +181,16 @@ class RFStage:
 
 @dataclass
 class FeedlineConfig:
-    """匹配无源馈线：loss_db为功率损耗，temperature_k为物理温度。"""
+    """馈线：相位是载频处总相位；时延只产生偏离载频的相位斜率。"""
 
     loss_db: float = 1.0
     temperature_k: float = 290.0
+    loss_by_antenna_db: dict[str, float] = field(default_factory=dict)
+    phase_at_carrier_deg: dict[str, float] = field(default_factory=dict)
+    delay_ns: dict[str, float] = field(default_factory=dict)
+    assumed_loss_by_antenna_db: dict[str, float] = field(default_factory=dict)
+    assumed_phase_at_carrier_deg: dict[str, float] = field(default_factory=dict)
+    assumed_delay_ns: dict[str, float] = field(default_factory=dict)
 
 
 @dataclass

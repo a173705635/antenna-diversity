@@ -18,7 +18,7 @@ class AntennaDiagnostics(TypedDict):
     open_circuit_response: np.ndarray
     coupling_matrix: np.ndarray
     coupled_response: np.ndarray
-    channel_response: np.ndarray
+    antenna_transfer_matrix: np.ndarray
     effective_manifold: np.ndarray
 
 
@@ -48,22 +48,15 @@ class ScenarioTruth(TypedDict):
     time_s: np.ndarray
     code: np.ndarray
     desired_waveform: np.ndarray
-    desired_component: np.ndarray
+    desired_input_component_v: np.ndarray
     desired_steering_true: np.ndarray
     desired_steering_assumed: np.ndarray
     desired_open_circuit_response_true: np.ndarray
     desired_open_circuit_response_assumed: np.ndarray
     interferer_steering_effective: list[np.ndarray]
-    interferer_components: list[np.ndarray]
+    interferer_input_components_v: list[np.ndarray]
     active_antennas: tuple[str, ...]
     positions_m: np.ndarray
-    channel_delay_true_ns: np.ndarray
-    channel_delay_estimated_ns: np.ndarray
-    channel_delay_true_samples: np.ndarray
-    channel_delay_estimated_samples: np.ndarray
-    desired_delay_phase_true: np.ndarray
-    desired_delay_phase_assumed: np.ndarray
-    interferer_delay_phases_true: list[np.ndarray]
     doppler_hz: float
     code_rate_hz: float
     code_delay_chips: float
@@ -225,7 +218,7 @@ class SimulationResults(TypedDict):
     config: SimulationConfig
     truth: ScenarioTruth
     scene_input_v: np.ndarray
-    noise_info: dict[str, float]
+    noise_info: dict[str, object]
     adc_codes: np.ndarray
     rf_info: RFInfo
     dfe_channels: np.ndarray

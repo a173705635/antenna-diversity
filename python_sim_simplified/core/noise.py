@@ -1,4 +1,4 @@
-"""独立接收噪声源；各阶段先生成未滤波复白噪声。"""
+"""独立接收噪声流；参考面和传播由对应物理阶段确定。"""
 
 import numpy as np
 
@@ -38,25 +38,37 @@ def generate_complex_noise(
     return output
 
 
-def add_antenna_noise(
-    clean_scene_v: np.ndarray,
-    temperature_k: float,
-    reference_impedance_ohm: float,
-    fs_hz: float,
-    channel_ids: tuple[str, ...],
-    seed: int,
-    *,
-    retain_analysis_flag: bool = False,
-) -> tuple[np.ndarray, dict]:
-    """在已汇总的天线端参考面加独立端口噪声；不经过方向响应或互耦。"""
-    added_noise_v = generate_complex_noise(
-        clean_scene_v.shape[1], temperature_k, reference_impedance_ohm,
-        fs_hz, channel_ids, seed, "antenna",
+def rf_input_noise_budget(
+    center_frequency_hz: float, antenna_info: dict, feedline_info: dict,
+    rf_added_temperature_k: float,
+) -> dict:
+    """由各参考面的独立噪声求RF输入载频中心点温度谱密度矩阵。
+
+    此矩阵单位K，乘k得到W/Hz。馈线时延使宽带跨通道谱随频率变化，
+    因而该中心频点矩阵不能当作整带零滞后采样协方差。
+    """
+    transfer = antenna_info["transfer_matrix"]
+    coupling = antenna_info["coupling_matrix"]
+    feedline = np.diag(feedline_info["center_response"])
+    antenna_temperature = (
+        antenna_info["input_temperature_k"] * transfer @ transfer.conj().T
+        + coupling @ np.diag(antenna_info["element_loss_temperature_k"])
+        @ coupling.conj().T
     )
-    info = {
-        "temperature_k": temperature_k,
-        "noise_psd_w_per_hz": BOLTZMANN_J_PER_K * temperature_k,
+    antenna_at_rf = feedline @ antenna_temperature @ feedline.conj().T
+    total = (
+        antenna_at_rf
+        + np.diag(feedline_info["added_noise_temperature_k"])
+        + np.eye(transfer.shape[0]) * rf_added_temperature_k
+    )
+    return {
+        "reference_plane": "RF input; center carrier frequency",
+        "center_frequency_hz": center_frequency_hz,
+        "antenna_at_rf_input_temperature_k": np.real(np.diag(antenna_at_rf)),
+        "antenna_at_rf_input_temperature_matrix_k": antenna_at_rf,
+        "feedline_added_temperature_k": feedline_info["added_noise_temperature_k"],
+        "rf_added_temperature_k": rf_added_temperature_k,
+        "total_rf_input_temperature_k": np.real(np.diag(total)),
+        "total_rf_input_temperature_matrix_k": total,
+        "feedline_loss_db": feedline_info["loss_db"],
     }
-    if retain_analysis_flag:
-        info["added_noise_v"] = added_noise_v
-    return clean_scene_v + added_noise_v, info

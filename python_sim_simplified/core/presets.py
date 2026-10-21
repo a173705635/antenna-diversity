@@ -40,7 +40,6 @@ def mate70_phase_centers() -> dict[str, tuple[float, float, float]]:
 
 def default_config() -> SimulationConfig:
     positions = mate70_phase_centers()
-    zero = {name: 0.0 for name in CORNER_NAMES}
     ideal = AntennaModelConfig(
         "ideal_isotropic",
         AntennaState(),
@@ -54,12 +53,6 @@ def default_config() -> SimulationConfig:
             active_antennas=CORNER_NAMES,
             phase_centers_m=positions,
             assumed_phase_centers_m=positions.copy(),
-            channel_amplitude_error_db=zero.copy(),
-            channel_phase_error_deg=zero.copy(),
-            channel_delay_ns=zero.copy(),
-            estimated_channel_amplitude_error_db=zero.copy(),
-            estimated_channel_phase_error_deg=zero.copy(),
-            estimated_channel_delay_ns=zero.copy(),
             antenna_model=ideal,
         ),
         interferers=[
