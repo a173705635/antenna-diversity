@@ -125,7 +125,7 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
             # ("target_power_gain", (("target_gain_db", "Target power gain vs SINGLE (dB)"),)),
             # ("linear_in_band_sinr", (("linear_in_band_sinr_db", "C / (I + N) (dB)"),)),
             ("acquisition_peak_ratio", (("acquisition_metric", "Acquisition peak ratio"),)),
-            ("tracking_cn0_late_median", (("tracking_cn0_late_median_db_hz", "Late tracking C/N0 (dB-Hz)"),)),
+            ("tracking_cn0_mean", (("tracking_cn0_mean_db_hz", "Tracking C/N0 (dB-Hz)"),)),
         ]
         # 各干扰源独立成图，避免长标签和过多行把目标/接收指标挤在一起。
         # source_names = _distinct_plot_names({source: _filename_label(source) for source in sources})
@@ -213,7 +213,7 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                             seed_count = len({row["seed"] for row in displayed_rows})
                             title += f"\nMean across seeds (n={seed_count})"
                             # ylabel = ylabel.replace("vs SINGLE", f"vs SINGLE-{displayed_rows[0]['single_reference_antenna']}")
-                            if metric == "tracking_cn0_late_median_db_hz":
+                            if metric == "tracking_cn0_mean_db_hz":
                                 title += "; available estimates only"
                         axis.set(title=title, xlabel=xlabel, ylabel=ylabel)
                         scan_points = [row["scan_value"] for row in factor_rows
@@ -229,7 +229,7 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                             for threshold in thresholds:
                                 axis.axhline(threshold, color="#888888", linestyle="-.",
                                              label=f"threshold {threshold:g}")
-                        if metric == "tracking_cn0_late_median_db_hz":
+                        if metric == "tracking_cn0_mean_db_hz":
                             axis.ticklabel_format(axis="y", style="plain", useOffset=False)
                             measured = [row[metric] for row in factor_rows
                                         if row["scene"] == scene and row["mode"] == mode

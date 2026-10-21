@@ -4,7 +4,7 @@
 
 所有实验已暂时注释事后分量分析及其处理、输出和绘图，不再生成分量功率、SNR/SINR、抑制比、分量增益、交叉项或联合量化残差。实际接收、相位处理、捕获跟踪及接收机 C/N₀ 保留；旧结果不改写。
 
-分集实验的日常摘要不展开RF/ADC/DFE、捕获积分、跟踪环路等接收机设计配置，完整配置保留在`manifest.json`；通用验证的`summary.json`通过`receiver_config_file`指向该文件。CSV不再重复捕获门限和判定容差，捕获误差与性能指标保留在结果明细中。
+分集实验优先看 `case_summary.csv` 用例汇总，`summary.csv` 保存明细，FULL CHAIN 的 `summary.csv` 每算法一行。`manifest.json` 保存条件、实际配置和源码哈希，通用验证的 `summary.json` 保存统计与核验。两入口的跟踪 C/N₀ 统一为原始历元后半段有效 dB-Hz 值的均值；细节见[抗干扰说明](docs/interference/README.md)。
 
 每次修改及实际验证统一记录在 [CHANGELOG](CHANGELOG.md)。抗干扰的建模前提、实验条件和已有结果见 [详细说明](docs/interference/README.md)。
 
@@ -39,13 +39,13 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 ### 通用条件验证
 
-日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。各类实验共用 `MODES`、`ACTIVE_ANTENNAS`、`SEEDS`、`DURATION_MS`、`WORKERS` 与统计去边；默认算法为 SINGLE 和 Blind Null（`blind_null`），设为 `("single", "blind_null", "egc", "mvdr")` 可同时运行两个对照算法。
+日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。各类实验共用 `MODES`、`ACTIVE_ANTENNAS`、`SEEDS`、`DURATION_MS`、`WORKERS` 与统计去边；验证默认运行 SINGLE、Blind Null、预设相位 EGC 和已知响应 MVDR，后两者标为对照。FULL CHAIN 仍只运行前两种方法。
 
 `EXPERIMENT_TYPE` 可选 `phase_direction_gain`、`phase_center_offset`（16条件）、`mutual_coupling`（12条件，MC-001～012）、`antenna_gain`（21条件，TC-001～021）；输出统一为 `results/interference/<EXPERIMENT_TYPE>/`。已有历史结果不移动，旧实验条件与结果见[相位中心说明](docs/interference/README.md#无干扰相位中心偏移验证2026-10-16)。
 
 相位/方向/增益实验通过 `SELECTED_SERIES`、`SCENES` 和各扫描元组设置范围；每个相位点固定生成基准、未补偿、准确补偿三组。`_base_config()` 集中设置共享配置，各构造函数只描述条件差异，`build_cases()` 统一展开种子；`build_settings()` 设置统计窗口、输出目录、并行数和绘图。各用例独立调度，结果按原用例顺序保存。顶部 `TARGET_TRUE_DIRECTION`、`TARGET_ASSUMED_DIRECTION` 分别设置真实与名义目标方向；`ACTIVE_ANTENNAS` 的第一根是 SINGLE 参考，增益、互耦和位置偏移条件作用于前两根，额外激活阵元保留基础配置。
 
-增益、互耦与相位中心汇总按“条件＋算法”统计捕获跟踪，保留均值、样本标准差、成功次数和缺测数。`scan_label`、`scan_unit` 用于真实扫描的图轴与文件名，离散条件不再填写 TC/MC/PC 伪单位。
+增益、互耦与相位中心汇总按“条件＋算法”统计捕获跟踪；日常表保留总 seed 数、成功次数、C/N₀ 均值、样本标准差和有效 seed 数，完整缺测统计在 JSON。`scan_label`、`scan_unit` 用于真实扫描的图轴与文件名，离散条件不再填写 TC/MC/PC 伪单位。
 
 专项统计由 `EXPERIMENT_TYPE` 选择；日常核验保留实际合并输出与功率的独立复算，依赖分量的理想噪声收益检查暂时停用。模型与权值公式检查放在本地测试；核验通过不代表捕获跟踪成功。
 

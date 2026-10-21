@@ -68,8 +68,8 @@ def summarize_phase_center(rows: list[dict]) -> dict:
     for (case_id, receiver_role, mode), observations in grouped.items():
         name = f"{case_id}-{mode}"
         first = observations[0]
-        finite_cn0 = [row["tracking_cn0_late_median_db_hz"] for row in observations
-                      if row["tracking_cn0_late_median_db_hz"] is not None]
+        finite_cn0 = [row["tracking_cn0_mean_db_hz"] for row in observations
+                      if row["tracking_cn0_mean_db_hz"] is not None]
         cases[name] = {
             "case": case_id, "mode": mode, "receiver_role": receiver_role,
             "phase_estimate_source": first["phase_estimate_source"],

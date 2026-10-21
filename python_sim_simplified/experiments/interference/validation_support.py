@@ -16,7 +16,7 @@ import numpy as np
 from core.config import SimulationConfig
 # from core.evaluation import linear_components
 # from core.diversity import combine_known
-from core.metrics import circular_chip_error
+from core.metrics import circular_chip_error, tracking_cn0_mean
 from core.pipeline import run_frontend, run_receiver
 from experiments.interference.coupling_support import (
     coupling_row_fields, sample_statistics, summarize_coupling,
@@ -137,10 +137,7 @@ def evaluate_case(
         # linear_sum = sum(projected.values())
         acquisition = branch_result["acquisition"]
         tracking = branch_result["tracking"]
-        cn0 = tracking["cn0_db_hz"] if tracking["success_flag"] else np.array([])
-        # 取跟踪后半段的有限 C/N₀ 中位数；缺测保存 None，不伪造成 0 dB-Hz。
-        finite = cn0[len(cn0) // 2:]
-        finite = finite[np.isfinite(finite)]
+        cn0_mean_db_hz, cn0_valid_count = tracking_cn0_mean(tracking)
         code_estimate = (acquisition["code_phase_samples"]
                          * case_cfg.signal.code_rate_hz / fs_out_hz)
         code_error_chips = float(circular_chip_error(
@@ -190,8 +187,8 @@ def evaluate_case(
             ),
             "tracking_success_flag": bool(tracking["success_flag"]),
             "tracking_status": tracking["status"],
-            "tracking_cn0_late_median_db_hz": float(np.median(finite)) if finite.size else None,
-            "tracking_cn0_late_finite_count": int(finite.size),
+            "tracking_cn0_mean_db_hz": cn0_mean_db_hz,
+            "tracking_cn0_valid_count": cn0_valid_count,
         }
         # 专项字段只记录实验条件和目标真实响应。
         if pattern_fields:
@@ -272,8 +269,8 @@ def summarize_pattern_gain(rows: list[dict]) -> dict:
         acquired = sum(row["acquired_flag"] for row in observations)
         correct = sum(row["acquisition_correct_flag"] for row in observations)
         tracked = sum(row["tracking_success_flag"] for row in observations)
-        finite_cn0 = [row["tracking_cn0_late_median_db_hz"] for row in observations
-                      if row["tracking_cn0_late_median_db_hz"] is not None]
+        finite_cn0 = [row["tracking_cn0_mean_db_hz"] for row in observations
+                      if row["tracking_cn0_mean_db_hz"] is not None]
         cases[name] = {
             "case": case_id, "mode": mode, "receiver_role": receiver_role,
             "phase_estimate_source": observations[0]["phase_estimate_source"],

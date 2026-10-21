@@ -29,7 +29,7 @@ GENERATE_PLOTS_FLAG = True
 SHOW_PLOTS_FLAG = True
 # 所有条件共用激活天线和方法；第一根是 SINGLE 参考，第二根用于双阵元条件。
 ACTIVE_ANTENNAS = ("TL", "BR")
-MODES = ("single", "blind_null")  # 可显式加入 "egc"、"mvdr"；顺序即运行与结果顺序。
+MODES = ("single", "blind_null", "egc", "mvdr")  # 后两种为预设/已知响应对照。
 
 # 单因素扫描；PHASE_ANTENNA 按物理名字定位，不使用固定行号。
 PHASE_ANTENNA = "BR"

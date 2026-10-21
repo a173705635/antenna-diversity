@@ -1,6 +1,7 @@
 """Run the complete simplified simulation, save figures, and display them."""
 
 from pathlib import Path
+import csv
 import sys
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -76,10 +77,23 @@ def main():
 
     save_results_figures(results)
     (output_dir/'manifest.json').write_text(json.dumps(serializable({
-        'config': asdict(cfg), 'source_sha256': source_hashes()}),
+        'config': asdict(cfg),
+        'methods': {record['mode']: {
+            'receiver_role': record['receiver_role'],
+            'phase_estimate_source': record['phase_estimate_source'],
+        } for record in results['metrics']},
+        'source_sha256': source_hashes()}),
         default=str, indent=2, allow_nan=False), encoding='utf-8')
     (output_dir/'summary.json').write_text(json.dumps(serializable(results['metrics']),
         indent=2, allow_nan=False), encoding='utf-8')
+    # 每种算法一行，复用同一份 metrics；完整追溯配置留在 manifest。
+    with (output_dir / 'summary.csv').open('w', newline='', encoding='utf-8-sig') as stream:
+        columns = ('mode', 'acquired_flag', 'tracking_flag',
+                   'tracking_cn0_mean_db_hz', 'acquisition_metric',
+                   'acquisition_code_bias_chips', 'tracking_code_bias_rms_m')
+        writer = csv.DictWriter(stream, fieldnames=columns)
+        writer.writeheader()
+        writer.writerows({key: record[key] for key in columns} for record in results['metrics'])
     if FREEZE_SOURCE_FLAG:
         freeze_source(output_dir)
 

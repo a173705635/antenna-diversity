@@ -207,7 +207,7 @@ class MetricRecord(TypedDict):
     pll_rms_rad: float | None
     dll_rms: float | None
     mean_prompt_magnitude: float | None
-    final_cn0_db_hz: float | None
+    tracking_cn0_mean_db_hz: float | None
     acquisition_code_bias_chips: float
     tracking_code_bias_rms_chips: float | None
     tracking_code_bias_rms_m: float | None

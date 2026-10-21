@@ -49,11 +49,14 @@ def tracking_code_bias_chips(
     return circular_chip_error(tracking["code_phase_chips"], expected)
 
 
-def _final_cn0(tracking: TrackingResult) -> float | None:
+def tracking_cn0_mean(tracking: TrackingResult) -> tuple[float | None, int]:
+    """对原跟踪序列后半段的有限 C/N₀ (dB-Hz) 求算术均值及有效历元数。"""
     if not tracking["success_flag"]:
-        return None
-    finite = tracking["cn0_db_hz"][np.isfinite(tracking["cn0_db_hz"])]
-    return float(finite[-1]) if finite.size else None
+        return None, 0
+    cn0 = tracking["cn0_db_hz"]
+    late_cn0 = cn0[len(cn0) // 2:]
+    finite_cn0 = late_cn0[np.isfinite(late_cn0)]
+    return (float(np.mean(finite_cn0)), int(finite_cn0.size)) if finite_cn0.size else (None, 0)
 
 
 def compute_metrics(results: SimulationResults) -> list[MetricRecord]:
@@ -109,7 +112,7 @@ def compute_metrics(results: SimulationResults) -> list[MetricRecord]:
                 "pll_rms_rad": pll_rms,
                 "dll_rms": dll_rms,
                 "mean_prompt_magnitude": mean_prompt,
-                "final_cn0_db_hz": _final_cn0(tracking),
+                "tracking_cn0_mean_db_hz": tracking_cn0_mean(tracking)[0],
                 "acquisition_code_bias_chips": acquisition_code_bias_chips(
                     acquisition,
                     results["truth"],
@@ -139,7 +142,7 @@ def format_metrics(records: list[MetricRecord]) -> str:
     lines = [header, "-" * len(header)]
     for record, mode_label in zip(records, mode_labels):
         doppler = record["final_doppler_hz"]
-        cn0 = record["final_cn0_db_hz"]
+        cn0 = record["tracking_cn0_mean_db_hz"]
         code_bias_m = record["tracking_code_bias_rms_m"]
         lines.append(
             f"{mode_label:>{mode_width}} {str(record['acquired_flag']):>6} "
