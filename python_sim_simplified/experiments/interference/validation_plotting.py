@@ -1,4 +1,4 @@
-"""通用抗干扰验证结果绘图；只消费标量结果行。"""
+"""按各验证实验的物理问题绘图；只读取逐 seed 接收结果。"""
 
 from collections import Counter
 import hashlib
@@ -10,65 +10,12 @@ import numpy as np
 from experiments.interference.validation_support import ValidationSettings
 
 
-def gain_plot_rows(rows: list[dict]) -> list[dict]:
-    """将前两根阵元的增益条件转为物理横轴，仅复制绘图字段。
-
-    零增益点同时作为共同衰减和第二阵元衰减的基准。
-    """
-    first_only_gains = {
-        row["input_gain_db_by_antenna"][0] for row in rows
-        if row["input_gain_db_by_antenna"][1] == 0
-        and row["input_gain_db_by_antenna"][0] != 0
-    }
-    second_only_gains = {
-        row["input_gain_db_by_antenna"][1] for row in rows
-        if row["input_gain_db_by_antenna"][0] == 0
-        and row["input_gain_db_by_antenna"][1] != 0
-    }
-    swapped_gains = first_only_gains & second_only_gains
-    prepared = []
-    seen = set()
-    for row in rows:
-        first_antenna, second_antenna = row["antennas"].split(",")[:2]
-        first_gain, second_gain = row["input_gain_db_by_antenna"][:2]
-        axes = []
-        if second_gain == 0:
-            axes.append((f"{first_antenna} gain ({second_antenna} = 0 dB)",
-                         first_gain, row["case"]))
-        if first_gain == second_gain:
-            axes.append((f"{first_antenna}/{second_antenna} common gain",
-                         first_gain, row["case"]))
-        if first_gain == 0:
-            axes.append((f"{second_antenna} gain ({first_antenna} = 0 dB)",
-                         second_gain, row["case"]))
-        if ((first_gain in swapped_gains and second_gain == 0)
-                or (first_gain == 0 and second_gain in swapped_gains)):
-            axes.append((f"{first_antenna} / {second_antenna} gain", None,
-                         f"{first_gain:g} / {second_gain:g}"))
-        for label, value, name in axes:
-            key = (label, row.get("scene"), row["mode"], row.get("seed"),
-                   first_gain, second_gain)
-            if key in seen:
-                continue
-            seen.add(key)
-            prepared.append(dict(row, scan_label=label, scan_unit="dB",
-                                 scan_value=value, case=name))
-    # 交换图只保留两个方向都存在的衰减值，并按衰减深度成对排列。
-    swap_rows = [row for row in prepared if " / " in row["scan_label"]]
-    swap_rows.sort(key=lambda row: (
-        abs(sum(row["input_gain_db_by_antenna"])),
-        -row["input_gain_db_by_antenna"][0],
-    ))
-    return [row for row in prepared if " / " not in row["scan_label"]] + swap_rows
-
-
 def _filename_label(value: str) -> str:
-    """保留可读标签，替换斜杠等不适合文件名的字符。"""
-    return re.sub(r"[^\w]+", "_", value.casefold()).strip("_")
+    return re.sub(r"[^\w]+", "_", str(value).casefold()).strip("_")
 
 
 def _distinct_plot_names(base_names: dict) -> dict:
-    """标签归一后同名时，仅给冲突项追加原始标签的稳定摘要。"""
+    """扫描标签归一后重名时追加稳定摘要，避免覆盖图片。"""
     counts = Counter(base_names.values())
     return {
         label: (base if counts[base] == 1 else
@@ -77,196 +24,325 @@ def _distinct_plot_names(base_names: dict) -> dict:
     }
 
 
-def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path]:
-    """从结果行绘图并返回 PNG 路径；不重新仿真，也不修改原始结果。
+def _mode_label(row: dict) -> str:
+    mode = row["mode"]
+    if mode == "egc":
+        source = row["phase_estimate_source"]
+        if source == "preset_assumed_target_response_phase":
+            return "EGC (preset phase)"
+        if source == "external_input":
+            return "EGC (external phase)"
+        return f"EGC ({source})"
+    if mode == "mvdr":
+        return "MVDR (known resp)"
+    return mode.upper()
 
-    每因素、指标、方法独立窗口，场景横排；捕获保留比值。
-    同一横轴点跨 seed 按当前显示单位取均值，缺测 C/N₀ 保持断线而非补零。
-    """
+
+def _case_groups(rows: list[dict]) -> list[list[dict]]:
+    """同一物理用例、场景和算法内跨 seed 汇总；绝不按相同横轴合并用例。"""
+    groups = {}
+    for row in rows:
+        key = (row["case"], row["scene"], row["mode"])
+        groups.setdefault(key, []).append(row)
+    return list(groups.values())
+
+
+def _mean_metric(group: list[dict], metric: str) -> float:
+    if metric == "acquisition_correct_flag":
+        return float(np.mean([row[metric] for row in group]))
+    available = [row[metric] for row in group if row[metric] is not None]
+    return float(np.mean(available)) if available else np.nan
+
+
+def _scan_points(rows: list[dict], metric: str) -> list[tuple[float, float]]:
+    """每个 case 给出一个物理扫描点；只在同一 case 内求指标的 seed 均值。"""
+    return sorted((group[0]["scan_value"], _mean_metric(group, metric))
+                  for group in _case_groups(rows))
+
+
+def _plot_points(axis, points: list[tuple], label: str, index: int,
+                 connect_flag: bool = True) -> None:
+    if not points:
+        return
+    x_values, y_values = zip(*points)
+    axis.plot(x_values, y_values,
+              linestyle=("-", "--", ":", "-.")[index % 4] if connect_flag else "None",
+              marker=("o", "s", "^", "D")[index % 4], markerfacecolor="none",
+              linewidth=1.5, label=label)
+
+
+def _finish_axis(axis, xlabel: str, metric: str) -> None:
+    ylabel = {"tracking_cn0_mean_db_hz": "TRK CN0 (dB-Hz)",
+              "acquisition_correct_flag": "ACQ OK rate",
+              "acquisition_metric": "ACQ Ratio"}[metric]
+    axis.set(xlabel=xlabel, ylabel=ylabel)
+    if metric == "tracking_cn0_mean_db_hz":
+        axis.ticklabel_format(axis="y", style="plain", useOffset=False)
+        if any(np.isfinite(value) for line in axis.lines for value in line.get_ydata()):
+            axis.tick_params(axis="y", labelleft=True)
+            axis.text(0.02, 0.02, "Gaps = missing CN0", fontsize=8,
+                      transform=axis.transAxes)
+        else:
+            axis.text(0.5, 0.5, "No valid CN0", ha="center",
+                      transform=axis.transAxes)
+            axis.tick_params(axis="y", labelleft=False)
+    if metric == "acquisition_correct_flag":
+        axis.set_ylim(-0.04, 1.04)
+    axis.grid(alpha=0.3)
+    if axis.lines:
+        axis.legend(fontsize=8)
+
+
+def _save_figure(fig, settings: ValidationSettings, name: str, paths: list[Path]) -> None:
     import matplotlib.pyplot as plt
 
-    # 只转换具备逐天线增益记录的原子批次；旧相位/方向扫描保持原横轴。
-    gain_batch_flag = bool(rows) and all(
-        row["case"].startswith("TC-") and "input_gain_db_by_antenna" in row
-        for row in rows
-    )
-    if gain_batch_flag:
-        experiment_name = "antenna_gain"
-    elif rows and all(row["case"].startswith("MC-") for row in rows):
-        experiment_name = "mutual_coupling"
-    elif rows and all(row["case"].startswith("PC-") for row in rows):
-        experiment_name = "phase_center_offset"
-    elif rows and all(any(marker in row["case"] for marker in
-                          ("/phase_", "/direction_", "/gain_")) for row in rows):
-        experiment_name = "phase_direction_gain"
-    else:
-        experiment_name = "validation"
-    if gain_batch_flag:
-        rows = gain_plot_rows(rows)
+    figure_path = settings.output_dir / f"{name}.png"
+    fig.savefig(figure_path, dpi=150)
+    paths.append(figure_path)
+    if not settings.show_plots_flag:
+        plt.close(fig)
+
+
+def _phase_direction_gain(rows: list[dict], settings: ValidationSettings) -> list[Path]:
+    """相位比较补偿三组；方向和增益扫描在同图比较各算法。"""
+    import matplotlib.pyplot as plt
+
+    paths = []
     factors = list(dict.fromkeys((row["scan_label"], row["scan_unit"]) for row in rows))
-    factor_filename_parts = {}
-    for factor_label, factor_unit in factors:
-        scan_label_name = _filename_label(factor_label)
-        scan_unit_name = _filename_label(factor_unit)
-        if scan_unit_name and not scan_label_name.endswith(f"_{scan_unit_name}"):
-            scan_label_name += f"_{scan_unit_name}"
-        factor_filename_parts[(factor_label, factor_unit)] = scan_label_name
-    factor_names = _distinct_plot_names(factor_filename_parts)
-    figure_paths = []
-    for factor_label, factor_unit in factors:
-        factor_rows = [row for row in rows
-                       if (row["scan_label"], row["scan_unit"]) == (factor_label, factor_unit)]
-        # 分量抑制比来源与绘图暂时停用。
-        # sources = list(dict.fromkeys(
-        #     source for row in factor_rows for source in row["interferer_suppression_db"]
-        # ))
-        figures = [
-            # ("thermal_snr_gain", (("thermal_snr_gain_db", "Thermal SNR gain vs SINGLE (dB)"),)),
-            # ("target_power_gain", (("target_gain_db", "Target power gain vs SINGLE (dB)"),)),
-            # ("linear_in_band_sinr", (("linear_in_band_sinr_db", "C / (I + N) (dB)"),)),
-            ("acquisition_peak_ratio", (("acquisition_metric", "ACQ Ratio"),)),
-            ("tracking_cn0_mean", (("tracking_cn0_mean_db_hz", "TRK CN0 (dB-Hz)"),)),
-        ]
-        # 各干扰源独立成图，避免长标签和过多行把目标/接收指标挤在一起。
-        # source_names = _distinct_plot_names({source: _filename_label(source) for source in sources})
-        # figures.extend((f"interferer_suppression_{source_names[source]}", ((f"suppression:{source}",
-        #                  f"Source {index}: suppression (dB)"),))
-        #                for index, source in enumerate(sources))
-        scenes = list(dict.fromkeys(row["scene"] for row in factor_rows))
-        modes = list(dict.fromkeys(row["mode"] for row in factor_rows))
-        series = list(dict.fromkeys(row["series"] for row in factor_rows))
-        # 每个指标、每种方法单独一个窗口，仅横排比较场景，不纵向堆叠。
-        separate_figures = [(filename, metrics, mode)
-                            for filename, metrics in figures for mode in modes]
-        for filename, metrics, figure_mode in separate_figures:
-            figure_scenes = scenes
-            comparison_source = (next(row["phase_estimate_source"] for row in factor_rows
-                                      if row["mode"] == figure_mode)
-                                 if figure_mode == "egc" else None)
-            # if filename.startswith("interferer_suppression_"):
-            #     source = metrics[0][0].removeprefix("suppression:")
-            #     figure_scenes = [scene for scene in scenes if any(
-            #         row["scene"] == scene and source in row["interferer_suppression_db"]
-            #         for row in factor_rows)]
-            fig, axes = plt.subplots(1, len(figure_scenes),
-                                     figsize=(6 * len(figure_scenes), 4.8),
-                                     squeeze=False, constrained_layout=True)
-            # if filename.startswith("interferer_suppression_"):
-            #     fig.suptitle(source, fontsize=11)
-            for metric_index, (metric, ylabel) in enumerate(metrics):
-                for mode_index, mode in enumerate([figure_mode]):
-                    for scene_index, scene in enumerate(figure_scenes):
-                        axis = axes[0, scene_index]
-                        plotted = []
-                        overlaps = []
-                        for series_index, label in enumerate(series):
-                            selected = [row for row in factor_rows if row["scene"] == scene
-                                        and row["mode"] == mode and row["series"] == label]
-                            if not selected:
-                                continue
-                            numeric_scan_flag = selected[0]["scan_value"] is not None
-                            points = (sorted({row["scan_value"] for row in selected})
-                                      if numeric_scan_flag else
-                                      list(dict.fromkeys(row["case"] for row in selected)))
-                            values = []
-                            for point in points:
-                                matching = [row for row in selected
-                                            if (row["scan_value"] if numeric_scan_flag else row["case"]) == point]
-                                # if metric.startswith("suppression:"):
-                                #     observations = [row["interferer_suppression_db"].get(
-                                #         metric.removeprefix("suppression:")) for row in matching]
-                                # elif metric == "target_gain_db":
-                                #     observations = [row["target_output_gain_db"] for row in matching]
-                                # else:
-                                observations = [row.get(metric) for row in matching]
-                                available = [value for value in observations if value is not None]
-                                # 这是跨 seed 的显示统计，不是把线性功率平均后再转 dB。
-                                values.append(float(np.mean(available)) if available else np.nan)
-                            # 不偏移真实数据：嵌套空心标记、不同线型，并明确注明重合。
-                            for previous_label, previous_points, previous_values in plotted:
-                                # 只标整条曲线数值一致；局部交点不做人工错位。
-                                if points == previous_points and np.allclose(
-                                        values, previous_values, atol=1e-8, rtol=0, equal_nan=True
-                                ) and np.any(np.isfinite(values)):
-                                    overlaps.append(f"{previous_label} = {label}")
-                            plotted.append((label, points, values))
-                            # 物理数值扫描可连线；TC编号和强弱交换类别只画点。
-                            atomic_cases_flag = not numeric_scan_flag
-                            axis.plot(points, values,
-                                      linestyle=("None" if atomic_cases_flag else
-                                                 ("-", "--", ":", "-.")[series_index % 4]),
-                                      marker=("o", "s", "x", "^")[series_index % 4],
-                                      markersize=(10, 7, 5, 8)[series_index % 4],
-                                      markerfacecolor="none", linewidth=1.6, label=label)
-                        if overlaps:
-                            axis.text(0.02, 0.98, "Overlapping (tolerance 1e-8):\n" + "\n".join(overlaps),
-                                      va="top", fontsize=9, transform=axis.transAxes,
-                                      bbox={"facecolor": "white", "alpha": 0.8, "edgecolor": "none"})
-                        xlabel = {
-                            "DFE channel phase": "DFE Phase",
-                            "target true azimuth": "True Az",
-                            "target azimuth": "Target Az",
-                        }.get(factor_label, factor_label or "condition")
-                        if factor_unit:
-                            xlabel += f" ({factor_unit})"
-                        displayed_rows = [row for row in factor_rows
-                                          if row["scene"] == scene and row["mode"] == mode]
-                        mode_label = mode.upper()
-                        if mode == "mvdr":
-                            mode_label = "MVDR (known resp)"
-                        elif mode == "egc":
-                            if comparison_source == "preset_assumed_target_response_phase":
-                                mode_label = "EGC (preset phase)"
-                            elif comparison_source == "external_input":
-                                mode_label = "EGC (external phase)"
-                            else:
-                                mode_label = f"EGC ({comparison_source})"
-                        title = f"{scene} / {mode_label}"
-                        if gain_batch_flag:
-                            seed_count = len({row["seed"] for row in displayed_rows})
-                            title += f"\nSeed mean (n={seed_count})"
-                            # ylabel = ylabel.replace("vs SINGLE", f"vs SINGLE-{displayed_rows[0]['single_reference_antenna']}")
-                            if metric == "tracking_cn0_mean_db_hz":
-                                title += "; Valid only"
-                        axis.set(title=title, xlabel=xlabel, ylabel=ylabel)
-                        scan_points = [row["scan_value"] for row in factor_rows
-                                       if row["scene"] == scene and row["mode"] == mode
-                                       and row["scan_value"] is not None]
-                        if scan_points:
-                            low, high = min(scan_points), max(scan_points)
-                            padding = (high - low) * 0.03 if high != low else 0.5
-                            axis.set_xlim(low - padding, high + padding)
+    factor_names = _distinct_plot_names({
+        factor: _filename_label("_".join(part for part in factor if part))
+        for factor in factors
+    })
+    for factor in factors:
+        factor_rows = [row for row in rows if (row["scan_label"], row["scan_unit"]) == factor]
+        for scene in dict.fromkeys(row["scene"] for row in factor_rows):
+            scene_rows = [row for row in factor_rows if row["scene"] == scene]
+            modes = list(dict.fromkeys(row["mode"] for row in scene_rows))
+            phase_flag = ("phase" in factor[0].casefold() or
+                          bool({row["series"] for row in scene_rows} &
+                               {"uncalibrated", "calibrated"}))
+            for metric, metric_name in (("acquisition_metric", "acquisition_peak_ratio"),
+                                        ("tracking_cn0_mean_db_hz", "tracking_cn0_mean")):
+                if phase_flag:
+                    fig, axes = plt.subplots(1, len(modes), figsize=(5.2 * len(modes), 4.5),
+                                             squeeze=False, constrained_layout=True)
+                    for mode_index, mode in enumerate(modes):
+                        axis = axes[0, mode_index]
+                        mode_rows = [row for row in scene_rows if row["mode"] == mode]
+                        series_points = {}
+                        for series_index, series in enumerate(dict.fromkeys(
+                                row["series"] for row in mode_rows)):
+                            selected = [row for row in mode_rows if row["series"] == series]
+                            points = _scan_points(selected, metric)
+                            series_points[series] = points
+                            _plot_points(axis, points, series, series_index)
+                        axis.set_title(_mode_label(mode_rows[0]))
+                        xlabel = {"DFE channel phase": "DFE Phase",
+                                  "target true azimuth": "True Az",
+                                  "target azimuth": "Target Az"}.get(factor[0], factor[0])
+                        _finish_axis(axis, f"{xlabel} ({factor[1]})", metric)
                         if metric == "acquisition_metric":
-                            thresholds = sorted({row["acquisition_threshold"] for row in factor_rows
-                                                 if row["scene"] == scene and row["mode"] == mode})
-                            for threshold in thresholds:
+                            for threshold in sorted({row["acquisition_threshold"] for row in mode_rows}):
                                 axis.axhline(threshold, color="#888888", linestyle="-.",
                                              label=f"Thr {threshold:g}")
-                        if metric == "tracking_cn0_mean_db_hz":
-                            axis.ticklabel_format(axis="y", style="plain", useOffset=False)
-                            measured = [row[metric] for row in factor_rows
-                                        if row["scene"] == scene and row["mode"] == mode
-                                        and row[metric] is not None]
-                            if measured:
-                                axis.text(0.02, 0.02, "Gaps = missing CN0",
-                                          fontsize=7, transform=axis.transAxes)
-                            else:
-                                axis.text(0.5, 0.5, "No valid CN0",
-                                          ha="center", transform=axis.transAxes)
-                                axis.set_yticks([])
-                        axis.grid(alpha=0.3)
-                        if axis.lines:
-                            axis.legend(fontsize=9, loc="upper left", bbox_to_anchor=(1.01, 1))
-            role_suffix = ("" if figure_mode in ("single", "blind_null")
-                           else "__known_response_comparison")
-            figure_path = settings.output_dir / (
-                f"{experiment_name}__{factor_names[(factor_label, factor_unit)]}"
-                f"__{filename}__{_filename_label(figure_mode)}{role_suffix}.png"
-            )
-            fig.savefig(figure_path, dpi=150)
-            figure_paths.append(figure_path)
-            if not settings.show_plots_flag:
-                plt.close(fig)
+                            axis.legend(fontsize=8)
+                        if "baseline" in series_points and "calibrated" in series_points:
+                            baseline = series_points["baseline"]
+                            calibrated = series_points["calibrated"]
+                            if ([point[0] for point in baseline] ==
+                                    [point[0] for point in calibrated]
+                                    and np.any(np.isfinite([point[1] for point in baseline]))
+                                    and np.allclose([point[1] for point in baseline],
+                                                    [point[1] for point in calibrated],
+                                                    rtol=0, atol=1e-8, equal_nan=True)):
+                                axis.text(0.02, 0.96, "Baseline = calibrated",
+                                          va="top", fontsize=8, transform=axis.transAxes)
+                    fig.suptitle(f"{scene}: baseline / injected phase / preset correction")
+                else:
+                    fig, axis = plt.subplots(figsize=(7, 4.5), constrained_layout=True)
+                    for mode_index, mode in enumerate(modes):
+                        selected = [row for row in scene_rows if row["mode"] == mode]
+                        points = _scan_points(selected, metric)
+                        _plot_points(axis, points, _mode_label(selected[0]), mode_index,
+                                     connect_flag=len({point[0] for point in points}) == len(points))
+                    xlabel = {"DFE channel phase": "DFE Phase",
+                              "target true azimuth": "True Az",
+                              "target azimuth": "Target Az"}.get(factor[0], factor[0])
+                    _finish_axis(axis, f"{xlabel} ({factor[1]})", metric)
+                    if metric == "acquisition_metric":
+                        for threshold in sorted({row["acquisition_threshold"] for row in scene_rows}):
+                            axis.axhline(threshold, color="#888888", linestyle="-.",
+                                         label=f"Thr {threshold:g}")
+                        axis.legend(fontsize=8)
+                    axis.set_title(scene)
+                _save_figure(fig, settings, f"phase_direction_gain__{_filename_label(scene)}"
+                      f"__{factor_names[factor]}__{metric_name}", paths)
+    return paths
+
+
+def _antenna_gain(rows: list[dict], settings: ValidationSettings) -> list[Path]:
+    """前两根阵元各自衰减，0/0 作为两个面板的共同基准。"""
+    import matplotlib.pyplot as plt
+
+    paths = []
+    antennas = rows[0]["antennas"].split(",")[:2]
+    for metric, metric_name in (("tracking_cn0_mean_db_hz", "tracking_cn0_mean"),
+                                ("acquisition_correct_flag", "acquisition_correct_rate")):
+        fig, axes = plt.subplots(1, 2, figsize=(12, 4.7), sharey=True,
+                                 constrained_layout=True)
+        for antenna_index, axis in enumerate(axes):
+            other_index = 1 - antenna_index
+            panel_rows = [row for row in rows
+                          if row["input_gain_db_by_antenna"][other_index] == 0]
+            for mode_index, mode in enumerate(dict.fromkeys(row["mode"] for row in panel_rows)):
+                selected = [row for row in panel_rows if row["mode"] == mode]
+                points = sorted((float(group[0]["input_gain_db_by_antenna"][antenna_index]),
+                                 _mean_metric(group, metric)) for group in _case_groups(selected))
+                _plot_points(axis, points, _mode_label(selected[0]), mode_index)
+            axis.set_title(f"{antennas[antenna_index]} attenuation; {antennas[other_index]} = 0 dB")
+            _finish_axis(axis, f"{antennas[antenna_index]} input gain (dB)", metric)
+        _save_figure(fig, settings, f"antenna_gain__single_antenna__{metric_name}", paths)
+    return paths
+
+
+def _mutual_coupling(rows: list[dict], settings: ValidationSettings) -> list[Path]:
+    """真实幅度、真实相位与固定真实条件下的名义失配分别比较。"""
+    import matplotlib.pyplot as plt
+
+    paths = []
+    for scene in dict.fromkeys(row["scene"] for row in rows):
+        scene_rows = [row for row in rows if row["scene"] == scene]
+        accurate = [row for row in scene_rows
+                    if row["true_coupling_db"] == row["assumed_coupling_db"]
+                    and row["true_coupling_phase_deg"] == row["assumed_coupling_phase_deg"]]
+        # 从实际条件选择幅度扫描的固定相位、相位扫描的固定幅度。
+        phases = [row["true_coupling_phase_deg"] for row in accurate
+                  if row["true_coupling_phase_deg"] is not None]
+        strength_phase = min(phases) if phases else None
+        strength = [row for row in accurate if row["true_coupling_db"] is None
+                    or row["true_coupling_phase_deg"] == strength_phase]
+        amplitude_phases = {}
+        for row in accurate:
+            if row["true_coupling_db"] is not None:
+                amplitude_phases.setdefault(row["true_coupling_db"], set()).add(
+                    row["true_coupling_phase_deg"])
+        phase_amplitude = (max(amplitude_phases, key=lambda amplitude:
+                               (len(amplitude_phases[amplitude]), amplitude))
+                           if amplitude_phases else None)
+        phase = [row for row in accurate if row["true_coupling_db"] == phase_amplitude
+                 and phase_amplitude is not None]
+        nominal_by_true = {}
+        for row in scene_rows:
+            true_key = (row["true_coupling_db"], row["true_coupling_phase_deg"])
+            nominal_by_true.setdefault(true_key, set()).add(
+                (row["assumed_coupling_db"], row["assumed_coupling_phase_deg"]))
+        mismatch_true = max(nominal_by_true, key=lambda key: len(nominal_by_true[key]))
+        mismatch = [row for row in scene_rows
+                    if (row["true_coupling_db"], row["true_coupling_phase_deg"]) == mismatch_true
+                    and mismatch_true[0] is not None]
+        groups = (("true_strength", strength), ("true_phase", phase),
+                  ("nominal_mismatch", mismatch))
+        for group_name, group_rows in groups:
+            if not group_rows:
+                continue
+            case_groups = _case_groups(group_rows)
+            identities = list(dict.fromkeys((group[0]["case"], group[0]["scene"])
+                                            for group in case_groups))
+            representative = {identity: next(group[0] for group in case_groups
+                                             if (group[0]["case"], group[0]["scene"]) == identity)
+                              for identity in identities}
+            if group_name == "true_strength":
+                identities.sort(key=lambda identity: (
+                    representative[identity]["true_coupling_db"] is not None,
+                    representative[identity]["true_coupling_db"] or -100))
+                labels = ["Off" if representative[key]["true_coupling_db"] is None else
+                          f"{representative[key]['true_coupling_db']:g} dB" for key in identities]
+            elif group_name == "nominal_mismatch":
+                labels = [("Off" if representative[key]["assumed_coupling_db"] is None else
+                           f"{representative[key]['assumed_coupling_db']:g} dB / "
+                           f"{representative[key]['assumed_coupling_phase_deg']:g}°")
+                          for key in identities]
+            fig, axes = plt.subplots(2, 1, figsize=(8, 7), constrained_layout=True)
+            for axis, metric in zip(axes, ("tracking_cn0_mean_db_hz", "acquisition_correct_flag")):
+                for mode_index, mode in enumerate(dict.fromkeys(row["mode"] for row in group_rows)):
+                    selected = [group for group in case_groups if group[0]["mode"] == mode]
+                    points = [((group[0]["true_coupling_phase_deg"] if group_name == "true_phase"
+                                else identities.index((group[0]["case"], group[0]["scene"]))),
+                               _mean_metric(group, metric)) for group in selected]
+                    _plot_points(axis, sorted(points), _mode_label(selected[0][0]), mode_index,
+                                 connect_flag=group_name == "true_phase")
+                if group_name != "true_phase":
+                    axis.set_xticks(range(len(labels)), labels,
+                                    rotation=20 if group_name == "nominal_mismatch" else 0)
+                _finish_axis(axis, {"true_strength": "True coupling",
+                                    "true_phase": "True phase (deg)",
+                                    "nominal_mismatch": "Nominal coupling"}[group_name], metric)
+            if group_name == "true_strength":
+                title = (f"Accurate nominal model; true phase {strength_phase:g}°"
+                         if strength_phase is not None else "No coupling")
+            elif group_name == "true_phase":
+                title = f"Accurate nominal model; true coupling {phase_amplitude:g} dB"
+            else:
+                title = f"True coupling {mismatch_true[0]:g} dB / {mismatch_true[1]:g}°"
+            fig.suptitle(f"{scene}: {title}")
+            _save_figure(fig, settings,
+                         f"mutual_coupling__{_filename_label(scene)}__{group_name}", paths)
+    return paths
+
+
+def _phase_center_offset(rows: list[dict], settings: ValidationSettings) -> list[Path]:
+    """总体几何条件只画独立散点；同一真实 XYZ 的名义校准单独成图。"""
+    import matplotlib.pyplot as plt
+
+    paths = []
+    groups = _case_groups(rows)
+    true_keys = {}
+    for group in groups:
+        true_key = (group[0]["scene"], tuple((antenna, tuple(offset)) for antenna, offset in sorted(
+            group[0]["true_offset_xyz_mm_by_antenna"].items())))
+        true_keys.setdefault(true_key, []).append(group)
+    calibration_groups = [collection for collection in true_keys.values()
+                          if len({group[0]["case"] for group in collection}) > 1
+                          and len({tuple((antenna, tuple(offset)) for antenna, offset in sorted(
+                              group[0]["assumed_offset_xyz_mm_by_antenna"].items()))
+                                   for group in collection}) > 1]
+    plot_groups = [("geometry", [group for group in groups if group[0]["scene"] == scene])
+                   for scene in dict.fromkeys(group[0]["scene"] for group in groups)]
+    plot_groups.extend((f"calibration_{index}", collection)
+                       for index, collection in enumerate(calibration_groups, 1))
+    for group_name, selected_groups in plot_groups:
+        fig, axes = plt.subplots(2, 1, figsize=(8, 7), constrained_layout=True)
+        for axis, metric in zip(axes, ("tracking_cn0_mean_db_hz", "acquisition_correct_flag")):
+            for mode_index, mode in enumerate(dict.fromkeys(group[0]["mode"]
+                                                            for group in selected_groups)):
+                mode_groups = [group for group in selected_groups if group[0]["mode"] == mode]
+                points = [(group[0]["residual_relative_los_mm"],
+                           _mean_metric(group, metric)) for group in mode_groups]
+                # 同 x 可属于不同真实 XYZ；保留多个点，不连接成伪扫描。
+                _plot_points(axis, sorted(points), _mode_label(mode_groups[0][0]), mode_index,
+                             connect_flag=False)
+            _finish_axis(axis, "Residual relative LOS (mm)", metric)
+        scene = selected_groups[0][0]["scene"]
+        fig.suptitle(f"{scene}: one point per physical case" if group_name == "geometry" else
+                     f"{scene}: nominal calibration at fixed true XYZ")
+        _save_figure(fig, settings,
+                     f"phase_center_offset__{_filename_label(scene)}__{group_name}", paths)
+    return paths
+
+
+def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path]:
+    """按显式实验类型分派绘图；保留真实数轴与同用例 seed 统计。"""
+    import matplotlib.pyplot as plt
+
+    if not rows:
+        return []
+    plotters = {
+        "phase_direction_gain": _phase_direction_gain,
+        "antenna_gain": _antenna_gain,
+        "mutual_coupling": _mutual_coupling,
+        "phase_center_offset": _phase_center_offset,
+    }
+    paths = plotters[settings.experiment_type](rows, settings)
     if settings.show_plots_flag and plt.get_backend().lower() != "agg":
         plt.show()
-    return figure_paths
+    return paths

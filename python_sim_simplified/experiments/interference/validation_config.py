@@ -14,7 +14,7 @@ from experiments.paths import INTERFERENCE_RESULTS_DIR
 from experiments.interference.validation_support import ValidationCase, ValidationSettings
 
 
-# 所有实验共用种子、时长、并行数和统计去边；绘图开关按实验区分。
+# 所有实验共用种子、时长、并行数、统计去边和绘图开关。
 # 选择实验类型后，输出固定写入 results/interference/<实验类型>/。
 EXPERIMENT_TYPE = "phase_direction_gain"  # 可选 "antenna_gain"、"mutual_coupling"、"phase_center_offset"。
 SEEDS = tuple(range(42, 43))  # 所有实验共用；单次运行设为 (42,)。
@@ -71,10 +71,8 @@ def _base_config(scene: str):
 
 
 def _pattern_gain_cases() -> list[ValidationCase]:
-    """21 个唯一物理增益条件；所有方法共用同一条件的前端。"""
+    """17 个唯一物理增益条件；所有方法共用同一条件的前端。"""
     case_definitions = [(gain_db, 0) for gain_db in range(0, -11, -1)]
-    for gain_db in (-3, -6, -10, -20):
-        case_definitions.append((gain_db, gain_db))
     for gain_db in (-3, -6, -10, -20, -40):
         case_definitions.append((0, gain_db))
     case_definitions.append((-20, 0))
@@ -260,18 +258,12 @@ def build_cases() -> list[ValidationCase]:
 
 
 def build_settings() -> ValidationSettings:
-    """共用统计窗口、输出推导和并行数；仅绘图选项随实验类型变化。"""
-    if EXPERIMENT_TYPE in ("mutual_coupling", "phase_center_offset"):
-        generate_plots_flag = False
-        show_plots_flag = False
-    else:
-        generate_plots_flag = GENERATE_PLOTS_FLAG
-        show_plots_flag = SHOW_PLOTS_FLAG
+    """共用统计窗口、输出推导、并行数和显式绘图开关。"""
     return ValidationSettings(
         evaluation_edge_trim_ms=EVALUATION_EDGE_TRIM_MS,
         output_dir=INTERFERENCE_RESULTS_DIR / EXPERIMENT_TYPE,
         experiment_type=EXPERIMENT_TYPE,
-        show_plots_flag=show_plots_flag,
+        show_plots_flag=SHOW_PLOTS_FLAG,
         workers=WORKERS,
-        generate_plots_flag=generate_plots_flag,
+        generate_plots_flag=GENERATE_PLOTS_FLAG,
     )

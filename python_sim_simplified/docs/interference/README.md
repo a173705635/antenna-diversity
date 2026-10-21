@@ -54,7 +54,7 @@ EGC 相位输入暂取名义响应相角，不随DFE注入误差调整。DFE 相
 
 移除源级响应实验后，以前述统一分派版本为基准，按相同条件核对保留的四类实验；固定 BLAS/OMP 单线程时，48行完整结果及144份合并采样、权值、跟踪Prompt数组的SHA256一致。未固定线程数时，合并采样可能存在浮点末位差异，独立复算误差不超过 `1e-14`；未重跑正式100 ms研究批次。
 
-验证共用 [validation_config.py](../../experiments/interference/validation_config.py) 顶部的 `MODES`、`ACTIVE_ANTENNAS`、`SEEDS`、`DURATION_MS`、`WORKERS` 及真实/名义目标方向；共享配置在 `_base_config()` 设置，`build_cases()` 统一展开种子。每个 seed 的增益、互耦、相位中心分别为21、12、16个物理条件，各自独立运行完整前端，默认四算法分别产生84、48、64行结果。当前增益编号TC-001～021，互耦编号MC-001～012，汇总按“条件＋算法”区分；下文旧结果按当时编号、算法和归一化方式解释。
+验证共用 [validation_config.py](../../experiments/interference/validation_config.py) 顶部的 `MODES`、`ACTIVE_ANTENNAS`、`SEEDS`、`DURATION_MS`、`WORKERS` 及真实/名义目标方向；共享配置在 `_base_config()` 设置，`build_cases()` 统一展开种子。每个 seed 的增益、互耦、相位中心分别为17、12、16个物理条件，各自独立运行完整前端，默认四算法分别产生68、48、64行结果。当前增益编号TC-001～017，互耦编号MC-001～012，汇总按“条件＋算法”区分；下文旧结果按当时编号、算法和归一化方式解释。
 
 所有实验暂时注释事后分量准备、投影、预算及其核验、打印、结果字段和图表。分量SNR/SINR、抑制比、相对SINGLE的分量收益、oracle C/N₀、交叉项及联合残差均不再输出；噪声预算专用实验也暂停。日常保留实际合并序列、协方差功率核验与捕获跟踪；相位仍在DFE输出注入，不代表天线端相位误差。
 
@@ -92,7 +92,7 @@ L1 C/A主码每1 ms重复。原实现将整个相干块的相关延迟作为搜�
 
 实际RF→DFE→接收链以seed 42、TL/BR、L1输入−128.5 dBm、40 ms数据、4×5捕获、最多20个跟踪历元执行。无干扰时SINGLE/EGC/MVDR/Blind Null峰峰比分别为23.551/38.232/38.246/23.551，均捕获1500 Hz、码相位885采样点并完成跟踪。保留默认首个CW（−90 dBm、方向80°/10°）时，MVDR/Blind Null分别为23.314/23.051并捕获跟踪；SINGLE/EGC仍约1而失败，属于该干扰场景的接收结果，不是重复真峰问题。搜索图为41×6600，实际相干积分长度26400采样点。验证在内存执行，未覆盖既有实验结果。
 
-新保存的验证图按“实验类型__扫描因素及单位__指标__算法.png”命名，例如 `antenna_gain__tl_gain_db__thermal_snr_gain__single.png`；干扰抑制图标明干扰源，独立实验图加实验前缀。下文历史记录中的旧文件名及已有图片保持原样。
+当前验证图按实验目标命名：相位、方向和增益扫描以场景及因素区分；天线增益按单路衰减、互耦按真实强度/相位/名义失配、相位中心按总体几何/固定真实位置校准区分。每个物理用例只在自身内部跨 seed 统计，C/N₀ 缺测保留空点，正确捕获比例使用全部 seed。下文历史记录中的旧文件名及已有图片保持原样。
 
 ## 无干扰相位中心偏移验证（2026-10-16）
 
@@ -127,7 +127,7 @@ L1 C/A主码每1 ms重复。原实现将整个相干块的相关延迟作为搜�
 
 ### 运行与结果表
 
-当前在python_sim_simplified目录执行 `python -m experiments.interference.validation`，默认 `EXPERIMENT_TYPE="phase_center_offset"`；种子、时长、并行数统一由 `SEEDS`、`DURATION_MS`、`WORKERS` 控制，输出自动为 `results/interference/phase_center_offset/`。下面命令运行当前版本的单seed验证，写入 `results/interference/smoke/phase_center_offset/`；历史结果仍对应当时源码：
+当前在python_sim_simplified目录执行 `python -m experiments.interference.validation`，先选择 `EXPERIMENT_TYPE="phase_center_offset"`；种子、时长、并行数统一由 `SEEDS`、`DURATION_MS`、`WORKERS` 控制，输出自动为 `results/interference/phase_center_offset/`。下面命令运行当前版本的单seed验证，写入 `results/interference/smoke/phase_center_offset/`；历史结果仍对应当时源码：
 
 ```powershell
 $env:OPENBLAS_NUM_THREADS='1'
@@ -265,7 +265,7 @@ TRK C/N₀不是上述分量SNR：例如严格EGC的PC001/PC002/PC009后段估�
 
 ### 运行互耦批次
 
-当前使用 `python -m experiments.interference.validation`，选择 `EXPERIMENT_TYPE="mutual_coupling"`；共用 `SEEDS`、`DURATION_MS`、`WORKERS`，默认30 seed、100 ms、4进程，输出自动为 `results/interference/mutual_coupling/`，不生成或弹出图片。
+当前使用 `python -m experiments.interference.validation`，选择 `EXPERIMENT_TYPE="mutual_coupling"`；共用 `SEEDS`、`DURATION_MS`、`WORKERS`，输出自动为 `results/interference/mutual_coupling/`。是否生成、显示图片由入口顶部 `GENERATE_PLOTS_FLAG`、`SHOW_PLOTS_FLAG` 决定；当前默认各为 `True`。
 
 优先阅读 `model_checks.csv`（7行模型检查）和 `case_summary.csv`（48行接收条件汇总）；`summary.csv`记录逐seed指标，`summary.json`、`verification.json`保留独立复算与失败原因，`manifest.json`记录实际配置。接收机权值仍只来自实际DFE数据和名义响应，真值与分量仅用于接收完成后的评分。
 
@@ -347,7 +347,7 @@ case_summary.csv每行一个条件及算法，保留条件参数、对照、性�
 
 无干扰方向图研究见 [天线方向图增益验证用例](antenna_pattern_validation_cases.md)：20 个分类下共 **425 条独立用例 TC-001～TC-425**，每条固定参数、一个被测方法、明确对照和判据。TC-001～044已执行，余下381条未执行，不将扫描组记作一条用例。
 
-增益验证入口为 `python -m experiments.interference.validation`，选择 `EXPERIMENT_TYPE="antenna_gain"`，新输出自动为 `results/interference/antenna_gain/`。历史首批44条及后来扩展的50条记录保留在 `results/interference/pattern_gain_first44/`；其参数和结论按下文对应记录解读。`progress.jsonl` 记录逐次完成进度，`summary.csv` 保存逐seed数据，`case_summary.csv` 保存逐用例汇总。切换相位/方向/增益扫描用 `EXPERIMENT_TYPE="phase_direction_gain"`，按需设置 `SEEDS` 等参数，输出目录随选择自动切换。运行中不要再次启动同输出目录的实验。
+增益验证入口为 `python -m experiments.interference.validation`，选择 `EXPERIMENT_TYPE="antenna_gain"`，新输出自动为 `results/interference/antenna_gain/`。当前17个条件为0/0基准、第一路单独衰减0至−10及−20 dB、第二路单独衰减−3/−6/−10/−20/−40 dB；删除四个双路共同衰减条件后，原 TC-016～021 改编为 TC-012～017，旧结果仍按旧编号解读。历史首批44条及后来扩展的50条记录保留在 `results/interference/pattern_gain_first44/`；其参数和结论按下文对应记录解读。`progress.jsonl` 记录逐次完成进度，`summary.csv` 保存逐seed数据，`case_summary.csv` 保存逐用例汇总。切换相位/方向/增益扫描用 `EXPERIMENT_TYPE="phase_direction_gain"`，按需设置 `SEEDS` 等参数，输出目录随选择自动切换。运行中不要再次启动同输出目录的实验。
 
 `egc` 保持旧幅度匹配实现，新增 `egc_strict` 才是等幅相位对齐；首批每条仅运行文档指定的一种方法。SINGLE的输出有单位响应归一，天线增益传递通过合并前的逐通道线性分量功率单独验证。TC编号是离散类别，因此本批图只画散点、不连成连续扫描曲线。
 
