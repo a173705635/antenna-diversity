@@ -6,7 +6,7 @@ import sys
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from core.metrics import format_metrics
+from core.metrics import format_metric_value, format_metrics
 from core.pipeline import run_end_to_end
 from core.plotting import (
     plot_cn0,
@@ -88,12 +88,17 @@ def main():
         indent=2, allow_nan=False), encoding='utf-8')
     # 每种算法一行，复用同一份 metrics；完整追溯配置留在 manifest。
     with (output_dir / 'summary.csv').open('w', newline='', encoding='utf-8-sig') as stream:
-        columns = ('mode', 'acquired_flag', 'tracking_flag',
-                   'tracking_cn0_mean_db_hz', 'acquisition_metric',
-                   'acquisition_code_bias_chips', 'tracking_code_bias_rms_m')
-        writer = csv.DictWriter(stream, fieldnames=columns)
+        columns = (
+            ('mode', 'Mode'), ('acquired_flag', 'ACQ Pass'),
+            ('tracking_flag', 'TRK'), ('tracking_cn0_mean_db_hz', 'CN0 (dB-Hz)'),
+            ('acquisition_metric', 'ACQ Ratio'),
+            ('acquisition_code_bias_chips', 'ACQ Code Err (chip)'),
+            ('tracking_code_bias_rms_m', 'TRK Code RMS (m)'),
+        )
+        writer = csv.DictWriter(stream, fieldnames=[label for _, label in columns])
         writer.writeheader()
-        writer.writerows({key: record[key] for key in columns} for record in results['metrics'])
+        writer.writerows({label: format_metric_value(key, record[key]) for key, label in columns}
+                         for record in results['metrics'])
     if FREEZE_SOURCE_FLAG:
         freeze_source(output_dir)
 

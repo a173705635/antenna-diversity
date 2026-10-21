@@ -29,7 +29,7 @@ def _branch_label(results, mode):
         if source == "external_input":
             return "EGC (external phase)"
         return f"EGC ({source})"
-    return "MVDR (known response)"
+    return "MVDR (known resp)"
 
 
 def _spectrum(x, fs_hz):
@@ -246,14 +246,14 @@ def plot_acquisition(results):
             markersize=9,
         )
         axis.set(
-            title=f"{_branch_label(results, mode)}  metric={acquisition['metric']:.2f}",
+            title=f"{_branch_label(results, mode)}  ACQ Ratio={acquisition['metric']:.2f}",
             xlabel="Code phase (samples)",
             ylabel="Doppler (Hz)",
         )
         figure.colorbar(image, ax=axis, label="Normalized power (dB)")
     for axis in axes.flat[len(modes) :]:
         axis.set_visible(False)
-    figure.suptitle("Acquisition search maps")
+    figure.suptitle("ACQ Maps")
     figure.tight_layout()
     return figure
 
@@ -276,7 +276,7 @@ def plot_tracking(results):
         axis.grid(True, alpha=0.3)
         if axis.lines:
             axis.legend()
-    figure.suptitle("Tracking loops")
+    figure.suptitle("TRK Loops")
     figure.tight_layout()
     return figure
 
@@ -289,9 +289,9 @@ def plot_cn0(results):
             values = branch_result["tracking"]["cn0_db_hz"]
             axis.plot(np.arange(values.size) + 1, values, label=_branch_label(results, mode))
     axis.set(
-        title="Tracking C/N0",
+        title="TRK CN0",
         xlabel="Epoch (ms)",
-        ylabel="C/N0 (dB-Hz)",
+        ylabel="TRK CN0 (dB-Hz)",
     )
     # C/N₀直接显示实际数值，避免倍率和偏移量影响读数。
     axis.ticklabel_format(axis="y", style="plain", useOffset=False)
@@ -760,7 +760,7 @@ def _plot_detailed_acquisition(results):
             markeredgewidth=2,
         )
         axes[0].set(
-            title=f"{_branch_label(results, mode)} search map",
+            title=f"{_branch_label(results, mode)} ACQ Map",
             xlabel="Code phase (chips)",
             ylabel="Doppler (Hz)",
         )
@@ -799,9 +799,9 @@ def _plot_detailed_acquisition(results):
         status = "PASS" if acquisition["success_flag"] else "FAIL"
         axes[1].set(
             title=(
-                f"{_branch_label(results, mode)}: {status}, metric={acquisition['metric']:.2f}\n"
-                f"Doppler={acquisition['doppler_hz']:.0f} Hz, "
-                f"code={peak_chip:.2f} chips"
+                f"{_branch_label(results, mode)}: {status}, ACQ Ratio={acquisition['metric']:.2f}\n"
+                f"Dop={acquisition['doppler_hz']:.0f} Hz, "
+                f"Code={peak_chip:.2f} chip"
             ),
             xlabel="Code phase (chips)",
             ylabel="Normalized power (dB)",
@@ -809,7 +809,7 @@ def _plot_detailed_acquisition(results):
         )
         axes[1].grid(True, alpha=0.3)
         axes[1].legend()
-        figure.suptitle(f"Detailed acquisition: {_branch_label(results, mode)}")
+        figure.suptitle(f"ACQ Detail: {_branch_label(results, mode)}")
         figure.tight_layout()
         figures[f"detailed_acquisition_{mode}"] = figure
     return figures

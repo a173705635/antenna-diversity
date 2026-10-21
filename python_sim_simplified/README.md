@@ -6,6 +6,10 @@
 
 分集实验优先看 `case_summary.csv` 用例汇总，`summary.csv` 保存明细，FULL CHAIN 的 `summary.csv` 每算法一行。`manifest.json` 保存条件、实际配置和源码哈希，通用验证的 `summary.json` 保存统计与核验。两入口的跟踪 C/N₀ 统一为原始历元后半段有效 dB-Hz 值的均值；细节见[抗干扰说明](docs/interference/README.md)。
 
+表头缩写：`ACQ Pass` 为过捕获门限，`ACQ OK` 为正确捕获（主表为次数、明细为布尔值），`TRK` 为跟踪成功；`N` 是总 seed 数，`CN0 Seeds` 是有效 seed 数，`CN0 Epochs` 是有效历元数，`SD` 是标准差，`Nom` 是名义值。
+
+CSV 与终端中的 CN0、标准差、捕获比值、频差和米制误差显示两位小数，码片误差三位，计数为整数；计算和 JSON 保留原始精度。
+
 每次修改及实际验证统一记录在 [CHANGELOG](CHANGELOG.md)。抗干扰的建模前提、实验条件和已有结果见 [详细说明](docs/interference/README.md)。
 
 ```text

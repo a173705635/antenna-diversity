@@ -16,6 +16,7 @@ if __package__ in (None, ""):
     # 支持直接运行本文件；模块方式启动时无需修改导入路径。
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from core.metrics import format_metric_value
 from core.provenance import source_hashes
 from core.serialization import serializable
 from experiments.interference.validation_config import build_cases, build_settings
@@ -33,6 +34,29 @@ DETAIL_RESULT_COLUMNS = (
     "tracking_success_flag", "tracking_status", "tracking_cn0_mean_db_hz",
     "tracking_cn0_valid_count",
 )
+
+CSV_LABELS = {
+    "case": "Case", "mode": "Mode", "seed": "Seed", "scene": "Scene",
+    "series": "Series", "seeds": "N",
+    "acquisition_correct_count": "ACQ OK", "tracking_success_count": "TRK",
+    "tracking_cn0_mean_db_hz": "CN0 (dB-Hz)",
+    "tracking_cn0_std_db_hz": "CN0 SD (dB)",
+    "tracking_cn0_valid_seed_count": "CN0 Seeds",
+    "acquisition_metric": "ACQ Ratio", "acquired_flag": "ACQ Pass",
+    "acquisition_correct_flag": "ACQ OK",
+    "acquired_code_error_chips": "ACQ Code Err (chip)",
+    "acquired_doppler_error_hz": "ACQ Dop Err (Hz)",
+    "tracking_success_flag": "TRK", "tracking_status": "TRK Status",
+    "tracking_cn0_valid_count": "CN0 Epochs",
+    "condition_xyz_mm": "XYZ (mm)",
+    "true_coupling_db": "Cpl True (dB)",
+    "true_coupling_phase_deg": "Cpl True (deg)",
+    "assumed_coupling_db": "Cpl Nom (dB)",
+    "assumed_coupling_phase_deg": "Cpl Nom (deg)",
+    "DFE channel phase (deg)": "DFE Phase (deg)",
+    "target true azimuth (deg)": "True Az (deg)",
+    "target azimuth (deg)": "Target Az (deg)",
+}
 
 
 def _write_json(output_path: Path, content: object) -> None:
@@ -57,8 +81,19 @@ def _write_csv(output_path: Path, records: list[dict]) -> None:
     columns = list(dict.fromkeys(key for record in records for key in record))
     with output_path.open("w", newline="", encoding="utf-8-sig") as stream:
         writer = csv.DictWriter(stream, fieldnames=columns)
-        writer.writeheader()
-        writer.writerows(records)
+        # 只格式化 CSV 的表头和数值；原记录供统计及 JSON 保存，不在此舍入。
+        writer.writerow({key: _csv_label(key) for key in columns})
+        writer.writerows({key: format_metric_value(key, value) for key, value in record.items()}
+                         for record in records)
+
+
+def _csv_label(key: str) -> str:
+    """保留内部字段名，只将 CSV 表头压成便于阅读的短标签。"""
+    if key in CSV_LABELS:
+        return CSV_LABELS[key]
+    if key.endswith("_gain_db"):
+        return f"{key.removesuffix('_gain_db')} Gain (dB)"
+    return key.replace(" gain (", " Gain (")
 
 
 def _phase_center_row_condition(row: dict) -> str:

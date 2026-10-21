@@ -124,8 +124,8 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
             # ("thermal_snr_gain", (("thermal_snr_gain_db", "Thermal SNR gain vs SINGLE (dB)"),)),
             # ("target_power_gain", (("target_gain_db", "Target power gain vs SINGLE (dB)"),)),
             # ("linear_in_band_sinr", (("linear_in_band_sinr_db", "C / (I + N) (dB)"),)),
-            ("acquisition_peak_ratio", (("acquisition_metric", "Acquisition peak ratio"),)),
-            ("tracking_cn0_mean", (("tracking_cn0_mean_db_hz", "Tracking C/N0 (dB-Hz)"),)),
+            ("acquisition_peak_ratio", (("acquisition_metric", "ACQ Ratio"),)),
+            ("tracking_cn0_mean", (("tracking_cn0_mean_db_hz", "TRK CN0 (dB-Hz)"),)),
         ]
         # 各干扰源独立成图，避免长标签和过多行把目标/接收指标挤在一起。
         # source_names = _distinct_plot_names({source: _filename_label(source) for source in sources})
@@ -140,6 +140,9 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                             for filename, metrics in figures for mode in modes]
         for filename, metrics, figure_mode in separate_figures:
             figure_scenes = scenes
+            comparison_source = (next(row["phase_estimate_source"] for row in factor_rows
+                                      if row["mode"] == figure_mode)
+                                 if figure_mode == "egc" else None)
             # if filename.startswith("interferer_suppression_"):
             #     source = metrics[0][0].removeprefix("suppression:")
             #     figure_scenes = [scene for scene in scenes if any(
@@ -199,22 +202,32 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                             axis.text(0.02, 0.98, "Overlapping (tolerance 1e-8):\n" + "\n".join(overlaps),
                                       va="top", fontsize=9, transform=axis.transAxes,
                                       bbox={"facecolor": "white", "alpha": 0.8, "edgecolor": "none"})
-                        xlabel = factor_label or "condition"
+                        xlabel = {
+                            "DFE channel phase": "DFE Phase",
+                            "target true azimuth": "True Az",
+                            "target azimuth": "Target Az",
+                        }.get(factor_label, factor_label or "condition")
                         if factor_unit:
                             xlabel += f" ({factor_unit})"
                         displayed_rows = [row for row in factor_rows
                                           if row["scene"] == scene and row["mode"] == mode]
-                        mode_label = {
-                            "egc": "EGC (preset phase comparison)",
-                            "mvdr": "MVDR (known response comparison)",
-                        }.get(mode, f"{mode} (actual)")
+                        mode_label = mode.upper()
+                        if mode == "mvdr":
+                            mode_label = "MVDR (known resp)"
+                        elif mode == "egc":
+                            if comparison_source == "preset_assumed_target_response_phase":
+                                mode_label = "EGC (preset phase)"
+                            elif comparison_source == "external_input":
+                                mode_label = "EGC (external phase)"
+                            else:
+                                mode_label = f"EGC ({comparison_source})"
                         title = f"{scene} / {mode_label}"
                         if gain_batch_flag:
                             seed_count = len({row["seed"] for row in displayed_rows})
-                            title += f"\nMean across seeds (n={seed_count})"
+                            title += f"\nSeed mean (n={seed_count})"
                             # ylabel = ylabel.replace("vs SINGLE", f"vs SINGLE-{displayed_rows[0]['single_reference_antenna']}")
                             if metric == "tracking_cn0_mean_db_hz":
-                                title += "; available estimates only"
+                                title += "; Valid only"
                         axis.set(title=title, xlabel=xlabel, ylabel=ylabel)
                         scan_points = [row["scan_value"] for row in factor_rows
                                        if row["scene"] == scene and row["mode"] == mode
@@ -228,17 +241,17 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
                                                  if row["scene"] == scene and row["mode"] == mode})
                             for threshold in thresholds:
                                 axis.axhline(threshold, color="#888888", linestyle="-.",
-                                             label=f"threshold {threshold:g}")
+                                             label=f"Thr {threshold:g}")
                         if metric == "tracking_cn0_mean_db_hz":
                             axis.ticklabel_format(axis="y", style="plain", useOffset=False)
                             measured = [row[metric] for row in factor_rows
                                         if row["scene"] == scene and row["mode"] == mode
                                         and row[metric] is not None]
                             if measured:
-                                axis.text(0.02, 0.02, "Gaps = no finite tracking estimate",
+                                axis.text(0.02, 0.02, "Gaps = missing CN0",
                                           fontsize=7, transform=axis.transAxes)
                             else:
-                                axis.text(0.5, 0.5, "No finite tracking estimate",
+                                axis.text(0.5, 0.5, "No valid CN0",
                                           ha="center", transform=axis.transAxes)
                                 axis.set_yticks([])
                         axis.grid(alpha=0.3)

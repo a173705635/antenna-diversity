@@ -12,6 +12,26 @@ from .models import (
 )
 
 
+# 日常结果的显示精度；只在导出时使用，统计和 JSON 仍保留原始数值。
+METRIC_DECIMAL_PLACES = {
+    "tracking_cn0_mean_db_hz": 2,
+    "tracking_cn0_std_db_hz": 2,
+    "acquisition_metric": 2,
+    "acquired_doppler_error_hz": 2,
+    "final_doppler_hz": 2,
+    "acquired_code_error_chips": 3,
+    "acquisition_code_bias_chips": 3,
+    "tracking_code_bias_rms_m": 2,
+}
+
+
+def format_metric_value(name: str, value):
+    """按指标单位生成显示文本；缺测值留空，条件、计数和布尔值原样保留。"""
+    if name in METRIC_DECIMAL_PLACES and value is not None:
+        return f"{value:.{METRIC_DECIMAL_PLACES[name]}f}"
+    return value
+
+
 def circular_chip_error(estimate, truth):
     return (
         np.asarray(estimate) - np.asarray(truth) + 511.5
@@ -130,26 +150,37 @@ def format_metrics(records: list[MetricRecord]) -> str:
     for record in records:
         mode_label = record["mode"]
         if record["receiver_role"] == "known_response_comparison":
-            source = (record["phase_estimate_source"] if mode_label == "egc"
-                      else "known_response")
-            mode_label += f" ({source})"
+            if mode_label == "mvdr":
+                mode_label = "MVDR (known resp)"
+            elif mode_label == "egc":
+                source = record["phase_estimate_source"]
+                if source == "preset_assumed_target_response_phase":
+                    mode_label = "EGC (preset phase)"
+                elif source == "external_input":
+                    mode_label = "EGC (external phase)"
+                else:
+                    mode_label = f"EGC ({source})"
+            else:
+                mode_label += f" ({record['phase_estimate_source']})"
         mode_labels.append(mode_label)
-    mode_width = max([10, *(len(label) for label in mode_labels)])
+    mode_width = max([4, *(len(label) for label in mode_labels)])
     header = (
-        f"{'Mode':>{mode_width}} {'Acq':>6} {'Metric':>9} {'Tracking':>9} "
-        f"{'Doppler':>10} {'C/N0':>9} {'CodeBias(m)':>12}"
+        f"{'Mode':>{mode_width}} {'ACQ Pass':>8} {'ACQ Ratio':>9} {'TRK':>5} "
+        f"{'Dop (Hz)':>9} {'CN0 (dB-Hz)':>12} {'Code RMS (m)':>12}"
     )
     lines = [header, "-" * len(header)]
     for record, mode_label in zip(records, mode_labels):
-        doppler = record["final_doppler_hz"]
-        cn0 = record["tracking_cn0_mean_db_hz"]
-        code_bias_m = record["tracking_code_bias_rms_m"]
+        # CSV 和终端共用精度；终端沿用 nan 标记缺测，CSV 仍为空单元格。
+        displayed_metrics = {
+            name: format_metric_value(name, value) if value is not None else "nan"
+            for name, value in record.items()
+        }
         lines.append(
-            f"{mode_label:>{mode_width}} {str(record['acquired_flag']):>6} "
-            f"{record['acquisition_metric']:>9.3f} "
-            f"{str(record['tracking_flag']):>9} "
-            f"{doppler if doppler is not None else np.nan:>10.2f} "
-            f"{cn0 if cn0 is not None else np.nan:>9.2f} "
-            f"{code_bias_m if code_bias_m is not None else np.nan:>12.3f}"
+            f"{mode_label:>{mode_width}} {str(record['acquired_flag']):>8} "
+            f"{displayed_metrics['acquisition_metric']:>9} "
+            f"{str(record['tracking_flag']):>5} "
+            f"{displayed_metrics['final_doppler_hz']:>9} "
+            f"{displayed_metrics['tracking_cn0_mean_db_hz']:>12} "
+            f"{displayed_metrics['tracking_code_bias_rms_m']:>12}"
         )
     return "\n".join(lines)
