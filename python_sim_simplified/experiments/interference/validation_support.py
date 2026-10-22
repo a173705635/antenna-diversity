@@ -77,6 +77,8 @@ def rf_group_delay_metadata(case_cfg: SimulationConfig) -> dict:
     return {"offset_ns_by_antenna": offset_ns_by_antenna,
             "affected_antenna": affected_antenna,
             "reference_antenna": reference_antenna,
+            "carrier_hz": case_cfg.signal.carrier_hz,
+            "delay_model": "physical_rf_delay",
             "dfe_cutoff_hz": case_cfg.dfe.cutoff_hz}
 
 

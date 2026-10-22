@@ -212,7 +212,7 @@ class RFConfig:
     # A scalar applies to every row; a tuple follows input channel row order.
     amplitude_error_db: float | tuple[float, ...] = 0.0
     phase_error_deg: float | tuple[float, ...] = 0.0
-    # 相对中频中心的非负附加固定群时延；按物理通道名指定，未列出的通道为零。
+    # 物理 RF 载频上的非负附加固定时延；按物理通道名指定，未列出的通道为零。
     group_delay_offset_ns: dict[str, float] = field(default_factory=dict)
 
 

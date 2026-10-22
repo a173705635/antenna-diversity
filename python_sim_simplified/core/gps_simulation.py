@@ -116,6 +116,7 @@ def run_record(seed, satellites, scene, cfg):
     adc, rf_info = process_rf(
         rf_input_v, cfg.rf, cfg.reference_impedance_ohm, seed,
         fs_hz=cfg.signal.fs_rf_hz, if_hz=cfg.signal.if_hz,
+        carrier_hz=cfg.signal.carrier_hz,
         channel_ids=cfg.phone.active_antennas,
     )
     del rf_input_v

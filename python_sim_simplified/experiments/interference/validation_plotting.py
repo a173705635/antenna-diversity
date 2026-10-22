@@ -104,7 +104,8 @@ def _phase_offset(rows: list[dict], settings: ValidationSettings) -> list[Path]:
 
 
 def _phase_or_rf_delay(rows: list[dict], settings: ValidationSettings, xlabel: str,
-                       caption: str, file_prefix: str) -> list[Path]:
+                       caption: str, file_prefix: str,
+                       connect_scan_flag: bool = True) -> list[Path]:
     """复用相位与 RF 时延扫描的 C/N₀、条件式 ACQ 绘图。"""
     import matplotlib.pyplot as plt
 
@@ -119,7 +120,8 @@ def _phase_or_rf_delay(rows: list[dict], settings: ValidationSettings, xlabel: s
         for mode_index, mode in enumerate(modes):
             mode_rows = [row for row in scene_rows if row["mode"] == mode]
             curves[mode] = _scan_points(mode_rows, "tracking_cn0_mean_db_hz")
-            _plot_points(axis, curves[mode], _mode_label(mode_rows[0]), mode_index)
+            _plot_points(axis, curves[mode], _mode_label(mode_rows[0]), mode_index,
+                         connect_flag=connect_scan_flag)
         axis.set_title(scene)
         axis.set_xticks(sorted({row["scan_value"] for row in scene_rows}))
         _finish_axis(axis, xlabel, "tracking_cn0_mean_db_hz")
@@ -192,29 +194,44 @@ def _phase_or_rf_delay(rows: list[dict], settings: ValidationSettings, xlabel: s
 
 
 def _rf_group_delay(rows: list[dict], settings: ValidationSettings) -> list[Path]:
-    """绘制接收指标，并单列展示相对参考通道的理想固定时延相位模型。"""
+    """绘制离散接收指标及 RF 物理时延的中心相位与带内连续相位。"""
     import matplotlib.pyplot as plt
 
     metadata = rows[0]["rf_group_delay"]
     affected = metadata["affected_antenna"]
     reference = metadata["reference_antenna"]
-    caption = (f"RF group delay on {affected} relative to {reference}"
-               "\nNominal target response fixed")
-    paths = _phase_or_rf_delay(rows, settings, "RF delay (ns)", caption, "rf_group_delay")
+    caption = (f"Physical RF delay on {affected} relative to {reference}"
+               "\nDiscrete scan points; nominal target response fixed")
+    paths = _phase_or_rf_delay(rows, settings, "Physical RF delay (ns)", caption,
+                               "rf_group_delay", connect_scan_flag=False)
 
-    # 理想传递函数 H_m(ν)=H_0(ν)exp(-j2πνΔτ)；这里只画模型，不把它说成实测响应。
+    # 中心相位使用真实 RF 载频；频偏斜率仅加一次，图中每条带内曲线连续。
     frequency_mhz = np.linspace(-metadata["dfe_cutoff_hz"], metadata["dfe_cutoff_hz"], 401) / 1e6
-    fig, axis = plt.subplots(figsize=(8, 5), constrained_layout=True)
+    fig, (center_axis, band_axis) = plt.subplots(2, 1, figsize=(8, 8),
+                                                  constrained_layout=True)
+    center_points = []
     for delay_ns in sorted({row["scan_value"] for row in rows}):
         row = next(item for item in rows if item["scan_value"] == delay_ns)
-        offsets_ns = row["rf_group_delay"]["offset_ns_by_antenna"]
+        row_metadata = row["rf_group_delay"]
+        offsets_ns = row_metadata["offset_ns_by_antenna"]
         relative_delay_ns = offsets_ns.get(affected, 0.0) - offsets_ns.get(reference, 0.0)
-        axis.plot(frequency_mhz, -360.0 * frequency_mhz * 1e6 * relative_delay_ns * 1e-9,
-                  label=f"{delay_ns:g} ns")
-    axis.set(xlabel="Frequency relative to IF center (MHz)", ylabel="Relative phase (deg)",
-             title=f"Ideal model: {affected} minus {reference}; DFE passband cutoff")
-    axis.grid(alpha=0.3)
-    axis.legend(title="RF delay")
+        center_phase_deg = np.angle(np.exp(
+            -2j * np.pi * row_metadata["carrier_hz"] * relative_delay_ns * 1e-9,
+        ), deg=True)
+        center_points.append((delay_ns, center_phase_deg))
+        band_axis.plot(frequency_mhz,
+                       center_phase_deg - 360.0 * frequency_mhz * relative_delay_ns * 1e-3,
+                       label=f"{delay_ns:g} ns")
+    center_axis.plot(*zip(*center_points), linestyle="None", marker="o")
+    center_axis.set(xlabel="Scanned RF delay (ns)", ylabel="Center phase (deg)",
+                    title=f"Ideal model: {affected} minus {reference}; principal center phase [-180, 180]")
+    center_axis.set_xticks([point[0] for point in center_points])
+    center_axis.grid(alpha=0.3)
+    band_axis.set(xlabel="Frequency relative to RF center (MHz)",
+                  ylabel="Relative phase (deg)",
+                  title="Ideal model: center-wrapped phase, continuous across band; DFE cutoff")
+    band_axis.grid(alpha=0.3)
+    band_axis.legend(title="RF delay")
     _save_figure(fig, settings, "rf_group_delay__ideal_phase_model", paths)
     return paths
 

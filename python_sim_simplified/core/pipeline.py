@@ -131,6 +131,7 @@ def run_frontend(
         cfg.random_seed,
         fs_hz=cfg.signal.fs_rf_hz,
         if_hz=cfg.signal.if_hz,
+        carrier_hz=cfg.signal.carrier_hz,
         channel_ids=cfg.phone.active_antennas,
         retain_analysis_flag=retain_analysis_flag,
     )

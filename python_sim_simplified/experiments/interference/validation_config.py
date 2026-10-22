@@ -189,7 +189,7 @@ def _phase_offset_cases() -> list[ValidationCase]:
 
 
 def _rf_group_delay_cases() -> list[ValidationCase]:
-    """每场景和附加时延独立运行完整前端；名义目标响应保持预设值。"""
+    """每场景独立扫描包络与 RF 载波的同一物理时延；名义响应不补偿。"""
     cases = []
     for scene in RF_GROUP_DELAY_SCENES:
         for delay_ns in RF_GROUP_DELAY_SCAN_NS:

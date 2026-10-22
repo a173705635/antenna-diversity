@@ -4,7 +4,7 @@ import numpy as np
 from scipy.optimize import brentq
 from scipy.signal import firwin, lfilter
 
-from .channel_delay import fractional_delay
+from .channel_delay import delay_phase, fractional_delay
 from .config import RFConfig
 from .models import RFInfo
 from .noise import (
@@ -28,8 +28,9 @@ def design_rf_filter(fs_hz: float, bandwidth_hz: float, num_taps: int) -> np.nda
 def filter_rf_input(
     samples: np.ndarray, coefficients: np.ndarray, fs_hz: float, if_hz: float,
     group_delay_offsets_s: float | np.ndarray = 0.0,
+    *, carrier_hz: float,
 ) -> np.ndarray:
-    """滤波复数 IF 电压并补偿 FIR 时延，再按通道延迟基带；输入非负时延，单位 s。"""
+    """滤波复数 IF 电压并对齐 FIR，再施加按通道指定的物理 RF 时延（s）。"""
     delay = (len(coefficients) - 1) // 2
     offsets_s = np.broadcast_to(np.asarray(group_delay_offsets_s, dtype=float), (samples.shape[0],))
     sample_index = np.arange(samples.shape[-1])
@@ -40,9 +41,10 @@ def filter_rf_input(
         padded = np.pad(baseband, (delay, delay))
         filtered = lfilter(coefficients, [1.0], padded)
         aligned = filtered[2 * delay:2 * delay + samples.shape[-1]]
-        # 附加时延位于公共 FIR 对齐之后，中心频率的复相位保持不变。
+        # 基带移位包含频偏相位；RF 载频的相位变化另乘一次，不使用 IF 频率。
         if offsets_s[row] != 0.0:
             aligned = fractional_delay(aligned, offsets_s[row] * fs_hz)
+            aligned *= delay_phase(offsets_s[row], carrier_hz)
         output[row] = aligned * oscillator.conj()
     return output
 
@@ -59,6 +61,7 @@ def process_rf(
     *,
     fs_hz: float,
     if_hz: float,
+    carrier_hz: float,
     channel_ids: tuple[str, ...],
     retain_analysis_flag: bool = False,
 ) -> tuple[np.ndarray, RFInfo]:
@@ -111,6 +114,7 @@ def process_rf(
     )
     filtered_input = filter_rf_input(
         x_rf_input_v + added_noise_v, coefficients, fs_hz, if_hz, group_delay_offsets_s,
+        carrier_hz=carrier_hz,
     )
     before_limit = filtered_input * np.sqrt(total_gain_linear)
     retained_added_noise_v = added_noise_v if retain_analysis_flag else None

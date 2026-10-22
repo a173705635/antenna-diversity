@@ -32,7 +32,7 @@ def linear_components(frontend: SimulationResults) -> dict[str, np.ndarray]:
         # 所有源和三段噪声在 RF 输入处汇合，统一滤波恰一次。
         filtered = filter_rf_input(
             voltage, rf_info["filter_coefficients"], rf_info["fs_hz"], rf_info["if_hz"],
-            rf_info["group_delay_offsets_s"],
+            rf_info["group_delay_offsets_s"], carrier_hz=cfg.signal.carrier_hz,
         )
         return linear_dfe(filtered * adc_scale, dfe_info) / output_scale
 

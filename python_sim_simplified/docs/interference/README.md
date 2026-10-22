@@ -2,7 +2,21 @@
 
 当前运行结果先看 `case_summary.csv`（用例×算法跨 seed 统计），再看 `summary.csv`（逐 seed；FULL CHAIN 为逐算法）。日常表只放必要条件、捕获/跟踪与 C/N₀；validation 的权值、实际功率和复算误差仍在 `summary.json` 的 rows 中，FULL CHAIN 的 `summary.json` 为逐算法 metrics 列表。CSV 使用 UTF-8 BOM；`manifest.json` 保存完整用例条件、实际配置、运行方法身份与源码哈希，通用验证的 `summary.json` 保存行、专项统计和 `verification`，不再另写 `verification.json`。并行验证运行中写 `progress.jsonl`，完整入口保存、绘图和核验成功后删除，失败时保留。两入口的跟踪 C/N₀ 均从原始历元 `len//2` 处取后半段，剔除 NaN/Inf 后直接计算 dB-Hz 算术均值，未完成跟踪或后半段全缺测留空；跨 seed 仅等权平均有值的 seed。这不保证跟踪已收敛，也不等同于线性域先平均再转 dB。历史结果文件及下文历史实验记录仍按生成时版本解读。
 
+## RF物理延时（2026-10-22）
+
+当前 `rf_group_delay` 改为真实RF纯延时模型：`u_out(t)=u_in(t−τ)exp(−j2πfcτ)`，即 `H(fc+ν)=exp[−j2π(fc+ν)τ]`。`fc` 使用实际信号载频（L1 1575.42 MHz，L5 1176.45 MHz），`ν` 是基带频偏；基带移位已包含多普勒和干扰频偏的相位，载频项只乘一次。全部信号和输入等效噪声在公共RF FIR对齐后一起延迟并旋转载波相位，再经过原增益、限幅、ADC和DFE；公共FIR时间对齐保留，新增通道延时不作逆补偿，不改馈线或接收机名义响应。EGC预设相位、MVDR名义约束不随延时更新，日常分量分析仍暂停；RF两个函数现在要求显式传入 `carrier_hz`。
+
+建模参考 [MathWorks复包络原理](https://www.mathworks.com/help/simrf/gs/circuit-envelope-basics.html)及其[延时传输线模型](https://www.mathworks.com/help/simrf/ug/transmission-lines-delay-based-and-lumped-models.html)：载波解析处理，采样只需覆盖包络带宽。这里复用原有33抽头分数延时和载波相位函数，无新增依赖；它是理想纯延时，不代表任意真实RF滤波器。若要贴合具体器件，应使用带绝对复相位的实测S参数/复频响，同时描述幅度、中心相位及群延时起伏；[RF Blockset支持导入S参数](https://www.mathworks.com/help/simrf/gs/circuit-envelope-library.html)，本次未引入未经测量的器件数据或S参数模型。
+
+仍按默认100 ms、seed 42、4×5捕获、四方法重跑三场景及BR的0/10/20/50/100/200 ns，共18条件72行；默认实验仍为 `phase_offset`，设 `EXPERIMENT_TYPE="rf_group_delay"` 可重跑。新结果在 `results/interference/rf_group_delay/`；旧包络延时结果完整移至 `results/interference/rf_group_delay_center_phase_fixed_f225898/`，原manifest和来源哈希不变。JSON记录 `delay_model="physical_rf_delay"` 和实际载频；日常CSV仍只列延时条件和接收结果。
+
+L1中心相位每约0.635 ns绕一圈，六个点的新增中心相移依次为0/88.49/176.98/82.44/164.88/−30.24°；因此CN0用离散点，不把稀疏采样连接成连续趋势。理想模型图分开显示中心相位主值及带内连续相位，两者均含载频项；不是实测频响。无干扰场景的EGC CN0依次为48.46/45.84/缺测/46.34/缺测/47.40 dB-Hz，20 ns、100 ns的EGC与MVDR均未正确捕获，缺测不填零；SINGLE及退回TL的Blind Null始终为46.14 dB-Hz。CW下Blind Null为45.70～46.52 dB-Hz，可自适应吸收该频点的相差；宽带下仍由45.42降至18.11 dB-Hz，固定复权值无法消除整带时延失配。当前TRK状态不保证载波锁定，接收机估计CN0的下降不能直接当成纯干扰抑制损失；本批不作跨seed或硬件容差结论。
+
+本地回归301项通过、2项历史数据测试未选中，72行公共核验通过，三张图已检查。独立复音/脉冲核对覆盖L1/L5的包络延迟、载波与频偏相位、通道映射及ADC前处理，显式线性复算同样带载波相位；三场景2 ms零延时ADC/DFE与 `11a0fd0` 逐点一致，100 ms零延时12行共同结果字段与旧批次完全一致。
+
 ## RF通道群延时差（2026-10-22）
+
+以下保留 `f225898` 的中心相位固定模型及当时结论，仅适用于旧结果 `results/interference/rf_group_delay_center_phase_fixed_f225898/`；当前物理延时模型见上节。
 
 在 `validation_config.py` 设 `EXPERIMENT_TYPE="rf_group_delay"`；默认仍为 `phase_offset`。新实验按物理通道名给BR增加0/10/20/50/100/200 ns固定群延时，TL为零，分别运行无干扰、单CW和纯2 MHz宽带干扰，共18个独立条件；CW和宽带沿用预设−90 dBm，后者中心偏频为0，不混入CW。四方法、时长、种子和并行数沿用公共设置；扫描值只作敏感性假设，不代表器件规格。
 
@@ -10,7 +24,7 @@
 
 复用33抽头窗化sinc分数延时，有限记录边界补零、尾部截断；它是理想恒模延时的近似。33 MHz采样、上述六个延时点、4097个频点的独立脉冲响应核对：在±1.8 MHz内，最大幅度误差0.00273 dB、相位误差0.08451°，数值相位差分得到的群延时偏差小于0.737 ns；扩到±4.092 MHz，幅度误差小于0.00579 dB。原RF噪声带宽/功率字段仍按公共RF FIR计算，不包含这项小幅插值误差；RF输入中心点噪温矩阵也不等于整带采样协方差。
 
-结果位于 `results/interference/rf_group_delay/`：CN0图按场景比较延时差，捕获失败时增加ACQ状态/比例图；独立模型图显示DFE截止频率范围内的理想相位斜率，明确标为模型而非实测。CSV只列场景、RF Delay和结果，JSON/manifest保留实际配置与绘图参考通道。ACQ正确性仍相对原始码时延，未按合并后的码峰重新定义真值；默认最大200 ns约0.205 chip，不将这批结果外推到大时延场景。
+旧结果现存于 `results/interference/rf_group_delay_center_phase_fixed_f225898/`：CN0图按场景比较延时差，捕获失败时增加ACQ状态/比例图；独立模型图显示DFE截止频率范围内的理想相位斜率，明确标为模型而非实测。CSV只列场景、RF Delay和结果，JSON/manifest保留实际配置与绘图参考通道。ACQ正确性仍相对原始码时延，未按合并后的码峰重新定义真值；默认最大200 ns约0.205 chip，不将这批结果外推到大时延场景。
 
 本地回归295项通过、2项历史数据测试未选中；默认100 ms、seed 42、4×5捕获、四方法的18条件72行实际运行及公共核验通过，三张图已检查。三个场景的零延时ADC/DFE数组及12行共同结果字段与 `d931838` 完全一致，旧五类实验84套配置除新增零值RF字段外不变；独立卷积、分数延时核与限幅量化复算逐点一致，目标、CW、宽带及热噪声的线性分量之和与独立总链复算相对误差 `7.08e-16`。
 
