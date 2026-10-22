@@ -46,7 +46,7 @@ class ValidationCase:
     dfe_estimated_phase_deg: dict[str, float] = field(default_factory=dict)
     compensate_dfe_phase_flag: bool = False
     # 仅记录温度条件；实际幅相增量已在构造用例时写入 config。
-    temperature_drift: dict = field(default_factory=dict)
+    temperature_offset: dict = field(default_factory=dict)
     # checks: tuple[str, ...] = ()  # 分量功率核验暂停。
 
 
@@ -195,8 +195,8 @@ def evaluate_case(
         # 专项字段只记录实验条件和目标真实响应。
         if pattern_fields:
             row.update(pattern_fields)
-        if case.temperature_drift:
-            row["temperature_drift"] = case.temperature_drift
+        if case.temperature_offset:
+            row["temperature_offset"] = case.temperature_offset
         if settings.experiment_type == "mutual_coupling":
             row.update(coupling_row_fields(
                 case, frontend["truth"]["desired_steering_true"], weights,
@@ -409,8 +409,8 @@ def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) ->
             "compensate_dfe_phase_flag": case.compensate_dfe_phase_flag,
             # "checks": case.checks,  # ideal_noise 标签暂停。
         })
-        if case.temperature_drift:
-            summary["temperature_drift"] = case.temperature_drift
+        if case.temperature_offset:
+            summary["temperature_offset"] = case.temperature_offset
         summary["receiver_configs"][str(case.config.random_seed)] = asdict(case.config)
     # by_identity = {(case.name, case.config.random_seed): case for case in cases}
     verification = verify_validation(rows)

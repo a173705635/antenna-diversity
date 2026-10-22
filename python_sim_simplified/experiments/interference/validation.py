@@ -104,11 +104,11 @@ def _csv_label(key: str) -> str:
 def _condition_columns(row: dict, experiment_type: str) -> dict:
     """只提取日常表需要的物理条件；完整配置和诊断仍留在 JSON。"""
     if experiment_type == "antenna_temperature":
-        drift = row["temperature_drift"]
+        temperature_info = row["temperature_offset"]
         return {"scene": row["scene"], "series": row["series"],
-                "temperature_c": drift["temperature_c"],
-                "gain_delta_db": drift["gain_delta_db"] if row["series"] == "gain" else None,
-                "phase_delta_deg": drift["phase_delta_deg"] if row["series"] == "phase" else None}
+                "temperature_c": temperature_info["temperature_c"],
+                "gain_delta_db": temperature_info["gain_delta_db"] if row["series"] == "gain" else None,
+                "phase_delta_deg": temperature_info["phase_delta_deg"] if row["series"] == "phase" else None}
     if experiment_type == "antenna_gain":
         return {f"{antenna}_gain_db": gain for antenna, gain in zip(
             row["antennas"].split(","), row["input_gain_db_by_antenna"])}

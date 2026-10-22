@@ -38,9 +38,9 @@ TARGET_AZIMUTH_SCAN_DEG = (30, 40, 50)
 ELEMENT_GAIN_ANTENNA = "BR"
 ELEMENT_GAIN_SCAN_DB = (0.0, 6.020599913279624)
 
-# 天线温漂仅作示例敏感性假设，系数不是实测标定；每个用例温度恒定。
+# 温偏指固定温度相对参考温度的偏差；系数为示例假设，每个用例温度恒定。
 # 两个系列分别只改指定天线真实增益或真实相位，名义状态始终固定于参考温度。
-TEMPERATURE_DRIFT_ANTENNA = "BR"
+TEMPERATURE_OFFSET_ANTENNA = "BR"
 TEMPERATURE_REFERENCE_C = 25.0
 TEMPERATURE_SCAN_C = (-20.0, 0.0, 25.0, 40.0, 60.0, 80.0)
 TEMPERATURE_GAIN_SLOPE_DB_PER_C = -0.02
@@ -233,7 +233,7 @@ def _phase_direction_gain_cases() -> list[ValidationCase]:
 
 
 def _antenna_temperature_cases() -> list[ValidationCase]:
-    """每场景独立扫描真实增益和相位温漂；参考温度在两系列各运行一次。"""
+    """每场景分开验证温偏引起的真实增益、相位变化；参考温度各运行一次。"""
     cases = []
     for scene in SCENES:
         for series in ("gain", "phase"):
@@ -247,21 +247,21 @@ def _antenna_temperature_cases() -> list[ValidationCase]:
                 true_state = case_cfg.phone.antenna_model.true_state
                 # 在预设基准上叠加变化；另一幅相字段、全部名义配置和噪声链保持原样。
                 if series == "gain":
-                    true_state.amplitude_error_db[TEMPERATURE_DRIFT_ANTENNA] = (
-                        true_state.amplitude_error_db.get(TEMPERATURE_DRIFT_ANTENNA, 0.0)
+                    true_state.amplitude_error_db[TEMPERATURE_OFFSET_ANTENNA] = (
+                        true_state.amplitude_error_db.get(TEMPERATURE_OFFSET_ANTENNA, 0.0)
                         + gain_delta_db
                     )
                 else:
-                    true_state.phase_error_deg[TEMPERATURE_DRIFT_ANTENNA] = (
-                        true_state.phase_error_deg.get(TEMPERATURE_DRIFT_ANTENNA, 0.0)
+                    true_state.phase_error_deg[TEMPERATURE_OFFSET_ANTENNA] = (
+                        true_state.phase_error_deg.get(TEMPERATURE_OFFSET_ANTENNA, 0.0)
                         + phase_delta_deg
                     )
                 cases.append(ValidationCase(
                     name=f"{scene}/{series}_temperature_{temperature_c:g}c",
                     config=case_cfg, scene_label=scene, series_label=series,
                     scan_label="temperature", scan_value=temperature_c, scan_unit="°C",
-                    temperature_drift={
-                        "antenna": TEMPERATURE_DRIFT_ANTENNA,
+                    temperature_offset={
+                        "antenna": TEMPERATURE_OFFSET_ANTENNA,
                         "reference_temperature_c": TEMPERATURE_REFERENCE_C,
                         "temperature_c": temperature_c,
                         "gain_slope_db_per_c": gain_slope,

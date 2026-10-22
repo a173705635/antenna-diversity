@@ -297,7 +297,7 @@ def _antenna_temperature(rows: list[dict], settings: ValidationSettings) -> list
     for scene in dict.fromkeys(row["scene"] for row in rows):
         scene_rows = [row for row in rows if row["scene"] == scene]
         modes = list(dict.fromkeys(row["mode"] for row in scene_rows))
-        drift = scene_rows[0]["temperature_drift"]
+        temperature_info = scene_rows[0]["temperature_offset"]
         for metric_name, metric in (("tracking_cn0_mean", "tracking_cn0_mean_db_hz"),
                                     ("acquisition_correct_rate", "acquisition_correct_flag")):
             fig, axes = plt.subplots(1, 2, figsize=(12, 4.8), sharey=True,
@@ -310,18 +310,18 @@ def _antenna_temperature(rows: list[dict], settings: ValidationSettings) -> list
                         points = _scan_points(selected, metric)
                         _plot_points(axis, points, _mode_label(selected[0]), mode_index)
                 if panel_rows:
-                    series_drift = panel_rows[0]["temperature_drift"]
+                    series_temperature_info = panel_rows[0]["temperature_offset"]
                     if series == "gain":
-                        title = (f"Gain; {series_drift['gain_slope_db_per_c']:g} dB/°C")
+                        title = (f"Gain; {series_temperature_info['gain_slope_db_per_c']:g} dB/°C")
                     else:
-                        title = (f"Phase; {series_drift['phase_slope_deg_per_c']:g} deg/°C")
+                        title = (f"Phase; {series_temperature_info['phase_slope_deg_per_c']:g} deg/°C")
                     axis.set_title(title)
                     _finish_axis(axis, "True temperature (°C)", metric)
-                    axis.axvline(series_drift["reference_temperature_c"], color="#888888",
+                    axis.axvline(series_temperature_info["reference_temperature_c"], color="#888888",
                                  linestyle=":", linewidth=1)
             fig.suptitle(
-                f"{scene}: {drift['antenna']} illustrative temperature drift; "
-                f"Nom at {drift['reference_temperature_c']:g}°C"
+                f"{scene}: {temperature_info['antenna']} illustrative temperature offset; "
+                f"Nom at {temperature_info['reference_temperature_c']:g}°C"
             )
             _save_figure(fig, settings,
                          f"antenna_temperature__{_filename_label(scene)}__{metric_name}", paths)

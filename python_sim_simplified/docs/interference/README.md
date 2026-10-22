@@ -2,7 +2,7 @@
 
 当前运行结果先看 `case_summary.csv`（用例×算法跨 seed 统计），再看 `summary.csv`（逐 seed；FULL CHAIN 为逐算法）。日常表只放必要条件、捕获/跟踪与 C/N₀；validation 的权值、实际功率和复算误差仍在 `summary.json` 的 rows 中，FULL CHAIN 的 `summary.json` 为逐算法 metrics 列表。CSV 使用 UTF-8 BOM；`manifest.json` 保存完整用例条件、实际配置、运行方法身份与源码哈希，通用验证的 `summary.json` 保存行、专项统计和 `verification`，不再另写 `verification.json`。并行验证运行中写 `progress.jsonl`，完整入口保存、绘图和核验成功后删除，失败时保留。两入口的跟踪 C/N₀ 均从原始历元 `len//2` 处取后半段，剔除 NaN/Inf 后直接计算 dB-Hz 算术均值，未完成跟踪或后半段全缺测留空；跨 seed 仅等权平均有值的 seed。这不保证跟踪已收敛，也不等同于线性域先平均再转 dB。历史结果文件及下文历史实验记录仍按生成时版本解读。
 
-## 天线温漂单因素扫描（2026-10-22）
+## 天线温偏单因素扫描（2026-10-22）
 
 `validation_config.py` 选 `antenna_temperature` 时，每个场景分别运行 gain、phase 两个独立系列，默认各扫描 −20/0/25/40/60/80°C。参考温度固定25°C，默认只给 BR 的真实逐源增益或相位叠加增量：`ΔG=kG(T−Tref)`，`Δφ=kφ(T−Tref)`，其中 `kG=−0.02 dB/°C`、`kφ=+1 deg/°C`；另一字段和全部名义响应保持参考值。**系数仅为示例敏感性假设，不是实测天线温度特性。** 每个条件在整个采样期间温度恒定，因此本实验研究静态温度失配，不模拟随时间变化的漂移或温度对无源损耗、130 K输入噪声、馈线、RF/ADC/DFE、PCO和互耦的影响。两个系列在参考温度分别完整运行，以保持各自独立条件。
 
