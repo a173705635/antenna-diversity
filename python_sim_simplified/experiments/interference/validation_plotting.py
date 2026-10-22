@@ -48,13 +48,12 @@ def _scan_points(rows: list[dict], metric: str) -> list[tuple[float, float]]:
                   for group in _case_groups(rows))
 
 
-def _plot_points(axis, points: list[tuple], label: str, index: int,
-                 connect_flag: bool = True) -> None:
+def _plot_points(axis, points: list[tuple], label: str, index: int) -> None:
     if not points:
         return
     x_values, y_values = zip(*points)
     axis.plot(x_values, y_values,
-              linestyle=("-", "--", ":", "-.")[index % 4] if connect_flag else "None",
+              linestyle=("-", "--", ":", "-.")[index % 4],
               marker=("o", "s", "^", "D")[index % 4], markerfacecolor="none",
               linewidth=1.5, label=label)
 
@@ -104,8 +103,7 @@ def _phase_offset(rows: list[dict], settings: ValidationSettings) -> list[Path]:
 
 
 def _phase_or_rf_delay(rows: list[dict], settings: ValidationSettings, xlabel: str,
-                       caption: str, file_prefix: str,
-                       connect_scan_flag: bool = True) -> list[Path]:
+                       caption: str, file_prefix: str) -> list[Path]:
     """复用相位与 RF 时延扫描的 C/N₀、条件式 ACQ 绘图。"""
     import matplotlib.pyplot as plt
 
@@ -120,8 +118,7 @@ def _phase_or_rf_delay(rows: list[dict], settings: ValidationSettings, xlabel: s
         for mode_index, mode in enumerate(modes):
             mode_rows = [row for row in scene_rows if row["mode"] == mode]
             curves[mode] = _scan_points(mode_rows, "tracking_cn0_mean_db_hz")
-            _plot_points(axis, curves[mode], _mode_label(mode_rows[0]), mode_index,
-                         connect_flag=connect_scan_flag)
+            _plot_points(axis, curves[mode], _mode_label(mode_rows[0]), mode_index)
         axis.set_title(scene)
         axis.set_xticks(sorted({row["scan_value"] for row in scene_rows}))
         _finish_axis(axis, xlabel, "tracking_cn0_mean_db_hz")
@@ -194,16 +191,16 @@ def _phase_or_rf_delay(rows: list[dict], settings: ValidationSettings, xlabel: s
 
 
 def _rf_group_delay(rows: list[dict], settings: ValidationSettings) -> list[Path]:
-    """绘制离散接收指标及 RF 物理时延的中心相位与带内连续相位。"""
+    """连接接收指标扫描点，并展示 RF 物理时延的中心相位与带内连续相位。"""
     import matplotlib.pyplot as plt
 
     metadata = rows[0]["rf_group_delay"]
     affected = metadata["affected_antenna"]
     reference = metadata["reference_antenna"]
     caption = (f"Physical RF delay on {affected} relative to {reference}"
-               "\nDiscrete scan points; nominal target response fixed")
+               "\nLines guide the eye; nominal target response fixed")
     paths = _phase_or_rf_delay(rows, settings, "Physical RF delay (ns)", caption,
-                               "rf_group_delay", connect_scan_flag=False)
+                               "rf_group_delay")
 
     # 中心相位使用真实 RF 载频；频偏斜率仅加一次，图中每条带内曲线连续。
     frequency_mhz = np.linspace(-metadata["dfe_cutoff_hz"], metadata["dfe_cutoff_hz"], 401) / 1e6
