@@ -96,6 +96,16 @@ def _save_figure(fig, settings: ValidationSettings, name: str, paths: list[Path]
 
 def _phase_offset(rows: list[dict], settings: ValidationSettings) -> list[Path]:
     """每场景分面显示真实相位的跟踪 C/N₀；捕获失败时另画状态或比例。"""
+    affected = sorted({antenna for row in rows for antenna in row["dfe_phase_deg"]
+                       if antenna in row["antennas"].split(",")})
+    caption = ("DFE output: whole-channel phase on " + ", ".join(affected)
+               + "\nNominal target response fixed")
+    return _phase_or_rf_delay(rows, settings, "DFE phase (deg)", caption, "phase_offset")
+
+
+def _phase_or_rf_delay(rows: list[dict], settings: ValidationSettings, xlabel: str,
+                       caption: str, file_prefix: str) -> list[Path]:
+    """复用相位与 RF 时延扫描的 C/N₀、条件式 ACQ 绘图。"""
     import matplotlib.pyplot as plt
 
     paths = []
@@ -112,7 +122,7 @@ def _phase_offset(rows: list[dict], settings: ValidationSettings) -> list[Path]:
             _plot_points(axis, curves[mode], _mode_label(mode_rows[0]), mode_index)
         axis.set_title(scene)
         axis.set_xticks(sorted({row["scan_value"] for row in scene_rows}))
-        _finish_axis(axis, "DFE phase (deg)", "tracking_cn0_mean_db_hz")
+        _finish_axis(axis, xlabel, "tracking_cn0_mean_db_hz")
         if all(row["acquisition_correct_flag"] for row in scene_rows):
             axis.text(0.02, 0.97, "ACQ all pass", va="top", fontsize=8,
                       transform=axis.transAxes)
@@ -137,12 +147,8 @@ def _phase_offset(rows: list[dict], settings: ValidationSettings) -> list[Path]:
         if overlaps:
             axis.text(0.02, 0.12, "Identical CN0:\n" + "\n".join(overlaps),
                       fontsize=8, transform=axis.transAxes)
-    affected = sorted({antenna for row in rows for antenna in row["dfe_phase_deg"]
-                       if antenna in row["antennas"].split(",")})
-    caption = ("DFE output: whole-channel phase on " + ", ".join(affected)
-               + "\nNominal target response fixed")
     fig.suptitle(caption)
-    _save_figure(fig, settings, "phase_offset__tracking_cn0_mean", paths)
+    _save_figure(fig, settings, f"{file_prefix}__tracking_cn0_mean", paths)
 
     failed_scenes = [scene for scene in scenes if any(
         not row["acquisition_correct_flag"] for row in rows if row["scene"] == scene)]
@@ -175,13 +181,41 @@ def _phase_offset(rows: list[dict], settings: ValidationSettings) -> list[Path]:
                 axis.legend(fontsize=8)
             axis.set_title(scene)
             axis.set_xticks(sorted({row["scan_value"] for row in scene_rows}))
-            axis.set_xlabel("DFE phase (deg)")
+            axis.set_xlabel(xlabel)
             axis.grid(alpha=0.3)
         fig.suptitle(caption)
         plot_kind = ("status" if all(seed_counts[scene] == 1 for scene in failed_scenes)
                      else "rate" if all(seed_counts[scene] > 1 for scene in failed_scenes)
                      else "status_rate")
-        _save_figure(fig, settings, f"phase_offset__acquisition_{plot_kind}", paths)
+        _save_figure(fig, settings, f"{file_prefix}__acquisition_{plot_kind}", paths)
+    return paths
+
+
+def _rf_group_delay(rows: list[dict], settings: ValidationSettings) -> list[Path]:
+    """绘制接收指标，并单列展示相对参考通道的理想固定时延相位模型。"""
+    import matplotlib.pyplot as plt
+
+    metadata = rows[0]["rf_group_delay"]
+    affected = metadata["affected_antenna"]
+    reference = metadata["reference_antenna"]
+    caption = (f"RF group delay on {affected} relative to {reference}"
+               "\nNominal target response fixed")
+    paths = _phase_or_rf_delay(rows, settings, "RF delay (ns)", caption, "rf_group_delay")
+
+    # 理想传递函数 H_m(ν)=H_0(ν)exp(-j2πνΔτ)；这里只画模型，不把它说成实测响应。
+    frequency_mhz = np.linspace(-metadata["dfe_cutoff_hz"], metadata["dfe_cutoff_hz"], 401) / 1e6
+    fig, axis = plt.subplots(figsize=(8, 5), constrained_layout=True)
+    for delay_ns in sorted({row["scan_value"] for row in rows}):
+        row = next(item for item in rows if item["scan_value"] == delay_ns)
+        offsets_ns = row["rf_group_delay"]["offset_ns_by_antenna"]
+        relative_delay_ns = offsets_ns.get(affected, 0.0) - offsets_ns.get(reference, 0.0)
+        axis.plot(frequency_mhz, -360.0 * frequency_mhz * 1e6 * relative_delay_ns * 1e-9,
+                  label=f"{delay_ns:g} ns")
+    axis.set(xlabel="Frequency relative to IF center (MHz)", ylabel="Relative phase (deg)",
+             title=f"Ideal model: {affected} minus {reference}; DFE passband cutoff")
+    axis.grid(alpha=0.3)
+    axis.legend(title="RF delay")
+    _save_figure(fig, settings, "rf_group_delay__ideal_phase_model", paths)
     return paths
 
 
@@ -338,6 +372,7 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
         return []
     plotters = {
         "phase_offset": _phase_offset,
+        "rf_group_delay": _rf_group_delay,
         "antenna_gain": _antenna_gain,
         "mutual_coupling": _mutual_coupling,
         "phase_center_offset": _phase_center_offset,

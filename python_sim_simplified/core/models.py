@@ -74,6 +74,7 @@ class RFInfo(TypedDict):
     noise_bandwidth_hz: float
     measured_noise_bandwidth_hz: float
     group_delay_compensation_samples: int
+    group_delay_offsets_s: np.ndarray
     noise_reference_temperature_k: float
     added_noise_temperature_k: float
     added_noise_psd_w_per_hz: float

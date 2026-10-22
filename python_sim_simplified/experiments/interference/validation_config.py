@@ -7,7 +7,7 @@ from copy import deepcopy
 
 import numpy as np
 
-from core.config import CouplingPath, Direction
+from core.config import CouplingPath, Direction, WidebandInterferer
 from core.presets import default_config
 from experiments.paths import INTERFERENCE_RESULTS_DIR
 from experiments.interference.validation_support import ValidationCase, ValidationSettings
@@ -15,7 +15,7 @@ from experiments.interference.validation_support import ValidationCase, Validati
 
 # 所有实验共用种子、时长、并行数、统计去边和绘图开关。
 # 选择实验类型后，输出固定写入 results/interference/<实验类型>/。
-EXPERIMENT_TYPE = "phase_offset"  # 另可选 "antenna_temperature"、"antenna_gain"、"mutual_coupling"、"phase_center_offset"。
+EXPERIMENT_TYPE = "phase_offset"  # 另可选 "rf_group_delay"、"antenna_temperature"、"antenna_gain"、"mutual_coupling"、"phase_center_offset"。
 SEEDS = tuple(range(42, 43))  # 所有实验共用；单次运行设为 (42,)。
 # 每个用例独立生成采样；配对条件保持相同 seed 和物理配置，以复现相同噪声。
 # 功率统计首尾各舍弃此时长，避开滤波瞬态；不裁掉送入捕获跟踪的数据。
@@ -33,6 +33,9 @@ MODES = ("single", "blind_null", "egc", "mvdr")  # 后两种为预设/已知响�
 # 单因素扫描；PHASE_ANTENNA 按物理名字定位，不使用固定行号。
 PHASE_ANTENNA = "BR"
 PHASE_SCAN_DEG = (0, 30, 60, 90, 120, 180)
+RF_GROUP_DELAY_ANTENNA = "BR"
+RF_GROUP_DELAY_SCAN_NS = (0, 10, 20, 50, 100, 200)
+RF_GROUP_DELAY_SCENES = ("noise_only", "single_cw", "single_wideband")
 
 # 温偏指固定温度相对参考温度的偏差；系数为示例假设，每个用例温度恒定。
 # 两个系列分别只改指定天线真实增益或真实相位，名义状态始终固定于参考温度。
@@ -62,7 +65,7 @@ JAMMER_DIRECTION = Direction(80.0, 10.0)
 
 
 def _base_config(scene: str):
-    """生成指定天线/方法的基础场景；noise_only 无干扰，single_cw 保留首个 CW。"""
+    """生成指定场景；宽带场景仅保留预设的 2 MHz、-90 dBm、零偏频干扰。"""
     base_cfg = default_config()
     base_cfg.phone.active_antennas = ACTIVE_ANTENNAS
     base_cfg.diversity.modes = MODES
@@ -73,6 +76,9 @@ def _base_config(scene: str):
         base_cfg.interferers = []
     elif scene == "single_cw":
         base_cfg.interferers = base_cfg.interferers[:1]
+    elif scene == "single_wideband":
+        base_cfg.interferers = [source for source in base_cfg.interferers
+                                if isinstance(source, WidebandInterferer)]
     base_cfg.signal.true_direction = deepcopy(TARGET_TRUE_DIRECTION)
     base_cfg.signal.assumed_direction = deepcopy(TARGET_ASSUMED_DIRECTION)
     for interferer in base_cfg.interferers:
@@ -182,6 +188,21 @@ def _phase_offset_cases() -> list[ValidationCase]:
     return cases
 
 
+def _rf_group_delay_cases() -> list[ValidationCase]:
+    """每场景和附加时延独立运行完整前端；名义目标响应保持预设值。"""
+    cases = []
+    for scene in RF_GROUP_DELAY_SCENES:
+        for delay_ns in RF_GROUP_DELAY_SCAN_NS:
+            case_cfg = _base_config(scene)
+            case_cfg.rf.group_delay_offset_ns[RF_GROUP_DELAY_ANTENNA] = delay_ns
+            cases.append(ValidationCase(
+                name=f"{scene}/rf_delay_{delay_ns:g}ns", config=case_cfg,
+                scene_label=scene, series_label="rf_group_delay",
+                scan_label="RF delay", scan_value=delay_ns, scan_unit="ns",
+            ))
+    return cases
+
+
 def _antenna_temperature_cases() -> list[ValidationCase]:
     """每场景分开验证温偏引起的真实增益、相位变化；参考温度各运行一次。"""
     cases = []
@@ -233,6 +254,7 @@ def build_cases() -> list[ValidationCase]:
         "mutual_coupling": _coupling_cases,
         "phase_center_offset": _phase_center_cases,
         "phase_offset": _phase_offset_cases,
+        "rf_group_delay": _rf_group_delay_cases,
         "antenna_temperature": _antenna_temperature_cases,
     }
     if EXPERIMENT_TYPE not in builders:

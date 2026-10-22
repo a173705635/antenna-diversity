@@ -4,6 +4,7 @@ import numpy as np
 from scipy.optimize import brentq
 from scipy.signal import firwin, lfilter
 
+from .channel_delay import fractional_delay
 from .config import RFConfig
 from .models import RFInfo
 from .noise import (
@@ -25,10 +26,12 @@ def design_rf_filter(fs_hz: float, bandwidth_hz: float, num_taps: int) -> np.nda
 
 
 def filter_rf_input(
-    samples: np.ndarray, coefficients: np.ndarray, fs_hz: float, if_hz: float
+    samples: np.ndarray, coefficients: np.ndarray, fs_hz: float, if_hz: float,
+    group_delay_offsets_s: float | np.ndarray = 0.0,
 ) -> np.ndarray:
-    """滤波 [通道, RF采样] 复数 IF 电压并补偿群延时；边界补零。"""
+    """滤波复数 IF 电压并补偿 FIR 时延，再按通道延迟基带；输入非负时延，单位 s。"""
     delay = (len(coefficients) - 1) // 2
+    offsets_s = np.broadcast_to(np.asarray(group_delay_offsets_s, dtype=float), (samples.shape[0],))
     sample_index = np.arange(samples.shape[-1])
     oscillator = np.exp(-2j * np.pi * if_hz * sample_index / fs_hz)
     output = np.empty_like(samples, dtype=complex)
@@ -37,6 +40,9 @@ def filter_rf_input(
         padded = np.pad(baseband, (delay, delay))
         filtered = lfilter(coefficients, [1.0], padded)
         aligned = filtered[2 * delay:2 * delay + samples.shape[-1]]
+        # 附加时延位于公共 FIR 对齐之后，中心频率的复相位保持不变。
+        if offsets_s[row] != 0.0:
+            aligned = fractional_delay(aligned, offsets_s[row] * fs_hz)
         output[row] = aligned * oscillator.conj()
     return output
 
@@ -87,6 +93,11 @@ def process_rf(
 
     total_gain_linear = np.prod(gain_linear)
     coefficients = design_rf_filter(fs_hz, cfg.noise_bandwidth_hz, cfg.noise_filter_taps)
+    group_delay_offsets_s = np.array(
+        [cfg.group_delay_offset_ns.get(channel_id, 0.0) * 1e-9 for channel_id in channel_ids],
+        dtype=float,
+    )
+    # 原有噪声预算口径仅描述公共 RF FIR；附加插值的有限带内幅度误差不计入此 ENBW。
     measured_bandwidth_hz = fs_hz * np.sum(coefficients**2)
     added_noise_temperature_k = float(
         NOISE_REFERENCE_TEMPERATURE_K * (cascade_noise_factor - 1.0)
@@ -98,7 +109,9 @@ def process_rf(
         x_rf_input_v.shape[1], added_noise_temperature_k,
         reference_impedance_ohm, fs_hz, channel_ids, seed, "rf",
     )
-    filtered_input = filter_rf_input(x_rf_input_v + added_noise_v, coefficients, fs_hz, if_hz)
+    filtered_input = filter_rf_input(
+        x_rf_input_v + added_noise_v, coefficients, fs_hz, if_hz, group_delay_offsets_s,
+    )
     before_limit = filtered_input * np.sqrt(total_gain_linear)
     retained_added_noise_v = added_noise_v if retain_analysis_flag else None
     del filtered_input, added_noise_v
@@ -135,6 +148,7 @@ def process_rf(
         "noise_bandwidth_hz": cfg.noise_bandwidth_hz,
         "measured_noise_bandwidth_hz": measured_bandwidth_hz,
         "group_delay_compensation_samples": (len(coefficients) - 1) // 2,
+        "group_delay_offsets_s": group_delay_offsets_s,
         "noise_reference_temperature_k": NOISE_REFERENCE_TEMPERATURE_K,
         "added_noise_temperature_k": added_noise_temperature_k,
         "added_noise_psd_w_per_hz": added_noise_psd_w_per_hz,

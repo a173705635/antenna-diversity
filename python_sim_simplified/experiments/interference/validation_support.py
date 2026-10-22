@@ -68,6 +68,18 @@ def apply_dfe_phase(
     return channels * factors[:, None]
 
 
+def rf_group_delay_metadata(case_cfg: SimulationConfig) -> dict:
+    """按物理通道名记录注入通道及未注入的参考通道，供结果和理论图使用。"""
+    offset_ns_by_antenna = case_cfg.rf.group_delay_offset_ns.copy()
+    affected_antenna = next(iter(offset_ns_by_antenna))
+    reference_antenna = next(antenna for antenna in case_cfg.phone.active_antennas
+                             if antenna != affected_antenna)
+    return {"offset_ns_by_antenna": offset_ns_by_antenna,
+            "affected_antenna": affected_antenna,
+            "reference_antenna": reference_antenna,
+            "dfe_cutoff_hz": case_cfg.dfe.cutoff_hz}
+
+
 # 分量功率核验暂停；保留估计导向计算，恢复 ideal_noise 时可复用。
 # def _assumed_steering(cfg: SimulationConfig) -> np.ndarray:
 #     """为理想噪声适用性检查计算RF输入目标导向，含名义馈线。"""
@@ -191,6 +203,8 @@ def evaluate_case(
             row["temperature_offset"] = case.temperature_offset
         if settings.experiment_type == "phase_offset":
             row["dfe_phase_deg"] = case.dfe_phase_deg
+        if settings.experiment_type == "rf_group_delay":
+            row["rf_group_delay"] = rf_group_delay_metadata(case_cfg)
         if settings.experiment_type == "mutual_coupling":
             row.update(coupling_row_fields(
                 case, frontend["truth"]["desired_steering_true"], weights,
