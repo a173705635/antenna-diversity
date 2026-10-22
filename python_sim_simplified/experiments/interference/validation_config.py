@@ -16,7 +16,7 @@ from experiments.interference.validation_support import ValidationCase, Validati
 
 # 所有实验共用种子、时长、并行数、统计去边和绘图开关。
 # 选择实验类型后，输出固定写入 results/interference/<实验类型>/。
-EXPERIMENT_TYPE = "phase_direction_gain"  # 可选 "antenna_gain"、"mutual_coupling"、"phase_center_offset"。
+EXPERIMENT_TYPE = "phase_direction_gain"  # 另可选 "antenna_temperature"、"antenna_gain"、"mutual_coupling"、"phase_center_offset"。
 SEEDS = tuple(range(42, 43))  # 所有实验共用；单次运行设为 (42,)。
 # 每个用例独立生成采样；配对条件保持相同 seed 和物理配置，以复现相同噪声。
 # 功率统计首尾各舍弃此时长，避开滤波瞬态；不裁掉送入捕获跟踪的数据。
@@ -37,6 +37,14 @@ PHASE_SCAN_DEG = (0, 30, 60, 90, 120, 180)
 TARGET_AZIMUTH_SCAN_DEG = (30, 40, 50)
 ELEMENT_GAIN_ANTENNA = "BR"
 ELEMENT_GAIN_SCAN_DB = (0.0, 6.020599913279624)
+
+# 天线温漂仅作示例敏感性假设，系数不是实测标定；每个用例温度恒定。
+# 两个系列分别只改指定天线真实增益或真实相位，名义状态始终固定于参考温度。
+TEMPERATURE_DRIFT_ANTENNA = "BR"
+TEMPERATURE_REFERENCE_C = 25.0
+TEMPERATURE_SCAN_C = (-20.0, 0.0, 25.0, 40.0, 60.0, 80.0)
+TEMPERATURE_GAIN_SLOPE_DB_PER_C = -0.02
+TEMPERATURE_PHASE_SLOPE_DEG_PER_C = 1.0
 
 # 互耦系数是复电压比；0 表示无互耦，不对应有限 dB 值。
 COUPLING_STRENGTH_SCAN_V_PER_V = (0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5)
@@ -224,6 +232,47 @@ def _phase_direction_gain_cases() -> list[ValidationCase]:
     return cases
 
 
+def _antenna_temperature_cases() -> list[ValidationCase]:
+    """每场景独立扫描真实增益和相位温漂；参考温度在两系列各运行一次。"""
+    cases = []
+    for scene in SCENES:
+        for series in ("gain", "phase"):
+            for temperature_c in TEMPERATURE_SCAN_C:
+                case_cfg = _base_config(scene)
+                gain_slope = TEMPERATURE_GAIN_SLOPE_DB_PER_C if series == "gain" else 0.0
+                phase_slope = TEMPERATURE_PHASE_SLOPE_DEG_PER_C if series == "phase" else 0.0
+                temperature_offset_c = temperature_c - TEMPERATURE_REFERENCE_C
+                gain_delta_db = gain_slope * temperature_offset_c
+                phase_delta_deg = phase_slope * temperature_offset_c
+                true_state = case_cfg.phone.antenna_model.true_state
+                # 在预设基准上叠加变化；另一幅相字段、全部名义配置和噪声链保持原样。
+                if series == "gain":
+                    true_state.amplitude_error_db[TEMPERATURE_DRIFT_ANTENNA] = (
+                        true_state.amplitude_error_db.get(TEMPERATURE_DRIFT_ANTENNA, 0.0)
+                        + gain_delta_db
+                    )
+                else:
+                    true_state.phase_error_deg[TEMPERATURE_DRIFT_ANTENNA] = (
+                        true_state.phase_error_deg.get(TEMPERATURE_DRIFT_ANTENNA, 0.0)
+                        + phase_delta_deg
+                    )
+                cases.append(ValidationCase(
+                    name=f"{scene}/{series}_temperature_{temperature_c:g}c",
+                    config=case_cfg, scene_label=scene, series_label=series,
+                    scan_label="temperature", scan_value=temperature_c, scan_unit="°C",
+                    temperature_drift={
+                        "antenna": TEMPERATURE_DRIFT_ANTENNA,
+                        "reference_temperature_c": TEMPERATURE_REFERENCE_C,
+                        "temperature_c": temperature_c,
+                        "gain_slope_db_per_c": gain_slope,
+                        "phase_slope_deg_per_c": phase_slope,
+                        "gain_delta_db": gain_delta_db,
+                        "phase_delta_deg": phase_delta_deg,
+                    },
+                ))
+    return cases
+
+
 def build_cases() -> list[ValidationCase]:
     """按实验类型选择对应的用例构造函数。"""
     unsupported_modes = set(MODES) - {"single", "blind_null", "egc", "mvdr"}
@@ -234,6 +283,7 @@ def build_cases() -> list[ValidationCase]:
         "mutual_coupling": _coupling_cases,
         "phase_center_offset": _phase_center_cases,
         "phase_direction_gain": _phase_direction_gain_cases,
+        "antenna_temperature": _antenna_temperature_cases,
     }
     if EXPERIMENT_TYPE not in builders:
         raise ValueError(f"Unknown experiment type: {EXPERIMENT_TYPE}")

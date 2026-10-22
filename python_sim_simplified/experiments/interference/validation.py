@@ -56,6 +56,9 @@ CSV_LABELS = {
     "DFE channel phase (deg)": "DFE Phase (deg)",
     "target true azimuth (deg)": "True Az (deg)",
     "target azimuth (deg)": "Target Az (deg)",
+    "temperature_c": "Temperature (°C)",
+    "gain_delta_db": "Gain Δ (dB)",
+    "phase_delta_deg": "Phase Δ (deg)",
 }
 
 
@@ -83,7 +86,9 @@ def _write_csv(output_path: Path, records: list[dict]) -> None:
         writer = csv.DictWriter(stream, fieldnames=columns)
         # 只格式化 CSV 的表头和数值；原记录供统计及 JSON 保存，不在此舍入。
         writer.writerow({key: _csv_label(key) for key in columns})
-        writer.writerows({key: format_metric_value(key, value) for key, value in record.items()}
+        writer.writerows({key: (f"{round(value, 3) + 0.0:g}" if value is not None and key in (
+            "temperature_c", "gain_delta_db", "phase_delta_deg") else
+            format_metric_value(key, value)) for key, value in record.items()}
                          for record in records)
 
 
@@ -98,6 +103,12 @@ def _csv_label(key: str) -> str:
 
 def _condition_columns(row: dict, experiment_type: str) -> dict:
     """只提取日常表需要的物理条件；完整配置和诊断仍留在 JSON。"""
+    if experiment_type == "antenna_temperature":
+        drift = row["temperature_drift"]
+        return {"scene": row["scene"], "series": row["series"],
+                "temperature_c": drift["temperature_c"],
+                "gain_delta_db": drift["gain_delta_db"] if row["series"] == "gain" else None,
+                "phase_delta_deg": drift["phase_delta_deg"] if row["series"] == "phase" else None}
     if experiment_type == "antenna_gain":
         return {f"{antenna}_gain_db": gain for antenna, gain in zip(
             row["antennas"].split(","), row["input_gain_db_by_antenna"])}
@@ -133,7 +144,7 @@ def phase_center_summary_records(cases: list[dict]) -> list[dict]:
     return records
 
 
-def general_summary_records(rows: list[dict]) -> list[dict]:
+def general_summary_records(rows: list[dict], experiment_type: str = "phase_direction_gain") -> list[dict]:
     """按用例和算法汇总普通扫描；缺测 C/N₀ 只计数，不填零。"""
     grouped = {}
     for row in rows:
@@ -146,7 +157,7 @@ def general_summary_records(rows: list[dict]) -> list[dict]:
         cn0_statistics = sample_statistics(available_cn0)
         records.append({
             "case": case_name, "mode": mode,
-            **_condition_columns(first_row, "phase_direction_gain"),
+            **_condition_columns(first_row, experiment_type),
             "seeds": len(observations),
             "acquisition_correct_count": sum(row["acquisition_correct_flag"] for row in observations),
             "tracking_success_count": sum(row["tracking_success_flag"] for row in observations),
@@ -236,7 +247,7 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
         records = phase_center_summary_records(list(summary["phase_center"]["cases"].values()))
         _write_csv(settings.output_dir / "case_summary.csv", records)
     if not any(key in summary for key in ("pattern_gain", "mutual_coupling", "phase_center")):
-        records = general_summary_records(rows)
+        records = general_summary_records(rows, settings.experiment_type)
         _write_csv(settings.output_dir / "case_summary.csv", records)
 
 

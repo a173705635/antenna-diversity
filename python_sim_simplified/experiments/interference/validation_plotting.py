@@ -78,10 +78,13 @@ def _finish_axis(axis, xlabel: str, metric: str) -> None:
     axis.set(xlabel=xlabel, ylabel=ylabel)
     if metric == "tracking_cn0_mean_db_hz":
         axis.ticklabel_format(axis="y", style="plain", useOffset=False)
-        if any(np.isfinite(value) for line in axis.lines for value in line.get_ydata()):
+        values = [value for line in axis.lines for value in line.get_ydata()]
+        if any(np.isfinite(value) for value in values):
             axis.tick_params(axis="y", labelleft=True)
-            axis.text(0.02, 0.02, "Gaps = missing CN0", fontsize=8,
-                      transform=axis.transAxes)
+            if any(not np.isfinite(value) for value in values):
+                axis.text(0.02, 0.02, "Gaps = missing CN0", fontsize=8,
+                          bbox={"facecolor": "white", "alpha": 0.8, "edgecolor": "none"},
+                          transform=axis.transAxes)
         else:
             axis.text(0.5, 0.5, "No valid CN0", ha="center",
                       transform=axis.transAxes)
@@ -286,6 +289,45 @@ def _phase_center_offset(rows: list[dict], settings: ValidationSettings) -> list
     return paths
 
 
+def _antenna_temperature(rows: list[dict], settings: ValidationSettings) -> list[Path]:
+    """按真实温度分开显示增益和相位单因素扫描。"""
+    import matplotlib.pyplot as plt
+
+    paths = []
+    for scene in dict.fromkeys(row["scene"] for row in rows):
+        scene_rows = [row for row in rows if row["scene"] == scene]
+        modes = list(dict.fromkeys(row["mode"] for row in scene_rows))
+        drift = scene_rows[0]["temperature_drift"]
+        for metric_name, metric in (("tracking_cn0_mean", "tracking_cn0_mean_db_hz"),
+                                    ("acquisition_correct_rate", "acquisition_correct_flag")):
+            fig, axes = plt.subplots(1, 2, figsize=(12, 4.8), sharey=True,
+                                     constrained_layout=True)
+            for axis, series in zip(axes, ("gain", "phase")):
+                panel_rows = [row for row in scene_rows if row["series"] == series]
+                for mode_index, mode in enumerate(modes):
+                    selected = [row for row in panel_rows if row["mode"] == mode]
+                    if selected:
+                        points = _scan_points(selected, metric)
+                        _plot_points(axis, points, _mode_label(selected[0]), mode_index)
+                if panel_rows:
+                    series_drift = panel_rows[0]["temperature_drift"]
+                    if series == "gain":
+                        title = (f"Gain; {series_drift['gain_slope_db_per_c']:g} dB/°C")
+                    else:
+                        title = (f"Phase; {series_drift['phase_slope_deg_per_c']:g} deg/°C")
+                    axis.set_title(title)
+                    _finish_axis(axis, "True temperature (°C)", metric)
+                    axis.axvline(series_drift["reference_temperature_c"], color="#888888",
+                                 linestyle=":", linewidth=1)
+            fig.suptitle(
+                f"{scene}: {drift['antenna']} illustrative temperature drift; "
+                f"Nom at {drift['reference_temperature_c']:g}°C"
+            )
+            _save_figure(fig, settings,
+                         f"antenna_temperature__{_filename_label(scene)}__{metric_name}", paths)
+    return paths
+
+
 def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path]:
     """按显式实验类型分派绘图；保留真实数轴与同用例 seed 统计。"""
     import matplotlib.pyplot as plt
@@ -297,6 +339,7 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
         "antenna_gain": _antenna_gain,
         "mutual_coupling": _mutual_coupling,
         "phase_center_offset": _phase_center_offset,
+        "antenna_temperature": _antenna_temperature,
     }
     paths = plotters[settings.experiment_type](rows, settings)
     if settings.show_plots_flag and plt.get_backend().lower() != "agg":
