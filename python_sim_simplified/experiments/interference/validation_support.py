@@ -29,7 +29,7 @@ from experiments.paths import reset_output
 
 @dataclass
 class ValidationCase:
-    """一个实验条件：物理/接收配置 + 图上标签 + DFE 注入/补偿 + 验收项目。
+    """一个实验条件：物理/接收配置 + 图上标签 + DFE 相位注入。
 
     scan_value 是横轴坐标，不会自动修改 config；修改物理参数由配置文件完成。
     分量功率相关的 ideal_noise 核验暂时停用。
@@ -42,9 +42,6 @@ class ValidationCase:
     scan_value: float | None = None
     scan_unit: str = ""
     dfe_phase_deg: dict[str, float] = field(default_factory=dict)
-    # 估计值由外部给定；只有 compensate_dfe_phase_flag=True 时才执行逆旋转。
-    dfe_estimated_phase_deg: dict[str, float] = field(default_factory=dict)
-    compensate_dfe_phase_flag: bool = False
     # 仅记录温度条件；实际幅相增量已在构造用例时写入 config。
     temperature_offset: dict = field(default_factory=dict)
     # checks: tuple[str, ...] = ()  # 分量功率核验暂停。
@@ -106,11 +103,6 @@ def evaluate_case(
     #     name: values * result["injection_factors"]
     #     for name, values in components.items()
     # }
-    # if case.compensate_dfe_phase_flag:
-    #     components = {
-    #         name: values * result["correction_factors"]
-    #         for name, values in components.items()
-    #     }
     fs_out_hz = frontend["dfe_info"]["fs_out_hz"]
     edge_trim_samples = round(settings.evaluation_edge_trim_ms * 1e-3 * fs_out_hz)
     evaluation_window = slice(edge_trim_samples, receiver_samples.shape[1] - edge_trim_samples)
@@ -197,6 +189,8 @@ def evaluate_case(
             row.update(pattern_fields)
         if case.temperature_offset:
             row["temperature_offset"] = case.temperature_offset
+        if settings.experiment_type == "phase_offset":
+            row["dfe_phase_deg"] = case.dfe_phase_deg
         if settings.experiment_type == "mutual_coupling":
             row.update(coupling_row_fields(
                 case, frontend["truth"]["desired_steering_true"], weights,
@@ -244,11 +238,9 @@ def evaluate_case(
 #         return "RF channel amplitudes differ"
 #     if np.ptp(np.broadcast_to(case_cfg.rf.phase_error_deg, len(case_cfg.phone.active_antennas))) != 0:
 #         return "RF channel phases differ"
-#     if any(case.dfe_phase_deg.get(name, 0.0) -
-#            (case.dfe_estimated_phase_deg.get(name, 0.0)
-#             if case.compensate_dfe_phase_flag else 0.0) != 0.0
+#     if any(case.dfe_phase_deg.get(name, 0.0) != 0.0
 #            for name in case_cfg.phone.active_antennas):
-#         return "DFE phases are not corrected"
+#         return "DFE phases are injected"
 #     model = build_antenna_model(case_cfg.phone, case_cfg.signal.carrier_hz)
 #     true_steering, _ = antenna_response(
 #         model, case_cfg.signal.true_direction, case_cfg.signal.true_polarization,
@@ -334,16 +326,8 @@ def run_case(case: ValidationCase) -> dict:
     antennas = case_cfg.phone.active_antennas
     # frontend = run_frontend(case_cfg, retain_analysis_flag=True)  # 分量重放暂停。
     frontend = run_frontend(case_cfg)
-    # 两次复数乘法与原注入、逆补偿顺序一致；零净相位也保留浮点残差。
-    injection_factors = np.exp(1j * np.deg2rad([
-        case.dfe_phase_deg.get(name, 0.0) for name in antennas
-    ]))[:, None]
-    receiver_samples = frontend["dfe_channels"] * injection_factors
-    if case.compensate_dfe_phase_flag:
-        correction_factors = np.exp(1j * np.deg2rad([
-            -case.dfe_estimated_phase_deg.get(name, 0.0) for name in antennas
-        ]))[:, None]
-        receiver_samples = receiver_samples * correction_factors
+    # 在 DFE 输出处对整通道只旋转一次；零度也走相同路径。
+    receiver_samples = apply_dfe_phase(frontend["dfe_channels"], antennas, case.dfe_phase_deg)
     # 对照输入仅取原始名义目标响应，不把 DFE 注入相位当作目标相位估计。
     assumed_target_response = frontend["truth"]["desired_steering_assumed"]
     phase_estimates_deg = np.rad2deg(np.angle(assumed_target_response))
@@ -355,8 +339,6 @@ def run_case(case: ValidationCase) -> dict:
     )
     return {
         "frontend": frontend, "receiver_samples": receiver_samples, "branches": branches,
-        # "injection_factors": injection_factors,  # 分量重放暂停。
-        # "correction_factors": correction_factors,
     }
 
 
@@ -405,8 +387,6 @@ def run_validation(settings: ValidationSettings, cases: list[ValidationCase]) ->
             "scan_label": case.scan_label, "scan_value": case.scan_value,
             "scan_unit": case.scan_unit, "receiver_configs": {},
             "dfe_phase_deg": case.dfe_phase_deg,
-            "dfe_estimated_phase_deg": case.dfe_estimated_phase_deg,
-            "compensate_dfe_phase_flag": case.compensate_dfe_phase_flag,
             # "checks": case.checks,  # ideal_noise 标签暂停。
         })
         if case.temperature_offset:

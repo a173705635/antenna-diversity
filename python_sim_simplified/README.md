@@ -47,13 +47,13 @@ L1 默认捕获为4 ms相干×5次非相干累积，共20 ms；跟踪自动从�
 
 日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。各类实验共用 `MODES`、`ACTIVE_ANTENNAS`、`SEEDS`、`DURATION_MS`、`WORKERS` 与统计去边；验证默认运行 SINGLE、Blind Null、预设相位 EGC 和已知响应 MVDR，后两者标为对照。FULL CHAIN 仍只运行前两种方法。
 
-`EXPERIMENT_TYPE` 可选 `phase_direction_gain`（默认）、`antenna_temperature`、`phase_center_offset`（17条件，PC-001～017）、`mutual_coupling`（14条件，MC-001～014）、`antenna_gain`（17条件，TC-001～017）；输出统一为 `results/interference/<EXPERIMENT_TYPE>/`。温偏实验分别扫描真实天线增益和相位，名义响应固定在参考温度；系数仅为示例敏感性假设。条件与限制见[抗干扰说明](docs/interference/README.md)。
+`EXPERIMENT_TYPE` 可选 `phase_offset`（默认，12条件）、`antenna_temperature`、`phase_center_offset`（17条件，PC-001～017）、`mutual_coupling`（14条件，MC-001～014）、`antenna_gain`（17条件，TC-001～017）；输出统一为 `results/interference/<EXPERIMENT_TYPE>/`。温偏实验分别扫描真实天线增益和相位，名义响应固定在参考温度；系数仅为示例敏感性假设。条件与限制见[抗干扰说明](docs/interference/README.md)。
 
-相位/方向/增益实验通过 `SELECTED_SERIES`、`SCENES` 和各扫描元组设置范围；每个相位点固定生成基准、未补偿、准确补偿三组。`_base_config()` 集中设置共享配置，各构造函数只描述条件差异，`build_cases()` 统一展开种子；`build_settings()` 设置统计窗口、输出目录、并行数和绘图。各用例独立调度，结果按原用例顺序保存。顶部 `TARGET_TRUE_DIRECTION`、`TARGET_ASSUMED_DIRECTION` 分别设置真实与名义目标方向；`ACTIVE_ANTENNAS` 的第一根是 SINGLE 参考，增益、互耦和位置偏移条件作用于前两根，额外激活阵元保留基础配置。
+相位实验通过 `PHASE_ANTENNA`、`PHASE_SCAN_DEG` 和 `SCENES` 设置受影响通道、相位及场景，每个场景每个相位独立运行一次，0°作为基准；不再包含方向、增益扫描和准确补偿条件。`_base_config()` 集中设置共享配置，`build_cases()` 统一展开种子，`build_settings()` 设置统计、输出和并行参数。`TARGET_TRUE_DIRECTION`、`TARGET_ASSUMED_DIRECTION` 分别设置真实与名义目标方向；`ACTIVE_ANTENNAS` 的第一根是 SINGLE 参考，增益、互耦和位置偏移条件作用于前两根，额外激活阵元保留基础配置。
 
 增益、互耦与相位中心汇总按“条件＋算法”统计捕获跟踪；日常表保留总 seed 数、成功次数、C/N₀ 均值、样本标准差和有效 seed 数，完整缺测统计在 JSON。`scan_label`、`scan_unit` 用于真实扫描的图轴与文件名，离散条件不再填写 TC/MC/PC 伪单位。
 
-验证图按实验目标组织：相位比较基准、未补偿和准确补偿；单路增益比较两根天线的衰减；互耦在固定名义无耦合下分别扫描真实电压比与相位，相位中心在固定名义位置下分别扫描两根天线的视线偏移；温偏按增益/相位双面板展示。增益、互耦、相位中心和温偏入口共用 `GENERATE_PLOTS_FLAG`、`SHOW_PLOTS_FLAG`；C/N₀ 缺测不补零。
+验证图按实验目标组织：相位按场景分面比较四方法的 C/N₀，仅有捕获失败时增加 ACQ 图（单 seed 为成功/失败标记，多 seed 为正确捕获比例）；单路增益比较两根天线的衰减；互耦分别扫描电压比与相位，PCO分别移动两根天线，温偏分别扫描增益与相位。所有实验共用 `GENERATE_PLOTS_FLAG`、`SHOW_PLOTS_FLAG`；C/N₀ 缺测留空，重合曲线不人为错开。
 
 专项统计由 `EXPERIMENT_TYPE` 选择；日常核验保留实际合并输出与功率的独立复算，依赖分量的理想噪声收益检查暂时停用。模型与权值公式检查放在本地测试；核验通过不代表捕获跟踪成功。
 
@@ -63,9 +63,9 @@ L1 默认捕获为4 ms相干×5次非相干累积，共20 ms；跟踪自动从�
 
 完整 `MODES` 直接写入用例配置，`run_receiver()` 集中分派算法，结果统一放在 `branches`；各分支返回 `combined_samples`（合并采样）、`combining_info`（权值等信息）及算法角色、相位来源。通用验证的 `receiver_samples` 是相位处理后实际送入接收机的多通道采样。
 
-SINGLE 直接取第一根激活天线，不按目标响应归一化。MRC 已移除；EGC 使用显式输入的相位，权值为 `exp(jφ)/N`，各路等幅且不依赖目标强度。EGC 和 MVDR 只供显式对照，前者目前使用预设相位、后者使用已知目标响应，均不代表已实现自动估相。现有 DFE 通道误差补偿与 EGC 的目标相对相位对齐是不同环节；`AntennaState` 的幅相偏置只改变来波响应，器件通道误差由馈线和 RF 配置。接收机跟踪 C/N₀ 缺测不填零，实验条件见 [抗干扰说明](docs/interference/README.md)。
+SINGLE 直接取第一根激活天线，不按目标响应归一化。MRC 已移除；EGC 使用显式输入的相位，权值为 `exp(jφ)/N`，各路等幅且不依赖目标强度。EGC 和 MVDR 只供显式对照，前者目前使用预设相位、后者使用名义目标响应，均不代表已实现自动估相。`AntennaState` 的幅相偏置只改变来波响应，器件通道误差由馈线和 RF 配置。接收机跟踪 C/N₀ 缺测不填零，实验条件见 [抗干扰说明](docs/interference/README.md)。
 
-原通道相位入口已合入 `phase_direction_gain`。EGC 暂用名义响应相角，结果和图注明对照身份；通道相位实验不会把真实注入误差自动提供给 EGC。
+`phase_offset` 在 DFE 输出旋转指定完整通道（含目标、干扰、噪声），不代表天线端相位误差；名义模型固定，注入相位不自动提供给 EGC/MVDR，也不执行逆补偿。
 
 GPS 仿真定位的 `DURATION_MS` 至少为 210 ms 才包含当前首个定位时刻，不保证定位成功。真实录波输入固定为 `results/real_gnss_hackrf/first40s.int8`，需在本地具备录波且实际解出健康星历；记录需长于 1.01 s 才存在当前定位时刻。
 

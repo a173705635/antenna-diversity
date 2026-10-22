@@ -54,8 +54,6 @@ CSV_LABELS = {
     "assumed_coupling_db": "Cpl Nom (dB)",
     "assumed_coupling_phase_deg": "Cpl Nom (deg)",
     "DFE channel phase (deg)": "DFE Phase (deg)",
-    "target true azimuth (deg)": "True Az (deg)",
-    "target azimuth (deg)": "Target Az (deg)",
     "temperature_c": "Temperature (°C)",
     "gain_delta_db": "Gain Δ (dB)",
     "phase_delta_deg": "Phase Δ (deg)",
@@ -119,6 +117,8 @@ def _condition_columns(row: dict, experiment_type: str) -> dict:
                 "true_coupling_phase_deg": row["true_coupling_phase_deg"]}
     if experiment_type == "phase_center_offset":
         return {"series": row["series"], "los_offset_mm": row["scan_value"]}
+    if experiment_type == "phase_offset":
+        return {"scene": row["scene"], "DFE channel phase (deg)": row["scan_value"]}
     conditions = {"scene": row["scene"], "series": row["series"]}
     if row["scan_value"] is not None:
         label = row["scan_label"]
@@ -144,7 +144,7 @@ def phase_center_summary_records(cases: list[dict]) -> list[dict]:
     return records
 
 
-def general_summary_records(rows: list[dict], experiment_type: str = "phase_direction_gain") -> list[dict]:
+def general_summary_records(rows: list[dict], experiment_type: str = "phase_offset") -> list[dict]:
     """按用例和算法汇总普通扫描；缺测 C/N₀ 只计数，不填零。"""
     grouped = {}
     for row in rows:

@@ -1,7 +1,6 @@
 """日常只改本文件顶部条件；运行器与接收算法不随扫描点复制。
 
-方向/增益示例默认不选中。真实方向与名义方向是独立字段：改真实角度
-不会让接收机自动知道它。DFE 相位仅旋转完整通道；估计值是外部给定量。
+DFE 相位旋转完整通道，接收机的名义目标响应保持固定。
 """
 
 from copy import deepcopy
@@ -16,7 +15,7 @@ from experiments.interference.validation_support import ValidationCase, Validati
 
 # 所有实验共用种子、时长、并行数、统计去边和绘图开关。
 # 选择实验类型后，输出固定写入 results/interference/<实验类型>/。
-EXPERIMENT_TYPE = "phase_direction_gain"  # 另可选 "antenna_temperature"、"antenna_gain"、"mutual_coupling"、"phase_center_offset"。
+EXPERIMENT_TYPE = "phase_offset"  # 另可选 "antenna_temperature"、"antenna_gain"、"mutual_coupling"、"phase_center_offset"。
 SEEDS = tuple(range(42, 43))  # 所有实验共用；单次运行设为 (42,)。
 # 每个用例独立生成采样；配对条件保持相同 seed 和物理配置，以复现相同噪声。
 # 功率统计首尾各舍弃此时长，避开滤波瞬态；不裁掉送入捕获跟踪的数据。
@@ -34,9 +33,6 @@ MODES = ("single", "blind_null", "egc", "mvdr")  # 后两种为预设/已知响�
 # 单因素扫描；PHASE_ANTENNA 按物理名字定位，不使用固定行号。
 PHASE_ANTENNA = "BR"
 PHASE_SCAN_DEG = (0, 30, 60, 90, 120, 180)
-TARGET_AZIMUTH_SCAN_DEG = (30, 40, 50)
-ELEMENT_GAIN_ANTENNA = "BR"
-ELEMENT_GAIN_SCAN_DB = (0.0, 6.020599913279624)
 
 # 温偏指固定温度相对参考温度的偏差；系数为示例假设，每个用例温度恒定。
 # 两个系列分别只改指定天线真实增益或真实相位，名义状态始终固定于参考温度。
@@ -55,9 +51,6 @@ COUPLING_PHASE_SCAN_DEG = (0, 45, 90, 135, 180, 225, 270, 315)
 # 两根天线各自沿目标来波视线移动；零点是两条曲线共用的物理基准。
 PHASE_CENTER_LOS_SCAN_MM = (-40, -20, -10, -5, 0, 5, 10, 20, 40)
 
-# 默认复现旧相位实验。改为 ("direction",) 或 ("gain",) 即单独运行示例；
-# 可同时选择多个具名系列，但不会把不同因素做隐式笛卡尔积。
-SELECTED_SERIES = ("phase",)
 SCENES = ("noise_only", "single_cw")
 
 # 所有实验共用基础目标方向。
@@ -175,60 +168,17 @@ def _phase_center_cases() -> list[ValidationCase]:
     return cases
 
 
-def _phase_direction_gain_cases() -> list[ValidationCase]:
-    """按所选系列构造相位、方向和增益模板。"""
+def _phase_offset_cases() -> list[ValidationCase]:
+    """每个场景和 DFE 相位点运行一个独立完整用例；零度是自然基准。"""
     cases = []
     for scene in SCENES:
-        base_cfg = _base_config(scene)
-        if "phase" in SELECTED_SERIES:
-            for phase_deg in PHASE_SCAN_DEG:
-                # 每个横轴点固定三组；各组使用独立完整配置。
-                phase_case_prefix = f"{scene}/phase_{phase_deg}"
-                common_case_fields = dict(
-                    scene_label=scene, scan_label="DFE channel phase",
-                    scan_value=phase_deg, scan_unit="deg",
-                )
-                # ideal_checks = ("ideal_noise",) if scene == "noise_only" else ()
-                baseline_case = ValidationCase(
-                    f"{phase_case_prefix}/baseline", deepcopy(base_cfg), series_label="baseline",
-                    # checks=ideal_checks,  # 分量 SNR 核验暂停。
-                    **common_case_fields,
-                )
-                uncalibrated_case = ValidationCase(
-                    f"{phase_case_prefix}/uncalibrated", deepcopy(base_cfg), series_label="uncalibrated",
-                    dfe_phase_deg={PHASE_ANTENNA: phase_deg}, **common_case_fields,
-                )
-                calibrated_case = ValidationCase(
-                    f"{phase_case_prefix}/calibrated", deepcopy(base_cfg), series_label="calibrated",
-                    # 这里故意令估计相位等于真实相位，验证补偿闭环，不是自动估相。
-                    dfe_phase_deg={PHASE_ANTENNA: phase_deg},
-                    dfe_estimated_phase_deg={PHASE_ANTENNA: phase_deg},
-                    compensate_dfe_phase_flag=True, **common_case_fields,
-                )
-                cases.extend((baseline_case, uncalibrated_case, calibrated_case))
-        if "direction" in SELECTED_SERIES:
-            for azimuth_deg in TARGET_AZIMUTH_SCAN_DEG:
-                # 扫描真实入射方向；名义方向保持固定，仅供诊断与显式对照。
-                case_cfg = deepcopy(base_cfg)
-                case_cfg.signal.true_direction = Direction(azimuth_deg, case_cfg.signal.true_direction.elevation_deg)
-                direction_case = ValidationCase(
-                    f"{scene}/direction_{azimuth_deg}", case_cfg, scene_label=scene,
-                    series_label="true direction", scan_label="target true azimuth",
-                    scan_value=azimuth_deg, scan_unit="deg",
-                )
-                cases.append(direction_case)
-        if "gain" in SELECTED_SERIES:
-            for gain_db in ELEMENT_GAIN_SCAN_DB:
-                # dB 增益作用于阵元响应，6.02 dB 约为电压两倍；名义增益保持不变。
-                case_cfg = deepcopy(base_cfg)
-                case_cfg.phone.antenna_model.true_state.amplitude_error_db[ELEMENT_GAIN_ANTENNA] = gain_db
-                gain_case = ValidationCase(
-                    f"{scene}/gain_{gain_db}", case_cfg, scene_label=scene,
-                    series_label="true element gain", scan_label=f"{ELEMENT_GAIN_ANTENNA} gain",
-                    scan_value=gain_db, scan_unit="dB",
-                )
-                cases.append(gain_case)
-
+        for phase_deg in PHASE_SCAN_DEG:
+            cases.append(ValidationCase(
+                name=f"{scene}/phase_{phase_deg:g}", config=_base_config(scene),
+                scene_label=scene, series_label="phase",
+                scan_label="DFE channel phase", scan_value=phase_deg, scan_unit="deg",
+                dfe_phase_deg={PHASE_ANTENNA: phase_deg},
+            ))
     return cases
 
 
@@ -282,7 +232,7 @@ def build_cases() -> list[ValidationCase]:
         "antenna_gain": _pattern_gain_cases,
         "mutual_coupling": _coupling_cases,
         "phase_center_offset": _phase_center_cases,
-        "phase_direction_gain": _phase_direction_gain_cases,
+        "phase_offset": _phase_offset_cases,
         "antenna_temperature": _antenna_temperature_cases,
     }
     if EXPERIMENT_TYPE not in builders:

@@ -1,7 +1,5 @@
 """按各验证实验的物理问题绘图；只读取逐 seed 接收结果。"""
 
-from collections import Counter
-import hashlib
 from pathlib import Path
 import re
 
@@ -12,16 +10,6 @@ from experiments.interference.validation_support import ValidationSettings
 
 def _filename_label(value: str) -> str:
     return re.sub(r"[^\w]+", "_", str(value).casefold()).strip("_")
-
-
-def _distinct_plot_names(base_names: dict) -> dict:
-    """扫描标签归一后重名时追加稳定摘要，避免覆盖图片。"""
-    counts = Counter(base_names.values())
-    return {
-        label: (base if counts[base] == 1 else
-                f"{base}_{hashlib.sha256(str(label).encode('utf-8')).hexdigest()[:8]}")
-        for label, base in base_names.items()
-    }
 
 
 def _mode_label(row: dict) -> str:
@@ -106,80 +94,94 @@ def _save_figure(fig, settings: ValidationSettings, name: str, paths: list[Path]
         plt.close(fig)
 
 
-def _phase_direction_gain(rows: list[dict], settings: ValidationSettings) -> list[Path]:
-    """相位比较补偿三组；方向和增益扫描在同图比较各算法。"""
+def _phase_offset(rows: list[dict], settings: ValidationSettings) -> list[Path]:
+    """每场景分面显示真实相位的跟踪 C/N₀；捕获失败时另画状态或比例。"""
     import matplotlib.pyplot as plt
 
     paths = []
-    factors = list(dict.fromkeys((row["scan_label"], row["scan_unit"]) for row in rows))
-    factor_names = _distinct_plot_names({
-        factor: _filename_label("_".join(part for part in factor if part))
-        for factor in factors
-    })
-    for factor in factors:
-        factor_rows = [row for row in rows if (row["scan_label"], row["scan_unit"]) == factor]
-        for scene in dict.fromkeys(row["scene"] for row in factor_rows):
-            scene_rows = [row for row in factor_rows if row["scene"] == scene]
+    scenes = list(dict.fromkeys(row["scene"] for row in rows))
+    fig, axes = plt.subplots(1, len(scenes), figsize=(6.2 * len(scenes), 5),
+                             squeeze=False, constrained_layout=True)
+    for axis, scene in zip(axes[0], scenes):
+        scene_rows = [row for row in rows if row["scene"] == scene]
+        modes = list(dict.fromkeys(row["mode"] for row in scene_rows))
+        curves = {}
+        for mode_index, mode in enumerate(modes):
+            mode_rows = [row for row in scene_rows if row["mode"] == mode]
+            curves[mode] = _scan_points(mode_rows, "tracking_cn0_mean_db_hz")
+            _plot_points(axis, curves[mode], _mode_label(mode_rows[0]), mode_index)
+        axis.set_title(scene)
+        axis.set_xticks(sorted({row["scan_value"] for row in scene_rows}))
+        _finish_axis(axis, "DFE phase (deg)", "tracking_cn0_mean_db_hz")
+        if all(row["acquisition_correct_flag"] for row in scene_rows):
+            axis.text(0.02, 0.97, "ACQ all pass", va="top", fontsize=8,
+                      transform=axis.transAxes)
+        # 只比较相同横轴的完整有效曲线；接近但不相等的数值不标为重合。
+        matching_groups = []
+        for mode in modes:
+            points = curves[mode]
+            if not points or not all(np.isfinite(y) for _, y in points):
+                continue
+            for group in matching_groups:
+                reference = curves[group[0]]
+                if ([x for x, _ in points] == [x for x, _ in reference]
+                        and all(abs(value - reference_value) <= 1e-8
+                                for (_, value), (_, reference_value) in zip(points, reference))):
+                    group.append(mode)
+                    break
+            else:
+                matching_groups.append([mode])
+        overlaps = [" = ".join(_mode_label(next(row for row in scene_rows
+                                               if row["mode"] == mode)) for mode in group)
+                    for group in matching_groups if len(group) > 1]
+        if overlaps:
+            axis.text(0.02, 0.12, "Identical CN0:\n" + "\n".join(overlaps),
+                      fontsize=8, transform=axis.transAxes)
+    affected = sorted({antenna for row in rows for antenna in row["dfe_phase_deg"]
+                       if antenna in row["antennas"].split(",")})
+    caption = ("DFE output: whole-channel phase on " + ", ".join(affected)
+               + "\nNominal target response fixed")
+    fig.suptitle(caption)
+    _save_figure(fig, settings, "phase_offset__tracking_cn0_mean", paths)
+
+    failed_scenes = [scene for scene in scenes if any(
+        not row["acquisition_correct_flag"] for row in rows if row["scene"] == scene)]
+    if failed_scenes:
+        seed_counts = {scene: len({row["seed"] for row in rows if row["scene"] == scene})
+                       for scene in failed_scenes}
+        fig, axes = plt.subplots(1, len(failed_scenes), figsize=(6.2 * len(failed_scenes), 4.6),
+                                 squeeze=False, constrained_layout=True)
+        for axis, scene in zip(axes[0], failed_scenes):
+            scene_rows = [row for row in rows if row["scene"] == scene]
             modes = list(dict.fromkeys(row["mode"] for row in scene_rows))
-            phase_flag = ("phase" in factor[0].casefold() or
-                          bool({row["series"] for row in scene_rows} &
-                               {"uncalibrated", "calibrated"}))
-            for metric, metric_name in (("acquisition_metric", "acquisition_peak_ratio"),
-                                        ("tracking_cn0_mean_db_hz", "tracking_cn0_mean")):
-                if phase_flag:
-                    fig, axes = plt.subplots(1, len(modes), figsize=(5.2 * len(modes), 4.5),
-                                             squeeze=False, constrained_layout=True)
-                    for mode_index, mode in enumerate(modes):
-                        axis = axes[0, mode_index]
-                        mode_rows = [row for row in scene_rows if row["mode"] == mode]
-                        series_points = {}
-                        for series_index, series in enumerate(dict.fromkeys(
-                                row["series"] for row in mode_rows)):
-                            selected = [row for row in mode_rows if row["series"] == series]
-                            points = _scan_points(selected, metric)
-                            series_points[series] = points
-                            _plot_points(axis, points, series, series_index)
-                        axis.set_title(_mode_label(mode_rows[0]))
-                        xlabel = {"DFE channel phase": "DFE Phase",
-                                  "target true azimuth": "True Az",
-                                  "target azimuth": "Target Az"}.get(factor[0], factor[0])
-                        _finish_axis(axis, f"{xlabel} ({factor[1]})", metric)
-                        if metric == "acquisition_metric":
-                            for threshold in sorted({row["acquisition_threshold"] for row in mode_rows}):
-                                axis.axhline(threshold, color="#888888", linestyle="-.",
-                                             label=f"Thr {threshold:g}")
-                            axis.legend(fontsize=8)
-                        if "baseline" in series_points and "calibrated" in series_points:
-                            baseline = series_points["baseline"]
-                            calibrated = series_points["calibrated"]
-                            if ([point[0] for point in baseline] ==
-                                    [point[0] for point in calibrated]
-                                    and np.any(np.isfinite([point[1] for point in baseline]))
-                                    and np.allclose([point[1] for point in baseline],
-                                                    [point[1] for point in calibrated],
-                                                    rtol=0, atol=1e-8, equal_nan=True)):
-                                axis.text(0.02, 0.96, "Baseline = calibrated",
-                                          va="top", fontsize=8, transform=axis.transAxes)
-                    fig.suptitle(f"{scene}: baseline / injected phase / preset correction")
-                else:
-                    fig, axis = plt.subplots(figsize=(7, 4.5), constrained_layout=True)
-                    for mode_index, mode in enumerate(modes):
-                        selected = [row for row in scene_rows if row["mode"] == mode]
-                        points = _scan_points(selected, metric)
-                        _plot_points(axis, points, _mode_label(selected[0]), mode_index,
-                                     connect_flag=len({point[0] for point in points}) == len(points))
-                    xlabel = {"DFE channel phase": "DFE Phase",
-                              "target true azimuth": "True Az",
-                              "target azimuth": "Target Az"}.get(factor[0], factor[0])
-                    _finish_axis(axis, f"{xlabel} ({factor[1]})", metric)
-                    if metric == "acquisition_metric":
-                        for threshold in sorted({row["acquisition_threshold"] for row in scene_rows}):
-                            axis.axhline(threshold, color="#888888", linestyle="-.",
-                                         label=f"Thr {threshold:g}")
-                        axis.legend(fontsize=8)
-                    axis.set_title(scene)
-                _save_figure(fig, settings, f"phase_direction_gain__{_filename_label(scene)}"
-                      f"__{factor_names[factor]}__{metric_name}", paths)
+            if seed_counts[scene] == 1:
+                # 单 seed 的 0/1 是离散状态，按方法分行避免相同曲线遮盖。
+                for mode_index, mode in enumerate(modes):
+                    for row in (item for item in scene_rows if item["mode"] == mode):
+                        axis.scatter(row["scan_value"], mode_index,
+                                     marker="o" if row["acquisition_correct_flag"] else "x",
+                                     color="#238b45" if row["acquisition_correct_flag"] else "#c53030",
+                                     zorder=3)
+                axis.set_yticks(range(len(modes)), [_mode_label(next(
+                    row for row in scene_rows if row["mode"] == mode)) for mode in modes])
+                axis.set_ylabel("Method (○ pass; × fail)")
+            else:
+                for mode_index, mode in enumerate(modes):
+                    selected = [row for row in scene_rows if row["mode"] == mode]
+                    _plot_points(axis, _scan_points(selected, "acquisition_correct_flag"),
+                                 _mode_label(selected[0]), mode_index)
+                axis.set_ylim(-0.04, 1.04)
+                axis.set_ylabel("ACQ correct / all seeds")
+                axis.legend(fontsize=8)
+            axis.set_title(scene)
+            axis.set_xticks(sorted({row["scan_value"] for row in scene_rows}))
+            axis.set_xlabel("DFE phase (deg)")
+            axis.grid(alpha=0.3)
+        fig.suptitle(caption)
+        plot_kind = ("status" if all(seed_counts[scene] == 1 for scene in failed_scenes)
+                     else "rate" if all(seed_counts[scene] > 1 for scene in failed_scenes)
+                     else "status_rate")
+        _save_figure(fig, settings, f"phase_offset__acquisition_{plot_kind}", paths)
     return paths
 
 
@@ -335,7 +337,7 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
     if not rows:
         return []
     plotters = {
-        "phase_direction_gain": _phase_direction_gain,
+        "phase_offset": _phase_offset,
         "antenna_gain": _antenna_gain,
         "mutual_coupling": _mutual_coupling,
         "phase_center_offset": _phase_center_offset,
