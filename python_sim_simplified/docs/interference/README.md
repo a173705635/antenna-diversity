@@ -2,13 +2,19 @@
 
 当前运行结果先看 `case_summary.csv`（用例×算法跨 seed 统计），再看 `summary.csv`（逐 seed；FULL CHAIN 为逐算法）。日常表只放必要条件、捕获/跟踪与 C/N₀；validation 的权值、实际功率和复算误差仍在 `summary.json` 的 rows 中，FULL CHAIN 的 `summary.json` 为逐算法 metrics 列表。CSV 使用 UTF-8 BOM；`manifest.json` 保存完整用例条件、实际配置、运行方法身份与源码哈希，通用验证的 `summary.json` 保存行、专项统计和 `verification`，不再另写 `verification.json`。并行验证运行中写 `progress.jsonl`，完整入口保存、绘图和核验成功后删除，失败时保留。两入口的跟踪 C/N₀ 均从原始历元 `len//2` 处取后半段，剔除 NaN/Inf 后直接计算 dB-Hz 算术均值，未完成跟踪或后半段全缺测留空；跨 seed 仅等权平均有值的 seed。这不保证跟踪已收敛，也不等同于线性域先平均再转 dB。历史结果文件及下文历史实验记录仍按生成时版本解读。
 
+## 统一场景选择（2026-10-26）
+
+六类验证共用 `validation_config.py` 顶部的 `SCENES`，默认无干扰和单CW；加入 `single_wideband` 即可对任一实验扫描纯2 MHz宽带干扰。`build_cases()` 统一展开场景和seed，每个用例仍独立执行完整链路。增益、互耦、PCO的用例名增加场景前缀（如 `single_cw/MC-001`），CSV和专项JSON保留场景，增益图也按场景分开。
+
+与 `5c63271` 对照，原102套完整配置和用例元数据除名称前缀外一致；三场景对应扫描点之间只改变干扰源。用默认100 ms、seed 42、4×5捕获和四方法，抽样运行每场景的MC-001/005、TC-001/002、PC-001/006，共18条件72行，公共核验、CSV/JSON及manifest场景隔离检查通过，保存18张图并抽查三类CN0图。输出在 `results/interference/scene_selection_check/<实验类型>/`；这是入口与输出验证，未跑完三场景全部扫描，不据此新增性能结论。
+
 ## RF物理延时（2026-10-22）
 
 当前 `rf_group_delay` 改为真实RF纯延时模型：`u_out(t)=u_in(t−τ)exp(−j2πfcτ)`，即 `H(fc+ν)=exp[−j2π(fc+ν)τ]`。`fc` 使用实际信号载频（L1 1575.42 MHz，L5 1176.45 MHz），`ν` 是基带频偏；基带移位已包含多普勒和干扰频偏的相位，载频项只乘一次。全部信号和输入等效噪声在公共RF FIR对齐后一起延迟并旋转载波相位，再经过原增益、限幅、ADC和DFE；公共FIR时间对齐保留，新增通道延时不作逆补偿，不改馈线或接收机名义响应。EGC预设相位、MVDR名义约束不随延时更新，日常分量分析仍暂停；RF两个函数现在要求显式传入 `carrier_hz`。
 
 建模参考 [MathWorks复包络原理](https://www.mathworks.com/help/simrf/gs/circuit-envelope-basics.html)及其[延时传输线模型](https://www.mathworks.com/help/simrf/ug/transmission-lines-delay-based-and-lumped-models.html)：载波解析处理，采样只需覆盖包络带宽。这里复用原有33抽头分数延时和载波相位函数，无新增依赖；它是理想纯延时，不代表任意真实RF滤波器。若要贴合具体器件，应使用带绝对复相位的实测S参数/复频响，同时描述幅度、中心相位及群延时起伏；[RF Blockset支持导入S参数](https://www.mathworks.com/help/simrf/gs/circuit-envelope-library.html)，本次未引入未经测量的器件数据或S参数模型。
 
-仍按默认100 ms、seed 42、4×5捕获、四方法重跑三场景及BR的0/10/20/50/100/200 ns，共18条件72行；默认实验仍为 `phase_offset`，设 `EXPERIMENT_TYPE="rf_group_delay"` 可重跑。新结果在 `results/interference/rf_group_delay/`；旧包络延时结果完整移至 `results/interference/rf_group_delay_center_phase_fixed_f225898/`，原manifest和来源哈希不变。JSON记录 `delay_model="physical_rf_delay"` 和实际载频；日常CSV仍只列延时条件和接收结果。
+本批按当时默认100 ms、seed 42、4×5捕获、四方法重跑三场景及BR的0/10/20/50/100/200 ns，共18条件72行；当前复现须设 `EXPERIMENT_TYPE="rf_group_delay"`、`SCENES=("noise_only", "single_cw", "single_wideband")` 及上述扫描值。新结果在 `results/interference/rf_group_delay/`；旧包络延时结果完整移至 `results/interference/rf_group_delay_center_phase_fixed_f225898/`，原manifest和来源哈希不变。JSON记录 `delay_model="physical_rf_delay"` 和实际载频；日常CSV仍只列延时条件和接收结果。
 
 L1中心相位每约0.635 ns绕一圈，六个点的新增中心相移依次为0/88.49/176.98/82.44/164.88/−30.24°；CN0用标记点加连线，缺测处断开；连线仅引导阅读，不代表未采样时延处的真实变化。理想模型图分开显示中心相位主值及带内连续相位，两者均含载频项；不是实测频响。无干扰场景的EGC CN0依次为48.46/45.84/缺测/46.34/缺测/47.40 dB-Hz，20 ns、100 ns的EGC与MVDR均未正确捕获，缺测不填零；SINGLE及退回TL的Blind Null始终为46.14 dB-Hz。CW下Blind Null为45.70～46.52 dB-Hz，可自适应吸收该频点的相差；宽带下仍由45.42降至18.11 dB-Hz，固定复权值无法消除整带时延失配。当前TRK状态不保证载波锁定，接收机估计CN0的下降不能直接当成纯干扰抑制损失；本批不作跨seed或硬件容差结论。
 

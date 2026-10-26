@@ -40,7 +40,7 @@ def summarize_coupling(rows: list[dict]) -> dict:
                if row["tracking_cn0_mean_db_hz"] is not None]
         phases = np.deg2rad([row["true_response_phase_deg"] for row in observations])
         cases[f"{case_id}-{mode}"] = {
-            "case": case_id, "level": "link", "mode": mode,
+            "case": case_id, "scene": first["scene"], "level": "link", "mode": mode,
             "series": first["series"], "scan_value": first["scan_value"],
             "receiver_role": receiver_role,
             "phase_estimate_source": first["phase_estimate_source"],

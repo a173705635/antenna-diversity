@@ -109,15 +109,16 @@ def _condition_columns(row: dict, experiment_type: str) -> dict:
                 "gain_delta_db": temperature_info["gain_delta_db"] if row["series"] == "gain" else None,
                 "phase_delta_deg": temperature_info["phase_delta_deg"] if row["series"] == "phase" else None}
     if experiment_type == "antenna_gain":
-        return {f"{antenna}_gain_db": gain for antenna, gain in zip(
-            row["antennas"].split(","), row["input_gain_db_by_antenna"])}
+        return {"scene": row["scene"], **{f"{antenna}_gain_db": gain for antenna, gain in zip(
+            row["antennas"].split(","), row["input_gain_db_by_antenna"])}}
     if experiment_type == "mutual_coupling":
-        return {"series": row["series"],
+        return {"scene": row["scene"], "series": row["series"],
                 "true_coupling_voltage_ratio": (10 ** (row["true_coupling_db"] / 20)
                                                 if row["true_coupling_db"] is not None else 0),
                 "true_coupling_phase_deg": row["true_coupling_phase_deg"]}
     if experiment_type == "phase_center_offset":
-        return {"series": row["series"], "los_offset_mm": row["scan_value"]}
+        return {"scene": row["scene"], "series": row["series"],
+                "los_offset_mm": row["scan_value"]}
     if experiment_type == "phase_offset":
         return {"scene": row["scene"], "DFE channel phase (deg)": row["scan_value"]}
     if experiment_type == "rf_group_delay":
@@ -135,7 +136,7 @@ def phase_center_summary_records(cases: list[dict]) -> list[dict]:
     records = []
     for case in cases:
         records.append({
-            "case": case["case"], "mode": case["mode"],
+            "case": case["case"], "scene": case["scene"], "mode": case["mode"],
             "series": case["series"], "los_offset_mm": case["scan_value"],
             "seeds": case["seeds"],
             "acquisition_correct_count": case["acquisition_correct_count"],
@@ -231,7 +232,7 @@ def save_results(settings: ValidationSettings, summary: dict) -> None:
         records = []
         for case in summary["mutual_coupling"]["cases"].values():
             record = {
-                "case": case["case"], "mode": case["mode"],
+                "case": case["case"], "scene": case["scene"], "mode": case["mode"],
                 "series": case["series"],
                 "true_coupling_voltage_ratio": (10 ** (case["true_coupling_db"] / 20)
                                                 if case["true_coupling_db"] is not None else 0),

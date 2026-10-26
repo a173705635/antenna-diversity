@@ -238,23 +238,27 @@ def _antenna_gain(rows: list[dict], settings: ValidationSettings) -> list[Path]:
     import matplotlib.pyplot as plt
 
     paths = []
-    antennas = rows[0]["antennas"].split(",")[:2]
-    for metric, metric_name in (("tracking_cn0_mean_db_hz", "tracking_cn0_mean"),
-                                ("acquisition_correct_flag", "acquisition_correct_rate")):
-        fig, axes = plt.subplots(1, 2, figsize=(12, 4.7), sharey=True,
-                                 constrained_layout=True)
-        for antenna_index, axis in enumerate(axes):
-            other_index = 1 - antenna_index
-            panel_rows = [row for row in rows
-                          if row["input_gain_db_by_antenna"][other_index] == 0]
-            for mode_index, mode in enumerate(dict.fromkeys(row["mode"] for row in panel_rows)):
-                selected = [row for row in panel_rows if row["mode"] == mode]
-                points = sorted((float(group[0]["input_gain_db_by_antenna"][antenna_index]),
-                                 _mean_metric(group, metric)) for group in _case_groups(selected))
-                _plot_points(axis, points, _mode_label(selected[0]), mode_index)
-            axis.set_title(f"{antennas[antenna_index]} attenuation; {antennas[other_index]} = 0 dB")
-            _finish_axis(axis, f"{antennas[antenna_index]} input gain (dB)", metric)
-        _save_figure(fig, settings, f"antenna_gain__single_antenna__{metric_name}", paths)
+    for scene in dict.fromkeys(row["scene"] for row in rows):
+        scene_rows = [row for row in rows if row["scene"] == scene]
+        antennas = scene_rows[0]["antennas"].split(",")[:2]
+        for metric, metric_name in (("tracking_cn0_mean_db_hz", "tracking_cn0_mean"),
+                                    ("acquisition_correct_flag", "acquisition_correct_rate")):
+            fig, axes = plt.subplots(1, 2, figsize=(12, 4.7), sharey=True,
+                                     constrained_layout=True)
+            for antenna_index, axis in enumerate(axes):
+                other_index = 1 - antenna_index
+                panel_rows = [row for row in scene_rows
+                              if row["input_gain_db_by_antenna"][other_index] == 0]
+                for mode_index, mode in enumerate(dict.fromkeys(row["mode"] for row in panel_rows)):
+                    selected = [row for row in panel_rows if row["mode"] == mode]
+                    points = sorted((float(group[0]["input_gain_db_by_antenna"][antenna_index]),
+                                     _mean_metric(group, metric)) for group in _case_groups(selected))
+                    _plot_points(axis, points, _mode_label(selected[0]), mode_index)
+                axis.set_title(f"{antennas[antenna_index]} attenuation; {antennas[other_index]} = 0 dB")
+                _finish_axis(axis, f"{antennas[antenna_index]} input gain (dB)", metric)
+            fig.suptitle(scene)
+            _save_figure(fig, settings,
+                         f"antenna_gain__{_filename_label(scene)}__single_antenna__{metric_name}", paths)
     return paths
 
 
