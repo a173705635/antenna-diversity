@@ -151,7 +151,7 @@ def format_metrics(records: list[MetricRecord]) -> str:
         mode_label = record["mode"]
         if record["receiver_role"] == "known_response_comparison":
             if mode_label == "mvdr":
-                mode_label = "MVDR (known resp)"
+                mode_label = "MVDR (nominal resp)"
             elif mode_label == "egc":
                 source = record["phase_estimate_source"]
                 if source == "preset_assumed_target_response_phase":

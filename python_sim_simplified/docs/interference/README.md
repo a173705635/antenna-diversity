@@ -2,6 +2,25 @@
 
 当前运行结果先看 `case_summary.csv`（用例×算法跨 seed 统计），再看 `summary.csv`（逐 seed；FULL CHAIN 为逐算法）。日常表只放必要条件、捕获/跟踪与 C/N₀；validation 的权值、实际功率和复算误差仍在 `summary.json` 的 rows 中，FULL CHAIN 的 `summary.json` 为逐算法 metrics 列表。CSV 使用 UTF-8 BOM；`manifest.json` 保存完整用例条件、实际配置、运行方法身份与源码哈希，通用验证的 `summary.json` 保存行、专项统计和 `verification`，不再另写 `verification.json`。并行验证运行中写 `progress.jsonl`，完整入口保存、绘图和核验成功后删除，失败时保留。两入口的跟踪 C/N₀ 均从原始历元 `len//2` 处取后半段，剔除 NaN/Inf 后直接计算 dB-Hz 算术均值，未完成跟踪或后半段全缺测留空；跨 seed 仅等权平均有值的 seed。这不保证跟踪已收敛，也不等同于线性域先平均再转 dB。历史结果文件及下文历史实验记录仍按生成时版本解读。
 
+## 未知天线增益与名义响应审计（2026-10-26）
+
+`antenna_gain` 的17个条件现在只修改真实阵元增益，名义幅相保持基准值；此前构造用例时同时修改 `true_state` 与 `assumed_state`，使MVDR预先获知被测增益，不符合未知增益误差的研究目标。实际信号与噪声链不改，EGC仍使用预设相位，MVDR使用固定名义响应；图例和终端统一标为 `MVDR (nominal resp)`，不代表在线校准或准确响应上限。
+
+审计覆盖当前七类实验的三场景配置及接收调用链：发现上述一处扫描值写入名义模型的问题；相位、互耦、PCO、增益/相位温偏、RF延时和LNA档位均未将扫描误差传给名义响应。真实/名义天线、位置和馈线参数分别读取，SINGLE与Blind Null不读目标响应；用于评分的真值不参与求权。预设目标方向、相位和名义模型仍是显式对照前提，不能据此声称已经实现实际接收机的估相或校准。
+
+旧 `scene_selection_check/antenna_gain/` 的24行抽样中，manifest明确记录真实/名义增益同步，原文件保留；其MVDR结果仅适用于已知增益条件。首批44条的历史文档也采用该前提，且当前同名 `results/interference/pattern_gain_first44/` 目录已是36个相位条件、144行数据，不能用它复现旧增益报告；旧数值不改写为本次结果。当前完整增益结果统一保存到 `results/interference/antenna_gain/`。
+
+本次按无干扰、单CW、单宽带三个场景，各17条件、四方法，共51条件204行重跑及核验通过；seed 42、100 ms、捕获4×5，CN0沿用跟踪后半段均值。无干扰结果如下（dB-Hz），仅代表当前单seed，不能把小幅排序差异当成普遍优劣：
+
+| BR真实增益 / dB（TL固定0） | SINGLE | EGC | MVDR |
+| --- | ---: | ---: | ---: |
+| 0 | 46.14 | 48.46 | 48.47 |
+| −10 | 46.14 | 44.72 | 44.68 |
+| −20 | 46.14 | 43.14 | 43.14 |
+| −40 | 46.14 | 42.45 | 42.39 |
+
+移除真实增益信息后，当前无干扰扫描中MVDR与EGC接近，不能再沿用旧“准确已知增益”对照来判断未知增益的性能。三场景旧抽样中未受影响的21行（SINGLE、Blind Null、EGC及零误差MVDR）与新结果完全一致。另核对七类实验共231套配置：名义响应跨扫描点不变，除增益用例的名义幅度外，其余配置和用例元数据与修改前一致；代表用例的真实前端采样逐点一致。
+
 ## 两链路LNA档位差（2026-10-26）
 
 当前 `rf_agc` 改为只扫描BR的首级LNA（用户所指ILNA），TL及两路的混频器、VGA固定。`AGC_LNA_STATES` 显式配置LNA增益/NF（dB）：4/6、10/4、16/2.8、22/1.8、28/1.2，对应BR相对TL总增益差−24/−18/−12/−6/0 dB。这些是敏感性示例，NF不能仅由增益推算，也不沿用旧VGA的恒定输出噪声假设；实际器件需替换为各档测量值。
@@ -421,6 +440,8 @@ case_summary.csv每行一个条件及算法，保留条件参数、对照、性�
 
 ## 增益扫描对照修复（2026-10-15）
 
+本节为历史实现与运行记录；当前增益扫描已改为固定名义响应，旧批次已知增益前提及现存结果目录的身份差异见[本次审计](#未知天线增益与名义响应审计2026-10-26)。
+
 `validation_config.py::_pattern_gain_cases()` 现在按(TL增益, BR增益, 算法)查找对照，不再写死TC编号。用户将SINGLE扫描改为0至−10 dB后，共50个条件；共同衰减基准自动指向TC-012～014，强弱交换自动指向对应的交换前条件。非零增益SINGLE均与零增益SINGLE配对。扫描仍需保留0 dB基准，以及交换实验所引用的增益点。
 
 验证：配置对照断言在修复前失败、修复后通过；`python -B -m pytest -p no:cacheprovider -q tests/test_pattern_gain_validation.py` 为7 passed。读取用户现存500行summary.json，用新配置的对照映射调用 `summarize_pattern_gain(rows, references)`，50条核验全部通过。此操作只在内存复算，未覆盖原summary/verification/manifest及图片，也未重新生成IQ。
@@ -433,7 +454,7 @@ case_summary.csv每行一个条件及算法，保留条件参数、对照、性�
 
 无干扰方向图研究见 [天线方向图增益验证用例](antenna_pattern_validation_cases.md)：20 个分类下共 **425 条独立用例 TC-001～TC-425**，每条固定参数、一个被测方法、明确对照和判据。TC-001～044已执行，余下381条未执行，不将扫描组记作一条用例。
 
-增益验证入口为 `python -m experiments.interference.validation`，选择 `EXPERIMENT_TYPE="antenna_gain"`，新输出自动为 `results/interference/antenna_gain/`。当前17个条件为0/0基准、第一路单独衰减0至−10及−20 dB、第二路单独衰减−3/−6/−10/−20/−40 dB；删除四个双路共同衰减条件后，原 TC-016～021 改编为 TC-012～017，旧结果仍按旧编号解读。历史首批44条及后来扩展的50条记录保留在 `results/interference/pattern_gain_first44/`；其参数和结论按下文对应记录解读。`progress.jsonl` 记录逐次完成进度，`summary.csv` 保存逐seed数据，`case_summary.csv` 保存逐用例汇总。切换相位/方向/增益扫描用 `EXPERIMENT_TYPE="phase_direction_gain"`，按需设置 `SEEDS` 等参数，输出目录随选择自动切换。运行中不要再次启动同输出目录的实验。
+现行增益入口为 `python -m experiments.interference.validation`，选择 `EXPERIMENT_TYPE="antenna_gain"`，输出到 `results/interference/antenna_gain/`。17个条件为0/0基准、第一路单独衰减−1至−10及−20 dB、第二路单独衰减−3/−6/−10/−20/−40 dB；旧TC编号按对应版本解读。旧首批44条与后来50条的文档记录保留，下述数值不能由当前 `pattern_gain_first44/` 中的相位数据复现。`summary.csv` 保存逐seed数据，`case_summary.csv` 保存逐用例汇总；当前相位入口为 `phase_offset`，不再使用历史 `phase_direction_gain`。
 
 `egc` 保持旧幅度匹配实现，新增 `egc_strict` 才是等幅相位对齐；首批每条仅运行文档指定的一种方法。SINGLE的输出有单位响应归一，天线增益传递通过合并前的逐通道线性分量功率单独验证。TC编号是离散类别，因此本批图只画散点、不连成连续扫描曲线。
 
@@ -454,6 +475,8 @@ python -m experiments.interference.full_chain
 重跑入口只重建它自己的输出目录。已冻结的历史数据和来源清单保留原内容。
 
 ## 2026-10-15 首批44条增益用例结果
+
+以下为当时真实/名义增益同步、MVDR已知增益的历史结论，不适用于当前未知增益扫描。现存 `pattern_gain_first44/` 已是另一批相位数据，下方原文件路径不再构成本表的数据来源；本次未恢复或重新验证这1320次旧运行。
 
 条件：TC-001～044，TL/BR双天线，无干扰，入射信号−128.5 dBm，固定RF噪声系数；100 ms、seed 42～71、统计10～90 ms，详见用例公共条件C0。每个用例独立执行完整链路，没有提高信号强度。它们验证理想阵元的定值增益传递与合并，尚未验证参数化方向图的角度响应。
 

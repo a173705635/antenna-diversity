@@ -22,7 +22,7 @@ def _mode_label(row: dict) -> str:
             return "EGC (external phase)"
         return f"EGC ({source})"
     if mode == "mvdr":
-        return "MVDR (known resp)"
+        return "MVDR (nominal resp)"
     return mode.upper()
 
 
@@ -303,7 +303,7 @@ def _antenna_gain(rows: list[dict], settings: ValidationSettings) -> list[Path]:
                     _plot_points(axis, points, _mode_label(selected[0]), mode_index)
                 axis.set_title(f"{antennas[antenna_index]} attenuation; {antennas[other_index]} = 0 dB")
                 _finish_axis(axis, f"{antennas[antenna_index]} input gain (dB)", metric)
-            fig.suptitle(scene)
+            fig.suptitle(f"{scene}\nNominal target response fixed")
             _save_figure(fig, settings,
                          f"antenna_gain__{_filename_label(scene)}__single_antenna__{metric_name}", paths)
     return paths

@@ -45,7 +45,7 @@ L1 默认捕获为4 ms相干×5次非相干累积，共20 ms；跟踪自动从�
 
 ### 通用条件验证
 
-日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。各类实验共用 `SCENES`、`MODES`、`ACTIVE_ANTENNAS`、`SEEDS`、`DURATION_MS`、`WORKERS` 与统计去边；验证默认运行 SINGLE、Blind Null、预设相位 EGC 和已知响应 MVDR，后两者标为对照。FULL CHAIN 仍只运行前两种方法。
+日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。各类实验共用 `SCENES`、`MODES`、`ACTIVE_ANTENNAS`、`SEEDS`、`DURATION_MS`、`WORKERS` 与统计去边；验证默认运行 SINGLE、Blind Null、预设相位 EGC 和名义响应 MVDR，后两者标为对照。FULL CHAIN 仍只运行前两种方法。
 
 `EXPERIMENT_TYPE` 可选 `phase_offset`（默认）、`rf_group_delay`、`rf_agc`、`antenna_temperature`、`phase_center_offset`、`mutual_coupling`、`antenna_gain`；输出统一为 `results/interference/<EXPERIMENT_TYPE>/`。所有验证只用 `SCENES` 选择场景：`noise_only` 无干扰、`single_cw` 单CW、`single_wideband` 单宽带；默认前两种，需要宽带时加入第三种。用例名带场景前缀（如 `single_cw/MC-001`），表格和图片按场景区分。温偏系数仅为示例敏感性假设，名义响应固定于参考温度；条件与限制见[抗干扰说明](docs/interference/README.md)。
 
@@ -56,6 +56,8 @@ RF物理延时实验设 `EXPERIMENT_TYPE="rf_group_delay"`，由 `RF_GROUP_DELAY
 AGC固定档位实验设 `EXPERIMENT_TYPE="rf_agc"`，修改 `AGC_ANTENNA` 和 `AGC_LNA_STATES`；每档指定首级LNA增益和NF，混频器与VGA固定，两路分别计算级联增益和附加噪声，再经过ADC/DFE。默认BR相对TL扫描−24～0 dB，不按档位补偿幅度；档位表为示例假设，见[模型与用例](docs/interference/README.md#两链路lna档位差2026-10-26)。
 
 增益、互耦与相位中心汇总按“条件＋算法”统计捕获跟踪；日常表保留总 seed 数、成功次数、C/N₀ 均值、样本标准差和有效 seed 数，完整缺测统计在 JSON。`scan_label`、`scan_unit` 用于真实扫描的图轴与文件名，离散条件不再填写 TC/MC/PC 伪单位。
+
+所有验证只把扫描误差施加到真实链路，EGC/MVDR使用固定基准名义模型；天线增益扫描也不再把真实衰减写入名义增益。旧增益结果中MVDR已获知扫描增益，不能用来推断未知增益下的性能，见[修正与历史限制](docs/interference/README.md#未知天线增益与名义响应审计2026-10-26)。
 
 验证图按实验目标组织：相位按场景分面比较四方法的 C/N₀，仅有捕获失败时增加 ACQ 图（单 seed 为成功/失败标记，多 seed 为正确捕获比例）；单路增益比较两根天线的衰减；互耦分别扫描电压比与相位，PCO分别移动两根天线，温偏分别扫描增益与相位。所有实验共用 `GENERATE_PLOTS_FLAG`、`SHOW_PLOTS_FLAG`；C/N₀ 缺测留空，重合曲线不人为错开。
 
@@ -68,6 +70,8 @@ AGC固定档位实验设 `EXPERIMENT_TYPE="rf_agc"`，修改 `AGC_ANTENNA` 和 `
 完整 `MODES` 直接写入用例配置，`run_receiver()` 集中分派算法，结果统一放在 `branches`；各分支返回 `combined_samples`（合并采样）、`combining_info`（权值等信息）及算法角色、相位来源。通用验证的 `receiver_samples` 是相位处理后实际送入接收机的多通道采样。
 
 SINGLE 直接取第一根激活天线，不按目标响应归一化。MRC 已移除；EGC 使用显式输入的相位，权值为 `exp(jφ)/N`，各路等幅且不依赖目标强度。EGC 和 MVDR 只供显式对照，前者目前使用预设相位、后者使用名义目标响应，均不代表已实现自动估相。`AntennaState` 的幅相偏置只改变来波响应，器件通道误差由馈线和 RF 配置。接收机跟踪 C/N₀ 缺测不填零，实验条件见 [抗干扰说明](docs/interference/README.md)。
+
+图例与终端的 `MVDR (nominal resp)` 表示上述名义约束；JSON保留原对照分类 `known_response_comparison` 以兼容旧读取，它不保证名义响应等于受扰后的实际响应。
 
 `phase_offset` 在 DFE 输出旋转指定完整通道（含目标、干扰、噪声），不代表天线端相位误差；名义模型固定，注入相位不自动提供给 EGC/MVDR，也不执行逆补偿。
 

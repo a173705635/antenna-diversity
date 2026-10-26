@@ -29,7 +29,7 @@ GENERATE_PLOTS_FLAG = True
 SHOW_PLOTS_FLAG = True
 # 所有条件共用激活天线和方法；第一根是 SINGLE 参考，第二根用于双阵元条件。
 ACTIVE_ANTENNAS = ("TL", "BR")
-MODES = ("single", "blind_null", "egc", "mvdr")  # 后两种为预设/已知响应对照。
+MODES = ("single", "blind_null", "egc", "mvdr")  # 后两种使用预设相位/名义响应作对照。
 
 # 单因素扫描；PHASE_ANTENNA 按物理名字定位，不使用固定行号。
 PHASE_ANTENNA = "BR"
@@ -105,11 +105,10 @@ def _pattern_gain_cases(scene: str) -> list[ValidationCase]:
     first, second = ACTIVE_ANTENNAS[:2]
     for case_number, (first_gain_db, second_gain_db) in enumerate(case_definitions, 1):
         case_cfg = _base_config(scene)
-        # 额外激活阵元保留预设增益，仅改变扫描的前两根。
-        for state in (case_cfg.phone.antenna_model.true_state,
-                      case_cfg.phone.antenna_model.assumed_state):
-            state.amplitude_error_db[first] = first_gain_db
-            state.amplitude_error_db[second] = second_gain_db
+        # 仅注入真实增益误差；名义模型不获知扫描值，额外阵元保留预设增益。
+        true_state = case_cfg.phone.antenna_model.true_state
+        true_state.amplitude_error_db[first] = first_gain_db
+        true_state.amplitude_error_db[second] = second_gain_db
         cases.append(ValidationCase(
             name=f"{scene}/TC-{case_number:03d}", config=case_cfg, scene_label=scene,
             scan_label="gain condition",

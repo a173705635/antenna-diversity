@@ -1,4 +1,4 @@
-"""单通道实际接收，以及显式对照用的等幅和已知响应合并。"""
+"""单通道实际接收，以及显式对照用的预设相位等幅合并和名义响应 MVDR。"""
 
 import numpy as np
 
@@ -37,7 +37,7 @@ def combine_mvdr(
     assumed_target_response: np.ndarray,
     diagonal_loading_factor: float,
 ) -> tuple[np.ndarray, CombiningInfo]:
-    """仅供已知响应对照：按名义目标复响应和全段采样协方差求 MVDR 权值。"""
+    """按名义目标复响应和全段采样协方差求 MVDR 权值；名义响应不保证准确。"""
     covariance = dfe_channels @ dfe_channels.conj().T / dfe_channels.shape[1]
     loading = (
         diagonal_loading_factor

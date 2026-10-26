@@ -29,7 +29,7 @@ def _branch_label(results, mode):
         if source == "external_input":
             return "EGC (external phase)"
         return f"EGC ({source})"
-    return "MVDR (known resp)"
+    return "MVDR (nominal resp)"
 
 
 def _spectrum(x, fs_hz):
