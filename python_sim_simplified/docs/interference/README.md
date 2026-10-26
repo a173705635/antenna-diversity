@@ -10,6 +10,8 @@
 
 三场景、100 ms、seed 42、4×5捕获与四方法共15条件60行重跑及核验通过，结果和三张图在 `results/interference/rf_agc/`。LNA增益差从0降至−24 dB时，Blind Null的CN0在CW下由45.70降至36.60 dB-Hz，宽带下由45.42降至36.07 dB-Hz；这同时包含增益、噪声及量化等影响，仅代表本示例与单seed。两路同档的12行共同结果与旧VGA基准完全一致，其余六类实验144套默认配置不变；相关回归132项通过。
 
+无干扰−24 dB条件下，EGC为46.32、MVDR为34.71 dB-Hz：BR的RF电压增益仅为TL的0.0631倍，MVDR约束却未包含这一比例，求得TL/BR权值幅度约0.023/1.099，偏重低输出功率的BR。两路目标贡献仍同相，不能简单解释为反相自消。固定同一份实际DFE采样，仅将名义响应乘各路相对RF电压增益再求权，诊断MVDR恢复至46.06 dB-Hz，证实约束失配的重要影响；未改现有算法、配置或原结果。准确目标响应是[MVDR保护目标的前提](https://www.mathworks.com/help/phased/ug/conventional-and-adaptive-beamformers.html)，当前图表示未补偿档位的名义响应对照；有限样本、对角加载、量化和跟踪CN0估计仍影响排序，不据单seed宣称某算法必然更优。
+
 ## 两链路AGC固定档位差（2026-10-26）
 
 以下为旧版 `07d6d50` 的VGA扫描，参数和结论不适用于上方LNA扫描。原7个结果文件已原样移至 `results/interference/rf_agc_vga_07d6d50/`，manifest和文件哈希保持不变；当前 `results/interference/rf_agc/` 用于LNA结果。
