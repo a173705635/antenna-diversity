@@ -80,21 +80,20 @@ def process_rf(
         raise ValueError('RF amplitude/phase errors must be finite')
     with np.errstate(over='raise', invalid='raise'):
         error_response = 10.**(amplitude_db/20.) * np.exp(1j*np.deg2rad(phase_deg))
-    gain_linear = 10.0 ** (
-        np.array([stage.gain_db for stage in cfg.stages]) / 10.0
-    )
-    noise_factors = 10.0 ** (
-        np.array([stage.noise_figure_db for stage in cfg.stages]) / 10.0
-    )
-    cascade_noise_factor = noise_factors[0]
-    preceding_gain = gain_linear[0]
-    for index in range(1, len(gain_linear)):
-        cascade_noise_factor += (
-            noise_factors[index] - 1.0
-        ) / preceding_gain
-        preceding_gain *= gain_linear[index]
-
-    total_gain_linear = np.prod(gain_linear)
+    total_gain_linear = np.empty(len(channel_ids))
+    cascade_noise_factors = np.empty(len(channel_ids))
+    # 每路按自己的级联参数计算 Friis 噪声因子；参考面均为该路 RF 输入。
+    for row, channel_id in enumerate(channel_ids):
+        stages = cfg.stages_by_antenna.get(channel_id, cfg.stages)
+        gain_linear = 10.0 ** (np.array([stage.gain_db for stage in stages]) / 10.0)
+        noise_factors = 10.0 ** (np.array([stage.noise_figure_db for stage in stages]) / 10.0)
+        cascade_noise_factor = noise_factors[0]
+        preceding_gain = gain_linear[0]
+        for index in range(1, len(gain_linear)):
+            cascade_noise_factor += (noise_factors[index] - 1.0) / preceding_gain
+            preceding_gain *= gain_linear[index]
+        total_gain_linear[row] = np.prod(gain_linear)
+        cascade_noise_factors[row] = cascade_noise_factor
     coefficients = design_rf_filter(fs_hz, cfg.noise_bandwidth_hz, cfg.noise_filter_taps)
     group_delay_offsets_s = np.array(
         [cfg.group_delay_offset_ns.get(channel_id, 0.0) * 1e-9 for channel_id in channel_ids],
@@ -102,21 +101,21 @@ def process_rf(
     )
     # 原有噪声预算口径仅描述公共 RF FIR；附加插值的有限带内幅度误差不计入此 ENBW。
     measured_bandwidth_hz = fs_hz * np.sum(coefficients**2)
-    added_noise_temperature_k = float(
-        NOISE_REFERENCE_TEMPERATURE_K * (cascade_noise_factor - 1.0)
-    )
+    added_noise_temperature_k = NOISE_REFERENCE_TEMPERATURE_K * (cascade_noise_factors - 1.0)
     added_noise_psd_w_per_hz = BOLTZMANN_J_PER_K * added_noise_temperature_k
     added_noise_power_w = added_noise_psd_w_per_hz * measured_bandwidth_hz
     added_noise_rms_v = np.sqrt(added_noise_power_w * reference_impedance_ohm)
-    added_noise_v = generate_complex_noise(
-        x_rf_input_v.shape[1], added_noise_temperature_k,
-        reference_impedance_ohm, fs_hz, channel_ids, seed, "rf",
-    )
+    # 噪声种子仍由阶段、物理通道和 I/Q 决定，档位只改变同一标准正态流的幅度。
+    added_noise_v = np.vstack([
+        generate_complex_noise(x_rf_input_v.shape[1], temperature_k,
+                               reference_impedance_ohm, fs_hz, (channel_id,), seed, "rf")[0]
+        for channel_id, temperature_k in zip(channel_ids, added_noise_temperature_k)
+    ])
     filtered_input = filter_rf_input(
         x_rf_input_v + added_noise_v, coefficients, fs_hz, if_hz, group_delay_offsets_s,
         carrier_hz=carrier_hz,
     )
-    before_limit = filtered_input * np.sqrt(total_gain_linear)
+    before_limit = filtered_input * np.sqrt(total_gain_linear)[:, None]
     retained_added_noise_v = added_noise_v if retain_analysis_flag else None
     del filtered_input, added_noise_v
     if np.any(amplitude_db != 0.) or np.any(phase_deg != 0.):
@@ -160,7 +159,7 @@ def process_rf(
         "channel_total_gain_db": 10.0 * np.log10(total_gain_linear) + amplitude_db,
         "amplitude_error_db": amplitude_db.copy(),
         "phase_error_deg": phase_deg.copy(),
-        "noise_figure_db": 10.0 * np.log10(cascade_noise_factor),
+        "noise_figure_db": 10.0 * np.log10(cascade_noise_factors),
         "added_noise_power_w": added_noise_power_w,
         "added_noise_rms_v": added_noise_rms_v,
         "adc_lsb_v": lsb_v,

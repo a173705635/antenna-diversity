@@ -205,6 +205,8 @@ class RFConfig:
             RFStage("VGA", 44.0, 10.0),
         )
     )
+    # 按物理通道覆盖完整 RF 级联；未列出的通道使用公共 stages。
+    stages_by_antenna: dict[str, tuple[RFStage, ...]] = field(default_factory=dict)
     adc_bits: int = 10
     adc_vpp: float = 1.0
     enable_soft_limiting_flag: bool = True

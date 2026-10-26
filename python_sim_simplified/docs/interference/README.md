@@ -2,6 +2,20 @@
 
 当前运行结果先看 `case_summary.csv`（用例×算法跨 seed 统计），再看 `summary.csv`（逐 seed；FULL CHAIN 为逐算法）。日常表只放必要条件、捕获/跟踪与 C/N₀；validation 的权值、实际功率和复算误差仍在 `summary.json` 的 rows 中，FULL CHAIN 的 `summary.json` 为逐算法 metrics 列表。CSV 使用 UTF-8 BOM；`manifest.json` 保存完整用例条件、实际配置、运行方法身份与源码哈希，通用验证的 `summary.json` 保存行、专项统计和 `verification`，不再另写 `verification.json`。并行验证运行中写 `progress.jsonl`，完整入口保存、绘图和核验成功后删除，失败时保留。两入口的跟踪 C/N₀ 均从原始历元 `len//2` 处取后半段，剔除 NaN/Inf 后直接计算 dB-Hz 算术均值，未完成跟踪或后半段全缺测留空；跨 seed 仅等权平均有值的 seed。这不保证跟踪已收敛，也不等同于线性域先平均再转 dB。历史结果文件及下文历史实验记录仍按生成时版本解读。
 
+## 两链路AGC固定档位差（2026-10-26）
+
+`EXPERIMENT_TYPE="rf_agc"` 每个场景固定TL的原始RF链，只扫描BR的VGA档位；`AGC_ANTENNA` 可换被测通道，`AGC_VGA_STATES` 每项同时给出增益和NF。示例VGA增益/NF（dB）为20/34、26/28、32/22、38/16、44/10，LNA与混频器沿用原配置，两路总增益差为−24/−18/−12/−6/0 dB。档位在单次用例内恒定，EGC、MVDR名义响应不随档位更新。
+
+示例以原VGA的44 dB增益、10 dB NF为基准，假设各档 `增益+NF=54 dB`，表示接290 K匹配噪声源时VGA的输出噪声功率谱密度恒定；其输入等效附加噪声仍随档位变化。该关系参考[ADI对恒定输出噪声VGA的说明](https://www.analog.com/en/resources/technical-articles/analog-vga-simplifies-design-and-outperforms-competing-gain-control-methods.html)，数值是本项目的示例参数，不能作为具体GNSS芯片规格。
+
+每条链路按[Friis级联关系](https://www.mathworks.com/help/simrf/ug/modeling-system-noise-figure.html)独立计算：`G=∏Gi`、`F=F1+(F2−1)/G1+(F3−1)/(G1G2)`、`Tadd=290(F−1)`；`Gi` 为线性功率增益，`Fi=10^(NFi/10)`。RF自身噪声按该通道的 `Tadd` 生成，并在RF输入参考面与已有信号、天线及馈线噪声汇合，经原滤波、各路增益、限幅、ADC和DFE。RF输入噪温矩阵只加各路 `Tadd` 对角项，不再次乘RF增益；两路RF自身噪声独立。
+
+上述档位的总增益为56/62/68/74/80 dB，级联NF约2.92/1.72/1.36/1.26/1.24 dB，RF输入等效附加噪温约278/141/106/98/95 K。这些是参数预算；最终CN0还受两路幅度失配、干扰、限幅与量化共同影响。`rf.stages_by_antenna` 可按物理通道覆盖整套各级参数；未覆盖的通道使用 `rf.stages`。RF输出信息中的增益、NF及附加噪声字段统一为按 `channel_ids` 排列的数组，旧读取标量的自定义脚本需同步。
+
+本批设 `SCENES=("noise_only", "single_cw", "single_wideband")`，按100 ms、seed 42、4×5捕获及四方法运行全部15条件60行，公共核验通过；CSV、JSON及三张图保存在本地 `results/interference/rf_agc/`。图分别比较各场景CN0、必要的ACQ状态，以及逐路级联NF和限幅前复电压RMS占ADC半满量程的比例；后者不是峰值超限率，前端统计每个条件和seed只计一次。
+
+BR相对TL从0降至−24 dB时，Blind Null在CW下由45.70降至40.90 dB-Hz，宽带下由45.42降至39.27 dB-Hz；无干扰时SINGLE及退回TL的Blind Null均为46.14 dB-Hz，EGC由48.46降至46.17 dB-Hz。干扰场景的SINGLE和EGC均未正确捕获，缺测留空；MVDR仍使用原名义目标响应，包含档位造成的幅度失配。本批各路I/Q峰值超限比例均为0，但仍包含原软限幅与量化，结果不能只归因于NF，也不代表动态AGC或实测硬件性能。
+
 ## 统一场景选择（2026-10-26）
 
 六类验证共用 `validation_config.py` 顶部的 `SCENES`，默认无干扰和单CW；加入 `single_wideband` 即可对任一实验扫描纯2 MHz宽带干扰。`build_cases()` 统一展开场景和seed，每个用例仍独立执行完整链路。增益、互耦、PCO的用例名增加场景前缀（如 `single_cw/MC-001`），CSV和专项JSON保留场景，增益图也按场景分开。

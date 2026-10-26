@@ -99,12 +99,12 @@ def _phase_offset(rows: list[dict], settings: ValidationSettings) -> list[Path]:
                        if antenna in row["antennas"].split(",")})
     caption = ("DFE output: whole-channel phase on " + ", ".join(affected)
                + "\nNominal target response fixed")
-    return _phase_or_rf_delay(rows, settings, "DFE phase (deg)", caption, "phase_offset")
+    return _single_factor_receiver_plots(rows, settings, "DFE phase (deg)", caption, "phase_offset")
 
 
-def _phase_or_rf_delay(rows: list[dict], settings: ValidationSettings, xlabel: str,
-                       caption: str, file_prefix: str) -> list[Path]:
-    """复用相位与 RF 时延扫描的 C/N₀、条件式 ACQ 绘图。"""
+def _single_factor_receiver_plots(rows: list[dict], settings: ValidationSettings, xlabel: str,
+                                  caption: str, file_prefix: str) -> list[Path]:
+    """复用单因素扫描的 C/N₀、条件式 ACQ 绘图。"""
     import matplotlib.pyplot as plt
 
     paths = []
@@ -199,8 +199,8 @@ def _rf_group_delay(rows: list[dict], settings: ValidationSettings) -> list[Path
     reference = metadata["reference_antenna"]
     caption = (f"Physical RF delay on {affected} relative to {reference}"
                "\nLines guide the eye; nominal target response fixed")
-    paths = _phase_or_rf_delay(rows, settings, "Physical RF delay (ns)", caption,
-                               "rf_group_delay")
+    paths = _single_factor_receiver_plots(rows, settings, "Physical RF delay (ns)", caption,
+                                          "rf_group_delay")
 
     # 中心相位使用真实 RF 载频；频偏斜率仅加一次，图中每条带内曲线连续。
     frequency_mhz = np.linspace(-metadata["dfe_cutoff_hz"], metadata["dfe_cutoff_hz"], 401) / 1e6
@@ -230,6 +230,53 @@ def _rf_group_delay(rows: list[dict], settings: ValidationSettings) -> list[Path
     band_axis.grid(alpha=0.3)
     band_axis.legend(title="RF delay")
     _save_figure(fig, settings, "rf_group_delay__ideal_phase_model", paths)
+    return paths
+
+
+def _rf_agc(rows: list[dict], settings: ValidationSettings) -> list[Path]:
+    """按场景展示接收表现及每次前端执行一次的 RF/ADC 诊断。"""
+    import matplotlib.pyplot as plt
+
+    metadata = rows[0]["rf_agc"]
+    affected = metadata["affected_antenna"]
+    reference = metadata["reference_antenna"]
+    xlabel = f"{affected} RF gain minus {reference} RF gain (dB)"
+    caption = (f"Fixed {affected} VGA state relative to {reference}"
+               "\nNominal target response fixed")
+    paths = _single_factor_receiver_plots(rows, settings, xlabel, caption, "rf_agc")
+
+    scenes = list(dict.fromkeys(row["scene"] for row in rows))
+    fig, axes = plt.subplots(2, len(scenes), figsize=(6.2 * len(scenes), 8),
+                             squeeze=False, constrained_layout=True)
+    for column, scene in enumerate(scenes):
+        # 四种接收方法共用一份前端。按 (case, seed) 去重后再跨 seed 求平均。
+        unique = {}
+        for row in rows:
+            if row["scene"] == scene:
+                unique[(row["case"], row["seed"])] = row
+        for index, antenna in enumerate((reference, affected)):
+            points = {}
+            for row in unique.values():
+                diagnostics = row["rf_agc"]
+                channel = diagnostics["by_antenna"][antenna]
+                values = points.setdefault(row["scan_value"], {"nf": [], "rms": []})
+                values["nf"].append(channel["noise_figure_db"])
+                # 复电压 RMS 与每个 I/Q 的半满量程比较；不是峰值超限比例。
+                values["rms"].append(100 * channel["adc_input_rms_v"]
+                                     / (diagnostics["adc_vpp"] / 2))
+            x_values = sorted(points)
+            _plot_points(axes[0, column], [(x, float(np.mean(points[x]["nf"])))
+                                           for x in x_values], antenna, index)
+            _plot_points(axes[1, column], [(x, float(np.mean(points[x]["rms"])))
+                                           for x in x_values], antenna, index)
+        axes[0, column].set(title=scene, xlabel=xlabel, ylabel="Cascaded RF NF (dB)")
+        axes[1, column].set(xlabel=xlabel, ylabel="Pre-limiter complex RMS / ADC half-scale (%)")
+        for axis in axes[:, column]:
+            axis.set_xticks(sorted(points))
+            axis.grid(alpha=0.3)
+            axis.legend(fontsize=8)
+    fig.suptitle("RF input noise reference; ADC RMS is not I/Q peak saturation")
+    _save_figure(fig, settings, "rf_agc__rf_noise_and_adc_rms", paths)
     return paths
 
 
@@ -391,6 +438,7 @@ def plot_validation(rows: list[dict], settings: ValidationSettings) -> list[Path
     plotters = {
         "phase_offset": _phase_offset,
         "rf_group_delay": _rf_group_delay,
+        "rf_agc": _rf_agc,
         "antenna_gain": _antenna_gain,
         "mutual_coupling": _mutual_coupling,
         "phase_center_offset": _phase_center_offset,

@@ -7,7 +7,7 @@ from copy import deepcopy
 
 import numpy as np
 
-from core.config import CouplingPath, Direction, WidebandInterferer
+from core.config import CouplingPath, Direction, RFStage, WidebandInterferer
 from core.presets import default_config
 from experiments.paths import INTERFERENCE_RESULTS_DIR
 from experiments.interference.validation_support import ValidationCase, ValidationSettings
@@ -15,8 +15,8 @@ from experiments.interference.validation_support import ValidationCase, Validati
 
 # 所有实验共用种子、时长、并行数、统计去边和绘图开关。
 # 选择实验类型后，输出固定写入 results/interference/<实验类型>/。
-EXPERIMENT_TYPE = "phase_offset"  # 另可选 "rf_group_delay"、"antenna_temperature"、"antenna_gain"、"mutual_coupling"、"phase_center_offset"。
-SCENES = ("noise_only", "single_cw")  # 可加 "single_wideband"；六类实验共用此选择。
+EXPERIMENT_TYPE = "phase_offset"  # 另可选 "rf_agc"、"rf_group_delay"、"antenna_temperature"、"antenna_gain"、"mutual_coupling"、"phase_center_offset"。
+SCENES = ("noise_only", "single_cw")  # 可加 "single_wideband"；所有实验共用此选择。
 SEEDS = tuple(range(42, 43))  # 所有实验共用；单次运行设为 (42,)。
 # 每个用例独立生成采样；配对条件保持相同 seed 和物理配置，以复现相同噪声。
 # 功率统计首尾各舍弃此时长，避开滤波瞬态；不裁掉送入捕获跟踪的数据。
@@ -36,6 +36,17 @@ PHASE_ANTENNA = "BR"
 PHASE_SCAN_DEG = (0, 30, 60, 90, 120, 180)
 RF_GROUP_DELAY_ANTENNA = "BR"
 RF_GROUP_DELAY_SCAN_NS = (0, 10, 20, 50, 100, 200)
+
+# 示例固定 VGA 档位，并非真实芯片数据。每档 NF + Gain = 54 dB：以 290 K
+# 标准输入计，VGA 输出噪声不变；级联后仍须计算每路真实 RF 输入等效噪温。
+AGC_ANTENNA = "BR"
+AGC_VGA_STATES = (
+    RFStage("VGA", 20.0, 34.0),
+    RFStage("VGA", 26.0, 28.0),
+    RFStage("VGA", 32.0, 22.0),
+    RFStage("VGA", 38.0, 16.0),
+    RFStage("VGA", 44.0, 10.0),
+)
 
 # 温偏指固定温度相对参考温度的偏差；系数为示例假设，每个用例温度恒定。
 # 两个系列分别只改指定天线真实增益或真实相位，名义状态始终固定于参考温度。
@@ -199,6 +210,25 @@ def _rf_group_delay_cases(scene: str) -> list[ValidationCase]:
     return cases
 
 
+def _rf_agc_cases(scene: str) -> list[ValidationCase]:
+    """逐个固定 VGA 档位运行完整用例；只改变指定物理链路。"""
+    cases = []
+    for vga in AGC_VGA_STATES:
+        case_cfg = _base_config(scene)
+        reference_stages = case_cfg.rf.stages
+        selected_stages = tuple(vga if stage.name == "VGA" else stage
+                                for stage in reference_stages)
+        case_cfg.rf.stages_by_antenna[AGC_ANTENNA] = selected_stages
+        gain_difference_db = sum(stage.gain_db for stage in selected_stages) - sum(
+            stage.gain_db for stage in reference_stages)
+        cases.append(ValidationCase(
+            name=f"{scene}/agc_gain_{gain_difference_db:g}db", config=case_cfg,
+            scene_label=scene, series_label="rf_agc", scan_label="AGC gain difference",
+            scan_value=gain_difference_db, scan_unit="dB",
+        ))
+    return cases
+
+
 def _antenna_temperature_cases(scene: str) -> list[ValidationCase]:
     """每场景分开验证温偏引起的真实增益、相位变化；参考温度各运行一次。"""
     cases = []
@@ -250,6 +280,7 @@ def build_cases() -> list[ValidationCase]:
         "phase_center_offset": _phase_center_cases,
         "phase_offset": _phase_offset_cases,
         "rf_group_delay": _rf_group_delay_cases,
+        "rf_agc": _rf_agc_cases,
         "antenna_temperature": _antenna_temperature_cases,
     }
     if EXPERIMENT_TYPE not in builders:

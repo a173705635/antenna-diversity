@@ -82,6 +82,29 @@ def rf_group_delay_metadata(case_cfg: SimulationConfig) -> dict:
             "dfe_cutoff_hz": case_cfg.dfe.cutoff_hz}
 
 
+def rf_agc_metadata(case_cfg: SimulationConfig, rf_info: dict) -> dict:
+    """从实际前端记录逐路 RF 级联与限幅前诊断，单位见字段名。"""
+    affected_antenna = next(iter(case_cfg.rf.stages_by_antenna))
+    reference_antenna = next(name for name in rf_info["channel_ids"]
+                             if name != affected_antenna)
+    by_antenna = {}
+    for row, name in enumerate(rf_info["channel_ids"]):
+        by_antenna[name] = {
+            "total_gain_db": float(rf_info["total_gain_db"][row]),
+            "noise_figure_db": float(rf_info["noise_figure_db"][row]),
+            "added_noise_temperature_k": float(rf_info["added_noise_temperature_k"][row]),
+            "adc_input_rms_v": float(rf_info["adc_input_rms_v"][row]),
+            "saturation_fraction": float(rf_info["saturation_fraction"][row]),
+        }
+    return {
+        "affected_antenna": affected_antenna,
+        "reference_antenna": reference_antenna,
+        "noise_reference_plane": "RF input; T0 = 290 K",
+        "adc_vpp": float(rf_info["adc_vpp"]),
+        "by_antenna": by_antenna,
+    }
+
+
 # 分量功率核验暂停；保留估计导向计算，恢复 ideal_noise 时可复用。
 # def _assumed_steering(cfg: SimulationConfig) -> np.ndarray:
 #     """为理想噪声适用性检查计算RF输入目标导向，含名义馈线。"""
@@ -124,6 +147,8 @@ def evaluate_case(
     evaluation_samples = receiver_samples[:, evaluation_window]
     covariance = evaluation_samples @ evaluation_samples.conj().T / evaluation_samples.shape[1]
     pattern_fields = {}
+    agc_fields = (rf_agc_metadata(case_cfg, frontend["rf_info"])
+                  if settings.experiment_type == "rf_agc" else None)
     if settings.experiment_type == "antenna_gain":
         # 注入增益是物理条件；分量输出收益暂时停用。
         gain_db = tuple(case_cfg.phone.antenna_model.true_state.amplitude_error_db.get(name, 0.0)
@@ -207,6 +232,8 @@ def evaluate_case(
             row["dfe_phase_deg"] = case.dfe_phase_deg
         if settings.experiment_type == "rf_group_delay":
             row["rf_group_delay"] = rf_group_delay_metadata(case_cfg)
+        if agc_fields is not None:
+            row["rf_agc"] = agc_fields
         if settings.experiment_type == "mutual_coupling":
             row.update(coupling_row_fields(
                 case, frontend["truth"]["desired_steering_true"], weights,

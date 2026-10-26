@@ -76,15 +76,15 @@ class RFInfo(TypedDict):
     group_delay_compensation_samples: int
     group_delay_offsets_s: np.ndarray
     noise_reference_temperature_k: float
-    added_noise_temperature_k: float
-    added_noise_psd_w_per_hz: float
-    total_gain_db: float
+    added_noise_temperature_k: np.ndarray
+    added_noise_psd_w_per_hz: np.ndarray
+    total_gain_db: np.ndarray
     channel_total_gain_db: np.ndarray
     amplitude_error_db: np.ndarray
     phase_error_deg: np.ndarray
-    noise_figure_db: float
-    added_noise_power_w: float
-    added_noise_rms_v: float
+    noise_figure_db: np.ndarray
+    added_noise_power_w: np.ndarray
+    added_noise_rms_v: np.ndarray
     adc_lsb_v: float
     saturation_fraction: np.ndarray
     input_rms_v: np.ndarray

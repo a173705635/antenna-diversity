@@ -47,11 +47,13 @@ L1 默认捕获为4 ms相干×5次非相干累积，共20 ms；跟踪自动从�
 
 日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。各类实验共用 `SCENES`、`MODES`、`ACTIVE_ANTENNAS`、`SEEDS`、`DURATION_MS`、`WORKERS` 与统计去边；验证默认运行 SINGLE、Blind Null、预设相位 EGC 和已知响应 MVDR，后两者标为对照。FULL CHAIN 仍只运行前两种方法。
 
-`EXPERIMENT_TYPE` 可选 `phase_offset`（默认）、`rf_group_delay`、`antenna_temperature`、`phase_center_offset`、`mutual_coupling`、`antenna_gain`；输出统一为 `results/interference/<EXPERIMENT_TYPE>/`。所有验证只用 `SCENES` 选择场景：`noise_only` 无干扰、`single_cw` 单CW、`single_wideband` 单宽带；默认前两种，需要宽带时加入第三种。用例名带场景前缀（如 `single_cw/MC-001`），表格和图片按场景区分。温偏系数仅为示例敏感性假设，名义响应固定于参考温度；条件与限制见[抗干扰说明](docs/interference/README.md)。
+`EXPERIMENT_TYPE` 可选 `phase_offset`（默认）、`rf_group_delay`、`rf_agc`、`antenna_temperature`、`phase_center_offset`、`mutual_coupling`、`antenna_gain`；输出统一为 `results/interference/<EXPERIMENT_TYPE>/`。所有验证只用 `SCENES` 选择场景：`noise_only` 无干扰、`single_cw` 单CW、`single_wideband` 单宽带；默认前两种，需要宽带时加入第三种。用例名带场景前缀（如 `single_cw/MC-001`），表格和图片按场景区分。温偏系数仅为示例敏感性假设，名义响应固定于参考温度；条件与限制见[抗干扰说明](docs/interference/README.md)。
 
 相位实验通过 `PHASE_ANTENNA`、`PHASE_SCAN_DEG` 设置受影响通道和相位，每个场景每个相位独立运行一次，0°作为基准；不再包含方向、增益扫描和准确补偿条件。`_base_config()` 集中设置共享配置，`build_cases()` 统一展开场景和种子，`build_settings()` 设置统计、输出和并行参数。`TARGET_TRUE_DIRECTION`、`TARGET_ASSUMED_DIRECTION` 分别设置真实与名义目标方向；`ACTIVE_ANTENNAS` 的第一根是 SINGLE 参考，增益、互耦和位置偏移条件作用于前两根，额外激活阵元保留基础配置。
 
 RF物理延时实验设 `EXPERIMENT_TYPE="rf_group_delay"`，由 `RF_GROUP_DELAY_ANTENNA`、`RF_GROUP_DELAY_SCAN_NS` 和共用的 `SCENES` 控制；默认只给BR增加0/10/20/50/100/200 ns延时。`cfg.rf.group_delay_offset_ns` 按物理通道指定非负时延，空映射表示零；包络延迟与RF载波相移同时施加，馈线和名义模型保持不变，不作新增延时的逆补偿。输出带标记点连线的CN0、必要的ACQ图及理想中心/带内相位图；这是纯延时敏感性模型，非器件实测群延时起伏或硬件规格，见[模型与结果](docs/interference/README.md#rf物理延时2026-10-22)。
+
+AGC固定档位实验设 `EXPERIMENT_TYPE="rf_agc"`，修改 `AGC_ANTENNA` 和 `AGC_VGA_STATES`；每档同时指定VGA增益和噪声系数，两路分别计算级联增益与附加噪声，再经过ADC/DFE。默认BR相对TL扫描−24～0 dB，接收机不按档位补偿幅度；档位表为示例假设，见[模型与用例](docs/interference/README.md#两链路agc固定档位差2026-10-26)。
 
 增益、互耦与相位中心汇总按“条件＋算法”统计捕获跟踪；日常表保留总 seed 数、成功次数、C/N₀ 均值、样本标准差和有效 seed 数，完整缺测统计在 JSON。`scan_label`、`scan_unit` 用于真实扫描的图轴与文件名，离散条件不再填写 TC/MC/PC 伪单位。
 

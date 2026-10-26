@@ -58,6 +58,8 @@ CSV_LABELS = {
     "gain_delta_db": "Gain Δ (dB)",
     "phase_delta_deg": "Phase Δ (deg)",
     "rf_group_delay_ns": "RF Delay (ns)",
+    "agc_gain_difference_db": "AGC ΔG (dB)",
+    "affected_rf_noise_figure_db": "Affected RF NF (dB)",
 }
 
 
@@ -123,6 +125,11 @@ def _condition_columns(row: dict, experiment_type: str) -> dict:
         return {"scene": row["scene"], "DFE channel phase (deg)": row["scan_value"]}
     if experiment_type == "rf_group_delay":
         return {"scene": row["scene"], "rf_group_delay_ns": row["scan_value"]}
+    if experiment_type == "rf_agc":
+        metadata = row["rf_agc"]
+        affected_noise_figure_db = metadata["by_antenna"][metadata["affected_antenna"]]["noise_figure_db"]
+        return {"scene": row["scene"], "agc_gain_difference_db": row["scan_value"],
+                "affected_rf_noise_figure_db": f"{affected_noise_figure_db:.2f}"}
     conditions = {"scene": row["scene"], "series": row["series"]}
     if row["scan_value"] is not None:
         label = row["scan_label"]

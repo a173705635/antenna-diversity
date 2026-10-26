@@ -40,7 +40,7 @@ def generate_complex_noise(
 
 def rf_input_noise_budget(
     center_frequency_hz: float, antenna_info: dict, feedline_info: dict,
-    rf_added_temperature_k: float,
+    rf_added_temperature_k: float | np.ndarray,
 ) -> dict:
     """由各参考面的独立噪声求RF输入载频中心点温度谱密度矩阵。
 
@@ -60,7 +60,7 @@ def rf_input_noise_budget(
     total = (
         antenna_at_rf
         + np.diag(feedline_info["added_noise_temperature_k"])
-        + np.eye(transfer.shape[0]) * rf_added_temperature_k
+        + np.diag(np.broadcast_to(rf_added_temperature_k, transfer.shape[0]))
     )
     return {
         "reference_plane": "RF input; center carrier frequency",
