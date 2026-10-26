@@ -53,7 +53,7 @@ L1 默认捕获为4 ms相干×5次非相干累积，共20 ms；跟踪自动从�
 
 RF物理延时实验设 `EXPERIMENT_TYPE="rf_group_delay"`，由 `RF_GROUP_DELAY_ANTENNA`、`RF_GROUP_DELAY_SCAN_NS` 和共用的 `SCENES` 控制；默认只给BR增加0/10/20/50/100/200 ns延时。`cfg.rf.group_delay_offset_ns` 按物理通道指定非负时延，空映射表示零；包络延迟与RF载波相移同时施加，馈线和名义模型保持不变，不作新增延时的逆补偿。输出带标记点连线的CN0、必要的ACQ图及理想中心/带内相位图；这是纯延时敏感性模型，非器件实测群延时起伏或硬件规格，见[模型与结果](docs/interference/README.md#rf物理延时2026-10-22)。
 
-AGC固定档位实验设 `EXPERIMENT_TYPE="rf_agc"`，修改 `AGC_ANTENNA` 和 `AGC_VGA_STATES`；每档同时指定VGA增益和噪声系数，两路分别计算级联增益与附加噪声，再经过ADC/DFE。默认BR相对TL扫描−24～0 dB，接收机不按档位补偿幅度；档位表为示例假设，见[模型与用例](docs/interference/README.md#两链路agc固定档位差2026-10-26)。
+AGC固定档位实验设 `EXPERIMENT_TYPE="rf_agc"`，修改 `AGC_ANTENNA` 和 `AGC_LNA_STATES`；每档指定首级LNA增益和NF，混频器与VGA固定，两路分别计算级联增益和附加噪声，再经过ADC/DFE。默认BR相对TL扫描−24～0 dB，不按档位补偿幅度；档位表为示例假设，见[模型与用例](docs/interference/README.md#两链路lna档位差2026-10-26)。
 
 增益、互耦与相位中心汇总按“条件＋算法”统计捕获跟踪；日常表保留总 seed 数、成功次数、C/N₀ 均值、样本标准差和有效 seed 数，完整缺测统计在 JSON。`scan_label`、`scan_unit` 用于真实扫描的图轴与文件名，离散条件不再填写 TC/MC/PC 伪单位。
 

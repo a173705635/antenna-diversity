@@ -2,7 +2,17 @@
 
 当前运行结果先看 `case_summary.csv`（用例×算法跨 seed 统计），再看 `summary.csv`（逐 seed；FULL CHAIN 为逐算法）。日常表只放必要条件、捕获/跟踪与 C/N₀；validation 的权值、实际功率和复算误差仍在 `summary.json` 的 rows 中，FULL CHAIN 的 `summary.json` 为逐算法 metrics 列表。CSV 使用 UTF-8 BOM；`manifest.json` 保存完整用例条件、实际配置、运行方法身份与源码哈希，通用验证的 `summary.json` 保存行、专项统计和 `verification`，不再另写 `verification.json`。并行验证运行中写 `progress.jsonl`，完整入口保存、绘图和核验成功后删除，失败时保留。两入口的跟踪 C/N₀ 均从原始历元 `len//2` 处取后半段，剔除 NaN/Inf 后直接计算 dB-Hz 算术均值，未完成跟踪或后半段全缺测留空；跨 seed 仅等权平均有值的 seed。这不保证跟踪已收敛，也不等同于线性域先平均再转 dB。历史结果文件及下文历史实验记录仍按生成时版本解读。
 
+## 两链路LNA档位差（2026-10-26）
+
+当前 `rf_agc` 改为只扫描BR的首级LNA（用户所指ILNA），TL及两路的混频器、VGA固定。`AGC_LNA_STATES` 显式配置LNA增益/NF（dB）：4/6、10/4、16/2.8、22/1.8、28/1.2，对应BR相对TL总增益差−24/−18/−12/−6/0 dB。这些是敏感性示例，NF不能仅由增益推算，也不沿用旧VGA的恒定输出噪声假设；实际器件需替换为各档测量值。
+
+沿用逐通道[Friis级联计算](https://www.mathworks.com/help/simrf/ug/modeling-system-noise-figure.html)：首级NF直接进入总噪声因子，首级增益还决定后级噪声折算量。上述档位的整链NF约8.24/5.03/3.17/1.92/1.24 dB，RF输入等效附加噪温约1642/634/312/161/95 K；整链增益为56/62/68/74/80 dB。噪声与信号共经实际接收链，EGC预设相位与MVDR名义约束不随档位更新，MVDR仍根据实际采样协方差求权。
+
+三场景、100 ms、seed 42、4×5捕获与四方法共15条件60行重跑及核验通过，结果和三张图在 `results/interference/rf_agc/`。LNA增益差从0降至−24 dB时，Blind Null的CN0在CW下由45.70降至36.60 dB-Hz，宽带下由45.42降至36.07 dB-Hz；这同时包含增益、噪声及量化等影响，仅代表本示例与单seed。两路同档的12行共同结果与旧VGA基准完全一致，其余六类实验144套默认配置不变；相关回归132项通过。
+
 ## 两链路AGC固定档位差（2026-10-26）
+
+以下为旧版 `07d6d50` 的VGA扫描，参数和结论不适用于上方LNA扫描。原7个结果文件已原样移至 `results/interference/rf_agc_vga_07d6d50/`，manifest和文件哈希保持不变；当前 `results/interference/rf_agc/` 用于LNA结果。
 
 `EXPERIMENT_TYPE="rf_agc"` 每个场景固定TL的原始RF链，只扫描BR的VGA档位；`AGC_ANTENNA` 可换被测通道，`AGC_VGA_STATES` 每项同时给出增益和NF。示例VGA增益/NF（dB）为20/34、26/28、32/22、38/16、44/10，LNA与混频器沿用原配置，两路总增益差为−24/−18/−12/−6/0 dB。档位在单次用例内恒定，EGC、MVDR名义响应不随档位更新。
 
@@ -12,7 +22,7 @@
 
 上述档位的总增益为56/62/68/74/80 dB，级联NF约2.92/1.72/1.36/1.26/1.24 dB，RF输入等效附加噪温约278/141/106/98/95 K。这些是参数预算；最终CN0还受两路幅度失配、干扰、限幅与量化共同影响。`rf.stages_by_antenna` 可按物理通道覆盖整套各级参数；未覆盖的通道使用 `rf.stages`。RF输出信息中的增益、NF及附加噪声字段统一为按 `channel_ids` 排列的数组，旧读取标量的自定义脚本需同步。
 
-本批设 `SCENES=("noise_only", "single_cw", "single_wideband")`，按100 ms、seed 42、4×5捕获及四方法运行全部15条件60行，公共核验通过；CSV、JSON及三张图保存在本地 `results/interference/rf_agc/`。图分别比较各场景CN0、必要的ACQ状态，以及逐路级联NF和限幅前复电压RMS占ADC半满量程的比例；后者不是峰值超限率，前端统计每个条件和seed只计一次。
+本批设 `SCENES=("noise_only", "single_cw", "single_wideband")`，按100 ms、seed 42、4×5捕获及四方法运行全部15条件60行，公共核验通过；CSV、JSON及三张图现存本地 `results/interference/rf_agc_vga_07d6d50/`。图分别比较各场景CN0、必要的ACQ状态，以及逐路级联NF和限幅前复电压RMS占ADC半满量程的比例；后者不是峰值超限率，前端统计每个条件和seed只计一次。
 
 BR相对TL从0降至−24 dB时，Blind Null在CW下由45.70降至40.90 dB-Hz，宽带下由45.42降至39.27 dB-Hz；无干扰时SINGLE及退回TL的Blind Null均为46.14 dB-Hz，EGC由48.46降至46.17 dB-Hz。干扰场景的SINGLE和EGC均未正确捕获，缺测留空；MVDR仍使用原名义目标响应，包含档位造成的幅度失配。本批各路I/Q峰值超限比例均为0，但仍包含原软限幅与量化，结果不能只归因于NF，也不代表动态AGC或实测硬件性能。
 

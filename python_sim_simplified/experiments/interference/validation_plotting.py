@@ -240,8 +240,8 @@ def _rf_agc(rows: list[dict], settings: ValidationSettings) -> list[Path]:
     metadata = rows[0]["rf_agc"]
     affected = metadata["affected_antenna"]
     reference = metadata["reference_antenna"]
-    xlabel = f"{affected} RF gain minus {reference} RF gain (dB)"
-    caption = (f"Fixed {affected} VGA state relative to {reference}"
+    xlabel = f"{affected} - {reference} LNA gain (dB)"
+    caption = (f"Fixed {affected} LNA state relative to {reference}; Mixer/VGA fixed"
                "\nNominal target response fixed")
     paths = _single_factor_receiver_plots(rows, settings, xlabel, caption, "rf_agc")
 

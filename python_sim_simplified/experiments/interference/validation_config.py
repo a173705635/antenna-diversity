@@ -37,15 +37,14 @@ PHASE_SCAN_DEG = (0, 30, 60, 90, 120, 180)
 RF_GROUP_DELAY_ANTENNA = "BR"
 RF_GROUP_DELAY_SCAN_NS = (0, 10, 20, 50, 100, 200)
 
-# 示例固定 VGA 档位，并非真实芯片数据。每档 NF + Gain = 54 dB：以 290 K
-# 标准输入计，VGA 输出噪声不变；级联后仍须计算每路真实 RF 输入等效噪温。
+# 示例固定 LNA 档位，并非真实芯片数据；各档增益和噪声系数独立指定。
 AGC_ANTENNA = "BR"
-AGC_VGA_STATES = (
-    RFStage("VGA", 20.0, 34.0),
-    RFStage("VGA", 26.0, 28.0),
-    RFStage("VGA", 32.0, 22.0),
-    RFStage("VGA", 38.0, 16.0),
-    RFStage("VGA", 44.0, 10.0),
+AGC_LNA_STATES = (
+    RFStage("LNA", 4.0, 6.0),
+    RFStage("LNA", 10.0, 4.0),
+    RFStage("LNA", 16.0, 2.8),
+    RFStage("LNA", 22.0, 1.8),
+    RFStage("LNA", 28.0, 1.2),
 )
 
 # 温偏指固定温度相对参考温度的偏差；系数为示例假设，每个用例温度恒定。
@@ -211,19 +210,19 @@ def _rf_group_delay_cases(scene: str) -> list[ValidationCase]:
 
 
 def _rf_agc_cases(scene: str) -> list[ValidationCase]:
-    """逐个固定 VGA 档位运行完整用例；只改变指定物理链路。"""
+    """逐个固定 LNA 档位运行完整用例；只改变指定物理链路。"""
     cases = []
-    for vga in AGC_VGA_STATES:
+    for lna in AGC_LNA_STATES:
         case_cfg = _base_config(scene)
         reference_stages = case_cfg.rf.stages
-        selected_stages = tuple(vga if stage.name == "VGA" else stage
+        selected_stages = tuple(lna if stage.name == "LNA" else stage
                                 for stage in reference_stages)
         case_cfg.rf.stages_by_antenna[AGC_ANTENNA] = selected_stages
         gain_difference_db = sum(stage.gain_db for stage in selected_stages) - sum(
             stage.gain_db for stage in reference_stages)
         cases.append(ValidationCase(
-            name=f"{scene}/agc_gain_{gain_difference_db:g}db", config=case_cfg,
-            scene_label=scene, series_label="rf_agc", scan_label="AGC gain difference",
+            name=f"{scene}/agc_lna_gain_{gain_difference_db:g}db", config=case_cfg,
+            scene_label=scene, series_label="rf_agc", scan_label="LNA gain difference",
             scan_value=gain_difference_db, scan_unit="dB",
         ))
     return cases
