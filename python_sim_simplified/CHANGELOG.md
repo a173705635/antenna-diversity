@@ -2,9 +2,10 @@
 
 只记录实际改动、重要行为变化、最终验证和必要限制；实验细节见对应说明。以下路径除注明外均相对于 `python_sim_simplified/`，测试数字为各次修改当时的结果。
 
-## 2026-10-29 双通道在线校准研究需求
+## 2026-10-29 双通道校准与接收机抗扰研究需求
 
-- 新增[高校合作需求](docs/interference/rf_channel_calibration_requirements.md)，明确幅度0.1 dB、相位1°、时延0.1 ns的拟定RMS目标、验证条件与交付要求，区分文献估计波动和补偿后误差；仅修改文档，未重跑仿真。
+- 新增[高校合作需求](docs/interference/gnss_receiver_research_requirements.md)，明确幅度0.1 dB、相位1°、时延0.1 ns的拟定RMS目标，区分文献估计波动和补偿后误差。
+- 补充各类干扰的输入功率、欺骗相对功率及可信定位验收口径，未定门限保留待定；原 `docs/interference/rf_channel_calibration_requirements.md` 更名为上述文档。仅修改文档，未重跑仿真或恢复抗欺骗代码。
 
 ## 2026-10-26 AGC档位下的算法结果说明
 
