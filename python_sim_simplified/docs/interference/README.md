@@ -1,5 +1,7 @@
 # 抗干扰接收链实验
 
+高校合作方案讨论见[双接收通道在线校准研究需求](rf_channel_calibration_requirements.md)，包含拟定幅相与时延指标、验证条件和交付要求。
+
 当前运行结果先看 `case_summary.csv`（用例×算法跨 seed 统计），再看 `summary.csv`（逐 seed；FULL CHAIN 为逐算法）。日常表只放必要条件、捕获/跟踪与 C/N₀；validation 的权值、实际功率和复算误差仍在 `summary.json` 的 rows 中，FULL CHAIN 的 `summary.json` 为逐算法 metrics 列表。CSV 使用 UTF-8 BOM；`manifest.json` 保存完整用例条件、实际配置、运行方法身份与源码哈希，通用验证的 `summary.json` 保存行、专项统计和 `verification`，不再另写 `verification.json`。并行验证运行中写 `progress.jsonl`，完整入口保存、绘图和核验成功后删除，失败时保留。两入口的跟踪 C/N₀ 均从原始历元 `len//2` 处取后半段，剔除 NaN/Inf 后直接计算 dB-Hz 算术均值，未完成跟踪或后半段全缺测留空；跨 seed 仅等权平均有值的 seed。这不保证跟踪已收敛，也不等同于线性域先平均再转 dB。历史结果文件及下文历史实验记录仍按生成时版本解读。
 
 ## 未知天线增益与名义响应审计（2026-10-26）
