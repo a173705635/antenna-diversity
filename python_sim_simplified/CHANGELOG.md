@@ -5,7 +5,8 @@
 ## 2026-10-29 双通道校准与接收机抗扰研究需求
 
 - 新增[高校合作需求](docs/interference/gnss_receiver_research_requirements.md)，明确幅度0.1 dB、相位1°、时延0.1 ns的拟定RMS目标，区分文献估计波动和补偿后误差。
-- 补充各类干扰的输入功率、欺骗相对功率及可信定位验收口径，未定门限保留待定；原 `docs/interference/rf_channel_calibration_requirements.md` 更名为上述文档。仅修改文档，未重跑仿真或恢复抗欺骗代码。
+- 原 `docs/interference/rf_channel_calibration_requirements.md` 更名为上述文档；补充功率、可信定位及异常输出验收口径。
+- 参考公开双天线研究提出基础／进阶建议：每星−130 dBm、单源干扰−80 dBm、欺骗优势+10 dB、水平95%误差≤10 m，附定位连续性、文献依据及适用限制；数值为研究目标，不代表当前能力。仅修改文档，未重跑仿真或恢复抗欺骗代码。
 
 ## 2026-10-26 AGC档位下的算法结果说明
 
