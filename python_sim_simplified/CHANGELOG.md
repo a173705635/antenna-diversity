@@ -2,6 +2,10 @@
 
 只记录实际改动、重要行为变化、最终验证和必要限制；实验细节见对应说明。以下路径除注明外均相对于 `python_sim_simplified/`，测试数字为各次修改当时的结果。
 
+## 2026-10-30 默认验证切换为RF AGC
+
+- `experiments/interference/validation_config.py` 默认选择RF AGC，覆盖无干扰、单CW和单宽带干扰三场景；15套独立配置、60个方法项构建检查通过，未重跑仿真。
+
 ## 2026-10-29 双通道校准与接收机抗扰研究需求
 
 - 新增[高校合作需求](docs/interference/gnss_receiver_research_requirements.md)，明确幅度0.1 dB、相位1°、时延0.1 ns的拟定RMS目标，区分文献估计波动和补偿后误差。

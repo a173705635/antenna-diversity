@@ -15,8 +15,8 @@ from experiments.interference.validation_support import ValidationCase, Validati
 
 # 所有实验共用种子、时长、并行数、统计去边和绘图开关。
 # 选择实验类型后，输出固定写入 results/interference/<实验类型>/。
-EXPERIMENT_TYPE = "phase_offset"  # 另可选 "rf_agc"、"rf_group_delay"、"antenna_temperature"、"antenna_gain"、"mutual_coupling"、"phase_center_offset"。
-SCENES = ("noise_only", "single_cw")  # 可加 "single_wideband"；所有实验共用此选择。
+EXPERIMENT_TYPE = "rf_agc"  # 另可选 "phase_offset"、"rf_group_delay"、"antenna_temperature"、"antenna_gain"、"mutual_coupling"、"phase_center_offset"。
+SCENES = ("noise_only", "single_cw", "single_wideband")  # 所有实验共用此场景选择。
 SEEDS = tuple(range(42, 43))  # 所有实验共用；单次运行设为 (42,)。
 # 每个用例独立生成采样；配对条件保持相同 seed 和物理配置，以复现相同噪声。
 # 功率统计首尾各舍弃此时长，避开滤波瞬态；不裁掉送入捕获跟踪的数据。
