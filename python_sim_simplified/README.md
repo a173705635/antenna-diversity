@@ -43,6 +43,8 @@ archive/       本地冻结源码，不参与维护、导入或默认测试
 
 L1 默认捕获为4 ms相干×5次非相干累积，共20 ms；跟踪自动从捕获使用数据后的码边界开始，跟踪相干时长仍为1 ms。L5采用1 ms相干×5次累积，另需1 ms输入以处理NH码边界。
 
+加长捕获积分时同步增加实验入口的 `DURATION_MS`：4×50需要200 ms捕获输入，当前100 ms不足；只设200 ms仍受DFE去延时影响且没有跟踪余量，建议设300 ms，可留下约99 ms跟踪数据。VALIDATION在 `experiments/interference/validation_config.py` 设置，FULL CHAIN在 `experiments/interference/full_chain.py` 设置；`tracking.max_epochs` 只是历元上限，不会增加输入数据。
+
 ### 通用条件验证
 
 日常修改 [validation_config.py](experiments/interference/validation_config.py)，再运行固定入口 `python -m experiments.interference.validation`；也可直接在 IDE 运行 `experiments/interference/validation.py`。各类实验共用 `SCENES`、`MODES`、`ACTIVE_ANTENNAS`、`SEEDS`、`DURATION_MS`、`WORKERS` 与统计去边；验证默认运行 SINGLE、Blind Null、预设相位 EGC 和名义响应 MVDR，后两者标为对照。FULL CHAIN 仍只运行前两种方法。
