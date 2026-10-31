@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title description">
+  <title id="title">GNSS / RSMC PLL 架构</title>
+  <desc id="description">三套射频本振PLL：GNSS L1和L5共用一套GNSS PLL，通过本振生成与分配提供两路本振；RSMC TX与RSMC RX各自使用独立PLL。图中不指定参考时钟、具体频点或分频实现。</desc>
+  <defs>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#2563eb"/></marker>
+    <marker id="arrow-teal" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#0f766e"/></marker>
+    <marker id="arrow-amber" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#b45309"/></marker>
+    <style>
+      text { font-family: "Microsoft YaHei", "Segoe UI", sans-serif; }
+      .title { font-size: 44px; font-weight: 700; fill: #162238; }
+      .subtitle { font-size: 23px; fill: #566478; }
+      .section { font-size: 26px; font-weight: 700; text-anchor: middle; }
+      .pll-name { font-size: 27px; font-weight: 700; fill: white; text-anchor: middle; }
+      .pll-note { font-size: 20px; fill: white; text-anchor: middle; }
+      .chain-name { font-size: 30px; font-weight: 700; fill: #162238; text-anchor: middle; }
+      .chain-note { font-size: 21px; fill: #566478; text-anchor: middle; }
+      .lo-label { font-size: 21px; font-weight: 600; }
+      .wire { fill: none; stroke-width: 3; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="900" fill="#ffffff"/>
+  <text x="60" y="90" class="title">GNSS / RSMC PLL 架构</text>
+  <text x="60" y="139" class="subtitle">GNSS L1 / L5 共享PLL，RSMC TX / RX 分别使用独立PLL</text>
+
+  <rect x="60" y="200" width="690" height="610" rx="24" fill="#f2f6ff" stroke="#d9e5fb" stroke-width="2"/>
+  <rect x="800" y="200" width="345" height="610" rx="24" fill="#f0f8f6" stroke="#d6eae5" stroke-width="2"/>
+  <rect x="1195" y="200" width="345" height="610" rx="24" fill="#fffaef" stroke="#f1e3c4" stroke-width="2"/>
+  <text x="405" y="254" class="section" fill="#2454ab">GNSS · L1 + L5</text>
+  <text x="972.5" y="254" class="section" fill="#0f766e">RSMC · TX</text>
+  <text x="1367.5" y="254" class="section" fill="#a44b08">RSMC · RX</text>
+
+  <g id="pll-gnss" data-kind="pll">
+    <rect x="245" y="300" width="320" height="110" rx="16" fill="#2563eb"/>
+    <text x="405" y="347" class="pll-name">GNSS PLL</text>
+    <text x="405" y="383" class="pll-note">L1 / L5 共享</text>
+  </g>
+  <g id="pll-tx" data-kind="pll">
+    <rect x="840" y="300" width="265" height="110" rx="16" fill="#0f766e"/>
+    <text x="972.5" y="347" class="pll-name">RSMC TX PLL</text>
+    <text x="972.5" y="383" class="pll-note">独立PLL</text>
+  </g>
+  <g id="pll-rx" data-kind="pll">
+    <rect x="1235" y="300" width="265" height="110" rx="16" fill="#b45309"/>
+    <text x="1367.5" y="347" class="pll-name">RSMC RX PLL</text>
+    <text x="1367.5" y="383" class="pll-note">独立PLL</text>
+  </g>
+
+  <path data-from="pll-gnss" data-to="gnss-lo" d="M 405 410 V 458" class="wire" stroke="#2563eb" marker-end="url(#arrow-blue)"/>
+  <g id="gnss-lo">
+    <rect x="185" y="460" width="440" height="80" rx="14" fill="#ffffff" stroke="#a8c4f5" stroke-width="2"/>
+    <text x="405" y="510" text-anchor="middle" font-size="25" fill="#2454ab">L1 / L5 本振生成与分配</text>
+  </g>
+  <path data-from="gnss-lo" data-to="l1-rx" d="M 405 540 V 580 H 230 V 648" class="wire" stroke="#2563eb" marker-end="url(#arrow-blue)"/>
+  <path data-from="gnss-lo" data-to="l5-rx" d="M 405 580 H 580 V 648" class="wire" stroke="#2563eb" marker-end="url(#arrow-blue)"/>
+  <circle cx="405" cy="580" r="5" fill="#2563eb"/>
+  <text x="251" y="621" class="lo-label" fill="#2454ab">L1 LO</text>
+  <text x="601" y="621" class="lo-label" fill="#2454ab">L5 LO</text>
+
+  <path data-from="pll-tx" data-to="rsmc-tx" d="M 972.5 410 V 648" class="wire" stroke="#0f766e" marker-end="url(#arrow-teal)"/>
+  <text x="994" y="541" class="lo-label" fill="#0f766e">TX LO</text>
+  <path data-from="pll-rx" data-to="rsmc-rx" d="M 1367.5 410 V 648" class="wire" stroke="#b45309" marker-end="url(#arrow-amber)"/>
+  <text x="1389" y="541" class="lo-label" fill="#a44b08">RX LO</text>
+
+  <g id="l1-rx" data-kind="rf-chain">
+    <rect x="110" y="650" width="240" height="110" rx="16" fill="#ffffff" stroke="#a8c4f5" stroke-width="2"/>
+    <text x="230" y="697" class="chain-name">GNSS L1</text>
+    <text x="230" y="733" class="chain-note">接收链 RX</text>
+  </g>
+  <g id="l5-rx" data-kind="rf-chain">
+    <rect x="460" y="650" width="240" height="110" rx="16" fill="#ffffff" stroke="#a8c4f5" stroke-width="2"/>
+    <text x="580" y="697" class="chain-name">GNSS L5</text>
+    <text x="580" y="733" class="chain-note">接收链 RX</text>
+  </g>
+  <g id="rsmc-tx" data-kind="rf-chain">
+    <rect x="840" y="650" width="265" height="110" rx="16" fill="#ffffff" stroke="#9fcfc5" stroke-width="2"/>
+    <text x="972.5" y="697" class="chain-name">RSMC TX</text>
+    <text x="972.5" y="733" class="chain-note">发射链</text>
+  </g>
+  <g id="rsmc-rx" data-kind="rf-chain">
+    <rect x="1235" y="650" width="265" height="110" rx="16" fill="#ffffff" stroke="#e3c492" stroke-width="2"/>
+    <text x="1367.5" y="697" class="chain-name">RSMC RX</text>
+    <text x="1367.5" y="733" class="chain-note">接收链</text>
+  </g>
+
+  <text x="60" y="859" font-size="19" fill="#6c7789">连线表示射频本振（LO）分配关系；具体频率规划及本振生成方式另定。</text>
+</svg>

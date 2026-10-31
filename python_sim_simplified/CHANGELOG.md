@@ -2,6 +2,10 @@
 
 只记录实际改动、重要行为变化、最终验证和必要限制；实验细节见对应说明。以下路径除注明外均相对于 `python_sim_simplified/`，测试数字为各次修改当时的结果。
 
+## 2026-10-31 GNSS与RSMC PLL框架图
+
+- 新增[PLL框架图](docs/gnss_rsmc_pll_architecture.png)及[可编辑SVG](docs/gnss_rsmc_pll_architecture.svg)：GNSS L1/L5共享PLL，RSMC TX、RX各用独立PLL，具体本振频率规划另定；连线及导出图已检查，未改代码或重跑仿真。
+
 ## 2026-10-30 抗多径需求与合作交付件
 
 - [高校合作需求](docs/interference/gnss_receiver_research_requirements.md)补充抗多径场景、测距/定位建议指标及公开依据，区分LOS反射和NLOS，不把多阵元或四通道结果直接作为双通道保证。
