@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-labelledby="title description">
+  <title id="title">新增L6：共PLL与共天线示例</title>
+  <desc id="description">共三套PLL、五条射频链。GNSS L1和L5共用GNSS PLL；新增L6接收链，与RSMC TX共用一套PLL，经本振生成与分配分别提供TX和L6本振。RSMC TX发射信号与L6接收信号经收发分路和隔离网络共用双频天线。RSMC RX使用独立PLL。虚线为本振，实线为射频；是否同时收发需由频率规划和收发隔离能力确定。</desc>
+  <defs>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#2563eb"/></marker>
+    <marker id="arrow-teal" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#0f766e"/></marker>
+    <marker id="arrow-amber" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#b45309"/></marker>
+    <marker id="arrow-rf" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 0 0 L 11 5.5 L 0 11 Z" fill="#334155"/></marker>
+    <style>
+      text { font-family: "Microsoft YaHei", "Segoe UI", sans-serif; }
+      .title { font-size: 44px; font-weight: 700; fill: #162238; }
+      .subtitle { font-size: 23px; fill: #566478; }
+      .section { font-size: 28px; font-weight: 700; text-anchor: middle; }
+      .pll-name { font-size: 28px; font-weight: 700; fill: white; text-anchor: middle; }
+      .pll-note { font-size: 20px; fill: white; text-anchor: middle; }
+      .chain-name { font-size: 30px; font-weight: 700; fill: #162238; text-anchor: middle; }
+      .chain-note { font-size: 21px; fill: #566478; text-anchor: middle; }
+      .lo-label { font-size: 21px; font-weight: 600; }
+      .lo-wire { fill: none; stroke-width: 3; stroke-dasharray: 9 6; stroke-linejoin: round; }
+      .rf-wire { fill: none; stroke: #334155; stroke-width: 3.5; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <rect width="1920" height="1080" fill="#ffffff"/>
+  <text x="64" y="88" class="title">新增 L6：共PLL与共天线示例</text>
+  <text x="64" y="139" class="subtitle">GNSS L1 / L5 共享PLL；L6与RSMC TX共享PLL及天线；RSMC RX保持独立PLL</text>
+  <path d="M 1435 78 H 1495" class="lo-wire" stroke="#0f766e"/>
+  <text x="1508" y="85" font-size="21" fill="#566478">本振 LO</text>
+  <path d="M 1680 78 H 1740" class="rf-wire"/>
+  <text x="1753" y="85" font-size="21" fill="#566478">射频 RF</text>
+
+  <rect x="64" y="195" width="536" height="795" rx="24" fill="#f2f6ff" stroke="#d9e5fb" stroke-width="2"/>
+  <rect x="630" y="195" width="850" height="795" rx="24" fill="#f0f8f6" stroke="#d6eae5" stroke-width="2"/>
+  <rect x="1510" y="195" width="346" height="795" rx="24" fill="#fffaef" stroke="#f1e3c4" stroke-width="2"/>
+  <text x="332" y="250" class="section" fill="#2454ab">GNSS · L1 + L5</text>
+  <text x="1055" y="250" class="section" fill="#0f766e">RSMC TX + L6 RX · 共享示例</text>
+  <text x="1683" y="250" class="section" fill="#a44b08">RSMC · RX</text>
+
+  <g id="pll-gnss" data-kind="pll">
+    <rect x="152" y="290" width="360" height="102" rx="16" fill="#2563eb"/>
+    <text x="332" y="334" class="pll-name">GNSS PLL</text>
+    <text x="332" y="369" class="pll-note">L1 / L5 共享</text>
+  </g>
+  <g id="pll-tx-l6" data-kind="pll">
+    <rect x="875" y="290" width="360" height="102" rx="16" fill="#0f766e"/>
+    <text x="1055" y="334" class="pll-name">TX / L6 共享PLL</text>
+    <text x="1055" y="369" class="pll-note">复用原RSMC TX PLL</text>
+  </g>
+  <g id="pll-rx" data-kind="pll">
+    <rect x="1555" y="290" width="256" height="102" rx="16" fill="#b45309"/>
+    <text x="1683" y="334" class="pll-name">RSMC RX PLL</text>
+    <text x="1683" y="369" class="pll-note">独立PLL</text>
+  </g>
+
+  <!-- 本振与射频分开绘制；共享PLL不表示两个链路使用相同LO频率。 -->
+  <path data-kind="lo" data-from="pll-gnss" data-to="gnss-lo" d="M 332 392 V 432" class="lo-wire" stroke="#2563eb" marker-end="url(#arrow-blue)"/>
+  <g id="gnss-lo">
+    <rect x="112" y="434" width="440" height="80" rx="14" fill="#ffffff" stroke="#a8c4f5" stroke-width="2"/>
+    <text x="332" y="483" text-anchor="middle" font-size="25" fill="#2454ab">L1 / L5 本振生成与分配</text>
+  </g>
+  <path data-kind="lo" data-from="gnss-lo" data-to="l1-rx" d="M 332 514 V 552 H 207 V 604" class="lo-wire" stroke="#2563eb" marker-end="url(#arrow-blue)"/>
+  <path data-kind="lo" data-from="gnss-lo" data-to="l5-rx" d="M 332 552 H 457 V 604" class="lo-wire" stroke="#2563eb" marker-end="url(#arrow-blue)"/>
+  <circle cx="332" cy="552" r="5" fill="#2563eb"/>
+  <text x="224" y="587" class="lo-label" fill="#2454ab">L1 LO</text>
+  <text x="474" y="587" class="lo-label" fill="#2454ab">L5 LO</text>
+
+  <path data-kind="lo" data-from="pll-tx-l6" data-to="tx-l6-lo" d="M 1055 392 V 432" class="lo-wire" stroke="#0f766e" marker-end="url(#arrow-teal)"/>
+  <g id="tx-l6-lo">
+    <rect x="815" y="434" width="480" height="80" rx="14" fill="#ffffff" stroke="#9fcfc5" stroke-width="2"/>
+    <text x="1055" y="468" text-anchor="middle" font-size="25" fill="#0f766e">TX / L6 本振生成与分配</text>
+    <text x="1055" y="498" text-anchor="middle" font-size="18" fill="#566478">分别提供两路LO，具体频率规划待定</text>
+  </g>
+  <path data-kind="lo" data-from="tx-l6-lo" data-to="rsmc-tx" d="M 1055 514 V 552 H 865.5 V 604" class="lo-wire" stroke="#0f766e" marker-end="url(#arrow-teal)"/>
+  <path data-kind="lo" data-from="tx-l6-lo" data-to="l6-rx" d="M 1055 552 H 1245.5 V 604" class="lo-wire" stroke="#0f766e" marker-end="url(#arrow-teal)"/>
+  <circle cx="1055" cy="552" r="5" fill="#0f766e"/>
+  <text x="883" y="587" class="lo-label" fill="#0f766e">TX LO</text>
+  <text x="1263" y="587" class="lo-label" fill="#0f766e">L6 LO</text>
+
+  <path data-kind="lo" data-from="pll-rx" data-to="rsmc-rx" d="M 1683 392 V 604" class="lo-wire" stroke="#b45309" marker-end="url(#arrow-amber)"/>
+  <text x="1703" y="504" class="lo-label" fill="#a44b08">RX LO</text>
+
+  <g id="l1-rx" data-kind="rf-chain">
+    <rect x="100" y="606" width="214" height="110" rx="16" fill="#ffffff" stroke="#a8c4f5" stroke-width="2"/>
+    <text x="207" y="653" class="chain-name">GNSS L1</text>
+    <text x="207" y="690" class="chain-note">接收链 RX</text>
+  </g>
+  <g id="l5-rx" data-kind="rf-chain">
+    <rect x="350" y="606" width="214" height="110" rx="16" fill="#ffffff" stroke="#a8c4f5" stroke-width="2"/>
+    <text x="457" y="653" class="chain-name">GNSS L5</text>
+    <text x="457" y="690" class="chain-note">接收链 RX</text>
+  </g>
+  <g id="rsmc-tx" data-kind="rf-chain">
+    <rect x="718" y="606" width="295" height="110" rx="16" fill="#ffffff" stroke="#9fcfc5" stroke-width="2"/>
+    <text x="865.5" y="653" class="chain-name">RSMC TX</text>
+    <text x="865.5" y="690" class="chain-note">发射链 · 含PA</text>
+  </g>
+  <g id="l6-rx" data-kind="rf-chain">
+    <rect x="1098" y="606" width="295" height="110" rx="16" fill="#ffffff" stroke="#0f766e" stroke-width="2.5"/>
+    <text x="1245.5" y="653" class="chain-name">L6 RX</text>
+    <text x="1245.5" y="690" class="chain-note">新增接收链 · 含LNA</text>
+  </g>
+  <g id="rsmc-rx" data-kind="rf-chain">
+    <rect x="1555" y="606" width="256" height="110" rx="16" fill="#ffffff" stroke="#e3c492" stroke-width="2"/>
+    <text x="1683" y="653" class="chain-name">RSMC RX</text>
+    <text x="1683" y="690" class="chain-note">接收链</text>
+  </g>
+
+  <!-- TX从链路流向天线，L6从天线流向接收链；双向公共端不表示已保证并发收发。 -->
+  <path data-kind="rf" data-from="rsmc-tx" data-to="rf-diplexer" d="M 865.5 716 V 819 H 903" class="rf-wire" marker-end="url(#arrow-rf)"/>
+  <text x="842" y="771" text-anchor="end" font-size="21" fill="#334155">TX RF</text>
+  <path data-kind="rf" data-from="rf-diplexer" data-to="l6-rx" d="M 1205 819 H 1245.5 V 718" class="rf-wire" marker-end="url(#arrow-rf)"/>
+  <text x="1269" y="771" font-size="21" fill="#334155">L6 RF</text>
+  <g id="rf-diplexer" data-kind="rf-network">
+    <rect x="905" y="774" width="300" height="90" rx="14" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+    <text x="1055" y="812" text-anchor="middle" font-size="25" font-weight="600" fill="#334155">收发分路 / 隔离</text>
+    <text x="1055" y="844" text-anchor="middle" font-size="20" fill="#566478">双工滤波网络</text>
+  </g>
+  <path data-kind="rf" data-from="rf-diplexer" data-to="shared-antenna" data-direction="bidirectional" d="M 1055 867 V 906" class="rf-wire" marker-start="url(#arrow-rf)" marker-end="url(#arrow-rf)"/>
+  <g id="shared-antenna" data-kind="antenna">
+    <rect x="855" y="909" width="400" height="60" rx="14" fill="#334155"/>
+    <text x="1055" y="947" text-anchor="middle" font-size="24" font-weight="600" fill="#ffffff">共用天线 · TX / L6 双频</text>
+  </g>
+
+  <text x="332" y="947" text-anchor="middle" font-size="22" fill="#6c7789">2 路接收 · 1 套PLL</text>
+  <text x="1683" y="947" text-anchor="middle" font-size="22" fill="#6c7789">1 路接收 · 独立PLL</text>
+  <text x="64" y="1040" font-size="21" fill="#6c7789">共PLL不等于同频；能否同时收发取决于频率规划与TX→L6隔离能力。本图为方案示意。</text>
+</svg>

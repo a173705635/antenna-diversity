@@ -12,7 +12,10 @@ CSV 与终端中的 CN0、标准差、捕获比值、频差和米制误差显示
 
 每次修改及实际验证统一记录在 [CHANGELOG](CHANGELOG.md)。抗干扰的建模前提、实验条件和已有结果见 [详细说明](docs/interference/README.md)。
 
-射频本振方案：[GNSS / RSMC PLL框架图](docs/gnss_rsmc_pll_architecture.png)（[可编辑SVG](docs/gnss_rsmc_pll_architecture.svg)）。GNSS L1/L5共用一套PLL，RSMC TX、RX各用独立PLL；这是方案示意，不代表当前仿真已实现RSMC。
+射频本振方案（示意图，不代表当前仿真已实现RSMC或L6）：
+
+- [基础方案](docs/gnss_rsmc_pll_architecture.png)（[SVG](docs/gnss_rsmc_pll_architecture.svg)）：GNSS L1/L5共用一套PLL，RSMC TX、RX各用独立PLL。
+- [新增L6示例](docs/gnss_rsmc_l6_shared_architecture.png)（[SVG](docs/gnss_rsmc_l6_shared_architecture.svg)）：L6接收链与RSMC TX共享PLL及双频天线，经双工滤波网络分路、隔离；共PLL不等于同频，能否同时收发需验证频率规划与TX→L6隔离能力。
 
 ```text
 core/          天线、GNSS、RF/DFE、捕获跟踪与定位；interference/ 放干扰场景与盲零陷
