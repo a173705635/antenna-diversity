@@ -6,6 +6,7 @@
 
 - 新增[PLL框架图](docs/gnss_rsmc_pll_architecture.png)及[可编辑SVG](docs/gnss_rsmc_pll_architecture.svg)：GNSS L1/L5共享PLL，RSMC TX、RX各用独立PLL，具体本振频率规划另定；连线及导出图已检查，未改代码或重跑仿真。
 - 保留基础图，另增[L6共PLL、共天线示例](docs/gnss_rsmc_l6_shared_architecture.png)及[SVG](docs/gnss_rsmc_l6_shared_architecture.svg)：L6接收链复用RSMC TX的PLL与双频天线，补充收发分路、隔离及LO/RF区分；三套PLL、五条链路、收发方向和导出图已检查，并发能力仍需频率规划及隔离验证。
+- 新增[双天线共本振示例](docs/dual_antenna_shared_lo_architecture.png)及[SVG](docs/dual_antenna_shared_lo_architecture.svg)：两条同频接收链保留独立RF与ADC，共享LO和采样时钟；注明仍需同步与通道误差校准。连线、导出图及文档链接已检查，未改代码或重跑仿真。
 
 ## 2026-10-30 抗多径需求与合作交付件
 

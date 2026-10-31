@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-labelledby="title description">
+  <title id="title">双天线接收：共本振与共采样时钟</title>
+  <desc id="description">同一GNSS频段的双天线接收示例。两个天线分别接入独立的RF前端、混频器、IF滤波与ADC通道。一个共享RF PLL经本振缓冲和分配驱动两个混频器，一个公共采样时钟源驱动两个ADC。两路数据分别进入双通道DFE与抗干扰处理。共本振和共时钟不会消除空间来波差异及通道幅相、时延误差，仍需同步与校准。</desc>
+  <defs>
+    <marker id="arrow-signal" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 11 5.5 L 0 11 Z" fill="#334155"/></marker>
+    <marker id="arrow-lo" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 11 5.5 L 0 11 Z" fill="#2563eb"/></marker>
+    <marker id="arrow-clock" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 11 5.5 L 0 11 Z" fill="#0f766e"/></marker>
+    <style>
+      text { font-family: "Microsoft YaHei", "Segoe UI", sans-serif; }
+      .title { font-size: 44px; font-weight: 700; fill: #162238; }
+      .subtitle { font-size: 23px; fill: #566478; }
+      .section { font-size: 28px; font-weight: 700; text-anchor: middle; }
+      .block-name { font-size: 27px; font-weight: 700; fill: #162238; text-anchor: middle; }
+      .block-note { font-size: 20px; fill: #566478; text-anchor: middle; }
+      .wire { fill: none; stroke-width: 3.5; stroke-linejoin: round; }
+      .signal { stroke: #334155; }
+      .lo { stroke: #2563eb; stroke-dasharray: 9 6; }
+      .clock { stroke: #0f766e; stroke-dasharray: 12 5 2 5; }
+    </style>
+  </defs>
+
+  <rect width="1920" height="1080" fill="#ffffff"/>
+  <text x="64" y="88" class="title">双天线接收：共本振与共采样时钟</text>
+  <text x="64" y="139" class="subtitle">同一GNSS频段，两条独立接收链共享LO与采样时钟，保留两路独立观测</text>
+  <path d="M 1280 79 H 1328" class="wire signal"/>
+  <text x="1341" y="86" font-size="20" fill="#566478">信号 / 数据</text>
+  <path d="M 1490 79 H 1538" class="wire lo"/>
+  <text x="1551" y="86" font-size="20" fill="#566478">本振 LO</text>
+  <path d="M 1685 79 H 1733" class="wire clock"/>
+  <text x="1746" y="86" font-size="20" fill="#566478">采样时钟</text>
+
+  <rect x="64" y="195" width="600" height="660" rx="24" fill="#f2f6ff" stroke="#d9e5fb" stroke-width="2"/>
+  <rect x="704" y="195" width="512" height="660" rx="24" fill="#f0f8f6" stroke="#d6eae5" stroke-width="2"/>
+  <rect x="1256" y="195" width="600" height="660" rx="24" fill="#f2f6ff" stroke="#d9e5fb" stroke-width="2"/>
+  <text x="364" y="248" class="section" fill="#2454ab">接收通道 1</text>
+  <text x="960" y="248" class="section" fill="#0f766e">共享本振与时钟</text>
+  <text x="1556" y="248" class="section" fill="#2454ab">接收通道 2</text>
+
+  <g id="antenna-1" data-kind="antenna">
+    <rect x="220" y="280" width="288" height="65" rx="14" fill="#2563eb"/>
+    <text x="364" y="322" text-anchor="middle" font-size="28" font-weight="700" fill="#ffffff">天线 1</text>
+  </g>
+  <g id="antenna-2" data-kind="antenna">
+    <rect x="1412" y="280" width="288" height="65" rx="14" fill="#2563eb"/>
+    <text x="1556" y="322" text-anchor="middle" font-size="28" font-weight="700" fill="#ffffff">天线 2</text>
+  </g>
+  <text x="960" y="314" text-anchor="middle" font-size="22" fill="#566478">一套RF PLL · 两路同频LO</text>
+
+  <!-- 每个天线保留独立模拟接收与采样通道，信号不在RF端合路。 -->
+  <g id="rf-1" data-kind="rf-front-end">
+    <rect x="220" y="380" width="288" height="86" rx="14" fill="#ffffff" stroke="#a8c4f5" stroke-width="2"/>
+    <text x="364" y="417" class="block-name">RF前端 1</text>
+    <text x="364" y="448" class="block-note">选频滤波 / LNA</text>
+  </g>
+  <g id="rf-2" data-kind="rf-front-end">
+    <rect x="1412" y="380" width="288" height="86" rx="14" fill="#ffffff" stroke="#a8c4f5" stroke-width="2"/>
+    <text x="1556" y="417" class="block-name">RF前端 2</text>
+    <text x="1556" y="448" class="block-note">选频滤波 / LNA</text>
+  </g>
+  <g id="mixer-1" data-kind="mixer">
+    <rect x="220" y="525" width="288" height="86" rx="14" fill="#ffffff" stroke="#a8c4f5" stroke-width="2"/>
+    <text x="364" y="562" class="block-name">混频器 1</text>
+    <text x="364" y="593" class="block-note">RF → IF</text>
+  </g>
+  <g id="mixer-2" data-kind="mixer">
+    <rect x="1412" y="525" width="288" height="86" rx="14" fill="#ffffff" stroke="#a8c4f5" stroke-width="2"/>
+    <text x="1556" y="562" class="block-name">混频器 2</text>
+    <text x="1556" y="593" class="block-note">RF → IF</text>
+  </g>
+  <g id="adc-1" data-kind="adc-channel">
+    <rect x="220" y="700" width="288" height="86" rx="14" fill="#ffffff" stroke="#a8c4f5" stroke-width="2"/>
+    <text x="364" y="737" class="block-name">IF滤波 / ADC 1</text>
+    <text x="364" y="768" class="block-note">独立采样通道</text>
+  </g>
+  <g id="adc-2" data-kind="adc-channel">
+    <rect x="1412" y="700" width="288" height="86" rx="14" fill="#ffffff" stroke="#a8c4f5" stroke-width="2"/>
+    <text x="1556" y="737" class="block-name">IF滤波 / ADC 2</text>
+    <text x="1556" y="768" class="block-note">独立采样通道</text>
+  </g>
+
+  <path data-kind="signal" data-from="antenna-1" data-to="rf-1" d="M 364 345 V 378" class="wire signal" marker-end="url(#arrow-signal)"/>
+  <path data-kind="signal" data-from="rf-1" data-to="mixer-1" d="M 364 466 V 523" class="wire signal" marker-end="url(#arrow-signal)"/>
+  <path data-kind="signal" data-from="mixer-1" data-to="adc-1" d="M 364 611 V 698" class="wire signal" marker-end="url(#arrow-signal)"/>
+  <text x="387" y="662" font-size="21" fill="#566478">IF 1</text>
+  <path data-kind="signal" data-from="antenna-2" data-to="rf-2" d="M 1556 345 V 378" class="wire signal" marker-end="url(#arrow-signal)"/>
+  <path data-kind="signal" data-from="rf-2" data-to="mixer-2" d="M 1556 466 V 523" class="wire signal" marker-end="url(#arrow-signal)"/>
+  <path data-kind="signal" data-from="mixer-2" data-to="adc-2" d="M 1556 611 V 698" class="wire signal" marker-end="url(#arrow-signal)"/>
+  <text x="1579" y="662" font-size="21" fill="#566478">IF 2</text>
+
+  <!-- LO仅进入混频器，采样时钟仅进入ADC；共用时钟源不等于已消除路径误差。 -->
+  <g id="shared-rf-pll" data-kind="rf-pll">
+    <rect x="800" y="380" width="320" height="86" rx="14" fill="#2563eb"/>
+    <text x="960" y="417" text-anchor="middle" font-size="28" font-weight="700" fill="#ffffff">共享RF PLL</text>
+    <text x="960" y="448" text-anchor="middle" font-size="20" fill="#ffffff">同一本振源</text>
+  </g>
+  <g id="lo-distributor" data-kind="lo-distributor">
+    <rect x="800" y="525" width="320" height="86" rx="14" fill="#ffffff" stroke="#a8c4f5" stroke-width="2"/>
+    <text x="960" y="562" class="block-name">本振缓冲 / 分配</text>
+    <text x="960" y="593" class="block-note">两路LO分别驱动混频器</text>
+  </g>
+  <path data-kind="lo" data-from="shared-rf-pll" data-to="lo-distributor" d="M 960 466 V 523" class="wire lo" marker-end="url(#arrow-lo)"/>
+  <path data-kind="lo" data-from="lo-distributor" data-to="mixer-1" d="M 800 568 H 510" class="wire lo" marker-end="url(#arrow-lo)"/>
+  <path data-kind="lo" data-from="lo-distributor" data-to="mixer-2" d="M 1120 568 H 1410" class="wire lo" marker-end="url(#arrow-lo)"/>
+  <text x="654" y="548" text-anchor="middle" font-size="21" font-weight="600" fill="#2454ab">同频LO</text>
+  <text x="1266" y="548" text-anchor="middle" font-size="21" font-weight="600" fill="#2454ab">同频LO</text>
+
+  <g id="sample-clock" data-kind="sample-clock">
+    <rect x="800" y="700" width="320" height="86" rx="14" fill="#0f766e"/>
+    <text x="960" y="737" text-anchor="middle" font-size="27" font-weight="700" fill="#ffffff">公共采样时钟</text>
+    <text x="960" y="768" text-anchor="middle" font-size="20" fill="#ffffff">时钟生成 / 缓冲分配</text>
+  </g>
+  <path data-kind="clock" data-from="sample-clock" data-to="adc-1" d="M 800 743 H 510" class="wire clock" marker-end="url(#arrow-clock)"/>
+  <path data-kind="clock" data-from="sample-clock" data-to="adc-2" d="M 1120 743 H 1410" class="wire clock" marker-end="url(#arrow-clock)"/>
+  <text x="654" y="723" text-anchor="middle" font-size="21" font-weight="600" fill="#0f766e">CLK</text>
+  <text x="1266" y="723" text-anchor="middle" font-size="21" font-weight="600" fill="#0f766e">CLK</text>
+
+  <path data-kind="digital" data-from="adc-1" data-to="digital-processing" d="M 364 786 V 890 H 760 V 916" class="wire signal" marker-end="url(#arrow-signal)"/>
+  <path data-kind="digital" data-from="adc-2" data-to="digital-processing" d="M 1556 786 V 890 H 1160 V 916" class="wire signal" marker-end="url(#arrow-signal)"/>
+  <text x="388" y="831" font-size="21" fill="#566478">通道 1 数据</text>
+  <text x="1580" y="831" font-size="21" fill="#566478">通道 2 数据</text>
+  <g id="digital-processing" data-kind="digital-processing">
+    <rect x="640" y="918" width="640" height="95" rx="16" fill="#334155"/>
+    <text x="960" y="958" text-anchor="middle" font-size="29" font-weight="700" fill="#ffffff">双通道DFE / 抗干扰处理</text>
+    <text x="960" y="991" text-anchor="middle" font-size="21" fill="#ffffff">保留两路采样数据，数字域再合并</text>
+  </g>
+  <text x="64" y="1050" font-size="21" fill="#6c7789">共本振与共时钟不消除空间来波差异，也不消除通道幅相、时延误差；仍需同步与校准。本图为方案示意。</text>
+</svg>
